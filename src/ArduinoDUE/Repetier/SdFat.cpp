@@ -672,9 +672,9 @@ uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFil
 #if JSON_OUTPUT
                 if (isJson) {
                     if (!firstFile) Com::print(',');
-				    Com::print('"');Com::print('*');
+            Com::print('"');Com::print('*');
                     SDCard::printEscapeChars(tempLongFilename);
-				    Com::print('"');
+            Com::print('"');
                     firstFile = false;
                 } else {
                     Com::print(tempLongFilename);
@@ -733,9 +733,9 @@ uint8_t SdBaseFile::lsRecursive(SdBaseFile *parent, uint8_t level, char *findFil
 #if JSON_OUTPUT
                 if (isJson) {
                     if (!firstFile) Com::printF(Com::tComma);
-				    Com::print('"');
+            Com::print('"');
                     SDCard::printEscapeChars(tempLongFilename);
-				    Com::print('"');
+            Com::print('"');
                     firstFile = false;
                 } else
 #endif
@@ -1591,8 +1591,8 @@ bool SdBaseFile::openRoot(SdVolume* vol) {
   // error if file is already open
   if (isOpen()) {
 #if defined(DEBUG_SD_ERROR)
-	Com::printErrorFLN(PSTR("Root already open"));
-#endif	  
+  Com::printErrorFLN(PSTR("Root already open"));
+#endif
     DBG_FAIL_MACRO;
     goto fail;
   }
@@ -1611,8 +1611,8 @@ bool SdBaseFile::openRoot(SdVolume* vol) {
   } else {
     // volume is not initialized, invalid, or FAT12 without support
 #if defined(DEBUG_SD_ERROR)
-	Com::printErrorF(PSTR("volume is not initialized, invalid, or FAT12 without support, type:"));
-	Com::print((int)vol->fatType());Com::println();
+  Com::printErrorF(PSTR("volume is not initialized, invalid, or FAT12 without support, type:"));
+  Com::print((int)vol->fatType());Com::println();
 #endif
     DBG_FAIL_MACRO;
     goto fail;
@@ -1632,7 +1632,7 @@ bool SdBaseFile::openRoot(SdVolume* vol) {
  fail:
 #if defined(DEBUG_SD_ERROR)
    Com::printErrorFLN(PSTR("SD open root dir failed"));
-#endif   
+#endif
   return false;
 }
 //------------------------------------------------------------------------------
@@ -2025,28 +2025,28 @@ dir_t *SdBaseFile::getLongFilename(dir_t *dir, char *longFilename, int8_t cVFATN
         {
        if (longFilename != NULL)
         {
-    	vfat_t *VFAT = (vfat_t*)dir;
+      vfat_t *VFAT = (vfat_t*)dir;
         int8_t nSeq = VFAT->sequenceNumber & 0x1F;
 
-	// Sanity check the VFAT entry. The first cluster is always set to zero. And the sequence number should be higher then 0
-    	if (VFAT->firstClusterLow == 0 && nSeq > 0 && nSeq <= MAX_VFAT_ENTRIES)
-    	      {
-    		n = (nSeq - 1) * 13;
+  // Sanity check the VFAT entry. The first cluster is always set to zero. And the sequence number should be higher then 0
+      if (VFAT->firstClusterLow == 0 && nSeq > 0 && nSeq <= MAX_VFAT_ENTRIES)
+            {
+        n = (nSeq - 1) * 13;
 
-		longFilename[n+0] = (char)VFAT->name1[0];
+    longFilename[n+0] = (char)VFAT->name1[0];
 
-      		longFilename[n+1] = (char)VFAT->name1[1];
-      		longFilename[n+2] = (char)VFAT->name1[2];
-     		longFilename[n+3] = (char)VFAT->name1[3];
-     		longFilename[n+4] = (char)VFAT->name1[4];
-     		longFilename[n+5] = (char)VFAT->name2[0];
-     		longFilename[n+6] = (char)VFAT->name2[1];
-     		longFilename[n+7] = (char)VFAT->name2[2];
-      		longFilename[n+8] = (char)VFAT->name2[3];
-      		longFilename[n+9] = (char)VFAT->name2[4];
-      		longFilename[n+10] = (char)VFAT->name2[5];
-      		longFilename[n+11] = (char)VFAT->name3[0];
-      		longFilename[n+12] = (char)VFAT->name3[1];
+          longFilename[n+1] = (char)VFAT->name1[1];
+          longFilename[n+2] = (char)VFAT->name1[2];
+         longFilename[n+3] = (char)VFAT->name1[3];
+         longFilename[n+4] = (char)VFAT->name1[4];
+         longFilename[n+5] = (char)VFAT->name2[0];
+         longFilename[n+6] = (char)VFAT->name2[1];
+         longFilename[n+7] = (char)VFAT->name2[2];
+          longFilename[n+8] = (char)VFAT->name2[3];
+          longFilename[n+9] = (char)VFAT->name2[4];
+          longFilename[n+10] = (char)VFAT->name2[5];
+          longFilename[n+11] = (char)VFAT->name3[0];
+          longFilename[n+12] = (char)VFAT->name3[1];
 
                 if (bLastPart)
                   {
@@ -2054,7 +2054,7 @@ dir_t *SdBaseFile::getLongFilename(dir_t *dir, char *longFilename, int8_t cVFATN
                   longFilename[n+13] = 0;
                   }
                 bLastPart = false;
-		}
+    }
         }
         }
         else
@@ -4266,15 +4266,15 @@ bool SdVolume::init(Sd2Card* dev, uint8_t part) {
   if (part) {
     if (part > 4) {
 #if defined(DEBUG_SD_ERROR)
-	Com::printErrorFLN(PSTR("volume init: illegal part"));
-#endif		
+  Com::printErrorFLN(PSTR("volume init: illegal part"));
+#endif
       DBG_FAIL_MACRO;
       goto fail;
     }
     pc = cacheFetch(volumeStartBlock, CACHE_FOR_READ);
     if (!pc) {
 #if defined(DEBUG_SD_ERROR)
-		Com::printErrorFLN(PSTR("volume init: cache fetch failed"));
+    Com::printErrorFLN(PSTR("volume init: cache fetch failed"));
 #endif
       DBG_FAIL_MACRO;
       goto fail;
@@ -4285,7 +4285,7 @@ bool SdVolume::init(Sd2Card* dev, uint8_t part) {
       p->firstSector == 0) {
       // not a valid partition
 #if defined(DEBUG_SD_ERROR)
-		Com::printErrorFLN(PSTR("volume init: invalid partition"));
+    Com::printErrorFLN(PSTR("volume init: invalid partition"));
 #endif
       DBG_FAIL_MACRO;
       goto fail;
@@ -4307,11 +4307,11 @@ Com::printErrorFLN(PSTR("volume init: cache fetch failed"));
     fbs->sectorsPerCluster == 0) {
        // not valid FAT volume
 #if defined(DEBUG_SD_ERROR)
-	Com::printErrorFLN(PSTR("volume init: not a valid FAT volume"));
-	Com::printFLN(PSTR("BytesPerSector:"),fbs->bytesPerSector);
-	Com::printFLN(PSTR("fatCount:"),fbs->fatCount);
-	Com::printFLN(PSTR("reservedSectorCount:"),fbs->reservedSectorCount);
-	Com::printFLN(PSTR("sectorsPerCluster:"),fbs->sectorsPerCluster);
+  Com::printErrorFLN(PSTR("volume init: not a valid FAT volume"));
+  Com::printFLN(PSTR("BytesPerSector:"),fbs->bytesPerSector);
+  Com::printFLN(PSTR("fatCount:"),fbs->fatCount);
+  Com::printFLN(PSTR("reservedSectorCount:"),fbs->reservedSectorCount);
+  Com::printFLN(PSTR("sectorsPerCluster:"),fbs->sectorsPerCluster);
 #endif
       DBG_FAIL_MACRO;
       goto fail;
@@ -4356,7 +4356,7 @@ Com::printErrorFLN(PSTR("volume init: cache fetch failed"));
     fatType_ = 12;
     if (!FAT12_SUPPORT) {
 #if defined(DEBUG_SD_ERROR)
-		Com::printErrorFLN(PSTR("volume init: No FAT 12 support"));
+    Com::printErrorFLN(PSTR("volume init: No FAT 12 support"));
 #endif
       DBG_FAIL_MACRO;
       goto fail;

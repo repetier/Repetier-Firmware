@@ -120,8 +120,8 @@ typedef char prog_char;
 //#define SERIAL_PORT_VECTOR      UART_Handler
 
 // TWI1 if SDA pin = 20  TWI0 for pin = 70
-#define TWI_INTERFACE   		TWI1
-#define TWI_ID  				ID_TWI1
+#define TWI_INTERFACE           TWI1
+#define TWI_ID                  ID_TWI1
 
 
 #define EXTRUDER_CLOCK_FREQ     60000 // extruder stepper interrupt frequency
@@ -135,7 +135,7 @@ typedef char prog_char;
 #define SERVO2500US             (((F_CPU_TRUE / SERVO_PRESCALE) / 1000000) * 2500)
 #define SERVO5000US             (((F_CPU_TRUE / SERVO_PRESCALE) / 1000000) * 5000)
 
-#define AD_PRESCALE_FACTOR      84  // 500 kHz ADC clock 
+#define AD_PRESCALE_FACTOR      84  // 500 kHz ADC clock
 #define AD_TRACKING_CYCLES      4   // 0 - 15     + 1 adc clock cycles
 #define AD_TRANSFER_CYCLES      1   // 0 - 3      * 2 + 3 adc clock cycles
 
@@ -156,18 +156,18 @@ typedef char prog_char;
 #define COMPAT_PRE1
 #endif
 
-//#define	READ(pin)  PIO_Get(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin)
+//#define READ(pin)  PIO_Get(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin)
 #define READ_VAR(pin) (g_APinDescription[pin].pPort->PIO_PDSR & g_APinDescription[pin].ulPin ? 1 : 0) // does return 0 or pin value
 #define _READ(pin) (DIO ##  pin ## _PORT->PIO_PDSR & DIO ##  pin ## _PIN ? 1 : 0) // does return 0 or pin value
 #define READ(pin) _READ(pin)
-//#define	WRITE_VAR(pin, v) PIO_SetOutput(g_APinDescription[pin].pPort, g_APinDescription[pin].ulPin, v, 0, PIO_PULLUP)
-#define	WRITE_VAR(pin, v) do{if(v) {g_APinDescription[pin].pPort->PIO_SODR = g_APinDescription[pin].ulPin;} else {g_APinDescription[pin].pPort->PIO_CODR = g_APinDescription[pin].ulPin; }}while(0)
-#define		_WRITE(port, v)			do { if (v) {DIO ##  port ## _PORT -> PIO_SODR = DIO ## port ## _PIN; } else {DIO ##  port ## _PORT->PIO_CODR = DIO ## port ## _PIN; }; } while (0)
+//#define WRITE_VAR(pin, v) PIO_SetOutput(g_APinDescription[pin].pPort, g_APinDescription[pin].ulPin, v, 0, PIO_PULLUP)
+#define WRITE_VAR(pin, v) do{if(v) {g_APinDescription[pin].pPort->PIO_SODR = g_APinDescription[pin].ulPin;} else {g_APinDescription[pin].pPort->PIO_CODR = g_APinDescription[pin].ulPin; }}while(0)
+#define _WRITE(port, v) do { if (v) {DIO ##  port ## _PORT -> PIO_SODR = DIO ## port ## _PIN; } else {DIO ##  port ## _PORT->PIO_CODR = DIO ## port ## _PIN; }; } while (0)
 #define WRITE(pin,v) _WRITE(pin,v)
 
-#define	SET_INPUT(pin) pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId); \
+#define SET_INPUT(pin) pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId); \
   PIO_Configure(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin, 0)
-#define	SET_OUTPUT(pin) PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1, \
+#define SET_OUTPUT(pin) PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1, \
                                       g_APinDescription[pin].ulPin, g_APinDescription[pin].ulPinConfiguration)
 #define TOGGLE(pin) WRITE(pin,!READ(pin))
 #define TOGGLE_VAR(pin) HAL::digitalWrite(pin,!HAL::digitalRead(pin))
@@ -328,7 +328,7 @@ class HAL
     // as long as hal eeprom functions are used.
     static char virtualEeprom[EEPROM_BYTES];
     static bool wdPinged;
-    
+
     HAL();
     virtual ~HAL();
 
@@ -339,9 +339,9 @@ class HAL
         // Disable watchdog
         WDT_Disable(WDT);
       #endif
-  
+
       #if EEPROM_AVAILABLE == EEPROM_I2C || UI_DISPLAY_TYPE == 3 //init i2c when EEprom installed or using i2c display
-      HAL::i2cInit(TWI_CLOCK_FREQ); 
+      HAL::i2cInit(TWI_CLOCK_FREQ);
       #endif
       // make debugging startup easier
       //Serial.begin(115200);
@@ -582,7 +582,7 @@ class HAL
       }
       i2cStop();          // signal end of transaction
       delayMilliseconds(EEPROM_PAGE_WRITE_TIME);   // wait for page write to complete
-#endif//(MOTHERBOARD==500) || (MOTHERBOARD==501)
+#endif
     }
 
     // Read any data type from EEPROM that was previously written by eprBurnValue
@@ -631,8 +631,8 @@ class HAL
         // read an incomming byte
         v.b[i] = 0;
      }
-     return v;       
-#endif //(MOTHERBOARD==500) || (MOTHERBOARD==501)
+     return v;
+#endif
     }
 
     static inline void allowInterrupts()
@@ -794,11 +794,6 @@ class HAL
     // Write single byte to SPI
     static void spiSend(byte b);
     static void spiSend(const uint8_t* buf , size_t n);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
-    static void spiSend(uint32_t chan , const uint8_t* buf , size_t n);
-    static void spiSend(uint32_t chan, byte b);
-    static uint8_t spiReceive(uint32_t chan);
-#endif
     // Read single byte from SPI
     static uint8_t spiReceive();
     // Read from SPI into buffer

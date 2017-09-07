@@ -1,10 +1,10 @@
 /*
-	This code contibuted by Triffid_Hunter and modified by Kliment
-	why double up on these macros? see http://gcc.gnu.org/onlinedocs/cpp/Stringification.html
+  This code contibuted by Triffid_Hunter and modified by Kliment
+  why double up on these macros? see http://gcc.gnu.org/onlinedocs/cpp/Stringification.html
         2012/3/10 AT90USB128x modified by lincomatic to match Teensyduino
 */
-#ifndef	_FASTIO_H
-#define	_FASTIO_H
+#ifndef _FASTIO_H
+#define _FASTIO_H
 
 #include <sam.h>
 #include <sam3xa/include/pio/pio_sam3x8h.h>
@@ -270,41 +270,8 @@
 #define DIO91_PORT PIOB
 #define DIO91_PIN PIO_PB15A_CANRX1|PIO_PB14A_CANTX1
 
-// Additional Pins for Alligator board
-#if (MOTHERBOARD == 500) || (MOTHERBOARD == 501)
-//92
-#define DIO92_PORT PIOA
-#define DIO92_PIN PIO_PA5
-//93
-#define DIO93_PORT PIOB
-#define DIO93_PIN PIO_PB12X1_AD8
-//94
-#define DIO94_PORT PIOB
-#define DIO94_PIN PIO_PB22
-//95
-#define DIO95_PORT PIOB
-#define DIO95_PIN PIO_PB23
-//96
-#define DIO96_PORT PIOB
-#define DIO96_PIN PIO_PB24
-//97
-#define DIO97_PORT PIOC
-#define DIO97_PIN PIO_PC20
-//98
-#define DIO98_PORT PIOC
-#define DIO98_PIN PIO_PC27
-//99
-#define DIO99_PORT PIOC
-#define DIO99_PIN PIO_PC10
-//100
-#define DIO100_PORT PIOC
-#define DIO100_PIN PIO_PC11
-#endif
 
-
-
-
-#ifndef	DIO0_PIN
+#ifndef DIO0_PIN
 #error pins for this chip not defined in arduino.h! If you write an appropriate pin definition and have this firmware work on your chip, please submit a pull request
 #endif
 

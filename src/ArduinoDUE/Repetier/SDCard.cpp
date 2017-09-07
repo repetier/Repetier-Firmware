@@ -57,8 +57,8 @@ void SDCard::automount()
         {
             UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_SD_INSERTED_ID));
             mount();
-			if(sdmode != 100) // send message only if we have success
-	            Com::printFLN(PSTR("SD card inserted")); // Not translatable or host will not understand signal
+            if(sdmode != 100) // send message only if we have success
+                Com::printFLN(PSTR("SD card inserted")); // Not translatable or host will not understand signal
 #if UI_DISPLAY_TYPE != NO_DISPLAY
             if(sdactive && !uid.isWizardActive()) { // Wizards have priority
                 Printer::setAutomount(true);
@@ -78,22 +78,22 @@ void SDCard::initsd()
     if(READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
         return;
 #endif
-	HAL::pingWatchdog();
-	HAL::delayMilliseconds(50); // wait for stabilization of contacts, bootup ...
+    HAL::pingWatchdog();
+    HAL::delayMilliseconds(50); // wait for stabilization of contacts, bootup ...
     fat.begin(SDSS, SPI_FULL_SPEED);  // dummy init of SD_CARD
     HAL::delayMilliseconds(50);       // wait for init end
-	HAL::pingWatchdog();
+    HAL::pingWatchdog();
     /*if(dir[0].isOpen())
         dir[0].close();*/
     if(!fat.begin(SDSS, SPI_FULL_SPEED))
     {
         Com::printFLN(Com::tSDInitFail);
-		sdmode = 100; // prevent automount loop!
+        sdmode = 100; // prevent automount loop!
         return;
     }
     sdactive = true;
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED, true);
-	HAL::pingWatchdog();
+    HAL::pingWatchdog();
 
     fat.chdir();
     if(selectFile("init.g", true))
@@ -142,11 +142,7 @@ void SDCard::pausePrint(bool intern)
         Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE,
                             Printer::memoryE - RETRACT_ON_PAUSE,
                             Printer::maxFeedrate[E_AXIS] / 2);
-#if DRIVE_SYSTEM == DELTA
-        Printer::moveToReal(0, 0.9 * EEPROM::deltaMaxRadius(), IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]);
-#else
         Printer::moveToReal(Printer::xMin, Printer::yMin + Printer::yLength, IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS]);
-#endif
         Printer::lastCmdPos[X_AXIS] = Printer::currentPosition[X_AXIS];
         Printer::lastCmdPos[Y_AXIS] = Printer::currentPosition[Y_AXIS];
         Printer::lastCmdPos[Z_AXIS] = Printer::currentPosition[Z_AXIS];
@@ -189,24 +185,24 @@ void SDCard::writeCommand(GCode *code)
     uint8_t p = 2;
     file.writeError = false;
     uint16_t params = 128 | (code->params & ~1);
-	memcopy2(buf,&params);
+    memcopy2(buf,&params);
     //*(int*)buf = params;
     if(code->isV2())   // Read G,M as 16 bit value
     {
-		memcopy2(&buf[p],&code->params2);
+        memcopy2(&buf[p],&code->params2);
         //*(int*)&buf[p] = code->params2;
         p += 2;
         if(code->hasString())
             buf[p++] = strlen(code->text);
         if(code->hasM())
         {
-			memcopy2(&buf[p],&code->M);
+            memcopy2(&buf[p],&code->M);
             //*(int*)&buf[p] = code->M;
             p += 2;
         }
         if(code->hasG())
         {
-			memcopy2(&buf[p],&code->G);
+            memcopy2(&buf[p],&code->G);
             //*(int*)&buf[p]= code->G;
             p += 2;
         }
@@ -224,31 +220,31 @@ void SDCard::writeCommand(GCode *code)
     }
     if(code->hasX())
     {
-		memcopy4(&buf[p],&code->X);
+        memcopy4(&buf[p],&code->X);
         //*(float*)&buf[p] = code->X;
         p += 4;
     }
     if(code->hasY())
     {
-		memcopy4(&buf[p],&code->Y);
+        memcopy4(&buf[p],&code->Y);
         //*(float*)&buf[p] = code->Y;
         p += 4;
     }
     if(code->hasZ())
     {
-		memcopy4(&buf[p],&code->Z);
+        memcopy4(&buf[p],&code->Z);
         //*(float*)&buf[p] = code->Z;
         p += 4;
     }
     if(code->hasE())
     {
-		memcopy4(&buf[p],&code->E);
+        memcopy4(&buf[p],&code->E);
         //*(float*)&buf[p] = code->E;
         p += 4;
     }
     if(code->hasF())
     {
-		memcopy4(&buf[p],&code->F);
+        memcopy4(&buf[p],&code->F);
         //*(float*)&buf[p] = code->F;
         p += 4;
     }
@@ -258,79 +254,79 @@ void SDCard::writeCommand(GCode *code)
     }
     if(code->hasS())
     {
-		memcopy4(&buf[p],&code->S);
+        memcopy4(&buf[p],&code->S);
         //*(int32_t*)&buf[p] = code->S;
         p += 4;
     }
     if(code->hasP())
     {
-		memcopy4(&buf[p],&code->P);
+        memcopy4(&buf[p],&code->P);
         //*(int32_t*)&buf[p] = code->P;
         p += 4;
     }
     if(code->hasI())
     {
-		memcopy4(&buf[p],&code->I);
+        memcopy4(&buf[p],&code->I);
         //*(float*)&buf[p] = code->I;
         p += 4;
     }
     if(code->hasJ())
     {
-		memcopy4(&buf[p],&code->J);
+        memcopy4(&buf[p],&code->J);
         //*(float*)&buf[p] = code->J;
         p += 4;
     }
     if(code->hasR())
     {
-		memcopy4(&buf[p],&code->R);
+        memcopy4(&buf[p],&code->R);
         //*(float*)&buf[p] = code->R;
         p += 4;
     }
     if(code->hasD())
     {
-		memcopy4(&buf[p],&code->D);
+        memcopy4(&buf[p],&code->D);
         //*(float*)&buf[p] = code->D;
         p += 4;
     }
     if(code->hasC())
     {
-		memcopy4(&buf[p],&code->C);
+        memcopy4(&buf[p],&code->C);
         //*(float*)&buf[p] = code->C;
         p += 4;
     }
     if(code->hasH())
     {
-		memcopy4(&buf[p],&code->H);
+        memcopy4(&buf[p],&code->H);
         //*(float*)&buf[p] = code->H;
         p += 4;
     }
     if(code->hasA())
     {
-		memcopy4(&buf[p],&code->A);
+        memcopy4(&buf[p],&code->A);
         //*(float*)&buf[p] = code->A;
         p += 4;
     }
     if(code->hasB())
     {
-		memcopy4(&buf[p],&code->B);
+        memcopy4(&buf[p],&code->B);
         //*(float*)&buf[p] = code->B;
         p += 4;
     }
     if(code->hasK())
     {
-		memcopy4(&buf[p],&code->K);
+        memcopy4(&buf[p],&code->K);
         //*(float*)&buf[p] = code->K;
         p += 4;
     }
     if(code->hasL())
     {
-		memcopy4(&buf[p],&code->L);
+        memcopy4(&buf[p],&code->L);
         //*(float*)&buf[p] = code->L;
         p += 4;
     }
     if(code->hasO())
     {
-		memcopy4(&buf[p],&code->O);
+        memcopy4(&buf[p],&code->O);
         //*(float*)&buf[p] = code->O;
         p += 4;
     }
@@ -364,11 +360,11 @@ void SDCard::writeCommand(GCode *code)
     }
     buf[p++] = sum1;
     buf[p++] = sum2;
-	// Debug
-	/*Com::printF(PSTR("Buf: "));
-	for(int i=0;i<p;i++)
-	Com::printF(PSTR(" "),(int)buf[i]);
-	Com::println();*/
+    // Debug
+    /*Com::printF(PSTR("Buf: "));
+    for(int i=0;i<p;i++)
+    Com::printF(PSTR(" "),(int)buf[i]);
+    Com::println();*/
     if(params == 128)
     {
         Com::printErrorFLN(Com::tAPIDFinished);
@@ -466,10 +462,10 @@ void SDCard::printEscapeChars(const char *s) {
             case '\r':
             case '\t':
             case '\\':
-				Com::print('\\');
+                Com::print('\\');
                 break;
         }
-		Com::print(s[i]);
+        Com::print(s[i]);
     }
 }
 
@@ -486,7 +482,7 @@ void SDCard::JSONFileInfo(const char* filename) {
             Com::printFLN(Com::tJSONErrorEnd);
             return;
         }
-		info = &tmpInfo;
+        info = &tmpInfo;
         info->init(targetFile);
     }
     if (!targetFile.isOpen()) {
@@ -511,9 +507,9 @@ void SDCard::JSONFileInfo(const char* filename) {
     if (strlen(filename) == 0) {
         Com::printF(Com::tJSONFileInfoName);
         file.printName();
-	    Com::print('"');
+        Com::print('"');
     }
-	Com::print('}');
+    Com::print('}');
     Com::println();
 };
 

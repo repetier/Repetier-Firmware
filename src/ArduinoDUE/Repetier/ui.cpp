@@ -59,6 +59,20 @@ millis_t ui_autoreturn_time = 0;
 int zBabySteps = 0;
 #endif
 
+enum bedLevelStates
+{
+  stopped = 0,
+  started,
+  firstStage,
+  secondStage,
+  thirdStage,
+  secondNozzle,
+  finish
+};
+
+int bedLevelState = stopped;
+//float zPosition;
+
 void beep(uint8_t duration,uint8_t count)
 {
 #if FEATURE_BEEPER
@@ -218,52 +232,52 @@ const long baudrates[] PROGMEM = {9600,14400,19200,28800,38400,56000,57600,76800
                                   460800,500000,921600,1000000,1500000,0
                                  };
 
-#define LCD_ENTRYMODE			0x04			/**< Set entrymode */
+#define LCD_ENTRYMODE            0x04 /**< Set entrymode */
 
 /** @name GENERAL COMMANDS */
 /*@{*/
-#define LCD_CLEAR			0x01	/**< Clear screen */
-#define LCD_HOME			0x02	/**< Cursor move to first digit */
+#define LCD_CLEAR                0x01 /**< Clear screen */
+#define LCD_HOME                 0x02 /**< Cursor move to first digit */
 /*@}*/
 
 /** @name ENTRYMODES */
 /*@{*/
-#define LCD_ENTRYMODE			0x04			/**< Set entrymode */
-#define LCD_INCREASE		LCD_ENTRYMODE | 0x02	/**<	Set cursor move direction -- Increase */
-#define LCD_DECREASE		LCD_ENTRYMODE | 0x00	/**<	Set cursor move direction -- Decrease */
-#define LCD_DISPLAYSHIFTON	LCD_ENTRYMODE | 0x01	/**<	Display is shifted */
-#define LCD_DISPLAYSHIFTOFF	LCD_ENTRYMODE | 0x00	/**<	Display is not shifted */
+#define LCD_ENTRYMODE            0x04                    /**< Set entrymode */
+#define LCD_INCREASE             LCD_ENTRYMODE | 0x02    /**<    Set cursor move direction -- Increase */
+#define LCD_DECREASE             LCD_ENTRYMODE | 0x00    /**<    Set cursor move direction -- Decrease */
+#define LCD_DISPLAYSHIFTON       LCD_ENTRYMODE | 0x01    /**<    Display is shifted */
+#define LCD_DISPLAYSHIFTOFF      LCD_ENTRYMODE | 0x00    /**<    Display is not shifted */
 /*@}*/
 
 /** @name DISPLAYMODES */
 /*@{*/
-#define LCD_DISPLAYMODE			0x08			/**< Set displaymode */
-#define LCD_DISPLAYON		LCD_DISPLAYMODE | 0x04	/**<	Display on */
-#define LCD_DISPLAYOFF		LCD_DISPLAYMODE | 0x00	/**<	Display off */
-#define LCD_CURSORON		LCD_DISPLAYMODE | 0x02	/**<	Cursor on */
-#define LCD_CURSOROFF		LCD_DISPLAYMODE | 0x00	/**<	Cursor off */
-#define LCD_BLINKINGON		LCD_DISPLAYMODE | 0x01	/**<	Blinking on */
-#define LCD_BLINKINGOFF		LCD_DISPLAYMODE | 0x00	/**<	Blinking off */
+#define LCD_DISPLAYMODE          0x08                   /**< Set displaymode */
+#define LCD_DISPLAYON            LCD_DISPLAYMODE | 0x04 /**< Display on */
+#define LCD_DISPLAYOFF           LCD_DISPLAYMODE | 0x00 /**< Display off */
+#define LCD_CURSORON             LCD_DISPLAYMODE | 0x02 /**< Cursor on */
+#define LCD_CURSOROFF            LCD_DISPLAYMODE | 0x00 /**< Cursor off */
+#define LCD_BLINKINGON           LCD_DISPLAYMODE | 0x01 /**< Blinking on */
+#define LCD_BLINKINGOFF          LCD_DISPLAYMODE | 0x00 /**< Blinking off */
 /*@}*/
 
 /** @name SHIFTMODES */
 /*@{*/
-#define LCD_SHIFTMODE			0x10			/**< Set shiftmode */
-#define LCD_DISPLAYSHIFT	LCD_SHIFTMODE | 0x08	/**<	Display shift */
-#define LCD_CURSORMOVE		LCD_SHIFTMODE | 0x00	/**<	Cursor move */
-#define LCD_RIGHT		LCD_SHIFTMODE | 0x04	/**<	Right shift */
-#define LCD_LEFT		LCD_SHIFTMODE | 0x00	/**<	Left shift */
+#define LCD_SHIFTMODE            0x10                 /**< Set shiftmode */
+#define LCD_DISPLAYSHIFT         LCD_SHIFTMODE | 0x08 /**< Display shift */
+#define LCD_CURSORMOVE           LCD_SHIFTMODE | 0x00 /**< Cursor move */
+#define LCD_RIGHT                LCD_SHIFTMODE | 0x04 /**< Right shift */
+#define LCD_LEFT                 LCD_SHIFTMODE | 0x00 /**< Left shift */
 /*@}*/
 
 /** @name DISPLAY_CONFIGURATION */
 /*@{*/
-#define LCD_CONFIGURATION		0x20				/**< Set function */
-#define LCD_8BIT		LCD_CONFIGURATION | 0x10	/**<	8 bits interface */
-#define LCD_4BIT		LCD_CONFIGURATION | 0x00	/**<	4 bits interface */
-#define LCD_2LINE		LCD_CONFIGURATION | 0x08	/**<	2 line display */
-#define LCD_1LINE		LCD_CONFIGURATION | 0x00	/**<	1 line display */
-#define LCD_5X10		LCD_CONFIGURATION | 0x04	/**<	5 X 10 dots */
-#define LCD_5X7			LCD_CONFIGURATION | 0x00	/**<	5 X 7 dots */
+#define LCD_CONFIGURATION        0x20                     /**< Set function */
+#define LCD_8BIT                 LCD_CONFIGURATION | 0x10 /**< 8 bits interface */
+#define LCD_4BIT                 LCD_CONFIGURATION | 0x00 /**< 4 bits interface */
+#define LCD_2LINE                LCD_CONFIGURATION | 0x08 /**< 2 line display */
+#define LCD_1LINE                LCD_CONFIGURATION | 0x00 /**< 1 line display */
+#define LCD_5X10                 LCD_CONFIGURATION | 0x04 /**< 5 X 10 dots */
+#define LCD_5X7                  LCD_CONFIGURATION | 0x00 /**< 5 X 7 dots */
 
 #define LCD_SETCGRAMADDR 0x40
 
@@ -369,10 +383,10 @@ void initializeLCD()
     HAL::delayMicroseconds(180);
     // finally, set # lines, font size, etc.
     lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
-    lcdCommand(LCD_CLEAR);					//-	Clear Screen
+    lcdCommand(LCD_CLEAR);//- Clear Screen
     HAL::delayMilliseconds(4); // clear is slow operation
-    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
-    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
+    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF); //- Entrymode (Display Shift: off, Increment Address Counter)
+    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF); //- Display on
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
     uid.createChar(1,character_back);
     uid.createChar(2,character_degree);
@@ -437,17 +451,9 @@ void lcdWriteByte(uint8_t c,uint8_t rs)
     WRITE(UI_DISPLAY_D5_PIN, c & 0x20);
     WRITE(UI_DISPLAY_D6_PIN, c & 0x40);
     WRITE(UI_DISPLAY_D7_PIN, c & 0x80);
-#if FEATURE_CONTROLLER == CONTROLLER_RADDS
     HAL::delayMicroseconds(10);
-#else
-    HAL::delayMicroseconds(2);
-#endif
     WRITE(UI_DISPLAY_ENABLE_PIN, HIGH);   // enable pulse must be >450ns
-#if FEATURE_CONTROLLER == CONTROLLER_RADDS
     HAL::delayMicroseconds(10);
-#else
-    HAL::delayMicroseconds(2);
-#endif
     WRITE(UI_DISPLAY_ENABLE_PIN, LOW);
 
     WRITE(UI_DISPLAY_D4_PIN, c & 0x01);
@@ -495,8 +501,8 @@ void repairLCD()
     HAL::delayMicroseconds(160);
     // finally, set # lines, font size, etc.
     lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
-    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
-    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
+    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF); //- Entrymode (Display Shift: off, Increment Address Counter)
+    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF); //- Display on
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
     uid.createChar(1, character_back);
     uid.createChar(2, character_degree);
@@ -553,10 +559,10 @@ void initializeLCD()
     // finally, set # lines, font size, etc.
     lcdCommand(LCD_4BIT | LCD_2LINE | LCD_5X7);
 
-    lcdCommand(LCD_CLEAR);					//-	Clear Screen
+    lcdCommand(LCD_CLEAR); //- Clear Screen
     HAL::delayMilliseconds(3); // clear is slow operation
-    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF);	//-	Entrymode (Display Shift: off, Increment Address Counter)
-    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF);	//-	Display on
+    lcdCommand(LCD_INCREASE | LCD_DISPLAYSHIFTOFF); //- Entrymode (Display Shift: off, Increment Address Counter)
+    lcdCommand(LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKINGOFF); //- Display on
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
     uid.createChar(1, character_back);
     uid.createChar(2, character_degree);
@@ -782,7 +788,7 @@ void initializeLCD()
     u8g_InitSPI(&u8g,&u8g_dev_ssd1306_128x64_sw_spi,  UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN, U8G_PIN_NONE, U8G_PIN_NONE);
 #endif
 #ifdef U8GLIB_SH1106_SW_SPI
-	u8g_InitSPI(&u8g,&u8g_dev_sh1106_128x64_sw_spi,  UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN, U8G_PIN_NONE, U8G_PIN_NONE);
+    u8g_InitSPI(&u8g,&u8g_dev_sh1106_128x64_sw_spi,  UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN, U8G_PIN_NONE, U8G_PIN_NONE);
 #endif
 #ifdef U8GLIB_KS0108_FAST
     u8g_Init8Bit(&u8g,&u8g_dev_ks0108_128x64_fast,UI_DISPLAY_D0_PIN,UI_DISPLAY_D1_PIN,UI_DISPLAY_D2_PIN,UI_DISPLAY_D3_PIN,UI_DISPLAY_D4_PIN,UI_DISPLAY_D5_PIN,UI_DISPLAY_D6_PIN,UI_DISPLAY_D7_PIN,UI_DISPLAY_ENABLE_PIN,UI_DISPLAY_CS1,UI_DISPLAY_CS2,
@@ -940,19 +946,15 @@ void UIDisplay::initialize()
     for(uint8_t y=0; y<UI_ROWS; y++) displayCache[y][0] = 0;
     printRowP(0, versionString);
     printRowP(1, PSTR(UI_PRINTER_NAME));
-#if UI_ROWS>2
     printRowP(UI_ROWS-1, PSTR(UI_PRINTER_COMPANY));
-#endif
 #endif
 #else
     slideIn(0, versionString);
     strcpy(displayCache[0], uid.printCols);
     slideIn(1, PSTR(UI_PRINTER_NAME));
     strcpy(displayCache[1], uid.printCols);
-#if UI_ROWS>2
     slideIn(UI_ROWS-1, PSTR(UI_PRINTER_COMPANY));
     strcpy(displayCache[UI_ROWS-1], uid.printCols);
-#endif
 #endif
 #endif // gameduino2
     HAL::delayMilliseconds(UI_START_SCREEN_DELAY);
@@ -1250,17 +1252,15 @@ void UIDisplay::parse(const char *txt,bool ram)
             if(c2 >= 'x' && c2 <= 'z')       addFloat(Printer::maxAccelerationMMPerSquareSecond[c2 - 'x'], 5, 0);
             else if(c2 >= 'X' &&  c2 <= 'Z') addFloat(Printer::maxTravelAccelerationMMPerSquareSecond[c2-'X'], 5, 0);
             else if(c2 == 'j') addFloat(Printer::maxJerk, 3, 1);
-#if DRIVE_SYSTEM != DELTA
             else if(c2 == 'J') addFloat(Printer::maxZJerk, 3, 1);
-#endif
             break;
-		case 'B':
-            if(c2 == 'C')	 //Custom coating
+        case 'B':
+            if(c2 == 'C') //Custom coating
             {
-	            addFloat(Printer::zBedOffset, 3, 2);
-	            break;
+                addFloat(Printer::zBedOffset, 3, 2);
+                break;
             }
-			break;
+            break;
         case 'd':  // debug boolean
             if (c2 == 'o') addStringOnOff(Printer::debugEcho());
             if (c2 == 'i') addStringOnOff(Printer::debugInfo());
@@ -1347,9 +1347,7 @@ void UIDisplay::parse(const char *txt,bool ram)
         case 'E': // Target extruder temperature
             if(c2 == 'c') fvalue = Extruder::current->tempControl.targetTemperatureC;
             else if(c2 >= '0' && c2 <= '9') fvalue = extruder[c2 - '0'].tempControl.targetTemperatureC;
-#if HAVE_HEATED_BED
             else if(c2 == 'b') fvalue = heatedBedController.targetTemperatureC;
-#endif
             addFloat(fvalue, 3, 0 /*UI_TEMP_PRECISION*/);
             break;
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
@@ -1443,9 +1441,7 @@ void UIDisplay::parse(const char *txt,bool ram)
 #endif
             // Extruder output level
             if(c2 >= '0' && c2 <= '9') ivalue = pwm_pos[c2 - '0'];
-#if HAVE_HEATED_BED
             else if(c2 == 'b') ivalue = pwm_pos[heatedBedController.pwmIndex];
-#endif
             else if(c2 == 'C') ivalue = pwm_pos[Extruder::current->id];
             ivalue = (ivalue * 100) / 255;
             addInt(ivalue, 3);
@@ -1655,10 +1651,6 @@ void UIDisplay::parse(const char *txt,bool ram)
 #endif
             break;
         case 'y':
-#if DRIVE_SYSTEM == DELTA
-            if(c2 >= '0' && c2 <= '3') fvalue = (float)Printer::currentNonlinearPositionSteps[c2 - '0']*Printer::invAxisStepsPerMM[c2-'0'];
-            addFloat(fvalue,3,2);
-#endif
             break;
         case 'z':
 #if EEPROM_MODE != 0 && FEATURE_Z_PROBE
@@ -2025,20 +2017,18 @@ void UIDisplay::refreshPage()
                 cache[0][0] = Printer::isAnimation()?'\x08':'\x09';
             else
                 cache[0][0] = '\x0a'; //off
-#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_EXTRUDER == 2
             if(extruder[1].tempControl.targetTemperatureC > 30)
                 cache[1][0] = Printer::isAnimation()?'\x08':'\x09';
             else
                 cache[1][0] = '\x0a'; //off
 #endif
-#if HAVE_HEATED_BED
             //heated bed animated icons
             uint8_t lin = 2 - ((NUM_EXTRUDER != 2) ? 1 : 0);
             if(heatedBedController.targetTemperatureC > 30)
                 cache[lin][0] = Printer::isAnimation() ? '\x0c' : '\x0d';
             else
                 cache[lin][0] = '\x0b';
-#endif
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
             //fan
             fanPercent = Printer::getFanSpeed() * 100 / 255;
@@ -2094,9 +2084,9 @@ void UIDisplay::refreshPage()
                     drawVProgressBar(116, 0, 9, 20, fanPercent);
 #endif
                     if(u8g_IsBBXIntersection(&u8g, 0, 42 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
-					   printU8GRow(0,42,cache[3]); //multiplier + extruded
+                       printU8GRow(0,42,cache[3]); //multiplier + extruded
                     if(u8g_IsBBXIntersection(&u8g, 0, 52 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
-						printU8GRow(0,52,cache[4]); //buffer usage
+                        printU8GRow(0,52,cache[4]); //buffer usage
 #if SDSUPPORT
                     //SD Card
                     if(sd.sdactive && u8g_IsBBXIntersection(&u8g, 66, 52 - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
@@ -2381,7 +2371,7 @@ int UIDisplay::okAction(bool allowMoves)
         switch(action)
         {
 #if FEATURE_RETRACTION
-        case UI_ACTION_WIZARD_FILAMENTCHANGE: // filament change is finished
+        case UI_ACTION_WIZARD_FILAMENTCHANGE: // Knob clicked callback. Filament change is finished
 //            BEEP_SHORT;
             popMenu(true);
             Extruder::current->retractDistance(EEPROM_FLOAT(RETRACTION_LENGTH));
@@ -2401,6 +2391,58 @@ int UIDisplay::okAction(bool allowMoves)
             Extruder::markAllUnjammed();
 #endif
             Printer::setJamcontrolDisabled(false);
+            break;
+        case UI_ACTION_WIZARD_BED_LEVEL:    // knob clicked callback
+            bedLevelState++;
+            switch(bedLevelState)
+            {
+              case firstStage:
+                GCode::executeFString(PSTR("G28 X Y Z\n")); // home all
+                GCode::executeFString(PSTR("G1 Z8\n")); // lower bed to safe distance from nozzle
+                GCode::executeFString(PSTR("T0\n")); // select extruder 0, leaving extruder 1 in parking position
+                GCode::executeFString(PSTR("G0 X310 Y398 F6000\n")); // go to first level position
+                GCode::executeFString(PSTR("M400\n")); // wait until moving extruders completed
+                popMenu(false);
+                pushMenu(&ui_wiz_manual_probe, true); // present menu to raise bed to extruder 0, and confirm by clicking
+                break;
+              case secondStage:
+                Printer::setOrigin(0, 0, 5);
+                GCode::executeFString(PSTR("G1 Z8\n")); // lower bed to safe distance from nozzle
+                GCode::executeFString(PSTR("G0 X140 Y98 F6000\n")); // go to second level position
+                GCode::executeFString(PSTR("G1 Z5\n")); // raise bed to height of firstStage
+                GCode::executeFString(PSTR("M400\n")); // wait until moving extruders completed
+                popMenu(false);
+                pushMenu(&ui_wiz_hardware_knob_left, true); // ask user to level with hardware knob under the bed, and confirm by clicking
+                break;
+              case thirdStage:
+                GCode::executeFString(PSTR("G1 Z8\n")); // lower bed to safe distance from nozzle
+                GCode::executeFString(PSTR("G0 X480 F6000\n")); // go to third level position
+                GCode::executeFString(PSTR("G1 Z5\n")); // raise bed to height of firstStage
+                GCode::executeFString(PSTR("M400\n")); // wait until moving extruders completed
+                popMenu(false);
+                pushMenu(&ui_wiz_hardware_knob_right, true); // ask user to level with hardware knob under the bed, and confirm by clicking
+                break;
+             case secondNozzle:
+                GCode::executeFString(PSTR("G1 Z8\n")); // lower bed to safe distance from nozzle
+                GCode::executeFString(PSTR("T1\n")); // activate extruder 1
+                GCode::executeFString(PSTR("G0 X264 Y398 F6000\n")); //
+                GCode::executeFString(PSTR("M400\n")); // wait until moving extruders completed
+                popMenu(false);
+                pushMenu(&ui_wiz_manual_probe, true); // present menu to user asking to raise bed until second nozzle touches, and confirm by clicking
+                break;
+              case finish:
+                // store zPosition extruder1
+                GCode::executeFString(PSTR("G90\n")); // set back to absolute positioning
+                GCode::executeFString(PSTR("G1 Z8\n")); // lower bed to safe distance from nozzle
+                // GCode::executeFString(PSTR("T0\n"));
+                // GCode::executeFString(PSTR("G1 X0 Y0\n"));
+                GCode::executeFString(PSTR("M400\n")); // wait until moving extruders completed
+                bedLevelState = stopped;
+                popMenu(true);
+                break;
+              default:
+                break;
+            }
             break;
 #if EXTRUDER_JAM_CONTROL
         case UI_ACTION_WIZARD_JAM_REHEAT: // user saw problem and takes action
@@ -2425,11 +2467,9 @@ int UIDisplay::okAction(bool allowMoves)
 #if FEATURE_BABYSTEPPING
         zBabySteps = 0;
 #endif
-#if HAVE_HEATED_BED
         if(action == pgm_read_word(&ui_menu_conf_bed.action))  // enter Bed configuration menu
             currHeaterForSetup = &heatedBedController;
         else
-#endif
             currHeaterForSetup = &(Extruder::current->tempControl);
         Printer::setMenuMode(MENU_MODE_FULL_PID, currHeaterForSetup->heatManager == 1);
         Printer::setMenuMode(MENU_MODE_DEADTIME, currHeaterForSetup->heatManager == 3);
@@ -2709,6 +2749,49 @@ ZPOS2:
         Commands::waitUntilEndOfAllMoves();
         Extruder::current->disableCurrentExtruderMotor();
         break;
+    case UI_ACTION_WIZARD_BED_LEVEL:      // knob turned callback
+        switch(bedLevelState)
+        {
+          case firstStage:
+            if(increment > 0)
+            {
+              if(Printer::currentPosition[Z_AXIS] < (Z_PROBE_BED_DISTANCE + Z_PROBE_HEIGHT))
+              {
+                PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS] * increment/20,0,Printer::homingFeedrate[Z_AXIS],true,false);
+                Printer::setNoDestinationCheck(false);
+              }
+            }
+            else
+            {
+              if(Printer::currentPosition[Z_AXIS] > Z_PROBE_BED_DISTANCE)
+              {
+                PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS] * increment/20,0,Printer::homingFeedrate[Z_AXIS],true,false);
+                Printer::setNoDestinationCheck(false);
+              }
+            }
+            break;
+          case secondNozzle:
+          if(increment > 0)
+          {
+            if(Printer::currentPosition[Z_AXIS] < (Z_PROBE_BED_DISTANCE + Z_PROBE_HEIGHT))
+            {
+              PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS] * increment/20,0,Printer::homingFeedrate[Z_AXIS],true,false);
+              Printer::setNoDestinationCheck(false);
+            }
+          }
+          else
+          {
+            if(Printer::currentPosition[Z_AXIS] > Z_PROBE_BED_DISTANCE)
+            {
+              PrintLine::moveRelativeDistanceInStepsReal(0,0,Printer::axisStepsPerMM[Z_AXIS] * increment/20,0,Printer::homingFeedrate[Z_AXIS],true,false);
+              Printer::setNoDestinationCheck(false);
+            }
+          }
+            break;
+          default:
+            break;
+        }
+        break;
 #endif
     case UI_ACTION_Z_BABYSTEPS:
 #if FEATURE_BABYSTEPPING
@@ -2719,7 +2802,7 @@ ZPOS2:
 #endif
         if((abs((int)Printer::zBabystepsMissing + (increment * BABYSTEP_MULTIPLICATOR))) < 20000)
         {
-			InterruptProtectedBlock noint;
+            InterruptProtectedBlock noint;
             Printer::zBabystepsMissing += increment * BABYSTEP_MULTIPLICATOR;
             zBabySteps += increment * BABYSTEP_MULTIPLICATOR;
         }
@@ -2727,7 +2810,6 @@ ZPOS2:
 #endif
     break;
     case UI_ACTION_HEATED_BED_TEMP:
-#if HAVE_HEATED_BED
     {
         int tmp = (int)heatedBedController.targetTemperatureC;
         if(tmp < UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
@@ -2737,7 +2819,6 @@ ZPOS2:
         else if(tmp > UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
         Extruder::setHeatedBedTemperature(tmp);
     }
-#endif
     break;
 
     case UI_ACTION_EXTRUDER0_TEMP:
@@ -2801,31 +2882,21 @@ ZPOS2:
     case UI_ACTION_PRINT_ACCEL_X:
     case UI_ACTION_PRINT_ACCEL_Y:
     case UI_ACTION_PRINT_ACCEL_Z:
-#if DRIVE_SYSTEM != DELTA
         INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[action - UI_ACTION_PRINT_ACCEL_X],((action == UI_ACTION_PRINT_ACCEL_Z) ? 1 : 100),0,10000);
-#else
-        INCREMENT_MIN_MAX(Printer::maxAccelerationMMPerSquareSecond[action - UI_ACTION_PRINT_ACCEL_X],100,0,10000);
-#endif
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_MOVE_ACCEL_X:
     case UI_ACTION_MOVE_ACCEL_Y:
     case UI_ACTION_MOVE_ACCEL_Z:
-#if DRIVE_SYSTEM != DELTA
         INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[action - UI_ACTION_MOVE_ACCEL_X],((action == UI_ACTION_MOVE_ACCEL_Z) ? 1 : 100),0,10000);
-#else
-        INCREMENT_MIN_MAX(Printer::maxTravelAccelerationMMPerSquareSecond[action - UI_ACTION_MOVE_ACCEL_X],100,0,10000);
-#endif
         Printer::updateDerivedParameter();
         break;
     case UI_ACTION_MAX_JERK:
         INCREMENT_MIN_MAX(Printer::maxJerk,0.1,1,99.9);
         break;
-#if DRIVE_SYSTEM != DELTA
     case UI_ACTION_MAX_ZJERK:
         INCREMENT_MIN_MAX(Printer::maxZJerk,0.1,0.1,99.9);
         break;
-#endif
     case UI_ACTION_HOMING_FEEDRATE_X:
     case UI_ACTION_HOMING_FEEDRATE_Y:
     case UI_ACTION_HOMING_FEEDRATE_Z:
@@ -3049,8 +3120,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             break;
         case UI_ACTION_HOME_X:
             if(!allowMoves) return UI_ACTION_HOME_X;
-            Printer::homeAxis(true, false, false);
-            Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_X "));
+//            Printer::homeAxis(true, false, false);
+//            Commands::printCurrentPosition(PSTR("UI_ACTION_HOME_X "));
+            GCode::executeFString(PSTR("G28 X\n"));
             break;
         case UI_ACTION_HOME_Y:
             if(!allowMoves) return UI_ACTION_HOME_Y;
@@ -3084,9 +3156,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             {
                 for(int i = 0;i < NUM_EXTRUDER; i++)
                     Extruder::setTemperatureForExtruder(0, i);
-#if HAVE_HEATED_BED
                 Extruder::setHeatedBedTemperature(0);
-#endif
             }
             break;
         case UI_ACTION_POWER:
@@ -3115,9 +3185,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
 #if NUM_EXTRUDER > 2
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_PLA,2);
 #endif
-#if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_PLA);
-#endif
             break;
         case UI_ACTION_PREHEAT_ABS:
             UI_STATUS_F(Com::translatedF(UI_TEXT_PREHEAT_ABS_ID));
@@ -3128,22 +3196,16 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
 #if NUM_EXTRUDER > 2
             Extruder::setTemperatureForExtruder(UI_SET_PRESET_EXTRUDER_TEMP_ABS,2);
 #endif
-#if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(UI_SET_PRESET_HEATED_BED_TEMP_ABS);
-#endif
             break;
         case UI_ACTION_COOLDOWN:
             UI_STATUS_F(Com::translatedF(UI_TEXT_COOLDOWN_ID));
             for(int i = 0;i < NUM_EXTRUDER; i++)
                 Extruder::setTemperatureForExtruder(0, i);
-#if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(0);
-#endif
             break;
         case UI_ACTION_HEATED_BED_OFF:
-#if HAVE_HEATED_BED
             Extruder::setHeatedBedTemperature(0);
-#endif
             break;
         case UI_ACTION_EXTRUDER0_OFF:
 #if NUM_EXTRUDER > 1
@@ -3371,12 +3433,21 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             pushMenu(&UI_USERMENU10, false);
             break;
 #endif
+        case UI_ACTION_WIZARD_BED_LEVEL:  //  Menu activated callback
+            BEEP_LONG;
+            if(bedLevelState == stopped)
+            {
+              bedLevelState = started;
+              pushMenu(&ui_wiz_bed_level, true);
+            }
+        break;
 #if FEATURE_RETRACTION
-        case UI_ACTION_WIZARD_FILAMENTCHANGE:
+        case UI_ACTION_WIZARD_FILAMENTCHANGE: //  Menu activated callback
         {
             if(Printer::isBlockingReceive()) break;
+            Printer::enableZStepper();
             Printer::setJamcontrolDisabled(true);
-            Com::printFLN(PSTR("important: Filament change required!"));
+            Com::printFLN(PSTR("Important: Filament change required!"));
             Printer::setBlockingReceive(true);
             BEEP_LONG;
             pushMenu(&ui_wiz_filamentchange, true);
@@ -3457,14 +3528,12 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
         }
         break;
         case UI_ACTION_HEATED_BED_UP:
-#if HAVE_HEATED_BED
         {
             int tmp = (int)heatedBedController.targetTemperatureC + 1;
             if(tmp == 1) tmp = UI_SET_MIN_HEATED_BED_TEMP;
             else if(tmp > UI_SET_MAX_HEATED_BED_TEMP) tmp = UI_SET_MAX_HEATED_BED_TEMP;
             Extruder::setHeatedBedTemperature(tmp);
         }
-#endif
         break;
 #if MAX_HARDWARE_ENDSTOP_Z
         case UI_ACTION_SET_MEASURED_ORIGIN:
@@ -3473,9 +3542,6 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             Printer::zLength -= Printer::currentPosition[Z_AXIS];
             Printer::currentPositionSteps[Z_AXIS] = 0;
             Printer::updateDerivedParameter();
-#if NONLINEAR_SYSTEM
-            transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
-#endif
             Printer::updateCurrentPosition(true);
             Com::printFLN(Com::tZProbePrinterHeight, Printer::zLength);
 #if EEPROM_MODE != 0
@@ -3487,47 +3553,19 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
         break;
 #endif
         case UI_ACTION_SET_P1:
-#if SOFTWARE_LEVELING
-            for (uint8_t i = 0; i < 3; i++)
-            {
-                Printer::levelingP1[i] = Printer::currentPositionSteps[i];
-            }
-#endif
             break;
         case UI_ACTION_SET_P2:
-#if SOFTWARE_LEVELING
-            for (uint8_t i = 0; i < 3; i++)
-            {
-                Printer::levelingP2[i] = Printer::currentPositionSteps[i];
-            }
-#endif
             break;
         case UI_ACTION_SET_P3:
-#if SOFTWARE_LEVELING
-            for (uint8_t i = 0; i < 3; i++)
-            {
-                Printer::levelingP3[i] = Printer::currentPositionSteps[i];
-            }
-#endif
             break;
         case UI_ACTION_CALC_LEVEL:
-#if SOFTWARE_LEVELING
-            int32_t factors[4];
-            PrintLine::calculatePlane(factors, Printer::levelingP1, Printer::levelingP2, Printer::levelingP3);
-            Com::printFLN(Com::tLevelingCalc);
-            Com::printFLN(Com::tTower1, PrintLine::calcZOffset(factors, Printer::deltaAPosXSteps, Printer::deltaAPosYSteps) * Printer::invAxisStepsPerMM[Z_AXIS]);
-            Com::printFLN(Com::tTower2, PrintLine::calcZOffset(factors, Printer::deltaBPosXSteps, Printer::deltaBPosYSteps) * Printer::invAxisStepsPerMM[Z_AXIS]);
-            Com::printFLN(Com::tTower3, PrintLine::calcZOffset(factors, Printer::deltaCPosXSteps, Printer::deltaCPosYSteps) * Printer::invAxisStepsPerMM[Z_AXIS]);
-#endif
             break;
         case UI_ACTION_HEATED_BED_DOWN:
-#if HAVE_HEATED_BED
         {
             int tmp = (int)heatedBedController.targetTemperatureC - 1;
             if(tmp < UI_SET_MIN_HEATED_BED_TEMP) tmp = 0;
             Extruder::setHeatedBedTemperature(tmp);
         }
-#endif
         break;
         case UI_ACTION_FAN_UP:
             Commands::setFanSpeed(Printer::getFanSpeed() + 32, true);
@@ -3591,6 +3629,11 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
         case UI_ACTION_TEMP_DEFECT:
             Printer::setAnyTempsensorDefect();
             break;
+            //case UI_ACTION_500XL_TEST:
+                //if (!allowMoves) return UI_ACTION_500XL_TEST;
+                // HOME Y
+                //GCode::executeFString(PSTR("G28 Y\n"));
+              //break;
         case UI_ACTION_LANGUAGE_EN:
         case UI_ACTION_LANGUAGE_DE:
         case UI_ACTION_LANGUAGE_NL:
@@ -3649,7 +3692,7 @@ void UIDisplay::slowAction(bool allowMoves)
 #if NUM_EXTRUDER>0 && defined(UI_I2C_HOTEND_LED)
             led |= (tempController[Extruder::current->id]->targetTemperatureC > 0 ? UI_I2C_HOTEND_LED : 0);
 #endif
-#if HAVE_HEATED_BED && defined(UI_I2C_HEATBED_LED)
+#if defined(UI_I2C_HEATBED_LED)
             led |= (heatedBedController.targetTemperatureC > 0 ? UI_I2C_HEATBED_LED : 0);
 #endif
 #if FAN_PIN>=0 && defined(UI_I2C_FAN_LED)
@@ -3661,7 +3704,7 @@ void UIDisplay::slowAction(bool allowMoves)
 #endif
         uint16_t nextAction = 0;
         uiCheckSlowKeys(nextAction);
-#ifdef HAS_USER_KEYS        
+#ifdef HAS_USER_KEYS
         ui_check_Ukeys(nextAction);
 #endif
         if(lastButtonAction != nextAction)
@@ -3834,4 +3877,3 @@ const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,0,0,0,-1,0,0,1,0}; // 
 #endif
 #endif
 #endif
-

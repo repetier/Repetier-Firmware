@@ -41,8 +41,6 @@ Implemented Codes
 - G4  - Dwell S<seconds> or P<milliseconds>
 - G10 S<1 = long retract, 0 = short retract = default> retracts filament according to stored setting
 - G11 S<1 = long retract, 0 = short retract = default> = Undo retraction according to stored setting
-- G20 - Units for G0/G1 are inches.
-- G21 - Units for G0/G1 are mm.
 - G28 - Home all axis or named axis.
 - G29 S<0..2> - Z-Probe at the 3 defined probe points. S = 1 measure avg. zHeight, S = 2 store avg zHeight
 - G30 P<0..3> - Single z-probe at current position P = 1 first measurement, P = 2 Last measurement P = 0 or 3 first and last measurement
@@ -51,9 +49,6 @@ Implemented Codes
 - G90 - Use absolute coordinates
 - G91 - Use relative coordinates
 - G92 - Set current position to coordinates given
-- G131 - set extruder offset position to 0 - needed for calibration with G132
-- G132 - calibrate endstop positions. Call this, after calling G131 and after centering the extruder holder.
-- G133 - measure steps until max endstops for deltas. Can be used to detect lost steps within tolerances of endstops.
 - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
 
 RepRap M Codes
@@ -67,9 +62,6 @@ RepRap M Codes
 
 Custom M Codes
 
-- M3 - Spindle on, Clockwise or Laser on during G1 moves.
-- M4 - Spindle on, Counterclockwise.
-- M5 - Spindle off, Laser off.
 - M20  - List SD card
 - M21  - Init SD card
 - M22  - Release SD card
@@ -100,7 +92,6 @@ Custom M Codes
 - M117 <message> - Write message in status row on lcd
 - M119 - Report endstop status
 - M140 S<temp> F1 - Set bed target temp, F1 makes a beep when temperature is reached the first time
-- M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
 - M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
 - M190 - Wait for bed current temp to reach target temp.
 - M200 T<extruder> D<diameter> - Use volumetric extrusion. Set D0 or omit D to disable volumetric extr. Omit T for current extruder.
@@ -127,7 +118,6 @@ Custom M Codes
 - M320 S<0/1> - Activate autolevel, S1 stores it in eeprom
 - M321 S<0/1> - Deactivate autolevel, S1 stores it in eeprom
 - M322 - Reset autolevel matrix
-- M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
 - M340 P<servoId> S<pulseInUS> R<autoOffIn ms>: servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off. R allows automatic disabling after a while.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set microstepping on RAMBO board
 - M355 S<0/1> - Turn case light on/off, no S = report status
@@ -135,10 +125,6 @@ Custom M Codes
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.
 - M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate fo rthat move.
-- M450 - Reports printer mode
-- M451 - Set printer mode to FFF
-- M452 - Set printer mode to laser
-- M453 - Set printer mode to CNC
 - M460 X<minTemp> Y<maxTemp> : Set temperature range for thermistor controlled fan
 - M500 Store settings to EEPROM
 - M501 Load settings from EEPROM
@@ -147,7 +133,6 @@ Custom M Codes
 - M600 Change filament
 - M601 S<1/0> - Pause extruders. Paused extrudes disable heaters and motor. Unpausing reheats extruder to old temp.
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
-- M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 - M999 - Continue from fatal error. M999 S1 will create a fatal error for testing.
 */
 

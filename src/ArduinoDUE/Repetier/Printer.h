@@ -33,10 +33,6 @@ Level 3: Transformed and shifter => Include extruder offset and bed rotation.
 Level 4: Step position => Level 3 converted into steps for motor position
         currentPositionSteps and destinationPositionSteps are from this level.
 
-Level 5: Nonlinear motor step position, only for nonlinear drive systems
-         destinationDeltaSteps
-
-
 */
 
 #ifndef PRINTER_H_INCLUDED
@@ -116,53 +112,13 @@ union wizardVar
 #define towerCMinSteps Printer::zMinSteps
 
 class Plane {
-	public:
-	// f(x, y) = ax + by + c
-	float a,b,c;
-	float z(float x,float y) {
-		return a * x + y * b + c;
-	}
+    public:
+    // f(x, y) = ax + by + c
+    float a,b,c;
+    float z(float x,float y) {
+        return a * x + y * b + c;
+    }
 };
-#if DISTORTION_CORRECTION
-class Distortion
-{
-public:
-    Distortion();
-    void init();
-    void enable(bool permanent = true);
-    void disable(bool permanent = true);
-    bool measure(void);
-    int32_t correct(int32_t x, int32_t y, int32_t z) const;
-    void updateDerived();
-    void reportStatus();
-	bool isEnabled() {return enabled;}
-	int32_t zMaxSteps() {return zEnd;}	
-	void set(float x,float y,float z);
-	void showMatrix();		
-    void resetCorrection();
-private:
-    int matrixIndex(fast8_t x, fast8_t y) const;
-    int32_t getMatrix(int index) const;
-    void setMatrix(int32_t val, int index);
-    bool isCorner(fast8_t i, fast8_t j) const;
-    INLINE int32_t extrapolatePoint(fast8_t x1, fast8_t y1, fast8_t x2, fast8_t y2) const;
-    void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
-    void extrapolateCorners();
-// attributes
-#if DRIVE_SYSTEM == DELTA	
-    int32_t step;
-    int32_t radiusCorrectionSteps;
-#else
-	int32_t xCorrectionSteps,xOffsetSteps;
-	int32_t yCorrectionSteps,yOffsetSteps;
-#endif	
-    int32_t zStart,zEnd;
-#if !DISTORTION_PERMANENT
-    int32_t matrix[DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS];
-#endif
-    bool enabled;
-};
-#endif //DISTORTION_CORRECTION
 
 #define ENDSTOP_X_MIN_ID 1
 #define ENDSTOP_X_MAX_ID 2
@@ -199,10 +155,10 @@ public:
     }
     static INLINE bool anyXYZ() {
 #ifdef EXTENDED_ENDSTOPS
-	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0 ||
-		lastState2 != 0;
+        return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0 ||
+        lastState2 != 0;
 #else
-	    return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0;
+        return (lastState & (ENDSTOP_X_MAX_ID|ENDSTOP_Y_MAX_ID|ENDSTOP_Z_MAX_ID|ENDSTOP_X_MIN_ID|ENDSTOP_Y_MIN_ID|ENDSTOP_Z_MIN_ID|ENDSTOP_Z2_MIN_ID)) != 0;
 #endif
     }
     static INLINE void resetAccumulator() {
@@ -275,18 +231,6 @@ public:
     }
 };
 
-#ifndef DEFAULT_PRINTER_MODE
-#if NUM_EXTRUDER > 0
-#define DEFAULT_PRINTER_MODE PRINTER_MODE_FFF
-#elif defined(SUPPORT_LASER) && SUPPORT_LASER
-#define DEFAULT_PRINTER_MODE PRINTER_MODE_LASER
-#elif defined(SUPPORT_CNC) && SUPPORT_CNC
-#define DEFAULT_PRINTER_MODE PRINTER_MODE_CNC
-#else
-#error No supported printer mode compiled
-#endif
-#endif
-
 class Printer
 {
     static uint8_t debugLevel;
@@ -312,7 +256,6 @@ public:
     static uint8_t relativeCoordinateMode;    ///< Determines absolute (false) or relative Coordinates (true).
     static uint8_t relativeExtruderCoordinateMode;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
-    static uint8_t unitIsInches;
     static uint8_t mode;
     static uint8_t fanSpeed; // Last fan speed set with M106/M107
     static float zBedOffset;
@@ -329,46 +272,17 @@ public:
     static int32_t destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
     static float extrudeMultiplyError; ///< Accumulated error during extrusion
     static float extrusionFactor; ///< Extrusion multiply factor
-#if NONLINEAR_SYSTEM
-    static int32_t maxDeltaPositionSteps;
-    static int32_t currentNonlinearPositionSteps[E_TOWER_ARRAY];
-    static floatLong deltaDiagonalStepsSquaredA;
-    static floatLong deltaDiagonalStepsSquaredB;
-    static floatLong deltaDiagonalStepsSquaredC;
-    static float deltaMaxRadiusSquared;
-    static int32_t deltaFloorSafetyMarginSteps;
-    static int32_t deltaAPosXSteps;
-    static int32_t deltaAPosYSteps;
-    static int32_t deltaBPosXSteps;
-    static int32_t deltaBPosYSteps;
-    static int32_t deltaCPosXSteps;
-    static int32_t deltaCPosYSteps;
-    static int32_t realDeltaPositionSteps[TOWER_ARRAY];
-    static int16_t travelMovesPerSecond;
-    static int16_t printMovesPerSecond;
-    static float radius0;
-#endif
-#if DRIVE_SYSTEM != DELTA
-	static int32_t zCorrectionStepsIncluded; 	
-#endif
-#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
+    static int32_t zCorrectionStepsIncluded;
+#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z
     static int32_t stepsRemainingAtZHit;
 #endif
-#if DRIVE_SYSTEM == DELTA
-    static int32_t stepsRemainingAtXHit;
-    static int32_t stepsRemainingAtYHit;
-#endif
-#ifdef SOFTWARE_LEVELING
-    static int32_t levelingP1[3];
-    static int32_t levelingP2[3];
-    static int32_t levelingP3[3];
-#endif
+
 #if FEATURE_AUTOLEVEL
     static float autolevelTransformation[9]; ///< Transformation matrix
 #endif
 #if FAN_THERMO_PIN > -1
-	static float thermoMinTemp;
-	static float thermoMaxTemp;
+    static float thermoMinTemp;
+    static float thermoMaxTemp;
 #endif
     static int16_t zBabystepsMissing;
     static float minimumSpeed;               ///< lowest allowed speed to keep integration error small
@@ -390,9 +304,7 @@ public:
     static unsigned int extrudeMultiply;     ///< Flow multiplier in percdent (factor 1 = 100)
     static float maxJerk;                    ///< Maximum allowed jerk in mm/s
     static uint8_t interruptEvent;           ///< Event generated in interrupts that should/could be handled in main thread
-#if DRIVE_SYSTEM!=DELTA
     static float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
-#endif
     static float offsetX;                     ///< X-offset for different extruder positions.
     static float offsetY;                     ///< Y-offset for different extruder positions.
     static float offsetZ;                     ///< Y-offset for different extruder positions.
@@ -410,7 +322,7 @@ public:
     static float memoryZ;
     static float memoryE;
     static float memoryF;
-#if GANTRY && !defined(FAST_COREXYZ)
+#if GANTRY
     static int8_t motorX;
     static int8_t motorYorZ;
 #endif
@@ -430,7 +342,6 @@ public:
         if(highPriority || interruptEvent == 0)
             interruptEvent = evt;
     }
-    static void reportPrinterMode();
     static INLINE void setMenuMode(uint8_t mode,bool on)
     {
         if(on)
@@ -443,15 +354,15 @@ public:
     {
         return (menuMode & mode) == mode;
     }
-	static void setDebugLevel(uint8_t newLevel);
-	static void toggleEcho();
-	static void toggleInfo();
-	static void toggleErrors();
-	static void toggleDryRun();
-	static void toggleCommunication();
-	static void toggleNoMoves();
+    static void setDebugLevel(uint8_t newLevel);
+    static void toggleEcho();
+    static void toggleInfo();
+    static void toggleErrors();
+    static void toggleDryRun();
+    static void toggleCommunication();
+    static void toggleNoMoves();
     static void toggleEndStop();
-	static INLINE uint8_t getDebugLevel() {return debugLevel;}
+    static INLINE uint8_t getDebugLevel() {return debugLevel;}
     static INLINE bool debugEcho()
     {
         return ((debugLevel & 1) != 0);
@@ -486,7 +397,7 @@ public:
     {
         return ((debugLevel & 64) != 0);
     }
-    
+
     static INLINE bool debugFlag(uint8_t flags)
     {
         return (debugLevel & flags);
@@ -823,10 +734,6 @@ public:
     {
         setAnimation(!isAnimation());
     }
-    static INLINE float convertToMM(float x)
-    {
-        return (unitIsInches ? x*25.4 : x);
-    }
     static INLINE bool areAllSteppersDisabled()
     {
         return flag0 & PRINTER_FLAG0_STEPPER_DISABLED;
@@ -849,7 +756,7 @@ public:
     static INLINE void setAnyTempsensorDefect()
     {
         flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
-		debugSet(8);
+        debugSet(8);
     }
     static INLINE void unsetAnyTempsensorDefect()
     {
@@ -878,7 +785,7 @@ public:
     }
     static INLINE void executeXYGantrySteps()
     {
-#if (GANTRY) && !defined(FAST_COREXYZ)
+#if (GANTRY)
         if(motorX <= -2)
         {
             WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
@@ -915,7 +822,7 @@ public:
     }
     static INLINE void executeXZGantrySteps()
     {
-#if (GANTRY) && !defined(FAST_COREXYZ)
+#if (GANTRY)
         if(motorX <= -2)
         {
             WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
@@ -960,18 +867,18 @@ public:
     {
 #if DUAL_X_AXIS
 #if FEATURE_DITTO_PRINTING
-		if(Extruder::dittoMode) {
-			WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
-			WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
-			return;
-		}
+        if(Extruder::dittoMode) {
+            WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
+            WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
+            return;
+        }
 #endif
-		if(Extruder::current->id) {
-			WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);			
-		} else {
-			WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);			
-		}
-#else		
+        if(Extruder::current->id) {
+            WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
+        } else {
+            WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
+        }
+#else
         WRITE(X_STEP_PIN,START_STEP_WITH_HIGH);
 #if FEATURE_TWO_XSTEPPER
         WRITE(X2_STEP_PIN,START_STEP_WITH_HIGH);
@@ -1107,23 +1014,14 @@ public:
     }
     static INLINE int getFan2Speed()
     {
-	    return (int)pwm_pos[PWM_FAN2];
+        return (int)pwm_pos[PWM_FAN2];
     }
-#if NONLINEAR_SYSTEM
-    static INLINE void setDeltaPositions(long xaxis, long yaxis, long zaxis)
-    {
-        currentNonlinearPositionSteps[A_TOWER] = xaxis;
-        currentNonlinearPositionSteps[B_TOWER] = yaxis;
-        currentNonlinearPositionSteps[C_TOWER] = zaxis;
-    }
-    static void deltaMoveToTopEndstops(float feedrate);
-#endif
 #if MAX_HARDWARE_ENDSTOP_Z
     static float runZMaxProbe();
 #endif
 #if FEATURE_Z_PROBE
-	static void startProbing(bool runScript);
-	static void finishProbing();
+    static void startProbing(bool runScript);
+    static void finishProbing();
     static float runZProbe(bool first,bool last,uint8_t repeat = Z_PROBE_REPETITIONS,bool runStartScript = true);
     static void waitForZProbeStart();
     static float bendingCorrectionAt(float x,float y);
@@ -1136,10 +1034,6 @@ public:
     static void resetTransformationMatrix(bool silent);
     //static void buildTransformationMatrix(float h1,float h2,float h3);
     static void buildTransformationMatrix(Plane &plane);
-#endif
-#if DISTORTION_CORRECTION
-    static bool measureDistortion(void);
-    static Distortion distortion;
 #endif
     static void MemoryPosition();
     static void GoToMemoryPosition(bool x,bool y,bool z,bool e,float feed);

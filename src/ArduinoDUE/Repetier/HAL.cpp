@@ -163,20 +163,6 @@ void HAL::setupTimer() {
 // Initialize ADC channels
 void HAL::analogStart(void)
 {
-
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
-  PIO_Configure(
-    g_APinDescription[58].pPort,
-    g_APinDescription[58].ulPinType,
-    g_APinDescription[58].ulPin,
-    g_APinDescription[58].ulPinConfiguration);
-  PIO_Configure(
-    g_APinDescription[59].pPort,
-    g_APinDescription[59].ulPinType,
-    g_APinDescription[59].ulPin,
-    g_APinDescription[59].ulPinConfiguration);
-#endif // (MOTHERBOARD==500) || (MOTHERBOARD==501)
-
   // ensure we can write to ADC registers
   ADC->ADC_WPMR = 0x41444300u; //ADC_WPMR_WPKEY(0);
   pmc_enable_periph_clk(ID_ADC);  // enable adc clock
@@ -285,15 +271,9 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
 
 #ifndef DUE_SOFTWARE_SPI
 // hardware SPI
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
-bool spiInitMaded = false;
-#endif
 void HAL::spiBegin()
 {
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
-  if (spiInitMaded == false)
-  {
-#endif        // Configre SPI pins
+    // Configre SPI pins
     PIO_Configure(
       g_APinDescription[SCK_PIN].pPort,
       g_APinDescription[SCK_PIN].ulPinType,
@@ -314,60 +294,23 @@ void HAL::spiBegin()
     SPI_Configure(SPI0, ID_SPI0, SPI_MR_MSTR |
                   SPI_MR_MODFDIS | SPI_MR_PS);
     SPI_Enable(SPI0);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
-    SET_OUTPUT(DAC0_SYNC);
-#if NUM_EXTRUDER > 1
-    SET_OUTPUT(DAC1_SYNC);
-    WRITE(DAC1_SYNC, HIGH);
-#endif
-    SET_OUTPUT(SPI_EEPROM1_CS);
-    SET_OUTPUT(SPI_EEPROM2_CS);
-    SET_OUTPUT(SPI_FLASH_CS);
-    WRITE(DAC0_SYNC, HIGH);
-    WRITE(SPI_EEPROM1_CS, HIGH );
-    WRITE(SPI_EEPROM2_CS, HIGH );
-    WRITE(SPI_FLASH_CS, HIGH );
-    WRITE(SDSS , HIGH );
-#endif// MOTHERBOARD == 500 || MOTHERBOARD == 501
     PIO_Configure(
       g_APinDescription[SPI_PIN].pPort,
       g_APinDescription[SPI_PIN].ulPinType,
       g_APinDescription[SPI_PIN].ulPin,
       g_APinDescription[SPI_PIN].ulPinConfiguration);
     spiInit(1);
-#if (MOTHERBOARD==500) || (MOTHERBOARD==501)
-    spiInitMaded = true;
-  }
-#endif
 }
 // spiClock is 0 to 6, relecting AVR clock dividers 2,4,8,16,32,64,128
 // Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
 void HAL::spiInit(uint8_t spiClock)
 {
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
-  if (spiInitMaded == false)
-  {
-#endif
-    if (spiClock > 4) spiClock = 1;
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
-    // Set SPI mode 1, clock, select not active after transfer, with delay between transfers
-    SPI_ConfigureNPCS(SPI0, SPI_CHAN_DAC,
-                      SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) |
-                      SPI_CSR_DLYBCT(1));
-    // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
-    SPI_ConfigureNPCS(SPI0, SPI_CHAN_EEPROM1, SPI_CSR_NCPHA |
-                      SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) |
-                      SPI_CSR_DLYBCT(1));
-#endif// MOTHERBOARD==500 || MOTHERBOARD==501
-    // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
-    SPI_ConfigureNPCS(SPI0, SPI_CHAN, SPI_CSR_NCPHA |
-                      SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) |
-                      SPI_CSR_DLYBCT(1));
-    SPI_Enable(SPI0);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
-    spiInitMaded = true;
-  }
-#endif
+  if (spiClock > 4) spiClock = 1;
+  // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
+  SPI_ConfigureNPCS(SPI0, SPI_CHAN, SPI_CSR_NCPHA |
+                    SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) |
+                    SPI_CSR_DLYBCT(1));
+  SPI_Enable(SPI0);
 }
 // Write single byte to SPI
 void HAL::spiSend(byte b) {
@@ -409,54 +352,7 @@ uint8_t HAL::spiReceive()
   //delayMicroseconds(1);
   return SPI0->SPI_RDR;
 }
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501
 
-void HAL::spiSend(uint32_t chan, byte b)
-{
-  uint8_t dummy_read = 0;
-  // wait for transmit register empty
-  while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
-  // write byte with address and end transmission flag
-  SPI0->SPI_TDR = (uint32_t)b | SPI_PCS(chan) | SPI_TDR_LASTXFER;
-  // wait for receive register
-  while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
-  // clear status
-  while ((SPI0->SPI_SR & SPI_SR_RDRF) == 1)
-    dummy_read = SPI0->SPI_RDR;
-}
-
-void HAL::spiSend(uint32_t chan , const uint8_t* buf , size_t n)
-{
-  uint8_t dummy_read = 0;
-  if (n == 0) return;
-  for (int i = 0; i < n - 1; i++)
-  {
-    while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
-    SPI0->SPI_TDR = (uint32_t)buf[i] | SPI_PCS(chan);
-    while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
-    while ((SPI0->SPI_SR & SPI_SR_RDRF) == 1)
-      dummy_read = SPI0->SPI_RDR;
-  }
-  spiSend(chan, buf[n - 1]);
-}
-
-uint8_t HAL::spiReceive(uint32_t chan)
-{
-  uint8_t spirec_tmp;
-  // wait for transmit register empty
-  while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
-  while ((SPI0->SPI_SR & SPI_SR_RDRF) == 1)
-    spirec_tmp =  SPI0->SPI_RDR;
-
-  // write dummy byte with address and end transmission flag
-  SPI0->SPI_TDR = 0x000000FF | SPI_PCS(chan) | SPI_TDR_LASTXFER;
-
-  // wait for receive register
-  while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
-  // get byte from receive register
-  return SPI0->SPI_RDR;
-}
-#endif
 // Read from SPI into buffer
 void HAL::spiReadBlock(uint8_t*buf, uint16_t nbyte)
 {
@@ -914,22 +810,22 @@ void PWM_TIMER_VECTOR ()
 #if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1
     if ((pwm_pos_set[0] = (pwm_pos[0] & HEATER_PWM_MASK)) > 0) WRITE(EXT0_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1 && !MIXING_EXTRUDER
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
     if ((pwm_pos_set[1] = (pwm_pos[1] & HEATER_PWM_MASK)) > 0) WRITE(EXT1_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2 && !MIXING_EXTRUDER
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2
     if ((pwm_pos_set[2] = (pwm_pos[2] & HEATER_PWM_MASK)) > 0) WRITE(EXT2_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3 && !MIXING_EXTRUDER
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3
     if ((pwm_pos_set[3] = (pwm_pos[3] & HEATER_PWM_MASK)) > 0) WRITE(EXT3_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4 && !MIXING_EXTRUDER
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4
     if ((pwm_pos_set[4] = (pwm_pos[4] & HEATER_PWM_MASK)) > 0) WRITE(EXT4_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5 && !MIXING_EXTRUDER
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5
     if ((pwm_pos_set[5] = (pwm_pos[5] & HEATER_PWM_MASK)) > 0) WRITE(EXT5_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
-#if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
+#if HEATED_BED_HEATER_PIN > -1
     if ((pwm_pos_set[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER]) > 0) WRITE(HEATED_BED_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
   }
@@ -970,10 +866,10 @@ void PWM_TIMER_VECTOR ()
         if((pwm_pos_set[PWM_FAN1] = (pwm_pos[PWM_FAN1] & COOLER_PWM_MASK)) > 0) WRITE(FAN_PIN,1);
 #endif
 #if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
-		if((pwm_pos_set[PWM_FAN2] = (pwm_pos[PWM_FAN2] & COOLER_PWM_MASK)) > 0) WRITE(FAN2_PIN,1);
+    if((pwm_pos_set[PWM_FAN2] = (pwm_pos[PWM_FAN2] & COOLER_PWM_MASK)) > 0) WRITE(FAN2_PIN,1);
 #endif
 #if defined(FAN_THERMO_PIN) && FAN_THERMO_PIN > -1
-		if((pwm_pos_set[PWM_FAN_THERMO] = (pwm_pos[PWM_FAN_THERMO] & COOLER_PWM_MASK)) > 0) WRITE(FAN_THERMO_PIN,1);
+    if((pwm_pos_set[PWM_FAN_THERMO] = (pwm_pos[PWM_FAN_THERMO] & COOLER_PWM_MASK)) > 0) WRITE(FAN_THERMO_PIN,1);
 #endif
   }
 #if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1
@@ -990,7 +886,7 @@ void PWM_TIMER_VECTOR ()
 #endif
 #endif
 #endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1 && !MIXING_EXTRUDER
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
 #if PDM_FOR_EXTRUDER
   pulseDensityModulate(EXT1_HEATER_PIN, pwm_pos[1], pwm_pos_set[1], HEATER_PINS_INVERTED);
 #else
@@ -1004,7 +900,7 @@ void PWM_TIMER_VECTOR ()
 #endif
 #endif
 #endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2 && !MIXING_EXTRUDER
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2
 #if PDM_FOR_EXTRUDER
   pulseDensityModulate(EXT2_HEATER_PIN, pwm_pos[2], pwm_pos_set[2], HEATER_PINS_INVERTED);
 #else
@@ -1018,7 +914,7 @@ void PWM_TIMER_VECTOR ()
 #endif
 #endif
 #endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3 && !MIXING_EXTRUDER
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3
 #if PDM_FOR_EXTRUDER
   pulseDensityModulate(EXT3_HEATER_PIN, pwm_pos[3], pwm_pos_set[3], HEATER_PINS_INVERTED);
 #else
@@ -1032,7 +928,7 @@ void PWM_TIMER_VECTOR ()
 #endif
 #endif
 #endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4 && !MIXING_EXTRUDER
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4
 #if PDM_FOR_EXTRUDER
   pulseDensityModulate(EXT4_HEATER_PIN, pwm_pos[4], pwm_pos_set[4], HEATER_PINS_INVERTED);
 #else
@@ -1046,7 +942,7 @@ void PWM_TIMER_VECTOR ()
 #endif
 #endif
 #endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5 && !MIXING_EXTRUDER
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5
 #if PDM_FOR_EXTRUDER
   pulseDensityModulate(EXT5_HEATER_PIN, pwm_pos[5], pwm_pos_set[5], HEATER_PINS_INVERTED);
 #else
@@ -1080,21 +976,21 @@ void PWM_TIMER_VECTOR ()
 #if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
 if(fan2Kickstart == 0)
 {
-	#if PDM_FOR_COOLER
-	pulseDensityModulate(FAN2_PIN, pwm_pos[PWM_FAN2], pwm_pos_set[PWM_FAN2], false);
-	#else
-	if(pwm_pos_set[PWM_FAN2] == pwm_count_cooler && pwm_pos_set[PWM_FAN2] != COOLER_PWM_MASK) WRITE(FAN2_PIN,0);
-	#endif
+  #if PDM_FOR_COOLER
+  pulseDensityModulate(FAN2_PIN, pwm_pos[PWM_FAN2], pwm_pos_set[PWM_FAN2], false);
+  #else
+  if(pwm_pos_set[PWM_FAN2] == pwm_count_cooler && pwm_pos_set[PWM_FAN2] != COOLER_PWM_MASK) WRITE(FAN2_PIN,0);
+  #endif
 }
 #endif
 #if defined(FAN_THERMO_PIN) && FAN_THERMO_PIN > -1
-	#if PDM_FOR_COOLER
-	pulseDensityModulate(FAN_THERMO_PIN, pwm_pos[PWM_FAN_THERMO], pwm_pos_set[PWM_FAN_THERMO], false);
-	#else
-	if(pwm_pos_set[PWM_FAN_THERMO] == pwm_count_cooler && pwm_pos_set[PWM_FAN_THERMO] != COOLER_PWM_MASK) WRITE(FAN_THERMO_PIN,0);
-	#endif
+  #if PDM_FOR_COOLER
+  pulseDensityModulate(FAN_THERMO_PIN, pwm_pos[PWM_FAN_THERMO], pwm_pos_set[PWM_FAN_THERMO], false);
+  #else
+  if(pwm_pos_set[PWM_FAN_THERMO] == pwm_count_cooler && pwm_pos_set[PWM_FAN_THERMO] != COOLER_PWM_MASK) WRITE(FAN_THERMO_PIN,0);
+  #endif
 #endif
-#if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
+#if HEATED_BED_HEATER_PIN > -1
 #if PDM_FOR_EXTRUDER
   pulseDensityModulate(HEATED_BED_HEATER_PIN, pwm_pos[NUM_EXTRUDER], pwm_pos_set[NUM_EXTRUDER], HEATER_PINS_INVERTED);
 #else
