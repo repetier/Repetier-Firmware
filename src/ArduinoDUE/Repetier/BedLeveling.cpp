@@ -282,7 +282,7 @@ void correctAutolevel(Plane &plane) {
 }
 
 
-/*
+/**
 Implementation of the G32 command
 G32 S<0..2> - Autolevel print bed. S = 1 measure zLength, S = 2 Measure and store new zLength
 S = 0 : Do not update length - use this if you have not homed before or you mess up zLength!
@@ -438,6 +438,10 @@ bool runBedLeveling(int s) {
 
 #endif
 
+/** \brief Activate or deactivate rotation correction.
+
+\param on True if Rotation correction should be enabled.
+*/
 void Printer::setAutolevelActive(bool on) {
 #if FEATURE_AUTOLEVEL
     if(on == isAutolevelActive()) return;
@@ -450,6 +454,9 @@ void Printer::setAutolevelActive(bool on) {
 #endif // FEATURE_AUTOLEVEL
 }
 #if MAX_HARDWARE_ENDSTOP_Z
+/** \brief Measure distance from current position until triggering z max endstop.
+
+\return Distance until triggering in mm. */
 float Printer::runZMaxProbe() {
 #if NONLINEAR_SYSTEM
     long startZ = realDeltaPositionSteps[Z_AXIS] = currentNonlinearPositionSteps[Z_AXIS]; // update real
@@ -481,16 +488,17 @@ float Printer::runZMaxProbe() {
 #endif
 
 #if FEATURE_Z_PROBE
-bool Printer::startProbing(bool runScript) {
+/** \brief Activate z-probe
+
+Tests if switching from active tool to z-probe is possible at current position. If not the operation is aborted.
+If ok, it runs start script, checks z position and applies the z-probe offset.
+
+\param runScript Run start z-probe script from configuration.
+\param enforceStartHeight If true moves z to EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0) + 0.1 if current position is higher.
+\return True if activation was successful. */
+bool Printer::startProbing(bool runScript, bool enforceStartHeight) {
     float cx, cy, cz;
     realPosition(cx, cy, cz);
-    if(runScript)
-        GCode::executeFString(Com::tZProbeStartScript);
-    float maxStartHeight = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0) + 0.1;
-    if(currentPosition[Z_AXIS] > maxStartHeight) {
-        cz = maxStartHeight;
-        moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, maxStartHeight, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
-    }
     // Fix position to be inside print area when probe is enabled
 #if EXTRUDER_IS_Z_PROBE == 0
     float ZPOffsetX = EEPROM::zProbeXOffset();
@@ -513,6 +521,14 @@ bool Printer::startProbing(bool runScript) {
         GCode::fatalError(PSTR("Could not activate z-probe offset due to coordinate constraints - result is inaccurate!"));
         return false;
     } else {
+	    if(runScript)
+			GCode::executeFString(Com::tZProbeStartScript);
+	    float maxStartHeight = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0) + 0.1;
+	    if(currentPosition[Z_AXIS] > maxStartHeight && enforceStartHeight) {
+		    cz = maxStartHeight;
+		    moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, maxStartHeight, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
+	    }
+
         // Update position
         Printer::offsetX = -ZPOffsetX;
         Printer::offsetY = -ZPOffsetY;
@@ -530,6 +546,7 @@ bool Printer::startProbing(bool runScript) {
     return true;
 }
 
+/** \brief Deactivate z-probe. */
 void Printer::finishProbing() {
     float cx, cy, cz;
     realPosition(cx, cy, cz);
@@ -549,7 +566,8 @@ void Printer::finishProbing() {
     Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
 }
 
-/*
+/** \brief Measure distance to bottom at current position.
+
 This is the most important function for bed leveling. It does
 1. Run probe start script if first = true and runStartScript = true
 2. Position zProbe at current position if first = true. If we are more then maxStartHeight away from bed we also go down to that distance.
@@ -564,13 +582,20 @@ d) Add distortion correction.
 e) Add bending correction
 
 Then we return the measured and corrected z distance.
+
+\param first If true, Printer::startProbing is called.
+\param last If true, Printer::finishProbing is called at the end.
+\param repeat Number of repetitions to average measurement errors.
+\param runStartScript If true tells startProbing to run start script.
+\param enforceStartHeight Tells start script to enforce a maximum distance to bed.
+\return ILLEGAL_Z_PROBE on errors or measured distance.
 */
-float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScript) {
+float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScript, bool enforceStartHeight) {
     float oldOffX = Printer::offsetX;
     float oldOffY = Printer::offsetY;
     float oldOffZ = Printer::offsetZ;
     if(first) {
-        if(!startProbing(runStartScript))
+        if(!startProbing(runStartScript, enforceStartHeight))
             return ILLEGAL_Z_PROBE;
     }
     Commands::waitUntilEndOfAllMoves();
@@ -664,8 +689,8 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
 #if DISTORTION_CORRECTION
     float zCorr = 0;
     if(Printer::distortion.isEnabled()) {
-        zCorr = distortion.correct(currentPositionSteps[X_AXIS] + EEPROM::zProbeXOffset() * axisStepsPerMM[X_AXIS], currentPositionSteps[Y_AXIS]
-                                   + EEPROM::zProbeYOffset() * axisStepsPerMM[Y_AXIS], 0) * invAxisStepsPerMM[Z_AXIS];
+        zCorr = distortion.correct(currentPositionSteps[X_AXIS]/* + EEPROM::zProbeXOffset() * axisStepsPerMM[X_AXIS]*/, currentPositionSteps[Y_AXIS]
+                                  /* + EEPROM::zProbeYOffset() * axisStepsPerMM[Y_AXIS]*/, zMinSteps) * invAxisStepsPerMM[Z_AXIS];
         distance += zCorr;
     }
 #endif

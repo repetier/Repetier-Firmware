@@ -204,9 +204,9 @@ void Commands::printTemperatures(bool showRaw) {
     }
 #endif
 #ifdef FAKE_CHAMBER
-   Com::printF(PSTR(" C:"),extruder[0].tempControl.currentTemperatureC);
-   Com::printF(Com::tSpaceSlash, extruder[0].tempControl.targetTemperatureC, 0);
-   Com::printF(PSTR(" @:"), (pwm_pos[extruder[0].tempControl.pwmIndex]));
+    Com::printF(PSTR(" C:"), extruder[0].tempControl.currentTemperatureC);
+    Com::printF(Com::tSpaceSlash, extruder[0].tempControl.targetTemperatureC, 0);
+    Com::printF(PSTR(" @:"), (pwm_pos[extruder[0].tempControl.pwmIndex]));
 #endif
     Com::println();
 #endif
@@ -1108,15 +1108,37 @@ void Commands::processGCode(GCode *com) {
         // G30 [Pn] [S]
         // G30 (the same as G30 P3) single probe set Z0
         // G30 S1 Z<real_z_pos> - measures probe height (P is ignored) assuming we are at real height Z
+        // G30 H<height> O<offset> Make probe define new Z and z offset (R) at trigger point assuming z-probe measured an object of H height.
         if (com->hasS()) {
             Printer::measureZProbeHeight(com->hasZ() ? com->Z : Printer::currentPosition[Z_AXIS]);
         } else {
             uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
-            if(Printer::runZProbe(p & 1, p & 2) == ILLEGAL_Z_PROBE) {
+            float z = Printer::runZProbe(p & 1, p & 2, Z_PROBE_REPETITIONS, true, false);
+            if(z == ILLEGAL_Z_PROBE) {
                 GCode::fatalError(PSTR("G30 probing failed!"));
                 break;
             }
-            Printer::updateCurrentPosition(p & 1);
+            if(com->hasO() || com->hasH()) {
+                float h = Printer::convertToMM(com->hasH() ? com->H : 0);
+                float o = Printer::convertToMM(com->hasR() ? com->R : h);
+#if DISTORTION_CORRECTION
+				// Undo z distortion correction contained in z
+                float zCorr = 0;
+                if(Printer::distortion.isEnabled()) {
+                    zCorr = Printer::distortion.correct(Printer::currentPositionSteps[X_AXIS], Printer::currentPositionSteps[Y_AXIS], Printer::zMinSteps) * Printer::invAxisStepsPerMM[Z_AXIS];
+                    z -= zCorr;
+                }
+#endif
+                Printer::coordinateOffset[Z_AXIS] = o - h;
+                Printer::currentPosition[Z_AXIS] = Printer::lastCmdPos[Z_AXIS] = z + h + Printer::zMin;
+                Printer::updateCurrentPositionSteps();
+                Printer::setZHomed(true);
+#if NONLINEAR_SYSTEM
+                transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
+#endif
+            } else {
+                Printer::updateCurrentPosition(p & 1);
+            }
         }
     }
     break;
@@ -1174,6 +1196,9 @@ void Commands::processGCode(GCode *com) {
         if(com->hasE()) {
             Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = Printer::convertToMM(com->E) * Printer::axisStepsPerMM[E_AXIS];
         }
+		Com::printF(PSTR("X_OFFSET:"), Printer::coordinateOffset[X_AXIS], 3);
+		Com::printF(PSTR(" Y_OFFSET:"), Printer::coordinateOffset[Y_AXIS], 3);
+		Com::printFLN(PSTR(" Z_OFFSET:"), Printer::coordinateOffset[Z_AXIS], 3);
     }
     break;
 #if DRIVE_SYSTEM == DELTA

@@ -164,7 +164,7 @@ void halfautomaticLevel2() {
   Printer::wizardStack[0].f = z2; 
   Printer::wizardStack[1].f = z1; 
   uid.popMenu(false);
-  if(fabs(z1) <= 10 && fabs(z2) <= 10) {
+  if(fabs(z1) <= 15 && fabs(z2) <= 15) {
     Printer::finishProbing();
     uid.pushMenu(&cui_calib_zprobe_dist, true);
     Printer::measureDistortion();

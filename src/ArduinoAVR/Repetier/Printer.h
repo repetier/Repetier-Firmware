@@ -128,223 +128,10 @@ public:
         return a * x + y * b + c;
     }
 };
-#if DISTORTION_CORRECTION
-class Distortion {
-public:
-    Distortion();
-    void init();
-    void enable(bool permanent = true);
-    void disable(bool permanent = true);
-    bool measure(void);
-    int32_t correct(int32_t x, int32_t y, int32_t z) const;
-    void updateDerived();
-    void reportStatus();
-    bool isEnabled() {
-        return enabled;
-    }
-    int32_t zMaxSteps() {
-        return zEnd;
-    }
-    void set(float x, float y, float z);
-    void showMatrix();
-    void resetCorrection();
-private:
-    int matrixIndex(fast8_t x, fast8_t y) const;
-    int32_t getMatrix(int index) const;
-    void setMatrix(int32_t val, int index);
-    bool isCorner(fast8_t i, fast8_t j) const;
-    INLINE int32_t extrapolatePoint(fast8_t x1, fast8_t y1, fast8_t x2, fast8_t y2) const;
-    void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
-    void extrapolateCorners();
-// attributes
-#if DRIVE_SYSTEM == DELTA
-    int32_t step;
-    int32_t radiusCorrectionSteps;
-#else
-    int32_t xCorrectionSteps, xOffsetSteps;
-    int32_t yCorrectionSteps, yOffsetSteps;
-#endif
-    int32_t zStart, zEnd;
-#if !DISTORTION_PERMANENT
-    int32_t matrix[DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS];
-#endif
-    bool enabled;
-};
-#endif //DISTORTION_CORRECTION
 
-#define ENDSTOP_X_MIN_ID 1
-#define ENDSTOP_X_MAX_ID 2
-#define ENDSTOP_Y_MIN_ID 4
-#define ENDSTOP_Y_MAX_ID 8
-#define ENDSTOP_Z_MIN_ID 16
-#define ENDSTOP_Z_MAX_ID 32
-#define ENDSTOP_Z2_MIN_ID 64
-#define ENDSTOP_Z2_MINMAX_ID 64
-#define ENDSTOP_Z_PROBE_ID 128
+#include "Distortion.h"
 
-// These endstops are only used with EXTENDED_ENDSTOPS
-#define ENDSTOP_X2_MIN_ID 1
-#define ENDSTOP_X2_MAX_ID 2
-#define ENDSTOP_Y2_MIN_ID 4
-#define ENDSTOP_Y2_MAX_ID 8
-#define ENDSTOP_Z2_MAX_ID 16
-#define ENDSTOP_Z3_MIN_ID 32
-#define ENDSTOP_Z3_MAX_ID 64
-
-#if IS_MAC_TRUE(MIN_HARDWARE_ENDSTOP_X2) || IS_MAC_TRUE(MAX_HARDWARE_ENDSTOP_X2) || IS_MAC_TRUE(MIN_HARDWARE_ENDSTOP_Y2) || IS_MAC_TRUE(MAX_HARDWARE_ENDSTOP_Y2) || IS_MAC_TRUE(MAX_HARDWARE_ENDSTOP_Z2) || IS_MAC_TRUE(MAX_HARDWARE_ENDSTOP_Z3) || IS_MAC_TRUE(MIN_HARDWARE_ENDSTOP_Z3)
-#define EXTENDED_ENDSTOPS 1
-#endif
-
-class Endstops {
-    static flag8_t lastState;
-    static flag8_t lastRead;
-    static flag8_t accumulator;
-#ifdef EXTENDED_ENDSTOPS
-    static flag8_t lastState2;
-    static flag8_t lastRead2;
-    static flag8_t accumulator2;
-#endif
-public:
-    static void update();
-    static void report();
-    static INLINE bool anyXYZMax() {
-        return (lastState & (ENDSTOP_X_MAX_ID | ENDSTOP_Y_MAX_ID | ENDSTOP_Z_MAX_ID)) != 0;
-    }
-    static INLINE bool anyXYZ() {
-#ifdef EXTENDED_ENDSTOPS
-        return (lastState & (ENDSTOP_X_MAX_ID | ENDSTOP_Y_MAX_ID | ENDSTOP_Z_MAX_ID | ENDSTOP_X_MIN_ID | ENDSTOP_Y_MIN_ID | ENDSTOP_Z_MIN_ID | ENDSTOP_Z2_MIN_ID)) != 0 ||
-               lastState2 != 0;
-#else
-        return (lastState & (ENDSTOP_X_MAX_ID | ENDSTOP_Y_MAX_ID | ENDSTOP_Z_MAX_ID | ENDSTOP_X_MIN_ID | ENDSTOP_Y_MIN_ID | ENDSTOP_Z_MIN_ID | ENDSTOP_Z2_MIN_ID)) != 0;
-#endif
-    }
-    static INLINE bool anyEndstopHit() {
-#ifdef EXTENDED_ENDSTOPS
-        return lastState != 0 || lastState2 != 0;
-#else
-        return lastState != 0;
-#endif
-    }
-    static INLINE void resetAccumulator() {
-        accumulator = 0;
-#ifdef EXTENDED_ENDSTOPS
-        accumulator2 = 0;
-#endif
-    }
-    static INLINE void fillFromAccumulator() {
-        lastState = accumulator;
-#ifdef EXTENDED_ENDSTOPS
-        lastState2 = accumulator2;
-#endif
-    }
-    static INLINE bool xMin() {
-#if (X_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_X
-        return (lastState & ENDSTOP_X_MIN_ID) != 0;
-#else
-        return false;
-#endif
-    }
-    static INLINE bool xMax() {
-#if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
-        return (lastState & ENDSTOP_X_MAX_ID) != 0;
-#else
-        return false;
-#endif
-    }
-    static INLINE bool yMin() {
-#if (Y_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y
-        return (lastState & ENDSTOP_Y_MIN_ID) != 0;
-#else
-        return false;
-#endif
-    }
-    static INLINE bool yMax() {
-#if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
-        return (lastState & ENDSTOP_Y_MAX_ID) != 0;
-#else
-        return false;
-#endif
-    }
-    static INLINE bool zMin() {
-#if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
-        return (lastState & ENDSTOP_Z_MIN_ID) != 0;
-#else
-        return false;
-#endif
-    }
-    static INLINE bool zMax() {
-#if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
-        return (lastState & ENDSTOP_Z_MAX_ID) != 0;
-#else
-        return false;
-#endif
-    }
-    static INLINE bool z2MinMax() {
-#if (Z2_MINMAX_PIN > -1) && MINMAX_HARDWARE_ENDSTOP_Z2
-        return (lastState & ENDSTOP_Z2_MIN_ID) != 0;
-#else
-        return false;
-#endif
-    }
-    static INLINE bool zProbe() {
-#if FEATURE_Z_PROBE
-        return (lastState & ENDSTOP_Z_PROBE_ID) != 0;
-#else
-        return false;
-#endif
-#ifdef EXTENDED_ENDSTOPS
-        static INLINE bool x2Min() {
-#if HAS_PIN(X2_MIN_PIN) && MIN_HARDWARE_ENDSTOP_X2
-            return (lastState2 & ENDSTOP_X2_MIN_ID) != 0;
-#else
-            return false;
-#endif
-        }
-        static INLINE bool x2Max() {
-#if HAS_PIN(X2_MAX_PIN) && MAX_HARDWARE_ENDSTOP_X2
-            return (lastState2 & ENDSTOP_X2_MAX_ID) != 0;
-#else
-            return false;
-#endif
-        }
-        static INLINE bool y2Min() {
-#if HAS_PIN(Y2_MIN_PIN) && MIN_HARDWARE_ENDSTOP_Y2
-            return (lastState2 & ENDSTOP_Y2_MIN_ID) != 0;
-#else
-            return false;
-#endif
-        }
-        static INLINE bool y2Max() {
-#if HAS_PIN(Y2_MAX_PIN) && MAX_HARDWARE_ENDSTOP_Y2
-            return (lastState2 & ENDSTOP_Y2_MAX_ID) != 0;
-#else
-            return false;
-#endif
-        }
-        static INLINE bool z2Max() {
-#if HAS_PIN(Z2_MAX_PIN) && MAX_HARDWARE_ENDSTOP_Z2
-            return (lastState2 & ENDSTOP_Z2_MAX_ID) != 0;
-#else
-            return false;
-#endif
-        }
-        static INLINE bool z3Max() {
-#if HAS_PIN(Z3_MAX_PIN) && MAX_HARDWARE_ENDSTOP_Z3
-            return (lastState2 & ENDSTOP_Z3_MAX_ID) != 0;
-#else
-            return false;
-#endif
-        }
-        static INLINE bool z3Min() {
-#if HAS_PIN(Z3_MIN_PIN) && MIN_HARDWARE_ENDSTOP_Z3
-            return (lastState2 & ENDSTOP_Z3_MIN_ID) != 0;
-#else
-            return false;
-#endif
-        }
-#endif
-    }
-};
+#include "Endstops.h"
 
 #ifndef DEFAULT_PRINTER_MODE
 #if NUM_EXTRUDER > 0
@@ -360,27 +147,111 @@ public:
 
 extern bool runBedLeveling(int save); // save = S parameter in gcode
 
+/**
+The Printer class is the main class for the control of the 3d printer. Here all
+movement related key variables are stored like positions, accelerations.
+
+## Coordinates
+
+The firmware works with 4 different coordinate systems and understanding the
+dependencies between them is crucial to a good understanding on how positions
+are handled.
+
+### Real world floating coordinates (RWC)
+
+These coordinates are the real floating positions with any offsets subtracted,
+which might be set with G92. This is used to show coordinates or for computations
+based on real positions. Any correction coming from rotation or distortion is 
+not included in these coordinates. currentPosition and lastCmdPos use this coordinate
+system.
+
+When these coordinates need to be used for computation, the value of offsetX, offsetY and offsetZ
+is always added. These are the offsets of the currently active tool to virtual tool center
+(normally first extruder).
+
+### Rotated floating coordinates (ROTC)
+
+If auto leveling is active, printing to the official coordinates is not possible. We have to assume
+that the bed is somehow rotated against the Cartesian mechanics from the printer. Applying
+_transformToPrinter_ to the real world coordinates, rotates them around the origin to
+be equal to the rotated bed. _transformFromPrinter_ would apply the opposite transformation.
+
+### Cartesian motor position coordinates (CMC)
+
+The position of motors is stored as steps from 0. The reason for this is that it is crucial that
+no rounding errors ever cause addition of any steps. These positions are simply computed by
+multiplying the ROTC coordinates with the axisStepsPerMM.
+
+If distortion correction is enabled, there is an additional factor for the z position that
+gets added: _zCorrectionStepsIncluded_ This value is recalculated by every move added to
+reflect the distortion at any given xyz position.
+
+### Nonlinear motor position coordinates (NMC)
+
+In case of a nonlinear mechanic like a delta printer, the CMC does not define the motor positions.
+An additional transformation converts the CMC coordinates into NMC.
+
+### Transformations from RWC to CMC
+
+Given: 
+- Target position for tool: x_rwc, y_rwc, z_rwc
+- Tool offsets: offsetX, offsetY, offsetZ
+- Offset from bed leveling: offsetZ2
+
+Step 1: Convert to ROTC
+
+    transformToPrinter(x_rwc + Printer::offsetX, y_rwc + Printer::offsetY, z_rwc +  Printer::offsetZ, x_rotc, y_rotc, z_rotc);
+    z_rotc += offsetZ2
+
+Step 2: Compute CMC
+
+    x_cmc = static_cast<int32_t>(floor(x_rotc * axisStepsPerMM[X_AXIS] + 0.5f));
+    y_cmc = static_cast<int32_t>(floor(y_rotc * axisStepsPerMM[Y_AXIS] + 0.5f));
+    z_cmc = static_cast<int32_t>(floor(z_rotc * axisStepsPerMM[Z_AXIS] + 0.5f));
+
+### Transformation from CMC to RWC
+
+Note: _zCorrectionStepsIncluded_ comes from distortion correction and gets set when a move is queued by the queuing function.
+Therefore it is not visible in the inverse transformation above. When transforming back, consider if the value was set or not! 
+
+Step 1: Convert to ROTC
+
+    x_rotc = static_cast<float>(x_cmc) * invAxisStepsPerMM[X_AXIS];
+    y_rotc = static_cast<float>(y_cmc) * invAxisStepsPerMM[Y_AXIS];
+    #if NONLINEAR_SYSTEM
+    z_rotc = static_cast<float>(z_cmc * invAxisStepsPerMM[Z_AXIS] - offsetZ2;
+    #else
+    z_rotc = static_cast<float>(z_cmc - zCorrectionStepsIncluded) * invAxisStepsPerMM[Z_AXIS] - offsetZ2;
+    #endif
+
+Step 2: Convert to RWC
+
+    transformFromPrinter(x_rotc, y_rotc, z_rotc,x_rwc, y_rwc, z_rwc);
+    x_rwc -= Printer::offsetX; // Offset from active extruder or z probe
+    y_rwc -= Printer::offsetY;
+    z_rwc -= Printer::offsetZ;
+*/
 class Printer {
     static uint8_t debugLevel;
 public:
-#if USE_ADVANCE
+#if USE_ADVANCE || defined(DOXYGEN)
     static volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
     static ufast8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
     //static uint8_t extruderAccelerateDelay;     ///< delay between 2 speec increases
     static int advanceStepsSet;
-#if ENABLE_QUADRATIC_ADVANCE
+#if ENABLE_QUADRATIC_ADVANCE || defined(DOXYGEN)
     static long advanceExecuted;             ///< Executed advance steps
 #endif
 #endif
     static uint16_t menuMode;
-#if DUAL_X_RESOLUTION
+#if DUAL_X_RESOLUTION || defined(DOXYGEN)
     static float axisX1StepsPerMM;
     static float axisX2StepsPerMM;
 #endif
-    static float axisStepsPerMM[];
-    static float invAxisStepsPerMM[];
-    static float maxFeedrate[];
-    static float homingFeedrate[];
+    static float axisStepsPerMM[]; ///< Resolution of each axis in steps per mm.
+    static float invAxisStepsPerMM[]; ///< 1/axisStepsPerMM for faster computation.
+    static float maxFeedrate[]; ///< Maximum feedrate in mm/s per axis.
+    static float homingFeedrate[]; // Feedrate in mm/s for homing.
     static uint32_t maxInterval; // slowest allowed interval
     static float maxAccelerationMMPerSquareSecond[];
     static float maxTravelAccelerationMMPerSquareSecond[];
@@ -392,22 +263,22 @@ public:
     static uint8_t unitIsInches;
     static uint8_t mode;
     static uint8_t fanSpeed; // Last fan speed set with M106/M107
+    static fast8_t stepsPerTimerCall;
     static float zBedOffset;
     static uint8_t flag0, flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t flag2, flag3;
-    static fast8_t stepsPerTimerCall;
     static uint32_t interval;    ///< Last step duration in ticks.
     static uint32_t timer;              ///< used for acceleration/deceleration timing
     static uint32_t stepNumber;         ///< Step number in current move.
     static float coordinateOffset[Z_AXIS_ARRAY];
     static int32_t currentPositionSteps[E_AXIS_ARRAY];     ///< Position in steps from origin.
-    static float currentPosition[Z_AXIS_ARRAY];
-    static float lastCmdPos[Z_AXIS_ARRAY]; ///< Last coordinates send by gcodes
+    static float currentPosition[Z_AXIS_ARRAY]; ///< Position in global coordinates
+    static float lastCmdPos[Z_AXIS_ARRAY]; ///< Last coordinates (global coordinates) send by g-codes
     static int32_t destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
     static millis_t lastTempReport;
     static float extrudeMultiplyError; ///< Accumulated error during extrusion
     static float extrusionFactor; ///< Extrusion multiply factor
-#if NONLINEAR_SYSTEM
+#if NONLINEAR_SYSTEM || defined(DOXYGEN)
     static int32_t maxDeltaPositionSteps;
     static int32_t currentNonlinearPositionSteps[E_TOWER_ARRAY];
     static floatLong deltaDiagonalStepsSquaredA;
@@ -426,36 +297,36 @@ public:
     static int16_t printMovesPerSecond;
     static float radius0;
 #endif
-#if !NONLINEAR_SYSTEM || defined(FAST_COREXYZ)
+#if !NONLINEAR_SYSTEM || defined(FAST_COREXYZ) || defined(DOXYGEN)
     static int32_t xMinStepsAdj, yMinStepsAdj, zMinStepsAdj; // adjusted to cover extruder/probe offsets
     static int32_t xMaxStepsAdj, yMaxStepsAdj, zMaxStepsAdj;
 #endif
-#if DRIVE_SYSTEM != DELTA
+#if DRIVE_SYSTEM != DELTA || defined(DOXYGEN)
     static int32_t zCorrectionStepsIncluded;
 #endif
-#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
+#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM || defined(DOXYGEN)
     static int32_t stepsRemainingAtZHit;
 #endif
-#if DRIVE_SYSTEM == DELTA
+#if DRIVE_SYSTEM == DELTA || defined(DOXYGEN)
     static int32_t stepsRemainingAtXHit;
     static int32_t stepsRemainingAtYHit;
 #endif
-#if SOFTWARE_LEVELING
+#if SOFTWARE_LEVELING || defined(DOXYGEN)
     static int32_t levelingP1[3];
     static int32_t levelingP2[3];
     static int32_t levelingP3[3];
 #endif
-#if FEATURE_AUTOLEVEL
+#if FEATURE_AUTOLEVEL || defined(DOXYGEN)
     static float autolevelTransformation[9]; ///< Transformation matrix
 #endif
-#if FAN_THERMO_PIN > -1
+#if FAN_THERMO_PIN > -1 || defined(DOXYGEN)
     static float thermoMinTemp;
     static float thermoMaxTemp;
 #endif
-#if LAZY_DUAL_X_AXIS
+#if LAZY_DUAL_X_AXIS || defined(DOXYGEN)
     static bool sledParked;
 #endif
-#if FEATURE_BABYSTEPPING
+#if FEATURE_BABYSTEPPING || defined(DOXYGEN)
     static int16_t zBabystepsMissing;
     static int16_t zBabysteps;
 #endif
@@ -478,23 +349,23 @@ public:
     static unsigned int extrudeMultiply;     ///< Flow multiplier in percent (factor 1 = 100)
     static float maxJerk;                    ///< Maximum allowed jerk in mm/s
     static uint8_t interruptEvent;           ///< Event generated in interrupts that should/could be handled in main thread
-#if DRIVE_SYSTEM!=DELTA
+#if DRIVE_SYSTEM!=DELTA || defined(DOXYGEN)
     static float maxZJerk;                   ///< Maximum allowed jerk in z direction in mm/s
 #endif
-    static float offsetX;                     ///< X-offset for different extruder positions.
-    static float offsetY;                     ///< Y-offset for different extruder positions.
-    static float offsetZ;                     ///< Z-offset for different extruder positions.
+    static float offsetX;                     ///< X-offset for different tool positions.
+    static float offsetY;                     ///< Y-offset for different tool positions.
+    static float offsetZ;                     ///< Z-offset for different tool positions.
     static float offsetZ2;                    ///< Z-offset without rotation correction. Required for z probe corrections
     static speed_t vMaxReached;               ///< Maximum reached speed
     static uint32_t msecondsPrinting;         ///< Milliseconds of printing time (means time with heated extruder)
     static float filamentPrinted;             ///< mm of filament printed since counting started
-#if ENABLE_BACKLASH_COMPENSATION
+#if ENABLE_BACKLASH_COMPENSATION || defined(DOXYGEN)
     static float backlashX;
     static float backlashY;
     static float backlashZ;
     static uint8_t backlashDir;
 #endif
-#if MULTI_ZENDSTOP_HOMING
+#if MULTI_ZENDSTOP_HOMING || defined(DOXYGEN)
     static fast8_t multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
 #endif
     static float memoryX;
@@ -502,7 +373,7 @@ public:
     static float memoryZ;
     static float memoryE;
     static float memoryF;
-#if GANTRY && !defined(FAST_COREXYZ)
+#if (GANTRY && !defined(FAST_COREXYZ)) || defined(DOXYGEN)
     static int8_t motorX;
     static int8_t motorYorZ;
 #endif
@@ -587,8 +458,9 @@ public:
     static INLINE void debugReset(uint8_t flags) {
         setDebugLevel(debugLevel & ~flags);
     }
-    /** Sets the pwm for the fan speed. Gets called by motion control ot Commands::setFanSpeed. */
+    /** Sets the pwm for the fan speed. Gets called by motion control or Commands::setFanSpeed. */
     static void setFanSpeedDirectly(uint8_t speed);
+    /** Sets the pwm for the fan 2 speed. Gets called by motion control or Commands::setFan2Speed. */
     static void setFan2SpeedDirectly(uint8_t speed);
     /** \brief Disable stepper motor for x direction. */
     static INLINE void disableXStepper() {
@@ -725,6 +597,7 @@ public:
         return((READ(X_DIR_PIN) != 0) ^ INVERT_X_DIR);
     }
 
+	/** For large machines, the nonlinear transformation can exceed integer 32bit range, so floating point math is needed. */
     static INLINE uint8_t isLargeMachine() {
         return flag0 & PRINTER_FLAG0_LARGE_MACHINE;
     }
@@ -761,6 +634,7 @@ public:
 
     static INLINE void setXHomed(uint8_t b) {
         flag3 = (b ? flag3 | PRINTER_FLAG3_X_HOMED : flag3 & ~PRINTER_FLAG3_X_HOMED);
+		updateHomedAll();
     }
 
     static INLINE uint8_t isYHomed() {
@@ -769,6 +643,7 @@ public:
 
     static INLINE void setYHomed(uint8_t b) {
         flag3 = (b ? flag3 | PRINTER_FLAG3_Y_HOMED : flag3 & ~PRINTER_FLAG3_Y_HOMED);
+		updateHomedAll();
     }
 
     static INLINE uint8_t isZHomed() {
@@ -777,6 +652,7 @@ public:
 
     static INLINE void setZHomed(uint8_t b) {
         flag3 = (b ? flag3 | PRINTER_FLAG3_Z_HOMED : flag3 & ~PRINTER_FLAG3_Z_HOMED);
+		updateHomedAll();
     }
     static INLINE uint8_t isAutoreportTemp() {
         return flag3 & PRINTER_FLAG3_AUTOREPORT_TEMP;
@@ -1174,6 +1050,7 @@ public:
     static INLINE float realZPosition() {
         return currentPosition[Z_AXIS];
     }
+	/** \brief copies currentPosition to parameter. */
     static INLINE void realPosition(float &xp, float &yp, float &zp) {
         xp = currentPosition[X_AXIS];
         yp = currentPosition[Y_AXIS];
@@ -1184,18 +1061,65 @@ public:
         HAL::delayMicroseconds(STEPPER_HIGH_DELAY);
 #endif
     }
-    static void constrainDestinationCoords();
     static void updateDerivedParameter();
+	/** If we are not homing or destination check being disabled, this will reduce _destinationSteps_ to a
+	valid value. In other words this works as software endstop. */
+    static void constrainDestinationCoords();
+	/** Computes _currentposition_ from _currentPositionSteps_ considering all active transformations. If the _copyLastCmd_ flag is true, the
+	result is also copied to _lastCmdPos_ . */
     static void updateCurrentPosition(bool copyLastCmd = false);
+    static void updateCurrentPositionSteps();
+	/** \brief Sets the destination coordinates to values stored in com.
+	
+	Extracts x,y,z,e,f from g-code considering active units. Converted result is stored in currentPosition and lastCmdPos. Converts 
+	position to destinationSteps including rotation and offsets, excluding distortion correction (which gets added on move queuing).
+	\param com g-code with new destination position.
+	\return true if it is a move, false if no move results from coordinates.
+	 */
+    static uint8_t setDestinationStepsFromGCode(GCode *com);
+	/** \brief Move to position without considering transformations.
+
+	Computes the destinationSteps without rotating but including active offsets!
+	The coordinates are in printer coordinates with no G92 offset. 
+
+	\param x Target x coordinate or IGNORE_COORDINATE if it should be ignored.
+	\param x Target y coordinate or IGNORE_COORDINATE if it should be ignored.
+	\param x Target z coordinate or IGNORE_COORDINATE if it should be ignored.
+	\param x Target e coordinate or IGNORE_COORDINATE if it should be ignored.
+	\param x Target f feedrate or IGNORE_COORDINATE if it should use latest feedrate.
+	\return true if queuing was successful.
+	*/
+    static uint8_t moveTo(float x, float y, float z, float e, float f);
+	/** \brief Move to position considering transformations.
+
+	Computes the destinationSteps including rotating and active offsets.
+	The coordinates are in printer coordinates with no G92 offset. 
+
+	\param x Target x coordinate or IGNORE_COORDINATE if it should be ignored.
+	\param x Target y coordinate or IGNORE_COORDINATE if it should be ignored.
+	\param x Target z coordinate or IGNORE_COORDINATE if it should be ignored.
+	\param x Target e coordinate or IGNORE_COORDINATE if it should be ignored.
+	\param x Target f feedrate or IGNORE_COORDINATE if it should use latest feedrate.
+	\param pathOptimize true if path planner should include it in calculation, otherwise default start/end speed is enforced.
+	\return true if queuing was successful.
+	*/
+    static uint8_t moveToReal(float x, float y, float z, float e, float f, bool pathOptimize = true);
     static void kill(uint8_t only_steppers);
     static void updateAdvanceFlags();
     static void setup();
     static void defaultLoopActions();
-    static uint8_t setDestinationStepsFromGCode(GCode *com);
-    static uint8_t moveTo(float x, float y, float z, float e, float f);
-    static uint8_t moveToReal(float x, float y, float z, float e, float f, bool pathOptimize = true);
     static void homeAxis(bool xaxis, bool yaxis, bool zaxis); /// Home axis
     static void setOrigin(float xOff, float yOff, float zOff);
+	/** \brief Tests if the target position is allowed.
+
+	Tests if the test position lies inside the defined geometry. For Cartesian
+	printers this is the defined cube defined by x,y,z min and length. For
+	delta printers the cylindrical shape is tested.
+
+	\param x X position in mm.
+	\param x Y position in mm.
+	\param x Z position in mm.
+	\return true if position is valid and can be reached. */
     static bool isPositionAllowed(float x, float y, float z);
     static INLINE int getFanSpeed() {
         return (int)pwm_pos[PWM_FAN1];
@@ -1203,7 +1127,7 @@ public:
     static INLINE int getFan2Speed() {
         return (int)pwm_pos[PWM_FAN2];
     }
-#if NONLINEAR_SYSTEM
+#if NONLINEAR_SYSTEM || defined(DOXYGEN)
     static INLINE void setDeltaPositions(long xaxis, long yaxis, long zaxis) {
         currentNonlinearPositionSteps[A_TOWER] = xaxis;
         currentNonlinearPositionSteps[B_TOWER] = yaxis;
@@ -1211,13 +1135,13 @@ public:
     }
     static void deltaMoveToTopEndstops(float feedrate);
 #endif
-#if MAX_HARDWARE_ENDSTOP_Z
+#if MAX_HARDWARE_ENDSTOP_Z || defined(DOXYGEN)
     static float runZMaxProbe();
 #endif
-#if FEATURE_Z_PROBE
-    static bool startProbing(bool runScript);
+#if FEATURE_Z_PROBE || defined(DOXYGEN)
+    static bool startProbing(bool runScript, bool enforceStartHeight = true);
     static void finishProbing();
-    static float runZProbe(bool first, bool last, uint8_t repeat = Z_PROBE_REPETITIONS, bool runStartScript = true);
+    static float runZProbe(bool first, bool last, uint8_t repeat = Z_PROBE_REPETITIONS, bool runStartScript = true, bool enforceStartHeight = true);
     static void measureZProbeHeight(float curHeight);
     static void waitForZProbeStart();
     static float bendingCorrectionAt(float x, float y);
@@ -1226,12 +1150,12 @@ public:
     // system without Z-probe
     static void transformToPrinter(float x, float y, float z, float &transX, float &transY, float &transZ);
     static void transformFromPrinter(float x, float y, float z, float &transX, float &transY, float &transZ);
-#if FEATURE_AUTOLEVEL
+#if FEATURE_AUTOLEVEL || defined(DOXYGEN)
     static void resetTransformationMatrix(bool silent);
     //static void buildTransformationMatrix(float h1,float h2,float h3);
     static void buildTransformationMatrix(Plane &plane);
 #endif
-#if DISTORTION_CORRECTION
+#if DISTORTION_CORRECTION || defined(DOXYGEN)
     static void measureDistortion(void);
     static Distortion distortion;
 #endif
@@ -1251,7 +1175,7 @@ public:
     static void showConfiguration();
     static void setCaseLight(bool on);
     static void reportCaseLightStatus();
-#if JSON_OUTPUT
+#if JSON_OUTPUT || defined(DOXYGEN)
     static void showJSONStatus(int type);
 #endif
     static void homeXAxis();
@@ -1260,7 +1184,15 @@ public:
     static void pausePrint();
     static void continuePrint();
     static void stopPrint();
-#if FEATURE_Z_PROBE
+#if FEATURE_Z_PROBE || defined(DOXYGEN)
+	/** \brief Prepares printer for probing commands.
+
+	Probing can not start under all conditions. This command therefore makes sure,
+	a probing command can be executed by:
+	- Ensuring all axes are homed.
+	- Going to a low z position for fast measuring.
+	- Go to a position, where enabling the z-probe is possible without leaving the valid print area.
+	*/
     static void prepareForProbing();
 #endif
 };

@@ -1,10 +1,10 @@
 var struct__u8g__dev__arg__pixel__t =
 [
-    [ "blue", "struct__u8g__dev__arg__pixel__t.html#a287b397e90d7b995c81ff54e741f96b2", null ],
-    [ "color", "struct__u8g__dev__arg__pixel__t.html#aa99ddefe5089389e170ccbec18a60ec2", null ],
-    [ "dir", "struct__u8g__dev__arg__pixel__t.html#a92abda0bec7c1c978fe96f87aad18067", null ],
-    [ "hi_color", "struct__u8g__dev__arg__pixel__t.html#adf8ea7940de241dd8dd533bbbf94147b", null ],
-    [ "pixel", "struct__u8g__dev__arg__pixel__t.html#a03ae8f6034c643489417f0a12a95966d", null ],
-    [ "x", "struct__u8g__dev__arg__pixel__t.html#a0bd126a4a84709451f22abb1c7c704d0", null ],
-    [ "y", "struct__u8g__dev__arg__pixel__t.html#a14d91862d05b147bd3ddaa61dec19f21", null ]
+    [ "blue", "struct__u8g__dev__arg__pixel__t.html#ad8af04b8556ba079a1349ba6202a29d7", null ],
+    [ "color", "struct__u8g__dev__arg__pixel__t.html#a5257572f8561b596737235b1496f77eb", null ],
+    [ "dir", "struct__u8g__dev__arg__pixel__t.html#a10ff6d5d25e67eab51809319ec706f35", null ],
+    [ "hi_color", "struct__u8g__dev__arg__pixel__t.html#a58303bcf281b98110440807a0688115a", null ],
+    [ "pixel", "struct__u8g__dev__arg__pixel__t.html#a06d06e46dbc0ca4a5c910ac3e3fcadcb", null ],
+    [ "x", "struct__u8g__dev__arg__pixel__t.html#af150fd56177399bc4c4d828b9b26e77f", null ],
+    [ "y", "struct__u8g__dev__arg__pixel__t.html#ad232cc68b60e6ff0c275e61d12cd86b6", null ]
 ];

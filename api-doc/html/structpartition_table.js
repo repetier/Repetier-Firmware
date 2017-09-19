@@ -1,15 +1,15 @@
 var structpartition_table =
 [
-    [ "beginCylinderHigh", "structpartition_table.html#aae20759e6c6dbfa51368964f8fe095c7", null ],
-    [ "beginCylinderLow", "structpartition_table.html#afefdee23280567f8434f9c31610e0a3b", null ],
-    [ "beginHead", "structpartition_table.html#ab27b713d70d01c43e31fc67e08f876bf", null ],
-    [ "beginSector", "structpartition_table.html#a3ef026d5e8a9c697e414cf773b129db4", null ],
-    [ "boot", "structpartition_table.html#ad2acb7fab9ef33a6f00c834401250229", null ],
-    [ "endCylinderHigh", "structpartition_table.html#adeccbdcad0d989d1e33a07b435ab7300", null ],
-    [ "endCylinderLow", "structpartition_table.html#a3eb4b87675075500899edbb9296e0435", null ],
-    [ "endHead", "structpartition_table.html#a248e6a8c42872744129b8b85a864a7a6", null ],
-    [ "endSector", "structpartition_table.html#a1412f3c5116885eb7d4a047e432c9cdd", null ],
-    [ "firstSector", "structpartition_table.html#a5951cd74127d45180071909972899c0e", null ],
-    [ "totalSectors", "structpartition_table.html#ab3559f69d4a46a945bd4c037070585f2", null ],
-    [ "type", "structpartition_table.html#a1d127017fb298b889f4ba24752d08b8e", null ]
+    [ "beginCylinderHigh", "structpartition_table.html#a744f0c7f9ad4c426b10de085b4f52392", null ],
+    [ "beginCylinderLow", "structpartition_table.html#a941fcb4df298f5f73ccca011bf40787a", null ],
+    [ "beginHead", "structpartition_table.html#a7d426694b8cf2151ae38568670a8c845", null ],
+    [ "beginSector", "structpartition_table.html#ae201c11d9671c9efc307c654a2b6c026", null ],
+    [ "boot", "structpartition_table.html#adf386afb1f33046d8b6a1a0afa780ec9", null ],
+    [ "endCylinderHigh", "structpartition_table.html#a32fea225b8ffd925ad919ffc56e9abda", null ],
+    [ "endCylinderLow", "structpartition_table.html#ad7829e34be70084abe145227b0d18274", null ],
+    [ "endHead", "structpartition_table.html#a4a3945bfd3a29f474984cb9f180dbd51", null ],
+    [ "endSector", "structpartition_table.html#a27cdc4320c418ed0d833ab163ed77ad7", null ],
+    [ "firstSector", "structpartition_table.html#a02bbdff840c854dc96fa0b6da8589d86", null ],
+    [ "totalSectors", "structpartition_table.html#acf96e59ce648a9a0cf35751c3b6d7730", null ],
+    [ "type", "structpartition_table.html#a3861cf276c728c4dd30ca04e74197ee8", null ]
 ];

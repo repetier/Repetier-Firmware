@@ -1,15 +1,15 @@
 var structfat32_boot_sector =
 [
-    [ "bootCode", "structfat32_boot_sector.html#a5d683c906867f4e0122d2ce3462de292", null ],
-    [ "bootSectorSig0", "structfat32_boot_sector.html#abdaf2cc75b74800944ede557442ca5bd", null ],
-    [ "bootSectorSig1", "structfat32_boot_sector.html#a44983e94ecddbdcb7ab691e493a13d94", null ],
-    [ "bootSignature", "structfat32_boot_sector.html#acc4a4e4c22b630d12c1b2c2b8c7eb366", null ],
-    [ "bpb", "structfat32_boot_sector.html#a4d8105e4754b2750ab421b9e84d2c43e", null ],
-    [ "driveNumber", "structfat32_boot_sector.html#aa7c65fdb4f759fca094105d1c870bcb2", null ],
-    [ "fileSystemType", "structfat32_boot_sector.html#adf80bb044ef7c8ac6d371268aa338e23", null ],
-    [ "jmpToBootCode", "structfat32_boot_sector.html#ae765fe8abf71fd961317f4314e16c1ac", null ],
-    [ "oemName", "structfat32_boot_sector.html#ac1adff84818e7f18fdfea3374569a380", null ],
-    [ "reserved1", "structfat32_boot_sector.html#a2a2556147677ece60b8aadf4a0d608ed", null ],
-    [ "volumeLabel", "structfat32_boot_sector.html#a253960050a38d2bfb2f57e86769aca62", null ],
-    [ "volumeSerialNumber", "structfat32_boot_sector.html#a7c9ffcee12051cefe1724e8024af25f8", null ]
+    [ "bootCode", "structfat32_boot_sector.html#a7a845a41d575937bb7aac2c5204a6e1d", null ],
+    [ "bootSectorSig0", "structfat32_boot_sector.html#aea26006be62f6bbca4637e359ce85e40", null ],
+    [ "bootSectorSig1", "structfat32_boot_sector.html#a92816cfa0d97e94c46eaff1ccc92f1fa", null ],
+    [ "bootSignature", "structfat32_boot_sector.html#a1a06079dbeb74e505689a56ab08c05a7", null ],
+    [ "bpb", "structfat32_boot_sector.html#a01848fd44bea48d521bf13dcc8d69c95", null ],
+    [ "driveNumber", "structfat32_boot_sector.html#a625a50384e3a46c5e330d0398c35a898", null ],
+    [ "fileSystemType", "structfat32_boot_sector.html#a2835c957e6b680afded2b5f7e133fd3e", null ],
+    [ "jmpToBootCode", "structfat32_boot_sector.html#ad8c4921d1fcaba0370cff44a27f6f2d1", null ],
+    [ "oemName", "structfat32_boot_sector.html#a8516a46b7865715cf0f8f5c39dd96273", null ],
+    [ "reserved1", "structfat32_boot_sector.html#a0a59c59a3f18c1117ffc6a0c25295b9c", null ],
+    [ "volumeLabel", "structfat32_boot_sector.html#a327d3769a6a9d172cec163cda30a35ee", null ],
+    [ "volumeSerialNumber", "structfat32_boot_sector.html#aa4dffa8748097e02373c33d5f1957b1e", null ]
 ];

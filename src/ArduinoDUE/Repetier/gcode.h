@@ -93,29 +93,29 @@ class GCode   // 52 uint8_ts per command needed
     uint16_t params;
     uint16_t params2;
 public:
-    uint16_t N; // Line number
-    uint16_t M;
-    uint16_t G;
-    float X;
-    float Y;
-    float Z;
-    float E;
-    float F;
-    int32_t S;
-    int32_t P;
-    float I;
-    float J;
-    float R;
-    float D;
-    float C;
-    float H;
-    float A;
-    float B;
-    float K;
-    float L;
-    float O;
+    uint16_t N; ///< Line number reduced to 16 bit
+    uint16_t M; ///< G-code M value if set
+    uint16_t G; ///< G-code G value if set
+    float X; ///< G-code X value if set
+    float Y; ///< G-code Y value if set
+    float Z; ///< G-code Z value if set
+    float E; ///< G-code E value if set
+    float F; ///< G-code F value if set
+    int32_t S; ///< G-code S value if set
+    int32_t P; ///< G-code P value if set
+    float I; ///< G-code I value if set
+    float J; ///< G-code J value if set
+    float R; ///< G-code R value if set
+    float D; ///< G-code D value if set
+    float C; ///< G-code C value if set
+    float H; ///< G-code H value if set
+    float A; ///< G-code A value if set
+    float B; ///< G-code B value if set
+    float K; ///< G-code K value if set
+    float L; ///< G-code L value if set
+    float O; ///< G-code O value if set
 
-    char *text; //text[17];
+    char *text; ///< Text message of g-code if present.
     //moved the byte to the end and aligned ints on short boundary
     // Old habit from PC, which require alignments for data types such as int and long to be on 2 or 4 byte boundary
     // Otherwise, the compiler adds padding, wasted space.

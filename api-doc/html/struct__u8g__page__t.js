@@ -1,8 +1,8 @@
 var struct__u8g__page__t =
 [
-    [ "page", "struct__u8g__page__t.html#a2f83e9b107394d95fc3967db09e97d76", null ],
-    [ "page_height", "struct__u8g__page__t.html#a0810d393e31b561104c34655919e0e1a", null ],
-    [ "page_y0", "struct__u8g__page__t.html#ad849a6c82137ac60b0a2bd19cbd21b5a", null ],
-    [ "page_y1", "struct__u8g__page__t.html#ad80e065e972df7c230dccebf745006fb", null ],
-    [ "total_height", "struct__u8g__page__t.html#a64804ce3ac5cacbd32e9793e3fe63ec9", null ]
+    [ "page", "struct__u8g__page__t.html#a052b7240e6c2b340c8d513270c48899c", null ],
+    [ "page_height", "struct__u8g__page__t.html#a0162c1920d176413c545073444fb5183", null ],
+    [ "page_y0", "struct__u8g__page__t.html#adf5d0b63bc2e81e027f4b64b05ed4b80", null ],
+    [ "page_y1", "struct__u8g__page__t.html#a25e9ad54c785861737f06f525a527468", null ],
+    [ "total_height", "struct__u8g__page__t.html#a3de9dda2dfd8562bef7469c323014b53", null ]
 ];

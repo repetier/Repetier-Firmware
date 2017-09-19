@@ -1,5 +1,10 @@
 var _fat_structs_8h =
 [
+    [ "partitionTable", "structpartition_table.html", "structpartition_table" ],
+    [ "masterBootRecord", "structmaster_boot_record.html", "structmaster_boot_record" ],
+    [ "biosParmBlock", "structbios_parm_block.html", "structbios_parm_block" ],
+    [ "fat32BootSector", "structfat32_boot_sector.html", "structfat32_boot_sector" ],
+    [ "directoryEntry", "structdirectory_entry.html", "structdirectory_entry" ],
     [ "bpb_t", "_fat_structs_8h.html#a5c8af240713e05e7e6c959006ced35fb", null ],
     [ "dir_t", "_fat_structs_8h.html#a803db59d4e16a0c54a647afc6a7954e3", null ],
     [ "fbs_t", "_fat_structs_8h.html#a91a3979f1149ff688d0d8bb696bc2887", null ],

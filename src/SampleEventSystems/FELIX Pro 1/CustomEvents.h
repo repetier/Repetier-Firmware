@@ -96,7 +96,7 @@ extern bool cCustomParser(char c1, char c2);
 #define HALF_FIX_X 132
 #define HALF_FIX_Y 110
 #ifdef TEC4
-#define HALF_Z 1.8
+#define HALF_Z 2.8
 #else
 #define HALF_Z 3
 #endif 

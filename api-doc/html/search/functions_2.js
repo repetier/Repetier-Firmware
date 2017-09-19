@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['backwardplanner',['backwardPlanner',['../class_print_line.html#a6df1053090484ae917049015769b0ac5',1,'PrintLine']]],
+  ['beep',['beep',['../_display_list_8h.html#a4cdb62ccad20bd76e7ff3da83985b54d',1,'beep(uint8_t duration, uint8_t count):&#160;ui.cpp'],['../ui_8cpp.html#a4cdb62ccad20bd76e7ff3da83985b54d',1,'beep(uint8_t duration, uint8_t count):&#160;ui.cpp']]],
+  ['begin',['begin',['../class_g_d_class.html#a8bdcb9061b19da87b430dae426677683',1,'GDClass::begin()'],['../class_poly.html#ad0dd1e12fa2a59df2828ef8a72b0a662',1,'Poly::begin()'],['../class_g_d_transport.html#aad24612fe2d7e3b725643c33fe777e89',1,'GDTransport::begin()'],['../class_r_f_hardware_serial.html#aa3b6d7c004de553130ebb85b8cfa41a9',1,'RFHardwareSerial::begin()'],['../class_g_d_class.html#a38fadda1ccb109100cf116f9dc68d584',1,'GDClass::Begin()']]],
+  ['bendingcorrectiona',['bendingCorrectionA',['../class_e_e_p_r_o_m.html#a599689c31e854669cb92fa96fb423621',1,'EEPROM']]],
+  ['bendingcorrectionat',['bendingCorrectionAt',['../class_printer.html#ae470dfb946a46282fe460bcf98d310b6',1,'Printer']]],
+  ['bendingcorrectionb',['bendingCorrectionB',['../class_e_e_p_r_o_m.html#a588c88fd7ccb3b72a429fd555d5456f8',1,'EEPROM']]],
+  ['bendingcorrectionc',['bendingCorrectionC',['../class_e_e_p_r_o_m.html#a0dc453614d6edfb403dcbc74eeb477f9',1,'EEPROM']]],
+  ['bitmaphandle',['BitmapHandle',['../class_g_d_class.html#abebcc8a077049eb968072b24c63c9fa6',1,'GDClass']]],
+  ['bitmaplayout',['BitmapLayout',['../class_g_d_class.html#a3e7b7548dab167bbdbac13ee68c1af0c',1,'GDClass']]],
+  ['bitmapsize',['BitmapSize',['../class_g_d_class.html#af8b9e11ec21eac94646caa26a3ef224b',1,'GDClass']]],
+  ['bitmapsource',['BitmapSource',['../class_g_d_class.html#a431c9fced0fd2face857079fa9d0472d',1,'GDClass']]],
+  ['bitmaptransforma',['BitmapTransformA',['../class_g_d_class.html#ab2c6606c51294da7f127f7b1be2ca7bd',1,'GDClass']]],
+  ['bitmaptransformb',['BitmapTransformB',['../class_g_d_class.html#a70faf35ff08a5eb203284e2ee9a223ad',1,'GDClass']]],
+  ['bitmaptransformc',['BitmapTransformC',['../class_g_d_class.html#a896fc77a7074c7a82cfae1abc85dc9da',1,'GDClass']]],
+  ['bitmaptransformd',['BitmapTransformD',['../class_g_d_class.html#af044cc3d469708cb4bacc91ba3fe3af6',1,'GDClass']]],
+  ['bitmaptransforme',['BitmapTransformE',['../class_g_d_class.html#ac4f879b24d7f0c4f1c24ddccf31979e9',1,'GDClass']]],
+  ['bitmaptransformf',['BitmapTransformF',['../class_g_d_class.html#a2eabfa689aaef093dd7da511d0e59fd8',1,'GDClass']]],
+  ['blendfunc',['BlendFunc',['../class_g_d_class.html#a6aa6970a58dbc22ce6fb171019a1518d',1,'GDClass']]],
+  ['block',['block',['../class_print_line.html#a0059685dda66276eb8c115b61ffaec1e',1,'PrintLine']]],
+  ['bresenhamstep',['bresenhamStep',['../class_print_line.html#a06b314c77062f18b11edd7a58dced232',1,'PrintLine']]],
+  ['buildtransformationmatrix',['buildTransformationMatrix',['../class_printer.html#a520884b16a6dee3cd5d5b50185610978',1,'Printer']]],
+  ['bulk',['bulk',['../class_g_d_transport.html#ad6331ba933b3861515353c7879345e82',1,'GDTransport']]],
+  ['bulkrd',['bulkrd',['../class_g_d_class.html#a21ddd59e2b4214da415fa0da2d30a3b3',1,'GDClass']]]
+];
