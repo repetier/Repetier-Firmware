@@ -386,7 +386,7 @@ public:
         return dir & XY_STEP;
     }
     inline bool isXOrZMove() {
-        return dir & (XSTEP | YSTEP);
+        return dir & (XSTEP | ZSTEP);
     }
     inline bool isZMove() {
         return (dir & ZSTEP);
