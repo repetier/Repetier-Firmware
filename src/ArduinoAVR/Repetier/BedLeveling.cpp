@@ -140,7 +140,7 @@ void Printer::prepareForProbing() {
     float targetX = Printer::currentPosition[X_AXIS];
     float targetY = Printer::currentPosition[Y_AXIS];
     if(ZPOffsetX > 0 && targetX - ZPOffsetX < Printer::xMin) {
-        targetX = Printer::xMin - ZPOffsetX;
+        targetX = Printer::xMin + ZPOffsetX;
     }
     if(ZPOffsetY > 0 && targetY - ZPOffsetY < Printer::yMin) {
         targetY = Printer::yMin + ZPOffsetY;
