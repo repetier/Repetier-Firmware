@@ -877,6 +877,15 @@ public:
     inline RVector3 operator*(float lhs,const RVector3 &rhs) {
         return rhs.scale(lhs);
     }
+
+#if !defined(MAX_FAN_PWM) || MAX_FAN_PWM == 255
+#define TRIM_FAN_PWM(x) x
+#undef MAX_FAN_PWM
+#define MAX_FAN_PWM 255
+#else
+#define TRIM_FAN_PWM(x) static_cast<uint8_t>(static_cast<unsigned int>(x) * MAX_FAN_PWM / 255)
+#endif
+
 extern const uint8 osAnalogInputChannels[] PROGMEM;
 //extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
 //extern uint osAnalogInputBuildup[ANALOG_INPUTS];

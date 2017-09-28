@@ -1402,7 +1402,10 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 /** Some fans won't start for low values, but would run if started with higher power at the beginning.
 This defines the full power duration before returning to set value. Time is in milliseconds */
 #define FAN_KICKSTART_TIME  200
-
+/** Defines the max. fan speed for M106 controlled fans. Normally 255 to use full range, but for
+ 12V fans on 24V this might help preventing a defect. For all other fans there is a explicit maximum PWM value
+ you can set, so this is not used for other fans! */
+#define MAX_FAN_PWM 255
 
 
 /* A watchdog resets the printer, if a signal is not send within predefined time limits. That way we can be sure that the board

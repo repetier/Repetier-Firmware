@@ -298,8 +298,9 @@ bool Printer::isPositionAllowed(float x, float y, float z) {
 }
 
 void Printer::setFanSpeedDirectly(uint8_t speed) {
+	uint8_t trimmedSpeed = TRIM_FAN_PWM(speed);
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
-    if(pwm_pos[PWM_FAN1] == speed)
+    if(pwm_pos[PWM_FAN1] == trimmedSpeed)
         return;
 #if FAN_KICKSTART_TIME
     if(fanKickstart == 0 && speed > pwm_pos[PWM_FAN1] && speed < 85) {
@@ -307,12 +308,13 @@ void Printer::setFanSpeedDirectly(uint8_t speed) {
         else                  fanKickstart = FAN_KICKSTART_TIME / 25;
     }
 #endif
-    pwm_pos[PWM_FAN1] = speed;
+    pwm_pos[PWM_FAN1] = trimmedSpeed;
 #endif
 }
 void Printer::setFan2SpeedDirectly(uint8_t speed) {
+	uint8_t trimmedSpeed = TRIM_FAN_PWM(speed);
 #if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
-    if(pwm_pos[PWM_FAN2] == speed)
+    if(pwm_pos[PWM_FAN2] == trimmedSpeed)
         return;
 #if FAN_KICKSTART_TIME
     if(fan2Kickstart == 0 && speed > pwm_pos[PWM_FAN2] && speed < 85) {
@@ -320,7 +322,7 @@ void Printer::setFan2SpeedDirectly(uint8_t speed) {
         else                  fan2Kickstart = FAN_KICKSTART_TIME / 25;
     }
 #endif
-    pwm_pos[PWM_FAN2] = speed;
+    pwm_pos[PWM_FAN2] = trimmedSpeed;
 #endif
 }
 
