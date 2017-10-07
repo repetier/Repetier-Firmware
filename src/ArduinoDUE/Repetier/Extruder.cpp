@@ -2331,6 +2331,7 @@ void TemperatureController::updateCurrentTemperature() {
 }
 
 void TemperatureController::setTargetTemperature(float target) {
+	ENSURE_POWER
     targetTemperatureC = target;
     stopDecouple();
 }

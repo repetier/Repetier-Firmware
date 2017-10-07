@@ -42,6 +42,15 @@ Level 5: Nonlinear motor step position, only for nonlinear drive systems
 #ifndef PRINTER_H_INCLUDED
 #define PRINTER_H_INCLUDED
 
+
+#if defined(AUTOMATIC_POWERUP) && AUTOMATIC_POWERUP && PS_ON_PIN > -1
+#define ENSURE_POWER {Printer::enablePowerIfNeeded();}
+#else
+#undef AUTOMATIC_POWERUP
+#define AUTOMATIC_POWERUP 0
+#define ENSURE_POWER {}
+#endif
+
 union floatLong {
     float f;
     uint32_t l;
@@ -457,7 +466,10 @@ public:
 
     static INLINE void debugReset(uint8_t flags) {
         setDebugLevel(debugLevel & ~flags);
-    }
+	}
+#if AUTOMATIC_POWERUP    
+	static void enablePowerIfNeeded();
+#endif
     /** Sets the pwm for the fan speed. Gets called by motion control or Commands::setFanSpeed. */
     static void setFanSpeedDirectly(uint8_t speed);
     /** Sets the pwm for the fan 2 speed. Gets called by motion control or Commands::setFan2Speed. */

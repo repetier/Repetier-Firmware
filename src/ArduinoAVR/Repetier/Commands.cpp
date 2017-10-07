@@ -1626,7 +1626,7 @@ void Commands::processMCode(GCode *com) {
         }
         break;
     case 80: // M80 - ATX Power On
-#if PS_ON_PIN>-1
+#if PS_ON_PIN > -1
         Commands::waitUntilEndOfAllMoves();
         previousMillisCmd = HAL::timeInMilliseconds();
         SET_OUTPUT(PS_ON_PIN); //GND
@@ -1635,7 +1635,7 @@ void Commands::processMCode(GCode *com) {
 #endif
         break;
     case 81: // M81 - ATX Power Off
-#if PS_ON_PIN>-1
+#if PS_ON_PIN > -1
         Commands::waitUntilEndOfAllMoves();
         SET_OUTPUT(PS_ON_PIN); //GND
         Printer::setPowerOn(false);
@@ -2245,6 +2245,7 @@ void Commands::processMCode(GCode *com) {
 #if FEATURE_SERVO
     case 340: // M340
         if(com->hasP() && com->P < 4 && com->P >= 0) {
+			ENSURE_POWER
             int s = 0;
             if(com->hasS())
                 s = com->S;

@@ -507,6 +507,17 @@ void Printer::updateDerivedParameter() {
     Printer::updateAdvanceFlags();
     EVENT_UPDATE_DERIVED;
 }
+#if AUTOMATIC_POWERUP
+void Printer::enablePowerIfNeeded() {
+	if(Printer::isPowerOn())
+		return;
+    SET_OUTPUT(PS_ON_PIN); //GND
+    Printer::setPowerOn(true);
+    WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
+	HAL::delayMilliseconds(500); // Just to ensure power is up and stable
+}
+#endif
+
 /**
   \brief Stop heater and stepper motors. Disable power,if possible.
 */

@@ -1294,6 +1294,11 @@ If you use an ATX power supply you need the power pin to work non inverting. For
 boards you might need to make it inverting.
 */
 #define POWER_INVERTING 0
+
+/** Automatically enable power when temperatures or moves/homing is used. Set only to 1 if
+ *you have a power unit controlled by PS_ON_PIN! */
+#define AUTOMATIC_POWERUP 0
+
 /** What shall the printer do, when it receives an M112 emergency stop signal?
  0 = Disable heaters/motors, wait forever until someone presses reset.
  1 = restart by resetting the AVR controller. The USB connection will not reset if managed by a different chip!

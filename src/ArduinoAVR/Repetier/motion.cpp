@@ -319,6 +319,7 @@ void PrintLine::queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOpti
   @param check_endstops Read end stop during move.
 */
 void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize) {
+	ENSURE_POWER
 #if LAZY_DUAL_X_AXIS
     if(Printer::sledParked && (Printer::currentPositionSteps[X_AXIS] != Printer::destinationSteps[X_AXIS] ||
                                Printer::currentPositionSteps[Y_AXIS] != Printer::destinationSteps[Y_AXIS] ||
@@ -1854,6 +1855,7 @@ inline void PrintLine::queueEMove(int32_t extrudeDiff, uint8_t check_endstops, u
   @param softEndstop check if we go out of bounds.
 */
 uint8_t PrintLine::queueNonlinearMove(uint8_t check_endstops, uint8_t pathOptimize, uint8_t softEndstop) {
+	ENSURE_POWER
     //if (softEndstop && Printer::destinationSteps[Z_AXIS] < 0) Printer::destinationSteps[Z_AXIS] = 0; // now constrained at entry level including cylinder test
     EVENT_CONTRAIN_DESTINATION_COORDINATES
     int32_t difference[E_AXIS_ARRAY];

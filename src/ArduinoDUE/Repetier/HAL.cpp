@@ -1085,7 +1085,7 @@ void PWM_TIMER_VECTOR () {
 #if PDM_FOR_COOLER
     pulseDensityModulate(FAN_BOARD_PIN, pwm_pos[PWM_BOARD_FAN], pwm_pos_set[PWM_BOARD_FAN], false);
 #else
-    if(pwm_pos_set[PWM_BOARD_FAN] == pwm_count_cooler && pwm_pos_set[NUM_EXTRUDER + 1] != COOLER_PWM_MASK) WRITE(FAN_BOARD_PIN, 0);
+    if(pwm_pos_set[PWM_BOARD_FAN] == pwm_count_cooler && pwm_pos_set[PWM_BOARD_FAN] != COOLER_PWM_MASK) WRITE(FAN_BOARD_PIN, 0);
 #endif
 #endif
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
