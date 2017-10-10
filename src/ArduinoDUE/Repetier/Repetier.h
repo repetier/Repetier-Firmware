@@ -73,9 +73,6 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define CARTESIAN 0
 #define XY_GANTRY 1
 #define YX_GANTRY 2
-#define DELTA 3
-#define TUGA 4
-#define BIPOD 5
 #define XZ_GANTRY 8
 #define ZX_GANTRY 9
 #define GANTRY_FAKE 10
@@ -135,33 +132,6 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define HOME_ORDER_ZXYTZ 7 // Needs hot hotend for correct homing
 #define HOME_ORDER_XYTZ 8 // Needs hot hotend for correct homing
 
-#define NO_CONTROLLER 0
-#define UICONFIG_CONTROLLER 1
-#define CONTROLLER_SMARTRAMPS 2
-#define CONTROLLER_ADAFRUIT 3
-#define CONTROLLER_FOLTYN 4
-#define CONTROLLER_VIKI 5
-#define CONTROLLER_MEGATRONIC 6
-#define CONTROLLER_RADDS 7
-#define CONTROLLER_PIBOT20X4 8
-#define CONTROLLER_PIBOT16X2 9
-#define CONTROLLER_GADGETS3D_SHIELD 10
-#define CONTROLLER_REPRAPDISCOUNT_GLCD 11
-#define CONTROLLER_FELIX 12
-#define CONTROLLER_RAMBO 13
-#define CONTROLLER_OPENHARDWARE_LCD2004 14
-#define CONTROLLER_SANGUINOLOLU_PANELOLU2 15
-#define CONTROLLER_GAMEDUINO2 16
-#define CONTROLLER_MIREGLI 17
-#define CONTROLLER_GATE_3NOVATICA 18
-#define CONTROLLER_SPARKLCD 19
-#define CONTROLLER_BAM_DICE_DUE 20
-#define CONTROLLER_VIKI2 21
-#define CONTROLLER_LCD_MP_PHARAOH_DUE 22
-#define CONTROLLER_SPARKLCD_ADAPTER 23
-#define CONTROLLER_ZONESTAR 24
-#define CONTROLLER_FELIX_DUE 405
-
 //direction flags
 #define X_DIRPOS 1
 #define Y_DIRPOS 2
@@ -185,10 +155,6 @@ usage or for searching for memory induced errors. Switch it off for production, 
 // add pid control
 #define TEMP_PID 1
 
-#define PRINTER_MODE_FFF 0
-#define PRINTER_MODE_LASER 1
-#define PRINTER_MODE_CNC 2
-
 #define ILLEGAL_Z_PROBE -888
 
 // we can not prevent this as some configurations need a parameter and others not
@@ -205,7 +171,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define DUAL_X_AXIS 0
 #endif
 
-#if SHARED_EXTRUDER_HEATER || MIXING_EXTRUDER
+#if SHARED_EXTRUDER_HEATER
 #undef EXT1_HEATER_PIN
 #undef EXT2_HEATER_PIN
 #undef EXT3_HEATER_PIN
@@ -227,30 +193,15 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #endif
 #define XY_GANTRY 1
 #define YX_GANTRY 2
-#define DELTA 3
-#define TUGA 4
-#define BIPOD 5
 #define XZ_GANTRY 8
 #define ZX_GANTRY 9
-#if defined(FAST_COREXYZ) && !(DRIVE_SYSTEM==XY_GANTRY || DRIVE_SYSTEM==YX_GANTRY || DRIVE_SYSTEM==XZ_GANTRY || DRIVE_SYSTEM==ZX_GANTRY || DRIVE_SYSTEM==GANTRY_FAKE)
-#undef FAST_COREXYZ
-#endif
-#ifdef FAST_COREXYZ
-#if DELTA_SEGMENTS_PER_SECOND_PRINT < 30
-#undef DELTA_SEGMENTS_PER_SECOND_PRINT
-#define DELTA_SEGMENTS_PER_SECOND_PRINT 30 // core is linear, no subsegments needed
-#endif
-#if DELTA_SEGMENTS_PER_SECOND_MOVE < 30
-#undef DELTA_SEGMENTS_PER_SECOND_MOVE
-#define DELTA_SEGMENTS_PER_SECOND_MOVE 30
-#endif
-#endif
+
 
 inline void memcopy2(void *dest,void *source) {
-	*((int16_t*)dest) = *((int16_t*)source);
+    *((int16_t*)dest) = *((int16_t*)source);
 }
 inline void memcopy4(void *dest,void *source) {
-	*((int32_t*)dest) = *((int32_t*)source);
+    *((int32_t*)dest) = *((int32_t*)source);
 }
 
 #ifndef JSON_OUTPUT
@@ -263,12 +214,6 @@ inline void memcopy4(void *dest,void *source) {
 
 #if FEATURE_Z_PROBE && Z_PROBE_PIN < 0
 #error You need to define Z_PROBE_PIN to use z probe!
-#endif
-
-#if DISTORTION_CORRECTION
-#if !FEATURE_Z_PROBE
-#error Distortion correction requires the z probe feature to be enabled and configured!
-#endif
 #endif
 
 #ifndef MAX_ROOM_TEMPERATURE
@@ -286,11 +231,7 @@ inline void memcopy4(void *dest,void *source) {
 #define MICROSTEP2 HIGH,LOW
 #define MICROSTEP4 LOW,HIGH
 #define MICROSTEP8 HIGH,HIGH
-#if (MOTHERBOARD == 501)
-#define MICROSTEP16 LOW,LOW
-#else
 #define MICROSTEP16 HIGH,HIGH
-#endif
 #define MICROSTEP32 HIGH,HIGH
 
 #define GCODE_BUFFER_SIZE 1
@@ -314,21 +255,8 @@ inline void memcopy4(void *dest,void *source) {
 #define SPEED_MAX_MILLIS 60
 #define SPEED_MAGNIFICATION 100.0f
 
-#define SOFTWARE_LEVELING (defined(FEATURE_SOFTWARE_LEVELING) && (DRIVE_SYSTEM==DELTA))
-/**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
-*/
-#if !defined(ROD_RADIUS) && DRIVE_SYSTEM == DELTA
-#define ROD_RADIUS (PRINTER_RADIUS-END_EFFECTOR_HORIZONTAL_OFFSET-CARRIAGE_HORIZONTAL_OFFSET)
-#endif
-
 #ifndef UI_SPEEDDEPENDENT_POSITIONING
 #define UI_SPEEDDEPENDENT_POSITIONING true
-#endif
-
-#if DRIVE_SYSTEM==DELTA || DRIVE_SYSTEM==TUGA || DRIVE_SYSTEM==BIPOD || defined(FAST_COREXYZ)
-#define NONLINEAR_SYSTEM 1
-#else
-#define NONLINEAR_SYSTEM 0
 #endif
 
 #ifdef FEATURE_Z_PROBE
@@ -467,7 +395,7 @@ inline void memcopy4(void *dest,void *source) {
 #define EXT5_ANALOG_CHANNEL
 #endif
 
-#if HAVE_HEATED_BED && HEATED_BED_SENSOR_TYPE < 101
+#if HEATED_BED_SENSOR_TYPE < 101
 #define BED_ANALOG_INPUTS 1
 #define BED_SENSOR_INDEX EXT0_ANALOG_INPUTS+EXT1_ANALOG_INPUTS+EXT2_ANALOG_INPUTS+EXT3_ANALOG_INPUTS+EXT4_ANALOG_INPUTS+EXT5_ANALOG_INPUTS
 #define BED_ANALOG_CHANNEL ACCOMMA5 HEATED_BED_SENSOR_PIN
@@ -811,21 +739,21 @@ public:
         return t.normalize();
     }
 };
-	inline RVector3 operator+(RVector3 lhs, const RVector3& rhs) // first arg by value, second by const ref
-	{
-		lhs.x += rhs.x;
-		lhs.y += rhs.y;
-		lhs.z += rhs.z;
-		return lhs;
-	}
+    inline RVector3 operator+(RVector3 lhs, const RVector3& rhs) // first arg by value, second by const ref
+    {
+        lhs.x += rhs.x;
+        lhs.y += rhs.y;
+        lhs.z += rhs.z;
+        return lhs;
+    }
 
-	inline RVector3 operator-(RVector3 lhs, const RVector3& rhs) // first arg by value, second by const ref
-	{
-		lhs.x -= rhs.x;
-		lhs.y -= rhs.y;
-		lhs.z -= rhs.z;
-		return lhs;
-	}
+    inline RVector3 operator-(RVector3 lhs, const RVector3& rhs) // first arg by value, second by const ref
+    {
+        lhs.x -= rhs.x;
+        lhs.y -= rhs.y;
+        lhs.z -= rhs.z;
+        return lhs;
+    }
 
     inline RVector3 operator*(const RVector3 &lhs,float rhs) {
         return lhs.scale(rhs);
@@ -856,19 +784,12 @@ extern int maxadv2;
 extern float maxadvspeed;
 #endif
 
-
+#include "TemperatureController.h"
 #include "Extruder.h"
 
 void manage_inactivity(uint8_t debug);
 
 extern void finishNextSegment();
-#if NONLINEAR_SYSTEM
-extern uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long deltaPosSteps[]);
-#if SOFTWARE_LEVELING
-extern void calculatePlane(long factors[], long p1[], long p2[], long p3[]);
-extern float calcZOffset(long factors[], long pointX, long pointY);
-#endif
-#endif
 extern void linear_move(long steps_remaining[]);
 #ifndef FEATURE_DITTO_PRINTING
 #define FEATURE_DITTO_PRINTING false
@@ -982,9 +903,6 @@ extern void updateStepsParameter(PrintLine *p/*,uint8_t caller*/);
 extern int debugWaitLoop;
 #endif
 
-#if NONLINEAR_SYSTEM
-#define NUM_AXIS 4
-#endif
 
 #define STR(s) #s
 #define XSTR(s) STR(s)

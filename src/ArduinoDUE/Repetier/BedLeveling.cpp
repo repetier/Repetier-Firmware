@@ -88,7 +88,7 @@ point 1 is mirrored to 1m across the axis. Using the symmetry we then remove the
 from 1 and use that as plane.
 
 By now the leveling process is finished. All errors that remain are measuring errors and bumps on
-the bed it self. For deltas you can enable distortion correction to follow the bumps.
+the bed it self.
 
 There are 2 ways to consider a changing bed coating, which are defined by Z_PROBE_Z_OFFSET_MODE.
 Z_PROBE_Z_OFFSET_MODE = 0 means we measure the surface of the bed below any coating. This is e.g. 
@@ -126,9 +126,9 @@ requires the extruder to bend the coating thickness without harm!
 class PlaneBuilder {
         float sum_xx,sum_xy,sum_yy,sum_x,sum_y,sum_xz,sum_yz,sum_z,n;
     public:
-		PlaneBuilder() {
-			reset();
-		}
+        PlaneBuilder() {
+            reset();
+        }
         void reset() {
             sum_xx = sum_xy = sum_yy = sum_x = sum_y = sum_xz = sum_yz = sum_z = n = 0;
         }
@@ -148,11 +148,11 @@ class PlaneBuilder {
             plane.a = ((sum_xy * sum_y  - sum_x * sum_yy)  * sum_z + (sum_x * sum_y  - n      * sum_xy) * sum_yz + sum_xz * (n      * sum_yy - sum_y * sum_y))  / det;
             plane.b = ((sum_x  * sum_xy - sum_xx * sum_y)  * sum_z + (n     * sum_xx - sum_x  * sum_x)  * sum_yz + sum_xz * (sum_x  * sum_y  - n     * sum_xy)) / det;
             plane.c = ((sum_xx * sum_yy - sum_xy * sum_xy) * sum_z + (sum_x * sum_xy - sum_xx * sum_y)  * sum_yz + sum_xz * (sum_xy * sum_y  - sum_x * sum_yy)) / det;
-			if(!silent) {
-				Com::printF(PSTR("plane: a = "),plane.a,4);
-				Com::printF(PSTR(" b = "),plane.b,4);
-				Com::printFLN(PSTR(" c = "),plane.c,4);
-			}
+            if(!silent) {
+                Com::printF(PSTR("plane: a = "),plane.a,4);
+                Com::printF(PSTR(" b = "),plane.b,4);
+                Com::printFLN(PSTR(" c = "),plane.c,4);
+            }
         }
 };
 
@@ -242,7 +242,7 @@ bool measureAutolevelPlane(Plane &plane) {
 void correctAutolevel(GCode *code,Plane &plane) {
 #if BED_CORRECTION_METHOD == 0 // rotation matrix
     //Printer::buildTransformationMatrix(plane.z(EEPROM::zProbeX1(),EEPROM::zProbeY1()),plane.z(EEPROM::zProbeX2(),EEPROM::zProbeY2()),plane.z(EEPROM::zProbeX3(),EEPROM::zProbeY3()));
-	Printer::buildTransformationMatrix(plane);
+    Printer::buildTransformationMatrix(plane);
 #elif BED_CORRECTION_METHOD == 1 // motorized correction
 #if !defined(NUM_MOTOR_DRIVERS) || NUM_MOTOR_DRIVERS < 2
 #error You need to define 2 motors for motorized bed correction
@@ -255,11 +255,11 @@ void correctAutolevel(GCode *code,Plane &plane) {
     h2 -= h1;
     h3 -= h1;
 #if defined(LIMIT_MOTORIZED_CORRECTION)
-	if(h2 < -LIMIT_MOTORIZED_CORRECTION) h2 = -LIMIT_MOTORIZED_CORRECTION;
-	if(h2 > LIMIT_MOTORIZED_CORRECTION) h2 = LIMIT_MOTORIZED_CORRECTION;
-	if(h3 < -LIMIT_MOTORIZED_CORRECTION) h3 = -LIMIT_MOTORIZED_CORRECTION;
-	if(h3 > LIMIT_MOTORIZED_CORRECTION) h3 = LIMIT_MOTORIZED_CORRECTION;
-#endif	
+    if(h2 < -LIMIT_MOTORIZED_CORRECTION) h2 = -LIMIT_MOTORIZED_CORRECTION;
+    if(h2 > LIMIT_MOTORIZED_CORRECTION) h2 = LIMIT_MOTORIZED_CORRECTION;
+    if(h3 < -LIMIT_MOTORIZED_CORRECTION) h3 = -LIMIT_MOTORIZED_CORRECTION;
+    if(h3 > LIMIT_MOTORIZED_CORRECTION) h3 = LIMIT_MOTORIZED_CORRECTION;
+#endif
     MotorDriverInterface *motor2 = getMotorDriver(0);
     MotorDriverInterface *motor3 = getMotorDriver(1);
     motor2->setCurrentAs(0);
@@ -284,33 +284,14 @@ S = 2 : Like s = 1 plus store results in EEPROM for next connection.
 bool runBedLeveling(GCode *com) {
     float h1,h2,h3,hc,oldFeedrate = Printer::feedrate;
     int s = com->hasS() ? com->S : -1;
-#if DISTORTION_CORRECTION
-    bool distEnabled = Printer::distortion.isEnabled();
-    Printer::distortion.disable(false); // if level has changed, distortion is also invalid
-#endif
     Printer::setAutolevelActive(false); // iterate
     Printer::resetTransformationMatrix(true); // in case we switch from matrix to motorized!
-#if DRIVE_SYSTEM == DELTA
-    // It is not possible to go to the edges at the top, also users try
-    // it often and wonder why the coordinate system is then wrong.
-    // For that reason we ensure a correct behavior by code.
-    Printer::homeAxis(true, true, true);
-    Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + EEPROM::zProbeHeight(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
-#endif
     Printer::startProbing(true);
     //GCode::executeFString(Com::tZProbeStartScript);
     Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
     Plane plane;
 #if BED_CORRECTION_METHOD == 1
     for(int r = 0; r < BED_LEVELING_REPETITIONS; r++) {
-#if DRIVE_SYSTEM == DELTA
-        if(r > 0) {
-            Printer::finishProbing();
-            Printer::homeAxis(true, true, true);
-            Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + EEPROM::zProbeHeight(), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
-            Printer::startProbing(true);
-        }
-#endif
 #endif
         if(!measureAutolevelPlane(plane)) {
             Com::printErrorFLN(PSTR("Probing had returned errors - autoleveling canceled."));
@@ -351,15 +332,8 @@ bool runBedLeveling(GCode *com) {
     }
     Printer::updateCurrentPosition(true);
     Commands::printCurrentPosition(PSTR("G32 "));
-#if DISTORTION_CORRECTION
-    if(distEnabled)
-        Printer::distortion.enable(false); // if level has changed, distortion is also invalid
-#endif
-#if DRIVE_SYSTEM == DELTA
-    Printer::homeAxis(true, true, true); // shifting z makes positioning invalid, need to recalibrate
-#endif
     Printer::feedrate = oldFeedrate;
-	return true;
+    return true;
 }
 
 #endif
@@ -377,9 +351,6 @@ void Printer::setAutolevelActive(bool on) {
 }
 #if MAX_HARDWARE_ENDSTOP_Z
 float Printer::runZMaxProbe() {
-#if NONLINEAR_SYSTEM
-    long startZ = realDeltaPositionSteps[Z_AXIS] = currentNonlinearPositionSteps[Z_AXIS]; // update real
-#endif
     Commands::waitUntilEndOfAllMoves();
     long probeDepth = 2*(Printer::zMaxSteps-Printer::zMinSteps);
     stepsRemainingAtZHit = -1;
@@ -391,11 +362,7 @@ float Printer::runZMaxProbe() {
     }
     setZProbingActive(false);
     currentPositionSteps[Z_AXIS] -= stepsRemainingAtZHit;
-#if NONLINEAR_SYSTEM
-    probeDepth -= (realDeltaPositionSteps[Z_AXIS] - startZ);
-#else
     probeDepth -= stepsRemainingAtZHit;
-#endif
     float distance = (float)probeDepth * invAxisStepsPerMM[Z_AXIS];
     Com::printF(Com::tZProbeMax,distance);
     Com::printF(Com::tSpaceXColon,realXPosition());
@@ -465,9 +432,6 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
     int32_t sum = 0, probeDepth;
     int32_t shortMove = static_cast<int32_t>((float)Z_PROBE_SWITCHING_DISTANCE * axisStepsPerMM[Z_AXIS]); // distance to go up for repeated moves
     int32_t lastCorrection = currentPositionSteps[Z_AXIS]; // starting position
-#if NONLINEAR_SYSTEM
-    realDeltaPositionSteps[Z_AXIS] = currentNonlinearPositionSteps[Z_AXIS]; // update real
-#endif
     //int32_t updateZ = 0;
     waitForZProbeStart();
     Endstops::update();
@@ -489,14 +453,6 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
             return ILLEGAL_Z_PROBE;
         }
         setZProbingActive(false);
-#if NONLINEAR_SYSTEM
-        stepsRemainingAtZHit = realDeltaPositionSteps[C_TOWER] - currentNonlinearPositionSteps[C_TOWER]; // nonlinear moves may split z so stepsRemainingAtZHit is only what is left from last segment not total move. This corrects the problem.
-#endif
-#if DRIVE_SYSTEM == DELTA
-        currentNonlinearPositionSteps[A_TOWER] += stepsRemainingAtZHit; // Update difference
-        currentNonlinearPositionSteps[B_TOWER] += stepsRemainingAtZHit;
-        currentNonlinearPositionSteps[C_TOWER] += stepsRemainingAtZHit;
-#endif
         currentPositionSteps[Z_AXIS] += stepsRemainingAtZHit; // now current position is correct
         sum += lastCorrection - currentPositionSteps[Z_AXIS];
         if(r + 1 < repeat) {
@@ -512,27 +468,10 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
 #if Z_PROBE_Z_OFFSET_MODE == 1
     distance += EEPROM::zProbeZOffset(); // We measured including coating, so we need to add coating thickness!
 #endif
-#if DISTORTION_CORRECTION
-    float zCorr = 0;
-    if(Printer::distortion.isEnabled()) {
-        zCorr = distortion.correct(currentPositionSteps[X_AXIS] + EEPROM::zProbeXOffset() * axisStepsPerMM[X_AXIS],currentPositionSteps[Y_AXIS]
-                                   + EEPROM::zProbeYOffset() * axisStepsPerMM[Y_AXIS],0) * invAxisStepsPerMM[Z_AXIS];
-        distance += zCorr;
-    }
-#endif
     distance += bendingCorrectionAt(currentPosition[X_AXIS], currentPosition[Y_AXIS]);
     Com::printF(Com::tZProbe, distance);
     Com::printF(Com::tSpaceXColon, realXPosition());
-#if DISTORTION_CORRECTION
-    if(Printer::distortion.isEnabled()) {
-        Com::printF(Com::tSpaceYColon, realYPosition());
-        Com::printFLN(PSTR(" zCorr:"), zCorr);
-    } else {
-        Com::printFLN(Com::tSpaceYColon, realYPosition());
-    }
-#else
     Com::printFLN(Com::tSpaceYColon, realYPosition());
-#endif
     // Go back to start position
     PrintLine::moveRelativeDistanceInSteps(0, 0, lastCorrection - currentPositionSteps[Z_AXIS], 0, EEPROM::zProbeSpeed(), true, true);
     if(Endstops::zProbe()) {
@@ -546,13 +485,13 @@ float Printer::runZProbe(bool first,bool last,uint8_t repeat,bool runStartScript
 }
 
 float Printer::bendingCorrectionAt(float x, float y) {
-	PlaneBuilder builder;
+    PlaneBuilder builder;
     builder.addPoint(EEPROM::zProbeX1(),EEPROM::zProbeY1(),EEPROM::bendingCorrectionA());
     builder.addPoint(EEPROM::zProbeX2(),EEPROM::zProbeY2(),EEPROM::bendingCorrectionB());
     builder.addPoint(EEPROM::zProbeX3(),EEPROM::zProbeY3(),EEPROM::bendingCorrectionC());
-	Plane plane;
-	builder.createPlane(plane,true);
-	return plane.z(x,y);
+    Plane plane;
+    builder.createPlane(plane,true);
+    return plane.z(x,y);
 }
 
 void Printer::waitForZProbeStart() {
@@ -594,37 +533,37 @@ void Printer::transformToPrinter(float x,float y,float z,float &transX,float &tr
     y = y + z * EEPROM::axisCompTanYZ();
 #endif
 #if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
-	if(isAutolevelActive()) {
-		transX = x * autolevelTransformation[0] + y * autolevelTransformation[3] + z * autolevelTransformation[6];
-		transY = x * autolevelTransformation[1] + y * autolevelTransformation[4] + z * autolevelTransformation[7];
-		transZ = x * autolevelTransformation[2] + y * autolevelTransformation[5] + z * autolevelTransformation[8];
-	} else {
-		transX = x;
-		transY = y;
-		transZ = z;		
-	}
+    if(isAutolevelActive()) {
+        transX = x * autolevelTransformation[0] + y * autolevelTransformation[3] + z * autolevelTransformation[6];
+        transY = x * autolevelTransformation[1] + y * autolevelTransformation[4] + z * autolevelTransformation[7];
+        transZ = x * autolevelTransformation[2] + y * autolevelTransformation[5] + z * autolevelTransformation[8];
+    } else {
+        transX = x;
+        transY = y;
+        transZ = z;
+    }
 #else
-	transX = x;
-	transY = y;
-	transZ = z;
-#endif	
+    transX = x;
+    transY = y;
+    transZ = z;
+#endif
 }
 
 void Printer::transformFromPrinter(float x,float y,float z,float &transX,float &transY,float &transZ) {
 #if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
-	if(isAutolevelActive()) {
-		transX = x * autolevelTransformation[0] + y * autolevelTransformation[1] + z * autolevelTransformation[2];
-		transY = x * autolevelTransformation[3] + y * autolevelTransformation[4] + z * autolevelTransformation[5];
-		transZ = x * autolevelTransformation[6] + y * autolevelTransformation[7] + z * autolevelTransformation[8];
-	} else {
-		transX = x;
-		transY = y;
-		transZ = z;		
-	}
+    if(isAutolevelActive()) {
+        transX = x * autolevelTransformation[0] + y * autolevelTransformation[1] + z * autolevelTransformation[2];
+        transY = x * autolevelTransformation[3] + y * autolevelTransformation[4] + z * autolevelTransformation[5];
+        transZ = x * autolevelTransformation[6] + y * autolevelTransformation[7] + z * autolevelTransformation[8];
+    } else {
+        transX = x;
+        transY = y;
+        transZ = z;
+    }
 #else
-	transX = x;
-	transY = y;
-	transZ = z;
+    transX = x;
+    transY = y;
+    transZ = z;
 #endif
 #if FEATURE_AXISCOMP
     // Axis compensation:
@@ -642,9 +581,9 @@ void Printer::resetTransformationMatrix(bool silent) {
 }
 
 void Printer::buildTransformationMatrix(Plane &plane) {
-	float z0 = plane.z(0,0);
-	float az = z0-plane.z(1,0); // ax = 1, ay = 0
-	float bz = z0-plane.z(0,1); // bx = 0, by = 1
+    float z0 = plane.z(0,0);
+    float az = z0-plane.z(1,0); // ax = 1, ay = 0
+    float bz = z0-plane.z(0,1); // bx = 0, by = 1
     // First z direction
     autolevelTransformation[6] = -az;
     autolevelTransformation[7] = -bz;
@@ -668,7 +607,7 @@ void Printer::buildTransformationMatrix(Plane &plane) {
     autolevelTransformation[3] /= len;
     autolevelTransformation[4] /= len;
     autolevelTransformation[5] /= len;
-	
+    
     Com::printArrayFLN(Com::tTransformationMatrix,autolevelTransformation, 9, 6);
 }
 /* 

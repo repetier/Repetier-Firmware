@@ -135,34 +135,7 @@ FSTRINGVAR(tEEPROMUpdated)
 FSTRINGVAR(tFilamentSlipping)
 FSTRINGVAR(tPauseCommunication)
 FSTRINGVAR(tContinueCommunication)
-#if NONLINEAR_SYSTEM
-FSTRINGVAR(tInvalidDeltaCoordinate)
-FSTRINGVAR(tDBGDeltaNoMoveinDSegment)
-#endif
-#if DRIVE_SYSTEM == DELTA
-FSTRINGVAR(tMeasurementReset)
-FSTRINGVAR(tMeasureDeltaSteps)
-FSTRINGVAR(tMeasureDelta)
-FSTRINGVAR(tMeasureOriginReset)
-FSTRINGVAR(tMeasurementAbortedOrigin)
-FSTRINGVAR(tLevelingCalc)
-FSTRINGVAR(tTower1)
-FSTRINGVAR(tTower2)
-FSTRINGVAR(tTower3)
-FSTRINGVAR(tDeltaAlphaA)
-FSTRINGVAR(tDeltaAlphaB)
-FSTRINGVAR(tDeltaAlphaC)
-FSTRINGVAR(tDeltaRadiusCorrectionA)
-FSTRINGVAR(tDeltaRadiusCorrectionB)
-FSTRINGVAR(tDeltaRadiusCorrectionC)
-FSTRINGVAR(tDeltaDiagonalCorrectionA)
-FSTRINGVAR(tDeltaDiagonalCorrectionB)
-FSTRINGVAR(tDeltaDiagonalCorrectionC)
-FSTRINGVAR(tEPRDeltaMaxRadius)
-#endif // DRIVE_SYSTEM
-#if DRIVE_SYSTEM==TUGA
-FSTRINGVAR(tEPRDiagonalRodLength)
-#endif
+
 #ifdef DEBUG_GENERIC
 FSTRINGVAR(tGenTemp)
 #endif // DEBUG_GENERICFSTRINGVALUE(Com::,"")
@@ -305,7 +278,7 @@ FSTRINGVAR(tEPRAccelerationFactorAtTop)
 FSTRINGVAR(tEPRZStepsPerMM)
 FSTRINGVAR(tEPRZMaxFeedrate)
 FSTRINGVAR(tEPRZHomingFeedrate)
-#if DRIVE_SYSTEM != DELTA
+
 FSTRINGVAR(tEPRMaxZJerk)
 FSTRINGVAR(tEPRXStepsPerMM)
 FSTRINGVAR(tEPRYStepsPerMM)
@@ -317,13 +290,7 @@ FSTRINGVAR(tEPRXAcceleration)
 FSTRINGVAR(tEPRYAcceleration)
 FSTRINGVAR(tEPRXTravelAcceleration)
 FSTRINGVAR(tEPRYTravelAcceleration)
-#else
-FSTRINGVAR(tEPRDiagonalRodLength)
-FSTRINGVAR(tEPRHorizontalRadius)
-FSTRINGVAR(tEPRTowerXOffset)
-FSTRINGVAR(tEPRTowerYOffset)
-FSTRINGVAR(tEPRTowerZOffset)
-#endif
+
 FSTRINGVAR(tEPROPSMode)
 FSTRINGVAR(tEPROPSMoveAfter)
 FSTRINGVAR(tEPROPSMinDistance)
@@ -383,10 +350,6 @@ FSTRINGVAR(tSDErrorCode)
 #endif // SDSUPPORT
 FSTRINGVAR(tHeaterDecoupled)
 FSTRINGVAR(tHeaterDecoupledWarning)
-#if DISTORTION_CORRECTION
-FSTRINGVAR(tZCorrectionEnabled)
-FSTRINGVAR(tZCorrectionDisabled)
-#endif
 #if FEATURE_RETRACTION
 FSTRINGVAR(tEPRAutoretractEnabled)
 FSTRINGVAR(tEPRRetractionLength)
@@ -400,19 +363,8 @@ FSTRINGVAR(tEPRRetractionUndoSpeed)
 FSTRINGVAR(tConfig)
 FSTRINGVAR(tExtrDot)
 
-#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
-FSTRINGVAR(tMCPEpromSettings)
-FSTRINGVAR(tMCPCurrentSettings)
-#endif
-FSTRINGVAR(tPrinterModeFFF)
-FSTRINGVAR(tPrinterModeLaser)
-FSTRINGVAR(tPrinterModeCNC)
 #ifdef STARTUP_GCODE
 FSTRINGVAR(tStartupGCode)
-#endif
-#if NONLINEAR_SYSTEM
-FSTRINGVAR(tEPRSegmentsPerSecondPrint)
-FSTRINGVAR(tEPRSegmentsPerSecondTravel)
 #endif
 
 static void config(FSTRINGPARAM(text));

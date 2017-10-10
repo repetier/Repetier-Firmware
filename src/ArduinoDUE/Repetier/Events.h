@@ -7,7 +7,7 @@ Event system in a nutshell:
 All printers are different and my need additions in th eone or other place.
 It is not very convenient to add these code parts across the firmware. For this
 reason repetier-firmware uses a simple event system that comes at no cost if
-a event is not used.
+an event is not used.
 
 - simple: Only one subscriber is possible
 - cost effective: Macros work as event caller. By default all macros are empty
@@ -17,7 +17,7 @@ How to use the system:
 1. In Configuration.h add
 #define CUSTOM_EVENTS
 2. Add a file "CustomEvents.h" which overrides all event macros you need.
-   It shoudl also include the function declarations used.
+   It should also include the function declarations used.
 3. Add a file "CustomEventsImpl.h" which includes all function definitions.
    Also it is named .h it will be included inside a cpp file only once.
    This is to compile only when selected and still keep ArduinoIDE happy.
@@ -56,23 +56,8 @@ Each of the following events describe the parameter and when it is called.
 // Gets called after a M999 to continue from fatal errors
 #define EVENT_CONTINUE_FROM_FATAL_ERROR
 
-// Called to initialize laser pins. Return false to prevent default initialization.
-#define EVENT_INITALIZE_LASER true
-// Set laser to intensity level 0 = off, 255 = full. Return false if you have overridden the setting routine.
-// with true the default solution will set it as digital value.
-#define EVENT_SET_LASER(intensity) true
-
-// Called to initialize CNC pins. Return false to prevent default initialization.
-#define EVENT_INITALIZE_CNC true
-// Turn off spindle
-#define EVENT_SPINDLE_OFF true
-// Turn spindle clockwise
-#define EVENT_SPINDLE_CW(rpm) true
-// Turn spindle counter clockwise
-#define EVENT_SPINDLE_CCW(rpm) true
-
 // Allow adding new G and M codes. To implement it create a function
-// bool eventUnhandledGCode(GCode *com)
+// bool eventUnhandledGCode(GCode *com);
 // that returns true if it handled the code, otherwise false.
 // Event define would then be
 // #define EVENT_UNHANDLED_G_CODE(c) eventUnhandledGCode(c)

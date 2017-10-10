@@ -153,20 +153,20 @@ uint8_t GCode::computeBinarySize(char *ptr)  // unsigned int bitfield) {
 }
 
 void GCode::keepAlive(enum FirmwareState state) {
-	millis_t now = HAL::timeInMilliseconds();
-	
-	if(state != NotBusy && keepAliveInterval != 0) {
-		if(now - lastBusySignal < keepAliveInterval)
-			return;
-		if(state == Paused) {
-			Com::printFLN(PSTR("busy:paused for user interaction"));	
-		} else if(state == WaitHeater) {
-			Com::printFLN(PSTR("busy:heating"));	
-		} else { // processing and uncaught cases
-			Com::printFLN(PSTR("busy:processing"));
-		}
-	}
-	lastBusySignal = now;
+    millis_t now = HAL::timeInMilliseconds();
+    
+    if(state != NotBusy && keepAliveInterval != 0) {
+        if(now - lastBusySignal < keepAliveInterval)
+            return;
+        if(state == Paused) {
+            Com::printFLN(PSTR("busy:paused for user interaction"));
+        } else if(state == WaitHeater) {
+            Com::printFLN(PSTR("busy:heating"));
+        } else { // processing and uncaught cases
+            Com::printFLN(PSTR("busy:processing"));
+        }
+    }
+    lastBusySignal = now;
 }
 
 void GCode::requestResend()
@@ -242,20 +242,20 @@ void GCode::checkAndPushCommand()
         }
         lastLineNumber = actLineNumber;
     } /*
-	This test is not compatible with all hosts. Replaced by forbidding backward switch of protocols.
-	else if(lastLineNumber && !(hasM() && M == 117)) { // once line number always line number!
-		if(Printer::debugErrors())
+    This test is not compatible with all hosts. Replaced by forbidding backward switch of protocols.
+    else if(lastLineNumber && !(hasM() && M == 117)) { // once line number always line number!
+        if(Printer::debugErrors())
         {
-			Com::printErrorFLN(PSTR("Missing linenumber"));
-		}
-		requestResend();
-		return;
-	}*/
-	if(GCode::hasFatalError() && !(hasM() && M==999)) {
-		GCode::reportFatalError();
-	} else {
-		pushCommand();
-	}
+            Com::printErrorFLN(PSTR("Missing linenumber"));
+        }
+        requestResend();
+        return;
+    }*/
+    if(GCode::hasFatalError() && !(hasM() && M==999)) {
+        GCode::reportFatalError();
+    } else {
+        pushCommand();
+    }
 #ifdef DEBUG_COM_ERRORS
     if(hasM() && M == 667)
         return; // omit ok
@@ -266,7 +266,7 @@ void GCode::checkAndPushCommand()
     Com::printFLN(Com::tOk);
 #endif
     wasLastCommandReceivedAsBinary = sendAsBinary;
-	keepAlive(NotBusy);
+    keepAlive(NotBusy);
     waitingForResend = -1; // everything is ok.
 }
 
@@ -370,9 +370,9 @@ It must be called frequently to empty the incoming buffer.
 void GCode::readFromSerial()
 {
     if(bufferLength >= GCODE_BUFFER_SIZE || (waitUntilAllCommandsAreParsed && bufferLength)) {
-		keepAlive(Processing);
-		return; // all buffers full
-	}
+        keepAlive(Processing);
+        return; // all buffers full
+    }
     waitUntilAllCommandsAreParsed = false;
     millis_t time = HAL::timeInMilliseconds();
     if(!HAL::serialByteAvailable())
@@ -739,7 +739,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
     params = 0;
     params2 = 0;
     internalCommand = !fromSerial;
-	bool hasChecksum = false;
+    bool hasChecksum = false;
     char c;
     while ( (c = *(pos++)) )
     {
@@ -887,58 +887,58 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         case 'C':
         case 'c':
         {
-	        D = parseFloatValue(pos);
-	        params2 |= 16;
-	        params |= 4096; // Needs V2 for saving
-	        break;
+            D = parseFloatValue(pos);
+            params2 |= 16;
+            params |= 4096; // Needs V2 for saving
+            break;
         }
         case 'H':
         case 'h':
         {
-	        D = parseFloatValue(pos);
-	        params2 |= 32;
-	        params |= 4096; // Needs V2 for saving
-	        break;
+            D = parseFloatValue(pos);
+            params2 |= 32;
+            params |= 4096; // Needs V2 for saving
+            break;
         }
         case 'A':
         case 'a':
         {
-	        D = parseFloatValue(pos);
-	        params2 |= 64;
-	        params |= 4096; // Needs V2 for saving
-	        break;
+            D = parseFloatValue(pos);
+            params2 |= 64;
+            params |= 4096; // Needs V2 for saving
+            break;
         }
         case 'B':
         case 'b':
         {
-	        D = parseFloatValue(pos);
-	        params2 |= 128;
-	        params |= 4096; // Needs V2 for saving
-	        break;
+            D = parseFloatValue(pos);
+            params2 |= 128;
+            params |= 4096; // Needs V2 for saving
+            break;
         }
         case 'K':
         case 'k':
         {
-	        D = parseFloatValue(pos);
-	        params2 |= 256;
-	        params |= 4096; // Needs V2 for saving
-	        break;
+            D = parseFloatValue(pos);
+            params2 |= 256;
+            params |= 4096; // Needs V2 for saving
+            break;
         }
         case 'L':
         case 'l':
         {
-	        D = parseFloatValue(pos);
-	        params2 |= 512;
-	        params |= 4096; // Needs V2 for saving
-	        break;
+            D = parseFloatValue(pos);
+            params2 |= 512;
+            params |= 4096; // Needs V2 for saving
+            break;
         }
         case 'O':
         case 'o':
         {
-	        D = parseFloatValue(pos);
-	        params2 |= 1024;
-	        params |= 4096; // Needs V2 for saving
-	        break;
+            D = parseFloatValue(pos);
+            params2 |= 1024;
+            params |= 4096; // Needs V2 for saving
+            break;
         }
         case '*' : //checksum
         {
@@ -956,17 +956,17 @@ bool GCode::parseAscii(char *line,bool fromSerial)
                 }
                 return false; // mismatch
             }
-			hasChecksum = true;
+            hasChecksum = true;
             break;
         }
         default:
             break;
         }// end switch
     }// end while
-	if(wasLastCommandReceivedAsBinary && !hasChecksum && fromSerial) {
-		Com::printErrorFLN("Checksum required when switching back to ASCII protocol.");
-		return false;
-	}
+    if(wasLastCommandReceivedAsBinary && !hasChecksum && fromSerial) {
+        Com::printErrorFLN("Checksum required when switching back to ASCII protocol.");
+        return false;
+    }
     if(hasFormatError() || (params & 518) == 0)   // Must contain G, M or T command and parameter need to have variables!
     {
         formatErrors++;
@@ -1052,33 +1052,33 @@ void GCode::printCommand()
 }
 
 void GCode::fatalError(FSTRINGPARAM(message)) {
-	fatalErrorMsg = message;
+    fatalErrorMsg = message;
 #if SDSUPPORT
-	if(sd.sdmode != 0)	{ // stop sd print to prevent damage
-		sd.stopPrint();
-	}
+    if(sd.sdmode != 0)	{ // stop sd print to prevent damage
+        sd.stopPrint();
+    }
 #endif	
-	if(Printer::currentPosition[Z_AXIS] < Printer::zMin + Printer::zLength - 15)
-		PrintLine::moveRelativeDistanceInStepsReal(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],true,true);
-	EVENT_FATAL_ERROR_OCCURED		
-	Commands::waitUntilEndOfAllMoves();
-	Printer::kill(true);		
-	reportFatalError();
+    if(Printer::currentPosition[Z_AXIS] < Printer::zMin + Printer::zLength - 15)
+        PrintLine::moveRelativeDistanceInStepsReal(0,0,10*Printer::axisStepsPerMM[Z_AXIS],0,Printer::homingFeedrate[Z_AXIS],true,true);
+    EVENT_FATAL_ERROR_OCCURED		
+    Commands::waitUntilEndOfAllMoves();
+    Printer::kill(true);		
+    reportFatalError();
 }
 
 void GCode::reportFatalError() {
-	Com::printF(Com::tFatal);
-	Com::printF(fatalErrorMsg);
-	Com::printFLN(PSTR(" Printer stopped and heaters disabled due to this error. Fix error and restart with M999."));
-	UI_ERROR_P(fatalErrorMsg)
+    Com::printF(Com::tFatal);
+    Com::printF(fatalErrorMsg);
+    Com::printFLN(PSTR(" Printer stopped and heaters disabled due to this error. Fix error and restart with M999."));
+    UI_ERROR_P(fatalErrorMsg)
 }
 
 void GCode::resetFatalError() {
-	TemperatureController::resetAllErrorStates();
-	fatalErrorMsg = NULL;
-	UI_ERROR("");
-	EVENT_CONTINUE_FROM_FATAL_ERROR
-	Com::printFLN(PSTR("info:Continue from fatal state"));
+    TemperatureController::resetAllErrorStates();
+    fatalErrorMsg = NULL;
+    UI_ERROR("");
+    EVENT_CONTINUE_FROM_FATAL_ERROR
+    Com::printFLN(PSTR("info:Continue from fatal state"));
 }
 
 #if JSON_OUTPUT
@@ -1092,46 +1092,46 @@ void GCode::resetFatalError() {
 // --------------------------------------------------------------- //
 
 void GCodeFileInfo::init(SdBaseFile &file) {
-	this->fileSize = file.fileSize();
-	this->filamentNeeded = 0.0;
-	this->objectHeight = 0.0;
-	this->layerHeight = 0.0;
-	if (!file.isOpen()) return;
-	bool genByFound = false, layerHeightFound = false, filamentNeedFound = false;
-	#if CPU_ARCH==ARCH_AVR
-	#define GCI_BUF_SIZE 120
-	#else
-	#define GCI_BUF_SIZE 1024
-	#endif
-	// READ 4KB FROM THE BEGINNING
-	char buf[GCI_BUF_SIZE];
-	for (int i = 0; i < 4096; i += GCI_BUF_SIZE-50) {
-		if(!file.seekSet(i)) break;
-		file.read(buf, GCI_BUF_SIZE);
-		if (!genByFound && findGeneratedBy(buf, this->generatedBy)) genByFound = true;
-		if (!layerHeightFound && findLayerHeight(buf, this->layerHeight)) layerHeightFound = true;
-		if (!filamentNeedFound && findFilamentNeed(buf, this->filamentNeeded)) filamentNeedFound = true;
-		if(genByFound && layerHeightFound && filamentNeedFound) goto get_objectHeight;
-	}
+    this->fileSize = file.fileSize();
+    this->filamentNeeded = 0.0;
+    this->objectHeight = 0.0;
+    this->layerHeight = 0.0;
+    if (!file.isOpen()) return;
+    bool genByFound = false, layerHeightFound = false, filamentNeedFound = false;
+    #if CPU_ARCH==ARCH_AVR
+    #define GCI_BUF_SIZE 120
+    #else
+    #define GCI_BUF_SIZE 1024
+    #endif
+    // READ 4KB FROM THE BEGINNING
+    char buf[GCI_BUF_SIZE];
+    for (int i = 0; i < 4096; i += GCI_BUF_SIZE-50) {
+        if(!file.seekSet(i)) break;
+        file.read(buf, GCI_BUF_SIZE);
+        if (!genByFound && findGeneratedBy(buf, this->generatedBy)) genByFound = true;
+        if (!layerHeightFound && findLayerHeight(buf, this->layerHeight)) layerHeightFound = true;
+        if (!filamentNeedFound && findFilamentNeed(buf, this->filamentNeeded)) filamentNeedFound = true;
+        if(genByFound && layerHeightFound && filamentNeedFound) goto get_objectHeight;
+    }
 
-	// READ 4KB FROM END
-	for (int i = 0; i < 4096; i += GCI_BUF_SIZE-50) {
-		if(!file.seekEnd(-4096 + i)) break;
-		file.read(buf, GCI_BUF_SIZE);
-		if (!genByFound && findGeneratedBy(buf, this->generatedBy)) genByFound = true;
-		if (!layerHeightFound && findLayerHeight(buf, this->layerHeight)) layerHeightFound = true;
-		if (!filamentNeedFound && findFilamentNeed(buf, this->filamentNeeded)) filamentNeedFound = true;
-		if(genByFound && layerHeightFound && filamentNeedFound) goto get_objectHeight;
-	}
-	
-	get_objectHeight:
-	// MOVE FROM END UP IN 1KB BLOCKS UP TO 30KB
-	for (int i = GCI_BUF_SIZE; i < 30000; i += GCI_BUF_SIZE-50) {
-		if(!file.seekEnd(-i)) break;
-		file.read(buf, GCI_BUF_SIZE);
-		if (findTotalHeight(buf, this->objectHeight)) break;
-	}
-	file.seekSet(0);
+    // READ 4KB FROM END
+    for (int i = 0; i < 4096; i += GCI_BUF_SIZE-50) {
+        if(!file.seekEnd(-4096 + i)) break;
+        file.read(buf, GCI_BUF_SIZE);
+        if (!genByFound && findGeneratedBy(buf, this->generatedBy)) genByFound = true;
+        if (!layerHeightFound && findLayerHeight(buf, this->layerHeight)) layerHeightFound = true;
+        if (!filamentNeedFound && findFilamentNeed(buf, this->filamentNeeded)) filamentNeedFound = true;
+        if(genByFound && layerHeightFound && filamentNeedFound) goto get_objectHeight;
+    }
+    
+    get_objectHeight:
+    // MOVE FROM END UP IN 1KB BLOCKS UP TO 30KB
+    for (int i = GCI_BUF_SIZE; i < 30000; i += GCI_BUF_SIZE-50) {
+        if(!file.seekEnd(-i)) break;
+        file.read(buf, GCI_BUF_SIZE);
+        if (findTotalHeight(buf, this->objectHeight)) break;
+    }
+    file.seekSet(0);
 }
 
 bool GCodeFileInfo::findGeneratedBy(char *buf, char *genBy) {
@@ -1169,7 +1169,7 @@ bool GCodeFileInfo::findGeneratedBy(char *buf, char *genBy) {
 
 bool GCodeFileInfo::findLayerHeight(char *buf, float &layerHeight) {
     // SLIC3R
-	layerHeight = 0;
+    layerHeight = 0;
     const char* layerHeightSlic3r = PSTR("; layer_height ");
     char *pos = strstr_P(buf, layerHeightSlic3r);
     if (pos) {
@@ -1199,7 +1199,7 @@ bool GCodeFileInfo::findLayerHeight(char *buf, float &layerHeight) {
 bool GCodeFileInfo::findFilamentNeed(char *buf, float &filament) {
     const char* filamentUsedStr = PSTR("filament used");
     const char* pos = strstr_P(buf, filamentUsedStr);
-	filament = 0;
+    filament = 0;
     if (pos != NULL) {
         pos += strlen_P(filamentUsedStr);
         while (*pos == ' ' || *pos == 't' || *pos == '=' || *pos == ':') {
