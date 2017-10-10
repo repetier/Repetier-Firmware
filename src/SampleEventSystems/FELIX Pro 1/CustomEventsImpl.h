@@ -18,8 +18,8 @@ void Felix100MS() {
     
     // Test if bed is back
     if((bed->flags & TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT) == TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT && bed->currentTemperatureC > 0) {
+      GCode::resetFatalError();
       bed->flags &= ~TEMPERATURE_CONTROLLER_FLAG_SENSDEFECT;
-      Printer::debugReset(8);
       Printer::unsetAnyTempsensorDefect();
       UI_RESET_MENU
 #ifndef TEC4

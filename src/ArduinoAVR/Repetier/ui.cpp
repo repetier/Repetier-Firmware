@@ -1391,6 +1391,7 @@ void UIDisplay::parse(const char *txt, bool ram) {
                 //char c2 = (ram ? *(txt++) : pgm_read_byte(txt++));
                 txt++; // just skip c sign
                 ivalue = 0;
+				c2 = 'c';
             } else ivalue = UI_TEMP_PRECISION;
 
             if(c2 == 'r') { // Extruder relative mode
