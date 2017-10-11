@@ -39,6 +39,8 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_KILL(only_steppers) {}
 // Gets called when a jam was detected.
 #define EVENT_JAM_DETECTED {}
+// Gets called at the end of the detection routine.
+#define EVENT_JAM_DETECTED_END {}
 // Gets called every time the jam detection signal switches. Steps are the extruder steps since last change.
 #define EVENT_JAM_SIGNAL_CHANGED(extruderId,steps) {}
 // Gets called if a heater decoupling is detected.

@@ -2095,6 +2095,7 @@ void Printer::handleInterruptEvent() {
 #endif // SDSUPPORT
         GCodeSource::printAllFLN(PSTR("RequestPause:Extruder Jam Detected!"));
 #endif // JAM_ACTION
+		EVENT_JAM_DETECTED_END;
         break;
     case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0:
     case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL1:
