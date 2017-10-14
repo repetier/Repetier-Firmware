@@ -732,7 +732,11 @@ void Printer::measureZProbeHeight(float curHeight) {
 #endif
     float startHeight = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0);
     moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, startHeight, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
-    float zProbeHeight = EEPROM::zProbeHeight() + startHeight - Printer::runZProbe(true, true, Z_PROBE_REPETITIONS, true);
+	float zheight = Printer::runZProbe(true, true, Z_PROBE_REPETITIONS, true);
+	if(zheight == ILLEGAL_Z_PROBE) {
+		return;
+	}
+    float zProbeHeight = EEPROM::zProbeHeight() + startHeight -zheight;
 
 #if EEPROM_MODE != 0 // Com::tZProbeHeight is not declared when EEPROM_MODE is 0
     EEPROM::setZProbeHeight(zProbeHeight); // will also report on output
