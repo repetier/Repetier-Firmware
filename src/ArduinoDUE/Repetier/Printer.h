@@ -170,7 +170,7 @@ are handled.
 
 These coordinates are the real floating positions with any offsets subtracted,
 which might be set with G92. This is used to show coordinates or for computations
-based on real positions. Any correction coming from rotation or distortion is 
+based on real positions. Any correction coming from rotation or distortion is
 not included in these coordinates. currentPosition and lastCmdPos use this coordinate
 system.
 
@@ -202,7 +202,7 @@ An additional transformation converts the CMC coordinates into NMC.
 
 ### Transformations from RWC to CMC
 
-Given: 
+Given:
 - Target position for tool: x_rwc, y_rwc, z_rwc
 - Tool offsets: offsetX, offsetY, offsetZ
 - Offset from bed leveling: offsetZ2
@@ -221,7 +221,7 @@ Step 2: Compute CMC
 ### Transformation from CMC to RWC
 
 Note: _zCorrectionStepsIncluded_ comes from distortion correction and gets set when a move is queued by the queuing function.
-Therefore it is not visible in the inverse transformation above. When transforming back, consider if the value was set or not! 
+Therefore it is not visible in the inverse transformation above. When transforming back, consider if the value was set or not!
 
 Step 1: Convert to ROTC
 
@@ -377,6 +377,12 @@ public:
 #if MULTI_ZENDSTOP_HOMING || defined(DOXYGEN)
     static fast8_t multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
 #endif
+#if MULTI_XENDSTOP_HOMING || defined(DOXYGEN)
+    static fast8_t multiXHomeFlags;  // 1 = move X0, 2 = move X1
+#endif
+#if MULTI_YENDSTOP_HOMING || defined(DOXYGEN)
+    static fast8_t multiYHomeFlags;  // 1 = move Y0, 2 = move Y1
+#endif
     static float memoryX;
     static float memoryY;
     static float memoryZ;
@@ -466,9 +472,9 @@ public:
 
     static INLINE void debugReset(uint8_t flags) {
         setDebugLevel(debugLevel & ~flags);
-	}
-#if AUTOMATIC_POWERUP    
-	static void enablePowerIfNeeded();
+    }
+#if AUTOMATIC_POWERUP
+    static void enablePowerIfNeeded();
 #endif
     /** Sets the pwm for the fan speed. Gets called by motion control or Commands::setFanSpeed. */
     static void setFanSpeedDirectly(uint8_t speed);
@@ -609,7 +615,7 @@ public:
         return((READ(X_DIR_PIN) != 0) ^ INVERT_X_DIR);
     }
 
-	/** For large machines, the nonlinear transformation can exceed integer 32bit range, so floating point math is needed. */
+    /** For large machines, the nonlinear transformation can exceed integer 32bit range, so floating point math is needed. */
     static INLINE uint8_t isLargeMachine() {
         return flag0 & PRINTER_FLAG0_LARGE_MACHINE;
     }
@@ -646,7 +652,7 @@ public:
 
     static INLINE void setXHomed(uint8_t b) {
         flag3 = (b ? flag3 | PRINTER_FLAG3_X_HOMED : flag3 & ~PRINTER_FLAG3_X_HOMED);
-		updateHomedAll();
+        updateHomedAll();
     }
 
     static INLINE uint8_t isYHomed() {
@@ -655,7 +661,7 @@ public:
 
     static INLINE void setYHomed(uint8_t b) {
         flag3 = (b ? flag3 | PRINTER_FLAG3_Y_HOMED : flag3 & ~PRINTER_FLAG3_Y_HOMED);
-		updateHomedAll();
+        updateHomedAll();
     }
 
     static INLINE uint8_t isZHomed() {
@@ -664,7 +670,7 @@ public:
 
     static INLINE void setZHomed(uint8_t b) {
         flag3 = (b ? flag3 | PRINTER_FLAG3_Z_HOMED : flag3 & ~PRINTER_FLAG3_Z_HOMED);
-		updateHomedAll();
+        updateHomedAll();
     }
     static INLINE uint8_t isAutoreportTemp() {
         return flag3 & PRINTER_FLAG3_AUTOREPORT_TEMP;
@@ -946,17 +952,39 @@ public:
         } else {
             WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
         }
+#else // DUAL_X_AXIS
+#if MULTI_XENDSTOP_HOMING
+        if(Printer::multiXHomeFlags & 1) {
+            WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
+        }
+#if FEATURE_TWO_ZSTEPPER
+        if(Printer::multiXHomeFlags & 2) {
+            WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
+        }
+#endif
 #else
         WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
 #if FEATURE_TWO_XSTEPPER
         WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
 #endif
 #endif
+#endif
     }
     static INLINE void startYStep() {
+#if MULTI_YENDSTOP_HOMING
+        if(Printer::multiYHomeFlags & 1) {
+            WRITE(Y_STEP_PIN, START_STEP_WITH_HIGH);
+        }
+#if FEATURE_TWO_YSTEPPER
+        if(Printer::multiYHomeFlags & 2) {
+            WRITE(Y2_STEP_PIN, START_STEP_WITH_HIGH);
+        }
+#endif
+#else
         WRITE(Y_STEP_PIN, START_STEP_WITH_HIGH);
 #if FEATURE_TWO_YSTEPPER
         WRITE(Y2_STEP_PIN, START_STEP_WITH_HIGH);
+#endif
 #endif
     }
     static INLINE void startZStep() {
@@ -1062,7 +1090,7 @@ public:
     static INLINE float realZPosition() {
         return currentPosition[Z_AXIS];
     }
-	/** \brief copies currentPosition to parameter. */
+    /** \brief copies currentPosition to parameter. */
     static INLINE void realPosition(float &xp, float &yp, float &zp) {
         xp = currentPosition[X_AXIS];
         yp = currentPosition[Y_AXIS];
@@ -1074,47 +1102,47 @@ public:
 #endif
     }
     static void updateDerivedParameter();
-	/** If we are not homing or destination check being disabled, this will reduce _destinationSteps_ to a
-	valid value. In other words this works as software endstop. */
+    /** If we are not homing or destination check being disabled, this will reduce _destinationSteps_ to a
+    valid value. In other words this works as software endstop. */
     static void constrainDestinationCoords();
-	/** Computes _currentposition_ from _currentPositionSteps_ considering all active transformations. If the _copyLastCmd_ flag is true, the
-	result is also copied to _lastCmdPos_ . */
+    /** Computes _currentposition_ from _currentPositionSteps_ considering all active transformations. If the _copyLastCmd_ flag is true, the
+    result is also copied to _lastCmdPos_ . */
     static void updateCurrentPosition(bool copyLastCmd = false);
     static void updateCurrentPositionSteps();
-	/** \brief Sets the destination coordinates to values stored in com.
-	
-	Extracts x,y,z,e,f from g-code considering active units. Converted result is stored in currentPosition and lastCmdPos. Converts 
-	position to destinationSteps including rotation and offsets, excluding distortion correction (which gets added on move queuing).
-	\param com g-code with new destination position.
-	\return true if it is a move, false if no move results from coordinates.
-	 */
+    /** \brief Sets the destination coordinates to values stored in com.
+
+    Extracts x,y,z,e,f from g-code considering active units. Converted result is stored in currentPosition and lastCmdPos. Converts
+    position to destinationSteps including rotation and offsets, excluding distortion correction (which gets added on move queuing).
+    \param com g-code with new destination position.
+    \return true if it is a move, false if no move results from coordinates.
+     */
     static uint8_t setDestinationStepsFromGCode(GCode *com);
-	/** \brief Move to position without considering transformations.
+    /** \brief Move to position without considering transformations.
 
-	Computes the destinationSteps without rotating but including active offsets!
-	The coordinates are in printer coordinates with no G92 offset. 
+    Computes the destinationSteps without rotating but including active offsets!
+    The coordinates are in printer coordinates with no G92 offset.
 
-	\param x Target x coordinate or IGNORE_COORDINATE if it should be ignored.
-	\param x Target y coordinate or IGNORE_COORDINATE if it should be ignored.
-	\param x Target z coordinate or IGNORE_COORDINATE if it should be ignored.
-	\param x Target e coordinate or IGNORE_COORDINATE if it should be ignored.
-	\param x Target f feedrate or IGNORE_COORDINATE if it should use latest feedrate.
-	\return true if queuing was successful.
-	*/
+    \param x Target x coordinate or IGNORE_COORDINATE if it should be ignored.
+    \param x Target y coordinate or IGNORE_COORDINATE if it should be ignored.
+    \param x Target z coordinate or IGNORE_COORDINATE if it should be ignored.
+    \param x Target e coordinate or IGNORE_COORDINATE if it should be ignored.
+    \param x Target f feedrate or IGNORE_COORDINATE if it should use latest feedrate.
+    \return true if queuing was successful.
+    */
     static uint8_t moveTo(float x, float y, float z, float e, float f);
-	/** \brief Move to position considering transformations.
+    /** \brief Move to position considering transformations.
 
-	Computes the destinationSteps including rotating and active offsets.
-	The coordinates are in printer coordinates with no G92 offset. 
+    Computes the destinationSteps including rotating and active offsets.
+    The coordinates are in printer coordinates with no G92 offset.
 
-	\param x Target x coordinate or IGNORE_COORDINATE if it should be ignored.
-	\param x Target y coordinate or IGNORE_COORDINATE if it should be ignored.
-	\param x Target z coordinate or IGNORE_COORDINATE if it should be ignored.
-	\param x Target e coordinate or IGNORE_COORDINATE if it should be ignored.
-	\param x Target f feedrate or IGNORE_COORDINATE if it should use latest feedrate.
-	\param pathOptimize true if path planner should include it in calculation, otherwise default start/end speed is enforced.
-	\return true if queuing was successful.
-	*/
+    \param x Target x coordinate or IGNORE_COORDINATE if it should be ignored.
+    \param x Target y coordinate or IGNORE_COORDINATE if it should be ignored.
+    \param x Target z coordinate or IGNORE_COORDINATE if it should be ignored.
+    \param x Target e coordinate or IGNORE_COORDINATE if it should be ignored.
+    \param x Target f feedrate or IGNORE_COORDINATE if it should use latest feedrate.
+    \param pathOptimize true if path planner should include it in calculation, otherwise default start/end speed is enforced.
+    \return true if queuing was successful.
+    */
     static uint8_t moveToReal(float x, float y, float z, float e, float f, bool pathOptimize = true);
     static void kill(uint8_t only_steppers);
     static void updateAdvanceFlags();
@@ -1122,16 +1150,16 @@ public:
     static void defaultLoopActions();
     static void homeAxis(bool xaxis, bool yaxis, bool zaxis); /// Home axis
     static void setOrigin(float xOff, float yOff, float zOff);
-	/** \brief Tests if the target position is allowed.
+    /** \brief Tests if the target position is allowed.
 
-	Tests if the test position lies inside the defined geometry. For Cartesian
-	printers this is the defined cube defined by x,y,z min and length. For
-	delta printers the cylindrical shape is tested.
+    Tests if the test position lies inside the defined geometry. For Cartesian
+    printers this is the defined cube defined by x,y,z min and length. For
+    delta printers the cylindrical shape is tested.
 
-	\param x X position in mm.
-	\param x Y position in mm.
-	\param x Z position in mm.
-	\return true if position is valid and can be reached. */
+    \param x X position in mm.
+    \param x Y position in mm.
+    \param x Z position in mm.
+    \return true if position is valid and can be reached. */
     static bool isPositionAllowed(float x, float y, float z);
     static INLINE int getFanSpeed() {
         return (int)pwm_pos[PWM_FAN1];
@@ -1197,14 +1225,14 @@ public:
     static void continuePrint();
     static void stopPrint();
 #if FEATURE_Z_PROBE || defined(DOXYGEN)
-	/** \brief Prepares printer for probing commands.
+    /** \brief Prepares printer for probing commands.
 
-	Probing can not start under all conditions. This command therefore makes sure,
-	a probing command can be executed by:
-	- Ensuring all axes are homed.
-	- Going to a low z position for fast measuring.
-	- Go to a position, where enabling the z-probe is possible without leaving the valid print area.
-	*/
+    Probing can not start under all conditions. This command therefore makes sure,
+    a probing command can be executed by:
+    - Ensuring all axes are homed.
+    - Going to a low z position for fast measuring.
+    - Go to a position, where enabling the z-probe is possible without leaving the valid print area.
+    */
     static void prepareForProbing();
 #endif
 };

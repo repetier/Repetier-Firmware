@@ -93,9 +93,9 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define WIZARD_STACK_SIZE 8
 #define IGNORE_COORDINATE 999999
 
-#define IS_MAC_TRUE(x) (defined(x) && x!=0)
-#define IS_MAC_FALSE(x) (!defined(x) || x==0)
-#define HAS_PIN(x) (defined(x) && x > -1)
+#define IS_MAC_TRUE(x) (x!=0)
+#define IS_MAC_FALSE(x) (x==0)
+#define HAS_PIN(x) (defined( x ## _PIN) && x > -1)
 
 // Uncomment if no analyzer is connected
 //#define ANALYZER
@@ -344,6 +344,20 @@ inline void memcopy4(void *dest,void *source) {
 #define MULTI_ZENDSTOP_ALL 3
 #else
 #define MULTI_ZENDSTOP_HOMING 0
+#endif
+
+#if (X_HOME_DIR < 0 && HAS_PIN(X2_MIN) && MIN_HARDWARE_ENDSTOP_X2) || (X_HOME_DIR > 0 && HAS_PIN(X2_MAX) && MAX_HARDWARE_ENDSTOP_X2)
+#define MULTI_XENDSTOP_HOMING 1
+#define MULTI_XENDSTOP_ALL 3
+#else
+#define MULTI_XENDSTOP_HOMING 0
+#endif
+
+#if (Y_HOME_DIR < 0 && HAS_PIN(Y2_MIN) && MIN_HARDWARE_ENDSTOP_Y2) || (Y_HOME_DIR > 0 && HAS_PIN(Y2_MAX) && MAX_HARDWARE_ENDSTOP_Y2)
+#define MULTI_YENDSTOP_HOMING 1
+#define MULTI_YENDSTOP_ALL 3
+#else
+#define MULTI_YENDSTOP_HOMING 0
 #endif
 
 #define SPEED_MIN_MILLIS 400

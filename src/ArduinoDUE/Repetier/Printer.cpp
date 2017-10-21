@@ -184,6 +184,12 @@ float Printer::maxRealSegmentLength = 0;
 #ifdef DEBUG_REAL_JERK
 float Printer::maxRealJerk = 0;
 #endif
+#if MULTI_XENDSTOP_HOMING
+fast8_t Printer::multiXHomeFlags;  // 1 = move X0, 2 = move X1
+#endif
+#if MULTI_YENDSTOP_HOMING
+fast8_t Printer::multiYHomeFlags;  // 1 = move Y0, 2 = move Y1
+#endif
 #if MULTI_ZENDSTOP_HOMING
 fast8_t Printer::multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
 #endif
@@ -794,7 +800,6 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com) {
 
 void Printer::setup() {
     HAL::stopWatchdog();
-    HAL::delayMilliseconds(2000);
     for(uint8_t i = 0; i < NUM_PWM; i++) pwm_pos[i] = 0;
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
@@ -944,77 +949,8 @@ void Printer::setup() {
     PULLUP(DOOR_PIN, HIGH);
 #endif
 #endif
-    //end stop pull ups
-#if MIN_HARDWARE_ENDSTOP_X
-#if X_MIN_PIN > -1
-    SET_INPUT(X_MIN_PIN);
-#if ENDSTOP_PULLUP_X_MIN
-    PULLUP(X_MIN_PIN, HIGH);
-#endif
-#else
-#error You have defined hardware x min endstop without pin assignment. Set pin number for X_MIN_PIN
-#endif
-#endif
-#if MIN_HARDWARE_ENDSTOP_Y
-#if Y_MIN_PIN > -1
-    SET_INPUT(Y_MIN_PIN);
-#if ENDSTOP_PULLUP_Y_MIN
-    PULLUP(Y_MIN_PIN, HIGH);
-#endif
-#else
-#error You have defined hardware y min endstop without pin assignment. Set pin number for Y_MIN_PIN
-#endif
-#endif
-#if MIN_HARDWARE_ENDSTOP_Z
-#if Z_MIN_PIN > -1
-    SET_INPUT(Z_MIN_PIN);
-#if ENDSTOP_PULLUP_Z_MIN
-    PULLUP(Z_MIN_PIN, HIGH);
-#endif
-#else
-#error You have defined hardware z min endstop without pin assignment. Set pin number for Z_MIN_PIN
-#endif
-#endif
-#if MINMAX_HARDWARE_ENDSTOP_Z2
-#if Z2_MINMAX_PIN > -1
-    SET_INPUT(Z2_MINMAX_PIN);
-#if ENDSTOP_PULLUP_Z2_MINMAX
-    PULLUP(Z2_MINMAX_PIN, HIGH);
-#endif
-#else
-#error You have defined hardware z2 minmax endstop without pin assignment. Set pin number for Z2_MINMAX_PIN
-#endif
-#endif
-#if MAX_HARDWARE_ENDSTOP_X
-#if X_MAX_PIN > -1
-    SET_INPUT(X_MAX_PIN);
-#if ENDSTOP_PULLUP_X_MAX
-    PULLUP(X_MAX_PIN, HIGH);
-#endif
-#else
-#error You have defined hardware x max endstop without pin assignment. Set pin number for X_MAX_PIN
-#endif
-#endif
-#if MAX_HARDWARE_ENDSTOP_Y
-#if Y_MAX_PIN > -1
-    SET_INPUT(Y_MAX_PIN);
-#if ENDSTOP_PULLUP_Y_MAX
-    PULLUP(Y_MAX_PIN, HIGH);
-#endif
-#else
-#error You have defined hardware y max endstop without pin assignment. Set pin number for Y_MAX_PIN
-#endif
-#endif
-#if MAX_HARDWARE_ENDSTOP_Z
-#if Z_MAX_PIN>-1
-    SET_INPUT(Z_MAX_PIN);
-#if ENDSTOP_PULLUP_Z_MAX
-    PULLUP(Z_MAX_PIN, HIGH);
-#endif
-#else
-#error You have defined hardware z max endstop without pin assignment. Set pin number for Z_MAX_PIN
-#endif
-#endif
+	Endstops::setup();
+
 #if FEATURE_Z_PROBE && Z_PROBE_PIN>-1
     SET_INPUT(Z_PROBE_PIN);
 #if Z_PROBE_PULLUP

@@ -2301,6 +2301,12 @@ int32_t PrintLine::bresenhamStep() { // Version for delta printer
             LaserDriver::changeIntensity(cur->secondSpeed);
         }
 #endif
+#if MULTI_XENDSTOP_HOMING
+		Printer::multiXHomeFlags = MULTI_XENDSTOP_ALL;  // move all x motors until endstop says differently
+#endif
+#if MULTI_YENDSTOP_HOMING
+		Printer::multiYHomeFlags = MULTI_YENDSTOP_ALL;  // move all y motors until endstop says differently
+#endif
 #if MULTI_ZENDSTOP_HOMING
 		Printer::multiZHomeFlags = MULTI_ZENDSTOP_ALL;  // move all z motors until endstop says differently
 #endif
@@ -2671,6 +2677,12 @@ int32_t PrintLine::bresenhamStep() { // version for Cartesian printer
         else if(Printer::mode == PRINTER_MODE_LASER) {
             LaserDriver::changeIntensity(cur->secondSpeed);
         }
+#endif
+#if MULTI_XENDSTOP_HOMING
+		Printer::multiXHomeFlags = MULTI_XENDSTOP_ALL;  // move all x motors until endstop says differently
+#endif
+#if MULTI_YENDSTOP_HOMING
+		Printer::multiYHomeFlags = MULTI_YENDSTOP_ALL;  // move all y motors until endstop says differently
 #endif
 #if MULTI_ZENDSTOP_HOMING
         Printer::multiZHomeFlags = MULTI_ZENDSTOP_ALL;  // move all z motors until endstop says differently
