@@ -487,7 +487,7 @@ bool Custom_MCode(GCode *com)
                 if(com->hasS())
                 
 #if defined(GAMMA_CORRECTION) && (GAMMA_CORRECTION==true)
-                      newint =(com->S);
+                      newintens =(com->S);
                       if (Gamma_on)
                       {
                       Outval=pow(newintens/LASER_PWM_MAX,GAMMA)*LASER_PWM_MAX; //Gamma function

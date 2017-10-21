@@ -868,10 +868,36 @@ on this endstop.
 #define MAX_HARDWARE_ENDSTOP_Y false
 #define MAX_HARDWARE_ENDSTOP_Z true
 
+// If you have a mirrored motor you can put a second endstop to that motor.
+// On homing you would then need to trigge rboth endstops. Each endstop only 
+// stopps one motor, so they are aligned after homing. After homing only the 
+// first endstop gets used.
+
+#define ENDSTOP_PULLUP_X2_MIN false
+#define ENDSTOP_PULLUP_Y2_MIN false
+#define ENDSTOP_PULLUP_Z2_MINMAX false
+#define ENDSTOP_PULLUP_X2_MAX true
+#define ENDSTOP_PULLUP_Y2_MAX true
+
+#define ENDSTOP_X2_MIN_INVERTING true
+#define ENDSTOP_Y2_MIN_INVERTING true
+#define ENDSTOP_X2_MAX_INVERTING true
+#define ENDSTOP_Y2_MAX_INVERTING true
+
+#define MIN_HARDWARE_ENDSTOP_X2 false
+#define MIN_HARDWARE_ENDSTOP_Y2 false
+#define MAX_HARDWARE_ENDSTOP_X2 false
+#define MAX_HARDWARE_ENDSTOP_Y2 false
+#define MINMAX_HARDWARE_ENDSTOP_Z2 false
+
+#define X2_MIN_PIN -1
+#define X2_MAX_PIN -1
+#define Y2_MIN_PIN -1
+#define Y2_MAX_PIN -1
+#define Z2_MINMAX_PIN -1
+
 //If your axes are only moving in one direction, make sure the endstops are connected properly.
 //If your axes move in one direction ONLY when the endstops are triggered, set ENDSTOPS_INVERTING to true here
-
-
 
 //// ADVANCED SETTINGS - to tweak parameters
 

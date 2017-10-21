@@ -794,6 +794,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com) {
 
 void Printer::setup() {
     HAL::stopWatchdog();
+    HAL::delayMilliseconds(2000);
     for(uint8_t i = 0; i < NUM_PWM; i++) pwm_pos[i] = 0;
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
