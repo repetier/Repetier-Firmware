@@ -54,7 +54,7 @@ class Endstops {
 public:
     static void update();
     static void report();
-	static void setup();
+    static void setup();
     static INLINE bool anyXYZMax() {
         return (lastState & (ENDSTOP_X_MAX_ID | ENDSTOP_Y_MAX_ID | ENDSTOP_Z_MAX_ID)) != 0;
     }
@@ -140,58 +140,58 @@ public:
 #else
         return false;
 #endif
+    }
 #ifdef EXTENDED_ENDSTOPS
-        static INLINE bool x2Min() {
+    static INLINE bool x2Min() {
 #if HAS_PIN(X2_MIN) && MIN_HARDWARE_ENDSTOP_X2
-            return (lastState2 & ENDSTOP_X2_MIN_ID) != 0;
+        return (lastState2 & ENDSTOP_X2_MIN_ID) != 0;
 #else
-            return false;
-#endif
-        }
-        static INLINE bool x2Max() {
-#if HAS_PIN(X2_MAX) && MAX_HARDWARE_ENDSTOP_X2
-            return (lastState2 & ENDSTOP_X2_MAX_ID) != 0;
-#else
-            return false;
-#endif
-        }
-        static INLINE bool y2Min() {
-#if HAS_PIN(Y2_MIN) && MIN_HARDWARE_ENDSTOP_Y2
-            return (lastState2 & ENDSTOP_Y2_MIN_ID) != 0;
-#else
-            return false;
-#endif
-        }
-        static INLINE bool y2Max() {
-#if HAS_PIN(Y2_MAX) && MAX_HARDWARE_ENDSTOP_Y2
-            return (lastState2 & ENDSTOP_Y2_MAX_ID) != 0;
-#else
-            return false;
-#endif
-        }
-        static INLINE bool z2Max() {
-#if HAS_PIN(Z2_MAX) && MAX_HARDWARE_ENDSTOP_Z2
-            return (lastState2 & ENDSTOP_Z2_MAX_ID) != 0;
-#else
-            return false;
-#endif
-        }
-        static INLINE bool z3Max() {
-#if HAS_PIN(Z3_MAX) && MAX_HARDWARE_ENDSTOP_Z3
-            return (lastState2 & ENDSTOP_Z3_MAX_ID) != 0;
-#else
-            return false;
-#endif
-        }
-        static INLINE bool z3Min() {
-#if HAS_PIN(Z3_MIN) && MIN_HARDWARE_ENDSTOP_Z3
-            return (lastState2 & ENDSTOP_Z3_MIN_ID) != 0;
-#else
-            return false;
-#endif
-        }
+        return false;
 #endif
     }
+    static INLINE bool x2Max() {
+#if HAS_PIN(X2_MAX) && MAX_HARDWARE_ENDSTOP_X2
+        return (lastState2 & ENDSTOP_X2_MAX_ID) != 0;
+#else
+        return false;
+#endif
+    }
+    static INLINE bool y2Min() {
+#if HAS_PIN(Y2_MIN) && MIN_HARDWARE_ENDSTOP_Y2
+        return (lastState2 & ENDSTOP_Y2_MIN_ID) != 0;
+#else
+        return false;
+#endif
+    }
+    static INLINE bool y2Max() {
+#if HAS_PIN(Y2_MAX) && MAX_HARDWARE_ENDSTOP_Y2
+        return (lastState2 & ENDSTOP_Y2_MAX_ID) != 0;
+#else
+        return false;
+#endif
+    }
+    static INLINE bool z2Max() {
+#if HAS_PIN(Z2_MAX) && MAX_HARDWARE_ENDSTOP_Z2
+        return (lastState2 & ENDSTOP_Z2_MAX_ID) != 0;
+#else
+        return false;
+#endif
+    }
+    static INLINE bool z3Max() {
+#if HAS_PIN(Z3_MAX) && MAX_HARDWARE_ENDSTOP_Z3
+        return (lastState2 & ENDSTOP_Z3_MAX_ID) != 0;
+#else
+        return false;
+#endif
+    }
+    static INLINE bool z3Min() {
+#if HAS_PIN(Z3_MIN) && MIN_HARDWARE_ENDSTOP_Z3
+        return (lastState2 & ENDSTOP_Z3_MIN_ID) != 0;
+#else
+        return false;
+#endif
+    }
+#endif
 };
 
 #endif

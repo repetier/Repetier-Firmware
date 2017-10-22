@@ -144,17 +144,33 @@ void Endstops::report() {
     Com::printF(Com::tXMinColon);
     Com::printF(xMin() ? Com::tHSpace : Com::tLSpace);
 #endif
+#if HAS_PIN(X2_MIN) && IS_MAC_TRUE(MIN_HARDWARE_ENDSTOP_X2)
+    Com::printF(PSTR("x2_min:"));
+    Com::printF(x2Min() ? Com::tHSpace : Com::tLSpace);
+#endif
 #if (X_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_X
     Com::printF(Com::tXMaxColon);
     Com::printF(xMax() ? Com::tHSpace : Com::tLSpace);
+#endif
+#if HAS_PIN(X2_MAX) && IS_MAC_TRUE(MAX_HARDWARE_ENDSTOP_X2)
+    Com::printF(PSTR("x2_max:"));
+    Com::printF(x2Max() ? Com::tHSpace : Com::tLSpace);
 #endif
 #if (Y_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y
     Com::printF(Com::tYMinColon);
     Com::printF(yMin() ? Com::tHSpace : Com::tLSpace);
 #endif
+#if HAS_PIN(Y2_MIN) && IS_MAC_TRUE(MIN_HARDWARE_ENDSTOP_Y2)
+    Com::printF(PSTR("y2_min:"));
+    Com::printF(y2Min() ? Com::tHSpace : Com::tLSpace);
+#endif
 #if (Y_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Y
     Com::printF(Com::tYMaxColon);
     Com::printF(yMax() ? Com::tHSpace : Com::tLSpace);
+#endif
+#if HAS_PIN(Y2_MAX) && IS_MAC_TRUE(MAX_HARDWARE_ENDSTOP_Y2)
+    Com::printF(PSTR("y2_max:"));
+    Com::printF(y2Max() ? Com::tHSpace : Com::tLSpace);
 #endif
 #if (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
     Com::printF(Com::tZMinColon);
