@@ -919,9 +919,14 @@ on this endstop.
 
 // Inverting motor direction. Only in case of pure cartesian printers, this
 // is also the axis you invert!
-#define INVERT_X_DIR true
-#define INVERT_Y_DIR true
-#define INVERT_Z_DIR true
+#define INVERT_X_DIR 1
+#define INVERT_X2_DIR 1
+#define INVERT_Y_DIR 1
+#define INVERT_Y2_DIR 1
+#define INVERT_Z_DIR 1
+#define INVERT_Z2_DIR 1
+#define INVERT_Z3_DIR 1
+#define INVERT_Z4_DIR 1
 
 //// ENDSTOP SETTINGS:
 // Sets direction of endstops when homing; 1=MAX, -1=MIN

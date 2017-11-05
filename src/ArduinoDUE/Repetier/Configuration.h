@@ -894,9 +894,14 @@ on this endstop.
 //#define PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT
 
 // Inverting axis direction
-#define INVERT_X_DIR false
-#define INVERT_Y_DIR false
-#define INVERT_Z_DIR false
+#define INVERT_X_DIR 1
+#define INVERT_X2_DIR 1
+#define INVERT_Y_DIR 1
+#define INVERT_Y2_DIR 1
+#define INVERT_Z_DIR 1
+#define INVERT_Z2_DIR 1
+#define INVERT_Z3_DIR 1
+#define INVERT_Z4_DIR 1
 
 //// ENDSTOP SETTINGS:
 // Sets direction of endstops when homing; 1=MAX, -1=MIN

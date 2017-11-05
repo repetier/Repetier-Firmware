@@ -132,7 +132,10 @@ typedef char prog_char;
 
 
 #define EXTRUDER_CLOCK_FREQ     60000 // extruder stepper interrupt frequency
-#define PWM_CLOCK_FREQ          3906
+// #define PWM_CLOCK_FREQ          3906
+// #define PWM_COUNTER_100MS       390
+#define PWM_CLOCK_FREQ          10000
+#define PWM_COUNTER_100MS       1000
 #define TIMER1_CLOCK_FREQ       244
 #define TIMER1_PRESCALE         2
 

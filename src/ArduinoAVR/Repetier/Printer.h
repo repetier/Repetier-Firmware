@@ -261,7 +261,7 @@ public:
     static float invAxisStepsPerMM[]; ///< 1/axisStepsPerMM for faster computation.
     static float maxFeedrate[]; ///< Maximum feedrate in mm/s per axis.
     static float homingFeedrate[]; // Feedrate in mm/s for homing.
-    static uint32_t maxInterval; // slowest allowed interval
+    // static uint32_t maxInterval; // slowest allowed interval
     static float maxAccelerationMMPerSquareSecond[];
     static float maxTravelAccelerationMMPerSquareSecond[];
     static unsigned long maxPrintAccelerationStepsPerSquareSecond[];
@@ -374,14 +374,14 @@ public:
     static float backlashZ;
     static uint8_t backlashDir;
 #endif
-#if MULTI_ZENDSTOP_HOMING || defined(DOXYGEN)
-    static fast8_t multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
-#endif
 #if MULTI_XENDSTOP_HOMING || defined(DOXYGEN)
     static fast8_t multiXHomeFlags;  // 1 = move X0, 2 = move X1
 #endif
 #if MULTI_YENDSTOP_HOMING || defined(DOXYGEN)
     static fast8_t multiYHomeFlags;  // 1 = move Y0, 2 = move Y1
+#endif
+#if MULTI_ZENDSTOP_HOMING || defined(DOXYGEN)
+	static fast8_t multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
 #endif
     static float memoryX;
     static float memoryY;
@@ -554,12 +554,12 @@ public:
         if(positive) {
             WRITE(X_DIR_PIN, !INVERT_X_DIR);
 #if FEATURE_TWO_XSTEPPER || DUAL_X_AXIS
-            WRITE(X2_DIR_PIN, !INVERT_X_DIR);
+            WRITE(X2_DIR_PIN, !INVERT_X2_DIR);
 #endif
         } else {
             WRITE(X_DIR_PIN, INVERT_X_DIR);
 #if FEATURE_TWO_XSTEPPER || DUAL_X_AXIS
-            WRITE(X2_DIR_PIN, INVERT_X_DIR);
+            WRITE(X2_DIR_PIN, INVERT_X2_DIR);
 #endif
         }
     }
@@ -568,12 +568,12 @@ public:
         if(positive) {
             WRITE(Y_DIR_PIN, !INVERT_Y_DIR);
 #if FEATURE_TWO_YSTEPPER
-            WRITE(Y2_DIR_PIN, !INVERT_Y_DIR);
+            WRITE(Y2_DIR_PIN, !INVERT_Y2_DIR);
 #endif
         } else {
             WRITE(Y_DIR_PIN, INVERT_Y_DIR);
 #if FEATURE_TWO_YSTEPPER
-            WRITE(Y2_DIR_PIN, INVERT_Y_DIR);
+            WRITE(Y2_DIR_PIN, INVERT_Y2_DIR);
 #endif
         }
     }
@@ -581,24 +581,24 @@ public:
         if(positive) {
             WRITE(Z_DIR_PIN, !INVERT_Z_DIR);
 #if FEATURE_TWO_ZSTEPPER
-            WRITE(Z2_DIR_PIN, !INVERT_Z_DIR);
+            WRITE(Z2_DIR_PIN, !INVERT_Z2_DIR);
 #endif
 #if FEATURE_THREE_ZSTEPPER
-            WRITE(Z3_DIR_PIN, !INVERT_Z_DIR);
+            WRITE(Z3_DIR_PIN, !INVERT_Z3_DIR);
 #endif
 #if FEATURE_FOUR_ZSTEPPER
-            WRITE(Z4_DIR_PIN, !INVERT_Z_DIR);
+            WRITE(Z4_DIR_PIN, !INVERT_Z4_DIR);
 #endif
         } else {
             WRITE(Z_DIR_PIN, INVERT_Z_DIR);
 #if FEATURE_TWO_ZSTEPPER
-            WRITE(Z2_DIR_PIN, INVERT_Z_DIR);
+            WRITE(Z2_DIR_PIN, INVERT_Z2_DIR);
 #endif
 #if FEATURE_THREE_ZSTEPPER
-            WRITE(Z3_DIR_PIN, INVERT_Z_DIR);
+            WRITE(Z3_DIR_PIN, INVERT_Z3_DIR);
 #endif
 #if FEATURE_FOUR_ZSTEPPER
-            WRITE(Z4_DIR_PIN, INVERT_Z_DIR);
+            WRITE(Z4_DIR_PIN, INVERT_Z4_DIR);
 #endif
         }
     }
@@ -940,13 +940,13 @@ public:
     }
     static INLINE void startXStep() {
 #if DUAL_X_AXIS
-#if FEATURE_DITTO_PRINTING
+  #if FEATURE_DITTO_PRINTING
         if(Extruder::dittoMode) {
             WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
             WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
             return;
         }
-#endif
+  #endif
         if(Extruder::current->id) {
             WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
         } else {
@@ -957,12 +957,12 @@ public:
         if(Printer::multiXHomeFlags & 1) {
             WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
         }
-#if FEATURE_TWO_ZSTEPPER
+#if FEATURE_TWO_XSTEPPER
         if(Printer::multiXHomeFlags & 2) {
             WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);
         }
 #endif
-#else
+#else // MULTI_XENDSTOP_HOMING
         WRITE(X_STEP_PIN, START_STEP_WITH_HIGH);
 #if FEATURE_TWO_XSTEPPER
         WRITE(X2_STEP_PIN, START_STEP_WITH_HIGH);

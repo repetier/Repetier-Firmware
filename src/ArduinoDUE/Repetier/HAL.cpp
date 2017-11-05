@@ -1134,7 +1134,7 @@ void PWM_TIMER_VECTOR () {
 #endif
 #endif
     counterPeriodical++; // Approximate a 100ms timer
-    if (counterPeriodical >= 390) { //  (int)(F_CPU/40960))
+    if (counterPeriodical >= PWM_COUNTER_100MS) { //  (int)(F_CPU/40960))
         counterPeriodical = 0;
         executePeriodical = 1;
 #if FEATURE_FAN_CONTROL

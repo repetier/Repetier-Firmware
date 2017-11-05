@@ -521,8 +521,9 @@ bool Printer::startProbing(bool runScript, bool enforceStartHeight) {
         GCode::fatalError(PSTR("Could not activate z-probe offset due to coordinate constraints - result is inaccurate!"));
         return false;
     } else {
-	    if(runScript)
+	    if(runScript) {
 			GCode::executeFString(Com::tZProbeStartScript);
+		}
 	    float maxStartHeight = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0) + 0.1;
 	    if(currentPosition[Z_AXIS] > maxStartHeight && enforceStartHeight) {
 		    cz = maxStartHeight;
@@ -539,6 +540,10 @@ bool Printer::startProbing(bool runScript, bool enforceStartHeight) {
         transformToPrinter(EEPROM::zProbeXOffset(), EEPROM::zProbeYOffset(), 0, dx, dy, offsetZ2);
         //Com::printFLN(PSTR("ZPOffset2:"),offsetZ2,3);
 #endif
+    }
+#else
+    if(runScript) {
+	    GCode::executeFString(Com::tZProbeStartScript);
     }
 #endif
     Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
@@ -607,6 +612,9 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
 #endif
     //int32_t updateZ = 0;
     waitForZProbeStart();
+#if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
+	HAL::delayMilliseconds(Z_PROBE_DELAY);
+#endif
     Endstops::update();
     Endstops::update(); // need to call twice for full update!
     if(Endstops::zProbe()) {

@@ -41,7 +41,7 @@ float Printer::maxTravelAccelerationMMPerSquareSecond[E_AXIS_ARRAY] = {MAX_TRAVE
 unsigned long Printer::maxPrintAccelerationStepsPerSquareSecond[E_AXIS_ARRAY];
 /** Acceleration in steps/s^2 in movement mode.*/
 unsigned long Printer::maxTravelAccelerationStepsPerSquareSecond[E_AXIS_ARRAY];
-uint32_t Printer::maxInterval;
+// uint32_t Printer::maxInterval;
 #endif
 #if NONLINEAR_SYSTEM
 long Printer::currentNonlinearPositionSteps[E_TOWER_ARRAY];
@@ -333,7 +333,7 @@ void Printer::setFan2SpeedDirectly(uint8_t speed) {
 }
 
 bool Printer::updateDoorOpen() {
-#if defined(DOOR_PIN) && DOOR_PIN > -1 && SUPPORT_LASER
+#if defined(DOOR_PIN) && DOOR_PIN > -1 //  && SUPPORT_LASER should always be respected
     bool isOpen = isDoorOpen();
     uint8_t b = READ(DOOR_PIN) != DOOR_INVERTING;
     if(!b && isOpen) {
@@ -482,8 +482,18 @@ void Printer::updateDerivedParameter() {
         maxTravelAccelerationStepsPerSquareSecond[i] = maxTravelAccelerationMMPerSquareSecond[i] * axisStepsPerMM[i];
 #endif
     }
+	// For numeric stability we need to start accelerations at a minimum speed and hence ensure that the
+	// jerk is at least 2 * minimum speed.
+
+	// For xy moves the minimum speed is multiplied with 1.41 to enforce the condition also for diagonals since the
+	// driving axis is the problematic speed.
     float accel = RMath::max(maxAccelerationMMPerSquareSecond[X_AXIS], maxTravelAccelerationMMPerSquareSecond[X_AXIS]);
-    float minimumSpeed = accel * sqrt(2.0f / (axisStepsPerMM[X_AXIS] * accel));
+    float minimumSpeed = 1.41 * accel * sqrt(2.0f / (axisStepsPerMM[X_AXIS] * accel));
+    accel = RMath::max(maxAccelerationMMPerSquareSecond[Y_AXIS], maxTravelAccelerationMMPerSquareSecond[Y_AXIS]);
+    float minimumSpeed2 = 1.41 * accel * sqrt(2.0f / (axisStepsPerMM[Y_AXIS] * accel));
+	if(minimumSpeed2 > minimumSpeed) {
+		minimumSpeed = minimumSpeed2;
+	}
     if(maxJerk < 2 * minimumSpeed) {// Enforce minimum start speed if target is faster and jerk too low
         maxJerk = 2 * minimumSpeed;
         Com::printFLN(PSTR("XY jerk was too low, setting to "), maxJerk);
@@ -496,6 +506,7 @@ void Printer::updateDerivedParameter() {
         Com::printFLN(PSTR("Z jerk was too low, setting to "), maxZJerk);
     }
 #endif
+/*
     maxInterval = F_CPU / (minimumSpeed * axisStepsPerMM[X_AXIS]);
     uint32_t tmp = F_CPU / (minimumSpeed * axisStepsPerMM[Y_AXIS]);
     if(tmp < maxInterval)
@@ -505,6 +516,7 @@ void Printer::updateDerivedParameter() {
     if(tmp < maxInterval)
         maxInterval = tmp;
 #endif
+*/
     //Com::printFLN(PSTR("Minimum Speed:"),minimumSpeed);
     //Com::printFLN(PSTR("Minimum Speed Z:"),minimumZSpeed);
 #if DISTORTION_CORRECTION

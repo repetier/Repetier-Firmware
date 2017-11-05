@@ -351,9 +351,12 @@ public:
                             }
                         }
                     } else {
+#if !(Z_MIN_PIN == Z_PROBE_PIN && FEATURE_Z_PROBE)
                         if(isZNegativeMove() && Endstops::zMin()) {
                             setZMoveFinished();
-                        } else if(isZPositiveMove() && Endstops::zMax()) {
+                        } 
+#endif
+						else if(isZPositiveMove() && Endstops::zMax()) {
 #if MAX_HARDWARE_ENDSTOP_Z
                             Printer::stepsRemainingAtZHit = stepsRemaining;
 #endif
@@ -362,7 +365,11 @@ public:
                     }
                 }
 #else  // Multi endstop homing
-                    if(isZNegativeMove() && Endstops::zMin()) {
+                    if(isZNegativeMove() && Endstops::zMin()
+#if Z_MIN_PIN == Z_PROBE_PIN && FEATURE_Z_PROBE
+						&& Printer::isHoming()
+#endif
+					) {
                         setZMoveFinished();
                     } else if(isZPositiveMove() && Endstops::zMax()) {
 #if MAX_HARDWARE_ENDSTOP_Z

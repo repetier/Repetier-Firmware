@@ -1108,7 +1108,7 @@ void Commands::processGCode(GCode *com) {
         // G30 [Pn] [S]
         // G30 (the same as G30 P3) single probe set Z0
         // G30 S1 Z<real_z_pos> - measures probe height (P is ignored) assuming we are at real height Z
-        // G30 H<height> O<offset> Make probe define new Z and z offset (R) at trigger point assuming z-probe measured an object of H height.
+        // G30 H<height> R<offset> Make probe define new Z and z offset (R) at trigger point assuming z-probe measured an object of H height.
         if (com->hasS()) {
             Printer::measureZProbeHeight(com->hasZ() ? com->Z : Printer::currentPosition[Z_AXIS]);
         } else {
@@ -1196,9 +1196,11 @@ void Commands::processGCode(GCode *com) {
         if(com->hasE()) {
             Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = Printer::convertToMM(com->E) * Printer::axisStepsPerMM[E_AXIS];
         }
-		Com::printF(PSTR("X_OFFSET:"), Printer::coordinateOffset[X_AXIS], 3);
-		Com::printF(PSTR(" Y_OFFSET:"), Printer::coordinateOffset[Y_AXIS], 3);
-		Com::printFLN(PSTR(" Z_OFFSET:"), Printer::coordinateOffset[Z_AXIS], 3);
+		if(com->hasX() || com->hasY() || com->hasZ()) {
+			Com::printF(PSTR("X_OFFSET:"), Printer::coordinateOffset[X_AXIS], 3);
+			Com::printF(PSTR(" Y_OFFSET:"), Printer::coordinateOffset[Y_AXIS], 3);
+			Com::printFLN(PSTR(" Z_OFFSET:"), Printer::coordinateOffset[Z_AXIS], 3);
+		}
     }
     break;
 #if DRIVE_SYSTEM == DELTA
@@ -1648,6 +1650,34 @@ void Commands::processMCode(GCode *com) {
     case 83: // M83
         Printer::relativeExtruderCoordinateMode = true;
         break;
+	case 18: // M18 is to disable named axis
+        {
+			Commands::waitUntilEndOfAllMoves();
+			bool named = false;
+			if(com->hasX()) {
+				named = true;
+				Printer::disableXStepper();
+			}
+			if(com->hasY()) {
+				named = true;
+				Printer::disableYStepper();
+			}
+			if(com->hasZ()) {
+				named = true;
+				Printer::disableZStepper();
+			}
+			if(com->hasE()) {
+				named = true;
+				Extruder::disableCurrentExtruderMotor();
+			}
+			if(!named) {
+				Printer::disableXStepper();
+				Printer::disableYStepper();
+				Printer::disableZStepper();
+				Extruder::disableAllExtruderMotors();
+			}
+		}
+		break;
     case 84: // M84
         if(com->hasS()) {
             stepperInactiveTime = com->S * 1000;
