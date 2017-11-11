@@ -298,7 +298,29 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #undef SDCARDDETECTINVERTED
 #define SDCARDDETECTINVERTED   0
 
+#elif MOTHERBOARD == 413 // RURAMPS4D
+
+#undef BEEPER_PIN
+#define BEEPER_PIN        62
+#define UI_DISPLAY_RS_PIN 63
+#define UI_DISPLAY_RW_PIN -1
+#define UI_DISPLAY_ENABLE_PIN 64
+#define UI_DISPLAY_D0_PIN -1
+#define UI_DISPLAY_D1_PIN -1
+#define UI_DISPLAY_D2_PIN -1
+#define UI_DISPLAY_D3_PIN -1
+#define UI_DISPLAY_D4_PIN 48
+#define UI_DISPLAY_D5_PIN 50
+#define UI_DISPLAY_D6_PIN 52
+#define UI_DISPLAY_D7_PIN 53
+#define UI_ENCODER_A 42
+#define UI_ENCODER_B 44
+#define UI_ENCODER_CLICK 40
+#define UI_RESET_PIN -1
+#define UI_INVERT_MENU_DIRECTION 1
+
 #else  // RAMPS
+
 #undef BEEPER_PIN
 #define BEEPER_PIN             37
 #define UI_DISPLAY_RS_PIN      16
