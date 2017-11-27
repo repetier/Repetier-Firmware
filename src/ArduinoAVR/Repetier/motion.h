@@ -354,9 +354,10 @@ public:
 #if !(Z_MIN_PIN == Z_PROBE_PIN && FEATURE_Z_PROBE)
                         if(isZNegativeMove() && Endstops::zMin()) {
                             setZMoveFinished();
-                        } 
+                        } else
 #endif
-						else if(isZPositiveMove() && Endstops::zMax()) {
+						
+						if(isZPositiveMove() && Endstops::zMax()) {
 #if MAX_HARDWARE_ENDSTOP_Z
                             Printer::stepsRemainingAtZHit = stepsRemaining;
 #endif

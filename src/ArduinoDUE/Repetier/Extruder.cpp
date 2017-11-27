@@ -2485,7 +2485,7 @@ void TemperatureController::autotunePID(float temp, uint8_t controllerId, int ma
         }
         UI_MEDIUM;
         UI_SLOW(true);
-    }
+    } // loop
 }
 
 /** \brief Writes monitored temperatures.

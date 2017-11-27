@@ -539,9 +539,9 @@ void Printer::enablePowerIfNeeded() {
 /**
   \brief Stop heater and stepper motors. Disable power,if possible.
 */
-void Printer::kill(uint8_t only_steppers) {
-    EVENT_KILL(only_steppers);
-    if(areAllSteppersDisabled() && only_steppers) return;
+void Printer::kill(uint8_t onlySteppers) {
+    EVENT_KILL(onlySteppers);
+    if(areAllSteppersDisabled() && onlySteppers) return;
     if(Printer::isAllKilled()) return;
 #if defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS > 0
     disableAllMotorDrivers();
@@ -551,13 +551,13 @@ void Printer::kill(uint8_t only_steppers) {
 #if !defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT)
     disableZStepper();
 #else
-    if(!only_steppers)
+    if(!onlySteppers)
         disableZStepper();
 #endif
     Extruder::disableAllExtruderMotors();
     setAllSteppersDiabled();
     unsetHomedAll();
-    if(!only_steppers) {
+    if(!onlySteppers) {
         for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
             Extruder::setTemperatureForExtruder(0, i);
         Extruder::setHeatedBedTemperature(0);

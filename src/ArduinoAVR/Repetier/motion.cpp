@@ -27,7 +27,7 @@
 #ifndef STEP_DOUBLER_FREQUENCY
 #error Please add new parameter STEP_DOUBLER_FREQUENCY to your configuration.
 #else
-#if STEP_DOUBLER_FREQUENCY < 10000 || STEP_DOUBLER_FREQUENCY > 20000
+#if STEP_DOUBLER_FREQUENCY < 7000 || STEP_DOUBLER_FREQUENCY > 20000
 #if CPU_ARCH==ARCH_AVR
 #error STEP_DOUBLER_FREQUENCY should be in range 10000-16000.
 #endif
@@ -729,7 +729,7 @@ void PrintLine::updateTrapezoids() {
 #endif // DRIVE_SYSTEM
 
     if(previous->isEOnlyMove() != act->isEOnlyMove()) {
-        previous->maxJunctionSpeed = act->startSpeed;
+        previous->maxJunctionSpeed = previous->endSpeed; // act->startSpeed; // maybe remove this. Previous should be at minimum and systems have nothing in common
         previous->setEndSpeedFixed(true);
         act->setStartSpeedFixed(true);
         act->updateStepsParameter();

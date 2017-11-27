@@ -1118,7 +1118,7 @@ void Commands::processGCode(GCode *com) {
                 GCode::fatalError(PSTR("G30 probing failed!"));
                 break;
             }
-            if(com->hasO() || com->hasH()) {
+            if(com->hasR() || com->hasH()) {
                 float h = Printer::convertToMM(com->hasH() ? com->H : 0);
                 float o = Printer::convertToMM(com->hasR() ? com->R : h);
 #if DISTORTION_CORRECTION
