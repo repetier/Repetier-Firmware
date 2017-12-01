@@ -1141,7 +1141,7 @@ AD15 CH15
 *     RURAMPS4D Board
 ****************************/
  
-#if MOTHERBOARD == 413
+#if MOTHERBOARD == 414
 #ifndef __SAM3X8E__
 #error Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu.
 #endif
