@@ -2170,9 +2170,13 @@ void TemperatureController::updateCurrentTemperature() {
         break;
 #endif
 #ifdef SUPPORT_MAX31855
-    case 102: // MAX31855
-        currentTemperature = read_max31855(sensorPin);
-        break;
+    case 102: { // MAX31855
+        int16_t newTemp =  read_max31855(sensorPin);
+        if(newTemp != 20000) { // don't use error read
+            currentTemperature = newTemp;
+        }
+    }
+    break;
 #endif
     default:
         currentTemperature = 4095; // unknown method, return high value to switch heater off for safety
@@ -2331,7 +2335,7 @@ void TemperatureController::updateCurrentTemperature() {
 }
 
 void TemperatureController::setTargetTemperature(float target) {
-	ENSURE_POWER
+    ENSURE_POWER
     targetTemperatureC = target;
     stopDecouple();
 }
