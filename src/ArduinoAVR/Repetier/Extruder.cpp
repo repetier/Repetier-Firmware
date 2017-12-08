@@ -37,7 +37,7 @@ uint8_t Extruder::activeMixingExtruder = 0;
 extern int16_t read_max6675(uint8_t ss_pin, fast8_t idx);
 #endif
 #ifdef SUPPORT_MAX31855
-extern int16_t read_max31855(uint8_t ss_pin);
+extern int16_t read_max31855(uint8_t ss_pin, fast8_t idx);
 #endif
 
 #if ANALOG_INPUTS > 0
@@ -135,7 +135,7 @@ void Extruder::manageTemperatures() {
 
         // Check for obvious sensor errors
         if((act->currentTemperatureC < MIN_DEFECT_TEMPERATURE || act->currentTemperatureC > MAX_DEFECT_TEMPERATURE) &&
-                act->targetTemperatureC > MIN_DEFECT_TEMPERATURE /*is heating*/ &&
+                act->targetTemperatureC > 0 /*is heating*/ &&
                 (act->preheatTime() == 0 || act->preheatTime() >= MILLISECONDS_PREHEAT_TIME /*preheating time is over*/)) { // no temp sensor or short in sensor, disable heater
             errorDetected = 1;
             if(extruderTempErrors < 10)    // Ignore short temporary failures
@@ -332,14 +332,12 @@ void Extruder::manageTemperatures() {
         }
 #if defined(KILL_IF_SENSOR_DEFECT) && KILL_IF_SENSOR_DEFECT > 0
         if(!Printer::debugDryrun() && PrintLine::linesCount > 0) {  // kill printer if actually printing
-#if SDSUPPORT
-            sd.stopPrint();
-#endif // SDSUPPORT
-            Printer::kill(0);
+			Printer::stopPrint();
+            Printer::kill(false);
         }
 #endif // KILL_IF_SENSOR_DEFECT
         Printer::debugSet(8); // Go into dry mode
-        GCode::fatalError(PSTR("Heater/sensor failure"));
+        GCode::fatalError(PSTR("Heater/sensor error"));
     } // any sensor defect
 #endif // NUM_TEMPERATURE_LOOPS
 
@@ -350,7 +348,6 @@ void Extruder::manageTemperatures() {
             Printer::lastTempReport = now;
             Commands::printTemperatures();
         }
-
     }
 }
 
@@ -2166,12 +2163,16 @@ void TemperatureController::updateCurrentTemperature() {
 #endif
 #ifdef SUPPORT_MAX6675
     case 101: // MAX6675
-        currentTemperature = read_max6675(sensorPin, pwmIndex);
+		{
+		int newTemp = read_max6675(sensorPin, pwmIndex);
+		if(newTemp != 2000) {
+			currentTemperature = newTemp;
+		}
         break;
 #endif
 #ifdef SUPPORT_MAX31855
     case 102: { // MAX31855
-        int16_t newTemp =  read_max31855(sensorPin);
+        int16_t newTemp = read_max31855(sensorPin, pwmIndex);
         if(newTemp != 20000) { // don't use error read
             currentTemperature = newTemp;
         }
@@ -2556,7 +2557,19 @@ int16_t read_max6675(uint8_t ss_pin, fast8_t idx) {
 }
 #endif
 #ifdef SUPPORT_MAX31855
-int16_t read_max31855(uint8_t ss_pin) {
+/*
+Thermocouple with spi interface
+https://datasheets.maximintegrated.com/en/ds/MAX31855.pdf
+*/
+int16_t read_max31855(uint8_t ss_pin, fast8_t idx) {
+    static bool firstRun = true;
+    static int8_t max31855_errors[NUM_PWM];
+    if(firstRun) {
+	    for(fast8_t i = 0; i < NUM_PWM; i++) {
+		    max31855_errors[i] = 0;
+	    }
+	    firstRun = false;
+    }
     uint32_t data = 0;
     int16_t temperature;
     HAL::spiInit(2);
@@ -2571,9 +2584,12 @@ int16_t read_max31855(uint8_t ss_pin) {
     HAL::digitalWrite(ss_pin, 1);  // disable TT_MAX31855
 
     //Process temp
-    if (data & 0x00010000)
+    if (data & 65536 /* 0x00010000 */) { // test error flag
+		if( max31855_errors[idx] > 5)
+			return -396; // will trigger defect when heating, -99°C so it fits into display
+		max31855_errors[idx]++;
         return 20000; //Some form of error.
-    else {
+    } else {
         data = data >> 18;
         temperature = data & 0x00001FFF;
 
@@ -2581,6 +2597,7 @@ int16_t read_max31855(uint8_t ss_pin) {
             data = ~data;
             temperature = -1 * ((data & 0x00001FFF) + 1);
         }
+		max31855_errors[idx] = 0;
     }
     return temperature;
 }

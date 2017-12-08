@@ -563,7 +563,7 @@ public:
     }
 
     // Faster version of InterruptProtectedBlock.
-    // For safety it ma yonly be called from within an
+    // For safety it may only be called from within an
     // interrupt handler.
     static inline void allowInterrupts()
     {
@@ -615,7 +615,7 @@ public:
     static void resetHardware();
 
     // SPI related functions
-    static void spiBegin()
+    static void spiBegin(uint8_t ssPin = 0)
     {
 #if SDSS >= 0
         SET_INPUT(MISO_PIN);
@@ -636,9 +636,8 @@ public:
     {
          uint8_t r = 0;
          for (uint8_t b = 2; spiRate > b && r < 6; b <<= 1, r++);
-
-        SET_OUTPUT(SS);
-        WRITE(SS,HIGH);
+		SET_OUTPUT(SS);
+		WRITE(SS,HIGH);
         SET_OUTPUT(SCK);
         SET_OUTPUT(MOSI_PIN);
         SET_INPUT(MISO_PIN);

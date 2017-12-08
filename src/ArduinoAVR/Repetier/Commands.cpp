@@ -2593,6 +2593,9 @@ void Commands::processMCode(GCode *com) {
     }
     break;
 #endif
+	case 998:
+		UI_MESSAGE(com->S);
+		break;
     case 999: // Stop fatal error take down
         if(com->hasS())
             GCode::fatalError(PSTR("Testing fatal error"));

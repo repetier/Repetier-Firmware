@@ -1516,7 +1516,9 @@ void UIDisplay::parse(const char *txt, bool ram) {
                         uid.printCols[col++] = '%';
                 } else
 #endif
+{
                     parse(statusMsg, true);
+					}
                 break;
             }
             if(c2 == 'c') {
@@ -1851,11 +1853,13 @@ void UIDisplay::parse(const char *txt, bool ram) {
     }
     uid.printCols[col] = 0;
 }
+
 void UIDisplay::showLanguageSelectionWizard() {
 #if EEPROM_MODE != 0
     pushMenu(&ui_menu_languages_wiz, true);
 #endif
 }
+
 void UIDisplay::setStatusP(PGM_P txt, bool error) {
     if(!error && Printer::isUIErrorMessage()) return;
     uint8_t i = 0;
@@ -1868,6 +1872,7 @@ void UIDisplay::setStatusP(PGM_P txt, bool error) {
     if(error)
         Printer::setUIErrorMessage(true);
 }
+
 void UIDisplay::setStatus(const char *txt, bool error) {
     if(!error && Printer::isUIErrorMessage()) return;
     uint8_t i = 0;
@@ -2415,6 +2420,7 @@ void UIDisplay::popMenu(bool refresh) {
 
 void UIDisplay::showMessage(int id) {
     uid.menuLevel = 0;
+	Printer::setUIErrorMessage(true);
     switch(id) {
     case 1:
         uid.pushMenu(&ui_msg_leveling_error, true);
@@ -2434,7 +2440,7 @@ void UIDisplay::showMessage(int id) {
 int UIDisplay::okAction(bool allowMoves) {
     if(Printer::isUIErrorMessage()) {
         Printer::setUIErrorMessage(false);
-        return 0;
+        // return 0;
     }
     BEEP_SHORT
 #if UI_HAS_KEYS == 1
@@ -2689,7 +2695,7 @@ bool UIDisplay::isSticky() {
 bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves) {
     if(Printer::isUIErrorMessage()) {
         Printer::setUIErrorMessage(false);
-        return true;
+        // return true;
     }
     millis_t actTime = HAL::timeInMilliseconds();
     millis_t dtReal;

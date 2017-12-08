@@ -2506,9 +2506,10 @@ void Printer::continuePrint() {
         sd.continuePrint(true);
     } else
 #endif
-        if(Printer::isMenuMode(MENU_MODE_PRINTING)) {
+        if(Printer::isMenuMode(MENU_MODE_PAUSED)) {
             GCodeSource::printAllFLN(PSTR("RequestContinue:"));
         }
+	setMenuMode(MENU_MODE_PAUSED, false);
 }
 
 void Printer::stopPrint() {
@@ -2521,7 +2522,9 @@ void Printer::stopPrint() {
     {
         GCodeSource::printAllFLN(PSTR("RequestStop:"));
     }
-    UI_RESET_MENU
+	if(!isUIErrorMessage()) {
+		UI_RESET_MENU
+	}
 }
 
 

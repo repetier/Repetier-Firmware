@@ -736,10 +736,14 @@ class HAL
       }
       return b;
     }
-    static inline void spiBegin()
+    static inline void spiBegin(uint8_t ssPin = 0)
     {
-      SET_OUTPUT(SDSS);
-      WRITE(SDSS, HIGH);
+     	if (ssPin) {
+			   HAL::digitalWrite(ssPin, 0);
+		  } else {
+        SET_OUTPUT(SDSS);
+        WRITE(SDSS, HIGH);
+      }
       SET_OUTPUT(SCK_PIN);
       SET_INPUT(MISO_PIN);
       SET_OUTPUT(MOSI_PIN);
@@ -753,55 +757,55 @@ class HAL
     }
     static inline uint8_t spiReceive()
     {
-      WRITE(SDSS, LOW);
+      // WRITE(SDSS, LOW);
       uint8_t b = spiTransfer(0xff);
-      WRITE(SDSS, HIGH);
+      // WRITE(SDSS, HIGH);
       return b;
     }
     static inline void spiReadBlock(uint8_t*buf, uint16_t nbyte)
     {
       if (nbyte == 0) return;
-      WRITE(SDSS, LOW);
+      // WRITE(SDSS, LOW);
       for (int i = 0; i < nbyte; i++)
       {
         buf[i] = spiTransfer(0xff);
       }
-      WRITE(SDSS, HIGH);
+      // WRITE(SDSS, HIGH);
 
     }
     static inline void spiSend(uint8_t b) {
-      WRITE(SDSS, LOW);
+      // WRITE(SDSS, LOW);
       uint8_t response = spiTransfer(b);
-      WRITE(SDSS, HIGH);
+      // WRITE(SDSS, HIGH);
     }
 
     static inline void spiSend(const uint8_t* buf , size_t n)
     {
       if (n == 0) return;
-      WRITE(SDSS, LOW);
+      // WRITE(SDSS, LOW);
       for (uint16_t i = 0; i < n; i++) {
         spiTransfer(buf[i]);
       }
-      WRITE(SDSS, HIGH);
+      // WRITE(SDSS, HIGH);
     }
 
     inline __attribute__((always_inline))
     static void spiSendBlock(uint8_t token, const uint8_t* buf)
     {
-      WRITE(SDSS, LOW);
+      // WRITE(SDSS, LOW);
       spiTransfer(token);
 
       for (uint16_t i = 0; i < 512; i++)
       {
         spiTransfer(buf[i]);
       }
-      WRITE(SDSS, HIGH);
+      // WRITE(SDSS, HIGH);
     }
 
 #else
 
     // hardware SPI
-    static void spiBegin();
+    static void spiBegin(uint8_t ssPin = 0);
     // spiClock is 0 to 6, relecting AVR clock dividers 2,4,8,16,32,64,128
     // Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
     static void spiInit(uint8_t spiClock);

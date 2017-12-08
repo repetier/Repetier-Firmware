@@ -330,7 +330,7 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
 #if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
 bool spiInitMaded = false;
 #endif
-void HAL::spiBegin() {
+void HAL::spiBegin(uint8_t ssPin) {
 #if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
     if (spiInitMaded == false) {
 #endif        // Configre SPI pins
@@ -367,7 +367,11 @@ void HAL::spiBegin() {
         WRITE(SPI_EEPROM1_CS, HIGH );
         WRITE(SPI_EEPROM2_CS, HIGH );
         WRITE(SPI_FLASH_CS, HIGH );
-        WRITE(SDSS, HIGH );
+        if (ssPin) {
+			   HAL::digitalWrite(ssPin, 0);
+		    } else {
+          WRITE(SDSS, HIGH );
+        }
 #endif// MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
         PIO_Configure(
             g_APinDescription[SPI_PIN].pPort,
