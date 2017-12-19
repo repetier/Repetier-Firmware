@@ -163,6 +163,7 @@ void Extruder::manageTemperatures() {
                     newDefectFound = true;
                     Printer::setAnyTempsensorDefect();
                     reportTempsensorError();
+                    UI_MESSAGE(2);
                 }
                 EVENT_HEATER_DEFECT(controller);
             }
