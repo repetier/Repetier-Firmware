@@ -1,4 +1,4 @@
-/*
+﻿/*
     This file is part of the Repetier-Firmware for RF devices from Conrad Electronic SE.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -261,6 +261,7 @@ public:
 	FSTRINGVAR(tEPRXOffset)
 	FSTRINGVAR(tEPRYOffset)
 	FSTRINGVAR(tEPRZOffset)
+	FSTRINGVAR(tEPRZMode)
 	FSTRINGVAR(tEPRStabilizeTime)
 	FSTRINGVAR(tEPRRetractionWhenHeating)
 	FSTRINGVAR(tEPRDistanceRetractHeating)
@@ -313,6 +314,10 @@ public:
 #if FEATURE_FIND_Z_ORIGIN
 	FSTRINGVAR(tFindZOrigin)
 #endif // FEATURE_FIND_Z_ORIGIN
+
+#if FEATURE_TEST_STRAIN_GAUGE
+	FSTRINGVAR(tTestStrainGauge)
+#endif // FEATURE_TEST_STRAIN_GAUGE
 
 	static void printNumber(uint32_t n);
 	static void printWarningF(FSTRINGPARAM(text));

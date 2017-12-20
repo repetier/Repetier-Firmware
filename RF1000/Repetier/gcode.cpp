@@ -1,4 +1,4 @@
-/*
+﻿/*
     This file is part of the Repetier-Firmware for RF devices from Conrad Electronic SE.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -38,6 +38,8 @@ int8_t   GCode::waitingForResend=-1; ///< Waiting for line to be resend. -1 = no
 volatile uint8_t GCode::bufferLength=0; ///< Number of commands stored in gcode_buffer
 millis_t GCode::timeOfLastDataPacket=0; ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
 uint8_t  GCode::formatErrors=0;
+millis_t GCode::lastBusySignal = 0; ///< When was the last busy signal
+uint32_t GCode::keepAliveInterval = KEEP_ALIVE_INTERVAL;
 
 /** \page Repetier-protocol
 
@@ -125,6 +127,37 @@ uint8_t GCode::computeBinarySize(char *ptr)  // unsigned int bitfield) {
 } // computeBinarySize
 
 
+void GCode::keepAlive( enum FirmwareState state )
+{
+	millis_t now = HAL::timeInMilliseconds();
+
+
+	if( state != NotBusy && keepAliveInterval != 0 )
+	{
+		if( (now - lastBusySignal) < keepAliveInterval )
+		{
+			return;
+		}
+		if( state == Paused )
+		{
+			Com::printFLN( PSTR( "busy: paused for user interaction" ) );
+		}
+		else if( state == WaitHeater )
+		{
+			Com::printFLN( PSTR( "busy: heating" ) );	
+		}
+		else
+		{
+			// processing and uncaught cases
+			Com::printFLN( PSTR( "busy: processing" ) );
+		}
+	}
+	lastBusySignal = now;
+	return;
+
+} // keepAlive
+
+
 void GCode::requestResend()
 {
     HAL::serialFlush();
@@ -199,6 +232,7 @@ void GCode::checkAndPushCommand()
 #endif // ACK_WITH_LINENUMBER
 
 	wasLastCommandReceivedAsBinary = sendAsBinary;
+	keepAlive( NotBusy );
     waitingForResend = -1; // everything is ok.
 
 } // checkAndPushCommand
@@ -372,13 +406,9 @@ void GCode::executeString(char *cmd)
 	It must be called frequently to empty the incoming buffer. */
 void GCode::readFromSerial()
 {
-    if(bufferLength>=GCODE_BUFFER_SIZE)
+    if(bufferLength>=GCODE_BUFFER_SIZE || (waitUntilAllCommandsAreParsed && bufferLength))
 	{
 		// all buffers full
-		return;
-	}
-    if(waitUntilAllCommandsAreParsed && bufferLength)
-	{
 		return;
 	}
 
@@ -407,11 +437,12 @@ void GCode::readFromSerial()
     }
     while(HAL::serialByteAvailable() && commandsReceivingWritePosition < MAX_CMD_SIZE)    // consume data until no data or buffer full
     {
-#if FEATURE_WATCHDOG
-	    HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
         timeOfLastDataPacket = time;
+
+		if( !commandsReceivingWritePosition )
+		{
+			memset( commandReceiving, 0, sizeof( commandReceiving ) );
+		}
         commandReceiving[commandsReceivingWritePosition++] = HAL::serialReadByte();
 
         // first lets detect, if we got an old type ascii command
@@ -540,8 +571,11 @@ This function is the main function to read the commands from sdcard. */
 void GCode::readFromSD()
 {
 #if SDSUPPORT
-	if(!sd.sdmode || commandsReceivingWritePosition!=0)   // not reading or incoming serial command
+	if(!sd.sdmode || commandsReceivingWritePosition!=0)		// not reading or incoming serial command
         return;
+
+	if(g_uBlockSDCommands)									// no further commands from the SD card shall be processed
+		return;
 
 	if(!PrintLine::checkForXFreeLines(2))
 	{
@@ -552,16 +586,8 @@ void GCode::readFromSD()
 
     while( sd.filesize > sd.sdpos && commandsReceivingWritePosition < MAX_CMD_SIZE)    // consume data until no data or buffer full
     {
-#if FEATURE_WATCHDOG
-		HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
 		timeOfLastDataPacket = HAL::timeInMilliseconds();
         int n = sd.file.read();
-
-#if FEATURE_WATCHDOG
-		HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
 
 		if(n==-1)
         {
@@ -574,10 +600,6 @@ void GCode::readFromSD()
             // Second try in case of recoverable errors
             sd.file.seekSet(sd.sdpos);
             n = sd.file.read();
-
-#if FEATURE_WATCHDOG
-			HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
 
 			if(n==-1)
             {
@@ -623,10 +645,10 @@ void GCode::readFromSD()
             bool returnChar = ch == '\n' || ch == '\r';
             if(returnChar || sd.filesize == sd.sdpos || (!commentDetected && ch == ':') || commandsReceivingWritePosition >= (MAX_CMD_SIZE - 1) )  // complete line read
             {
-/*				Com::printF(PSTR("Parse SD ascii 1 >>>"));
-				Com::print((char*)commandReceiving);
-				Com::printFLN(PSTR("<<<"));
-*/
+				//Com::printF(PSTR("Parse SD ascii 1 >>>"));
+				//Com::print((char*)commandReceiving);
+				//Com::printFLN(PSTR("<<<"));
+
                 if(returnChar || ch == ':')
                     commandReceiving[commandsReceivingWritePosition-1]=0;
                 else
@@ -639,20 +661,23 @@ void GCode::readFromSD()
                     continue;
                 }
 
-/*				Com::printF(PSTR("Parse SD ascii 2 >>>"));
-				Com::print((char*)commandReceiving);
-				Com::printFLN(PSTR("<<<"));
-*/
+				//Com::printF(PSTR("Parse SD ascii 2 >>>"));
+				//Com::print((char*)commandReceiving);
+				//Com::printFLN(PSTR("<<<"));
+
 				GCode *act = &commandsBuffered[bufferWriteIndex];
                 if(act->parseAscii((char *)commandReceiving,false))
                 {   
                     // Success
                     pushCommand();
-//                  Com::printF(PSTR("Current ASCII from SD: "));
-//                  act->printCommand();
+					//Com::printF(PSTR("Current ASCII from SD: "));
+					//act->printCommand();
                 }
                 commandsReceivingWritePosition = 0;
-				memset( commandReceiving, 0, sizeof( commandReceiving ) );
+				//memset( commandReceiving, 0, sizeof( commandReceiving ) );
+
+				//Com::printF(PSTR("Verify: "));
+                //act->printCommand();
                 return;
             }
             else
@@ -853,22 +878,51 @@ bool GCode::parseAscii(char *line,bool fromSerial)
         if(M>255) params |= 4096;
     }
 
-    if(hasM() && (M == 23 || M == 28 || M == 29 || M == 30 || M == 32 || M == 117))
+    if(hasM() && (M == 23 || M == 28 || M == 29 || M == 30 || M == 32 || M == 117 || M == 3117))
     {
         // after M command we got a filename for sd card management
         char *sp = line;
-        while(*sp!='M') sp++; // Search M command
-        while(*sp!=' ') sp++; // search next whitespace
-        while(*sp==' ') sp++; // skip leading whitespaces
-        text = sp;
-        while(*sp)
-        {
-            if((M != 117 && *sp==' ') || *sp=='*') break; // end of filename reached
-            sp++;
-        }
-        *sp = 0; // Removes checksum, but we don't care. Could also be part of the string.
-        waitUntilAllCommandsAreParsed = true; // don't risk string be deleted
-        params |= 32768;
+		text = sp;
+
+		while(*sp!='M') sp++; // Search M command
+
+        while(*sp!=' ')
+		{
+			// search next whitespace
+			if( *sp == 0 )
+			{
+				// end of string
+				text = 0;
+				break;
+			}
+			sp++;
+		}
+
+        while(*sp==' ')
+		{
+			// skip leading whitespaces
+			if( *sp == 0 )
+			{
+				// end of string
+				text = 0;
+				break;
+			}
+			sp++;
+		}
+
+		if( text )
+		{
+			text = sp;
+			while(*sp)
+			{
+				if((M != 117 && M != 3117 && *sp==' ') || *sp=='*') break; // end of filename reached
+				sp++;
+			}
+			*sp = 0; // Removes checksum, but we don't care. Could also be part of the string.
+
+			waitUntilAllCommandsAreParsed = true; // don't risk string be deleted
+	        params |= 32768;
+		}
     }
     else
     {

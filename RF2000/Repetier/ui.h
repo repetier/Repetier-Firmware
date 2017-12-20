@@ -1,4 +1,4 @@
-/*
+﻿/*
     This file is part of the Repetier-Firmware for RF devices from Conrad Electronic SE.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -34,21 +34,6 @@
 
 #define UI_ACTION_NEXT						   1
 #define UI_ACTION_PREVIOUS					   2
-
-#define UI_ACTION_X_UP						 100
-#define UI_ACTION_X_DOWN					 101
-#define UI_ACTION_Y_UP						 102
-#define UI_ACTION_Y_DOWN					 103
-#define UI_ACTION_Z_UP						 104
-#define UI_ACTION_Z_DOWN					 105
-#define UI_ACTION_EXTRUDER_UP				 106
-#define UI_ACTION_EXTRUDER_DOWN				 107
-#define UI_ACTION_EXTRUDER_TEMP_UP			 108
-#define UI_ACTION_EXTRUDER_TEMP_DOWN		 109
-#define UI_ACTION_HEATED_BED_UP				 110
-#define UI_ACTION_HEATED_BED_DOWN			 111
-#define UI_ACTION_FAN_UP					 112
-#define UI_ACTION_FAN_DOWN					 113
 
 #define UI_ACTION_DUMMY					   10000
 #define UI_ACTION_BACK						1000
@@ -91,9 +76,6 @@
 #define UI_ACTION_MAX_FEEDRATE_X			1044
 #define UI_ACTION_MAX_FEEDRATE_Y			1045
 #define UI_ACTION_MAX_FEEDRATE_Z			1046
-#define UI_ACTION_STEPS_X					1047
-#define UI_ACTION_STEPS_Y					1048
-#define UI_ACTION_STEPS_Z					1049
 #define UI_ACTION_FAN_OFF					1050
 #define UI_ACTION_FAN_25					1051
 #define UI_ACTION_FAN_50					1052
@@ -101,11 +83,6 @@
 #define UI_ACTION_FAN_FULL					1054
 #define UI_ACTION_FEEDRATE_MULTIPLY			1055
 #define UI_ACTION_STEPPER_INACTIVE			1056
-#define UI_ACTION_PID_PGAIN					1058
-#define UI_ACTION_PID_IGAIN					1059
-#define UI_ACTION_PID_DGAIN					1060
-#define UI_ACTION_DRIVE_MIN					1061
-#define UI_ACTION_DRIVE_MAX					1062
 #define UI_ACTION_X_OFFSET					1063
 #define UI_ACTION_Y_OFFSET					1064
 #define UI_ACTION_EXTR_STEPS				1065
@@ -114,7 +91,6 @@
 #define UI_ACTION_EXTR_START_FEEDRATE		1068
 #define UI_ACTION_EXTR_HEATMANAGER			1069
 #define UI_ACTION_EXTR_WATCH_PERIOD			1070
-#define UI_ACTION_PID_MAX					1071
 #define UI_ACTION_ADVANCE_K					1072
 #define UI_ACTION_DEBUG_ECHO				1074
 #define UI_ACTION_DEBUG_INFO				1075
@@ -139,9 +115,6 @@
 #define UI_ACTION_ADVANCE_L					1094
 #define UI_ACTION_PREHEAT_ABS				1095
 #define UI_ACTION_FLOWRATE_MULTIPLY			1096
-#define UI_ACTION_KILL						1097
-#define UI_ACTION_RESET						1098
-#define UI_ACTION_PAUSE						1099
 #define UI_ACTION_EXTR_WAIT_RETRACT_TEMP	1100
 #define UI_ACTION_EXTR_WAIT_RETRACT_UNITS	1101
 #define UI_ACTION_EXTRUDER2_OFF				1102
@@ -171,6 +144,7 @@
 #define	UI_ACTION_ACTIVE_EXTRUDER			1127
 #define UI_ACTION_ZOFFSET					1128
 #define UI_ACTION_RIGHT						1129
+#define UI_ACTION_ZMODE						1130
 
 #define UI_ACTION_MENU_XPOS					4000
 #define UI_ACTION_MENU_YPOS					4001
@@ -183,10 +157,6 @@
 #define UI_ACTION_MENU_EXTRUDER				4008
 #define UI_ACTION_MENU_POSITIONS			4009
 #define UI_ACTION_SET_Z_ORIGIN				4012
-#define UI_ACTION_SET_P1					4013
-#define UI_ACTION_SET_P2					4014
-#define UI_ACTION_SET_P3					4015
-#define UI_ACTION_CALC_LEVEL				4016
 
 #define UI_ACTION_SHOW_USERMENU1			4101
 #define UI_ACTION_SHOW_USERMENU2			4102
@@ -236,6 +206,7 @@ extern const int8_t	encoder_table[16] PROGMEM;
 extern	char	g_nYesNo;
 extern	char	g_nContinueButtonPressed;
 extern	char	g_nServiceRequest;
+extern	char	g_nPrinterReady;
 
 
 // Key codes
@@ -355,30 +326,35 @@ extern	char	g_nServiceRequest;
 #define UI_FLAG_SLOW_ACTION_RUNNING		4
 #define	UI_FLAG_KEY_TEST_RUNNING		8
 
+#define	MAX_MENU_LEVELS					6
+
 
 class UIDisplay
 {
 public:
     volatile uint8_t	flags;
-    uint8_t				col;					// current col for buffer prefill
-    uint8_t				menuLevel;				// current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
-    uint8_t				menuPos[5];				// Positions in menu
-    void*				menu[5];				// Menus active
-    uint8_t				menuTop[5];				// Top row in menu
-    int8_t				shift;					// Display shift for scrolling text
-    int					pageDelay;				// Counter. If 0 page is refreshed if menuLevel is 0.
-    void*				errorMsg;
-    uint16_t			activeAction;			// action for ok/next/previous
+    uint8_t				col;						// current col for buffer prefill
+    uint8_t				menuLevel;					// current menu level, 0 = info, 1 = group, 2 = groupdata select, 3 = value change
+    uint8_t				menuPos[MAX_MENU_LEVELS];	// Positions in menu
+    void*				menu[MAX_MENU_LEVELS];		// Menus active
+    uint8_t				menuTop[MAX_MENU_LEVELS];	// Top row in menu
+    int8_t				shift;						// Display shift for scrolling text
+    int					pageDelay;					// Counter. If 0 page is refreshed if menuLevel is 0.
+    void*				messageLine1;
+    void*				messageLine2;
+    void*				messageLine3;
+    void*				messageLine4;
+    uint16_t			activeAction;				// action for ok/next/previous
     uint16_t			lastAction;
-    millis_t			lastSwitch;				// Last time display switched pages
+    millis_t			lastSwitch;					// Last time display switched pages
     millis_t			lastRefresh;
     uint16_t			lastButtonAction;
     millis_t			lastButtonStart;
-    millis_t			nextRepeat;				// Time of next autorepeat
-    millis_t			lastNextPrev;			// for increasing speed settings
-    float				lastNextAccumul;		// Accumulated value
-    unsigned int		outputMask;				// Output mask for backlight, leds etc.
-    int					repeatDuration;			// Time beween to actions if autorepeat is enabled
+    millis_t			nextRepeat;					// Time of next autorepeat
+    millis_t			lastNextPrev;				// for increasing speed settings
+    float				lastNextAccumul;			// Accumulated value
+    unsigned int		outputMask;					// Output mask for backlight, leds etc.
+    int					repeatDuration;				// Time beween to actions if autorepeat is enabled
     int8_t				oldMenuLevel;
     uint8_t				encoderStartScreen;
     char				statusMsg[21];
@@ -392,6 +368,7 @@ public:
     void addFloat(float number, char fixdigits,uint8_t digits);
     void addStringP(PGM_P text);
     void okAction();
+	void rightAction();
     void nextPreviousAction(int8_t next);
     UIDisplay();
     void createChar(uint8_t location,const uint8_t charmap[]);
@@ -406,10 +383,11 @@ public:
     void slowAction();
     void fastAction();
     void mediumAction();
+	void showMessage(bool refresh);
     void pushMenu(void *men,bool refresh);
     void adjustMenuPos();
     void setStatusP(PGM_P txt,bool error = false);
-    void setStatus(char *txt,bool error = false);
+    void setStatus(char *txt,bool error = false,bool force = false);
 
     inline void setOutputMaskBits(unsigned int bits)
 	{
@@ -589,7 +567,7 @@ void ui_check_slow_keys(int &action) {}
 #endif // UI_TEMP_PRECISION
 
 #define UI_INITIALIZE uid.initialize();
-#define UI_FAST if(pwm_count & 4) {uid.fastAction();}
+#define UI_FAST if(pwm_count_heater & 4) {uid.fastAction();}
 #define UI_MEDIUM uid.mediumAction();
 #define UI_SLOW uid.slowAction();
 #define UI_STATUS(status) uid.setStatusP(PSTR(status));

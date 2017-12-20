@@ -1,4 +1,4 @@
-/*
+﻿/*
     This file is part of the Repetier-Firmware for RF devices from Conrad Electronic SE.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -78,10 +78,6 @@ public:
     static float			queuePositionLastMM[3];				// Position in mm from origin.
     static float			queuePositionCommandMM[3];			// Last coordinates send by gcodes
 
-#if MAX_HARDWARE_ENDSTOP_Z
-    static long				stepsRemainingAtZHit;
-#endif // MAX_HARDWARE_ENDSTOP_Z
-
     static float			minimumSpeed;						// lowest allowed speed to keep integration error small
     static float			minimumZSpeed;						// lowest allowed speed to keep integration error small
     static long				maxSteps[3];						// For software endstops, limit of move in positive direction.
@@ -100,6 +96,8 @@ public:
     static float			filamentPrinted;					// mm of filament printed since counting started
     static uint8_t			wasLastHalfstepping;				// Indicates if last move had halfstepping enabled
 	static long				ZOffset;							// Z Offset in um
+	static char				ZMode;								// Z Scale
+	static char				moveMode[3];						// move mode which is applied within the Position X/Y/Z menus
 
 #if ENABLE_BACKLASH_COMPENSATION
     static float			backlash[3];
@@ -136,11 +134,16 @@ public:
 
     static long				queuePositionCurrentSteps[3];
 	static char				stepperDirection[3];				// this is the current x/y/z-direction from the processing of G-Codes
-	static char				blockZ;
+	static char				blockAll;
+
+#if FEATURE_Z_MIN_OVERRIDE_VIA_GCODE
+	static long				currentZSteps;
+#endif // FEATURE_Z_MIN_OVERRIDE_VIA_GCODE
 
 #if FEATURE_HEAT_BED_Z_COMPENSATION || FEATURE_WORK_PART_Z_COMPENSATION
     static long				compensatedPositionTargetStepsZ;
     static long				compensatedPositionCurrentStepsZ;
+	static char				endZCompensationStep;
 #endif // FEATURE_HEAT_BED_Z_COMPENSATION || FEATURE_WORK_PART_Z_COMPENSATION
 
 #if FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
@@ -162,8 +165,6 @@ public:
 	static char				lastZDirection;
 	static char				endstopZMinHit;
 	static char				endstopZMaxHit;
-	static long				stepsSinceZMinEndstop;
-	static long				stepsSinceZMaxEndstop;
 #endif // FEATURE_CONFIGURABLE_Z_ENDSTOPS
 
 #if FEATURE_CONFIGURABLE_HOTEND_TYPE
@@ -316,11 +317,7 @@ public:
 #endif // STEPPER_ON_DELAY
 
 #if FEATURE_CONFIGURABLE_Z_ENDSTOPS
-		Printer::lastZDirection		   = 0;
-		Printer::endstopZMinHit		   = ENDSTOP_NOT_HIT;
-		Printer::endstopZMaxHit		   = ENDSTOP_NOT_HIT;
-		Printer::stepsSinceZMinEndstop = 0;
-		Printer::stepsSinceZMaxEndstop = 0;
+		Printer::lastZDirection = 0;
 #endif // FEATURE_CONFIGURABLE_Z_ENDSTOPS
 
 		// when the stepper is disabled we loose our home position because somebody else can move our mechanical parts
@@ -394,6 +391,11 @@ public:
 
     static inline void setXDirection(bool positive)
     {
+		if( blockAll )
+		{
+			return;
+		}
+
         if(positive)
         {
             // extruder moves to the right
@@ -426,6 +428,11 @@ public:
 
     static inline void setYDirection(bool positive)
     {
+		if( blockAll )
+		{
+			return;
+		}
+
         if(positive)
         {
             // heat bed moves to the front
@@ -458,7 +465,7 @@ public:
 
     static inline void setZDirection(bool positive)
     {
-		if( blockZ )
+		if( blockAll )
 		{
 			return;
 		}
@@ -649,6 +656,7 @@ public:
 
 		if( ZEndstopType == ENDSTOP_TYPE_SINGLE )
 		{
+#if FEATURE_MILLING_MODE
 			if( operatingMode == OPERATING_MODE_PRINT )
 			{
 				// in case there is only one z-endstop and we are in operating mode "print", the z-min endstop must be connected
@@ -657,6 +665,10 @@ public:
 
 			// in case there is only one z-endstop and we are in operating mode "mill", the z-min endstop is not connected and can not be detected
 			return false;
+#else
+			// in case there is only one z-endstop and we are in operating mode "print", the z-min endstop must be connected
+			return READ(Z_MIN_PIN) != ENDSTOP_Z_MIN_INVERTING;
+#endif // FEATURE_MILLING_MODE
 		}
 
 		// we end up here in case the z-min and z-max endstops are connected in a circuit
@@ -681,12 +693,6 @@ public:
 				return true;
 			}
 
-			if( stepsSinceZMaxEndstop && stepsSinceZMaxEndstop > MINIMAL_Z_ENDSTOP_MAX_TO_MIN_STEPS )
-			{
-				// the z-max endstop was hit a few steps ago, so the z-min endstop can not be hit right now
-				return false;
-			}
-				
 			if( lastZDirection > 0 )
 			{
 				// z-min was not hit and we are moving downwards, so z-min can not become hit right now
@@ -694,10 +700,12 @@ public:
 			}
 
 			// the last z-direction is unknown or the heat bed has been moved upwards, thus we have to assume that the z-min endstop is hit
-			endstopZMinHit		  = ENDSTOP_IS_HIT;
-			endstopZMaxHit		  = ENDSTOP_NOT_HIT;
-			stepsSinceZMinEndstop = Z_ENDSTOP_MIN_TO_MAX_INITIAL_STEPS;
-			stepsSinceZMaxEndstop = 0;
+#if FEATURE_CONFIGURABLE_Z_ENDSTOPS && DEBUG_CONFIGURABLE_Z_ENDSTOPS
+			Com::printF( PSTR( "Z-Min hit") );
+#endif // FEATURE_CONFIGURABLE_Z_ENDSTOPS && DEBUG_CONFIGURABLE_Z_ENDSTOPS
+
+			endstopZMinHit = ENDSTOP_IS_HIT;
+			endstopZMaxHit = ENDSTOP_NOT_HIT;
 			return true;
 		}
 
@@ -748,6 +756,7 @@ public:
 
 		if( ZEndstopType == ENDSTOP_TYPE_SINGLE )
 		{
+#if FEATURE_MILLING_MODE
 			if( operatingMode == OPERATING_MODE_MILL )
 			{
 				// in case there is only one z-endstop and we are in operating mode "mill", the z-max endstop must be connected
@@ -756,6 +765,10 @@ public:
 
 			// in case there is only one z-endstop and we are in operating mode "print", the z-max endstop is not connected and can not be detected
 			return false;
+#else
+			// in case there is only one z-endstop and we are in operating mode "print", the z-max endstop is not connected and can not be detected
+			return false;
+#endif // FEATURE_MILLING_MODE
 		}
 
 		// we end up here in case the z-min and z-max endstops are connected in a circuit
@@ -780,25 +793,36 @@ public:
 				return true;
 			}
 				
-			if( stepsSinceZMinEndstop && stepsSinceZMinEndstop < MINIMAL_Z_ENDSTOP_MIN_TO_MAX_STEPS )
-			{
-				// the z-min endstop was hit a few steps ago, so the z-max endstop can not be hit right now
-				return false;
-			}
-				
 			if( lastZDirection < 0 )
 			{
 				// z-max was not hit and we are moving upwards, so z-max can not become hit right now
 				return false;
 			}
 
-//			g_debugInt32 = stepsSinceZMinEndstop;
+			if( isHomed() )
+			{
+#if FEATURE_Z_MIN_OVERRIDE_VIA_GCODE
+				if( currentZSteps < Z_MIN_DISTANCE )
+#else
+				if( currentZPositionSteps() < Z_MIN_DISTANCE )
+#endif // FEATURE_Z_MIN_OVERRIDE_VIA_GCODE
+				{
+					// we are close to z-min, so z-max can not become hit right now
+#if DEBUG_CONFIGURABLE_Z_ENDSTOPS
+					Com::printF( PSTR( "Z-Max not hit") );
+#endif // DEBUG_CONFIGURABLE_Z_ENDSTOPS
+
+					return false;
+				}
+			}
 
 			// the last z-direction is unknown or the heat bed has been moved downwards, thus we have to assume that the z-max endstop is hit
-			endstopZMinHit		  = ENDSTOP_NOT_HIT;
-			endstopZMaxHit		  = ENDSTOP_IS_HIT;
-			stepsSinceZMinEndstop = 0;
-			stepsSinceZMaxEndstop = Z_ENDSTOP_MAX_TO_MIN_INITIAL_STEPS;
+#if FEATURE_CONFIGURABLE_Z_ENDSTOPS && DEBUG_CONFIGURABLE_Z_ENDSTOPS
+			Com::printF( PSTR( "Z-Max hit") );
+#endif // FEATURE_CONFIGURABLE_Z_ENDSTOPS && DEBUG_CONFIGURABLE_Z_ENDSTOPS
+
+			endstopZMinHit = ENDSTOP_NOT_HIT;
+			endstopZMaxHit = ENDSTOP_IS_HIT;
 			return true;
 		}
 
@@ -1035,26 +1059,53 @@ public:
 
     } // currentYPosition
 
-    static inline float currentZPosition()
+    static inline long currentZPositionSteps()
     {
-		// return all values in [mm]
-		float	fvalue = (float)queuePositionCurrentSteps[Z_AXIS];
+		// return all values in [steps]
+		long	value = queuePositionCurrentSteps[Z_AXIS];
 
 
 #if FEATURE_HEAT_BED_Z_COMPENSATION || FEATURE_WORK_PART_Z_COMPENSATION
 		// add the current z-compensation
-		fvalue += (float)Printer::compensatedPositionCurrentStepsZ;
-		fvalue += (float)g_nZScanZPosition;
+		value += Printer::compensatedPositionCurrentStepsZ;
+		value += g_nZScanZPosition;
 #endif // FEATURE_HEAT_BED_Z_COMPENSATION || FEATURE_WORK_PART_Z_COMPENSATION
 
 #if FEATURE_FIND_Z_ORIGIN
-		fvalue += (float)g_nZOriginPosition[Z_AXIS];
+		value += g_nZOriginPosition[Z_AXIS];
 #endif // FEATURE_FIND_Z_ORIGIN
 
 #if FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
 		// add the current manual z-steps
-		fvalue += (float)Printer::directPositionCurrentSteps[Z_AXIS];
+		value += Printer::directPositionCurrentSteps[Z_AXIS];
 #endif // FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
+
+		return value;
+
+    } // currentZPositionSteps
+
+    static inline float currentZPosition()
+    {
+		// return all values in [mm]
+		float	fvalue = (float)currentZPositionSteps();
+
+		if (Printer::ZMode <= Z_VALUE_MODE_Z_MIN)
+		{
+			// show the z-distance to z-min (print) or to the z-origin (mill)
+			
+		}
+
+		else if (Printer::ZMode == Z_VALUE_MODE_SURFACE)
+		{
+			// show the z-distance to the surface of the heat bed (print) or work part (mill)
+#if FEATURE_HEAT_BED_Z_COMPENSATION
+			fvalue -= (float)getHeatBedOffset();
+#endif // FEATURE_HEAT_BED_Z_COMPENSATION
+
+#if FEATURE_WORK_PART_Z_COMPENSATION
+			fvalue -= (float)getWorkPartOffset();
+#endif // FEATURE_WORK_PART_Z_COMPENSATION
+		}
 
 		fvalue *= Printer::invAxisStepsPerMM[Z_AXIS];
 		return fvalue;
@@ -1087,6 +1138,7 @@ public:
     static void setup();
     static void defaultLoopActions();
     static uint8_t setDestinationStepsFromGCode(GCode *com);
+	static uint8_t setDestinationStepsFromMenu( float relativeX, float relativeY, float relativeZ );
     static void moveTo(float x,float y,float z,float e,float f);
     static void moveToReal(float x,float y,float z,float e,float f);
     static void homeAxis(bool xaxis,bool yaxis,bool zaxis); /// Home axis

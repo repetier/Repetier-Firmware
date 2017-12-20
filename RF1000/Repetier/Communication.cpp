@@ -1,4 +1,4 @@
-/*
+﻿/*
     This file is part of the Repetier-Firmware for RF devices from Conrad Electronic SE.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 #include "Repetier.h"
 
-FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/RF1000/RF-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
+FSTRINGVALUE(Com::tFirmware,"FIRMWARE_NAME:Repetier_" REPETIER_VERSION " FIRMWARE_URL:https://github.com/RF1000/Repetier-Firmware/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:2")
 
 FSTRINGVALUE(Com::tDebug,"Debug:");
 FSTRINGVALUE(Com::tOk,"ok")
@@ -50,8 +50,8 @@ FSTRINGVALUE(Com::tExpectedLine,"Error:expected line ")
 FSTRINGVALUE(Com::tGot," got ")
 FSTRINGVALUE(Com::tSkip,"skip ")
 FSTRINGVALUE(Com::tBLK,"BLK ")
-FSTRINGVALUE(Com::tStart,"Start")
-FSTRINGVALUE(Com::tStartWatchdog,"Start Watchdog")
+FSTRINGVALUE(Com::tStart,"start")					// do not change "start" to "Start" because some applications might not be able to detect "Start" as "start"
+FSTRINGVALUE(Com::tStartWatchdog,"start Watchdog")
 FSTRINGVALUE(Com::tPowerUp,"PowerUp")
 FSTRINGVALUE(Com::tExternalReset,"External Reset")
 FSTRINGVALUE(Com::tBrownOut,"Brown out Reset")
@@ -233,6 +233,7 @@ FSTRINGVALUE(Com::tEPRXTravelAcceleration,"X-axis travel acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRYTravelAcceleration,"Y-axis travel acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZTravelAcceleration,"Z-axis travel acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZOffset,"Z-Offset [um]")
+FSTRINGVALUE(Com::tEPRZMode,"Z Scale")
 FSTRINGVALUE(Com::tEPROPSMode,"OPS operation mode [0=Off,1=Classic,2=Fast]")
 FSTRINGVALUE(Com::tEPROPSMoveAfter,"OPS move after x% retract [%]")
 FSTRINGVALUE(Com::tEPROPSMinDistance,"OPS min. distance for fil. retraction [mm]")
@@ -269,7 +270,7 @@ FSTRINGVALUE(Com::tEPRCaseLightsMode,"case lights mode [0=off, 1=on]")
 FSTRINGVALUE(Com::tEPR230VOutputMode,"230V output mode [0=off, 1=on]")
 FSTRINGVALUE(Com::tEPROperatingMode,"operating mode [1=print, 2=mill]")
 FSTRINGVALUE(Com::tEPRZEndstopType,"Z endstop type [1=single, 2=circuit]")
-FSTRINGVALUE(Com::tEPRHotendType,"Hotend type [2=V1, 3=V2 single, 3=V2 dual]")
+FSTRINGVALUE(Com::tEPRHotendType,"Hotend type [2=V1, 3=V2 single, 4=V2 dual]")
 FSTRINGVALUE(Com::tEPRMillerType,"Miller type [1=one track, 2=two tracks]")
 FSTRINGVALUE(Com::tEPRRGBLightMode,"RGB Light mode [0=off, 1=white, 2=color, 3=manual]")
 FSTRINGVALUE(Com::tEPRFET1Mode,"FET1 mode [0=off, 1=on]")
@@ -300,8 +301,11 @@ FSTRINGVALUE(Com::tCreationFailed,"Creation failed")
 FSTRINGVALUE(Com::tSDErrorCode,"SD errorCode:")
 #endif // SDSUPPORT
 
+#if FEATURE_OUTPUT_FINISHED_OBJECT 
 FSTRINGVALUE(Com::tOutputObjectPrint,OUTPUT_OBJECT_SCRIPT_PRINT)
 FSTRINGVALUE(Com::tOutputObjectMill,OUTPUT_OBJECT_SCRIPT_MILL)
+#endif // FEATURE_OUTPUT_FINISHED_OBJECT 
+
 FSTRINGVALUE(Com::tUnmountFilamentWithHeating,UNMOUNT_FILAMENT_SCRIPT_WITH_HEATING)
 FSTRINGVALUE(Com::tUnmountFilamentWithoutHeating,UNMOUNT_FILAMENT_SCRIPT_WITHOUT_HEATING)
 FSTRINGVALUE(Com::tMountFilamentWithHeating,MOUNT_FILAMENT_SCRIPT_WITH_HEATING)
@@ -310,6 +314,10 @@ FSTRINGVALUE(Com::tMountFilamentWithoutHeating,MOUNT_FILAMENT_SCRIPT_WITHOUT_HEA
 #if FEATURE_FIND_Z_ORIGIN
 FSTRINGVALUE(Com::tFindZOrigin,FIND_Z_ORIGIN_SCRIPT)
 #endif // FEATURE_FIND_Z_ORIGIN
+
+#if FEATURE_TEST_STRAIN_GAUGE
+FSTRINGVALUE(Com::tTestStrainGauge,TEST_STRAIN_GAUGE_SCRIPT)
+#endif // FEATURE_TEST_STRAIN_GAUGE
 
 
 void Com::printWarningF(FSTRINGPARAM(text))

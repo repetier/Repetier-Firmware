@@ -1,4 +1,4 @@
-/*
+﻿/*
     This file is part of the Repetier-Firmware for RF devices from Conrad Electronic SE.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -20,6 +20,9 @@
 #define GCODE_H
 
 #define MAX_CMD_SIZE 128
+
+enum FirmwareState { NotBusy=0, Processing, Paused, WaitHeater };
+
 class SDCard;
 
 
@@ -181,6 +184,8 @@ public:
     static void executeString(char *cmd);
     static uint8_t computeBinarySize(char *ptr);
 	static void resetBuffer();
+	static void keepAlive(enum FirmwareState state);
+	static uint32_t keepAliveInterval;
 
     friend class SDCard;
     friend class UIDisplay;
@@ -221,6 +226,7 @@ private:
     static volatile uint8_t bufferLength;				///< Number of commands stored in gcode_buffer
     static millis_t timeOfLastDataPacket;				///< Time, when we got the last data packet. Used to detect missing uint8_ts.
     static uint8_t formatErrors;						///< Number of sequential format errors
+	static millis_t lastBusySignal;						///< When was the last busy signal
 
 public:
 	static int8_t waitingForResend;						///< Waiting for line to be resend. -1 = no wait.

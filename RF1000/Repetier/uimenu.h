@@ -1,4 +1,4 @@
-/*
+﻿/*
     This file is part of the Repetier-Firmware for RF devices from Conrad Electronic SE.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -37,7 +37,6 @@ List of placeholder:
 %Eb : Target temperature of heated bed
 %E0-9 : Target temperature of extruder 0..9
 %os : Status message
-%oe : Error message
 %oB : Buffer length
 %om : Speed multiplier
 %of : flow multiplier
@@ -56,6 +55,7 @@ List of placeholder:
 %sY : State of y max endstop
 %sz : State of z min endstop
 %sZ : State of z max endstop
+%sC : State of the z compensation
 %do : Debug echo state
 %di : Debug info state
 %de : Debug error state
@@ -85,9 +85,6 @@ List of placeholder:
 %fZ : Homing feedrate z direction
 %Fs : Fan speed
 %PN : Printer name
-%Sx : Steps per mm x direction
-%Sy : Steps per mm y direction
-%Sz : Steps per mm z direction
 %Se : Steps per mm current extruder
 %is : Stepper inactive time in seconds
 %ip : Max. inactive time in seconds
@@ -118,13 +115,23 @@ List of placeholder:
 %OM : operating mode
 %OZ : z endstop type
 %z0 : Z Offset
+%zm : Z Scale
 %ht : hotend type
 %mt : miller type
 %mY : menu yes
 %mN : menu no
+%m1 : message line 1
+%m2 : message line 2
+%m3 : message line 3
+%m4 : message line 4
 %Oa : Active Extruder
 %OE : Extruder offset X [mm]
 %OF : Extruder offset Y [mm]
+%px : mode of the Position X menu
+%py : mode of the Position Y menu
+%pz : mode of the Position Z menu
+%HB : active heat bed z matrix
+%WP : active work part z matrix
 %Z1-Z4: Page5 service intervall
 %Z5-Z8: Page4 printing/milling time
 */
@@ -191,15 +198,15 @@ for 2 row displays. You can add additional pages or change the default pages lik
 #elif UI_ROWS>=4
 #if HAVE_HEATED_BED==true
 #if UI_COLS<=16
-	UI_PAGE4(ui_page1,"%U1%ec/%EcB%eB/%Eb","Z:%x2 mm",UI_TEXT_STRAIN_GAUGE,"%os");
+	UI_PAGE4(ui_page1,"%U1%ec/%EcB%eB/%Eb","Z:%x2 mm %sC",UI_TEXT_STRAIN_GAUGE,"%os");
 #else
-	UI_PAGE4(ui_page1,"%U1%ec/%Ec\002 B%eB/%Eb\002","Z:%x2 mm",UI_TEXT_STRAIN_GAUGE,"%os");
+	UI_PAGE4(ui_page1,"%U1%ec/%Ec\002 B%eB/%Eb\002","Z:%x2 mm %sC",UI_TEXT_STRAIN_GAUGE,"%os");
 #endif // UI_COLS<=16
 #else
-	UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm",UI_TEXT_PAGE_BUFFER,"%os");
+	UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,"Z:%x2 mm %sC",UI_TEXT_STRAIN_GAUGE,"%os");
 #endif // HAVE_HEATED_BED==true
 
-	UI_PAGE4(ui_page2,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm","%os");
+	UI_PAGE4(ui_page2,"X:%x0 mm","Y:%x1 mm","Z:%x2 mm %sC","%os");
 	UI_PAGE4(ui_page3,UI_TEXT_PAGE_EXTRUDER1, 
 
  #if NUM_EXTRUDER>1
@@ -231,14 +238,14 @@ for 2 row displays. You can add additional pages or change the default pages lik
 
 	/* Merge pages together. Use the following pattern:
 	#define UI_PAGES {&name1,&name2,&name3} */
-	#define UI_PAGES {&ui_page1,&ui_page2,&ui_page3,&ui_page4 UI_SERVICE_PAGES}
+	#define UI_PAGES {&ui_page1,&ui_page2,&ui_page3 UI_PRINTTIME_PAGES UI_SERVICE_PAGES}
 
 	// How many pages do you want to have. Minimum is 1.
 	#define UI_NUM_PAGES 3+UI_PRINTTIME_COUNT+UI_SERVICE_COUNT
 #else
 	UI_PAGE2(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED);
 	UI_PAGE2(ui_page2,"X:%x0 Y:%x1","%os");
-	UI_PAGE2(ui_page3,"Z:%x2 mm","%os");
+	UI_PAGE2(ui_page3,"Z:%x2 mm %sC","%os");
 
 	/* Merge pages together. Use the following pattern:
 	#define UI_PAGES {&name1,&name2,&name3} */
@@ -262,9 +269,9 @@ next/previous changes the value
 ok sets the value if not already done and goes back to previous menu.
 */
 
-// Error menu
 
-UI_MENU_ACTION2(ui_menu_error,UI_ACTION_DUMMY,UI_TEXT_ERROR,"%oe");
+// error/warning/information message
+UI_MENU_ACTION4(ui_menu_message,UI_ACTION_DUMMY,"%m1","%m2","%m3","%m4");
 
 /** \brief Positions submenus */
 #if UI_ROWS>=4
@@ -276,15 +283,6 @@ UI_MENU_ACTION4C(ui_menu_xpos_fast,UI_ACTION_XPOSITION_FAST,UI_TEXT_ACTION_XPOSI
 UI_MENU_ACTION4C(ui_menu_ypos_fast,UI_ACTION_YPOSITION_FAST,UI_TEXT_ACTION_YPOSITION_FAST4);
 UI_MENU_ACTION4C(ui_menu_zpos_fast,UI_ACTION_ZPOSITION_FAST,UI_TEXT_ACTION_ZPOSITION_FAST4);
 UI_MENU_ACTION4C(ui_menu_zpos_fast_notest,UI_ACTION_ZPOSITION_FAST_NOTEST,UI_TEXT_ACTION_ZPOSITION_FAST4);
-#else
-UI_MENU_ACTION2C(ui_menu_xpos,UI_ACTION_XPOSITION,UI_TEXT_ACTION_XPOSITION2);
-UI_MENU_ACTION2C(ui_menu_ypos,UI_ACTION_YPOSITION,UI_TEXT_ACTION_YPOSITION2);
-UI_MENU_ACTION2C(ui_menu_zpos,UI_ACTION_ZPOSITION,UI_TEXT_ACTION_ZPOSITION2);
-UI_MENU_ACTION2C(ui_menu_zpos_notest,UI_ACTION_ZPOSITION,UI_TEXT_ACTION_ZPOSITION2);
-UI_MENU_ACTION2C(ui_menu_xpos_fast,UI_ACTION_XPOSITION_FAST,UI_TEXT_ACTION_XPOSITION_FAST2);
-UI_MENU_ACTION2C(ui_menu_ypos_fast,UI_ACTION_YPOSITION_FAST,UI_TEXT_ACTION_YPOSITION_FAST2);
-UI_MENU_ACTION2C(ui_menu_zpos_fast,UI_ACTION_ZPOSITION_FAST,UI_TEXT_ACTION_ZPOSITION_FAST2);
-UI_MENU_ACTION2C(ui_menu_zpos_fast_notest,UI_ACTION_ZPOSITION_FAST_NOTEST,UI_TEXT_ACTION_ZPOSITION_FAST2);
 #endif // UI_ROWS>=4
 
 UI_MENU_ACTION2C(ui_menu_epos,UI_ACTION_EPOSITION,UI_TEXT_ACTION_EPOSITION_FAST2);
@@ -332,11 +330,26 @@ UI_MENU_ACTIONSELECTOR(ui_menu_go_zfast_notest,UI_TEXT_Z_POS_FAST,ui_menu_zpos_f
 #define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_home_x,&ui_menu_home_y,&ui_menu_home_z UI_SPEED_X UI_SPEED_Y UI_SPEED_Z ,&ui_menu_go_epos}
 UI_MENU(ui_menu_positions,UI_MENU_POSITIONS,5 + 3 * UI_SPEED + UI_MENU_BACKCNT);
 
-UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_heat_bed_scan,UI_TEXT_DO_HEAT_BED_SCAN,UI_ACTION_RF_DO_HEAT_BED_SCAN,MENU_MODE_PRINTER,0);
-UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_work_part_scan,UI_TEXT_DO_WORK_PART_SCAN,UI_ACTION_RF_DO_WORK_PART_SCAN,0,MENU_MODE_PRINTER);
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_heat_bed_scan,UI_TEXT_DO_HEAT_BED_SCAN,UI_ACTION_RF_SCAN_HEAT_BED,MENU_MODE_PRINTER,0);
+
+#if FEATURE_PRECISE_HEAT_BED_SCAN
+
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_heat_bed_scan_pla,UI_TEXT_HEAT_BED_SCAN_PLA,UI_ACTION_RF_SCAN_HEAT_BED_PLA,MENU_MODE_PRINTER,0);
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_heat_bed_scan_abs,UI_TEXT_HEAT_BED_SCAN_ABS,UI_ACTION_RF_SCAN_HEAT_BED_ABS,MENU_MODE_PRINTER,0);
+#define UI_MENU_HEAT_BED_MODE_COND	 ,&ui_menu_heat_bed_scan_pla, &ui_menu_heat_bed_scan_abs
+#define	UI_MENU_HEAT_BED_MODE_COUNT 2
+#else
+#define UI_MENU_HEAT_BED_MODE_COND	 
+#define	UI_MENU_HEAT_BED_MODE_COUNT 0
+
+#endif // FEATURE_PRECISE_HEAT_BED_SCAN
+
+UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_work_part_scan,UI_TEXT_DO_WORK_PART_SCAN,UI_ACTION_RF_SCAN_WORK_PART,0,MENU_MODE_PRINTER);
 
 UI_MENU_ACTION4C(ui_menu_zoffset,UI_ACTION_ZOFFSET,UI_TEXT_ACTION_ZOFFSET);
 UI_MENU_ACTIONSELECTOR_FILTER(ui_menu_zoffset_z,UI_TEXT_Z_OFFSET,ui_menu_zoffset,MENU_MODE_PRINTER,0);
+
+UI_MENU_CHANGEACTION_FILTER(ui_menu_set_z_matrix_heat_bed,UI_TEXT_SET_Z_MATRIX_HEAT_BED,UI_ACTION_RF_SET_Z_MATRIX_HEAT_BED,MENU_MODE_PRINTER,0);
 
 /** \brief Z calibration menu */
 #if FEATURE_MILLING_MODE
@@ -353,19 +366,19 @@ UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_find_z_origin,UI_TEXT_FIND_Z_ORIGIN,UI_ACTI
 #define	UI_MENU_FIND_Z_COUNT 0
 #endif // FEATURE_FIND_Z_ORIGIN
 
-UI_MENU_CHANGEACTION_FILTER(ui_menu_set_work_part,UI_TEXT_SET_WORK_PART,UI_ACTION_RF_SET_WORK_PART,0,MENU_MODE_PRINTER);
+UI_MENU_CHANGEACTION_FILTER(ui_menu_set_z_matrix_work_part,UI_TEXT_SET_Z_MATRIX_WORK_PART,UI_ACTION_RF_SET_Z_MATRIX_WORK_PART,0,MENU_MODE_PRINTER);
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_set_xy_start,UI_TEXT_SET_SCAN_XY_START,UI_ACTION_RF_SET_SCAN_XY_START,0,MENU_MODE_PRINTER);
 UI_MENU_ACTIONCOMMAND_FILTER(ui_menu_set_xy_end,UI_TEXT_SET_SCAN_XY_END,UI_ACTION_RF_SET_SCAN_XY_END,0,MENU_MODE_PRINTER);
 UI_MENU_CHANGEACTION_FILTER(ui_menu_set_delta_x,UI_TEXT_SET_SCAN_DELTA_X,UI_ACTION_RF_SET_SCAN_DELTA_X,0,MENU_MODE_PRINTER);
 UI_MENU_CHANGEACTION_FILTER(ui_menu_set_delta_y,UI_TEXT_SET_SCAN_DELTA_Y,UI_ACTION_RF_SET_SCAN_DELTA_Y,0,MENU_MODE_PRINTER);
 
-#define UI_MENU_Z {UI_MENU_ADDCONDBACK /*UI_MENU_ADJUST_HOTEND*/ &ui_menu_heat_bed_scan, &ui_menu_zoffset_z, &ui_menu_work_part_scan UI_SPEED_Z_NOTEST,&ui_menu_set_z_origin UI_MENU_FIND_Z_COND, &ui_menu_set_work_part, &ui_menu_set_xy_start, &ui_menu_set_xy_end, &ui_menu_set_delta_x, &ui_menu_set_delta_y}
-UI_MENU(ui_menu_z,UI_MENU_Z,10 + UI_MENU_BACKCNT + UI_MENU_FIND_Z_COUNT/*+UI_MENU_ADJUST_HOTEND_COUNT*/);
+#define UI_MENU_Z {UI_MENU_ADDCONDBACK /*UI_MENU_ADJUST_HOTEND*/ &ui_menu_heat_bed_scan UI_MENU_HEAT_BED_MODE_COND, &ui_menu_zoffset_z, &ui_menu_work_part_scan UI_SPEED_Z /*UI_SPEED_Z_NOTEST*/,&ui_menu_set_z_origin UI_MENU_FIND_Z_COND, &ui_menu_set_z_matrix_heat_bed, &ui_menu_set_z_matrix_work_part, &ui_menu_set_xy_start, &ui_menu_set_xy_end, &ui_menu_set_delta_x, &ui_menu_set_delta_y}
+UI_MENU(ui_menu_z,UI_MENU_Z,11 + UI_MENU_BACKCNT + UI_MENU_HEAT_BED_MODE_COUNT + UI_MENU_FIND_Z_COUNT/*+UI_MENU_ADJUST_HOTEND_COUNT*/);
 
 #else
 
-#define UI_MENU_Z {UI_MENU_ADDCONDBACK &ui_menu_heat_bed_scan UI_SPEED_Z_NOTEST}
-UI_MENU(ui_menu_z,UI_MENU_Z,2 + UI_MENU_BACKCNT);
+#define UI_MENU_Z {UI_MENU_ADDCONDBACK &ui_menu_heat_bed_scan UI_MENU_HEAT_BED_MODE_COND, &ui_menu_zoffset_z UI_SPEED_Z /*UI_SPEED_Z_NOTEST*/, &ui_menu_set_z_matrix_heat_bed}
+UI_MENU(ui_menu_z,UI_MENU_Z,4 + UI_MENU_BACKCNT + UI_MENU_HEAT_BED_MODE_COUNT);
 
 #endif // FEATURE_MILLING_MODE
 
@@ -462,7 +475,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_quick_output_object,UI_TEXT_OUTPUT_OBJECT,UI_ACTIO
 #endif // FEATURE_OUTPUT_FINISHED_OBJECT
 
 #if FEATURE_PARK
-UI_MENU_ACTIONCOMMAND(ui_menu_quick_park,UI_TEXT_PARK,UI_ACTION_RF_PARK);
+UI_MENU_ACTIONCOMMAND(ui_menu_quick_park,UI_TEXT_PARK_HEAT_BED,UI_ACTION_RF_PARK);
 #define PARK_COUNT 1
 #define PARK_ENTRY ,&ui_menu_quick_park
 #else
@@ -483,7 +496,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_toggle_230V_output,UI_TEXT_230V_OUTPUT,UI_ACTION_2
 UI_MENU_ACTION4C(ui_menu_quick_reset_ack,UI_ACTION_RF_RESET_ACK,UI_TEXT_RESET_ACK);
 UI_MENU_ACTIONSELECTOR(ui_menu_quick_reset,UI_TEXT_RESET,ui_menu_quick_reset_ack);
 #define RESET_VIA_MENU_COUNT 1
-#define RESET_VIA_MENU_ENTRY,&ui_menu_quick_reset
+#define RESET_VIA_MENU_ENTRY ,&ui_menu_quick_reset
 #else
 #define RESET_VIA_MENU_COUNT 0
 #define RESET_VIA_MENU_ENTRY 
@@ -629,6 +642,8 @@ UI_MENU_ACTIONCOMMAND(ui_menu_light_mode,UI_TEXT_LIGHTS_ONOFF,UI_ACTION_LIGHTS_O
 #define LIGHT_MODE_COUNT 0
 #endif // FEATURE_CASE_LIGHT
 
+UI_MENU_ACTIONCOMMAND(ui_menu_z_mode,UI_TEXT_Z_MODE,UI_ACTION_ZMODE);
+
 #if FEATURE_MILLING_MODE
 UI_MENU_ACTIONCOMMAND(ui_menu_operating_mode,UI_TEXT_OPERATING_MODE,UI_ACTION_OPERATING_MODE);
 #define OPERATING_MODE_ENTRY ,&ui_menu_operating_mode
@@ -688,8 +703,8 @@ UI_MENU_ACTIONSELECTOR_FILTER(ui_menu_extruder_offset_y,UI_TEXT_EXTRUDER_OFFSET_
 #define	EXTRUDER_OFFSET_TYPE_COUNT_XY 0
 #endif // NUM_EXTRUDER>1
 
-#define UI_MENU_GENERAL {UI_MENU_ADDCONDBACK &ui_menu_general_baud,&ui_menu_general_stepper_inactive,&ui_menu_general_max_inactive BEEPER_MODE_ENTRY LIGHT_MODE_ENTRY OPERATING_MODE_ENTRY Z_ENDSTOP_TYPE_ENTRY HOTEND_TYPE_ENTRY MILLER_TYPE_ENTRY EXTRUDER_OFFSET_TYPE_ENTRY_X EXTRUDER_OFFSET_TYPE_ENTRY_Y}
-UI_MENU(ui_menu_general,UI_MENU_GENERAL,3+UI_MENU_BACKCNT+BEEPER_MODE_COUNT+LIGHT_MODE_COUNT+OPERATING_MODE_COUNT+Z_ENDSTOP_TYPE_COUNT+HOTEND_TYPE_COUNT+MILLER_TYPE_COUNT+EXTRUDER_OFFSET_TYPE_COUNT_XY);
+#define UI_MENU_GENERAL {UI_MENU_ADDCONDBACK &ui_menu_general_baud,&ui_menu_general_stepper_inactive,&ui_menu_general_max_inactive BEEPER_MODE_ENTRY LIGHT_MODE_ENTRY OPERATING_MODE_ENTRY,&ui_menu_z_mode Z_ENDSTOP_TYPE_ENTRY HOTEND_TYPE_ENTRY MILLER_TYPE_ENTRY EXTRUDER_OFFSET_TYPE_ENTRY_X EXTRUDER_OFFSET_TYPE_ENTRY_Y}
+UI_MENU(ui_menu_general,UI_MENU_GENERAL,4+UI_MENU_BACKCNT+BEEPER_MODE_COUNT+LIGHT_MODE_COUNT+OPERATING_MODE_COUNT+Z_ENDSTOP_TYPE_COUNT+HOTEND_TYPE_COUNT+MILLER_TYPE_COUNT+EXTRUDER_OFFSET_TYPE_COUNT_XY);
 
 /** \brief Configuration menu */
 UI_MENU_SUBMENU(ui_menu_conf_general, UI_TEXT_GENERAL,      ui_menu_general);

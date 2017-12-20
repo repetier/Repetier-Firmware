@@ -1,4 +1,4 @@
-/*
+﻿/*
     This file is part of the Repetier-Firmware for RF devices from Conrad Electronic SE.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -33,38 +33,37 @@ void Commands::commandLoop()
 #ifdef DEBUG_PRINT
         debugWaitLoop = 1;
 #endif
-
-        GCode::readFromSerial();
+		GCode::readFromSerial();
 		GCode *code = GCode::peekCurrentCommand();
-        UI_MEDIUM; // do check encoder
+		UI_MEDIUM; // do check encoder
 
 		if(code)
-        {
+		{
 #if DEBUG_COMMAND_PEEK
 			Com::printFLN( PSTR( "commandLoop(): peek" ) );
 #endif // DEBUG_COMMAND_PEEK
 
 #if SDSUPPORT
-            if(sd.savetosd)
-            {
-                if(!(code->hasM() && code->M == 29))   // still writing to file
-                {
-                    sd.writeCommand(code);
-                }
-                else
-                {
-                    sd.finishWrite();
-                }
+			if(sd.savetosd)
+			{
+				if(!(code->hasM() && code->M == 29))   // still writing to file
+				{
+					sd.writeCommand(code);
+				}
+				else
+				{
+					sd.finishWrite();
+				}
 #ifdef ECHO_ON_EXECUTE
-                code->echoCommand();
+				code->echoCommand();
 #endif
-            }
-            else
+			}
+			else
 #endif
-                Commands::executeGCode(code);
-            code->popCurrentCommand();
-        }
-        Printer::defaultLoopActions();
+				Commands::executeGCode(code);
+			code->popCurrentCommand();
+		}
+		Printer::defaultLoopActions();
     }
 
 } // commandLoop
@@ -76,7 +75,10 @@ void Commands::checkForPeriodicalActions()
 
     if(!executePeriodical) return;
     executePeriodical=0;
-    Extruder::manageTemperatures();
+
+	g_uLastCommandLoop = HAL::timeInMilliseconds();
+
+	Extruder::manageTemperatures();
     if(--counter250ms==0)
     {
         if(manageMonitor<=1+NUM_EXTRUDER)
@@ -85,6 +87,74 @@ void Commands::checkForPeriodicalActions()
     }
     UI_SLOW;
 	loopRF();
+
+#if FEATURE_PAUSE_PRINTING
+    switch( g_pauseStatus )
+	{
+		case PAUSE_STATUS_PREPARE_PAUSE_1:
+		{
+			if( (Printer::directPositionTargetSteps[E_AXIS] == Printer::directPositionCurrentSteps[E_AXIS]) )
+			{
+				// we have reached the pause position - nothing except the extruder can have been moved
+				g_pauseStatus = PAUSE_STATUS_PAUSED;
+
+				Printer::stepperDirection[X_AXIS]	= 0;
+				Printer::stepperDirection[Y_AXIS]	= 0;
+				Printer::stepperDirection[Z_AXIS]	= 0;
+				Extruder::current->stepperDirection = 0;
+			}
+			break;
+		}
+		case PAUSE_STATUS_PREPARE_PAUSE_2:
+		{
+			if( (Printer::directPositionTargetSteps[X_AXIS] == Printer::directPositionCurrentSteps[X_AXIS]) &&
+				(Printer::directPositionTargetSteps[Y_AXIS] == Printer::directPositionCurrentSteps[Y_AXIS]) &&
+				(Printer::directPositionTargetSteps[Z_AXIS] == Printer::directPositionCurrentSteps[Z_AXIS]) &&
+				(Printer::directPositionTargetSteps[E_AXIS] == Printer::directPositionCurrentSteps[E_AXIS]) )
+			{
+				// we have reached the pause position 1
+#if FEATURE_MILLING_MODE
+				if( Printer::operatingMode == OPERATING_MODE_MILL )
+				{
+					// in operating mode mill, we have 2 pause positions because we have to leave the work part before we shall move into x/y direction
+					g_pauseStatus = PAUSE_STATUS_PREPARE_PAUSE_3;
+
+					determinePausePosition();
+					PrintLine::prepareDirectMove();
+				}
+				else
+#endif // FEATURE_MILLING_MODE
+				{
+					// in operating mode print, there is no need for a second pause position
+					g_pauseStatus = PAUSE_STATUS_PAUSED;
+
+					Printer::stepperDirection[X_AXIS]	= 0;
+					Printer::stepperDirection[Y_AXIS]	= 0;
+					Printer::stepperDirection[Z_AXIS]	= 0;
+					Extruder::current->stepperDirection = 0;
+				}
+			}
+			break;
+		}
+		case PAUSE_STATUS_PREPARE_PAUSE_3:
+		{
+			if( (Printer::directPositionTargetSteps[X_AXIS] == Printer::directPositionCurrentSteps[X_AXIS]) &&
+				(Printer::directPositionTargetSteps[Y_AXIS] == Printer::directPositionCurrentSteps[Y_AXIS]) &&
+				(Printer::directPositionTargetSteps[Z_AXIS] == Printer::directPositionCurrentSteps[Z_AXIS]) &&
+				(Printer::directPositionTargetSteps[E_AXIS] == Printer::directPositionCurrentSteps[E_AXIS]) )
+			{
+				// we have reached the pause position 2
+				g_pauseStatus = PAUSE_STATUS_PAUSED;
+
+				Printer::stepperDirection[X_AXIS]	= 0;
+				Printer::stepperDirection[Y_AXIS]	= 0;
+				Printer::stepperDirection[Z_AXIS]	= 0;
+				Extruder::current->stepperDirection = 0;
+			}
+			break;
+		}
+	}
+#endif // FEATURE_PAUSE_PRINTING
 
 } // checkForPeriodicalActions
 
@@ -103,25 +173,32 @@ void Commands::waitUntilEndOfAllMoves()
 #endif
 
 	if( PrintLine::hasLines() )		bWait = 1;
+
 #if FEATURE_FIND_Z_ORIGIN
 	if( g_nFindZOriginStatus )		bWait = 1;
 #endif // FEATURE_FIND_Z_ORIGIN
 
+#if FEATURE_TEST_STRAIN_GAUGE
+	if( g_nTestStrainGaugeStatus )	bWait = 1;
+#endif // FEATURE_TEST_STRAIN_GAUGE
+
 	while( bWait )
 	{
-#if FEATURE_WATCHDOG
-		HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
 		GCode::readFromSerial();
         Commands::checkForPeriodicalActions();
+		GCode::keepAlive( Processing );
         UI_MEDIUM;
 
 		bWait = 0;
 		if( PrintLine::hasLines() )		bWait = 1;
+
 #if FEATURE_FIND_Z_ORIGIN
 		if( g_nFindZOriginStatus )		bWait = 1;
 #endif // FEATURE_FIND_Z_ORIGIN
+
+#if FEATURE_TEST_STRAIN_GAUGE
+		if( g_nTestStrainGaugeStatus )	bWait = 1;
+#endif // FEATURE_TEST_STRAIN_GAUGE
 	}
 
 } // waitUntilEndOfAllMoves
@@ -137,10 +214,6 @@ void Commands::waitUntilEndOfAllBuffers()
 
 	while(PrintLine::hasLines() || (code = GCode::peekCurrentCommand()) != NULL)
     {
-#if FEATURE_WATCHDOG
-		HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
 		GCode::readFromSerial();
         UI_MEDIUM; // do check encoder
         if(code)
@@ -194,7 +267,31 @@ void Commands::printCurrentPosition()
 		Com::printFLN(Com::tSpaceEColon,Printer::queuePositionLastSteps[E_AXIS]*Printer::invAxisStepsPerMM[E_AXIS]*(Printer::unitIsInches?0.03937:1),2);
 		//Com::printF(PSTR("OffX:"),Printer::extruderOffset[X_AXIS]); // to debug offset handling
 		//Com::printFLN(PSTR(" OffY:"),Printer::extruderOffset[Y_AXIS]);
-	}
+
+/*		Com::printF(Com::tXColon,Printer::directPositionTargetSteps[X_AXIS]);
+		Com::printF(Com::tSpaceYColon,Printer::directPositionTargetSteps[Y_AXIS]);
+		Com::printFLN(Com::tSpaceZColon,Printer::directPositionTargetSteps[Z_AXIS]);
+
+		Com::printF(Com::tXColon,Printer::directPositionCurrentSteps[X_AXIS]);
+		Com::printF(Com::tSpaceYColon,Printer::directPositionCurrentSteps[Y_AXIS]);
+		Com::printFLN(Com::tSpaceZColon,Printer::directPositionCurrentSteps[Z_AXIS]);
+*/	}
+
+/*	Com::printF(PSTR("Queue;x="),(float)Printer::queuePositionCurrentSteps[X_AXIS]*Printer::invAxisStepsPerMM[X_AXIS],2);
+	Com::printF(PSTR(";y="),(float)Printer::queuePositionCurrentSteps[Y_AXIS]*Printer::invAxisStepsPerMM[Y_AXIS],2);
+	Com::printFLN(PSTR(";z="),(float)Printer::queuePositionCurrentSteps[Z_AXIS]*Printer::invAxisStepsPerMM[Z_AXIS],2);
+	Com::printF(PSTR("Direct;x="),(float)Printer::directPositionCurrentSteps[X_AXIS]*Printer::invAxisStepsPerMM[X_AXIS],2);
+	Com::printF(PSTR(";y="),(float)Printer::directPositionCurrentSteps[Y_AXIS]*Printer::invAxisStepsPerMM[Y_AXIS],2);
+	Com::printFLN(PSTR(";z="),(float)Printer::directPositionCurrentSteps[Z_AXIS]*Printer::invAxisStepsPerMM[Z_AXIS],2);
+
+	Com::printF(PSTR("Queue;x="),(float)Printer::queuePositionTargetSteps[X_AXIS]*Printer::invAxisStepsPerMM[X_AXIS],2);
+	Com::printF(PSTR(";y="),(float)Printer::queuePositionTargetSteps[Y_AXIS]*Printer::invAxisStepsPerMM[Y_AXIS],2);
+	Com::printFLN(PSTR(";z="),(float)Printer::queuePositionTargetSteps[Z_AXIS]*Printer::invAxisStepsPerMM[Z_AXIS],2);
+	Com::printF(PSTR("Direct;x="),(float)Printer::directPositionTargetSteps[X_AXIS]*Printer::invAxisStepsPerMM[X_AXIS],2);
+	Com::printF(PSTR(";y="),(float)Printer::directPositionTargetSteps[Y_AXIS]*Printer::invAxisStepsPerMM[Y_AXIS],2);
+	Com::printFLN(PSTR(";z="),(float)Printer::directPositionTargetSteps[Z_AXIS]*Printer::invAxisStepsPerMM[Z_AXIS],2);
+	Com::printFLN(PSTR("*"));
+*/
 
 } // printCurrentPosition
 
@@ -288,7 +385,7 @@ void Commands::setFanSpeed(int speed,bool wait)
     Printer::setMenuMode(MENU_MODE_FAN_RUNNING,speed!=0);
 
     if(wait)
-        Commands::waitUntilEndOfAllMoves(); // use only if neededthis to change the speed exactly at that point, but it may cause blobs if you do!
+        Commands::waitUntilEndOfAllMoves(); // use only if needed this to change the speed exactly at that point, but it may cause blobs if you do!
 
 	if( Printer::debugInfo() )
 	{
@@ -642,14 +739,12 @@ void Commands::executeGCode(GCode *com)
             if(com->hasP()) codenum = com->P; // milliseconds to wait
             if(com->hasS()) codenum = com->S * 1000; // seconds to wait
             codenum += HAL::timeInMilliseconds();  // keep track of when we started waiting
+
             while((uint32_t)(codenum-HAL::timeInMilliseconds())  < 2000000000 )
             {
-#if FEATURE_WATCHDOG
-				HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
-                GCode::readFromSerial();
+				GCode::readFromSerial();
                 Commands::checkForPeriodicalActions();
+				GCode::keepAlive( Processing );
             }
             break;
 		}
@@ -663,7 +758,7 @@ void Commands::executeGCode(GCode *com)
             Printer::unitIsInches = 0;
             break;
 		}
-        case 28:  //G28 - Home all Axis one at a time
+        case 28:  // G28 - Home all axes one at a time
         {
 			if(!isHomingAllowed(com))
 			{
@@ -1053,10 +1148,6 @@ void Commands::executeGCode(GCode *com)
 					millis_t currentTime;
 					do
 					{
-#if FEATURE_WATCHDOG
-						HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
 						currentTime = HAL::timeInMilliseconds();
 						if( (currentTime - printedTime) > 1000 )   //Print Temp Reading every 1 second while heating up.
 						{
@@ -1064,6 +1155,7 @@ void Commands::executeGCode(GCode *com)
 							printedTime = currentTime;
 						}
 						Commands::checkForPeriodicalActions();
+						GCode::keepAlive( WaitHeater );
 #if RETRACT_DURING_HEATUP
 						if (actExtruder == Extruder::current && actExtruder->waitRetractUnits > 0 && !retracted && dirRising && actExtruder->tempControl.currentTemperatureC > actExtruder->waitRetractTemperature)
 						{
@@ -1097,7 +1189,7 @@ void Commands::executeGCode(GCode *com)
 #endif // FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
 				}
 
-				UI_CLEAR_STATUS;
+				g_uStartOfIdle	  = HAL::timeInMilliseconds();
 				previousMillisCmd = HAL::timeInMilliseconds();
 				break;
 			}
@@ -1141,16 +1233,13 @@ void Commands::executeGCode(GCode *com)
 					codenum = HAL::timeInMilliseconds();
 					while(heatedBedController.currentTemperatureC+TEMP_TOLERANCE < heatedBedController.targetTemperatureC)
 					{
-#if FEATURE_WATCHDOG
-						HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
 						if( (HAL::timeInMilliseconds()-codenum) > 1000 )   //Print Temp Reading every 1 second while heating up.
 						{
 							printTemperatures();
 							codenum = HAL::timeInMilliseconds();
 						}
 						Commands::checkForPeriodicalActions();
+						GCode::keepAlive( WaitHeater );
 					}
 
 #if FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
@@ -1159,7 +1248,7 @@ void Commands::executeGCode(GCode *com)
 #endif // HAVE_HEATED_BED
 				}
 
-				UI_CLEAR_STATUS;
+				g_uStartOfIdle	  = HAL::timeInMilliseconds();
 				previousMillisCmd = HAL::timeInMilliseconds();
 				break;
 			}
@@ -1173,10 +1262,6 @@ void Commands::executeGCode(GCode *com)
 						codenum = HAL::timeInMilliseconds();
 						while(!allReached)
 						{
-#if FEATURE_WATCHDOG
-							HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
 							allReached = true;
 							if( (HAL::timeInMilliseconds()-codenum) > 1000 )   //Print Temp Reading every 1 second while heating up.
 							{
@@ -1184,10 +1269,15 @@ void Commands::executeGCode(GCode *com)
 								codenum = HAL::timeInMilliseconds();
 							}
 							Commands::checkForPeriodicalActions();
-							for(uint8_t h=0;h<NUM_TEMPERATURE_LOOPS;h++) {
+							GCode::keepAlive( WaitHeater );
+
+							for( uint8_t h=0; h<NUM_TEMPERATURE_LOOPS; h++ )
+							{
 								TemperatureController *act = tempController[h];
-								if(act->targetTemperatureC>30 && fabs(act->targetTemperatureC-act->currentTemperatureC)>1)
+								if( act->targetTemperatureC > 30 && fabs( act->targetTemperatureC-act->currentTemperatureC ) > TEMP_TOLERANCE )
+								{
 									allReached = false;
+								}
 							}
 						}
 					}
@@ -1324,10 +1414,6 @@ void Commands::executeGCode(GCode *com)
 
                 while(wait-HAL::timeInMilliseconds() < 100000)
 				{
-#if FEATURE_WATCHDOG
-					HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
 					Printer::defaultLoopActions();
                 }
                 if(com->hasX())
@@ -1426,7 +1512,9 @@ void Commands::executeGCode(GCode *com)
 #endif // (Z_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Z
 
 #if (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
-#if FEATURE_MILLING_MODE && FEATURE_CONFIGURABLE_Z_ENDSTOPS
+#if MOTHERBOARD == DEVICE_TYPE_RF1000
+#if FEATURE_CONFIGURABLE_Z_ENDSTOPS
+#if FEATURE_MILLING_MODE
 				if( Printer::operatingMode == OPERATING_MODE_MILL )
 				{
 					// in operating mode "mill", the max endstop is used
@@ -1435,9 +1523,44 @@ void Commands::executeGCode(GCode *com)
 				}
 				else
 				{
-					// in operating mode "print", the max endstop is not used
+					if( Printer::ZEndstopType == ENDSTOP_TYPE_CIRCUIT )
+					{
+						// in operating mode "print", the max endstop is used only in case both z-endstops are in a circle
+						Com::printF(Com::tZMaxColon);
+						Com::printF(Printer::isZMaxEndstopHit()?Com::tHSpace:Com::tLSpace);
+					}
 				}
-#endif // FEATURE_MILLING_MODE && FEATURE_CONFIGURABLE_Z_ENDSTOPS
+#else
+				if( Printer::ZEndstopType == ENDSTOP_TYPE_CIRCUIT )
+				{
+					// in operating mode "print", the max endstop is used only in case both z-endstops are in a circle
+					Com::printF(Com::tZMaxColon);
+					Com::printF(Printer::isZMaxEndstopHit()?Com::tHSpace:Com::tLSpace);
+				}
+#endif // FEATURE_MILLING_MODE
+#else
+#if FEATURE_MILLING_MODE
+				if( Printer::operatingMode == OPERATING_MODE_MILL )
+				{
+					// in operating mode "mill", the max endstop is used
+					Com::printF(Com::tZMaxColon);
+					Com::printF(Printer::isZMaxEndstopHit()?Com::tHSpace:Com::tLSpace);
+				}
+				else
+				{
+					// in operating mode "print", the max endstop is used only in case both z-endstops are in a circle
+				}
+#else
+				// in operating mode "print", the max endstop is used only in case both z-endstops are in a circle
+#endif // FEATURE_MILLING_MODE
+#endif // FEATURE_CONFIGURABLE_Z_ENDSTOPS
+#endif // MOTHERBOARD == DEVICE_TYPE_RF1000
+
+#if MOTHERBOARD == DEVICE_TYPE_RF2000
+				// the RF2000 uses the max endstop in all operating modes
+				Com::printF(Com::tZMaxColon);
+				Com::printF(Printer::isZMaxEndstopHit()?Com::tHSpace:Com::tLSpace);
+#endif // MOTHERBOARD == DEVICE_TYPE_RF2000
 #endif // (Z_MAX_PIN > -1) && MAX_HARDWARE_ENDSTOP_Z
 
 				Com::println();
@@ -1456,19 +1579,19 @@ void Commands::executeGCode(GCode *com)
 #ifdef RAMP_ACCELERATION
 			case 201:	// M201
 			{
-				if(com->hasX()) Printer::maxAccelerationMMPerSquareSecond[0] = com->X;
-				if(com->hasY()) Printer::maxAccelerationMMPerSquareSecond[1] = com->Y;
-				if(com->hasZ()) Printer::maxAccelerationMMPerSquareSecond[2] = com->Z;
-				if(com->hasE()) Printer::maxAccelerationMMPerSquareSecond[3] = com->E;
+				if(com->hasX()) Printer::maxAccelerationMMPerSquareSecond[X_AXIS] = com->X;
+				if(com->hasY()) Printer::maxAccelerationMMPerSquareSecond[Y_AXIS] = com->Y;
+				if(com->hasZ()) Printer::maxAccelerationMMPerSquareSecond[Z_AXIS] = com->Z;
+				if(com->hasE()) Printer::maxAccelerationMMPerSquareSecond[E_AXIS] = com->E;
 				Printer::updateDerivedParameter();
 				break;
 			}
 			case 202:	// M202
 			{
-				if(com->hasX()) Printer::maxTravelAccelerationMMPerSquareSecond[0] = com->X;
-				if(com->hasY()) Printer::maxTravelAccelerationMMPerSquareSecond[1] = com->Y;
-				if(com->hasZ()) Printer::maxTravelAccelerationMMPerSquareSecond[2] = com->Z;
-				if(com->hasE()) Printer::maxTravelAccelerationMMPerSquareSecond[3] = com->E;
+				if(com->hasX()) Printer::maxTravelAccelerationMMPerSquareSecond[X_AXIS] = com->X;
+				if(com->hasY()) Printer::maxTravelAccelerationMMPerSquareSecond[Y_AXIS] = com->Y;
+				if(com->hasZ()) Printer::maxTravelAccelerationMMPerSquareSecond[Z_AXIS] = com->Z;
+				if(com->hasE()) Printer::maxTravelAccelerationMMPerSquareSecond[E_AXIS] = com->E;
 				Printer::updateDerivedParameter();
 				break;
 			}
@@ -1714,12 +1837,12 @@ void Commands::executeGCode(GCode *com)
 								int S = com->S;
 								if ( S >= 800 && S <= 2200 )
 								{
-									Com::printFLN( PSTR( " 1. Servo Value [uS] =  "), S );
+									Com::printFLN( PSTR( " 1. servo value [uS] =  "), S );
 									OCR5A = 2*S;
 								}
 								else
 								{
-									Com::printFLN( PSTR( " 1. Servo Value out of range ") );
+									Com::printFLN( PSTR( " 1. servo value out of range ") );
 								}
 							}
 							break;
@@ -1731,12 +1854,12 @@ void Commands::executeGCode(GCode *com)
 								int S = com->S;
 								if ( S >= 800 && S <= 2200 )
 								{
-									Com::printFLN( PSTR( " 2. Servo Value [uS] =  "), S );
+									Com::printFLN( PSTR( " 2. servo value [uS] =  "), S );
 									OCR5B = 2*S;
 								}
 								else
 								{
-									Com::printFLN( PSTR( " 2. Servo Value out of range ") );
+									Com::printFLN( PSTR( " 2. servo value out of range ") );
 								}
 							}
 							break;
@@ -1748,12 +1871,12 @@ void Commands::executeGCode(GCode *com)
 								int S = com->S;
 								if ( S >= 800 && S <= 2200 )
 								{
-									Com::printFLN( PSTR( " 3. Servo Value [uS] =  "), S );
+									Com::printFLN( PSTR( " 3. servo value [uS] =  "), S );
 									OCR5C = 2*S;
 								}
 								else
 								{
-									Com::printFLN( PSTR( " 3. Servo Value out of range ") );
+									Com::printFLN( PSTR( " 3. servo value out of range ") );
 								}
 							}
 							break;

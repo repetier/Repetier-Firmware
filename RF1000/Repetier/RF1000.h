@@ -1,4 +1,4 @@
-/*
+﻿/*
     This file is part of the Repetier-Firmware for RF devices from Conrad Electronic SE.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -47,6 +47,10 @@
 #if FEATURE_WORK_PART_Z_COMPENSATION && !FEATURE_FIND_Z_ORIGIN
 	#error It does not make sense to enable the work part z-compensation without enabling of the automatic detection of the z-origin
 #endif // FEATURE_WORK_PART_Z_COMPENSATION && !FEATURE_FIND_Z_ORIGIN
+
+/** \brief Experimental, do not use */
+#define FEATURE_TEST_STRAIN_GAUGE			0													// 1 = on, 0 = off
+
 
 #endif // FEATURE_MILLING_MODE
 
@@ -115,16 +119,17 @@ For delta robot Z_MAX_LENGTH is the maximum travel of the towers and should be s
 and the platform when the printer is at its home position.
 If EEPROM is enabled these values will be overidden with the values in the EEPROM */
 #if NUM_EXTRUDER == 2
-#define X_MAX_LENGTH						(long)180
+#define X_MAX_LENGTH_PRINT					(long)180
 #else
-#define X_MAX_LENGTH						(long)245
+#define X_MAX_LENGTH_PRINT					(long)245
 #endif // NUM_EXTRUDER == 2
 
+#define X_MAX_LENGTH_MILL					(long)230
 #define Y_MAX_LENGTH						(long)245
 #define Z_MAX_LENGTH						(long)200
 
 /** \brief Coordinates for the minimum axis. Can also be negative if you want to have the bed start at 0 and the printer can go to the left side
-of the bed. Maximum coordinate is given by adding the above X_MAX_LENGTH values. */
+of the bed. Maximum coordinate is given by adding the above MAX_LENGTH values. */
 #define X_MIN_POS							0
 #define Y_MIN_POS							0
 #define Z_MIN_POS							0
@@ -717,7 +722,7 @@ can set it on for safety. */
 #define INVERT_Z_DIR						false
 
 
-#if FEATURE_MILLING_MODE
+#if FEATURE_CONFIGURABLE_Z_ENDSTOPS
 
 /** \brief We set the current "steps after endstop" to the following offset values in order to avoid to reach a "steps after endstop" value of 0 (e.g. because of the up and down moving z-compensation or because of manual z movements.
            This initial value is set to a level which is above the steps which are possible in z-direction during the distance where the z-endstop is constantly pressed. */
@@ -733,7 +738,7 @@ can set it on for safety. */
 */
 #define	UNKNOWN_Z_ENDSTOP_DRIVE_FREE_STEPS	long(ZAXIS_STEPS_PER_MM * 5)						// [steps]
 
-#endif // FEATURE_MILLING_MODE
+#endif // FEATURE_CONFIGURABLE_Z_ENDSTOPS
 
 
 #define XYZ_DIRECTION_CHANGE_DELAY			250													// [us]
@@ -755,6 +760,10 @@ can set it on for safety. */
 
 /** \brief Automatic filament change, mounting of the filament without heating - ensure that G1 does not attempt to extrude more than EXTRUDE_MAXLENGTH */
 #define	MOUNT_FILAMENT_SCRIPT_WITHOUT_HEATING		"G21\nG90\nG92 E0\nG1 E90 F100"
+
+/** \brief speed of the PWM signal, 0 = 15.25Hz, 1 = 30.51Hz, 2 = 61.03Hz, 3 = 122.06Hz */
+#define HEATER_PWM_SPEED					1
+#define COOLER_PWM_SPEED					0
 
 
 // ##########################################################################################
@@ -786,9 +795,9 @@ can set it on for safety. */
 #define HOMING_FEEDRATE_Y_PRINT				165
 #define HOMING_FEEDRATE_Z_PRINT				10
 
-#define HOMING_FEEDRATE_X_MILL				50
-#define HOMING_FEEDRATE_Y_MILL				50
-#define HOMING_FEEDRATE_Z_MILL				5
+#define HOMING_FEEDRATE_X_MILL				70
+#define HOMING_FEEDRATE_Y_MILL				70
+#define HOMING_FEEDRATE_Z_MILL				7
 
 /** \brief Speed for direct movements in mm/s. Overridden if EEPROM activated. */
 #define DIRECT_FEEDRATE_XY					100
@@ -956,6 +965,8 @@ Above this value the z compensation will distribute the roughness of the surface
 #define	HEAT_BED_SCAN_Y_CALIBRATION_POINT_MM	100																		// [mm] from the front border of the heat bed
 #define HEAT_BED_SCAN_Y_CALIBRATION_POINT_STEPS	long(YAXIS_STEPS_PER_MM * HEAT_BED_SCAN_Y_CALIBRATION_POINT_MM)			// [steps]
 
+#define HEAT_BED_SCAN_Z_START_uM				500																		// [um]
+
 #define HEAT_BED_SCAN_CONTACT_PRESSURE_DELTA	10																		// [digits]
 #define HEAT_BED_SCAN_RETRY_PRESSURE_DELTA		5																		// [digits]
 #define HEAT_BED_SCAN_IDLE_PRESSURE_DELTA		0																		// [digits]
@@ -966,11 +977,17 @@ Above this value the z compensation will distribute the roughness of the surface
 #define HEAT_BED_SCAN_X_END_MM					5																		// [mm] from the right border of the heat bed
 #define HEAT_BED_SCAN_X_STEP_SIZE_MM			20																		// [mm]
 #define HEAT_BED_SCAN_X_STEP_SIZE_MIN_MM		10																		// [mm]
+#define HEAT_BED_SCAN_X_CALIBRATION_POINT_MM	100																		// [mm] from the left border of the heat bed
+#define HEAT_BED_SCAN_X_CALIBRATION_POINT_STEPS	long(XAXIS_STEPS_PER_MM * HEAT_BED_SCAN_X_CALIBRATION_POINT_MM)			// [steps]
 
 #define	HEAT_BED_SCAN_Y_START_MM				30																		// [mm] from the front border of the heat bed
 #define	HEAT_BED_SCAN_Y_END_MM					5																		// [mm] from the back border of the heat bed
 #define HEAT_BED_SCAN_Y_STEP_SIZE_MM			20																		// [mm]
 #define HEAT_BED_SCAN_Y_STEP_SIZE_MIN_MM		10																		// [mm]
+#define	HEAT_BED_SCAN_Y_CALIBRATION_POINT_MM	100																		// [mm] from the front border of the heat bed
+#define HEAT_BED_SCAN_Y_CALIBRATION_POINT_STEPS	long(YAXIS_STEPS_PER_MM * HEAT_BED_SCAN_Y_CALIBRATION_POINT_MM)			// [steps]
+
+#define HEAT_BED_SCAN_Z_START_uM				500																		// [um]
 
 #define HEAT_BED_SCAN_CONTACT_PRESSURE_DELTA	10																		// [digits]
 #define HEAT_BED_SCAN_RETRY_PRESSURE_DELTA		5																		// [digits]
@@ -979,17 +996,19 @@ Above this value the z compensation will distribute the roughness of the surface
 #define HEAT_BED_SCAN_IDLE_PRESSURE_MAX			7500																	// [digits]
 #endif // NUM_EXTRUDER == 2
 
-#define HEAT_BED_SCAN_X_START_STEPS				long(XAXIS_STEPS_PER_MM * HEAT_BED_SCAN_X_START_MM)						// [steps]
-#define HEAT_BED_SCAN_X_END_STEPS				long(XAXIS_STEPS_PER_MM * HEAT_BED_SCAN_X_END_MM)						// [steps]
-#define HEAT_BED_SCAN_X_STEP_SIZE_STEPS			long(XAXIS_STEPS_PER_MM * HEAT_BED_SCAN_X_STEP_SIZE_MM)					// [steps]
-#define HEAT_BED_SCAN_X_STEP_SIZE_MIN_STEPS		long(XAXIS_STEPS_PER_MM * HEAT_BED_SCAN_X_STEP_SIZE_MIN_MM)				// [steps]
-#define HEAT_BED_SCAN_X_MAX_POSITION_STEPS		long(X_MAX_LENGTH * XAXIS_STEPS_PER_MM - HEAT_BED_SCAN_X_END_STEPS)		// [steps]
+#define HEAT_BED_SCAN_X_START_STEPS				long(XAXIS_STEPS_PER_MM * HEAT_BED_SCAN_X_START_MM)							// [steps]
+#define HEAT_BED_SCAN_X_END_STEPS				long(XAXIS_STEPS_PER_MM * HEAT_BED_SCAN_X_END_MM)							// [steps]
+#define HEAT_BED_SCAN_X_STEP_SIZE_STEPS			long(XAXIS_STEPS_PER_MM * HEAT_BED_SCAN_X_STEP_SIZE_MM)						// [steps]
+#define HEAT_BED_SCAN_X_STEP_SIZE_MIN_STEPS		long(XAXIS_STEPS_PER_MM * HEAT_BED_SCAN_X_STEP_SIZE_MIN_MM)					// [steps]
+#define HEAT_BED_SCAN_X_MAX_POSITION_STEPS		long(X_MAX_LENGTH_PRINT * XAXIS_STEPS_PER_MM - HEAT_BED_SCAN_X_END_STEPS)	// [steps]
 
 #define	HEAT_BED_SCAN_Y_START_STEPS				long(YAXIS_STEPS_PER_MM * HEAT_BED_SCAN_Y_START_MM)						// [steps]
 #define	HEAT_BED_SCAN_Y_END_STEPS				long(YAXIS_STEPS_PER_MM * HEAT_BED_SCAN_Y_END_MM)						// [steps]
 #define	HEAT_BED_SCAN_Y_STEP_SIZE_STEPS			long(YAXIS_STEPS_PER_MM * HEAT_BED_SCAN_Y_STEP_SIZE_MM)					// [steps]
 #define	HEAT_BED_SCAN_Y_STEP_SIZE_MIN_STEPS		long(YAXIS_STEPS_PER_MM * HEAT_BED_SCAN_Y_STEP_SIZE_MIN_MM)				// [steps]
 #define HEAT_BED_SCAN_Y_MAX_POSITION_STEPS		long(Y_MAX_LENGTH * YAXIS_STEPS_PER_MM - HEAT_BED_SCAN_Y_END_STEPS)		// [steps]
+
+#define	HEAT_BED_SCAN_Z_START_STEPS				long(ZAXIS_STEPS_PER_MM * HEAT_BED_SCAN_Z_START_uM / 1000)				// [steps]
 
 #define HEAT_BED_SCAN_UP_FAST_STEPS				long(-ZAXIS_STEPS_PER_MM / 40)											// [steps]
 #define HEAT_BED_SCAN_UP_SLOW_STEPS				long(-ZAXIS_STEPS_PER_MM / 200)											// [steps]
@@ -1004,6 +1023,18 @@ Above this value the z compensation will distribute the roughness of the surface
 #define HEAT_BED_SCAN_PRESSURE_TOLERANCE		15																		// [digits]
 #define HEAT_BED_SCAN_PRESSURE_READ_DELAY_MS	15																		// [ms]
 #define	HEAT_BED_SCAN_DELAY						1000																	// [ms]
+
+#if FEATURE_PRECISE_HEAT_BED_SCAN
+
+#define PRECISE_HEAT_BED_SCAN_WARMUP_DELAY			(unsigned long)600													// [s]
+#define PRECISE_HEAT_BED_SCAN_CALIBRATION_DELAY		(unsigned long)600													// [s]
+#define PRECISE_HEAT_BED_SCAN_BED_TEMP_PLA			60																	// [°C]
+#define PRECISE_HEAT_BED_SCAN_BED_TEMP_ABS			130																	// [°C]
+#define	PRECISE_HEAT_BED_SCAN_EXTRUDER_TEMP_SCAN	100																	// [°C]
+#define PRECISE_HEAT_BED_SCAN_EXTRUDER_TEMP_PLA		230																	// [°C]
+#define PRECISE_HEAT_BED_SCAN_EXTRUDER_TEMP_ABS		260																	// [°C]
+
+#endif // FEATURE_PRECISE_HEAT_BED_SCAN
 
 #endif // FEATURE_HEAT_BED_Z_COMPENSATION
 
@@ -1024,15 +1055,15 @@ Above this value the z compensation will distribute the roughness of the surface
 #define WORK_PART_MAX_STATIC_Z_OFFSET_MM		10																		// [mm]
 
 /** \brief Configuration of the work part scan */
-#define WORK_PART_SCAN_X_START_MM				5																		// [mm] from the left border of the work bed
-#define WORK_PART_SCAN_X_START_STEPS			long(XAXIS_STEPS_PER_MM * WORK_PART_SCAN_X_START_MM)					// [steps]
-#define WORK_PART_SCAN_X_END_MM					220																		// [mm]
-#define WORK_PART_SCAN_X_END_STEPS				long(XAXIS_STEPS_PER_MM * WORK_PART_SCAN_X_END_MM)						// [steps]
-#define WORK_PART_SCAN_X_STEP_SIZE_MM			20																		// [mm]
-#define WORK_PART_SCAN_X_STEP_SIZE_STEPS		long(XAXIS_STEPS_PER_MM * WORK_PART_SCAN_X_STEP_SIZE_MM)				// [steps]
-#define WORK_PART_SCAN_X_STEP_SIZE_MIN_MM		10																		// [mm]
-#define WORK_PART_SCAN_X_STEP_SIZE_MIN_STEPS	long(XAXIS_STEPS_PER_MM * WORK_PART_SCAN_X_STEP_SIZE_MIN_MM)			// [steps]
-#define WORK_PART_SCAN_X_MAX_POSITION_STEPS		long(X_MAX_LENGTH * XAXIS_STEPS_PER_MM - WORK_PART_SCAN_X_END_STEPS)	// [steps]
+#define WORK_PART_SCAN_X_START_MM				5																			// [mm] from the left border of the work bed
+#define WORK_PART_SCAN_X_START_STEPS			long(XAXIS_STEPS_PER_MM * WORK_PART_SCAN_X_START_MM)						// [steps]
+#define WORK_PART_SCAN_X_END_MM					220																			// [mm]
+#define WORK_PART_SCAN_X_END_STEPS				long(XAXIS_STEPS_PER_MM * WORK_PART_SCAN_X_END_MM)							// [steps]
+#define WORK_PART_SCAN_X_STEP_SIZE_MM			20																			// [mm]
+#define WORK_PART_SCAN_X_STEP_SIZE_STEPS		long(XAXIS_STEPS_PER_MM * WORK_PART_SCAN_X_STEP_SIZE_MM)					// [steps]
+#define WORK_PART_SCAN_X_STEP_SIZE_MIN_MM		10																			// [mm]
+#define WORK_PART_SCAN_X_STEP_SIZE_MIN_STEPS	long(XAXIS_STEPS_PER_MM * WORK_PART_SCAN_X_STEP_SIZE_MIN_MM)				// [steps]
+#define WORK_PART_SCAN_X_MAX_POSITION_STEPS		long(X_MAX_LENGTH_MILL * XAXIS_STEPS_PER_MM - WORK_PART_SCAN_X_END_STEPS)	// [steps]
 
 #define	WORK_PART_SCAN_Y_START_MM				55																		// [mm] from the front border of the work bed
 #define	WORK_PART_SCAN_Y_START_STEPS			long(YAXIS_STEPS_PER_MM * WORK_PART_SCAN_Y_START_MM)					// [steps]
@@ -1091,25 +1122,8 @@ Above this value the z compensation will distribute the roughness of the surface
 #define	PAUSE_X_MIN							(XAXIS_STEPS_PER_MM *5)
 #define	PAUSE_Y_MIN							(YAXIS_STEPS_PER_MM *5)
 #define	PAUSE_Z_MIN							(ZAXIS_STEPS_PER_MM *2)
-#define	PAUSE_X_MAX							((X_MAX_LENGTH -5) * XAXIS_STEPS_PER_MM)
-#define	PAUSE_Y_MAX							((Y_MAX_LENGTH -5) * YAXIS_STEPS_PER_MM)
-#define	PAUSE_Z_MAX							((Z_MAX_LENGTH -2) * ZAXIS_STEPS_PER_MM)
 
 #endif // FEATURE_PAUSE_PRINTING
-
-
-// ##########################################################################################
-// ##	configuration of the manual steps
-// ##########################################################################################
-
-#if FEATURE_EXTENDED_BUTTONS
-
-/** \brief Configuration of the manual steps */
-#define DEFAULT_MANUAL_Z_STEPS				(RF_MICRO_STEPS *2)
-#define MAXIMAL_MANUAL_Z_STEPS				(ZAXIS_STEPS_PER_MM *10)
-#define DEFAULT_MANUAL_EXTRUDER_STEPS		(EXT0_STEPS_PER_MM /5)
-
-#endif // FEATURE_EXTENDED_BUTTONS
 
 
 // ##########################################################################################
@@ -1130,6 +1144,25 @@ Above this value the z compensation will distribute the roughness of the surface
 
 
 // ##########################################################################################
+// ##	configuration of the strain gauge test
+// ##########################################################################################
+
+#if FEATURE_TEST_STRAIN_GAUGE
+
+#define	TEST_STRAIN_GAUGE_CONTACT_PRESSURE_DELTA	500												// [digits]
+#define TEST_STRAIN_GAUGE_POSITION_DELAY			100												// [ms]
+#define TEST_STRAIN_GAUGE_BREAKOUT_DELAY			100												// [ms]
+#define	TEST_STRAIN_GAUGE_BED_UP_STEPS				long(-ZAXIS_STEPS_PER_MM / 20)					// [steps]
+#define TEST_STRAIN_GAUGE_BED_DOWN_STEPS			long(ZAXIS_STEPS_PER_MM / 40)					// [steps]
+#define	TEST_STRAIN_GAUGE_TEST_STEPS				long(-ZAXIS_STEPS_PER_MM / 128)					// [steps]
+
+/** \brief The following commands are executed before the test is ended. */
+#define	TEST_STRAIN_GAUGE_SCRIPT					"G91\nG1 Z15 F5000"
+
+#endif // FEATURE_TEST_STRAIN_GAUGE
+
+
+// ##########################################################################################
 // ##	debugging
 // ##########################################################################################
 
@@ -1147,6 +1180,13 @@ Above this value the z compensation will distribute the roughness of the surface
 #define DEBUG_FIND_Z_ORIGIN					0													// 1 = on, 0 = off
 
 #endif // FEATURE_FIND_Z_ORIGIN
+
+#if FEATURE_TEST_STRAIN_GAUGE
+
+/** \brief Enables debug outputs from the test of the strain gauge */
+#define DEBUG_TEST_STRAIN_GAUGE				0													// 1 = on, 0 = off
+
+#endif // FEATURE_TEST_STRAIN_GAUGE
 #endif // FEATURE_MILLING_MODE
 
 

@@ -214,14 +214,26 @@ public:
 		// Test Z-Axis every step if necessary, otherwise it could easyly ruin your printer!
         if(isZNegativeMove() && Printer::isZMinEndstopHit())
 		{
+#if FEATURE_Z_MIN_OVERRIDE_VIA_GCODE && FEATURE_ENABLE_Z_SAFETY
+			if( Printer::isHomed() )
+			{
+				// the following checks shall not allow to continue the z-move in case the z home position is unknown
+				if( Printer::currentZSteps > -Z_OVERRIDE_MAX )
+				{
+					// we allow to overdrive Z-min a little bit so that also G-Codes are able to move to a smaller z-position even when Z-min has fired already
+					return;
+				}
+
+				// during normal operation, we never should end up here ... typically, the Z-min hardware switch must be reconfigured when you end up here
+				doEmergencyStop( STOP_BECAUSE_OF_Z_MIN );
+			}
+
+#endif // FEATURE_Z_MIN_OVERRIDE_VIA_GCODE && FEATURE_ENABLE_Z_SAFETY
+
 			setZMoveFinished();
 		}
         if(isZPositiveMove() && Printer::isZMaxEndstopHit())
         {
-#if MAX_HARDWARE_ENDSTOP_Z
-            Printer::stepsRemainingAtZHit = stepsRemaining;
-#endif // MAX_HARDWARE_ENDSTOP_Z
-
             setZMoveFinished();
         }
     } // checkEndstops
@@ -511,6 +523,8 @@ public:
 		BEGIN_INTERRUPT_PROTECTED
         linesCount++;
         END_INTERRUPT_PROTECTED
+
+		g_uStartOfIdle = 0;
     } // pushLine
 
     static PrintLine *getNextWriteLine()
@@ -574,6 +588,12 @@ public:
 
 	inline void enableSteppers( void )
 	{
+		if( Printer::blockAll )
+		{
+			// do not enable anything in case everything is blocked
+			return;
+		}
+
 	    // Only enable axis that are moving. If the axis doesn't need to move then it can stay disabled depending on configuration.
 		if(isXMove())
 		{
@@ -585,7 +605,7 @@ public:
 			Printer::enableYStepper();
 			Printer::setYDirection(isYPositiveMove());
 		}
-        if(isZMove() && !Printer::blockZ)
+        if(isZMove())
         {
             Printer::enableZStepper();
 			Printer::unsetAllSteppersDisabled();
@@ -641,10 +661,9 @@ inline void startZStep( char nDirection )
     WRITE( Z2_STEP_PIN,HIGH );
 #endif // FEATURE_TWO_ZSTEPPER
 
-#if FEATURE_CONFIGURABLE_Z_ENDSTOPS
-	if( Printer::endstopZMinHit )	Printer::stepsSinceZMinEndstop += nDirection;
-	if( Printer::endstopZMaxHit )	Printer::stepsSinceZMaxEndstop += nDirection;
-#endif // FEATURE_CONFIGURABLE_Z_ENDSTOPS
+#if FEATURE_Z_MIN_OVERRIDE_VIA_GCODE
+	Printer::currentZSteps += nDirection;
+#endif //FEATURE_Z_MIN_OVERRIDE_VIA_GCODE
 
 } // startZStep
 

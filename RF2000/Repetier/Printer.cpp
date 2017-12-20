@@ -1,4 +1,4 @@
-/*
+﻿/*
     This file is part of the Repetier-Firmware for RF devices from Conrad Electronic SE.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -20,16 +20,16 @@
 #include <Wire.h>
 
 #if defined(USE_ADVANCE)
-uint8_t			Printer::minExtruderSpeed;							///< Timer delay for start extruder speed
-uint8_t			Printer::maxExtruderSpeed;							///< Timer delay for end extruder speed
-volatile int	Printer::extruderStepsNeeded;						///< This many extruder steps are still needed, <0 = reverse steps needed.
+uint8_t			Printer::minExtruderSpeed;								///< Timer delay for start extruder speed
+uint8_t			Printer::maxExtruderSpeed;								///< Timer delay for end extruder speed
+volatile int	Printer::extruderStepsNeeded;							///< This many extruder steps are still needed, <0 = reverse steps needed.
 #endif // defined(USE_ADVANCE)
 
-uint8_t			Printer::unitIsInches = 0;							///< 0 = Units are mm, 1 = units are inches.
+uint8_t			Printer::unitIsInches = 0;								///< 0 = Units are mm, 1 = units are inches.
 
 //Stepper Movement Variables
 float			Printer::axisStepsPerMM[4] = {XAXIS_STEPS_PER_MM,YAXIS_STEPS_PER_MM,ZAXIS_STEPS_PER_MM,1}; ///< Number of steps per mm needed.
-float			Printer::invAxisStepsPerMM[4];						///< Inverse of axisStepsPerMM for faster conversion
+float			Printer::invAxisStepsPerMM[4];							///< Inverse of axisStepsPerMM for faster conversion
 float			Printer::maxFeedrate[4] = {MAX_FEEDRATE_X, MAX_FEEDRATE_Y, MAX_FEEDRATE_Z}; ///< Maximum allowed feedrate.
 float			Printer::homingFeedrate[3];
 
@@ -43,8 +43,8 @@ unsigned long	Printer::maxPrintAccelerationStepsPerSquareSecond[4];
 unsigned long	Printer::maxTravelAccelerationStepsPerSquareSecond[4];
 #endif // RAMP_ACCELERATION
 
-uint8_t			Printer::relativeCoordinateMode = false;			///< Determines absolute (false) or relative Coordinates (true).
-uint8_t			Printer::relativeExtruderCoordinateMode = false;	///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
+uint8_t			Printer::relativeCoordinateMode = false;				///< Determines absolute (false) or relative Coordinates (true).
+uint8_t			Printer::relativeExtruderCoordinateMode = false;		///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
 long			Printer::queuePositionLastSteps[4];
 float			Printer::queuePositionLastMM[3];
@@ -63,40 +63,38 @@ uint8_t			Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo
 uint8_t			Printer::stepsPerTimerCall = 1;
 uint8_t			Printer::menuMode = 0;
 
-unsigned long	Printer::interval;									///< Last step duration in ticks.
-unsigned long	Printer::timer;										///< used for acceleration/deceleration timing
-unsigned long	Printer::stepNumber;								///< Step number in current move.
+unsigned long	Printer::interval;										///< Last step duration in ticks.
+unsigned long	Printer::timer;											///< used for acceleration/deceleration timing
+unsigned long	Printer::stepNumber;									///< Step number in current move.
 
 #ifdef USE_ADVANCE
 #ifdef ENABLE_QUADRATIC_ADVANCE
-long			Printer::advanceExecuted;							///< Executed advance steps
+long			Printer::advanceExecuted;								///< Executed advance steps
 #endif // ENABLE_QUADRATIC_ADVANCE
 
 int				Printer::advanceStepsSet;
 #endif // USE_ADVANCE
 
-#if MAX_HARDWARE_ENDSTOP_Z
-long			Printer::stepsRemainingAtZHit;
-#endif // MAX_HARDWARE_ENDSTOP_Z
-
-float			Printer::minimumSpeed;								///< lowest allowed speed to keep integration error small
+float			Printer::minimumSpeed;									///< lowest allowed speed to keep integration error small
 float			Printer::minimumZSpeed;
-long			Printer::maxSteps[3];								///< For software endstops, limit of move in positive direction.
-long			Printer::minSteps[3];								///< For software endstops, limit of move in negative direction.
+long			Printer::maxSteps[3];									///< For software endstops, limit of move in positive direction.
+long			Printer::minSteps[3];									///< For software endstops, limit of move in negative direction.
 float			Printer::lengthMM[3];
 float			Printer::minMM[3];
-float			Printer::feedrate;									///< Last requested feedrate.
-int				Printer::feedrateMultiply;							///< Multiplier for feedrate in percent (factor 1 = 100)
-unsigned int	Printer::extrudeMultiply;							///< Flow multiplier in percdent (factor 1 = 100)
-float			Printer::maxJerk;									///< Maximum allowed jerk in mm/s
-float			Printer::maxZJerk;									///< Maximum allowed jerk in z direction in mm/s
-float			Printer::extruderOffset[2];							///< offset for different extruder positions.
-unsigned int	Printer::vMaxReached;								///< Maximum reached speed
-unsigned long	Printer::msecondsPrinting;							///< Milliseconds of printing time (means time with heated extruder)
-unsigned long	Printer::msecondsMilling;							///< Milliseconds of milling time
-float			Printer::filamentPrinted;							///< mm of filament printed since counting started
-uint8_t			Printer::wasLastHalfstepping;						///< Indicates if last move had halfstepping enabled
-long			Printer::ZOffset;									///< Z Offset in um
+float			Printer::feedrate;										///< Last requested feedrate.
+int				Printer::feedrateMultiply;								///< Multiplier for feedrate in percent (factor 1 = 100)
+unsigned int	Printer::extrudeMultiply;								///< Flow multiplier in percdent (factor 1 = 100)
+float			Printer::maxJerk;										///< Maximum allowed jerk in mm/s
+float			Printer::maxZJerk;										///< Maximum allowed jerk in z direction in mm/s
+float			Printer::extruderOffset[2];								///< offset for different extruder positions.
+unsigned int	Printer::vMaxReached;									///< Maximum reached speed
+unsigned long	Printer::msecondsPrinting;								///< Milliseconds of printing time (means time with heated extruder)
+unsigned long	Printer::msecondsMilling;								///< Milliseconds of milling time
+float			Printer::filamentPrinted;								///< mm of filament printed since counting started
+uint8_t			Printer::wasLastHalfstepping;							///< Indicates if last move had halfstepping enabled
+long			Printer::ZOffset;										///< Z Offset in um
+char			Printer::ZMode				 = DEFAULT_Z_SCALE_MODE;	///< Z Scale  1 = show the z-distance to z-min (print) or to the z-origin (mill), 2 = show the z-distance to the surface of the heat bed (print) or work part (mill)
+char			Printer::moveMode[3];									///< move mode which is applied within the Position X/Y/Z menus
 
 #if ENABLE_BACKLASH_COMPENSATION
 float			Printer::backlash[3];
@@ -137,11 +135,16 @@ long			Printer::staticCompensationZ;
 
 long			Printer::queuePositionCurrentSteps[3];
 char			Printer::stepperDirection[3];
-char			Printer::blockZ;
+char			Printer::blockAll;
+
+#if FEATURE_Z_MIN_OVERRIDE_VIA_GCODE
+long			Printer::currentZSteps;
+#endif // FEATURE_Z_MIN_OVERRIDE_VIA_GCODE
 
 #if FEATURE_HEAT_BED_Z_COMPENSATION || FEATURE_WORK_PART_Z_COMPENSATION
 long			Printer::compensatedPositionTargetStepsZ;
 long			Printer::compensatedPositionCurrentStepsZ;
+char			Printer::endZCompensationStep;
 #endif // FEATURE_HEAT_BED_Z_COMPENSATION || FEATURE_WORK_PART_Z_COMPENSATION
 
 #if FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
@@ -163,8 +166,6 @@ char			Printer::ZEndstopUnknown;
 char			Printer::lastZDirection;
 char			Printer::endstopZMinHit;
 char			Printer::endstopZMaxHit;
-long			Printer::stepsSinceZMinEndstop;
-long			Printer::stepsSinceZMaxEndstop;
 #endif // FEATURE_CONFIGURABLE_Z_ENDSTOPS
 
 #if FEATURE_CONFIGURABLE_HOTEND_TYPE
@@ -266,7 +267,12 @@ void Printer::constrainDirectDestinationCoords()
     if (queuePositionTargetSteps[Z_AXIS] + directPositionTargetSteps[Z_AXIS] > Printer::maxSteps[Z_AXIS]) Printer::directPositionTargetSteps[Z_AXIS] = Printer::maxSteps[Z_AXIS] - queuePositionTargetSteps[Z_AXIS];
 #endif // max_software_endstop_z == true
 #endif //FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
-
+/*
+	Com::printF(PSTR("constrainDirectDestinationCoords(): "));
+	Com::printF(PSTR("x="),Printer::directPositionTargetSteps[X_AXIS]);
+	Com::printF(PSTR(",y="),Printer::directPositionTargetSteps[Y_AXIS]);
+	Com::printFLN(PSTR(", z="),Printer::directPositionTargetSteps[Z_AXIS]);
+*/
 } // constrainDirectDestinationCoords
 
 
@@ -446,6 +452,8 @@ uint8_t Printer::setOrigin(float xOff,float yOff,float zOff)
 			// we can not set the origin when we do not know the home position
 			Com::printFLN( PSTR("setOrigin(): the origin can not be set because the home position is unknown") );
 		}
+
+		showError( (void*)ui_text_set_origin, (void*)ui_text_home_unknown );
 		return 0;
 	}
 
@@ -488,7 +496,7 @@ void Printer::updateCurrentPosition(bool copyLastCmd)
 
   For the computation of the destination, the following facts are considered:
   - Are units inches or mm.
-  - Reltive or absolute positioning with special case only extruder relative.
+  - Relative or absolute positioning with special case only extruder relative.
   - Offset in x and y direction for multiple extruder support.
 */
 uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
@@ -547,7 +555,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     if(com->hasZ())
 	{
 		queuePositionTargetSteps[Z_AXIS] = zSteps;
-//		Com::printFLN( PSTR( "; " ), queuePositionTargetSteps[Z_AXIS] );
+//		Com::printFLN( PSTR( "qPTS=" ), queuePositionTargetSteps[Z_AXIS] );
 	}
 	else
 	{
@@ -595,7 +603,7 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
         if(unitIsInches)
             feedrate = com->F * 0.0042333f * (float)feedrateMultiply;  // Factor is 25.5/60/100
         else
-            feedrate = com->F * (float)feedrateMultiply * 0.00016666666f;
+            feedrate = com->F * 0.00016666666f * (float)feedrateMultiply;
     }
 
     if(!Printer::isPositionAllowed(x,y,z))
@@ -610,6 +618,68 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com)
     return !com->hasNoXYZ() || (com->hasE() && queuePositionTargetSteps[E_AXIS] != queuePositionLastSteps[E_AXIS]); // ignore unproductive moves
 
 } // setDestinationStepsFromGCode
+
+
+/**
+  \brief Sets the destination coordinates to the passed values.
+*/
+uint8_t Printer::setDestinationStepsFromMenu( float relativeX, float relativeY, float relativeZ )
+{
+    float	x, y, z;
+
+
+	if( relativeX ) queuePositionLastMM[X_AXIS] = (queuePositionCommandMM[X_AXIS] += relativeX);
+	if( relativeY ) queuePositionLastMM[Y_AXIS] = (queuePositionCommandMM[Y_AXIS] += relativeY);
+	if( relativeZ ) queuePositionLastMM[Z_AXIS] = (queuePositionCommandMM[Z_AXIS] += relativeZ);
+
+	x = queuePositionCommandMM[X_AXIS] + Printer::extruderOffset[X_AXIS];
+    y = queuePositionCommandMM[Y_AXIS] + Printer::extruderOffset[Y_AXIS];
+    z = queuePositionCommandMM[Z_AXIS];
+
+	long xSteps = static_cast<long>(floor(x * axisStepsPerMM[X_AXIS] + 0.5));
+    long ySteps = static_cast<long>(floor(y * axisStepsPerMM[Y_AXIS] + 0.5));
+    long zSteps = static_cast<long>(floor(z * axisStepsPerMM[Z_AXIS] + 0.5));
+    
+	if( relativeX )
+	{
+		queuePositionTargetSteps[X_AXIS] = xSteps;
+	}
+	else
+	{
+		queuePositionTargetSteps[X_AXIS] = queuePositionLastSteps[X_AXIS];
+	}
+
+    if( relativeY )
+	{
+		queuePositionTargetSteps[Y_AXIS] = ySteps;
+	}
+	else
+	{
+		queuePositionTargetSteps[Y_AXIS] = queuePositionLastSteps[Y_AXIS];
+	}
+
+    if( relativeZ )
+	{
+		queuePositionTargetSteps[Z_AXIS] = zSteps;
+	}
+	else
+	{
+		queuePositionTargetSteps[Z_AXIS] = queuePositionLastSteps[Z_AXIS];
+	}
+
+    if( !Printer::isPositionAllowed( x, y, z ) )
+	{
+		if( Printer::debugErrors() )
+		{
+			Com::printFLN( PSTR( "We should not be here." ) );
+		}
+        return false; // ignore move
+    }
+
+	PrintLine::prepareQueueMove( ALWAYS_CHECK_ENDSTOPS, true );
+	return true;
+
+} // setDestinationStepsFromMenu
 
 
 void Printer::setup()
@@ -945,13 +1015,11 @@ void Printer::setup()
 	msecondsMilling = 0;
     filamentPrinted = 0;
     flag0 = PRINTER_FLAG0_STEPPER_DISABLED;
-    lengthMM[X_AXIS] = X_MAX_LENGTH;
-    lengthMM[Y_AXIS] = Y_MAX_LENGTH;
-    lengthMM[Z_AXIS] = Z_MAX_LENGTH;
-    minMM[X_AXIS] = X_MIN_POS;
-    minMM[Y_AXIS] = Y_MIN_POS;
-    minMM[Z_AXIS] = Z_MIN_POS;
     wasLastHalfstepping = 0;
+
+	moveMode[X_AXIS] = DEFAULT_MOVE_MODE_X;
+	moveMode[Y_AXIS] = DEFAULT_MOVE_MODE_Y;
+	moveMode[Z_AXIS] = DEFAULT_MOVE_MODE_Z;
 
 #if ENABLE_BACKLASH_COMPENSATION
     backlash[X_AXIS] = X_BACKLASH;
@@ -975,11 +1043,16 @@ void Printer::setup()
 	stepperDirection[X_AXIS]		  = 
 	stepperDirection[Y_AXIS]		  = 
 	stepperDirection[Z_AXIS]		  = 0;
-	blockZ							  = 0;
+	blockAll						  = 0;
+
+#if FEATURE_Z_MIN_OVERRIDE_VIA_GCODE
+	currentZSteps					  = 0;
+#endif // FEATURE_Z_MIN_OVERRIDE_VIA_GCODE
 
 #if FEATURE_HEAT_BED_Z_COMPENSATION || FEATURE_WORK_PART_Z_COMPENSATION
 	compensatedPositionTargetStepsZ	 =
     compensatedPositionCurrentStepsZ = 0;
+	endZCompensationStep			 = 0;
 #endif // FEATURE_HEAT_BED_Z_COMPENSATION || FEATURE_WORK_PART_Z_COMPENSATION
 
 #if FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
@@ -999,14 +1072,31 @@ void Printer::setup()
 	drillZDepth	  = 0.0;
 #endif // FEATURE_MILLING_MODE
 
+#if FEATURE_MILLING_MODE
+	if( Printer::operatingMode == OPERATING_MODE_PRINT )
+	{
+	    lengthMM[X_AXIS] = X_MAX_LENGTH_PRINT;
+	}
+	else
+	{
+		lengthMM[X_AXIS] = X_MAX_LENGTH_MILL;
+	}
+#else
+    lengthMM[X_AXIS] = X_MAX_LENGTH_PRINT;
+#endif // FEATURE_MILLING_MODE
+
+    lengthMM[Y_AXIS] = Y_MAX_LENGTH;
+    lengthMM[Z_AXIS] = Z_MAX_LENGTH;
+    minMM[X_AXIS] = X_MIN_POS;
+    minMM[Y_AXIS] = Y_MIN_POS;
+    minMM[Z_AXIS] = Z_MIN_POS;
+
 #if FEATURE_CONFIGURABLE_Z_ENDSTOPS
 	ZEndstopType		  = DEFAULT_Z_ENDSTOP_TYPE;
 	ZEndstopUnknown		  = 0;
 	lastZDirection		  = 0;
 	endstopZMinHit		  = ENDSTOP_NOT_HIT;
 	endstopZMaxHit		  = ENDSTOP_NOT_HIT;
-	stepsSinceZMinEndstop = 0;
-	stepsSinceZMaxEndstop = 0;
 #endif // FEATURE_CONFIGURABLE_Z_ENDSTOPS
 
 #if STEPPER_ON_DELAY
@@ -1018,12 +1108,6 @@ void Printer::setup()
 #if FEATURE_CASE_LIGHT
 	enableCaseLight = CASE_LIGHTS_DEFAULT_ON;
 #endif // FEATURE_CASE_LIGHT
-
-#if FEATURE_230V_OUTPUT
-	enable230VOutput = OUTPUT_230V_DEFAULT_ON;
-	SET_OUTPUT(OUTPUT_230V_PIN);
-	WRITE(OUTPUT_230V_PIN, enable230VOutput);
-#endif // FEATURE_230V_OUTPUT
 
 #if FEATURE_24V_FET_OUTPUTS
 	enableFET1 = FET1_DEFAULT_ON;
@@ -1072,19 +1156,17 @@ void Printer::setup()
 	    Com::printFLN(Com::tStart);
 	}
 
-#if FEATURE_WATCHDOG
-	if( Printer::debugInfo() )
-	{
-	    Com::printFLN(Com::tStartWatchdog);
-	}
-    HAL::startWatchdog();
-#endif // FEATURE_WATCHDOG
-
 	UI_INITIALIZE;
 
     HAL::showStartReason();
     Extruder::initExtruder();
     EEPROM::init(); // Read settings from eeprom if wanted
+
+#if FEATURE_230V_OUTPUT
+	enable230VOutput = OUTPUT_230V_DEFAULT_ON;
+	SET_OUTPUT(OUTPUT_230V_PIN);
+	WRITE(OUTPUT_230V_PIN, enable230VOutput);
+#endif // FEATURE_230V_OUTPUT
 
 #if FEATURE_CASE_LIGHT
     SET_OUTPUT(CASE_LIGHT_PIN);
@@ -1109,6 +1191,18 @@ void Printer::setup()
 #if SDSUPPORT
     sd.initsd();
 #endif // SDSUPPORT
+
+	g_nActiveHeatBed = (char)readWord24C256( I2C_ADDRESS_EXTERNAL_EEPROM, EEPROM_OFFSET_ACTIVE_HEAT_BED_Z_MATRIX );
+	g_nActiveWorkPart = (char)readWord24C256( I2C_ADDRESS_EXTERNAL_EEPROM, EEPROM_OFFSET_ACTIVE_WORK_PART_Z_MATRIX );
+
+	if (Printer::ZMode == Z_VALUE_MODE_SURFACE)
+	{
+		if( g_ZCompensationMatrix[0][0] != EEPROM_FORMAT )
+		{
+			// we load the z compensation matrix
+			prepareZCompensation();
+		}
+	}
 
 #if FEATURE_RGB_LIGHT_EFFECTS
 	setRGBLEDs( 0, 0, 0 );
@@ -1138,6 +1232,14 @@ void Printer::setup()
 	}
 #endif // FEATURE_RGB_LIGHT_EFFECTS
 
+#if FEATURE_WATCHDOG
+	if( Printer::debugInfo() )
+	{
+	    Com::printFLN(Com::tStartWatchdog);
+	}
+    HAL::startWatchdog();
+#endif // FEATURE_WATCHDOG
+
 } // setup
 
 
@@ -1155,7 +1257,7 @@ void Printer::defaultLoopActions()
     else
     {
         curtime -= previousMillisCmd;
-        if(maxInactiveTime!=0 && curtime >  maxInactiveTime ) Printer::kill(false);
+        if(maxInactiveTime!=0 && curtime > maxInactiveTime ) Printer::kill(false);
         else Printer::setAllKilled(false); // prevent repeated kills
         if(stepperInactiveTime!=0 && curtime >  stepperInactiveTime )
 		{
@@ -1218,12 +1320,21 @@ void Printer::homeXAxis()
 #endif // X_HOME_DIR < 0
 #endif // NUM_EXTRUDER>1
 
+#if FEATURE_MILLING_MODE
+		if( Printer::operatingMode == OPERATING_MODE_MILL )
+		{
+			// in operating mode mill, there is no extruder offset
+			offX = 0;
+		}
+#endif // FEATURE_MILLING_MODE
+
 		UI_STATUS_UPD(UI_TEXT_HOME_X);
+		uid.lock();
 
 		steps = (Printer::maxSteps[X_AXIS]-Printer::minSteps[X_AXIS]) * X_HOME_DIR;
         queuePositionLastSteps[X_AXIS] = -steps;
         PrintLine::moveRelativeDistanceInSteps(2*steps,0,0,0,homingFeedrate[X_AXIS],true,true);
-        queuePositionLastSteps[X_AXIS] = (X_HOME_DIR == -1) ? minSteps[X_AXIS]-offX : maxSteps[X_AXIS] + offX;
+        queuePositionLastSteps[X_AXIS] = (X_HOME_DIR == -1) ? minSteps[X_AXIS]- offX : maxSteps[X_AXIS] + offX;
         PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * -ENDSTOP_X_BACK_MOVE * X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,false);
         PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * 2 * ENDSTOP_X_BACK_MOVE * X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR,true,true);
 
@@ -1242,7 +1353,10 @@ void Printer::homeXAxis()
 #endif // FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
 
 #if NUM_EXTRUDER>1
-        PrintLine::moveRelativeDistanceInSteps((Extruder::current->xOffset-offX) * X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS],true,false);
+		if( offX )
+		{
+	        PrintLine::moveRelativeDistanceInSteps((Extruder::current->xOffset-offX) * X_HOME_DIR,0,0,0,homingFeedrate[X_AXIS],true,false);
+		}
 #endif // NUM_EXTRUDER>1
 
 		// show that we are active
@@ -1271,7 +1385,16 @@ void Printer::homeYAxis()
 #endif // Y_HOME_DIR<0
 #endif // NUM_EXTRUDER>1
 
+#if FEATURE_MILLING_MODE
+		if( Printer::operatingMode == OPERATING_MODE_MILL )
+		{
+			// in operating mode mill, there is no extruder offset
+			offY = 0;
+		}
+#endif // FEATURE_MILLING_MODE
+
         UI_STATUS_UPD(UI_TEXT_HOME_Y);
+		uid.lock();
 
 		steps = (maxSteps[Y_AXIS]-Printer::minSteps[Y_AXIS]) * Y_HOME_DIR;
         queuePositionLastSteps[Y_AXIS] = -steps;
@@ -1295,7 +1418,10 @@ void Printer::homeYAxis()
 #endif // FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
 
 #if NUM_EXTRUDER>1
-        PrintLine::moveRelativeDistanceInSteps(0,(Extruder::current->yOffset-offY) * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS],true,false);
+		if( offY )
+		{
+	        PrintLine::moveRelativeDistanceInSteps(0,(Extruder::current->yOffset-offY) * Y_HOME_DIR,0,0,homingFeedrate[Y_AXIS],true,false);
+		}
 #endif // NUM_EXTRUDER>1
 
 		// show that we are active
@@ -1338,7 +1464,8 @@ void Printer::homeZAxis()
 
 	if( nProcess )
 	{
-        UI_STATUS_UPD(UI_TEXT_HOME_Z);
+        UI_STATUS_UPD( UI_TEXT_HOME_Z );
+		uid.lock();
 
 #if FEATURE_FIND_Z_ORIGIN
 		g_nZOriginPosition[X_AXIS] = 0;
@@ -1352,12 +1479,15 @@ void Printer::homeZAxis()
 		directPositionLastSteps[Z_AXIS]	   = 0;
 #endif // FEATURE_EXTENDED_BUTTONS || FEATURE_PAUSE_PRINTING
 
+		setHomed( false );
+
 #if FEATURE_CONFIGURABLE_Z_ENDSTOPS
 		if( ZEndstopUnknown )
 		{
 			// in case we do not know which z-endstop is currently active, we always move downwards first
 			// in case z-min was active, z-min will not be active anymore
 			// in case z-max was active, it will remain active
+			UI_STATUS_UPD( UI_TEXT_DRIVING_FREE_Z );
 
 			if( Printer::debugInfo() )
 			{
@@ -1383,15 +1513,18 @@ void Printer::homeZAxis()
 					Com::printFLN( PSTR( "driven free" ) );
 				}
 
-				lastZDirection		   = 0;
-				endstopZMinHit		   = ENDSTOP_NOT_HIT;
-				endstopZMaxHit		   = ENDSTOP_NOT_HIT;
-				stepsSinceZMinEndstop = 0;
-				stepsSinceZMaxEndstop = 0;
+				lastZDirection		  = 0;
+				endstopZMinHit		  = ENDSTOP_NOT_HIT;
+				endstopZMaxHit		  = ENDSTOP_NOT_HIT;
 				ZEndstopUnknown		  = 0;
 			}
 		}
 #endif // FEATURE_CONFIGURABLE_Z_ENDSTOPS
+
+#if FEATURE_HEAT_BED_Z_COMPENSATION || FEATURE_WORK_PART_Z_COMPENSATION
+        g_nZScanZPosition = 0;
+		queueTask( TASK_DISABLE_Z_COMPENSATION );
+#endif // FEATURE_HEAT_BED_Z_COMPENSATION || FEATURE_WORK_PART_Z_COMPENSATION
 
 		steps = (maxSteps[Z_AXIS] - minSteps[Z_AXIS]) * nHomeDir;
         queuePositionLastSteps[Z_AXIS] = -steps;
@@ -1417,10 +1550,9 @@ void Printer::homeZAxis()
 		queuePositionLastSteps[Z_AXIS]	  = (nHomeDir == -1) ? minSteps[Z_AXIS] : maxSteps[Z_AXIS];
         queuePositionCurrentSteps[Z_AXIS] = queuePositionLastSteps[Z_AXIS];
 
-#if FEATURE_HEAT_BED_Z_COMPENSATION || FEATURE_WORK_PART_Z_COMPENSATION
-        g_nZScanZPosition = 0;
-        queueTask( TASK_INIT_Z_COMPENSATION );
-#endif // FEATURE_HEAT_BED_Z_COMPENSATION || FEATURE_WORK_PART_Z_COMPENSATION
+#if FEATURE_Z_MIN_OVERRIDE_VIA_GCODE
+		currentZSteps					  = queuePositionLastSteps[Z_AXIS];
+#endif // FEATURE_Z_MIN_OVERRIDE_VIA_GCODE
 
 		// show that we are active
 		previousMillisCmd = HAL::timeInMilliseconds();
@@ -1433,7 +1565,8 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 {
     float	startX,startY,startZ;
 	char	homingOrder;
-
+	char	unlock = !uid.locked;
+	
 
     lastCalculatedPosition(startX,startY,startZ);
 
@@ -1509,7 +1642,6 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
     if(zaxis)
     {
 #if FEATURE_MILLING_MODE
-
 		if( Printer::operatingMode == OPERATING_MODE_PRINT )
 		{
 			startZ = Printer::minMM[Z_AXIS];
@@ -1532,10 +1664,17 @@ void Printer::homeAxis(bool xaxis,bool yaxis,bool zaxis) // home non-delta print
 #endif // FEATURE_CONFIGURABLE_Z_ENDSTOPS
     }
     updateCurrentPosition(true);
-    moveToReal(startX,startY,startZ,IGNORE_COORDINATE,homingFeedrate[X_AXIS]);
+    
+	
+	moveToReal(startX,startY,startZ,IGNORE_COORDINATE,homingFeedrate[X_AXIS]);
 
     setHomed(true);
-	UI_CLEAR_STATUS
+	
+	if( unlock )
+	{
+		uid.unlock();
+	}
+	g_uStartOfIdle = HAL::timeInMilliseconds();
     Commands::printCurrentPosition();
 
 } // homeAxis
@@ -1640,110 +1779,102 @@ void Printer::resetDirectPosition( void )
 #if FEATURE_HEAT_BED_Z_COMPENSATION || FEATURE_WORK_PART_Z_COMPENSATION
 void Printer::performZCompensation( void )
 {
-	char	doZCompensation = 0;
-
-
 	// the order of the following checks shall not be changed
-#if FEATURE_HEAT_BED_Z_COMPENSATION
-	if( doHeatBedZCompensation )
+#if FEATURE_HEAT_BED_Z_COMPENSATION && FEATURE_WORK_PART_Z_COMPENSATION
+	if( !doHeatBedZCompensation && !doWorkPartZCompensation )
 	{
-		doZCompensation = 1;
+		return;
 	}
-#endif // FEATURE_HEAT_BED_Z_COMPENSATION
+#elif FEATURE_HEAT_BED_Z_COMPENSATION
+	if( !doHeatBedZCompensation )
+	{
+		return;
+	}
+#elif FEATURE_WORK_PART_Z_COMPENSATION
+	if( !doWorkPartZCompensation )
+	{
+		return;
+	}
+#endif // FEATURE_HEAT_BED_Z_COMPENSATION && FEATURE_WORK_PART_Z_COMPENSATION
 
-#if FEATURE_WORK_PART_Z_COMPENSATION
-	if( doWorkPartZCompensation )
+	if( blockAll )
 	{
-		doZCompensation = 1;
+		// do not perform any compensation in case the moving is blocked
+		return;
 	}
-#endif // FEATURE_WORK_PART_Z_COMPENSATION
 
-	if( blockZ )
-	{
-		// do not perform any compensation in case the moving into z-direction is blocked
-		doZCompensation = 0;
-	}
 	if( PrintLine::cur )
 	{
 		if( PrintLine::cur->isZMove() )
 		{
 			// do not peform any compensation while there is a "real" move into z-direction
-			doZCompensation = 0;
+			return;
 		}
 	}
 
-	if( doZCompensation )
+	if( endZCompensationStep )
 	{
-		if( compensatedPositionCurrentStepsZ < compensatedPositionTargetStepsZ )
-		{
-			// we must move the heat bed do the bottom
-			if( stepperDirection[Z_AXIS] >= 0 )
-			{
-				// here we shall move the z-axis only in case performQueueMove() is not moving into the other direction at the moment
-				if( stepperDirection[Z_AXIS] == 0 )
-				{
-					// set the direction only in case it is not set already
-					prepareBedDown();
-					stepperDirection[Z_AXIS] = 1;
-					HAL::delayMicroseconds( 1 );
-				}
-				startZStep( 1 );
-
 #if STEPPER_HIGH_DELAY>0
-				HAL::delayMicroseconds( STEPPER_HIGH_DELAY );
+		HAL::delayMicroseconds( STEPPER_HIGH_DELAY );
 #endif // STEPPER_HIGH_DELAY>0
 
-				endZStep();
+		endZStep();
 				
-				compensatedPositionCurrentStepsZ ++;
-			}
+		compensatedPositionCurrentStepsZ += endZCompensationStep;
 
-			if( compensatedPositionCurrentStepsZ == compensatedPositionTargetStepsZ )
-			{
-				stepperDirection[Z_AXIS] = 0;
-
-#if DEBUG_HEAT_BED_Z_COMPENSATION
-				long	nDelay = micros() - g_nZCompensationUpdateTime;
-
-				if( nDelay > g_nZCompensationDelayMax )		g_nZCompensationDelayMax = nDelay;
-#endif // DEBUG_HEAT_BED_Z_COMPENSATION
-			}
-		}
-		else if( compensatedPositionCurrentStepsZ > compensatedPositionTargetStepsZ )
+		if( compensatedPositionCurrentStepsZ == compensatedPositionTargetStepsZ )
 		{
-			// we must move the heat bed to the top
-			if( stepperDirection[Z_AXIS] <= 0 )
-			{
-				// here we shall move the z-axis only in case performQueueMove() is not moving into the other direction at the moment
-				if( stepperDirection[Z_AXIS] == 0 )
-				{
-					// set the direction only in case it is not set already
-					prepareBedUp();
-					stepperDirection[Z_AXIS] = -1;
-					HAL::delayMicroseconds( 1 );
-				}
-				startZStep( -1 );
+			stepperDirection[Z_AXIS] = 0;
 
-#if STEPPER_HIGH_DELAY>0
-				HAL::delayMicroseconds( STEPPER_HIGH_DELAY );
-#endif // STEPPER_HIGH_DELAY>0
+#if DEBUG_HEAT_BED_Z_COMPENSATION || DEBUG_WORK_PART_Z_COMPENSATION
+			long	nDelay = micros() - g_nZCompensationUpdateTime;
 
-				endZStep();
-				
-				compensatedPositionCurrentStepsZ --;
-			}
-
-			if( compensatedPositionCurrentStepsZ == compensatedPositionTargetStepsZ )
-			{
-				stepperDirection[Z_AXIS] = 0;
-
-#if DEBUG_HEAT_BED_Z_COMPENSATION
-				long	nDelay = micros() - g_nZCompensationUpdateTime;
-
-				if( nDelay > g_nZCompensationDelayMax )		g_nZCompensationDelayMax = nDelay;
-#endif // DEBUG_HEAT_BED_Z_COMPENSATION
-			}
+			if( nDelay > g_nZCompensationDelayMax )		g_nZCompensationDelayMax = nDelay;
+#endif // DEBUG_HEAT_BED_Z_COMPENSATION || DEBUG_WORK_PART_Z_COMPENSATION
 		}
+
+		endZCompensationStep = 0;
+		return;
+	}
+
+	if( compensatedPositionCurrentStepsZ < compensatedPositionTargetStepsZ )
+	{
+		// we must move the heat bed do the bottom
+		if( stepperDirection[Z_AXIS] >= 0 )
+		{
+			// here we shall move the z-axis only in case performQueueMove() is not moving into the other direction at the moment
+			if( stepperDirection[Z_AXIS] == 0 )
+			{
+				// set the direction only in case it is not set already
+				prepareBedDown();
+				stepperDirection[Z_AXIS] = 1;
+				//return;
+			}
+			startZStep( 1 );
+			endZCompensationStep = 1;
+		}
+
+		return;
+	}
+
+	if( compensatedPositionCurrentStepsZ > compensatedPositionTargetStepsZ )
+	{
+		// we must move the heat bed to the top
+		if( stepperDirection[Z_AXIS] <= 0 )
+		{
+			// here we shall move the z-axis only in case performQueueMove() is not moving into the other direction at the moment
+			if( stepperDirection[Z_AXIS] == 0 )
+			{
+				// set the direction only in case it is not set already
+				prepareBedUp();
+				stepperDirection[Z_AXIS] = -1;
+				//return;
+			}
+			startZStep( -1 );
+			endZCompensationStep = -1;
+		}
+
+		return;
 	}
 
 } // performZCompensation
@@ -1757,12 +1888,17 @@ void Printer::resetCompensatedPosition( void )
 		queuePositionLastSteps[Z_AXIS]	  += compensatedPositionCurrentStepsZ;
 		queuePositionTargetSteps[Z_AXIS]  += compensatedPositionCurrentStepsZ;
 
+#if FEATURE_Z_MIN_OVERRIDE_VIA_GCODE
+		currentZSteps					  += compensatedPositionCurrentStepsZ;
+#endif // FEATURE_Z_MIN_OVERRIDE_VIA_GCODE
+
 		queuePositionCommandMM[Z_AXIS]	= 
 		queuePositionLastMM[Z_AXIS]		= (float)(queuePositionLastSteps[Z_AXIS])*invAxisStepsPerMM[Z_AXIS];
 	}
 
 	compensatedPositionTargetStepsZ  = 0;
 	compensatedPositionCurrentStepsZ = 0;
+	endZCompensationStep			 = 0;
 
 } // resetCompensatedPosition
 

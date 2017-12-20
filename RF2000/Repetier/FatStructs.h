@@ -1,4 +1,4 @@
-/* Arduino SdFat Library
+﻿/* Arduino SdFat Library
  * Copyright (C) 2009 by William Greiman
  *
  * This file is part of the Arduino SdFat Library

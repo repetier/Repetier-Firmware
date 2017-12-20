@@ -1,4 +1,4 @@
-/*
+﻿/*
     This file is part of the Repetier-Firmware for RF devices from Conrad Electronic SE.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -108,6 +108,10 @@ have problems with other modules using the eeprom */
 #define EPR_RF_RGB_MANUAL_G				1036
 #define EPR_RF_RGB_MANUAL_B				1037
 #define	EPR_RF_Z_OFFSET					1038
+#define	EPR_RF_MOVE_MODE_X				1042
+#define	EPR_RF_MOVE_MODE_Y				1043
+#define	EPR_RF_MOVE_MODE_Z				1044
+#define EPR_RF_Z_MODE					1045
 
 #define EEPROM_EXTRUDER_OFFSET			200
 

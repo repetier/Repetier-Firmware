@@ -1,4 +1,4 @@
-/*
+﻿/*
     This file is part of the Repetier-Firmware for RF devices from Conrad Electronic SE.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -97,10 +97,10 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 
 #if FEATURE_CONFIGURABLE_HOTEND_TYPE
 #if MOTHERBOARD == DEVICE_TYPE_RF1000
-		Printer::HotendType = HOTEND_TYPE_V2_SINGLE;
+	Printer::HotendType = HOTEND_TYPE_V2_SINGLE;
 #endif // MOTHERBOARD == DEVICE_TYPE_RF1000
 #if MOTHERBOARD == DEVICE_TYPE_RF2000
-		Printer::HotendType = HOTEND_TYPE_V2_DUAL;
+	Printer::HotendType = HOTEND_TYPE_V2_DUAL;
 #endif // MOTHERBOARD == DEVICE_TYPE_RF2000
 #endif // FEATURE_CONFIGURABLE_HOTEND_TYPE
 
@@ -129,7 +129,19 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 #endif // TEMP_PID
 #endif // HAVE_HEATED_BED
 
-    Printer::lengthMM[X_AXIS] = X_MAX_LENGTH;
+#if FEATURE_MILLING_MODE
+	if( Printer::operatingMode == OPERATING_MODE_PRINT )
+	{
+		Printer::lengthMM[X_AXIS] = X_MAX_LENGTH_PRINT;
+	}
+	else
+	{
+		Printer::lengthMM[X_AXIS] = X_MAX_LENGTH_MILL;
+	}
+#else
+	Printer::lengthMM[X_AXIS] = X_MAX_LENGTH_PRINT;
+#endif // FEATURE_MILLING_MODE
+
     Printer::lengthMM[Y_AXIS] = Y_MAX_LENGTH;
     Printer::lengthMM[Z_AXIS] = Z_MAX_LENGTH;
     Printer::minMM[X_AXIS] = X_MIN_POS;
@@ -382,14 +394,21 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
 
 void EEPROM::clearEEPROM()
 {
-    unsigned int i;
-    for(i=0; i<2048; i++)
-    {
-#if FEATURE_WATCHDOG
-		HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
+	millis_t		lastTime	= HAL::timeInMilliseconds();
+	millis_t		currentTime;
+	unsigned int	i;
 
-        HAL::eprSetByte(i,0);
+
+    for( i=0; i<2048; i++ )
+    {
+        HAL::eprSetByte( i, 0 );
+
+		currentTime = HAL::timeInMilliseconds();
+		if( (currentTime - lastTime) > PERIODICAL_ACTIONS_CALL_INTERVAL )
+		{
+			Commands::checkForPeriodicalActions();
+			lastTime = currentTime;
+		}
     }
 
 } // clearEEPROM
@@ -409,6 +428,10 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     HAL::eprSetFloat(EPR_Y_MAX_FEEDRATE,Printer::maxFeedrate[Y_AXIS]);
     HAL::eprSetFloat(EPR_Z_MAX_FEEDRATE,Printer::maxFeedrate[Z_AXIS]);
 	HAL::eprSetInt32(EPR_RF_Z_OFFSET,Printer::ZOffset);
+	HAL::eprSetByte(EPR_RF_Z_MODE,Printer::ZMode);
+	HAL::eprSetByte(EPR_RF_MOVE_MODE_X,Printer::moveMode[X_AXIS]);
+	HAL::eprSetByte(EPR_RF_MOVE_MODE_Y,Printer::moveMode[Y_AXIS]);
+	HAL::eprSetByte(EPR_RF_MOVE_MODE_Z,Printer::moveMode[Z_AXIS]);
 
 #if FEATURE_MILLING_MODE
 	if( Printer::operatingMode == OPERATING_MODE_PRINT )
@@ -483,10 +506,6 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
     // now the extruder
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
     {
-#if FEATURE_WATCHDOG
-		HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
         int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
         Extruder *e = &extruder[i];
         HAL::eprSetFloat(o+EPR_EXTRUDER_STEPS_PER_MM,e->stepsPerMM);
@@ -580,7 +599,8 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted)
 #endif // FEATURE_24V_FET_OUTPUTS
 
 #if FEATURE_230V_OUTPUT
-	HAL::eprSetByte( EPR_RF_230V_OUTPUT_MODE, Printer::enable230VOutput );
+	// after a power-on, the 230 V plug always shall be turned off - thus, we do not store this setting to the EEPROM
+	// HAL::eprSetByte( EPR_RF_230V_OUTPUT_MODE, Printer::enable230VOutput );
 #endif // FEATURE_230V_OUTPUT
 
 #if FEATURE_CONFIGURABLE_Z_ENDSTOPS
@@ -651,6 +671,11 @@ void EEPROM::readDataFromEEPROM()
     Printer::maxFeedrate[Y_AXIS] = HAL::eprGetFloat(EPR_Y_MAX_FEEDRATE);
     Printer::maxFeedrate[Z_AXIS] = HAL::eprGetFloat(EPR_Z_MAX_FEEDRATE);
 	Printer::ZOffset = HAL::eprGetInt32(EPR_RF_Z_OFFSET);
+	Printer::ZMode = HAL::eprGetByte(EPR_RF_Z_MODE);
+	g_staticZSteps = (Printer::ZOffset * Printer::axisStepsPerMM[Z_AXIS]) / 1000;
+	Printer::moveMode[X_AXIS] = HAL::eprGetByte(EPR_RF_MOVE_MODE_X);
+	Printer::moveMode[Y_AXIS] = HAL::eprGetByte(EPR_RF_MOVE_MODE_Y);
+	Printer::moveMode[Z_AXIS] = HAL::eprGetByte(EPR_RF_MOVE_MODE_Z);
 
     Printer::maxJerk = HAL::eprGetFloat(EPR_MAX_JERK);
     Printer::maxZJerk = HAL::eprGetFloat(EPR_MAX_ZJERK);
@@ -693,10 +718,6 @@ void EEPROM::readDataFromEEPROM()
     // now the extruder
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
     {
-#if FEATURE_WATCHDOG
-		HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
         int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
         Extruder *e = &extruder[i];
         e->stepsPerMM = HAL::eprGetFloat(o+EPR_EXTRUDER_STEPS_PER_MM);
@@ -714,8 +735,8 @@ void EEPROM::readDataFromEEPROM()
         e->tempControl.pidMax	   = HAL::eprGetByte(o+EPR_EXTRUDER_PID_MAX);
 #endif // TEMP_PID
 
-        e->xOffset = int32_t(HAL::eprGetFloat(o+EPR_EXTRUDER_X_OFFSET)*XAXIS_STEPS_PER_MM);
-        e->yOffset = int32_t(HAL::eprGetFloat(o+EPR_EXTRUDER_Y_OFFSET)*YAXIS_STEPS_PER_MM);
+        e->xOffset = int32_t(HAL::eprGetFloat(o+EPR_EXTRUDER_X_OFFSET)*Printer::axisStepsPerMM[X_AXIS]);
+        e->yOffset = int32_t(HAL::eprGetFloat(o+EPR_EXTRUDER_Y_OFFSET)*Printer::axisStepsPerMM[Y_AXIS]);
         e->watchPeriod = HAL::eprGetInt16(o+EPR_EXTRUDER_WATCH_PERIOD);
 
 #if RETRACT_DURING_HEATUP
@@ -762,7 +783,8 @@ void EEPROM::readDataFromEEPROM()
 #endif // FEATURE_24V_FET_OUTPUTS
 
 #if FEATURE_230V_OUTPUT
-	Printer::enable230VOutput = HAL::eprGetByte( EPR_RF_230V_OUTPUT_MODE );
+	// after a power-on, the 230 V plug always shall be turned off - thus, we do not store this setting to the EEPROM
+	// Printer::enable230VOutput = HAL::eprGetByte( EPR_RF_230V_OUTPUT_MODE );
 #endif // FEATURE_230V_OUTPUT
 
 #if FEATURE_CONFIGURABLE_Z_ENDSTOPS
@@ -791,7 +813,7 @@ void EEPROM::readDataFromEEPROM()
 
 #if FEATURE_CONFIGURABLE_HOTEND_TYPE
 	Printer::HotendType = HAL::eprGetByte( EPR_RF_HOTEND_TYPE );
-	if( Printer::HotendType < HOTEND_TYPE_1 || HOTEND_TYPE_V2_DUAL )
+	if( Printer::HotendType < HOTEND_TYPE_1 || Printer::HotendType == HOTEND_TYPE_V2_DUAL )
 	{
 #if MOTHERBOARD == DEVICE_TYPE_RF1000
 		Printer::HotendType = HOTEND_TYPE_V2_SINGLE;
@@ -818,6 +840,7 @@ void EEPROM::readDataFromEEPROM()
     }
     Printer::updateDerivedParameter();
     Extruder::initHeatedBed();
+
 #endif // EEPROM_MODE!=0
 
 } // readDataFromEEPROM
@@ -967,6 +990,7 @@ void EEPROM::writeSettings()
     writeFloat(EPR_Y_MAX_FEEDRATE,Com::tEPRYMaxFeedrate);
     writeFloat(EPR_Z_MAX_FEEDRATE,Com::tEPRZMaxFeedrate);
 	writeLong(EPR_RF_Z_OFFSET,Com::tEPRZOffset);
+	writeByte(EPR_RF_Z_MODE,Com::tEPRZMode);
 
 #if FEATURE_MILLING_MODE
 	if( Printer::operatingMode == OPERATING_MODE_PRINT )
@@ -1055,10 +1079,6 @@ void EEPROM::writeSettings()
     // now the extruder
     for(uint8_t i=0; i<NUM_EXTRUDER; i++)
     {
-#if FEATURE_WATCHDOG
-		HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
 		int o=i*EEPROM_EXTRUDER_LENGTH+EEPROM_EXTRUDER_OFFSET;
         Extruder *e = &extruder[i];
         writeFloat(o+EPR_EXTRUDER_STEPS_PER_MM,Com::tEPRStepsPerMM);
@@ -1122,7 +1142,8 @@ void EEPROM::writeSettings()
 #endif // FEATURE_24V_FET_OUTPUTS
 
 #if FEATURE_230V_OUTPUT
-	writeByte(EPR_RF_230V_OUTPUT_MODE,Com::tEPR230VOutputMode);
+	// after a power-on, the 230 V plug always shall be turned off - thus, we do not store this setting to the EEPROM
+	// writeByte(EPR_RF_230V_OUTPUT_MODE,Com::tEPR230VOutputMode);
 #endif // FEATURE_230V_OUTPUT
 
 #if FEATURE_CONFIGURABLE_HOTEND_TYPE
@@ -1146,18 +1167,23 @@ void EEPROM::writeSettings()
 #if EEPROM_MODE!=0
 uint8_t EEPROM::computeChecksum()
 {
+	millis_t		lastTime	= HAL::timeInMilliseconds();
+	millis_t		currentTime;
     unsigned int	i;
     uint8_t			checksum=0;
 
 
     for(i=0; i<2048; i++)
     {
-#if FEATURE_WATCHDOG
-		HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
 		if(i==EEPROM_OFFSET+EPR_INTEGRITY_BYTE) continue;
         checksum += HAL::eprGetByte(i);
+
+		currentTime = HAL::timeInMilliseconds();
+		if( (currentTime - lastTime) > PERIODICAL_ACTIONS_CALL_INTERVAL )
+		{
+			Commands::checkForPeriodicalActions();
+			lastTime = currentTime;
+		}
     }
     return checksum;
 

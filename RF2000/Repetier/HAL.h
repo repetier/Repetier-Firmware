@@ -1,4 +1,4 @@
-/*
+﻿/*
     This file is part of the Repetier-Firmware for RF devices from Conrad Electronic SE.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -55,6 +55,12 @@ All known arduino boards use 64. This value is needed for the extruder timing. *
 #define COMPAT_PRE1
 
 #include "fastio.h"
+
+
+#if FEATURE_WATCHDOG
+extern	unsigned char	g_bPingWatchdog;
+#endif // FEATURE_WATCHDOG
+
 
 #define BEGIN_INTERRUPT_PROTECTED {uint8_t sreg=SREG;__asm volatile( "cli" ::: "memory" );
 #define END_INTERRUPT_PROTECTED SREG=sreg;}
@@ -567,10 +573,6 @@ public:
 
     static inline void allowInterrupts()
     {
-#if FEATURE_WATCHDOG
-		HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
         sei();
 
     } // allowInterrupts
@@ -579,11 +581,7 @@ public:
     {
         cli();
 
-#if FEATURE_WATCHDOG
-		HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
-    } // forbidInterrupts
+	} // forbidInterrupts
 
     static inline unsigned long timeInMilliseconds()
     {
@@ -767,10 +765,14 @@ public:
         //wdt_enable(WDTO_1S);
 #endif // FEATURE_WATCHDOG && WATCHDOG_PIN>-1
 
+		g_bPingWatchdog = 1;
+
     } // startWatchdog
 
     inline static void stopWatchdog()
     {
+		g_bPingWatchdog = 0;
+
 #if FEATURE_WATCHDOG && WATCHDOG_PIN>-1
 		// external watchdog
 		SET_INPUT(WATCHDOG_PIN);
@@ -783,6 +785,12 @@ public:
 
     inline static void pingWatchdog()
     {
+		if( !g_bPingWatchdog )
+		{
+			// do not trigger the watchdog in case it is not enabled
+			return;
+		}
+
 #if FEATURE_WATCHDOG && WATCHDOG_PIN>-1
 		// external watchdog
 		WRITE(WATCHDOG_PIN,READ(WATCHDOG_PIN) ? 0 : 1);

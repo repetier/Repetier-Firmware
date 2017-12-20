@@ -1,3 +1,79 @@
+V RF.01.38 (2017-12-19)
+- Fixing of compiler errors in case FEATURE_MILLING_MODE was set to 0 for the RF1000 variant of the firmware.
+- Adding of a timeout so that continuePrint() can not block the further execution of G-Codes forever.
+- Improved handling of RF1000 installations where the z-min and z-max endstops are within the same circuit.
+- Adding of support for the following device configuration:
+  - RF2000 + miller
+- Direct steps into the y and z direction could cause small, unwanted steps into the x direction.
+  - These small steps could cause the x stepper to buzz.
+- The menu items "Set XY Start" and "Set XY End" did not set the start/end position properly in case direct movements where used to move to the start/end position.
+- readIdlePressure() cancels the heat bed scan in case the idle pressure is not constant.
+- After the start of the heat bed scan, the firmware waits until all temperatures are reached before it starts with the homing.
+  - After the homing, the z-axis is moved down HEAT_BED_SCAN_Z_START_STEPS steps (default = 0.5 mm).
+- The default homing speeds for the milling mode have been increased by about 50 %.
+- The z offset from the menu was not taken over during the startup of the firmware.
+- The z offset from the menu was not updated properly after the switch of the operating mode.
+- The last column and row of the heat bed/work part scan did not find their way into the heat bed/work part compensation matrix.
+  - Improved rounding of the x/y positions within the first row/column of the compensation matrix.
+- In case both extruders were heated up before the heat bed scan, only the first extruder was turned off at the end of the scan.
+- Adding of support for M3117.
+  - This command can be used in order to set a status text which is not overwritten by M117.
+  - M3117 makes M3110 obsolete, thus M3110 is not supported anymore.
+- In case the Z-compensation is active, "Cmp" is displayed at the status display right to the current z-value.
+- Adding of support for an alternative mode for the displayed z-value.
+  - In operating mode "print", the menu entry "Configuration" - "General" - "Z Scale" can be used in order to determine whether the displayed z-value shall be counted from z-min or from the surface of the heat bed.
+  - In operating mode "mill", the menu entry "Configuration" - "General" - "Z Scale" can be used in order to determine whether the displayed z-value shall be counted from the determined z-origin or from the surface of the work part.
+- In case an error or a warning is detected by the firmware, an according error/warning information can be displayed directly at the display.
+  - The status information is displayed until it is acknowledged via a button (or until it is overwritten by a following status information).
+  - An eventually ongoing print/mill operation is not interrupted/delayed through a displayed status information.
+  - Additional information can be provided via the log of the connected PC application (Repetier-Host).
+- In case FEATURE_EMERGENCY_Z_STOP is active, the strain gauge values are not examined anymore while the print/mill operation is paused.
+  - During this pause, someone might want to clean the extruder or to exchange the used tool of the miller. Such operations can bring high forces onto the strain gauge, in which case an emergency z block was possible.
+- In case the z-origin at the beginning of a mill operation was not searched at the x/y start position of the work part scan, the determined z offset could be wrong.
+- In case the firmware processes a long-lasting operation, it can notify an attached PC application via "busy:" packets. As a result, the PC application knows that the firmware is still alive and can avoid unnecessary timeouts.
+- Adding of support for multiple (up to 9) heat bed z-compensation matrices.
+  - Possible use cases are different heat bed z-compensation matrices for different beds and/or different heat bed z-compensation matrices for different filaments/temperatures.
+  - The active heat bed z-compensation matrix can be chosen via M3009.
+- Adding of support for a more precise heat bed scan.
+  - This more precise mode waits longer after heating up of the heating bed and extruders and it determines the static offset in z-direction which is caused by the changing length of the extruder at the printing temperature.
+  - The menu entries "Configuration" - "Z Calibration" - "Scan PLA/ABS" perform the scan with predefined temperature profiles for PLA/ABS.
+  - M3010 can be called with the S1 (PLA) or S2 (ABS) parameters now in order to start the scan with predefined temperature profiles for PLA/ABS.
+- The G-codes M3030, M3031, M3032, M3033, M3040, M3041, M3042, M3050, M3051, M3052, M3053, M3054 and M3055 are available also in operating mode "mill" now.
+- G0/G1 commands are allowed to overdrive Z-min now.
+  - The overdrive is limited through Z_OVERRIDE_MAX and allows G0/G1 to decrease the height of the first layer even in case Z-min is active already.
+  - An example use case can appear in case the calibration line is printed with a bigger height (e.g. 0.35 mm) than the first layer (e.g. 0.1 mm) - in such a scenario, the active z-compensation could drive the heat bed upwards so that Z-min is active already.
+- The mode of the movement via the "Position X/Y/Z" menus can be configured now.
+  - Within these menus, the right menu button can be pressed in order to switch the mode between "Single Steps", "Single Move", "1 mm", "10 mm" and "50 mm".
+  - The mode which is chosen within the "Position Z" menu is applied also to the "Heat Bed up" and "Heat Bed down" hardware buttons.
+- The speed of the PWM for the fans has been changed from ~15 to ~122 Hz.
+- The maximal length in x direction has been changed to 230 mm for the milling mode.
+- M3006 and M3146 support the Z parameter now which allows to configure the static z-offset in [mm].
+- M3007 and M3008 support the Z parameter now which allows to configure the z-compensation scope in [mm].
+- The codepage of all .cpp and .h files has been changed so that also characters like ° and µ can be used without warnings from the Arduino IDE.
+- Improved description of all RF-specific M-codes within RF.h.
+- M3013 P1 and M3153 P1 can be used now in order to output the z-offsets from the current z-compensation matrix in [mm] (instead of the default unit [steps]).
+- The firmware has sent "Start" via USB instead of "start" after its startup, which could cause problems with applications like OctoPrint.
+- Single moves into z-direction via the hardware buttons could continue although the button was released already.
+- Some unnecessary blocking of manual movements into the x, y and z-directions has been removed.
+- The "Hotend Type" setting from the menu was reset during each restart of the firmware.
+- There were situations where the wrong heat bed matrix could be loaded.
+- M303 did not update the P-value (only the I- and D-values were written to the EEPROM).
+- In case the "Z Type" of the RF1000 was configured to "Circuit", the firmware could detect Z-max as hit instead of Z-min during the processing of the first layers.
+- The firmware could hang or reset in case it had to process a lot of G-codes of rather short execution length (e.g. the single linear segments of a circle).
+- The emergency stop because of too high pressure values from the strain gauge stops all axes (instead of only the z-axis) now.
+- Successive homing of the z-axis and enabling of the z-compensation could lead to a wrong calculation of the z-position.
+- Removing of the .gitattributes file in order to allow easier cross-platform collaboration.
+- In case the heat bed scan is started and the extruder is warmer than the target temperature, the firmware waits until the extruder has cooled down.
+- Review of all calls to the watchdog in order to avoid situations where the heaters could remain constantly on because of a hang of the firmware.
+- "Printer Ready" could be shown too early (= at any moment in the middle of the printing). Typically this information was shown only for a short moment of time.
+- On some boards the watchdog could fire during the startup of the firmware, in which case the firmware ended in an endless restart loop.
+- M116 uses TEMP_TOLERANCE instead of "1" in order to judge whether the target temperature has been reached.
+- The PWM speed for the fan of the RF1000 has been changed from 122 Hz to 15 Hz.
+  - The PWM speed for the fan of the RF2000 remains unchanged at 122 Hz.
+- Directly after the start of the firmware, wrong values could be shown for the current temperatures of the heat bed and of the extruder.
+- After a restart of the firmware, the menu of the RF2000 could show that the 230 V plug is on although it is always turned off during the start of the firmware.
+- Minor clean-ups.
+
 V RF.01.10 (2015-12-14)
 - This firmware can be compiled for the RF1000 and for the RF2000.
   - Switch the value for "MOTHERBOARD" within Configuration.h between "DEVICE_TYPE_RF1000" and "DEVICE_TYPE_RF2000" in order to compile the proper variant of the firmware.

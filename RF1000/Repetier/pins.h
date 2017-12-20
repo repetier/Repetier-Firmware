@@ -1,4 +1,4 @@
-/*
+﻿/*
     This file is part of the Repetier-Firmware for RF devices from Conrad Electronic SE.
 
     Repetier-Firmware is free software: you can redistribute it and/or modify
@@ -20,9 +20,9 @@
 #define PINS_H
 
 
-#define CURRENT_CONTROL_DRV8711 4
-#define BEEPER_PIN_RF1000 	    23
-#define BEEPER_PIN_RF2000 	    5
+#define CURRENT_CONTROL_DRV8711		4
+#define BEEPER_PIN_RF1000 			23
+#define BEEPER_PIN_RF2000 			5
 
 
 // ##########################################################################################

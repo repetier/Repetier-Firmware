@@ -55,7 +55,7 @@ matches, the stored values are used to overwrite the settings.
 
 IMPORTANT: With mode <>0 some changes in Configuration.h are not set any more, as they are
            taken from the EEPROM. */
-#define EEPROM_MODE							110
+#define EEPROM_MODE							138
 
 
 // ##########################################################################################
@@ -67,6 +67,16 @@ IMPORTANT: With mode <>0 some changes in Configuration.h are not set any more, a
 
 /** \brief Enables automatic compensation in z direction for the operationg mode "print" */
 #define FEATURE_HEAT_BED_Z_COMPENSATION		1													// 1 = on, 0 = off
+
+/** \brief Enables the precise heat bed scan */
+#if FEATURE_HEAT_BED_Z_COMPENSATION
+
+#define FEATURE_PRECISE_HEAT_BED_SCAN		1													// 1 = on, 0 = off
+
+#endif // FEATURE_HEAT_BED_Z_COMPENSATION
+
+/** \brief Allows/disallows to override Z-min via G0 and G1 */
+#define FEATURE_Z_MIN_OVERRIDE_VIA_GCODE	1													// 1 = on, 0 = off
 
 /** \brief Enables/disables the output of the finished object feature */
 #define FEATURE_OUTPUT_FINISHED_OBJECT		1													// 1 = on, 0 = off
@@ -84,8 +94,8 @@ IMPORTANT: With mode <>0 some changes in Configuration.h are not set any more, a
 /** \brief Allows to cause an emergency stop via a 3-times push of the pause button */
 #define FEATURE_EMERGENCY_STOP_VIA_PAUSE	0													// 1 = on, 0 = off
 
-/** \brief Enables/diables the emergency z-stop in case of too high pressure */
-#define FEATURE_EMERGENCY_Z_STOP			1													// 1 = on, 0 = off
+/** \brief Enables/disables the emergency stop in case of too high pressure */
+#define FEATURE_EMERGENCY_STOP_ALL			1													// 1 = on, 0 = off
 
 /** \brief Specifies whether the current print shall be aborted in case a temperature sensor is defect */
 #define FEATURE_ABORT_PRINT_AFTER_TEMPERATURE_ERROR		1										// 1 = abort, 0 = do not abort
@@ -97,7 +107,7 @@ IMPORTANT: With mode <>0 some changes in Configuration.h are not set any more, a
 #define FEATURE_PARK						0													// 1 = on, 0 = off
 
 /** \brief Enables safety checks for the manual moving into z-direction via the additional hardware buttons */
-#define FEATURE_ENABLE_MANUAL_Z_SAFETY		1													// 1 = checks enabled, 0 = checks disabled
+#define FEATURE_ENABLE_Z_SAFETY				1													// 1 = checks enabled, 0 = checks disabled
 
 /** \brief Enables/disables the reset via the printer menu */
 #define	FEATURE_RESET_VIA_MENU				1													// 1 = on, 0 = off
@@ -159,7 +169,7 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 // ##########################################################################################
 
 /** \brief Define the to-be-used micro steps */
-#define	RF_MICRO_STEPS						32
+#define	RF_MICRO_STEPS						32												
 
 
 // ##########################################################################################
@@ -167,7 +177,7 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 // ##########################################################################################
 
 /** \brief Enables debug outputs which are used mainly for the development */
-#define DEBUG_SHOW_DEVELOPMENT_LOGS			1													// 1 = on, 0 = off
+#define DEBUG_SHOW_DEVELOPMENT_LOGS			0													// 1 = on, 0 = off
 
 
 #if FEATURE_HEAT_BED_Z_COMPENSATION 
@@ -176,7 +186,7 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define DEBUG_HEAT_BED_Z_COMPENSATION		0													// 1 = on, 0 = off
 
 /** \brief Enables debug outputs from the heat bed scan */
-#define DEBUG_HEAT_BED_SCAN					0													// 1 = on, 0 = off
+#define DEBUG_HEAT_BED_SCAN					0													// 0 = off, 1 = on, 2 = on with more debug outputs
 
 #endif // FEATURE_HEAT_BED_Z_COMPENSATION
 
@@ -200,6 +210,9 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 
 /** \brief Enables debug outputs about the heat bed temperature compensation */
 #define	DEBUG_HEAT_BED_TEMP_COMPENSATION	0													// 1 = on, 0 = off
+
+/** \brief Enables debug outputs about the configurable z endstops */
+#define DEBUG_CONFIGURABLE_Z_ENDSTOPS		0													// 1 = on, 0 = off
 
 /** \brief Allows M111 to set bit 5 (16) which disables all commands except M111. This can be used
 to test your data througput or search for communication problems. */
@@ -353,19 +366,19 @@ usage or for seraching for memory induced errors. Switch it off for production, 
 // ##	configuration of the emergency z stop functionality
 // ##########################################################################################
 
-#if FEATURE_EMERGENCY_Z_STOP
+#if FEATURE_EMERGENCY_STOP_ALL
 
 /** \brief Specifies the pressure at which the emergency z-stop shall be performed, in [digits] */
-#define EMERGENCY_Z_STOP_DIGITS_MIN			-5000
-#define EMERGENCY_Z_STOP_DIGITS_MAX			5000
+#define EMERGENCY_STOP_DIGITS_MIN			-5000
+#define EMERGENCY_STOP_DIGITS_MAX			5000
 
 /** \brief Specifies the interval at which the pressure check shall be performed, in [ms] */
-#define	EMERGENCY_Z_STOP_INTERVAL			10
+#define	EMERGENCY_STOP_INTERVAL				10
 
-/** \brief Specifies the number of pressure values which shall be averaged. The emergency z-stop can be detected each EMERGENCY_Z_STOP_INTERVAL * EMERGENCY_Z_STOP_CHECKS [ms] */
-#define	EMERGENCY_Z_STOP_CHECKS				3
+/** \brief Specifies the number of pressure values which shall be averaged. The emergency stop can be detected each EMERGENCY_STOP_INTERVAL * EMERGENCY_STOP_CHECKS [ms] */
+#define	EMERGENCY_STOP_CHECKS				3
 
-#endif // FEATURE_EMERGENCY_Z_STOP
+#endif // FEATURE_EMERGENCY_STOP_ALL
 
 
 // ##########################################################################################
@@ -575,6 +588,25 @@ instead of driving both with a single stepper. The same works for the other axis
 #define SD_MAX_FOLDER_DEPTH					2
 
 
+// ##########################################################################################
+// ##	configuration of the manual steps
+// ##########################################################################################
+
+#if FEATURE_EXTENDED_BUTTONS
+
+/** \brief Configuration of the manual steps */
+#define DEFAULT_MANUAL_STEPS_X				(RF_MICRO_STEPS *2)
+#define MAXIMAL_MANUAL_STEPS_X				(XAXIS_STEPS_PER_MM *10)
+#define DEFAULT_MANUAL_STEPS_Y				(RF_MICRO_STEPS *2)
+#define MAXIMAL_MANUAL_STEPS_Y				(YAXIS_STEPS_PER_MM *10)
+#define DEFAULT_MANUAL_STEPS_Z				(RF_MICRO_STEPS *2)
+#define MAXIMAL_MANUAL_STEPS_Z				(ZAXIS_STEPS_PER_MM *10)
+#define DEFAULT_MANUAL_STEPS_E				(EXT0_STEPS_PER_MM /5)
+#define MAXIMAL_MANUAL_STEPS_E				(EXT0_STEPS_PER_MM *10)
+
+#endif // FEATURE_EXTENDED_BUTTONS
+
+
 // ###############################################################################
 // ##	Values for menu settings
 // ###############################################################################
@@ -690,52 +722,58 @@ Values must be in range 1..255 */
 /*
 we use blocks of 2 kByte size for the structure of our EEPROM
 
-00000 ... 02047 bytes [2 kBytes] = general information
+00000 ... 01535 bytes [EEPROM_SECTOR_SIZE Bytes] = general information
   00000 [2 bytes] EEPROM format
-  00002 [2 bytes] active work part compensation matrix (1 ... EEPROM_MAX_WORK_PART_SECTORS)
+  00002 [2 bytes] active work part z-compensation matrix (1 ... EEPROM_MAX_WORK_PART_SECTORS)
+  00004 [2 bytes] active heat bed z-compensation matrix (1 ... EEPROM_MAX_HEAT_BED_SECTORS)
 
-02048 ... 04095 bytes [2 kBytes]  = heat bed compensation matrix
-  02048 [2 bytes] x-dimension of the heat bed compensation matrix
-  02050 [2 bytes] y-dimension of the heat bed compensation matrix
-  02052 [2 bytes] used micro steps
-  02054 [12 bytes] reserved
-  02066 [x bytes] heat bed compensation matrix
+01536 ... 03071 bytes [EEPROM_SECTOR_SIZE Bytes] = heat bed z-compensation matrix 1
+  01536 [2 bytes] x-dimension of the heat bed z-compensation matrix 1
+  01538 [2 bytes] y-dimension of the heat bed z-compensation matrix 1
+  01540 [2 bytes] used micro steps
+  01542 [12 bytes] reserved
+  01554 [x bytes] heat bed z-compensation matrix 1
 
-04096 ... 06143 bytes [2 kBytes]  = work part compensation matrix 1
-  04096 [2 bytes] x-dimension of the work part compensation matrix 1
-  04098 [2 bytes] y-dimension of the work part compensation matrix 1
-  04100 [2 bytes] used micro steps
-  04102 [2 bytes] x start position of the work part scan [mm]
-  04104 [2 bytes] y start position of the work part scan [mm]
-  04106 [2 bytes] x step size of the work part scan [mm]
-  04108 [2 bytes] y step size of the work part scan [mm]
-  04110 [2 bytes] x end position of the work part scan [mm]
-  04112 [2 bytes] y end position of the work part scan [mm]
-  04114 [x bytes] work part compensation matrix 1
+03072 ... 04597 bytes [EEPROM_SECTOR_SIZE Bytes] = heat bed z-compensation matrix 2
+  ...
 
-06144 ... 08191 bytes [2 kBytes]  = work part compensation matrix 2
+15360 ... 16895 bytes [EEPROM_SECTOR_SIZE Bytes]  = work part compensation matrix 1
+  15360 [2 bytes] x-dimension of the work part compensation matrix 1
+  15362 [2 bytes] y-dimension of the work part compensation matrix 1
+  15364 [2 bytes] used micro steps
+  15366 [2 bytes] x start position of the work part scan [mm]
+  15368 [2 bytes] y start position of the work part scan [mm]
+  15370 [2 bytes] x step size of the work part scan [mm]
+  15372 [2 bytes] y step size of the work part scan [mm]
+  15374 [2 bytes] x end position of the work part scan [mm]
+  15376 [2 bytes] y end position of the work part scan [mm]
+  15378 [x bytes] work part z-compensation matrix 1
+
+16895 ... 18430 bytes [2 kBytes]  = work part compensation matrix 2
   ...
 */
 
-#define	EEPROM_OFFSET_SECTOR_FORMAT			0
-#define EEPROM_OFFSET_DIMENSION_X			2
-#define EEPROM_OFFSET_DIMENSION_Y			4
-#define	EEPROM_OFFSET_MICRO_STEPS			6
-#define EEPROM_OFFSET_X_START_MM			16
-#define EEPROM_OFFSET_Y_START_MM			18
-#define EEPROM_OFFSET_X_STEP_MM				20
-#define EEPROM_OFFSET_Y_STEP_MM				22
-#define EEPROM_OFFSET_X_END_MM				24
-#define EEPROM_OFFSET_Y_END_MM				26
-#define EEPROM_OFFSET_MAXTRIX_START			28
+#define	EEPROM_OFFSET_SECTOR_FORMAT					0
+#define EEPROM_OFFSET_DIMENSION_X					2
+#define EEPROM_OFFSET_DIMENSION_Y					4
+#define	EEPROM_OFFSET_MICRO_STEPS					6
+#define EEPROM_OFFSET_X_START_MM					16
+#define EEPROM_OFFSET_Y_START_MM					18
+#define EEPROM_OFFSET_X_STEP_MM						20
+#define EEPROM_OFFSET_Y_STEP_MM						22
+#define EEPROM_OFFSET_X_END_MM						24
+#define EEPROM_OFFSET_Y_END_MM						26
+#define EEPROM_OFFSET_MAXTRIX_START					28
 
-#define	EEPROM_SECTOR_SIZE					2048												// [bytes]
-#define	EEPROM_MAX_WORK_PART_SECTORS		9
+#define	EEPROM_SECTOR_SIZE							1536										// [bytes]
+#define	EEPROM_MAX_WORK_PART_SECTORS				9
+#define	EEPROM_MAX_HEAT_BED_SECTORS					9
 
-#define EEPROM_OFFSET_HEADER_FORMAT			0													// [bytes]
-#define EEPROM_OFFSET_ACTIVE_WORK_PART		2													// [bytes]
+#define EEPROM_OFFSET_HEADER_FORMAT					0											// [bytes]
+#define EEPROM_OFFSET_ACTIVE_WORK_PART_Z_MATRIX		2											// [bytes]
+#define EEPROM_OFFSET_ACTIVE_HEAT_BED_Z_MATRIX		4											// [bytes]
 
-#define EEPROM_FORMAT						6
+#define EEPROM_FORMAT								7
 
 
 // ##########################################################################################
@@ -759,12 +797,15 @@ we use blocks of 2 kByte size for the structure of our EEPROM
 // ##	miscellaneous configurations
 // ##########################################################################################
 
-#if FEATURE_ENABLE_MANUAL_Z_SAFETY
+#if FEATURE_ENABLE_Z_SAFETY
 
-/** \brief Specifies the maximal steps which can be moved into z-direction via the hardware buttons after the z-endstop has been reached */
-#define	MANUAL_Z_OVERRIDE_MAX				ZAXIS_STEPS_PER_MM
+/** \brief Specifies the maximal steps which can be moved into z-direction after the z-endstop has been reached */
+#define	Z_OVERRIDE_MAX						(ZAXIS_STEPS_PER_MM / 2)
 
-#endif // FEATURE_ENABLE_MANUAL_Z_SAFETY
+#endif // FEATURE_ENABLE_Z_SAFETY
+
+/** \brief Specifies the minimal distance from z-min which must be reached before it is plausible that z-max is hit */
+#define	Z_MIN_DISTANCE						(ZAXIS_STEPS_PER_MM * 5)
 
 /** \brief Defines the Z-Offset stepsize in um */
 #define	Z_OFFSET_STEP						25
@@ -798,6 +839,13 @@ non-Repetier PC applications may fall over the debug outputs of the firmware. */
 /** \brief Configuration of the external watchdog
 The TPS3820 of the RF1000/RF2000 resets about 25 ms after the last time when it was triggered, the value of WATCHDOG_TIMEOUT should be less than half of this time. */
 #define WATCHDOG_TIMEOUT					10													// [ms]
+#define	WATCHDOG_MAIN_LOOP_TIMEOUT			10000												// [ms]
+
+/** \brief Longer-lasting operations shall call our periodical actions at least each defined time interval */
+#define	PERIODICAL_ACTIONS_CALL_INTERVAL	10													// [ms]
+
+/** \brief The display shows that the device is idle after no new commands were processed for longer than the minimal idle time */
+#define	MINIMAL_IDLE_TIME					500													// [ms]
 
 /** \brief If enabled you can select the distance your filament gets retracted during a M140 command, after a given temperature is reached. */
 #define RETRACT_DURING_HEATUP				true
@@ -823,8 +871,6 @@ Set the value to 0: Normal computation, just clip output to EXT0_PID_MAX if comp
 Set value to 1: Scale PID by EXT0_PID_MAX/256 and then clip to EXT0_PID_MAX.
 If your EXT0_PID_MAX is low, you should prefer the second method. */
 #define SCALE_PID_TO_MAX					0
-
-#define HEATER_PWM_SPEED					1													// How fast ist pwm signal 0 = 15.25Hz, 1 = 30.51Hz, 2 = 61.03Hz, 3 = 122.06Hz
 
 /** \brief Temperature range for target temperature to hold in M109 command. 5 means +/-5 degC
 Uncomment define to force the temperature into the range for given watchperiod. */
@@ -888,6 +934,12 @@ execution. This helps tracking errors, because there may be 8 or more commands i
 and it is elsewise difficult to know, what your reprap is currently doing. */
 #define ECHO_ON_EXECUTE						1
 
+/** \brief If the firmware is busy, it will send a busy signal to host signaling that
+ everything is fine and it only takes a bit longer to finish. That way the 
+ host can keep timeout short so in case of communication errors the resulting
+ blobs are much smaller. Set to 0 to disable it. */
+#define KEEP_ALIVE_INTERVAL					2000												// [ms]
+
 /** \brief  Turn the case light on/off per default */
 #define CASE_LIGHTS_DEFAULT_ON				0
 
@@ -897,6 +949,14 @@ and it is elsewise difficult to know, what your reprap is currently doing. */
 
 /** \brief Specify whether the case fan all be always on */
 #define CASE_FAN_ALWAYS_ON					0													// 1 = always on, 0 = automatic switching and switching via G-Code
+
+/** \brief Defines the default behavior of the Position X/Y/Z menus */
+#define DEFAULT_MOVE_MODE_X					MOVE_MODE_SINGLE_MOVE
+#define DEFAULT_MOVE_MODE_Y					MOVE_MODE_SINGLE_MOVE
+#define DEFAULT_MOVE_MODE_Z					MOVE_MODE_SINGLE_MOVE
+
+/** \brief Defines the default z scale */
+#define DEFAULT_Z_SCALE_MODE				Z_VALUE_MODE_Z_MIN
 
 
 #endif // CONFIGURATION_H

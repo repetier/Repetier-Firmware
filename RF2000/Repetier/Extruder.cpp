@@ -70,10 +70,6 @@ void Extruder::manageTemperatures()
     uint8_t errorDetected = 0;
     for(uint8_t controller=0; controller<NUM_TEMPERATURE_LOOPS; controller++)
     {
-#if FEATURE_WATCHDOG
-	    HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
         if(controller == autotuneIndex) continue;
         TemperatureController *act = tempController[controller];
 
@@ -105,6 +101,8 @@ void Extruder::manageTemperatures()
             {
                 Printer::flag0 |= PRINTER_FLAG0_TEMPSENSOR_DEFECT;
                 reportTempsensorError();
+
+				showError( (void*)ui_text_temperature_manager, (void*)ui_text_sensor_error );
             }
         }
         if(Printer::isAnyTempsensorDefect()) continue;
@@ -219,52 +217,6 @@ void Extruder::initHeatedBed()
 } // initHeatedBed
 
 
-#if defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
-void createGenericTable(short table[GENERIC_THERM_NUM_ENTRIES][2],short minTemp,short maxTemp,float beta,float r0,float t0,float r1,float r2)
-{
-    t0+=273.15f;
-    float rs,vs;
-
-
-    if(r1==0)
-    {
-        rs = r2;
-        vs = GENERIC_THERM_VREF;
-    }
-    else
-    {
-        vs =(float)(GENERIC_THERM_VREF*r1)/(r1+r2);
-        rs = (r2*r1)/(r1+r2);
-    }
-
-    float k		= r0*exp(-beta/t0);
-    float delta = (maxTemp-minTemp)/(GENERIC_THERM_NUM_ENTRIES-1.0f);
-
-    for(uint8_t i=0; i<GENERIC_THERM_NUM_ENTRIES; i++)
-    {
-#if FEATURE_WATCHDOG
-        HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
-        float t = maxTemp-i*delta;
-        float r = exp(beta/(t+272.65))*k;
-        float v = 4092*r*vs/((rs+r)*GENERIC_THERM_VREF);
-        int adc = (int)(v);
-        t *= 8;
-        if(adc>4092) adc=4092;
-        table[i][0] = (adc>>(ANALOG_REDUCE_BITS));
-        table[i][1] = (int)t;
-
-#ifdef DEBUG_GENERIC
-        Com::printF(Com::tGenTemp,table[i][0]);
-        Com::printFLN(Com::tComma,table[i][1]);
-#endif // DEBUG_GENERIC
-    }
-
-} // createGenericTable
-#endif // defined(USE_GENERIC_THERMISTORTABLE_1) || defined(USE_GENERIC_THERMISTORTABLE_2) || defined(USE_GENERIC_THERMISTORTABLE_3)
-
-
 /** \brief Initalizes all extruder.
 Updates the pin configuration needed for the extruder and activates extruder 0.
 Starts a interrupt based analog input reader, which is used by simple thermistors
@@ -357,7 +309,15 @@ This function changes and initalizes a new extruder. This is also called, after 
 */
 void Extruder::selectExtruderById(uint8_t extruderId)
 {
-    if(extruderId>=NUM_EXTRUDER)
+#if FEATURE_MILLING_MODE
+	if( Printer::operatingMode == OPERATING_MODE_MILL )
+	{
+		// in operating mode mill, the extruders are not used
+		return;
+	}
+#endif // FEATURE_MILLING_MODE
+
+	if(extruderId>=NUM_EXTRUDER)
         extruderId = 0;
 
 #if NUM_EXTRUDER>1
@@ -412,7 +372,9 @@ void Extruder::selectExtruderById(uint8_t extruderId)
     Printer::extruderOffset[X_AXIS] = -Extruder::current->xOffset*Printer::invAxisStepsPerMM[X_AXIS];
     Printer::extruderOffset[Y_AXIS] = -Extruder::current->yOffset*Printer::invAxisStepsPerMM[Y_AXIS];
     if(Printer::isHomed())
-        Printer::moveToReal(cx,cy,cz,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
+	{
+		Printer::moveToReal(cx,cy,cz,IGNORE_COORDINATE,Printer::homingFeedrate[X_AXIS]);
+	}
     Printer::feedrate = oldfeedrate;
     Printer::updateCurrentPosition();
 
@@ -517,7 +479,6 @@ void Extruder::setHeatedBedTemperature(float temperatureInCelsius,bool beep)
 {
 #if HAVE_HEATED_BED
 	float	offset = 0.0;
-
 
     if(temperatureInCelsius>HEATED_BED_MAX_TEMP) temperatureInCelsius = HEATED_BED_MAX_TEMP;
     if(temperatureInCelsius<0) temperatureInCelsius = 0;
@@ -1041,12 +1002,9 @@ void TemperatureController::setTargetTemperature(float target, float offset)
 			short oldraw = pgm_read_word(&temptable[0]);
 			short oldtemp = pgm_read_word(&temptable[1]);
 			short newraw,newtemp;
+
 			while(i<num)
 			{
-#if FEATURE_WATCHDOG
-				HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
 				newraw = pgm_read_word(&temptable[i++]);
 				newtemp = pgm_read_word(&temptable[i++]);
 				if (newtemp < temp)
@@ -1086,10 +1044,6 @@ void TemperatureController::setTargetTemperature(float target, float offset)
 
 			while(i<num)
 			{
-#if FEATURE_WATCHDOG
-			 HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
-
 				newraw = pgm_read_word(&temptable[i++]);
 				newtemp = pgm_read_word(&temptable[i++]);
 				if (newtemp > temp)
@@ -1239,14 +1193,17 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
         extruder[controllerId].coolerPWM = extruder[controllerId].coolerSpeed;
         extruder[0].coolerPWM = extruder[0].coolerSpeed;
     }
+
     for(;;)
     {
 #if FEATURE_WATCHDOG
         HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG
 
+		GCode::keepAlive( WaitHeater );
         updateCurrentTemperature();
         currentTemp = currentTemperatureC;
+
         unsigned long time = HAL::timeInMilliseconds();
         maxTemp=RMath::max(maxTemp,currentTemp);
         minTemp=RMath::min(minTemp,currentTemp);
@@ -1319,6 +1276,8 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
 			{
 	            Com::printErrorFLN(Com::tAPIDFailedHigh);
 			}
+
+			showError( (void*)ui_text_autodetect_pid, (void*)ui_text_temperature_wrong );
             Extruder::disableAllHeater();
             return;
         }
@@ -1334,6 +1293,8 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
 	            Com::printErrorFLN(Com::tAPIDFailedTimeout);
 			}
             Extruder::disableAllHeater();
+
+			showError( (void*)ui_text_autodetect_pid, (void*)ui_text_timeout );
             return;
         }
         if(cycles > 5)
@@ -1342,10 +1303,13 @@ void TemperatureController::autotunePID(float temp,uint8_t controllerId,bool sto
 			{
 	            Com::printInfoFLN(Com::tAPIDFinished);
 			}
+
+			UI_STATUS_UPD( UI_TEXT_AUTODETECT_PID_DONE );
+
             Extruder::disableAllHeater();
             if(storeValues)
             {
-                pidDGain = Kp;
+                pidPGain = Kp;
                 pidIGain = Ki;
                 pidDGain = Kd;
                 heatManager = 1;
