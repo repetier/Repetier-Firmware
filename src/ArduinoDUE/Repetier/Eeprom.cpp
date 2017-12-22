@@ -881,7 +881,9 @@ void EEPROM::writeSettings()
 #if EEPROM_MODE != 0
     writeByte(EPR_SELECTED_LANGUAGE,Com::tLanguage);
     writeLong(EPR_BAUDRATE, Com::tEPRBaudrate);
+#if NUM_EXTRUDER > 0
     writeFloat(EPR_PRINTING_DISTANCE, Com::tEPRFilamentPrinted);
+#endif
     writeLong(EPR_PRINTING_TIME, Com::tEPRPrinterActive);
     writeLong(EPR_MAX_INACTIVE_TIME, Com::tEPRMaxInactiveTime);
     writeLong(EPR_STEPPER_INACTIVE_TIME, Com::tEPRStopAfterInactivty);
