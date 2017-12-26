@@ -2218,7 +2218,6 @@ void Printer::showJSONStatus(int type) {
         Com::print((int)3);
     else
         Com::print((int)(heatedBedController.targetTemperatureC < 30 ? 0 : 2));
-    Com::print(heatedBedController.targetTemperatureC);
 #else
     Com::print((int)0);
 #endif
@@ -2238,6 +2237,10 @@ void Printer::showJSONStatus(int type) {
     Com::print(currentPosition[Z_AXIS]); // Z
     //  "extr": [0.0, 0.0],
     Com::printF(PSTR("],\"extr\":["));
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+	    if (i) Com::print(',');
+	    Com::printFloat(extruder[i].tempControl.currentTemperatureC,1);
+    }
     //  "sfactor": 100.00,
     Com::printF(PSTR("],\"sfactor\":"), Printer::feedrateMultiply);
     //  "efactor": [100.00, 100.00],

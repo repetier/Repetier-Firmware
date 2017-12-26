@@ -21,15 +21,58 @@ twice and not copied.
 new configurations since we need to add them also to our online tool, so users
 can set them correctly.
 
+.0 will be the last 1 version. Fixes for this will be done in the dev branch and
+moved to stable after a while as 1.0.x patch updates. With the release of the
+official 1.0 version we will start developing version 2.0 in the branch dev2
+where all the new features will be added.
+
+### Version 2.0 informations
+
+Version 2 will be a incompatible refactoring of version 1.0. We will try to keep
+commands and communication identical to 1.0, but for the configuration we see
+a much more flexible way that makes it much easier to adjust the firmware to
+nowadays needs. But that requires a different configuration at several parts.
+
+Planned stages:
+1. Merge AVR and Due into one fileset.
+2. Split long files like boards, displays, languages in several files into a subfolder.
+    That way it gets much faster to search the right place.
+3. Update used libraries.
+4. Change configuration.
+5. Change motion planner.
+6. Create a config tool.
+7. Public testing with more users. We assume until a config tool is available the configuration
+will get several changes and only users with programming skills will do it manually
+to benefit already from improvements achieved.
+
+Until 6. the version should be considered alpha stage. We do expect errors from all
+the changes and there may be bigger mods with an update. Of course we will try
+to keep every release workable, but as work in progress there is no guarantee. 
+
 ## Installation
 
 Please use your configuration tool at 
-[http://www.repetier.com/firmware/v092](http://www.repetier.com/firmware/v092)
-or for latest development version at
+[http://www.repetier.com/firmware/v100](http://www.repetier.com/firmware/v100)
+or for latest 1.0.x development version at
 [http://www.repetier.com/firmware/dev](http://www.repetier.com/firmware/dev)
 for easy and fast configuration. You get the complete sources you need to compile from the online configurator.
 This system also allows it to upload configurations created with this tool and modify the configuration. This is handy for updates as you get all newly introduced parameter just by uploading the old version and downloading the
 latest version. New parameter are initalized with default values.
+
+## Version 1.0.0
+* Fixed many autoleveling bugs.
+* More supported boards and displays.
+* Added CNC/Laser modes.
+* Improved event system to extend firmware without modification of files.
+* Dual X axis support (2 separate x axis)
+* New gcode handler for more flexible support of different inputs.
+* Improved menu.
+* Jam detection.
+* More stable temperature control with PID.
+* Per axis homing flag.
+* Keep alive signals for hosts.
+* Support capabilities protocol.
+* Many bug fixes.
 
 ## Version 0.92.8 
 * Cleaner code base.

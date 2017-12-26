@@ -25,7 +25,7 @@
 #include <math.h>
 #include <stdint.h>
 //#define REPETIER_VERSION "0.92.10"
-#define REPETIER_VERSION "1.0.0dev"
+#define REPETIER_VERSION "1.0.0"
 
 // Use new communication model for multiple channels - only until stable, then old version gets deleted
 #define NEW_COMMUNICATION 1
