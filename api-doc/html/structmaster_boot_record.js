@@ -1,9 +1,9 @@
 var structmaster_boot_record =
 [
-    [ "codeArea", "structmaster_boot_record.html#aa0506841535b45b93c3f51da3e662158", null ],
-    [ "diskSignature", "structmaster_boot_record.html#a6a40348b3b308847ba21a75829d91871", null ],
-    [ "mbrSig0", "structmaster_boot_record.html#aa5633d8ea0049be26315e7627e32bb4e", null ],
-    [ "mbrSig1", "structmaster_boot_record.html#af106928fafe93a641c06cfb87b0d24e3", null ],
-    [ "part", "structmaster_boot_record.html#a524278b18c83dccc3da5eaab41601a0d", null ],
-    [ "usuallyZero", "structmaster_boot_record.html#aefe56bef1bc942c24bc7eefc4a7aefcc", null ]
+    [ "codeArea", "structmaster_boot_record.html#a26ca1fb4ebbff2cc1a54153b1dfcd688", null ],
+    [ "diskSignature", "structmaster_boot_record.html#a77151c641444c0653ff71a253f0423ef", null ],
+    [ "mbrSig0", "structmaster_boot_record.html#a42b0b413ecb21ac5314d4f6bca05308f", null ],
+    [ "mbrSig1", "structmaster_boot_record.html#aafbbcb4f6a2d1181c6458d4c9603df4f", null ],
+    [ "part", "structmaster_boot_record.html#aa4e294e50f311635c10c92f4c99227c5", null ],
+    [ "usuallyZero", "structmaster_boot_record.html#afacfc863e98f64053cd9459c6dec948f", null ]
 ];

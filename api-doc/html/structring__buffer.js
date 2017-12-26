@@ -1,6 +1,6 @@
 var structring__buffer =
 [
-    [ "buffer", "structring__buffer.html#a2d9546fdd214976a34a12baa9c758ada", null ],
-    [ "head", "structring__buffer.html#aae22e2b3b3f930af186a18d70c863648", null ],
-    [ "tail", "structring__buffer.html#a7d299975a87db769b08769ea6b6561eb", null ]
+    [ "buffer", "structring__buffer.html#aeca719034fa6c52086936629e6cb3d39", null ],
+    [ "head", "structring__buffer.html#a6a4c701d83019fe9b6ce59e39daf7925", null ],
+    [ "tail", "structring__buffer.html#a612d23af97374f5dd9e3c0eab8eadc89", null ]
 ];

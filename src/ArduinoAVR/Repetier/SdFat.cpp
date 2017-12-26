@@ -1137,7 +1137,7 @@ bool SdBaseFile::open(SdBaseFile* dirFile,const uint8_t *dname, uint8_t oflag, b
   const char *tempPtr;
   char newName[SHORT_FILENAME_LENGTH+2];
   boolean bShortName = false;
-  int8_t cVFATNeeded = -1, cVFATFoundCur;
+  int8_t cVFATNeeded = -1, cVFATFoundCur = 0;
   uint32_t wIndexPos = 0;
   uint8_t cbFilename;
   char *Filename = (char *)dname;
@@ -1993,7 +1993,7 @@ dir_t *SdBaseFile::getLongFilename(dir_t *dir, char *longFilename, int8_t cVFATN
 {
   int16_t n;
   uint8_t bLastPart = true;
-  uint8_t checksum;
+  uint8_t checksum(0);
 
     if (longFilename != NULL)
       *longFilename = 0;
@@ -3075,28 +3075,59 @@ static void spiInit(uint8_t spiRate) {
 //------------------------------------------------------------------------------
 /** SPI receive a byte */
 static uint8_t spiRec() {
+#ifdef NONSTANDARD_SDSS
+    WRITE(SDSS, LOW);
+    uint8_t retval = HAL::spiReceive();
+    WRITE(SDSS, HIGH);
+    return retval;
+#else	
     return HAL::spiReceive();
+#endif	
 }
 //------------------------------------------------------------------------------
 /** SPI read data - only one call so force inline */
 static inline __attribute__((always_inline))
   uint8_t spiRec(uint8_t* buf, uint16_t nbyte) {
-HAL::spiReadBlock(buf,nbyte);
+#ifdef NONSTANDARD_SDSS
+  WRITE(SDSS, LOW);
+#endif
+  HAL::spiReadBlock(buf,nbyte);
+#ifdef NONSTANDARD_SDSS
+  WRITE(SDSS, HIGH);
+#endif
 return 0;
 }
 //------------------------------------------------------------------------------
 /** SPI send a byte */
 static void spiSend(uint8_t b) {
+#ifdef NONSTANDARD_SDSS
+WRITE(SDSS, LOW);
+#endif
     HAL::spiSend(b);
+#ifdef NONSTANDARD_SDSS
+WRITE(SDSS, HIGH);
+#endif
 }
 //------------------------------------------------------------------------------
 /** SPI send block - only one call so force inline */
 static inline __attribute__((always_inline))
   void spiSendBlock(uint8_t token, const uint8_t* buf) {
+#ifdef NONSTANDARD_SDSS
+WRITE(SDSS, LOW);
+#endif
       HAL::spiSendBlock(token,buf);
+#ifdef NONSTANDARD_SDSS
+WRITE(SDSS, HIGH);
+#endif
 }
 static void spiSend(const uint8_t* buf , size_t n) {
+#ifdef NONSTANDARD_SDSS
+WRITE(SDSS, LOW);
+#endif
     HAL::spiSend(buf,n);
+#ifdef NONSTANDARD_SDSS
+WRITE(SDSS, HIGH);
+#endif
 }
 
 //------------------------------------------------------------------------------

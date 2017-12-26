@@ -1,7 +1,7 @@
 var struct__u8g__dev__arg__irgb__t =
 [
-    [ "b", "struct__u8g__dev__arg__irgb__t.html#ab23a75b58e1f5f0f406890f2cdd77376", null ],
-    [ "g", "struct__u8g__dev__arg__irgb__t.html#a7fd191d918bc275c56acabcb5aa0bf5a", null ],
-    [ "idx", "struct__u8g__dev__arg__irgb__t.html#a22d765af22623542e427109d45d85809", null ],
-    [ "r", "struct__u8g__dev__arg__irgb__t.html#af1d72be24123b235c1fe53bfbfc771e4", null ]
+    [ "b", "struct__u8g__dev__arg__irgb__t.html#a93e46b405ebcfb1e847e90002584b322", null ],
+    [ "g", "struct__u8g__dev__arg__irgb__t.html#a5abb3f1e663a9fcceb585a4c2fbf9e5a", null ],
+    [ "idx", "struct__u8g__dev__arg__irgb__t.html#a0e3cc0e7e3a8ccc73f5e6e4265c788d5", null ],
+    [ "r", "struct__u8g__dev__arg__irgb__t.html#aafb5cea4c15476dbf54433495d14d528", null ]
 ];

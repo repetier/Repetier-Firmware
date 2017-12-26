@@ -1,6 +1,9 @@
 var motion_8h =
 [
+    [ "NonlinearSegment", "struct_nonlinear_segment.html", "struct_nonlinear_segment" ],
+    [ "PrintLine", "class_print_line.html", "class_print_line" ],
     [ "FLAG_ACCELERATION_ENABLED", "motion_8h.html#a2c78abde6b572b9cce3ba10bd79b5c7b", null ],
+    [ "FLAG_ALL_E_MOTORS", "motion_8h.html#a91042aaf3cefe55cabf89a9fc450c834", null ],
     [ "FLAG_BLOCKED", "motion_8h.html#aafd724d9cac420e263072927b00d9a45", null ],
     [ "FLAG_CHECK_ENDSTOPS", "motion_8h.html#a4928545b38f0d9f7c1cef343171db6b6", null ],
     [ "FLAG_DECELERATING", "motion_8h.html#ae80288e7929d2dd9a7a4aedcbbb53dbc", null ],
@@ -13,7 +16,7 @@ var motion_8h =
     [ "FLAG_JOIN_WAIT_EXTRUDER_DOWN", "motion_8h.html#ac8e3ee431a59c64705f133d526eb435b", null ],
     [ "FLAG_JOIN_WAIT_EXTRUDER_UP", "motion_8h.html#a20fd0b9b6301f01d0127ab40b93ca860", null ],
     [ "FLAG_NOMINAL", "motion_8h.html#a6d532b3a91829ce965b11bee7ce4a121", null ],
-    [ "FLAG_SKIP_ACCELERATING", "motion_8h.html#a1ce63ff7ba772791b6a64c15f80af9b9", null ],
     [ "FLAG_SKIP_DEACCELERATING", "motion_8h.html#afc633f974340414dfcc3da9489f8a9c3", null ],
-    [ "FLAG_WARMUP", "motion_8h.html#a6a2aad6af3e26a70043bb667d9fe6722", null ]
+    [ "FLAG_WARMUP", "motion_8h.html#a6a2aad6af3e26a70043bb667d9fe6722", null ],
+    [ "lastMoveID", "motion_8h.html#a214efd6b4f0d3ad28de96d5c9b5ace87", null ]
 ];

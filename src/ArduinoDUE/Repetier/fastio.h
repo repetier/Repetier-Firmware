@@ -271,7 +271,7 @@
 #define DIO91_PIN PIO_PB15A_CANRX1|PIO_PB14A_CANTX1
 
 // Additional Pins for Alligator board
-#if (MOTHERBOARD == 500) || (MOTHERBOARD == 501)
+//#if (MOTHERBOARD == 500) || (MOTHERBOARD == 501)
 //92
 #define DIO92_PORT PIOA
 #define DIO92_PIN PIO_PA5
@@ -299,10 +299,42 @@
 //100
 #define DIO100_PORT PIOC
 #define DIO100_PIN PIO_PC11
-#endif
+//#endif
 
+// 101 PB4
+#define DIO101_PORT PIOB
+#define DIO101_PIN PIO_PB4
+// 102 PB5
+#define DIO102_PORT PIOB
+#define DIO102_PIN PIO_PB5
+// 103 PB6
+#define DIO103_PORT PIOB
+#define DIO103_PIN PIO_PB6
+// 104 PB7
+#define DIO104_PORT PIOB
+#define DIO104_PIN PIO_PB7
+// 105 PB8
+#define DIO105_PORT PIOB
+#define DIO105_PIN PIO_PB8
+// 106 PB9
+#define DIO106_PORT PIOB
+#define DIO106_PIN PIO_PB9
+// 107 PB10
+#define DIO107_PORT PIOB
+#define DIO107_PIN PIO_PB10
 
-
+// 108 PB0
+#define DIO108_PORT PIOB
+#define DIO108_PIN PIO_PB0
+// 109 PB1
+#define DIO109_PORT PIOB
+#define DIO109_PIN PIO_PB1
+// 110 PB2
+#define DIO110_PORT PIOB
+#define DIO110_PIN PIO_PB2
+// 111 PB3
+#define DIO111_PORT PIOB
+#define DIO111_PIN PIO_PB3
 
 #ifndef	DIO0_PIN
 #error pins for this chip not defined in arduino.h! If you write an appropriate pin definition and have this firmware work on your chip, please submit a pull request
