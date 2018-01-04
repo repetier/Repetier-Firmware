@@ -1268,8 +1268,10 @@ public:
     static void prepareForProbing();
 #endif
 #if defined(DRV_TMC2130)
-    static void configTMC2130(TMC2130Stepper* tmc_driver, uint16_t tmc_current, uint16_t tmc_microsteps, bool tmc_stealthchop, int8_t tmc_sgt);
-    static void tmcPrepareHoming(TMC2130Stepper* tmc_driver);
+    static void configTMC2130(TMC2130Stepper* tmc_driver, 
+      uint16_t tmc_current, uint16_t tmc_microsteps, bool tmc_stealthchop, int8_t tmc_sgt,
+      uint8_t tmc_pwm_ampl, uint8_t tmc_pwm_grad, bool tmc_pwm_autoscale, uint8_t tmc_pwm_freq);
+    static void tmcPrepareHoming(TMC2130Stepper* tmc_driver, uint32_t coolstep_sp_min);
 #endif
 };
 
