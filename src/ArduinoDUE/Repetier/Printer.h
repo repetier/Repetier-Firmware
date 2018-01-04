@@ -51,7 +51,7 @@ Level 5: Nonlinear motor step position, only for nonlinear drive systems
 #define ENSURE_POWER {}
 #endif
 
-// #if defined(DRV_TMC2130)
+#if defined(DRV_TMC2130)
 #include <TMC2130Stepper.h>
 
 #define TMC2130_ON_X (TMC2130_X_CS_PIN > 0)
@@ -60,7 +60,7 @@ Level 5: Nonlinear motor step position, only for nonlinear drive systems
 #define TMC2130_ON_EXT0 (TMC2130_EXT0_CS_PIN > 0)
 #define TMC2130_ON_EXT1 (TMC2130_EXT1_CS_PIN > 0)
 #define TMC2130_ON_EXT2 (TMC2130_EXT2_CS_PIN > 0)
-// #endif
+#endif
 
 union floatLong {
     float f;
