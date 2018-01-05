@@ -2643,8 +2643,6 @@ void Printer::stopPrint() {
         while(!tmc_driver->stst());                     // Wait for motor stand-still
         tmc_driver->begin();                            // Initiate pins and registeries
         tmc_driver->I_scale_analog(true);               // Set current reference source
-        // tmc_driver->SilentStepStick2130(tmc_current);   // Set stepper current
-        // tmc_driver->microsteps(tmc_microsteps);         // Set microstepping
         tmc_driver->interpolate(true);                  // Set internal microstep interpolation
         tmc_driver->pwm_ampl(tmc_pwm_ampl);             // Chopper PWM amplitude
         tmc_driver->pwm_grad(tmc_pwm_grad);             // Velocity gradient for chopper PWM amplitude
