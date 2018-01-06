@@ -1592,7 +1592,7 @@ motorized bed leveling */
  *     and that it is perpendicular to the towers
  *     and that the (0,0) is in center
  * requires z-probe
- * G29 measures the Z offset in matrix NxN points (due to nature of the delta printer, the corners are extrapolated instead of measured)
+ * G33 measures the Z offset in matrix NxN points (due to nature of the delta printer, the corners are extrapolated instead of measured)
  * and compensate the distortion
  * more points means better compensation, but consumes more memory and takes more time
  * DISTORTION_CORRECTION_R is the distance of last row or column from center
