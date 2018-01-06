@@ -28,26 +28,102 @@ where all the new features will be added.
 
 ### Version 2.0 informations
 
-Version 2 will be a incompatible refactoring of version 1.0. We will try to keep
-commands and communication identical to 1.0, but for the configuration we see
-a much more flexible way that makes it much easier to adjust the firmware to
-nowadays needs. But that requires a different configuration at several parts.
+#### Status
 
-Planned stages:
-1. Merge AVR and Due into one fileset.
-2. Split long files like boards, displays, languages in several files into a subfolder.
-    That way it gets much faster to search the right place.
-3. Update used libraries.
-4. Change configuration.
-5. Change motion planner.
-6. Create a config tool.
-7. Public testing with more users. We assume until a config tool is available the configuration
-will get several changes and only users with programming skills will do it manually
-to benefit already from improvements achieved.
+Absolute alpha. Only supports my test printer at the moment and has no homing, 
+extrusions, lcd, ... I'm in the beginning of a big refactory and only if that
+is close to being finished it get usable for more users. See status which I will
+try to update from time to time. 
 
-Until 6. the version should be considered alpha stage. We do expect errors from all
-the changes and there may be bigger mods with an update. Of course we will try
-to keep every release workable, but as work in progress there is no guarantee. 
+Done:
+- New motion system and planner for better flexibility.
+- Due boards support new motion system.
+- First tests of the new modular configuration scheme.
+- Pure cartesian printer system.
+- Linear and cubic velocity shape.
+
+ToDo:
+- Quintic velocity shape.
+- Homing
+- Dual X axis printer type
+- Delta printer type
+- Core printer type
+- Convert PWM handling
+- Convert temperature handling
+- Convert Extruders
+- Make lcd work
+- Switch to latest sdfat library
+- Switch to u8g 2 library
+- Port AVR HAL to new system
+- recheck event system
+- New config tool
+
+#### Benefits of new system
+
+The new motion system will make a big impact on how firmware works. After
+the first printer can already move around we note many advantages:
+- Code is much easier to understand.
+- Same handling for all printer types. No difference between linear and nonlinear systems.
+- Less memory usage compared to old nonlinear handling.
+- Smoother moves.
+- Easier to adjust z correction, babystepping and advance.
+- No more delays for slower drivers wasting CPU time.
+- Most special cases can now be catched by the module system.
+
+
+#### What does module system mean
+
+The idea is that all required basic functions become a own classes with
+base classes or alternative implementations with the same function/variable
+names.
+
+Imagine the old system with the inputs. Digital inputs come in 4 versions depending
+on the hardware used. High signal as high or low and with or without pullup. So
+every function had used many define and if conditions to always us ethe right one.
+
+With the new system a input pin becomes a class with inline get function that
+returns a normalized state, has proper initialization. So instead of every function
+handling all 4 cases we have now 4 different classes that to the user all
+behave identical.
+
+Same for output pins which might need to be inverted or not. Now we have 2 classes
+handling the inversion internally.
+
+Now think about the stepper driver. That is a base class whcih gets consumed
+by motion routines. They normally require 3 output pins but some are inverted
+depending on connector and driver. No problem, just input the proper output class,
+stepper driver does not need to know about this.
+
+You want 2 motors for Z axis? No problem use a stepper driver that mirrors signals
+to 2 drivers you configured. Motion function just need to know about one of them.
+
+You see where this leads. We split the firmware into many blocks and you can
+simply combine modules to match your printer. And because all parts are normalized
+it becomes easy to add new function. You need a new stepper driver that can set
+microsteps? Just add a new derivative and use that instead. No big fiddeling
+at dozens of points where you might need extra cases.
+
+The complete firmware becomes more compact and easier to maintain and easier
+to extend.
+
+#### Developing
+
+If you want to start developing on V2, you will not get happy with the
+Arduino IDE. It will not show most files at all, also it will still compile
+all files. Best solution for developing is to use Visual Studio Code with
+the following plugins:
+- Arduino
+- C++ (required by Arduino so gets installed directly)
+- Clang-Format (for formatting, style guid is included in sources) 
+
+If you have clang-format installed (requires llvm compile to be installed)
+it will format the sources according to our styling definition on save.
+
+To test compile press Ctrl+Alt+R and it will compile the firmware.
+In the bottom right you see selected port and board. Select the right one
+and upload your new firmware with Ctrl+Alt+U.
+
+If you have once setup the system, you will never look back to the Arduino-IDE.
 
 ## Installation
 
