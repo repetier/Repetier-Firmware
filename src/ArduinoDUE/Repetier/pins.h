@@ -24,6 +24,7 @@ STEPPER_CURRENT_CONTROL
 #define CURRENT_CONTROL_DIGIPOT 2  // Use a digipot like RAMBO does
 #define CURRENT_CONTROL_LTC2600 3  // Use LTC2600 like Foltyn 3D Master
 #define CURRENT_CONTROL_ALLIGATOR 4  //Use External DAC like Alligator
+#define CURRENT_CONTROL_TMC2130 5  // Trinamic TMC2130 configured via SPI
 
 /*
   arm does not have a eeprom build in. Therefore boards can add a

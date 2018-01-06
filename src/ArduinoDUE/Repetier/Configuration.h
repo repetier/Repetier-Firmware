@@ -1873,5 +1873,77 @@ Values must be in range 1..255
 */
 //#define CUSTOM_EVENTS
 
+// ##########################################################################################
+// ##                        Trinamic TMC2130 driver configuration                         ##
+// ##########################################################################################
+
+#define DRV_TMC2130
+
+#define SENSORLESS_HOMING
+
+#undef STEPPER_CURRENT_CONTROL
+#define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_TMC2130
+
+#define TMC2130_X_CS_PIN 29
+#define TMC2130_Y_CS_PIN 30
+#define TMC2130_Z_CS_PIN 28
+#define TMC2130_EXT0_CS_PIN 31
+#define TMC2130_EXT1_CS_PIN -1
+#define TMC2130_EXT2_CS_PIN -1
+
+// default current setting for all axes
+#define TMC2130_CURRENT 1000
+// Per-axis current setting
+#define MOTOR_CURRENT {TMC2130_CURRENT,TMC2130_CURRENT,TMC2130_CURRENT,TMC2130_CURRENT,TMC2130_CURRENT,TMC2130_CURRENT}
+
+// Minimum speeds for stallguard2 detection
+#define TMC2130_TCOOLTHRS_X 300
+#define TMC2130_TCOOLTHRS_Y 300
+#define TMC2130_TCOOLTHRS_Z 300
+
+/*
+  X Axis driver settings
+*/
+#define TMC2130_STEALTHCHOP_X       1  // Enable extremely quiet stepping
+#define TMC2130_INTERPOLATE_256_X   true
+#define TMC2130_STALLGUARD_X        0
+#define TMC2130_PWM_AMPL_X        255
+#define TMC2130_PWM_GRAD_X          1
+#define TMC2130_PWM_AUTOSCALE_X  true
+#define TMC2130_PWM_FREQ_X          2
+
+/*
+  Y Axis driver settings
+*/
+#define TMC2130_STEALTHCHOP_Y       1  // Enable extremely quiet stepping
+#define TMC2130_INTERPOLATE_256_Y   true
+#define TMC2130_STALLGUARD_Y        0
+#define TMC2130_PWM_AMPL_Y        255
+#define TMC2130_PWM_GRAD_Y          1
+#define TMC2130_PWM_AUTOSCALE_Y  true
+#define TMC2130_PWM_FREQ_Y          2
+
+/*
+  Z Axis driver settings
+*/
+#define TMC2130_STEALTHCHOP_Z       1  // Enable extremely quiet stepping
+#define TMC2130_INTERPOLATE_256_Z   true
+#define TMC2130_STALLGUARD_Z        0
+#define TMC2130_PWM_AMPL_Z        255
+#define TMC2130_PWM_GRAD_Z          1
+#define TMC2130_PWM_AUTOSCALE_Z  true
+#define TMC2130_PWM_FREQ_Z          2
+
+/*
+  E0 Axis driver settings
+*/
+#define TMC2130_STEALTHCHOP_EXT0        1  // Enable extremely quiet stepping
+#define TMC2130_INTERPOLATE_256_EXT0    1
+#define TMC2130_STALLGUARD_EXT0         0
+#define TMC2130_PWM_AMPL_EXT0         255
+#define TMC2130_PWM_GRAD_EXT0           1
+#define TMC2130_PWM_AUTOSCALE_EXT0   true
+#define TMC2130_PWM_FREQ_EXT0           2
+
 #endif
 

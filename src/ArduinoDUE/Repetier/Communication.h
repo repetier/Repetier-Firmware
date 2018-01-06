@@ -476,6 +476,10 @@ FSTRINGVAR(tStartupGCode)
 FSTRINGVAR(tEPRSegmentsPerSecondPrint)
 FSTRINGVAR(tEPRSegmentsPerSecondTravel)
 #endif
+#ifdef DRV_TMC2130
+FSTRINGVAR(tTrinamicMotorCurrent)
+FSTRINGVAR(tTrinamicMicrostepMode)
+#endif
 
 static void cap(FSTRINGPARAM(text));
 static void config(FSTRINGPARAM(text));

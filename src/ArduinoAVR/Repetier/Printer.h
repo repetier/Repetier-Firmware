@@ -51,6 +51,17 @@ Level 5: Nonlinear motor step position, only for nonlinear drive systems
 #define ENSURE_POWER {}
 #endif
 
+#if defined(DRV_TMC2130)
+#include <TMC2130Stepper.h>
+
+#define TMC2130_ON_X (TMC2130_X_CS_PIN > 0)
+#define TMC2130_ON_Y (TMC2130_Y_CS_PIN > 0)
+#define TMC2130_ON_Z (TMC2130_Z_CS_PIN > 0)
+#define TMC2130_ON_EXT0 (TMC2130_EXT0_CS_PIN > 0)
+#define TMC2130_ON_EXT1 (TMC2130_EXT1_CS_PIN > 0)
+#define TMC2130_ON_EXT2 (TMC2130_EXT2_CS_PIN > 0)
+#endif
+
 union floatLong {
     float f;
     uint32_t l;
@@ -405,6 +416,27 @@ public:
     static float progress;
     static fast8_t wizardStackPos;
     static wizardVar wizardStack[WIZARD_STACK_SIZE];
+
+#if defined(DRV_TMC2130)
+#if TMC2130_ON_X
+    static TMC2130Stepper* tmc_driver_x;
+#endif
+#if TMC2130_ON_Y
+    static TMC2130Stepper* tmc_driver_y;
+#endif
+#if TMC2130_ON_Z
+    static TMC2130Stepper* tmc_driver_z;
+#endif
+#if TMC2130_ON_EXT0
+    static TMC2130Stepper* tmc_driver_e0;
+#endif
+#if TMC2130_ON_EXT1
+    static TMC2130Stepper* tmc_driver_e1;
+#endif
+#if TMC2130_ON_EXT2
+    static TMC2130Stepper* tmc_driver_e2;
+#endif
+#endif
 
     static void handleInterruptEvent();
 
@@ -1234,6 +1266,11 @@ public:
     - Go to a position, where enabling the z-probe is possible without leaving the valid print area.
     */
     static void prepareForProbing();
+#endif
+#if defined(DRV_TMC2130)
+    static void configTMC2130(TMC2130Stepper* tmc_driver, bool tmc_stealthchop, int8_t tmc_sgt,
+      uint8_t tmc_pwm_ampl, uint8_t tmc_pwm_grad, bool tmc_pwm_autoscale, uint8_t tmc_pwm_freq);
+    static void tmcPrepareHoming(TMC2130Stepper* tmc_driver, uint32_t coolstep_sp_min);
 #endif
 };
 

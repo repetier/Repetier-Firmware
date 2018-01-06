@@ -410,8 +410,8 @@ FSTRINGVALUE(Com::tEPRDistanceRetractHeating, "distance to retract when heating 
 FSTRINGVALUE(Com::tEPRExtruderCoolerSpeed, "extruder cooler speed [0-255]")
 FSTRINGVALUE(Com::tEPRAdvanceK, "advance K [0=off]")
 FSTRINGVALUE(Com::tEPRAdvanceL, "advance L [0=off]")
-FSTRINGVALUE(Com::tEPRPreheatTemp, "Preheat temp. [°C]")
-FSTRINGVALUE(Com::tEPRPreheatBedTemp, "Bed Preheat temp. [°C]")
+FSTRINGVALUE(Com::tEPRPreheatTemp, "Preheat temp. [ï¿½C]")
+FSTRINGVALUE(Com::tEPRPreheatBedTemp, "Bed Preheat temp. [ï¿½C]")
 
 #endif
 #if SDSUPPORT
@@ -465,7 +465,10 @@ FSTRINGVALUE(Com::tPrinterModeCNC, "PrinterMode:CNC")
 #ifdef STARTUP_GCODE
 FSTRINGVALUE(Com::tStartupGCode, STARTUP_GCODE)
 #endif
-
+#ifdef DRV_TMC2130
+FSTRINGVALUE(Com::tTrinamicMotorCurrent,  "Trinamic motor current:")
+FSTRINGVALUE(Com::tTrinamicMicrostepMode, "Trinamic microstep mode:")
+#endif
 bool Com::writeToAll = true; // transmit start messages to all devices!
 
 void Com::cap(FSTRINGPARAM(text)) {
