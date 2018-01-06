@@ -465,7 +465,10 @@ FSTRINGVALUE(Com::tPrinterModeCNC, "PrinterMode:CNC")
 #ifdef STARTUP_GCODE
 FSTRINGVALUE(Com::tStartupGCode, STARTUP_GCODE)
 #endif
-
+#ifdef DRV_TMC2130
+FSTRINGVALUE(Com::tTrinamicMotorCurrent,  "Trinamic motor current:")
+FSTRINGVALUE(Com::tTrinamicMicrostepMode, "Trinamic microstep mode:")
+#endif
 bool Com::writeToAll = true; // transmit start messages to all devices!
 
 void Com::cap(FSTRINGPARAM(text)) {

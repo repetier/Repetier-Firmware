@@ -488,6 +488,88 @@ void motorCurrentControlInit() { //Initialize Motor Current
 }
 #endif
 
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_TMC2130
+TMC2130Stepper* tmcDriverByIndex(uint8_t index) {
+    switch(index) {
+#if TMC2130_ON_X
+        case 0: // X Axis
+            return Printer::tmc_driver_x;
+        break;
+#endif
+#if TMC2130_ON_Y
+        case 1: // Y Axis
+            return Printer::tmc_driver_y;
+        break;
+#endif
+#if TMC2130_ON_Z
+        case 2: // Z Axis
+            return Printer::tmc_driver_z;
+        break;
+#endif
+#if TMC2130_ON_EXT0
+        case 3: // E0 Axis
+            return Printer::tmc_driver_e0;
+        break;
+#endif
+#if TMC2130_ON_EXT1
+        case 4: // E1 Axis
+            return Printer::tmc_driver_e1;
+        break;
+#endif
+#if TMC2130_ON_EXT2
+        case 5: // E2 Axis
+            return Printer::tmc_driver_e2;
+        break;
+#endif
+        default:
+            return NULL;
+        break;
+    }
+}
+
+void setMotorCurrent( uint8_t driver, uint16_t level ) {
+    TMC2130Stepper* tmc_driver = tmcDriverByIndex(driver);
+    if(tmc_driver) {
+        tmc_driver->rms_current(level);
+    }
+}
+
+void setMotorCurrentPercent( uint8_t channel, float level ) {
+    const uint16_t tmc_motor_current[] = MOTOR_CURRENT;
+    uint16_t raw_level = ( level * tmc_motor_current[channel] / 100 );
+    setMotorCurrent(channel, raw_level);
+}
+
+void motorCurrentControlInit() {
+    const uint16_t tmc_motor_current[] = MOTOR_CURRENT;
+    for(uint8_t i = 0; i < (sizeof(tmc_motor_current) / sizeof(uint16_t)); i++) {
+        setMotorCurrent(i, tmc_motor_current[i]);
+    }
+}
+
+void motorCurrentReadings() {
+    Com::printF(Com::tTrinamicMotorCurrent);
+#if TMC2130_ON_X
+    Com::printF(Com::tSpaceXColon, (uint32_t)(Printer::tmc_driver_x->rms_current()));
+#endif
+#if TMC2130_ON_Y
+    Com::printF(Com::tSpaceYColon, (uint32_t)(Printer::tmc_driver_y->rms_current()));
+#endif
+#if TMC2130_ON_Z
+    Com::printF(Com::tSpaceZColon, (uint32_t)(Printer::tmc_driver_z->rms_current()));
+#endif
+#if TMC2130_ON_EXT0
+    Com::printF(Com::tSpaceEColon, (uint32_t)(Printer::tmc_driver_e0->rms_current()));
+#endif
+#if TMC2130_ON_EXT1
+    Com::printF(PSTR(" E1:"), (uint32_t)(Printer::tmc_driver_e1->rms_current()));
+#endif
+#if TMC2130_ON_EXT2
+    Com::printF(PSTR(" E2:"), (uint32_t)(Printer::tmc_driver_e2->rms_current()));
+#endif
+    Com::printFLN(Com::tSpace);
+}
+#endif // CURRENT_CONTROL_TMC2130
 
 #if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
 uint8_t   _intVref[]     = {MCP4728_VREF, MCP4728_VREF, MCP4728_VREF, MCP4728_VREF};
@@ -608,6 +690,43 @@ void motorCurrentControlInit() { //Initialize MCP4728 Motor Current
 }
 #endif
 
+#if defined(DRV_TMC2130)
+void microstepMode(uint8_t driver, uint16_t stepping_mode) {
+    TMC2130Stepper* tmc_driver;
+    if(tmc_driver = tmcDriverByIndex(driver))
+        tmc_driver->microsteps(stepping_mode);
+}
+
+void microstepInit() {
+    const uint16_t microstep_modes[] = MICROSTEP_MODES;
+    for(uint8_t i = 0; i < (sizeof(microstep_modes) / sizeof(uint16_t)); i++) {
+        microstepMode(i, microstep_modes[i]);
+    }
+}
+
+void microstepReadings() {
+    Com::printF(Com::tTrinamicMicrostepMode);
+#if TMC2130_ON_X
+    Com::printF(Com::tSpaceXColon, (uint32_t)(Printer::tmc_driver_x->microsteps()));
+#endif
+#if TMC2130_ON_Y
+    Com::printF(Com::tSpaceYColon, (uint32_t)(Printer::tmc_driver_y->microsteps()));
+#endif
+#if TMC2130_ON_Z
+    Com::printF(Com::tSpaceZColon, (uint32_t)(Printer::tmc_driver_z->microsteps()));
+#endif
+#if TMC2130_ON_EXT0
+    Com::printF(Com::tSpaceEColon, (uint32_t)(Printer::tmc_driver_e0->microsteps()));
+#endif
+#if TMC2130_ON_EXT1
+    Com::printF(PSTR(" E1:"), (uint32_t)(Printer::tmc_driver_e1->microsteps()));
+#endif
+#if TMC2130_ON_EXT2
+    Com::printF(PSTR(" E1:"), (uint32_t)(Printer::tmc_driver_e2->microsteps()));
+#endif
+    Com::printFLN(Com::tSpace);
+}
+#else
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
 void microstepMS(uint8_t driver, int8_t ms1, int8_t ms2) {
     if(ms1 > -1) switch(driver) {
@@ -760,7 +879,7 @@ void microstepInit() {
     for(int i = 0; i <= 4; i++) microstepMode(i, microstep_modes[i]);
 #endif
 }
-
+#endif
 /**
 \brief Execute the Arc command stored in com.
 */
@@ -2287,13 +2406,14 @@ void Commands::processMCode(GCode *com) {
         break;
 #endif // FEATURE_SERVO
     case 350: { // M350 Set micro stepping mode. Warning: Steps per unit remains unchanged. S code sets stepping mode for all drivers.
-#if defined(X_MS1_PIN) && X_MS1_PIN > -1
+#if (defined(X_MS1_PIN) && X_MS1_PIN > -1) || defined(DRV_TMC2130)
         if(com->hasS()) for(int i = 0; i <= 4; i++) microstepMode(i, com->S);
         if(com->hasX()) microstepMode(0, (uint8_t)com->X);
         if(com->hasY()) microstepMode(1, (uint8_t)com->Y);
         if(com->hasZ()) microstepMode(2, (uint8_t)com->Z);
         if(com->hasE()) microstepMode(3, (uint8_t)com->E);
-        if(com->hasP()) microstepMode(4, com->P); // Original B but is not supported here
+        if(com->hasP()) microstepMode(4, (uint8_t)com->P); // Original B but is not supported here
+        if(com->hasR()) microstepMode(5, (uint8_t)com->R);
         microstepReadings();
 #endif
     }
@@ -2551,8 +2671,12 @@ void Commands::processMCode(GCode *com) {
     case 908: { // M908 Control digital trimpot directly.
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
         uint8_t channel, current;
-        if(com->hasP() && com->hasS())
+        if(com->hasP() && com->hasS()) {
             setMotorCurrent((uint8_t)com->P, (unsigned int)com->S);
+        }
+#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_TMC2130
+        motorCurrentReadings();
+#endif
 #endif
     }
     break;
@@ -2602,6 +2726,128 @@ void Commands::processMCode(GCode *com) {
         else
             GCode::resetFatalError();
         break;
+#if defined(DRV_TMC2130)
+    case 914: // Configure stallguard threshold on Trinamic TMC2130
+        Com::printF(PSTR("Trinamic SGT"));
+        if(com->hasNoXYZ()) {
+#if TMC2130_ON_X
+            Com::printF(PSTR(" X:"), Printer::tmc_driver_x->sg_stall_value());
+#endif
+#if TMC2130_ON_Y
+            Com::printF(PSTR(" Y:"), Printer::tmc_driver_y->sg_stall_value());
+#endif
+#if TMC2130_ON_Z
+            Com::printF(PSTR(" Z:"), Printer::tmc_driver_z->sg_stall_value());
+#endif
+#if TMC2130_ON_EXT0
+            Com::printF(PSTR(" E0:"), Printer::tmc_driver_e0->sg_stall_value());
+#endif
+#if TMC2130_ON_EXT1
+            Com::printF(PSTR(" E1:"), Printer::tmc_driver_e1->sg_stall_value());
+#endif
+#if TMC2130_ON_EXT2
+            Com::printF(PSTR(" E2:"), Printer::tmc_driver_e2->sg_stall_value());
+#endif
+        }
+#if TMC2130_ON_X
+        if(com->hasX()) {
+            Com::printF(PSTR(" X:"), com->X);
+            Printer::tmc_driver_x->sg_stall_value(com->X);
+        }
+#endif
+#if TMC2130_ON_Y
+        if(com->hasY()) {
+            Com::printF(PSTR(" Y:"), com->Y);
+            Printer::tmc_driver_y->sg_stall_value(com->Y);
+        }
+#endif
+#if TMC2130_ON_Z
+        if(com->hasZ()) {
+            Com::printF(PSTR(" Z:"), com->Z);
+            Printer::tmc_driver_z->sg_stall_value(com->Z);
+        }
+#endif
+#if TMC2130_ON_EXT0
+        if(com->hasE()) {
+            Com::printF(PSTR(" E0:"), com->E);
+            Printer::tmc_driver_e0->sg_stall_value(com->E);
+        }
+#endif
+#if TMC2130_ON_EXT1
+        if(com->hasE()) {
+            Com::printF(PSTR(" E1:"), com->F);
+            Printer::tmc_driver_e1->sg_stall_value(com->F);
+        }
+#endif
+#if TMC2130_ON_EXT2
+        if(com->hasE()) {
+            Com::printF(PSTR(" E2:"), com->G);
+            Printer::tmc_driver_e2->sg_stall_value(com->G);
+        }
+#endif
+        Com::println();
+    break;
+    case 915: // Configure StealthChop on Trinamic TMC2130
+        Com::printF(PSTR("Trinamic StealthChop"));
+        if(com->hasNoXYZ()) {
+#if TMC2130_ON_X
+            Com::printF(PSTR(" X:"), Printer::tmc_driver_x->stealthChop());
+#endif
+#if TMC2130_ON_Y
+            Com::printF(PSTR(" Y:"), Printer::tmc_driver_y->stealthChop());
+#endif
+#if TMC2130_ON_Z
+            Com::printF(PSTR(" Z:"), Printer::tmc_driver_z->stealthChop());
+#endif
+#if TMC2130_ON_EXT0
+            Com::printF(PSTR(" E0:"), Printer::tmc_driver_e0->stealthChop());
+#endif
+#if TMC2130_ON_EXT1
+            Com::printF(PSTR(" E1:"), Printer::tmc_driver_e1->stealthChop());
+#endif
+#if TMC2130_ON_EXT2
+            Com::printF(PSTR(" E2:"), Printer::tmc_driver_e2->stealthChop());
+#endif
+        }
+#if TMC2130_ON_X
+        if(com->hasX()) {
+            Com::printF(PSTR(" X:"), com->X);
+            Printer::tmc_driver_x->stealthChop((bool)(com->X));
+        }
+#endif
+#if TMC2130_ON_Y
+        if(com->hasY()) {
+            Com::printF(PSTR(" Y:"), com->Y);
+           Printer::tmc_driver_y->stealthChop((bool)(com->Y));
+        }
+#endif
+#if TMC2130_ON_Z
+        if(com->hasZ()) {
+            Com::printF(PSTR(" Z:"), com->Z);
+            Printer::tmc_driver_z->stealthChop((bool)(com->Z));
+        }
+#endif
+#if TMC2130_ON_EXT0
+        if(com->hasE()) {
+            Com::printF(PSTR(" E0:"), com->E);
+            Printer::tmc_driver_e0->stealthChop((bool)(com->E));
+        }
+#endif
+#if TMC2130_ON_EXT1
+        if(com->hasE()) {
+            Com::printF(PSTR(" E1:"), com->F);
+            Printer::tmc_driver_e1->stealthChop((bool)(com->F));
+        }
+#endif
+#if TMC2130_ON_EXT2
+        if(com->hasE()) {
+            Com::printF(PSTR(" E2:"), com->G);
+            Printer::tmc_driver_e2->stealthChop((bool)(com->G));
+        }
+#endif
+        Com::println();
+    break;
+#endif
     default:
         if(Printer::debugErrors()) {
             Com::writeToAll = false;
