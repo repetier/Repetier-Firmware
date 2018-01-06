@@ -2647,7 +2647,7 @@ void Printer::stopPrint() {
         tmc_driver->pwm_ampl(tmc_pwm_ampl);             // Chopper PWM amplitude
         tmc_driver->pwm_grad(tmc_pwm_grad);             // Velocity gradient for chopper PWM amplitude
         tmc_driver->pwm_autoscale(tmc_pwm_autoscale);   // Chopper PWM autoscaling
-        tmc_driver->pwm_freq(tmc_pwm_freq);                        // Chopper PWM frequency selection
+        tmc_driver->pwm_freq(tmc_pwm_freq);             // Chopper PWM frequency selection
         tmc_driver->stealthChop(tmc_stealthchop);       // Enable extremely quiet stepping
         tmc_driver->sg_stall_value(tmc_sgt);            // StallGuard sensitivity
     }

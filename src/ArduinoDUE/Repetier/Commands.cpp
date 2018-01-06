@@ -550,24 +550,24 @@ void motorCurrentControlInit() {
 void motorCurrentReadings() {
     Com::printF(Com::tTrinamicMotorCurrent);
 #if TMC2130_ON_X
-            Com::printF(Com::tSpaceXColon, (uint32_t)(Printer::tmc_driver_x->rms_current()));
+    Com::printF(Com::tSpaceXColon, (uint32_t)(Printer::tmc_driver_x->rms_current()));
 #endif
 #if TMC2130_ON_Y
-            Com::printF(Com::tSpaceYColon, (uint32_t)(Printer::tmc_driver_y->rms_current()));
+    Com::printF(Com::tSpaceYColon, (uint32_t)(Printer::tmc_driver_y->rms_current()));
 #endif
 #if TMC2130_ON_Z
-            Com::printF(Com::tSpaceZColon, (uint32_t)(Printer::tmc_driver_z->rms_current()));
+    Com::printF(Com::tSpaceZColon, (uint32_t)(Printer::tmc_driver_z->rms_current()));
 #endif
 #if TMC2130_ON_EXT0
-            Com::printF(Com::tSpaceEColon, (uint32_t)(Printer::tmc_driver_e0->rms_current()));
+    Com::printF(Com::tSpaceEColon, (uint32_t)(Printer::tmc_driver_e0->rms_current()));
 #endif
 #if TMC2130_ON_EXT1
-            Com::printF(PSTR(" E1:"), (uint32_t)(Printer::tmc_driver_e1->rms_current()));
+    Com::printF(PSTR(" E1:"), (uint32_t)(Printer::tmc_driver_e1->rms_current()));
 #endif
 #if TMC2130_ON_EXT2
-            Com::printF(PSTR(" E2:"), (uint32_t)(Printer::tmc_driver_e2->rms_current()));
+    Com::printF(PSTR(" E2:"), (uint32_t)(Printer::tmc_driver_e2->rms_current()));
 #endif
-    Com::printF(Com::tSpace);
+    Com::printFLN(Com::tSpace);
 }
 #endif // CURRENT_CONTROL_TMC2130
 
@@ -705,26 +705,26 @@ void microstepInit() {
 }
 
 void microstepReadings() {
-    Com::print(Com::tTrinamicMicrostepMode);
+    Com::printF(Com::tTrinamicMicrostepMode);
 #if TMC2130_ON_X
-    Com::printF(Com::tSpaceXColon, Printer::tmc_driver_x->microsteps());
+    Com::printF(Com::tSpaceXColon, (uint32_t)(Printer::tmc_driver_x->microsteps()));
 #endif
 #if TMC2130_ON_Y
-    Com::printF(Com::tSpaceYColon, Printer::tmc_driver_y->microsteps());
+    Com::printF(Com::tSpaceYColon, (uint32_t)(Printer::tmc_driver_y->microsteps()));
 #endif
 #if TMC2130_ON_Z
-    Com::printF(Com::tSpaceZColon, Printer::tmc_driver_z->microsteps());
+    Com::printF(Com::tSpaceZColon, (uint32_t)(Printer::tmc_driver_z->microsteps()));
 #endif
 #if TMC2130_ON_EXT0
-    Com::printF(Com::tSpaceEColon, Printer::tmc_driver_e0->microsteps());
+    Com::printF(Com::tSpaceEColon, (uint32_t)(Printer::tmc_driver_e0->microsteps()));
 #endif
 #if TMC2130_ON_EXT1
-    Com::printF(PSTR(" E1:"), Printer::tmc_driver_e1->microsteps());
+    Com::printF(PSTR(" E1:"), (uint32_t)(Printer::tmc_driver_e1->microsteps()));
 #endif
 #if TMC2130_ON_EXT2
-    Com::printF(PSTR(" E1:"), Printer::tmc_driver_e2->microsteps());
+    Com::printF(PSTR(" E1:"), (uint32_t)(Printer::tmc_driver_e2->microsteps()));
 #endif
-    Com::print(Com::tSpace);
+    Com::printFLN(Com::tSpace);
 }
 #else
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
@@ -2412,7 +2412,8 @@ void Commands::processMCode(GCode *com) {
         if(com->hasY()) microstepMode(1, (uint8_t)com->Y);
         if(com->hasZ()) microstepMode(2, (uint8_t)com->Z);
         if(com->hasE()) microstepMode(3, (uint8_t)com->E);
-        if(com->hasP()) microstepMode(4, com->P); // Original B but is not supported here
+        if(com->hasP()) microstepMode(4, (uint8_t)com->P); // Original B but is not supported here
+        if(com->hasR()) microstepMode(5, (uint8_t)com->R);
         microstepReadings();
 #endif
     }
@@ -2670,8 +2671,9 @@ void Commands::processMCode(GCode *com) {
     case 908: { // M908 Control digital trimpot directly.
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
         uint8_t channel, current;
-        if(com->hasP() && com->hasS())
+        if(com->hasP() && com->hasS()) {
             setMotorCurrent((uint8_t)com->P, (unsigned int)com->S);
+        }
 #if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_TMC2130
         motorCurrentReadings();
 #endif
