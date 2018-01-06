@@ -1439,6 +1439,91 @@ to print an object two times at the speed of one. Works only with dual extruder 
 */
 #define FEATURE_DITTO_PRINTING 0
 
+
+// ##########################################################################################
+// ##                        Trinamic TMC2130 driver configuration                         ##
+// ##########################################################################################
+
+/* If you want to use TMC2130 specific features uncomment next line and make sure all
+following settings are correct. 
+You need this library to compile:
+https://github.com/teemuatlut/TMC2130Stepper
+
+*/
+
+// #define DRV_TMC2130
+
+#ifdef DRV_TMC2130
+// Uncomment if you use the stall guard for homing. Only for cartesian printers and xy direction
+// #define SENSORLESS_HOMING
+
+#undef STEPPER_CURRENT_CONTROL
+#define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_TMC2130
+
+// The drivers with set CS pin will be used, all others are normal step/dir/enable drivers
+#define TMC2130_X_CS_PIN -1
+#define TMC2130_Y_CS_PIN -1
+#define TMC2130_Z_CS_PIN -1
+#define TMC2130_EXT0_CS_PIN -1
+#define TMC2130_EXT1_CS_PIN -1
+#define TMC2130_EXT2_CS_PIN -1
+
+// default current setting for all axes
+#define TMC2130_CURRENT 1000
+// Per-axis current setting
+#define MOTOR_CURRENT {TMC2130_CURRENT,TMC2130_CURRENT,TMC2130_CURRENT,TMC2130_CURRENT,TMC2130_CURRENT,TMC2130_CURRENT}
+
+// Minimum speeds for stallguard2 detection
+#define TMC2130_TCOOLTHRS_X 300
+#define TMC2130_TCOOLTHRS_Y 300
+#define TMC2130_TCOOLTHRS_Z 300
+
+/*
+  X Axis driver settings
+*/
+#define TMC2130_STEALTHCHOP_X       1  // Enable extremely quiet stepping
+#define TMC2130_INTERPOLATE_256_X   true
+#define TMC2130_STALLGUARD_X        0
+#define TMC2130_PWM_AMPL_X        255
+#define TMC2130_PWM_GRAD_X          1
+#define TMC2130_PWM_AUTOSCALE_X  true
+#define TMC2130_PWM_FREQ_X          2
+
+/*
+  Y Axis driver settings
+*/
+#define TMC2130_STEALTHCHOP_Y       1  // Enable extremely quiet stepping
+#define TMC2130_INTERPOLATE_256_Y   true
+#define TMC2130_STALLGUARD_Y        0
+#define TMC2130_PWM_AMPL_Y        255
+#define TMC2130_PWM_GRAD_Y          1
+#define TMC2130_PWM_AUTOSCALE_Y  true
+#define TMC2130_PWM_FREQ_Y          2
+
+/*
+  Z Axis driver settings
+*/
+#define TMC2130_STEALTHCHOP_Z       1  // Enable extremely quiet stepping
+#define TMC2130_INTERPOLATE_256_Z   true
+#define TMC2130_STALLGUARD_Z        0
+#define TMC2130_PWM_AMPL_Z        255
+#define TMC2130_PWM_GRAD_Z          1
+#define TMC2130_PWM_AUTOSCALE_Z  true
+#define TMC2130_PWM_FREQ_Z          2
+
+/*
+  E0 Axis driver settings
+*/
+#define TMC2130_STEALTHCHOP_EXT0        1  // Enable extremely quiet stepping
+#define TMC2130_INTERPOLATE_256_EXT0    1
+#define TMC2130_STALLGUARD_EXT0         0
+#define TMC2130_PWM_AMPL_EXT0         255
+#define TMC2130_PWM_GRAD_EXT0           1
+#define TMC2130_PWM_AUTOSCALE_EXT0   true
+#define TMC2130_PWM_FREQ_EXT0           2
+
+#endif
+
 /* Servos
 
 If you need to control servos, enable this feature. You can control up to 4 servos.
@@ -1592,7 +1677,7 @@ motorized bed leveling */
  *     and that it is perpendicular to the towers
  *     and that the (0,0) is in center
  * requires z-probe
- * G29 measures the Z offset in matrix NxN points (due to nature of the delta printer, the corners are extrapolated instead of measured)
+ * G33 measures the Z offset in matrix NxN points (due to nature of the delta printer, the corners are extrapolated instead of measured)
  * and compensate the distortion
  * more points means better compensation, but consumes more memory and takes more time
  * DISTORTION_CORRECTION_R is the distance of last row or column from center
