@@ -203,19 +203,6 @@ fast8_t Printer::wizardStackPos;
 wizardVar Printer::wizardStack[WIZARD_STACK_SIZE];
 
 #if defined(DRV_TMC2130)
-/*
-_TMC_COUNT determines the number of Trinamic chips to configure.
-It counts how many ChipSelect pins were configured by the user.
-*/
-#define _TMC_COUNT ( (TMC2130_X_CS_PIN >= 0) + \
-                     (TMC2130_Y_CS_PIN >= 0) + \
-                     (TMC2130_Z_CS_PIN >= 0) + \
-                  (TMC2130_EXT0_CS_PIN >= 0) + \
-                  (TMC2130_EXT1_CS_PIN >= 0) + \
-                  (TMC2130_EXT2_CS_PIN >= 0) )
-#if _TMC_COUNT < 1
-#error "Trinamic TMC2130 support enabled but no CS pins defined."
-#endif
 #if TMC2130_ON_X
 TMC2130Stepper* Printer::tmc_driver_x = NULL;
 #endif
@@ -234,7 +221,6 @@ TMC2130Stepper* Printer::tmc_driver_e1 = NULL;
 #if TMC2130_ON_EXT2
 TMC2130Stepper* Printer::tmc_driver_e2 = NULL;
 #endif
-#undef _TMC_COUNT
 #endif
 
 #if !NONLINEAR_SYSTEM
