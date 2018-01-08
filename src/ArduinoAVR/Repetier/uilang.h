@@ -1123,6 +1123,8 @@
 #define UI_TEXT_HOME_X_NL           "Home X"
 #define UI_TEXT_HOME_Y_NL           "Home Y"
 #define UI_TEXT_HOME_Z_NL           "Home Z"
+#define UI_TEXT_PREHEAT_SINGLE_NL   "Voorverwarmen Enkel Extr."
+#define UI_TEXT_PREHEAT_ALL_NL      "Voorverwarmen Alle Extr."
 #define UI_TEXT_PREHEAT_PLA_NL      "Voorverwarmen PLA"
 #define UI_TEXT_PREHEAT_ABS_NL      "Voorverwarmen ABS"
 #define UI_TEXT_LIGHTS_ONOFF_NL     "Lichten:%lo"
