@@ -39,10 +39,11 @@ class Motion3 {
 public:
     static Motion3Buffer buffers[NUM_MOTION3_BUFFER];
     static volatile fast8_t length; // shared between threads
-    static fast8_t last; // used by pushing thread
-    static fast8_t nextActId; // used only inside interrupt
-    static fast8_t skipParentId; // Skip blocks from this id - endstop was triggered
-    static Motion3Buffer *act;
+    static fast8_t last;            // used by pushing thread
+    static fast8_t nextActId;       // used only inside interrupt
+    static fast8_t skipParentId;    // Skip blocks from this id - endstop was triggered
+    static fast8_t lastParentId;
+    static Motion3Buffer* act;
     static void init();
     /* Stepper timer called at STEPPER_FREQUENCY
     This is a very small code that is run at the highest interrupt level
@@ -50,7 +51,7 @@ public:
     */
     static void timer();
     /** Return pointe rto next available buffer or nullptr. */
-    static Motion3Buffer *tryReserve();
+    static Motion3Buffer* tryReserve();
     /** Increment head position an dincrement length */
     static void pushReserved();
     static void activateNext();

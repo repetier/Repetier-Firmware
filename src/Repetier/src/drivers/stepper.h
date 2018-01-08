@@ -28,6 +28,10 @@ public:
     virtual void setMicrosteps(int microsteps) {}
     /// Set max current as range 0..255
     virtual void setMaxCurrent(int max) {}
+    // Called before homing starts. Can be used e.g. to disable silent mode
+    // or otherwise prepare for endstop detection.
+    virtual void beforeHoming() {}
+    virtual void afterHoming() {}
     EndstopDriver *minEndstop;
     EndstopDriver *maxEndstop;
     bool direction;

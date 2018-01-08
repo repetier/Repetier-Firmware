@@ -26,8 +26,7 @@ Motion1Buffer* Motion2::actM1;
 int32_t Motion2::lastMotorPos[2][NUM_AXES];
 fast8_t Motion2::lastMotorIdx; // index to last pos
 
-void Motion2::init()
-{
+void Motion2::init() {
     length = nextActId = 0;
     actM1 = nullptr;
     lastMotorIdx = 0;
@@ -44,8 +43,7 @@ void Motion2::init()
 // is for a 2000 / PREPARE_FREQUENCY long period of constant speed. We try to
 // precompute up to 16 such tiny buffers and with the double frequency We
 // should be on the safe side of never getting an underflow.
-void Motion2::timer()
-{
+void Motion2::timer() {
     // First check if can push anything into next level
     Motion3Buffer* m3 = Motion3::tryReserve();
     if (m3 == nullptr) { // no free space, do nothing until free
@@ -137,7 +135,7 @@ void Motion2::timer()
         // Fill structures used to update bresenham
         m3->directions = 0;
         m3->usedAxes = 0;
-        m3->last = (act->state == Motion2State::FINISHED);
+        m3->last = (act->state == Motion2State::FINISHED) || (Motion3::skipParentId == act->id);
         if ((m3->stepsRemaining = VelocityProfile::stepsPerSegment) == 0) {
             if (m3->last) { // extreme case, normally never happens
                 m3->usedAxes = 0;
@@ -163,14 +161,108 @@ void Motion2::timer()
         m3->parentId = act->id;
         m3->checkEndstops = actM1->isCheckEndstops();
         m3->secondSpeed = actM1->secondSpeed;
-        XMotor.enable();
-        YMotor.enable();
-        ZMotor.enable();
-        Printer::unsetAllSteppersDisabled();
+        Motion1::enableMotors(m3->usedAxes);
         if (m3->last) {
             actM1 = nullptr; // select next on next interrupt
         }
-        // DEBUG_MSG2_FAST("add ", (int)m3->stepsRemaining);
+    } else if (actM1->action == Motion1Action::MOVE_STEPS) {
+        if (act->state == Motion2State::NOT_INITIALIZED) {
+            act->nextState();
+        }
+        float sFactor = 1.0;
+        if (act->state == Motion2State::ACCELERATE_INIT) {
+            act->state = Motion2State::ACCELERATING;
+            if (VelocityProfile::start(actM1->startSpeed, actM1->feedrate, act->t1)) {
+                act->nextState();
+            }
+            // DEBUG_MSG2_FAST("se:", VelocityProfile::segments);
+            sFactor = act->t1 * VelocityProfile::s;
+        } else if (act->state == Motion2State::ACCELERATING) {
+            if (VelocityProfile::next()) {
+                act->nextState();
+            }
+            sFactor = act->t1 * VelocityProfile::s;
+        } else if (act->state == Motion2State::PLATEU_INIT) {
+            act->state = Motion2State::PLATEU;
+            if (VelocityProfile::start(actM1->feedrate, actM1->feedrate, act->t2)) {
+                act->nextState();
+            }
+            sFactor = act->t2 * VelocityProfile::s + act->s1;
+        } else if (act->state == Motion2State::PLATEU) {
+            if (VelocityProfile::next()) {
+                act->nextState();
+            }
+            sFactor = act->t2 * VelocityProfile::s + act->s1;
+        } else if (act->state == Motion2State::DECCELERATE_INIT) {
+            act->state = Motion2State::DECELERATING;
+            act->s1 += act->s2;
+            if (VelocityProfile::start(actM1->feedrate, actM1->endSpeed, act->t3)) {
+                act->nextState();
+            }
+            sFactor = act->t3 * VelocityProfile::s + act->s1;
+        } else if (act->state == Motion2State::DECELERATING) {
+            if (VelocityProfile::next()) {
+                act->nextState();
+            }
+            sFactor = act->t3 * VelocityProfile::s + act->s1;
+        } else if (act->state == Motion2State::FINISHED) {
+            DEBUG_MSG("finished")
+            m3->directions = 0;
+            m3->usedAxes = 0;
+            m3->stepsRemaining = 1;
+            // Need to add this move to handle finished state correctly
+            Motion3::pushReserved();
+            return;
+        }
+        if (sFactor > 0.999 * actM1->length) { // prevent rounding errors
+            sFactor = 1.0;
+        } else {
+            sFactor *= actM1->invLength;
+        }
+        // Com::printFLN("sf:", sFactor, 4);
+        // Convert float position to integer motor position
+        // This step catches all nonlinear behaviour from
+        // acceleration profile and printer geometry
+        float pos[NUM_AXES];
+        fast8_t nextMotorIdx = 1 - lastMotorIdx;
+        int32_t* np = lastMotorPos[nextMotorIdx];
+        int32_t* lp = lastMotorPos[lastMotorIdx];
+        for (fast8_t i = 0; i < NUM_AXES; i++) {
+            np[i] = roundf(actM1->start[i] + sFactor * actM1->unitDir[i]);
+        }
+        // Fill structures used to update bresenham
+        m3->directions = 0;
+        m3->usedAxes = 0;
+        m3->last = (act->state == Motion2State::FINISHED) || (Motion3::skipParentId == act->id);
+        if ((m3->stepsRemaining = VelocityProfile::stepsPerSegment) == 0) {
+            if (m3->last) { // extreme case, normally never happens
+                m3->usedAxes = 0;
+                m3->stepsRemaining = 1;
+                // Need to add this move to handle finished state correctly
+                Motion3::pushReserved();
+            }
+            return; // don't add empty moves
+        }
+        m3->errorUpdate = (m3->stepsRemaining << 1);
+        for (fast8_t i = 0; i < NUM_AXES; i++) {
+            if ((m3->delta[i] = ((np[i] - lp[i]) << 1)) < 0) {
+                m3->delta[i] = -m3->delta[i];
+            } else {
+                m3->directions |= axisBits[i];
+            }
+            if (m3->delta[i]) {
+                m3->usedAxes |= axisBits[i];
+            }
+            m3->error[i] = -(m3->stepsRemaining);
+        }
+        lastMotorIdx = nextMotorIdx;
+        m3->parentId = act->id;
+        m3->checkEndstops = actM1->isCheckEndstops();
+        m3->secondSpeed = actM1->secondSpeed;
+        Motion1::enableMotors(m3->usedAxes);
+        if (m3->last) {
+            actM1 = nullptr; // select next on next interrupt
+        }
     } else if (actM1->action == Motion1Action::WAIT || actM1->action == Motion1Action::LASER_WARMUP) { // just wait a bit
         m3->parentId = act->id;
         m3->usedAxes = 0;
@@ -197,17 +289,27 @@ void Motion2::timer()
 // Gets called when an end stop is triggered during motion.
 // Will stop all motions stored. For z probing and homing We
 // Also note the remainig z steps.
-void Motion2::endstopTriggered(Motion3Buffer* act)
-{
+void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis) {
+    Motion1::axesTriggered |= axisBits[axis];
+    Motion1::setAxisHomed(axis, false);
     Motion2Buffer& m2 = Motion2::buffers[act->parentId];
-    for (fast8_t i = 0; i < NUM_AXES; i++) {
-        PrinterType::stepsRemaining[i] = m2.stepsRemaining[i];
+    if (Motion1::endstopMode == EndstopMode::STOP_AT_ANY_HIT || Motion1::endstopMode == EndstopMode::PROBING) {
+        for (fast8_t i = 0; i < NUM_AXES; i++) {
+            Motion1::stepsRemaining[i] = m2.stepsRemaining[i];
+        }
+        Motion3::skipParentId = act->parentId;
+        if (Motion1::endstopMode == EndstopMode::STOP_AT_ANY_HIT) {
+            // TODO: Trigger fatal error
+        }
+    } else { // only mark hit axis
+        Motion1::stepsRemaining[axis] = m2.stepsRemaining[axis];
+        if ((Motion1::stopMask & Motion1::axesTriggered) == Motion1::stopMask) {
+            Motion3::skipParentId = act->parentId;
+        }
     }
-    Motion3::skipParentId = act->parentId;
 }
 
-void Motion2Buffer::nextState()
-{
+void Motion2Buffer::nextState() {
     if (state == Motion2State::NOT_INITIALIZED) {
         if (t1 > 0) {
             state = Motion2State::ACCELERATE_INIT;
@@ -241,8 +343,17 @@ void Motion2Buffer::nextState()
     state = Motion2State::FINISHED;
 }
 
-void Motion2::reportBuffers()
-{
+void Motion2::copyMotorPos(int32_t pos[NUM_AXES]) {
+    FOR_ALL_AXES(i) {
+        pos[i] = lastMotorPos[lastMotorIdx][i];
+    }
+}
+
+void Motion2::setMotorPositionFromTransformed() {
+    PrinterType::transform(Motion1::currentPositionTransformed, lastMotorPos[lastMotorIdx]);
+}
+
+void Motion2::reportBuffers() {
     Com::printFLN(PSTR("M2 Buffer:"));
     Com::printFLN(PSTR("m1 ptr:"), (int)actM1);
     Com::printFLN(PSTR("length:"), (int)length);

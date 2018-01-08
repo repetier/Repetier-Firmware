@@ -1704,7 +1704,7 @@ void UIDisplay::parse(const char *txt, bool ram) {
                         addStringP(PSTR(" Homing"));
                         break;
                     } else {
-                        if(Printer::isAnimation() && ((c2 == '0' && !Printer::isXHomed()) || (c2 == '1' && !Printer::isYHomed()) || (c2 == '2' && !Printer::isZHomed()))) {
+                        if(Printer::isAnimation() && ((c2 == '0' && !Motion1::isAxisHomed(X_AXIS)) || (c2 == '1' && !Motion1::isAxisHomed(Y_AXIS)) || (c2 == '2' && !Motion1::isAxisHomed(Z_AXIS)))) {
                             addStringP(PSTR("   ?.??"));
                             break;
                         }

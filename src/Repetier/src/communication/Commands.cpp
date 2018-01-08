@@ -25,8 +25,7 @@ const int8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list fo
 int Commands::lowestRAMValue = MAX_RAM;
 int Commands::lowestRAMValueSend = MAX_RAM;
 
-void Commands::commandLoop()
-{
+void Commands::commandLoop() {
 //while(true) {
 #ifdef DEBUG_PRINT
     debugWaitLoop = 1;
@@ -59,8 +58,7 @@ void Commands::commandLoop()
     //}
 }
 
-void Commands::checkForPeriodicalActions(bool allowNewMoves)
-{
+void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     Printer::handleInterruptEvent();
     EVENT_PERIODICAL;
 #if defined(DOOR_PIN) && DOOR_PIN > -1
@@ -94,8 +92,7 @@ Some commands expect no movement, before they can execute. This function
 waits, until the steppers are stopped. In the meanwhile it buffers incoming
 commands and manages temperatures.
 */
-void Commands::waitUntilEndOfAllMoves()
-{
+void Commands::waitUntilEndOfAllMoves() {
 #ifdef DEBUG_PRINT
     debugWaitLoop = 8;
 #endif
@@ -107,8 +104,7 @@ void Commands::waitUntilEndOfAllMoves()
     }
 }
 
-void Commands::waitUntilEndOfAllBuffers()
-{
+void Commands::waitUntilEndOfAllBuffers() {
     GCode* code = NULL;
 #ifdef DEBUG_PRINT
     debugWaitLoop = 9;
@@ -137,8 +133,7 @@ void Commands::waitUntilEndOfAllBuffers()
     }
 }
 
-void Commands::printCurrentPosition()
-{
+void Commands::printCurrentPosition() {
     float x, y, z;
     Printer::realPosition(x, y, z);
     x += Motion1::g92Offsets[X_AXIS];
@@ -160,8 +155,7 @@ void Commands::printCurrentPosition()
 #endif
 }
 
-void Commands::printTemperatures(bool showRaw)
-{
+void Commands::printTemperatures(bool showRaw) {
     int error;
 #if NUM_EXTRUDER > 0
     float temp = Extruder::current->tempControl.currentTemperatureC;
@@ -218,8 +212,7 @@ void Commands::printTemperatures(bool showRaw)
     Com::println();
 #endif
 }
-void Commands::changeFeedrateMultiply(int factor)
-{
+void Commands::changeFeedrateMultiply(int factor) {
     if (factor < 25)
         factor = 25;
     if (factor > 500)
@@ -229,8 +222,7 @@ void Commands::changeFeedrateMultiply(int factor)
     Com::printFLN(Com::tSpeedMultiply, factor);
 }
 
-void Commands::changeFlowrateMultiply(int factor)
-{
+void Commands::changeFlowrateMultiply(int factor) {
     if (factor < 25)
         factor = 25;
     if (factor > 200)
@@ -250,8 +242,7 @@ uint8_t fanKickstart;
 uint8_t fan2Kickstart;
 #endif
 
-void Commands::setFanSpeed(int speed, bool immediately)
-{
+void Commands::setFanSpeed(int speed, bool immediately) {
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
     if (Printer::fanSpeed == speed)
         return;
@@ -268,8 +259,7 @@ void Commands::setFanSpeed(int speed, bool immediately)
     Com::printFLN(Com::tFanspeed, speed); // send only new values to break update loops!
 #endif
 }
-void Commands::setFan2Speed(int speed)
-{
+void Commands::setFan2Speed(int speed) {
 #if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
     speed = constrain(speed, 0, 255);
     Printer::setFan2SpeedDirectly(speed);
@@ -277,8 +267,7 @@ void Commands::setFan2Speed(int speed)
 #endif
 }
 
-void Commands::reportPrinterUsage()
-{
+void Commands::reportPrinterUsage() {
 #if EEPROM_MODE != 0
     float dist = Printer::filamentPrinted * 0.001 + HAL::eprGetFloat(EPR_PRINTING_DISTANCE);
     Com::printF(Com::tPrintedFilament, dist, 2);
@@ -305,8 +294,7 @@ void Commands::reportPrinterUsage()
     // Digipot methods for controling current and microstepping
 
 #if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
-int digitalPotWrite(int address, uint16_t value)
-{ // From Arduino DigitalPotControl example
+int digitalPotWrite(int address, uint16_t value) { // From Arduino DigitalPotControl example
     if (value > 255)
         value = 255;
     WRITE(DIGIPOTSS_PIN, LOW); // take the SS pin low to select the chip
@@ -316,23 +304,20 @@ int digitalPotWrite(int address, uint16_t value)
     //delay(10);
 }
 
-void setMotorCurrent(uint8_t driver, uint16_t current)
-{
+void setMotorCurrent(uint8_t driver, uint16_t current) {
     if (driver > 4)
         return;
     const uint8_t digipot_ch[] = DIGIPOT_CHANNELS;
     digitalPotWrite(digipot_ch[driver], current);
 }
 
-void setMotorCurrentPercent(uint8_t channel, float level)
-{
+void setMotorCurrentPercent(uint8_t channel, float level) {
     uint16_t raw_level = (level * 255 / 100);
     setMotorCurrent(channel, raw_level);
 }
 #endif
 
-void motorCurrentControlInit()
-{ //Initialize Digipot Motor Current
+void motorCurrentControlInit() { //Initialize Digipot Motor Current
 #if DIGIPOTSS_PIN && DIGIPOTSS_PIN > -1
     HAL::spiInit(0); //SPI.begin();
     SET_OUTPUT(DIGIPOTSS_PIN);
@@ -353,8 +338,7 @@ void motorCurrentControlInit()
 
 #if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_LTC2600
 
-void setMotorCurrent(uint8_t channel, unsigned short level)
-{
+void setMotorCurrent(uint8_t channel, unsigned short level) {
     if (channel >= LTC2600_NUM_CHANNELS)
         return;
     const uint8_t ltc_channels[] = LTC2600_CHANNELS;
@@ -397,16 +381,14 @@ void setMotorCurrent(uint8_t channel, unsigned short level)
     WRITE(LTC2600_CS_PIN, HIGH);
 
 } // setLTC2600
-void setMotorCurrentPercent(uint8_t channel, float level)
-{
+void setMotorCurrentPercent(uint8_t channel, float level) {
     if (level > 100.0f)
         level = 100.0f;
     uint16_t raw_level = static_cast<uint16_t>((long)level * 65535L / 100L);
     setMotorCurrent(channel, raw_level);
 }
 
-void motorCurrentControlInit()
-{ //Initialize LTC2600 Motor Current
+void motorCurrentControlInit() { //Initialize LTC2600 Motor Current
     uint8_t i;
 #ifdef MOTOR_CURRENT_PERCENT
     const float digipot_motor_current[] = MOTOR_CURRENT_PERCENT;
@@ -423,8 +405,7 @@ void motorCurrentControlInit()
 #endif
 
 #if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_ALLIGATOR
-void setMotorCurrent(uint8_t channel, unsigned short value)
-{
+void setMotorCurrent(uint8_t channel, unsigned short value) {
     if (channel >= 7) // max channel (X,Y,Z,E0,E1,E2,E3)
         return;
     if (value > 255)
@@ -466,14 +447,12 @@ void setMotorCurrent(uint8_t channel, unsigned short value)
     HAL::spiSend(SPI_CHAN_DAC, externalDac_buf, 2);
 }
 
-void setMotorCurrentPercent(uint8_t channel, float level)
-{
+void setMotorCurrentPercent(uint8_t channel, float level) {
     uint16_t raw_level = (level * 255 / 100);
     setMotorCurrent(channel, raw_level);
 }
 
-void motorCurrentControlInit()
-{                                                //Initialize Motor Current
+void motorCurrentControlInit() {                 //Initialize Motor Current
     uint8_t externalDac_buf[2] = { 0x20, 0x00 }; //all off
 
     // All SPI chip-select HIGH
@@ -531,15 +510,13 @@ int16_t _valuesEp[] = { 0, 0, 0, 0 };
 
 uint8_t dac_stepper_channel[] = MCP4728_STEPPER_ORDER;
 
-int dacSimpleCommand(uint8_t simple_command)
-{
+int dacSimpleCommand(uint8_t simple_command) {
     HAL::i2cStartWait(MCP4728_GENERALCALL_ADDRESS + I2C_WRITE);
     HAL::i2cWrite(simple_command);
     HAL::i2cStop();
 }
 
-void dacReadStatus()
-{
+void dacReadStatus() {
     HAL::delayMilliseconds(500);
     HAL::i2cStartWait(MCP4728_I2C_ADDRESS | I2C_READ);
 
@@ -566,8 +543,7 @@ void dacReadStatus()
     HAL::i2cStop();
 }
 
-void dacAnalogUpdate(bool saveEEPROM = false)
-{
+void dacAnalogUpdate(bool saveEEPROM = false) {
     uint8_t dac_write_cmd = MCP4728_CMD_SEQ_WRITE;
 
     HAL::i2cStartWait(MCP4728_I2C_ADDRESS + I2C_WRITE);
@@ -595,14 +571,12 @@ void dacAnalogUpdate(bool saveEEPROM = false)
     // if (saveEEPROM) dacReadStatus(); // Not necessary, just a read-back sanity check.
 }
 
-void dacCommitEeprom()
-{
+void dacCommitEeprom() {
     dacAnalogUpdate(true);
     dacReadStatus(); // Refresh EEPROM Values with values actually stored in EEPROM. .
 }
 
-void dacPrintSet(int dacChannelSettings[], const char* dacChannelPrefixes[])
-{
+void dacPrintSet(int dacChannelSettings[], const char* dacChannelPrefixes[]) {
     for (int i = 0; i < MCP4728_NUM_CHANNELS; i++) {
         uint8_t dac_channel = dac_stepper_channel[i]; // DAC Channel is a mapped lookup.
         Com::printF(dacChannelPrefixes[i], ((float)dacChannelSettings[dac_channel] * 100 / MCP4728_VOUT_MAX));
@@ -611,8 +585,7 @@ void dacPrintSet(int dacChannelSettings[], const char* dacChannelPrefixes[])
     }
 }
 
-void dacPrintValues()
-{
+void dacPrintValues() {
     const char* dacChannelPrefixes[] = { Com::tSpaceXColon, Com::tSpaceYColon, Com::tSpaceZColon, Com::tSpaceEColon };
 
     Com::printFLN(Com::tMCPEpromSettings);
@@ -622,8 +595,7 @@ void dacPrintValues()
     dacPrintSet(dac_motor_current, dacChannelPrefixes); // And another for the RUNTIME set
 }
 
-void setMotorCurrent(uint8_t xyz_channel, uint16_t level)
-{
+void setMotorCurrent(uint8_t xyz_channel, uint16_t level) {
     if (xyz_channel >= MCP4728_NUM_CHANNELS)
         return;
     uint8_t stepper_channel = dac_stepper_channel[xyz_channel];
@@ -631,14 +603,12 @@ void setMotorCurrent(uint8_t xyz_channel, uint16_t level)
     dacAnalogUpdate();
 }
 
-void setMotorCurrentPercent(uint8_t channel, float level)
-{
+void setMotorCurrentPercent(uint8_t channel, float level) {
     uint16_t raw_level = (level * MCP4728_VOUT_MAX / 100);
     setMotorCurrent(channel, raw_level);
 }
 
-void motorCurrentControlInit()
-{                                                    //Initialize MCP4728 Motor Current
+void motorCurrentControlInit() {                     //Initialize MCP4728 Motor Current
     HAL::i2cInit(400000);                            // Initialize the i2c bus.
     dacSimpleCommand((uint8_t)MCP4728_CMD_GC_RESET); // MCP4728 General Command Reset
     dacReadStatus();                                 // Load Values from EEPROM.
@@ -650,8 +620,7 @@ void motorCurrentControlInit()
 #endif
 
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
-void microstepMS(uint8_t driver, int8_t ms1, int8_t ms2)
-{
+void microstepMS(uint8_t driver, int8_t ms1, int8_t ms2) {
     if (ms1 > -1)
         switch (driver) {
         case 0:
@@ -710,8 +679,7 @@ void microstepMS(uint8_t driver, int8_t ms1, int8_t ms2)
         }
 }
 
-void microstepMode(uint8_t driver, uint8_t stepping_mode)
-{
+void microstepMode(uint8_t driver, uint8_t stepping_mode) {
     switch (stepping_mode) {
     case 1:
         microstepMS(driver, MICROSTEP1);
@@ -734,8 +702,7 @@ void microstepMode(uint8_t driver, uint8_t stepping_mode)
     }
 }
 
-void microstepReadings()
-{
+void microstepReadings() {
     Com::printFLN(Com::tMS1MS2Pins);
 #if X_MS1_PIN > -1 && X_MS2_PIN > -1
     Com::printF(Com::tXColon, READ(X_MS1_PIN));
@@ -770,8 +737,7 @@ void microstepReadings()
 }
 #endif
 
-void microstepInit()
-{
+void microstepInit() {
 #if defined(X_MS1_PIN) && X_MS1_PIN > -1
     const uint8_t microstep_modes[] = MICROSTEP_MODES;
 #if X_MS1_PIN > -1
@@ -813,8 +779,7 @@ void microstepInit()
 \brief Execute the Arc command stored in com.
 */
 #if ARC_SUPPORT
-void Commands::processArc(GCode* com)
-{
+void Commands::processArc(GCode* com) {
     float position[Z_AXIS_ARRAY];
     Printer::realPosition(position[X_AXIS], position[Y_AXIS], position[Z_AXIS]);
     // TODO: Make Arc work again
@@ -930,8 +895,7 @@ void Commands::processArc(GCode* com)
 /**
 \brief Execute the G command stored in com.
 */
-void Commands::processGCode(GCode* com)
-{
+void Commands::processGCode(GCode* com) {
     if (EVENT_UNHANDLED_G_CODE(com)) {
         previousMillisCmd = HAL::timeInMilliseconds();
         return;
@@ -1048,11 +1012,15 @@ void Commands::processGCode(GCode* com)
         Printer::unitIsInches = 0;
         break;
     case 28: { //G28 Home all Axis one at a time
-        uint8_t homeAllAxis = (com->hasNoXYZ() && !com->hasE());
-        if (com->hasE())
-            Motion1::currentPosition[E_AXIS] = 0;
-        if (homeAllAxis || !com->hasNoXYZ())
-            Printer::homeAxis(homeAllAxis || com->hasX(), homeAllAxis || com->hasY(), homeAllAxis || com->hasZ());
+        fast8_t homeAxis = 0;
+        homeAxis |= com->hasX() ? 1 : 0;
+        homeAxis |= com->hasY() ? 2 : 0;
+        homeAxis |= com->hasZ() ? 4 : 0;
+        homeAxis |= com->hasE() ? 8 : 0;
+        homeAxis |= com->hasA() ? 16 : 0;
+        homeAxis |= com->hasB() ? 32 : 0;
+        homeAxis |= com->hasC() ? 64 : 0;
+        Motion1::homeAxes(homeAxis);
     } break;
 #if FEATURE_Z_PROBE
     case 29: { // G29 3 points, build average or distortion compensation
@@ -1537,8 +1505,7 @@ void Commands::processGCode(GCode* com)
 /**
 \brief Execute the G command stored in com.
 */
-void Commands::processMCode(GCode* com)
-{
+void Commands::processMCode(GCode* com) {
     if (EVENT_UNHANDLED_M_CODE(com))
         return;
     switch (com->M) {
@@ -2448,8 +2415,8 @@ void Commands::processMCode(GCode* com)
     case 513:
         Extruder::markAllUnjammed();
         break;
-#endif  // EXTRUDER_JAM_CONTROL
-        //- M530 S<printing> L<layer> - Enables explicit printing mode (S1) or disables it (S0). L can set layer count
+#endif // EXTRUDER_JAM_CONTROL
+    //- M530 S<printing> L<layer> - Enables explicit printing mode (S1) or disables it (S0). L can set layer count
     case 530:
         if (com->hasL())
             Printer::maxLayer = static_cast<int>(com->L);
@@ -2686,8 +2653,7 @@ void Commands::processMCode(GCode* com)
 /**
 \brief Execute the command stored in com.
 */
-void Commands::executeGCode(GCode* com)
-{
+void Commands::executeGCode(GCode* com) {
 #if NEW_COMMUNICATION
     // Set return channel for private commands. By default all commands send to all receivers.
     GCodeSource* actSource = GCodeSource::activeSource;
@@ -2731,8 +2697,7 @@ void Commands::executeGCode(GCode* com)
 #endif
 }
 
-void Commands::emergencyStop()
-{
+void Commands::emergencyStop() {
 #if defined(KILL_METHOD) && KILL_METHOD == 1
     HAL::resetHardware();
 #else
@@ -2773,15 +2738,13 @@ void Commands::emergencyStop()
 #endif
 }
 
-void Commands::checkFreeMemory()
-{
+void Commands::checkFreeMemory() {
     int newfree = HAL::getFreeRam();
     if (newfree < lowestRAMValue)
         lowestRAMValue = newfree;
 }
 
-void Commands::writeLowestFreeRAM()
-{
+void Commands::writeLowestFreeRAM() {
     if (lowestRAMValueSend > lowestRAMValue) {
         lowestRAMValueSend = lowestRAMValue;
         Com::printFLN(Com::tFreeRAM, lowestRAMValue);

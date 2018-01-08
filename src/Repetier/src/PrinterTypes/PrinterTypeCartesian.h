@@ -20,18 +20,20 @@
 
 class PrinterType {
 public:
-    static int32_t stepsRemaining[NUM_AXES]; // Steps remaining when testing endstops
-
     // Are subdivisions required due to nonlinear kinematics
     static bool subdivisionsRequired() {
         return false;
     }
-    
+
     static void transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]);
 
     static void homeAxis(fast8_t axis);
 
     static bool positionAllowed(float pos[NUM_AXES]);
     static void disableAllowedStepper();
+    /** During probing or homing a move in steps might be needed.
+     * This returns the acceleration to use. */
+    static float accelerationForMoveSteps(fast8_t axes);
+    static float feedrateForMoveSteps(fast8_t axes);
 };
 #endif

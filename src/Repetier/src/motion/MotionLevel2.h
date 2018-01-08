@@ -40,7 +40,7 @@ class Motion2Buffer {
 public:
     fast8_t id;
     Motion2State state;
-    Motion1Buffer *motion1;
+    Motion1Buffer* motion1;
     float t1, t2, t3;
     float s1, s2, s3;
     // float sScale1,sScale2,sScale3;
@@ -50,9 +50,10 @@ public:
 };
 
 class Motion2 {
-    static Motion2Buffer *act; // used only inside m2 thraed
-    static Motion1Buffer *actM1;
+    static Motion2Buffer* act; // used only inside m2 thraed
+    static Motion1Buffer* actM1;
     static fast8_t nextActId;
+
 public:
     static Motion2Buffer buffers[NUM_MOTION2_BUFFER];
     static volatile fast8_t length;
@@ -70,7 +71,7 @@ public:
     // Gets called when an end stop is triggered during motion.
     // Will stop all motions stored. For z probing and homing We
     // Also note the remainig z steps.
-    static void endstopTriggered(Motion3Buffer *act);
+    static void endstopTriggered(Motion3Buffer* act, fast8_t axis);
 
     /// Called from m3 timer when line is finished as planned
     static void pop() {
@@ -79,4 +80,9 @@ public:
         Motion1::pop();
     }
     static void reportBuffers();
+
+    static void copyMotorPos(int32_t pos[NUM_AXES]);
+
+    /// Assume we are at Motion1::currentPositionTransformed.
+    static void setMotorPositionFromTransformed();
 };

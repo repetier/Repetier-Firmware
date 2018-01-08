@@ -43,9 +43,7 @@ public:
     static bool next();
 };
 
-#endif
-
-#if VELOCITY_PROFILE == 3
+#elif VELOCITY_PROFILE == 3
 /*
 This class uses a cubic velcity profile, such that at the start and
 end of each move the accelerations are 0.
@@ -75,10 +73,12 @@ public:
     static bool next();
 };
 
-#endif
+#elif VELOCITY_PROFILE == 5
 
-#if VELOCITY_PROFILE == 5
-#error cubic speed profile not yet implemented, please fall back to cubic
+/*
+a_max = 1.875 * a_linear
+j_max = 5.625 * a_linear
+*/
 class VelocityProfile {
 public:
     static float f, d1, d2, d3, d4, d5;
@@ -99,4 +99,9 @@ public:
     */
     static bool next();
 };
+
+#else
+
+#error Selected value for VELOCITY_PROFILE not supported. Please select 1, 3 or 5.
+
 #endif

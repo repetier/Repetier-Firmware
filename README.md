@@ -40,11 +40,11 @@ Done:
 - Due boards support new motion system.
 - First tests of the new modular configuration scheme.
 - Pure cartesian printer system.
-- Linear and cubic velocity shape.
+- Linear, cubic and quintic velocity shape.
+- No minimum speed required any more.
+- Homing
 
 ToDo:
-- Quintic velocity shape.
-- Homing
 - Dual X axis printer type
 - Delta printer type
 - Core printer type
@@ -69,6 +69,7 @@ the first printer can already move around we note many advantages:
 - Easier to adjust z correction, babystepping and advance.
 - No more delays for slower drivers wasting CPU time.
 - Most special cases can now be catched by the module system.
+- Support of up to 7 axes (X,Y, Z, E, A, B, C)
 
 
 #### What does module system mean

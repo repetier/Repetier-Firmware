@@ -20,14 +20,11 @@
 
 #if PRINTER_TYPE == 0
 
-void PrinterType::homeAxis(fast8_t axis)
-{
-    switch (axis) {
-    }
+void PrinterType::homeAxis(fast8_t axis) {
+    Motion1::simpleHome(axis);
 }
 
-bool PrinterType::positionAllowed(float pos[NUM_AXES])
-{
+bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
     if (Printer::isNoDestinationCheck()) {
         return true;
     }
@@ -44,20 +41,38 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES])
     return true;
 }
 
-void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES])
-{
+void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]) {
     for (fast8_t i = 0; i < NUM_AXES; i++) {
         motor[i] = static_cast<int32_t>(floor(pos[i] * Motion1::resolution[i] + 0.5f));
     }
 }
 
-void PrinterType::disableAllowedStepper()
-{
+void PrinterType::disableAllowedStepper() {
     if (DISABLE_X)
         Motion1::motors[X_AXIS]->disable();
     if (DISABLE_Y)
         Motion1::motors[Y_AXIS]->disable();
     if (DISABLE_Z)
         Motion1::motors[Z_AXIS]->disable();
+}
+
+float PrinterType::accelerationForMoveSteps(fast8_t axes) {
+    float acceleration = 500.0f;
+    FOR_ALL_AXES(i) {
+        if (axes & axisBits[i]) {
+            acceleration = RMath::min(acceleration, Motion1::maxAcceleration[i]);
+        }
+    }
+    return acceleration;
+}
+
+float PrinterType::feedrateForMoveSteps(fast8_t axes) {
+    float feedrate = 100.0f;
+    FOR_ALL_AXES(i) {
+        if (axes & axisBits[i]) {
+            feedrate = RMath::min(feedrate, Motion1::maxFeedrate[i]);
+        }
+    }
+    return feedrate;
 }
 #endif

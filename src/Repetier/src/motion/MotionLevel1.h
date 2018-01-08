@@ -46,9 +46,17 @@ enum Motion1State {
 };
 
 enum Motion1Action {
-    WAIT = 0, // Add a wait - in the hope a next move follows for bette roptimization
-    MOVE = 1, // A plain move
-    LASER_WARMUP = 2
+    WAIT = 0,         // Add a wait - in the hope a next move follows for bette roptimization
+    LASER_WARMUP = 1, // Preheat laser
+    MOVE = 2,         // A plain move
+    MOVE_STEPS = 3    // Distance in motor steps given
+};
+
+enum EndstopMode {
+    DISABLED = 0,        // Endstop tests disabled
+    STOP_AT_ANY_HIT = 1, // Stop move on any hit endstop
+    STOP_HIT_AXES = 2,   // Continue until all endstops are hit
+    PROBING = 3          // Z probing
 };
 
 // 158 byte for 7 axes
@@ -73,8 +81,7 @@ public:
     float invLength;
 
     void computeMaxJunctionSpeed();
-    inline bool isAxisMoving(fast8_t axis)
-    {
+    inline bool isAxisMoving(fast8_t axis) {
         return (axisUsed & axisBits[axis]) != 0;
     }
     /* inline bool isDirPositive(fast8_t axis) {
@@ -85,12 +92,10 @@ public:
     // Try blocking buffer. Return true on success.
     bool block();
     void unblock();
-    inline bool isBlocked()
-    {
+    inline bool isBlocked() {
         return flags & FLAG_BLOCKED || state == Motion1State::FREE;
     }
-    inline bool isCheckEndstops()
-    {
+    inline bool isCheckEndstops() {
         return flags & FLAG_CHECK_ENDSTOPS;
     }
 };
@@ -113,10 +118,15 @@ public:
     static float homeRetestReduction[NUM_AXES];
     static float homeEndstopDistance[NUM_AXES];
     static fast8_t homeDir[NUM_AXES];
+    static fast8_t homePriority[NUM_AXES]; // determines homing order, lower number first
     static StepperDriverBase* motors[NUM_AXES];
     static fast8_t axesHomed;
     static float memory[MEMORY_POS_SIZE][NUM_AXES + 1];
     static fast8_t memoryPos;
+    static EndstopMode endstopMode;
+    static int32_t stepsRemaining[NUM_AXES]; // Steps remaining when testing endstops
+    static fast8_t axesTriggered;
+    static fast8_t stopMask; // stop move if these axes are triggered
     /* Buffer is a bit special in the sense that end keeps
     stored until all low level functions are finished while
     mid motion level can already be on an other segment in
@@ -142,6 +152,7 @@ public:
     static void moveRelativeByOfficial(float coords[NUM_AXES], float feedrate);
     // Move to the printer coordinates (after offset, transform, ...)
     static void moveRelativeByPrinter(float coords[NUM_AXES], float feedrate);
+    static void moveRelativeByStepsRelative(int32_t coords[NUM_AXES]);
     static void updatePositionsFromCurrent();
     static void updatePositionsFromCurrentTransformed();
     // Sets A,B,C coordinates to ignore for easy use.
@@ -150,18 +161,15 @@ public:
     static void setTmpPositionXYZ(float x, float y, float z);
     static void setTmpPositionXYZE(float x, float y, float z, float e);
     // Reserve new buffer. Waits if required until a buffer is free.
-    static Motion1Buffer& reserve();
     static void setMotorForAxis(StepperDriverBase* motor, fast8_t axis);
     static void waitForEndOfMoves();
     static void waitForXFreeMoves(fast8_t, bool allowMoves = false);
     static void pop(); // Only called by Motion2::pop !
     static fast8_t buffersUsed();
-    static void backplan(fast8_t actId);
     /* If possible does a forward step and returns
     the forwarded buffer. If none is available nullptr
     is returned. Will update process and lengthUnprocessed */
     static Motion1Buffer* forward(Motion2Buffer* m2);
-    static void queueMove(float feedrate);
     static void insertWaitIfNeeded();
     static void LaserWarmUp(uint32_t wait);
     static void reportBuffers();
@@ -169,5 +177,17 @@ public:
     static bool pushToMemory();
     /// Pop memorized position to tmpPosition
     static bool popFromMemory();
+    static void enableMotors(fast8_t axes);
+    static bool isAxisHomed(fast8_t axis);
+    static void setAxisHomed(fast8_t axis, bool state);
+    static void homeAxes(fast8_t axes);
+    static void simpleHome(fast8_t axis);
+    static void callBeforeHomingOnSteppers();
+    static void callAfterHomingOnSteppers();
+
+private:
+    static void backplan(fast8_t actId);
+    static Motion1Buffer& reserve();
+    static void queueMove(float feedrate);
 };
 #endif

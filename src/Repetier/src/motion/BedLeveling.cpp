@@ -126,7 +126,7 @@ requires the extruder to bend the coating thickness without harm!
 void Printer::prepareForProbing() {
 #ifndef SKIP_PROBE_PREPARE
     // 1. Ensure we are homed so positions make sense
-    if(!Printer::isHomedAll()) {
+    if (!Printer::isHomedAll()) {
         Printer::homeAxis(true, true, true);
     }
     // 2. Go to z probe bed distance for probing
@@ -139,16 +139,16 @@ void Printer::prepareForProbing() {
 #if DRIVE_SYSTEM != DELTA
     float targetX = Printer::currentPosition[X_AXIS];
     float targetY = Printer::currentPosition[Y_AXIS];
-    if(ZPOffsetX > 0 && targetX - ZPOffsetX < Printer::xMin) {
+    if (ZPOffsetX > 0 && targetX - ZPOffsetX < Printer::xMin) {
         targetX = Printer::xMin + ZPOffsetX;
     }
-    if(ZPOffsetY > 0 && targetY - ZPOffsetY < Printer::yMin) {
+    if (ZPOffsetY > 0 && targetY - ZPOffsetY < Printer::yMin) {
         targetY = Printer::yMin + ZPOffsetY;
     }
-    if(ZPOffsetX < 0 && targetX - ZPOffsetX > Printer::xMin + Printer::xLength) {
+    if (ZPOffsetX < 0 && targetX - ZPOffsetX > Printer::xMin + Printer::xLength) {
         targetX = Printer::xMin + Printer::xLength + ZPOffsetX;
     }
-    if(ZPOffsetY < 0 && targetY - ZPOffsetY > Printer::yMin + Printer::yLength) {
+    if (ZPOffsetY < 0 && targetY - ZPOffsetY > Printer::yMin + Printer::yLength) {
         targetY = Printer::yMin + Printer::yLength + ZPOffsetY;
     }
     Printer::moveToReal(targetX, targetY, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
@@ -161,24 +161,24 @@ void Printer::prepareForProbing() {
 
 #if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
 
-bool measureAutolevelPlane(Plane &plane) {
+bool measureAutolevelPlane(Plane& plane) {
     PlaneBuilder builder;
     builder.reset();
 #if BED_LEVELING_METHOD == 0 // 3 point
     float h;
     Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
     h = Printer::runZProbe(false, false);
-    if(h == ILLEGAL_Z_PROBE)
+    if (h == ILLEGAL_Z_PROBE)
         return false;
     builder.addPoint(EEPROM::zProbeX1(), EEPROM::zProbeY1(), h);
     Printer::moveTo(EEPROM::zProbeX2(), EEPROM::zProbeY2(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
     h = Printer::runZProbe(false, false);
-    if(h == ILLEGAL_Z_PROBE)
+    if (h == ILLEGAL_Z_PROBE)
         return false;
     builder.addPoint(EEPROM::zProbeX2(), EEPROM::zProbeY2(), h);
     Printer::moveTo(EEPROM::zProbeX3(), EEPROM::zProbeY3(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
     h = Printer::runZProbe(false, false);
-    if(h == ILLEGAL_Z_PROBE)
+    if (h == ILLEGAL_Z_PROBE)
         return false;
     builder.addPoint(EEPROM::zProbeX3(), EEPROM::zProbeY3(), h);
 #elif BED_LEVELING_METHOD == 1 // linear regression
@@ -189,13 +189,13 @@ bool measureAutolevelPlane(Plane &plane) {
     float ay = delta * (EEPROM::zProbeY2() - EEPROM::zProbeY1());
     float bx = delta * (EEPROM::zProbeX3() - EEPROM::zProbeX1());
     float by = delta * (EEPROM::zProbeY3() - EEPROM::zProbeY1());
-    for(int ix = 0; ix < BED_LEVELING_GRID_SIZE; ix++) {
-        for(int iy = 0; iy < BED_LEVELING_GRID_SIZE; iy++) {
+    for (int ix = 0; ix < BED_LEVELING_GRID_SIZE; ix++) {
+        for (int iy = 0; iy < BED_LEVELING_GRID_SIZE; iy++) {
             float px = ox + static_cast<float>(ix) * ax + static_cast<float>(iy) * bx;
             float py = oy + static_cast<float>(ix) * ay + static_cast<float>(iy) * by;
             Printer::moveTo(px, py, IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
             float h = Printer::runZProbe(false, false);
-            if(h == ILLEGAL_Z_PROBE)
+            if (h == ILLEGAL_Z_PROBE)
                 return false;
             builder.addPoint(px, py, h);
         }
@@ -216,21 +216,21 @@ bool measureAutolevelPlane(Plane &plane) {
     float y1Mirror = EEPROM::zProbeY1() + 2.0 * (xy - EEPROM::zProbeY1());
     Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
     h1 = Printer::runZProbe(false, false);
-    if(h1 == ILLEGAL_Z_PROBE)
+    if (h1 == ILLEGAL_Z_PROBE)
         return false;
     Printer::moveTo(EEPROM::zProbeX2(), EEPROM::zProbeY2(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
     h2 = Printer::runZProbe(false, false);
-    if(h2 == ILLEGAL_Z_PROBE)
+    if (h2 == ILLEGAL_Z_PROBE)
         return false;
     Printer::moveTo(EEPROM::zProbeX3(), EEPROM::zProbeY3(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
     h3 = Printer::runZProbe(false, false);
-    if(h3 == ILLEGAL_Z_PROBE)
+    if (h3 == ILLEGAL_Z_PROBE)
         return false;
     Printer::moveTo(x1Mirror, y1Mirror, IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
     h4 = Printer::runZProbe(false, false);
-    if(h4 == ILLEGAL_Z_PROBE)
+    if (h4 == ILLEGAL_Z_PROBE)
         return false;
-    t = h2 + (h3 - h2) * t; // theoretical height for crossing point for symmetric axis
+    t = h2 + (h3 - h2) * t;   // theoretical height for crossing point for symmetric axis
     h1 = t - (h4 - h1) * 0.5; // remove bending part
     builder.addPoint(EEPROM::zProbeX1(), EEPROM::zProbeY1(), h1);
     builder.addPoint(EEPROM::zProbeX2(), EEPROM::zProbeY2(), h2);
@@ -242,7 +242,7 @@ bool measureAutolevelPlane(Plane &plane) {
     return true;
 }
 
-void correctAutolevel(Plane &plane) {
+void correctAutolevel(Plane& plane) {
 #if BED_CORRECTION_METHOD == 0 // rotation matrix
     //Printer::buildTransformationMatrix(plane.z(EEPROM::zProbeX1(),EEPROM::zProbeY1()),plane.z(EEPROM::zProbeX2(),EEPROM::zProbeY2()),plane.z(EEPROM::zProbeX3(),EEPROM::zProbeY3()));
     Printer::buildTransformationMatrix(plane);
@@ -258,13 +258,17 @@ void correctAutolevel(Plane &plane) {
     h2 -= h1;
     h3 -= h1;
 #if defined(LIMIT_MOTORIZED_CORRECTION)
-    if(h2 < -LIMIT_MOTORIZED_CORRECTION) h2 = -LIMIT_MOTORIZED_CORRECTION;
-    if(h2 > LIMIT_MOTORIZED_CORRECTION) h2 = LIMIT_MOTORIZED_CORRECTION;
-    if(h3 < -LIMIT_MOTORIZED_CORRECTION) h3 = -LIMIT_MOTORIZED_CORRECTION;
-    if(h3 > LIMIT_MOTORIZED_CORRECTION) h3 = LIMIT_MOTORIZED_CORRECTION;
+    if (h2 < -LIMIT_MOTORIZED_CORRECTION)
+        h2 = -LIMIT_MOTORIZED_CORRECTION;
+    if (h2 > LIMIT_MOTORIZED_CORRECTION)
+        h2 = LIMIT_MOTORIZED_CORRECTION;
+    if (h3 < -LIMIT_MOTORIZED_CORRECTION)
+        h3 = -LIMIT_MOTORIZED_CORRECTION;
+    if (h3 > LIMIT_MOTORIZED_CORRECTION)
+        h3 = LIMIT_MOTORIZED_CORRECTION;
 #endif
-    MotorDriverInterface *motor2 = getMotorDriver(0);
-    MotorDriverInterface *motor3 = getMotorDriver(1);
+    MotorDriverInterface* motor2 = getMotorDriver(0);
+    MotorDriverInterface* motor3 = getMotorDriver(1);
     motor2->setCurrentAs(0);
     motor3->setCurrentAs(0);
     motor2->gotoPosition(h2);
@@ -280,7 +284,6 @@ void correctAutolevel(Plane &plane) {
 #endif
 }
 
-
 /**
 Implementation of the G32 command
 G32 S<0..2> - Autolevel print bed. S = 1 measure zLength, S = 2 Measure and store new zLength
@@ -292,31 +295,30 @@ bool runBedLeveling(int s) {
     Printer::prepareForProbing();
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
     float actTemp[NUM_EXTRUDER];
-    for(int i = 0; i < NUM_EXTRUDER; i++)
+    for (int i = 0; i < NUM_EXTRUDER; i++)
         actTemp[i] = extruder[i].tempControl.targetTemperatureC;
     Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::max(EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0), static_cast<float>(ZHOME_HEAT_HEIGHT)), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
     Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
-    for(int i = 0; i < NUM_EXTRUDER; i++) {
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
         Extruder::setTemperatureForExtruder(RMath::max(actTemp[i], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), i, false, false);
     }
-    for(int i = 0; i < NUM_EXTRUDER; i++) {
-        if(extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        if (extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
             Extruder::setTemperatureForExtruder(RMath::max(actTemp[i], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), i, false, true);
     }
 #else
-    if(extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
+    if (extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
         Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), Extruder::current->id, false, true);
 #endif
 #endif //  defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
-
 
     float h1, h2, h3, hc, oldFeedrate = Printer::feedrate;
 #if DISTORTION_CORRECTION
     bool distEnabled = Printer::distortion.isEnabled();
     Printer::distortion.disable(false); // if level has changed, distortion is also invalid
 #endif
-    Printer::setAutolevelActive(false); // iterate
+    Printer::setAutolevelActive(false);       // iterate
     Printer::resetTransformationMatrix(true); // in case we switch from matrix to motorized!
 #if DRIVE_SYSTEM == DELTA
     // It is not possible to go to the edges at the top, also users try
@@ -325,8 +327,9 @@ bool runBedLeveling(int s) {
     Printer::homeAxis(true, true, true);
     Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
 #else
-    if(!Printer::isXHomed() || !Printer::isYHomed())
-        Printer::homeAxis(true, true, false);
+    if (!Motion1::isAxisHomed(X_AXIS) || !Motion1::isAxisHomed(Y_AXIS)) {
+        Motion1::homeAxes(3); // x and Y axis
+    }
     Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
 #endif
     Motion1::g92Offsets[X_AXIS] = Motion1::g92Offsets[Y_AXIS] = Motion1::g92Offsets[Z_AXIS] = 0;
@@ -334,9 +337,9 @@ bool runBedLeveling(int s) {
     //GCode::executeFString(Com::tZProbeStartScript);
     Plane plane;
 #if BED_CORRECTION_METHOD == 1
-    for(int r = 0; r < BED_LEVELING_REPETITIONS; r++) {
+    for (int r = 0; r < BED_LEVELING_REPETITIONS; r++) {
 #if DRIVE_SYSTEM == DELTA
-        if(r > 0) {
+        if (r > 0) {
             Printer::finishProbing();
             Printer::homeAxis(true, true, true);
             Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
@@ -344,7 +347,7 @@ bool runBedLeveling(int s) {
         }
 #endif // DELTA
 #endif // BED_CORRECTION_METHOD == 1
-        if(!measureAutolevelPlane(plane)) {
+        if (!measureAutolevelPlane(plane)) {
             Com::printErrorFLN(PSTR("Probing had returned errors - autoleveling canceled."));
             UI_MESSAGE(1);
             return false;
@@ -361,7 +364,7 @@ bool runBedLeveling(int s) {
         //Printer::transformFromPrinter(Printer::currentPosition[X_AXIS],Printer::currentPosition[Y_AXIS],Printer::currentPosition[Z_AXIS],xRot,yRot,zRot);
         //Com::printFLN(PSTR("Z after rotation:"),zRot);
         // With max z end stop we adjust z length so after next homing we have also a calibrated printer
-        if(s != 0) {
+        if (s != 0) {
             // at origin rotations have no influence so use values there to update
             Printer::zLength += currentZ - Printer::currentPosition[Z_AXIS];
             //Printer::zLength += /*currentZ*/ plane.z((float)Printer::currentPositionSteps[X_AXIS] * Printer::invAxisStepsPerMM[X_AXIS],(float)Printer::currentPositionSteps[Y_AXIS] * Printer::invAxisStepsPerMM[Y_AXIS]) - zRot;
@@ -375,21 +378,21 @@ bool runBedLeveling(int s) {
         Com::printFLN(PSTR(" atZ:"), Printer::currentPosition[Z_AXIS]);
         Printer::currentPositionSteps[Z_AXIS] = currentZ * Printer::axisStepsPerMM[Z_AXIS];
 #if BED_CORRECTION_METHOD == 1
-        if(fabsf(plane.a) < 0.00025 && fabsf(plane.b) < 0.00025 )
-            break;  // we reached achievable precision so we can stop
-    } // for BED_LEVELING_REPETITIONS
+        if (fabsf(plane.a) < 0.00025 && fabsf(plane.b) < 0.00025)
+            break; // we reached achievable precision so we can stop
+    }              // for BED_LEVELING_REPETITIONS
 #if Z_HOME_DIR > 0 && MAX_HARDWARE_ENDSTOP_Z
     float zall = Printer::runZProbe(false, false, 1, false);
-    if(zall == ILLEGAL_Z_PROBE)
+    if (zall == ILLEGAL_Z_PROBE)
         return false;
     Printer::currentPosition[Z_AXIS] = zall;
     Printer::currentPositionSteps[Z_AXIS] = zall * Printer::axisStepsPerMM[Z_AXIS];
 #if NONLINEAR_SYSTEM
     transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
 #endif
-    if(s >= 1) {
+    if (s >= 1) {
         float zMax = Printer::runZMaxProbe();
-        if(zMax == ILLEGAL_Z_PROBE)
+        if (zMax == ILLEGAL_Z_PROBE)
             return false;
         zall += zMax - ENDSTOP_Z_BACK_ON_HOME;
         Printer::zLength = zall;
@@ -401,12 +404,12 @@ bool runBedLeveling(int s) {
 #if BED_CORRECTION_METHOD != 1
     Printer::setAutolevelActive(true); // only for software correction or we can spare the comp. time
 #endif
-    if(s >= 2) {
+    if (s >= 2) {
         EEPROM::storeDataIntoEEPROM();
     }
     Commands::printCurrentPosition();
 #if DISTORTION_CORRECTION
-    if(distEnabled)
+    if (distEnabled)
         Printer::distortion.enable(false); // if level has changed, distortion is also invalid
 #endif
 #if DRIVE_SYSTEM == DELTA
@@ -416,15 +419,15 @@ bool runBedLeveling(int s) {
 
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
 #if ZHOME_HEAT_ALL
-    for(int i = 0; i < NUM_EXTRUDER; i++) {
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
         Extruder::setTemperatureForExtruder(RMath::max(actTemp[i], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), i, false, false);
     }
-    for(int i = 0; i < NUM_EXTRUDER; i++) {
-        if(extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        if (extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
             Extruder::setTemperatureForExtruder(RMath::max(actTemp[i], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), i, false, true);
     }
 #else
-    if(extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
+    if (extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
         Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), Extruder::current->id, false, true);
 #endif
 #endif
@@ -440,9 +443,10 @@ bool runBedLeveling(int s) {
 */
 void Printer::setAutolevelActive(bool on) {
 #if FEATURE_AUTOLEVEL
-    if(on == isAutolevelActive()) return;
+    if (on == isAutolevelActive())
+        return;
     flag0 = (on ? flag0 | PRINTER_FLAG0_AUTOLEVEL_ACTIVE : flag0 & ~PRINTER_FLAG0_AUTOLEVEL_ACTIVE);
-    if(on)
+    if (on)
         Com::printInfoFLN(Com::tAutolevelEnabled);
     else
         Com::printInfoFLN(Com::tAutolevelDisabled);
@@ -461,7 +465,7 @@ float Printer::runZMaxProbe() {
     stepsRemainingAtZHit = -1;
     setZProbingActive(true);
     PrintLine::moveRelativeDistanceInSteps(0, 0, probeDepth, 0, homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR, true, true);
-    if(stepsRemainingAtZHit < 0) {
+    if (stepsRemainingAtZHit < 0) {
         Com::printErrorFLN(PSTR("z-max homing failed"));
         return ILLEGAL_Z_PROBE;
     }
@@ -502,12 +506,9 @@ bool Printer::startProbing(bool runScript, bool enforceStartHeight) {
     float rad = EEPROM::deltaMaxRadius();
     float dx = Printer::currentPosition[X_AXIS] - ZPOffsetX;
     float dy = Printer::currentPosition[Y_AXIS] - ZPOffsetY;
-    if(sqrt(dx * dx + dy * dy) > rad)
+    if (sqrt(dx * dx + dy * dy) > rad)
 #else
-    if((ZPOffsetX > 0 && Printer::currentPosition[X_AXIS] - ZPOffsetX < Printer::xMin) ||
-            (ZPOffsetY > 0 && Printer::currentPosition[Y_AXIS] - ZPOffsetY < Printer::yMin) ||
-            (ZPOffsetX < 0 && Printer::currentPosition[X_AXIS] - ZPOffsetX > Printer::xMin + Printer::xLength) ||
-            (ZPOffsetY < 0 && Printer::currentPosition[Y_AXIS] - ZPOffsetY > Printer::yMin + Printer::yLength))
+    if ((ZPOffsetX > 0 && Printer::currentPosition[X_AXIS] - ZPOffsetX < Printer::xMin) || (ZPOffsetY > 0 && Printer::currentPosition[Y_AXIS] - ZPOffsetY < Printer::yMin) || (ZPOffsetX < 0 && Printer::currentPosition[X_AXIS] - ZPOffsetX > Printer::xMin + Printer::xLength) || (ZPOffsetY < 0 && Printer::currentPosition[Y_AXIS] - ZPOffsetY > Printer::yMin + Printer::yLength))
 #endif
     {
         Com::printErrorF(PSTR("Activating z-probe would lead to forbidden xy position: "));
@@ -516,14 +517,14 @@ bool Printer::startProbing(bool runScript, bool enforceStartHeight) {
         GCode::fatalError(PSTR("Could not activate z-probe offset due to coordinate constraints - result is inaccurate!"));
         return false;
     } else {
-	    if(runScript) {
-			GCode::executeFString(Com::tZProbeStartScript);
-		}
-	    float maxStartHeight = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0) + 0.1;
-	    if(currentPosition[Z_AXIS] > maxStartHeight && enforceStartHeight) {
-		    cz = maxStartHeight;
-		    moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, maxStartHeight, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
-	    }
+        if (runScript) {
+            GCode::executeFString(Com::tZProbeStartScript);
+        }
+        float maxStartHeight = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0) + 0.1;
+        if (currentPosition[Z_AXIS] > maxStartHeight && enforceStartHeight) {
+            cz = maxStartHeight;
+            moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, maxStartHeight, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
+        }
 
         // Update position
         Printer::offsetX = -ZPOffsetX;
@@ -537,8 +538,8 @@ bool Printer::startProbing(bool runScript, bool enforceStartHeight) {
 #endif
     }
 #else
-    if(runScript) {
-	    GCode::executeFString(Com::tZProbeStartScript);
+    if (runScript) {
+        GCode::executeFString(Com::tZProbeStartScript);
     }
 #endif
     Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
@@ -550,7 +551,7 @@ void Printer::finishProbing() {
     float cx, cy, cz;
     realPosition(cx, cy, cz);
     GCode::executeFString(Com::tZProbeEndScript);
-    if(Extruder::current) {
+    if (Extruder::current) {
 #if DUAL_X_AXIS
         offsetX = 0; // offsets are parking positions for dual x axis!
 #else
@@ -593,42 +594,42 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
     float oldOffX = Printer::offsetX;
     float oldOffY = Printer::offsetY;
     float oldOffZ = Printer::offsetZ;
-    if(first) {
-        if(!startProbing(runStartScript, enforceStartHeight))
+    if (first) {
+        if (!startProbing(runStartScript, enforceStartHeight))
             return ILLEGAL_Z_PROBE;
     }
     Commands::waitUntilEndOfAllMoves();
     int32_t sum = 0, probeDepth;
     int32_t shortMove = static_cast<int32_t>((float)Z_PROBE_SWITCHING_DISTANCE * axisStepsPerMM[Z_AXIS]); // distance to go up for repeated moves
-    int32_t lastCorrection = currentPositionSteps[Z_AXIS]; // starting position
+    int32_t lastCorrection = currentPositionSteps[Z_AXIS];                                                // starting position
 #if NONLINEAR_SYSTEM
     realDeltaPositionSteps[Z_AXIS] = currentNonlinearPositionSteps[Z_AXIS]; // update real
 #endif
     //int32_t updateZ = 0;
     waitForZProbeStart();
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
-	HAL::delayMilliseconds(Z_PROBE_DELAY);
+    HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
     Endstops::update();
     Endstops::update(); // need to call twice for full update!
-    if(Endstops::zProbe()) {
+    if (Endstops::zProbe()) {
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
         return ILLEGAL_Z_PROBE;
     }
 #if Z_PROBE_DISABLE_HEATERS
-	Extruder::pauseExtruders(true);
-	HAL::delayMilliseconds(70);
+    Extruder::pauseExtruders(true);
+    HAL::delayMilliseconds(70);
 #endif
-    for(int8_t r = 0; r < repeat; r++) {
+    for (int8_t r = 0; r < repeat; r++) {
         probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps); // probe should always hit within this distance
-        stepsRemainingAtZHit = -1; // Marker that we did not hit z probe
+        stepsRemainingAtZHit = -1;                                  // Marker that we did not hit z probe
         setZProbingActive(true);
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
         HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
         PrintLine::moveRelativeDistanceInSteps(0, 0, -probeDepth, 0, EEPROM::zProbeSpeed(), true, true);
         setZProbingActive(false);
-        if(stepsRemainingAtZHit < 0) {
+        if (stepsRemainingAtZHit < 0) {
             Com::printErrorFLN(Com::tZProbeFailed);
             return ILLEGAL_Z_PROBE;
         }
@@ -645,10 +646,10 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
         currentPositionSteps[Z_AXIS] += stepsRemainingAtZHit; // now current position is correct
         sum += lastCorrection - currentPositionSteps[Z_AXIS];
         //Com::printFLN(PSTR("ZHSteps:"),lastCorrection - currentPositionSteps[Z_AXIS]);
-        if(r + 1 < repeat) {
+        if (r + 1 < repeat) {
             // go only shortest possible move up for repetitions
             PrintLine::moveRelativeDistanceInSteps(0, 0, shortMove, 0, HOMING_FEEDRATE_Z, true, true);
-            if(Endstops::zProbe()) {
+            if (Endstops::zProbe()) {
                 Com::printErrorFLN(PSTR("z-probe did not untrigger on repetitive measurement - maybe you need to increase distance!"));
                 UI_MESSAGE(1);
                 return ILLEGAL_Z_PROBE;
@@ -659,12 +660,12 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
 #endif
     }
 #if Z_PROBE_DISABLE_HEATERS
-	Extruder::unpauseExtruders(false);
+    Extruder::unpauseExtruders(false);
 #endif
 
     // Go back to start position
     PrintLine::moveRelativeDistanceInSteps(0, 0, lastCorrection - currentPositionSteps[Z_AXIS], 0, HOMING_FEEDRATE_Z, true, true);
-    if(Endstops::zProbe()) { // did we untrigger? If not don't trust result!
+    if (Endstops::zProbe()) { // did we untrigger? If not don't trust result!
         Com::printErrorFLN(PSTR("z-probe did not untrigger on repetitive measurement - maybe you need to increase distance!"));
         UI_MESSAGE(1);
         return ILLEGAL_Z_PROBE;
@@ -689,9 +690,11 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
 
 #if DISTORTION_CORRECTION
     float zCorr = 0;
-    if(Printer::distortion.isEnabled()) {
-        zCorr = distortion.correct(currentPositionSteps[X_AXIS]/* + EEPROM::zProbeXOffset() * axisStepsPerMM[X_AXIS]*/, currentPositionSteps[Y_AXIS]
-                                  /* + EEPROM::zProbeYOffset() * axisStepsPerMM[Y_AXIS]*/, zMinSteps) * invAxisStepsPerMM[Z_AXIS];
+    if (Printer::distortion.isEnabled()) {
+        zCorr = distortion.correct(currentPositionSteps[X_AXIS] /* + EEPROM::zProbeXOffset() * axisStepsPerMM[X_AXIS]*/, currentPositionSteps[Y_AXIS]
+                                   /* + EEPROM::zProbeYOffset() * axisStepsPerMM[Y_AXIS]*/,
+                                   zMinSteps)
+            * invAxisStepsPerMM[Z_AXIS];
         distance += zCorr;
     }
 #endif
@@ -701,7 +704,7 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
     Com::printF(Com::tZProbe, distance, 3);
     Com::printF(Com::tSpaceXColon, realXPosition());
 #if DISTORTION_CORRECTION
-    if(Printer::distortion.isEnabled()) {
+    if (Printer::distortion.isEnabled()) {
         Com::printF(Com::tSpaceYColon, realYPosition());
         Com::printFLN(PSTR(" zCorr:"), zCorr, 3);
     } else {
@@ -710,12 +713,12 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
 #else
     Com::printFLN(Com::tSpaceYColon, realYPosition());
 #endif
-    if(Endstops::zProbe()) {
+    if (Endstops::zProbe()) {
         Com::printErrorFLN(PSTR("z-probe did not untrigger after going back to start position."));
         UI_MESSAGE(1);
         return ILLEGAL_Z_PROBE;
     }
-    if(last)
+    if (last)
         finishProbing();
     return distance;
 }
@@ -732,13 +735,13 @@ void Printer::measureZProbeHeight(float curHeight) {
 #endif
     float startHeight = EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0);
     moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, startHeight, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
-	float zheight = Printer::runZProbe(true, true, Z_PROBE_REPETITIONS, true);
-	if(zheight == ILLEGAL_Z_PROBE) {
-		return;
-	}
-    float zProbeHeight = EEPROM::zProbeHeight() + startHeight -zheight;
+    float zheight = Printer::runZProbe(true, true, Z_PROBE_REPETITIONS, true);
+    if (zheight == ILLEGAL_Z_PROBE) {
+        return;
+    }
+    float zProbeHeight = EEPROM::zProbeHeight() + startHeight - zheight;
 
-#if EEPROM_MODE != 0 // Com::tZProbeHeight is not declared when EEPROM_MODE is 0
+#if EEPROM_MODE != 0                       // Com::tZProbeHeight is not declared when EEPROM_MODE is 0
     EEPROM::setZProbeHeight(zProbeHeight); // will also report on output
 #else
     Com::printFLN(PSTR("Z-probe height [mm]:"), zProbeHeight);
@@ -760,7 +763,8 @@ void Printer::waitForZProbeStart() {
 #if Z_PROBE_WAIT_BEFORE_TEST
     Endstops::update();
     Endstops::update(); // double test to get right signal. Needed for crosstalk protection.
-    if(Endstops::zProbe()) return;
+    if (Endstops::zProbe())
+        return;
 #if UI_DISPLAY_TYPE != NO_DISPLAY
     uid.setStatusP(Com::tHitZProbe);
     uid.refreshPage();
@@ -768,7 +772,7 @@ void Printer::waitForZProbeStart() {
 #ifdef DEBUG_PRINT
     debugWaitLoop = 3;
 #endif
-    while(!Endstops::zProbe()) {
+    while (!Endstops::zProbe()) {
         defaultLoopActions();
         Endstops::update();
         Endstops::update(); // double test to get right signal. Needed for crosstalk protection.
@@ -777,7 +781,7 @@ void Printer::waitForZProbeStart() {
     debugWaitLoop = 4;
 #endif
     HAL::delayMilliseconds(30);
-    while(Endstops::zProbe()) {
+    while (Endstops::zProbe()) {
         defaultLoopActions();
         Endstops::update();
         Endstops::update(); // double test to get right signal. Needed for crosstalk protection.
@@ -796,14 +800,14 @@ void Printer::waitForZProbeStart() {
  we send to printers, the theoretical coordinates. In contrast we have the printer coordinates that
  we need to be at to get the desired result, the real coordinates.
 */
-void Printer::transformToPrinter(float x, float y, float z, float &transX, float &transY, float &transZ) {
+void Printer::transformToPrinter(float x, float y, float z, float& transX, float& transY, float& transZ) {
 #if FEATURE_AXISCOMP
     // Axis compensation:
     x = x + y * EEPROM::axisCompTanXY() + z * EEPROM::axisCompTanXZ();
     y = y + z * EEPROM::axisCompTanYZ();
 #endif
 #if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
-    if(isAutolevelActive()) {
+    if (isAutolevelActive()) {
         transX = x * autolevelTransformation[0] + y * autolevelTransformation[3] + z * autolevelTransformation[6];
         transY = x * autolevelTransformation[1] + y * autolevelTransformation[4] + z * autolevelTransformation[7];
         transZ = x * autolevelTransformation[2] + y * autolevelTransformation[5] + z * autolevelTransformation[8];
@@ -820,9 +824,9 @@ void Printer::transformToPrinter(float x, float y, float z, float &transX, float
 }
 
 /* Transform back to real printer coordinates. */
-void Printer::transformFromPrinter(float x, float y, float z, float &transX, float &transY, float &transZ) {
+void Printer::transformFromPrinter(float x, float y, float z, float& transX, float& transY, float& transZ) {
 #if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
-    if(isAutolevelActive()) {
+    if (isAutolevelActive()) {
         transX = x * autolevelTransformation[0] + y * autolevelTransformation[1] + z * autolevelTransformation[2];
         transY = x * autolevelTransformation[3] + y * autolevelTransformation[4] + z * autolevelTransformation[5];
         transZ = x * autolevelTransformation[6] + y * autolevelTransformation[7] + z * autolevelTransformation[8];
@@ -845,13 +849,12 @@ void Printer::transformFromPrinter(float x, float y, float z, float &transX, flo
 #if FEATURE_AUTOLEVEL
 void Printer::resetTransformationMatrix(bool silent) {
     autolevelTransformation[0] = autolevelTransformation[4] = autolevelTransformation[8] = 1;
-    autolevelTransformation[1] = autolevelTransformation[2] = autolevelTransformation[3] =
-                                     autolevelTransformation[5] = autolevelTransformation[6] = autolevelTransformation[7] = 0;
-    if(!silent)
+    autolevelTransformation[1] = autolevelTransformation[2] = autolevelTransformation[3] = autolevelTransformation[5] = autolevelTransformation[6] = autolevelTransformation[7] = 0;
+    if (!silent)
         Com::printInfoFLN(Com::tAutolevelReset);
 }
 
-void Printer::buildTransformationMatrix(Plane &plane) {
+void Printer::buildTransformationMatrix(Plane& plane) {
     float z0 = plane.z(0, 0);
     float az = z0 - plane.z(1, 0); // ax = 1, ay = 0
     float bz = z0 - plane.z(0, 1); // bx = 0, by = 1

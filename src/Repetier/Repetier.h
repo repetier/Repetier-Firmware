@@ -730,7 +730,7 @@ extern void microstepInit();
 #include "src/motion/MotionLevel1.h"
 #include "src/motion/MotionLevel2.h"
 #include "src/motion/MotionLevel3.h"
-#include "src/motion/PrinterTypeCartesian.h"
+#include "src/PrinterTypes/PrinterTypeCartesian.h"
 #include "src/motion/VelocityProfile.h"
 // #include "src/motion/motion.h"
 
@@ -788,8 +788,7 @@ public:
     void pausePrint(bool intern = false);
     void continuePrint(bool intern = false);
     void stopPrint();
-    inline void setIndex(uint32_t newpos)
-    {
+    inline void setIndex(uint32_t newpos) {
         if (!sdactive)
             return;
         sdpos = newpos;

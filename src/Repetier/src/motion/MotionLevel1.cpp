@@ -21,8 +21,6 @@
 uint8_t axisBits[NUM_AXES];
 uint8_t allAxes;
 
-int32_t PrinterType::stepsRemaining[NUM_AXES]; // Steps remaining when testing endstops
-
 Motion1Buffer Motion1::buffers[PRINTLINE_CACHE_SIZE]; // Buffer storage
 float Motion1::currentPosition[NUM_AXES];             // Current printer position
 float Motion1::currentPositionTransformed[NUM_AXES];
@@ -43,7 +41,12 @@ float Motion1::memory[MEMORY_POS_SIZE][NUM_AXES + 1];
 fast8_t Motion1::memoryPos;
 StepperDriverBase* Motion1::motors[NUM_AXES];
 fast8_t Motion1::homeDir[NUM_AXES];
+fast8_t Motion1::homePriority[NUM_AXES];
 fast8_t Motion1::axesHomed;
+EndstopMode Motion1::endstopMode;
+int32_t Motion1::stepsRemaining[NUM_AXES]; // Steps remaining when testing endstops
+fast8_t Motion1::axesTriggered;
+fast8_t Motion1::stopMask;
 
 volatile fast8_t Motion1::last;    /// newest entry
 volatile fast8_t Motion1::first;   /// first entry
@@ -51,8 +54,7 @@ volatile fast8_t Motion1::process; /// being processed
 volatile fast8_t Motion1::length;  /// number of entries
 volatile fast8_t Motion1::lengthUnprocessed;
 
-void Motion1::init()
-{
+void Motion1::init() {
     int i;
     for (i = 0; i < PRINTLINE_CACHE_SIZE; i++) {
         buffers[i].id = i;
@@ -61,8 +63,8 @@ void Motion1::init()
     }
     allAxes = 0;
     axesHomed = 0;
-    FOR_ALL_AXES(i)
-    {
+    axesTriggered = 0;
+    FOR_ALL_AXES(i) {
         axisBits[i] = (uint8_t)1 << i;
         allAxes |= axisBits[i];
         currentPosition[i] = 0;
@@ -72,11 +74,11 @@ void Motion1::init()
     }
     last = first = length = 0;
     process = lengthUnprocessed = 0;
+    endstopMode = EndstopMode::DISABLED;
     setFromConfig(); // initial config
 }
 
-void Motion1::setFromConfig()
-{
+void Motion1::setFromConfig() {
     resolution[X_AXIS] = XAXIS_STEPS_PER_MM;
     resolution[Y_AXIS] = YAXIS_STEPS_PER_MM;
     resolution[Z_AXIS] = ZAXIS_STEPS_PER_MM;
@@ -132,21 +134,25 @@ void Motion1::setFromConfig()
     homeDir[Z_AXIS] = Z_HOME_DIR;
     homeDir[E_AXIS] = 0;
 
+    homePriority[X_AXIS] = X_HOME_PRIORITY;
+    homePriority[Y_AXIS] = Y_HOME_PRIORITY;
+    homePriority[Z_AXIS] = Z_HOME_PRIORITY;
+    homePriority[E_AXIS] = 0;
+
     motors[X_AXIS] = &XMotor;
     motors[Y_AXIS] = &YMotor;
     motors[Z_AXIS] = &ZMotor;
-    motors[E_AXIS] = nullptr;
+    motors[E_AXIS] = &E0Motor;
 
-#if NUM_AXES >= A_AXIS
+#if NUM_AXES > A_AXIS
 #endif
-#if NUM_AXES >= B_AXIS
+#if NUM_AXES > B_AXIS
 #endif
-#if NUM_AXES >= C_AXIS
+#if NUM_AXES > C_AXIS
 #endif
 }
 
-void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback)
-{
+void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback) {
     if (code.hasX()) {
         pos[X_AXIS] = code.X;
     } else {
@@ -162,28 +168,28 @@ void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback)
     } else {
         pos[Z_AXIS] = fallback;
     }
-#if NUM_AXES >= E_AXIS
+#if NUM_AXES > E_AXIS
     if (code.hasE()) {
         pos[E_AXIS] = code.E;
     } else {
         pos[E_AXIS] = fallback;
     }
 #endif
-#if NUM_AXES >= A_AXIS
+#if NUM_AXES > A_AXIS
     if (code.hasA()) {
         pos[A_AXIS] = code.A;
     } else {
         pos[A_AXIS] = fallback;
     }
 #endif
-#if NUM_AXES >= B_AXIS
+#if NUM_AXES > B_AXIS
     if (code.hasB()) {
         pos[B_AXIS] = code.B;
     } else {
         pos[B_AXIS] = fallback;
     }
 #endif
-#if NUM_AXES >= C_AXIS
+#if NUM_AXES > C_AXIS
     if (code.hasC()) {
         pos[C_AXIS] = code.C;
     } else {
@@ -192,8 +198,7 @@ void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback)
 #endif
 }
 
-void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback[NUM_AXES])
-{
+void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback[NUM_AXES]) {
     if (code.hasX()) {
         pos[X_AXIS] = code.X;
     } else {
@@ -209,28 +214,28 @@ void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback[
     } else {
         pos[Z_AXIS] = fallback[Z_AXIS];
     }
-#if NUM_AXES >= E_AXIS
+#if NUM_AXES > E_AXIS
     if (code.hasE()) {
         pos[E_AXIS] = code.E;
     } else {
         pos[E_AXIS] = fallback[E_AXIS];
     }
 #endif
-#if NUM_AXES >= A_AXIS
+#if NUM_AXES > A_AXIS
     if (code.hasA()) {
         pos[A_AXIS] = code.A;
     } else {
         pos[A_AXIS] = fallback[A_AXIS];
     }
 #endif
-#if NUM_AXES >= B_AXIS
+#if NUM_AXES > B_AXIS
     if (code.hasB()) {
         pos[B_AXIS] = code.B;
     } else {
         pos[B_AXIS] = fallback[B_AXIS];
     }
 #endif
-#if NUM_AXES >= C_AXIS
+#if NUM_AXES > C_AXIS
     if (code.hasC()) {
         pos[C_AXIS] = code.C;
     } else {
@@ -239,36 +244,29 @@ void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback[
 #endif
 }
 
-void Motion1::setMotorForAxis(StepperDriverBase* motor, fast8_t axis)
-{
+void Motion1::setMotorForAxis(StepperDriverBase* motor, fast8_t axis) {
     waitForEndOfMoves();
     motors[axis] = motor;
 }
 
-fast8_t Motion1::buffersUsed()
-{
+fast8_t Motion1::buffersUsed() {
     InterruptProtectedBlock noInts;
     return length;
 }
 
-void Motion1::waitForEndOfMoves()
-{
+void Motion1::waitForEndOfMoves() {
     while (buffersUsed() > 0) {
-        Com::printFLN("we", (int)length);
         Commands::checkForPeriodicalActions(false);
     }
 }
 
-void Motion1::waitForXFreeMoves(fast8_t n, bool allowMoves)
-{
+void Motion1::waitForXFreeMoves(fast8_t n, bool allowMoves) {
     while (buffersUsed() >= PRINTLINE_CACHE_SIZE - n) {
-        Com::printFLN("wx", (int)length);
         Commands::checkForPeriodicalActions(allowMoves);
     }
 }
 
-Motion1Buffer& Motion1::reserve()
-{
+Motion1Buffer& Motion1::reserve() {
     waitForXFreeMoves(1);
     InterruptProtectedBlock noInts;
     fast8_t idx = first;
@@ -282,8 +280,7 @@ Motion1Buffer& Motion1::reserve()
 }
 
 // Gets called by Motion2::pop only inside interrupt protected block
-void Motion1::pop()
-{
+void Motion1::pop() {
     Motion1Buffer& b = buffers[last];
     b.state = Motion1State::FREE;
     b.flags = 0; // unblock
@@ -295,23 +292,19 @@ void Motion1::pop()
     length--;
 }
 
-void Motion1::setIgnoreABC(float coords[NUM_AXES])
-{
+void Motion1::setIgnoreABC(float coords[NUM_AXES]) {
     for (fast8_t i = 4; i < NUM_AXES; i++) {
         coords[i] = IGNORE_COORDINATE;
     }
 }
 
-void Motion1::copyCurrentOfficial(float coords[NUM_AXES])
-{
-    FOR_ALL_AXES(i)
-    {
+void Motion1::copyCurrentOfficial(float coords[NUM_AXES]) {
+    FOR_ALL_AXES(i) {
         coords[i] = currentPosition[i];
     }
 }
 
-void Motion1::setTmpPositionXYZ(float x, float y, float z)
-{
+void Motion1::setTmpPositionXYZ(float x, float y, float z) {
     setIgnoreABC(tmpPosition);
     tmpPosition[X_AXIS] = x;
     tmpPosition[Y_AXIS] = y;
@@ -319,8 +312,7 @@ void Motion1::setTmpPositionXYZ(float x, float y, float z)
     tmpPosition[E_AXIS] = 0;
 }
 
-void Motion1::setTmpPositionXYZE(float x, float y, float z, float e)
-{
+void Motion1::setTmpPositionXYZE(float x, float y, float z, float e) {
     setIgnoreABC(tmpPosition);
     tmpPosition[X_AXIS] = x;
     tmpPosition[Y_AXIS] = y;
@@ -328,8 +320,7 @@ void Motion1::setTmpPositionXYZE(float x, float y, float z, float e)
     tmpPosition[E_AXIS] = e;
 }
 // Move with coordinates in official coordinates (before offset, transform, ...)
-void Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate)
-{
+void Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate) {
     for (fast8_t i = 0; i < NUM_AXES; i++) {
         if (coords[i] != IGNORE_COORDINATE) {
             currentPosition[i] = coords[i];
@@ -352,8 +343,8 @@ void Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate)
     if (feedrate == IGNORE_COORDINATE) {
         feedrate = Printer::feedrate;
     }
-#if NUM_AXES > 4
-    for (fast8_t i = 4; i < NUM_AXES; i++) {
+#if NUM_AXES > A_AXIS
+    for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
         destinationPositionTransformed[i] = coords[i];
     }
 #endif
@@ -361,9 +352,8 @@ void Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate)
 }
 
 // Move to the printer coordinates (after offset, transform, ...)
-void Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate)
-{
-    for (fast8_t i = 0; i < NUM_AXES; i++) {
+void Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate) {
+    FOR_ALL_AXES(i) {
         if (coords[i] == IGNORE_COORDINATE) {
             destinationPositionTransformed[i] = currentPositionTransformed[i];
         } else {
@@ -380,16 +370,15 @@ void Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate)
     currentPosition[X_AXIS] -= Printer::offsetX; // Offset from active extruder or z probe
     currentPosition[Y_AXIS] -= Printer::offsetY;
     currentPosition[Z_AXIS] -= Printer::offsetZ;
-#if NUM_AXES > 4
-    for (fast8_t i = 4; i < NUM_AXES; i++) {
+#if NUM_AXES > A_AXIS
+    for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
         currentPosition[i] = destinationPositionTransformed[i];
     }
 #endif
     queueMove(feedrate);
 }
 
-void Motion1::updatePositionsFromCurrent()
-{
+void Motion1::updatePositionsFromCurrent() {
     Printer::transformToPrinter(currentPosition[X_AXIS] + Printer::offsetX,
                                 currentPosition[Y_AXIS] + Printer::offsetY,
                                 currentPosition[Z_AXIS] + Printer::offsetZ,
@@ -397,15 +386,14 @@ void Motion1::updatePositionsFromCurrent()
                                 currentPositionTransformed[Y_AXIS],
                                 currentPositionTransformed[Z_AXIS]);
     currentPositionTransformed[Z_AXIS] += Printer::offsetZ2;
-#if NUM_AXES > 3
-    for (fast8_t i = 3; i < NUM_AXES; i++) {
+#if NUM_AXES > E_AXIS
+    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
         currentPositionTransformed[i] = currentPosition[i];
     }
 #endif
 }
 
-void Motion1::updatePositionsFromCurrentTransformed()
-{
+void Motion1::updatePositionsFromCurrentTransformed() {
     Printer::transformFromPrinter(
         currentPositionTransformed[X_AXIS],
         currentPositionTransformed[Y_AXIS],
@@ -416,17 +404,16 @@ void Motion1::updatePositionsFromCurrentTransformed()
     currentPosition[X_AXIS] -= Printer::offsetX; // Offset from active extruder or z probe
     currentPosition[Y_AXIS] -= Printer::offsetY;
     currentPosition[Z_AXIS] -= Printer::offsetZ;
-#if NUM_AXES > 3
-    for (fast8_t i = 3; i < NUM_AXES; i++) {
+#if NUM_AXES > E_AXIS
+    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
         currentPosition[i] = destinationPositionTransformed[i];
     }
 #endif
 }
 
 // Move with coordinates in official coordinates (before offset, transform, ...)
-void Motion1::moveRelativeByOfficial(float coords[NUM_AXES], float feedrate)
-{
-    for (fast8_t i = 0; i < NUM_AXES; i++) {
+void Motion1::moveRelativeByOfficial(float coords[NUM_AXES], float feedrate) {
+    FOR_ALL_AXES(i) {
         if (coords[i] != IGNORE_COORDINATE) {
             coords[i] += currentPosition[i];
         }
@@ -435,9 +422,8 @@ void Motion1::moveRelativeByOfficial(float coords[NUM_AXES], float feedrate)
 }
 
 // Move to the printer coordinates (after offset, transform, ...)
-void Motion1::moveRelativeByPrinter(float coords[NUM_AXES], float feedrate)
-{
-    for (fast8_t i = 0; i < NUM_AXES; i++) {
+void Motion1::moveRelativeByPrinter(float coords[NUM_AXES], float feedrate) {
+    FOR_ALL_AXES(i) {
         if (coords[i] != IGNORE_COORDINATE) {
             coords[i] += currentPositionTransformed[i];
         }
@@ -445,13 +431,45 @@ void Motion1::moveRelativeByPrinter(float coords[NUM_AXES], float feedrate)
     moveByPrinter(coords, feedrate);
 }
 
-void Motion1::queueMove(float feedrate)
-{
+/** This function is required to fix some errors left over after homing/z-probing.
+ * It assumes that we can move all axes in parallel.
+ */
+void Motion1::moveRelativeByStepsRelative(int32_t coords[NUM_AXES]) {
+    fast8_t axesUsed = 0;
+    FOR_ALL_AXES(i) {
+        if (coords[i]) {
+            axesUsed |= axisBits[i];
+        }
+    }
+    if (axesUsed == 0) {
+        return;
+    }
+    waitForEndOfMoves();
+    int32_t lpos[NUM_AXES];
+    Motion2::copyMotorPos(lpos);
+    Motion1Buffer& buf = reserve();
+    buf.flags = 0;
+    buf.action = Motion1Action::MOVE_STEPS;
+    buf.feedrate = PrinterType::feedrateForMoveSteps(axesUsed);
+    buf.acceleration = PrinterType::accelerationForMoveSteps(axesUsed);
+    buf.length = 0;
+    buf.startSpeed = buf.endSpeed = 0;
+    FOR_ALL_AXES(i) {
+        buf.start[i] = lpos[i];
+        buf.unitDir[i] = coords[i];
+        buf.length += RMath::sqr(buf.unitDir[i] / resolution[i]);
+    }
+    buf.length = sqrtf(buf.length);
+    buf.invLength = 1.0f / buf.length;
+    buf.sa2 = 2.0f * buf.length * buf.acceleration;
+    buf.state = Motion1State::BACKWARD_PLANNED;
+}
+
+void Motion1::queueMove(float feedrate) {
     float delta[NUM_AXES];
     float e2 = 0, length2 = 0;
     fast8_t axisUsed = 0;
-    FOR_ALL_AXES(i)
-    {
+    FOR_ALL_AXES(i) {
         if (motors[i] == nullptr) { // for E, A,B,C make motors removeable
             delta[i] = 0;
             continue;
@@ -478,7 +496,7 @@ void Motion1::queueMove(float feedrate)
     buf.invLength = 1.0 / buf.length;
 
     buf.action = Motion1Action::MOVE;
-    if (ALWAYS_CHECK_ENDSTOPS || Printer::isHoming()) {
+    if (endstopMode != EndstopMode::DISABLED) {
         buf.flags = FLAG_CHECK_ENDSTOPS;
     } else {
         buf.flags = 0;
@@ -504,8 +522,7 @@ void Motion1::queueMove(float feedrate)
     // Check axis contraints like max. feedrate and acceleration
     float reduction = 1.0;
     // float invTime = buf.feedrate * buf.invLength;
-    FOR_ALL_AXES(i)
-    {
+    FOR_ALL_AXES(i) {
         buf.start[i] = currentPositionTransformed[i];
         if (!buf.isAxisMoving(i)) { // no influence here
             buf.speed[i] = 0;
@@ -527,8 +544,7 @@ void Motion1::queueMove(float feedrate)
     }
     // Next we compute highest possible acceleration
     buf.acceleration = 1000000;
-    FOR_ALL_AXES(i)
-    {
+    FOR_ALL_AXES(i) {
         if (!buf.isAxisMoving(i)) { // no influence here
             continue;
         }
@@ -551,8 +567,7 @@ void Motion1::queueMove(float feedrate)
     // Com::printFLN(" f:", (int)buf.flags);
 }
 
-void Motion1::insertWaitIfNeeded()
-{
+void Motion1::insertWaitIfNeeded() {
     if (buffersUsed()) { // already printing, do not wait
         return;
     }
@@ -569,8 +584,7 @@ void Motion1::insertWaitIfNeeded()
     }
 }
 
-void Motion1::LaserWarmUp(uint32_t wait)
-{
+void Motion1::LaserWarmUp(uint32_t wait) {
     Motion1Buffer& buf = reserve();
     buf.action = Motion1Action::LASER_WARMUP;
     buf.feedrate = ceilf((wait * 1000000.0) * invStepperFrequency);
@@ -578,8 +592,7 @@ void Motion1::LaserWarmUp(uint32_t wait)
     buf.state = Motion1State::FORWARD_PLANNED;
 }
 
-void Motion1::backplan(fast8_t actId)
-{
+void Motion1::backplan(fast8_t actId) {
     // DEBUG_MSG_FAST("bp1")
     Motion1Buffer* next = nullptr;
     Motion1Buffer* act = nullptr;
@@ -653,8 +666,7 @@ void Motion1::backplan(fast8_t actId)
     act->unblock();
 }
 
-Motion1Buffer* Motion1::forward(Motion2Buffer* m2)
-{
+Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
     if (lengthUnprocessed == 0) {
         return nullptr;
     }
@@ -723,6 +735,31 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2)
                 m2->t2 = m2->s2 / f->feedrate;
                 // Com::printFLN(" s2:", m2->s2,2);
             }
+        } else if (f->action == Motion1Action::MOVE_STEPS) {
+            float invAcceleration = 1.0 / f->acceleration;
+            // Where do we hit if we accelerate from both speed
+            // and search for equal speed.
+            // t1 is time to accelerate to feedrate
+            m2->t1 = (f->feedrate - f->startSpeed) * invAcceleration;
+            m2->s1 = m2->t1 * (f->startSpeed + 0.5 * f->acceleration * m2->t1);
+            // t3 is time to deccelerate to feedrate
+            m2->t3 = (f->feedrate - f->endSpeed) * invAcceleration;
+            m2->s3 = m2->t3 * (f->endSpeed + 0.5 * f->acceleration * m2->t3);
+            if (m2->s1 + m2->s3 > f->length) {
+                float div = 0.5 * invAcceleration;
+                float sterm = sqrtf(f->startSpeed * f->startSpeed + f->endSpeed * f->endSpeed + f->sa2) * 1.414213562;
+                m2->t1 = RMath::max(0.0f, (sterm - 2.0f * f->startSpeed) * div);
+                m2->t3 = RMath::max(0.0f, (sterm - 2.0f * f->endSpeed) * div);
+                m2->t2 = 0;
+                m2->s2 = 0;
+                m2->s1 = (0.5 * f->acceleration * m2->t1 + f->startSpeed) * m2->t1;
+                // Acceleration stops at feedrate so make sure it is set to right limit
+                f->feedrate = f->startSpeed + m2->t1 * f->acceleration;
+            } else {
+                m2->s2 = f->length - m2->s1 - m2->s3;
+                m2->t2 = m2->s2 / f->feedrate;
+                // Com::printFLN(" s2:", m2->s2,2);
+            }
             /* Com::printF("ss:", f->startSpeed, 0);
             Com::printF(" es:", f->endSpeed, 0);
             Com::printF(" f:", f->feedrate, 0);
@@ -750,11 +787,9 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2)
     }
 }
 
-float Motion1Buffer::calculateSaveStartEndSpeed()
-{
+float Motion1Buffer::calculateSaveStartEndSpeed() {
     float safe = feedrate;
-    FOR_ALL_AXES(i)
-    {
+    FOR_ALL_AXES(i) {
         if (axisUsed & axisBits[i]) {
             safe = RMath::min(safe, fabs(0.5 * Motion1::maxYank[i] / unitDir[i]));
         }
@@ -770,8 +805,7 @@ float Motion1Buffer::calculateSaveStartEndSpeed()
  have a real jerk (physically) we name the shock at velocity
  change now yank to prevent name conflicts.
 */
-void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next)
-{
+void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next) {
     state = Motion1State::JUNCTION_COMPUTED;
     float vStart, vEnd, factor = 1.0, corrFactor, yank;
     bool limited = false, prevSmaller;
@@ -784,8 +818,7 @@ void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next)
         corrFactor = feedrate / next.feedrate;
         maxJoinSpeed = next.feedrate;
     }
-    FOR_ALL_AXES(i)
-    {
+    FOR_ALL_AXES(i) {
         if ((axisUsed & axisBits[i]) || (next.axisUsed & axisBits[i])) {
             if (prevSmaller) {
                 if (limited) {
@@ -825,8 +858,7 @@ void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next)
 }
 
 static int errcount = 0;
-bool Motion1Buffer::block()
-{
+bool Motion1Buffer::block() {
     InterruptProtectedBlock noInts;
     if (flags & FLAG_BLOCKED) {
         /*if (errcount < 10) {
@@ -855,8 +887,7 @@ bool Motion1Buffer::block()
     return true;
 }
 
-void Motion1Buffer::unblock()
-{
+void Motion1Buffer::unblock() {
     flags &= ~FLAG_BLOCKED;
     // Com::printF("bfu ", (int)id);
     // Com::printF(" id ", (int)id);
@@ -864,13 +895,11 @@ void Motion1Buffer::unblock()
 }
 
 /// Pushes current position to memory stack. Return true on success.
-bool Motion1::pushToMemory()
-{
+bool Motion1::pushToMemory() {
     if (memoryPos == MEMORY_POS_SIZE) {
         return false;
     }
-    FOR_ALL_AXES(i)
-    {
+    FOR_ALL_AXES(i) {
         memory[memoryPos][i] = currentPosition[i];
     }
     memory[memoryPos][NUM_AXES] = Printer::feedrate;
@@ -878,22 +907,159 @@ bool Motion1::pushToMemory()
     return true;
 }
 /// Pop memorized position to tmpPosition
-bool Motion1::popFromMemory()
-{
+bool Motion1::popFromMemory() {
     if (memoryPos == 0) {
         return false;
     }
     memoryPos--;
-    FOR_ALL_AXES(i)
-    {
+    FOR_ALL_AXES(i) {
         tmpPosition[i] = memory[memoryPos][i];
     }
     Printer::feedrate = memory[memoryPos][NUM_AXES];
     return true;
 }
 
-void Motion1::reportBuffers()
-{
+void Motion1::enableMotors(fast8_t axes) {
+    FOR_ALL_AXES(i) {
+        if ((axes & axisBits[i]) != 0 && motors[i]) {
+            motors[i]->enable();
+        }
+    }
+    Printer::unsetAllSteppersDisabled();
+}
+
+bool Motion1::isAxisHomed(fast8_t axis) {
+    return (axesHomed & axisBits[axis]) != 0;
+}
+
+void Motion1::setAxisHomed(fast8_t axis, bool state) {
+    if (state) {
+        axis |= axisBits[axis];
+    } else {
+        axis &= ~axisBits[axis];
+    }
+}
+
+void Motion1::homeAxes(fast8_t axes) {
+    Printer::setHoming(true);
+    callBeforeHomingOnSteppers();
+#if ZHOME_PRE_RAISE
+    if (!isAxisHomed(Z_AXIS) || currentPosition[Z_AXIS] + ZHOME_PRE_RAISE_DISTANCE < maxPos[Z_AXIS]) {
+        setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_PRE_RAISE_DISTANCE);
+        moveRelativeByOfficial(tmpPosition, homingFeedrate[Z_AXIS]);
+    }
+#endif
+    for (int priority = 0; priority <= 10; priority++) {
+        FOR_ALL_AXES(i) {
+            if ((axisBits[i] & axes) == 0 && axes != 0) {
+                continue;
+            }
+            if (homePriority[i] == priority) {
+                if (i == Z_AXIS) { // Special case if we want z homing at certain position
+                    setTmpPositionXYZ(ZHOME_X_POS, ZHOME_Y_POS, IGNORE_COORDINATE);
+                    moveByOfficial(tmpPosition, maxFeedrate[X_AXIS]);
+                    if (ZProbe != nullptr && homeDir[Z_AXIS] < 0) { // activate z probe
+                        ZProbeHandler::activate();
+                    }
+                }
+                PrinterType::homeAxis(i);
+                if (i == Z_AXIS && ZProbe != nullptr && homeDir[Z_AXIS] < 0) {
+                    ZProbeHandler::deactivate();
+                }
+#if ZHOME_HEAT_HEIGHT > 0
+                if (i == Z_AXIS) {
+                    setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT);
+                    moveByOfficial(tmpPosition, maxFeedrate[Z_AXIS]);
+                }
+#endif
+            }
+        }
+    }
+
+    callAfterHomingOnSteppers();
+    Printer::setHoming(false);
+
+    // Test if all axes are homed
+    bool ok = true;
+    FOR_ALL_AXES(i) {
+        if (i != E_AXIS && isAxisHomed(i) == false) {
+            ok = false;
+        }
+    }
+    Printer::setHomedAll(ok);
+}
+
+void Motion1::simpleHome(fast8_t axis) {
+    if (homeDir[axis] == 0) { // nothing to do, just set to min
+        setAxisHomed(axis, true);
+        currentPosition[axis] = minPos[axis];
+        updatePositionsFromCurrent();
+        Motion2::setMotorPositionFromTransformed();
+        return;
+    }
+    float secureDistance = (maxPos[axis] - minPos[axis]) * 1.5f;
+    EndstopMode oldMode = endstopMode;
+    EndstopMode newMode = EndstopMode::STOP_HIT_AXES;
+    if (axis == Z_AXIS && ZProbe != nullptr && homeDir[Z_AXIS] < 0) {
+        newMode = EndstopMode::PROBING;
+    }
+    endstopMode = newMode;
+    Motion1::stopMask = axisBits[axis]; // when this endstop is triggered we are at home
+    float dest[NUM_AXES];
+    FOR_ALL_AXES(i) {
+        dest[i] = IGNORE_COORDINATE;
+    }
+    waitForEndOfMoves(); // defined starting condition
+    dest[axis] = homeDir[axis] * secureDistance;
+    Motion1::axesTriggered = 0;
+    moveRelativeByOfficial(dest, homingFeedrate[axis]);
+    waitForEndOfMoves();
+    //Motion3::reportBuffers();
+    HAL::delayMilliseconds(100);
+    endstopMode = EndstopMode::DISABLED;
+    dest[axis] = -homeDir[axis] * homeRetestDistance[axis];
+    Motion1::axesTriggered = 0;
+    moveRelativeByOfficial(dest, homingFeedrate[axis]);
+    waitForEndOfMoves();
+    //Motion3::reportBuffers();
+    endstopMode = newMode;
+    dest[axis] = homeDir[axis] * homeRetestDistance[axis] * 1.5;
+    Motion1::axesTriggered = 0;
+    moveRelativeByOfficial(dest, homingFeedrate[axis] / homeRetestReduction[axis]);
+    waitForEndOfMoves();
+    // Motion3::reportBuffers();
+    HAL::delayMilliseconds(100);
+    dest[axis] = -homeDir[axis] * homeEndstopDistance[axis];
+    if (axis == Z_AXIS && ZProbe != nullptr && homeDir[Z_AXIS] < 0) {
+        dest[axis] -= ZProbeHandler::getZProbeHeight();
+    }
+    endstopMode = EndstopMode::DISABLED;
+    moveRelativeByOfficial(dest, homingFeedrate[axis]);
+    waitForEndOfMoves();
+    currentPosition[axis] = homeDir[axis] > 0 ? maxPos[axis] : minPos[axis];
+    updatePositionsFromCurrent();
+    Motion2::setMotorPositionFromTransformed();
+    endstopMode = oldMode;
+    setAxisHomed(axis, true);
+    Motion1::axesTriggered = 0;
+}
+
+void Motion1::callBeforeHomingOnSteppers() {
+    FOR_ALL_AXES(i) {
+        if (motors[i]) {
+            motors[i]->beforeHoming();
+        }
+    }
+}
+void Motion1::callAfterHomingOnSteppers() {
+    FOR_ALL_AXES(i) {
+        if (motors[i]) {
+            motors[i]->afterHoming();
+        }
+    }
+}
+
+void Motion1::reportBuffers() {
     Com::printFLN(PSTR("M1 Buffer:"));
     Com::printFLN(PSTR("length:"), (int)length);
     Com::printFLN(PSTR("lengthUP:"), (int)lengthUnprocessed);

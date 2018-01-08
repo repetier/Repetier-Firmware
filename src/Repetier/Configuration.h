@@ -38,7 +38,7 @@
 
 // The follwing variables are required early to decide on the right modules.
 #define NUM_EXTRUDER 2
-#define MOTHERBOARD 402 // 405
+#define MOTHERBOARD 405 // 405
 #define RFSERIAL Serial
 #define FEATURE_SERVO 1
 #define FEATURE_WATCHDOG 0
@@ -48,7 +48,7 @@
 #define STEPPER_FREQUENCY 250000
 #define PREPARE_FREQUENCY 600
 #define BLOCK_FREQUENCY 300
-#define VELOCITY_PROFILE 1 // 1 = linear, 3 = cubic, 5 = quintic velocity shape
+#define VELOCITY_PROFILE 5 // 1 = linear, 3 = cubic, 5 = quintic velocity shape
 
 // Next 7 lines are required to make the following work, do not change!
 #include "pins.h"
@@ -73,6 +73,14 @@ CONFIG_VARIABLE(YMOTOR_TYPE, YMotor, YMOTOR_PARAMS)
 #define ZMOTOR_TYPE SimpleStepperDriver<IOZ1Step, IOZ1Dir, IOZ1Enable>
 #define ZMOTOR_PARAMS (&endstopZMin, &endstopNone)
 CONFIG_VARIABLE(ZMOTOR_TYPE, ZMotor, ZMOTOR_PARAMS)
+#define E0MOTOR_TYPE SimpleStepperDriver<IOE0Step, IOE0Dir, IOE0Enable>
+#define E0MOTOR_PARAMS (&endstopZMin, &endstopNone)
+CONFIG_VARIABLE(E0MOTOR_TYPE, E0Motor, E0MOTOR_PARAMS)
+
+/** Axes are homed in order of priority (0..10) if homing direction is not 0. */
+#define X_HOME_PRIORITY 0
+#define Y_HOME_PRIORITY 1
+#define Z_HOME_PRIORITY 2
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 // ################ END MANUAL SETTINGS ##########################
@@ -361,7 +369,7 @@ It also can add a delay to wait for spindle to run on full speed.
 #define DOOR_PIN -1
 #define DOOR_PULLUP 1
 #define DOOR_INVERTING 1
-#define ENDSTOP_X_BACK_MOVE 5
+#define ENDSTOP_X_BACK_MOVE 30
 #define ENDSTOP_Y_BACK_MOVE 5
 #define ENDSTOP_Z_BACK_MOVE 1
 #define ENDSTOP_X_RETEST_REDUCTION_FACTOR 2
@@ -432,11 +440,10 @@ It also can add a delay to wait for spindle to run on full speed.
 #define MAX_INACTIVE_TIME 1200L
 #define MAX_FEEDRATE_X 200
 #define MAX_FEEDRATE_Y 200
-#define MAX_FEEDRATE_Z 10
+#define MAX_FEEDRATE_Z 30
 #define HOMING_FEEDRATE_X 50
 #define HOMING_FEEDRATE_Y 50
-#define HOMING_FEEDRATE_Z 3
-#define HOMING_ORDER HOME_ORDER_ZXYTZ
+#define HOMING_FEEDRATE_Z 5
 #define ZHOME_PRE_RAISE 0
 #define ZHOME_PRE_RAISE_DISTANCE 10
 #define RAISE_Z_ON_TOOLCHANGE 0
@@ -452,12 +459,9 @@ It also can add a delay to wait for spindle to run on full speed.
 #define RAMP_ACCELERATION 1
 #define STEPPER_HIGH_DELAY 0
 #define DIRECTION_DELAY 0
-#define STEP_DOUBLER_FREQUENCY 80000
-#define ALLOW_QUADSTEPPING 1
-#define DOUBLE_STEP_DELAY 1 // time in microseconds
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 2000
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 2000
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1500
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1500
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 50
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 1100
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1100
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100

@@ -42,13 +42,14 @@ Level 5: Nonlinear motor step position, only for nonlinear drive systems
 #ifndef PRINTER_H_INCLUDED
 #define PRINTER_H_INCLUDED
 
-
 #if defined(AUTOMATIC_POWERUP) && AUTOMATIC_POWERUP && PS_ON_PIN > -1
-#define ENSURE_POWER {Printer::enablePowerIfNeeded();}
+#define ENSURE_POWER \
+    { Printer::enablePowerIfNeeded(); }
 #else
 #undef AUTOMATIC_POWERUP
 #define AUTOMATIC_POWERUP 0
-#define ENSURE_POWER {}
+#define ENSURE_POWER \
+    {}
 #endif
 
 union floatLong {
@@ -68,47 +69,52 @@ union wizardVar {
     int8_t c;
     uint8_t uc;
 
-    wizardVar(): i(0) {}
-    wizardVar(float _f): f(_f) {}
-    wizardVar(int32_t _f): l(_f) {}
-    wizardVar(uint32_t _f): ul(_f) {}
-    wizardVar(int16_t _f): i(_f) {}
-    wizardVar(uint16_t _f): ui(_f) {}
-    wizardVar(int8_t _f): c(_f) {}
-    wizardVar(uint8_t _f): uc(_f) {}
+    wizardVar()
+        : i(0) {}
+    wizardVar(float _f)
+        : f(_f) {}
+    wizardVar(int32_t _f)
+        : l(_f) {}
+    wizardVar(uint32_t _f)
+        : ul(_f) {}
+    wizardVar(int16_t _f)
+        : i(_f) {}
+    wizardVar(uint16_t _f)
+        : ui(_f) {}
+    wizardVar(int8_t _f)
+        : c(_f) {}
+    wizardVar(uint8_t _f)
+        : uc(_f) {}
 };
 
-#define PRINTER_FLAG0_STEPPER_DISABLED      1
+#define PRINTER_FLAG0_STEPPER_DISABLED 1
 #define PRINTER_FLAG0_SEPERATE_EXTRUDER_INT 2
-#define PRINTER_FLAG0_TEMPSENSOR_DEFECT     4
-#define PRINTER_FLAG0_FORCE_CHECKSUM        8
-#define PRINTER_FLAG0_MANUAL_MOVE_MODE      16
-#define PRINTER_FLAG0_AUTOLEVEL_ACTIVE      32
-#define PRINTER_FLAG0_ZPROBEING             64
-#define PRINTER_FLAG0_LARGE_MACHINE         128
-#define PRINTER_FLAG1_HOMED_ALL             1
-#define PRINTER_FLAG1_AUTOMOUNT             2
-#define PRINTER_FLAG1_ANIMATION             4
-#define PRINTER_FLAG1_ALLKILLED             8
-#define PRINTER_FLAG1_UI_ERROR_MESSAGE      16
-#define PRINTER_FLAG1_NO_DESTINATION_CHECK  32
-#define PRINTER_FLAG1_POWER_ON              64
-#define PRINTER_FLAG1_ALLOW_COLD_EXTRUSION  128
-#define PRINTER_FLAG2_BLOCK_RECEIVING       1
-#define PRINTER_FLAG2_AUTORETRACT           2
-#define PRINTER_FLAG2_RESET_FILAMENT_USAGE  4
-#define PRINTER_FLAG2_IGNORE_M106_COMMAND   8
-#define PRINTER_FLAG2_DEBUG_JAM             16
-#define PRINTER_FLAG2_JAMCONTROL_DISABLED   32
-#define PRINTER_FLAG2_HOMING                64
-#define PRINTER_FLAG2_ALL_E_MOTORS          128 // Set all e motors flag
-#define PRINTER_FLAG3_X_HOMED               1
-#define PRINTER_FLAG3_Y_HOMED               2
-#define PRINTER_FLAG3_Z_HOMED               4
-#define PRINTER_FLAG3_PRINTING              8 // set explicitly with M530
-#define PRINTER_FLAG3_AUTOREPORT_TEMP       16
-#define PRINTER_FLAG3_SUPPORTS_STARTSTOP    32
-#define PRINTER_FLAG3_DOOR_OPEN             64
+#define PRINTER_FLAG0_TEMPSENSOR_DEFECT 4
+#define PRINTER_FLAG0_FORCE_CHECKSUM 8
+#define PRINTER_FLAG0_MANUAL_MOVE_MODE 16
+#define PRINTER_FLAG0_AUTOLEVEL_ACTIVE 32
+#define PRINTER_FLAG0_ZPROBEING 64
+#define PRINTER_FLAG0_LARGE_MACHINE 128
+#define PRINTER_FLAG1_HOMED_ALL 1
+#define PRINTER_FLAG1_AUTOMOUNT 2
+#define PRINTER_FLAG1_ANIMATION 4
+#define PRINTER_FLAG1_ALLKILLED 8
+#define PRINTER_FLAG1_UI_ERROR_MESSAGE 16
+#define PRINTER_FLAG1_NO_DESTINATION_CHECK 32
+#define PRINTER_FLAG1_POWER_ON 64
+#define PRINTER_FLAG1_ALLOW_COLD_EXTRUSION 128
+#define PRINTER_FLAG2_BLOCK_RECEIVING 1
+#define PRINTER_FLAG2_AUTORETRACT 2
+#define PRINTER_FLAG2_RESET_FILAMENT_USAGE 4
+#define PRINTER_FLAG2_IGNORE_M106_COMMAND 8
+#define PRINTER_FLAG2_DEBUG_JAM 16
+#define PRINTER_FLAG2_JAMCONTROL_DISABLED 32
+#define PRINTER_FLAG2_HOMING 64
+#define PRINTER_FLAG2_ALL_E_MOTORS 128 // Set all e motors flag
+#define PRINTER_FLAG3_PRINTING 8       // set explicitly with M530
+#define PRINTER_FLAG3_AUTOREPORT_TEMP 16
+#define PRINTER_FLAG3_SUPPORTS_STARTSTOP 32
+#define PRINTER_FLAG3_DOOR_OPEN 64
 
 // List of possible interrupt events (1-255 allowed)
 #define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
@@ -119,7 +125,7 @@ union wizardVar {
 #define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL4 6
 #define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL5 7
 // define an integer number of steps more than large enough to get to end stop from anywhere
-#define HOME_DISTANCE_STEPS (Printer::zMaxSteps-Printer::zMinSteps+1000)
+#define HOME_DISTANCE_STEPS (Printer::zMaxSteps - Printer::zMinSteps + 1000)
 #define HOME_DISTANCE_MM (HOME_DISTANCE_STEPS * invAxisStepsPerMM[Z_AXIS])
 // Some defines to make clearer reading, as we overload these Cartesian memory locations for delta
 #define towerAMaxSteps Printer::xMaxSteps
@@ -242,21 +248,22 @@ Step 2: Convert to RWC
 */
 class Printer {
     static uint8_t debugLevel;
+
 public:
 #if USE_ADVANCE || defined(DOXYGEN)
     static volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
-    static ufast8_t maxExtruderSpeed;            ///< Timer delay for end extruder speed
+    static ufast8_t maxExtruderSpeed;        ///< Timer delay for end extruder speed
     //static uint8_t extruderAccelerateDelay;     ///< delay between 2 speec increases
     static int advanceStepsSet;
 #if ENABLE_QUADRATIC_ADVANCE || defined(DOXYGEN)
-    static long advanceExecuted;             ///< Executed advance steps
+    static long advanceExecuted; ///< Executed advance steps
 #endif
 #endif
     static uint16_t menuMode;
     static float homingFeedrate[]; // Feedrate in mm/s for homing.
     // static uint32_t maxInterval; // slowest allowed interval
-    static uint8_t relativeCoordinateMode;    ///< Determines absolute (false) or relative Coordinates (true).
-    static uint8_t relativeExtruderCoordinateMode;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
+    static uint8_t relativeCoordinateMode;         ///< Determines absolute (false) or relative Coordinates (true).
+    static uint8_t relativeExtruderCoordinateMode; ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
     static uint8_t unitIsInches;
     static uint8_t mode;
@@ -265,12 +272,12 @@ public:
     static float zBedOffset;
     static uint8_t flag0, flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t flag2, flag3;
-    static uint32_t interval;    ///< Last step duration in ticks.
-    static uint32_t timer;              ///< used for acceleration/deceleration timing
-    static uint32_t stepNumber;         ///< Step number in current move.
+    static uint32_t interval;   ///< Last step duration in ticks.
+    static uint32_t timer;      ///< used for acceleration/deceleration timing
+    static uint32_t stepNumber; ///< Step number in current move.
     static millis_t lastTempReport;
     static float extrudeMultiplyError; ///< Accumulated error during extrusion
-    static float extrusionFactor; ///< Extrusion multiply factor
+    static float extrusionFactor;      ///< Extrusion multiply factor
 #if NONLINEAR_SYSTEM || defined(DOXYGEN)
     static int32_t maxDeltaPositionSteps;
     static int32_t currentNonlinearPositionSteps[E_TOWER_ARRAY];
@@ -323,17 +330,17 @@ public:
     static int16_t zBabystepsMissing;
     static int16_t zBabysteps;
 #endif
-    static float feedrate;                   ///< Last requested feedrate.
-    static int feedrateMultiply;             ///< Multiplier for feedrate in percent (factor 1 = 100)
-    static unsigned int extrudeMultiply;     ///< Flow multiplier in percent (factor 1 = 100)
-    static uint8_t interruptEvent;           ///< Event generated in interrupts that should/could be handled in main thread
-    static float offsetX;                     ///< X-offset for different tool positions.
-    static float offsetY;                     ///< Y-offset for different tool positions.
-    static float offsetZ;                     ///< Z-offset for different tool positions.
-    static float offsetZ2;                    ///< Z-offset without rotation correction. Required for z probe corrections
-    static speed_t vMaxReached;               ///< Maximum reached speed
-    static uint32_t msecondsPrinting;         ///< Milliseconds of printing time (means time with heated extruder)
-    static float filamentPrinted;             ///< mm of filament printed since counting started
+    static float feedrate;               ///< Last requested feedrate.
+    static int feedrateMultiply;         ///< Multiplier for feedrate in percent (factor 1 = 100)
+    static unsigned int extrudeMultiply; ///< Flow multiplier in percent (factor 1 = 100)
+    static uint8_t interruptEvent;       ///< Event generated in interrupts that should/could be handled in main thread
+    static float offsetX;                ///< X-offset for different tool positions.
+    static float offsetY;                ///< Y-offset for different tool positions.
+    static float offsetZ;                ///< Z-offset for different tool positions.
+    static float offsetZ2;               ///< Z-offset without rotation correction. Required for z probe corrections
+    static speed_t vMaxReached;          ///< Maximum reached speed
+    static uint32_t msecondsPrinting;    ///< Milliseconds of printing time (means time with heated extruder)
+    static float filamentPrinted;        ///< mm of filament printed since counting started
 #if ENABLE_BACKLASH_COMPENSATION || defined(DOXYGEN)
     static float backlashX;
     static float backlashY;
@@ -341,20 +348,20 @@ public:
     static uint8_t backlashDir;
 #endif
 #if MULTI_XENDSTOP_HOMING || defined(DOXYGEN)
-    static fast8_t multiXHomeFlags;  // 1 = move X0, 2 = move X1
+    static fast8_t multiXHomeFlags; // 1 = move X0, 2 = move X1
 #endif
 #if MULTI_YENDSTOP_HOMING || defined(DOXYGEN)
-    static fast8_t multiYHomeFlags;  // 1 = move Y0, 2 = move Y1
+    static fast8_t multiYHomeFlags; // 1 = move Y0, 2 = move Y1
 #endif
 #if MULTI_ZENDSTOP_HOMING || defined(DOXYGEN)
-	static fast8_t multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
+    static fast8_t multiZHomeFlags; // 1 = move Z0, 2 = move Z1
 #endif
 #ifdef DEBUG_REAL_JERK
     static float maxRealJerk;
 #endif
     // Print status related
     static int currentLayer;
-    static int maxLayer; // -1 = unknown
+    static int maxLayer;       // -1 = unknown
     static char printName[21]; // max. 20 chars + 0
     static float progress;
     static fast8_t wizardStackPos;
@@ -363,12 +370,12 @@ public:
     static void handleInterruptEvent();
 
     static INLINE void setInterruptEvent(uint8_t evt, bool highPriority) {
-        if(highPriority || interruptEvent == 0)
+        if (highPriority || interruptEvent == 0)
             interruptEvent = evt;
     }
     static void reportPrinterMode();
     static INLINE void setMenuMode(uint16_t mode, bool on) {
-        if(on)
+        if (on)
             menuMode |= mode;
         else
             menuMode &= ~mode;
@@ -435,7 +442,6 @@ public:
     /** Sets the pwm for the fan 2 speed. Gets called by motion control or Commands::setFan2Speed. */
     static void setFan2SpeedDirectly(uint8_t speed);
 
-
     /** For large machines, the nonlinear transformation can exceed integer 32bit range, so floating point math is needed. */
     static INLINE uint8_t isLargeMachine() {
         return flag0 & PRINTER_FLAG0_LARGE_MACHINE;
@@ -459,40 +465,12 @@ public:
 
     static INLINE void unsetHomedAll() {
         flag1 &= ~PRINTER_FLAG1_HOMED_ALL;
-        flag3 &= ~(PRINTER_FLAG3_X_HOMED | PRINTER_FLAG3_Y_HOMED | PRINTER_FLAG3_Z_HOMED);
     }
 
-    static INLINE void updateHomedAll() {
-        bool b = isXHomed() && isYHomed() && isZHomed();
+    static INLINE void setHomedAll(bool b) {
         flag1 = (b ? flag1 | PRINTER_FLAG1_HOMED_ALL : flag1 & ~PRINTER_FLAG1_HOMED_ALL);
     }
 
-    static INLINE uint8_t isXHomed() {
-        return flag3 & PRINTER_FLAG3_X_HOMED;
-    }
-
-    static INLINE void setXHomed(uint8_t b) {
-        flag3 = (b ? flag3 | PRINTER_FLAG3_X_HOMED : flag3 & ~PRINTER_FLAG3_X_HOMED);
-        updateHomedAll();
-    }
-
-    static INLINE uint8_t isYHomed() {
-        return flag3 & PRINTER_FLAG3_Y_HOMED;
-    }
-
-    static INLINE void setYHomed(uint8_t b) {
-        flag3 = (b ? flag3 | PRINTER_FLAG3_Y_HOMED : flag3 & ~PRINTER_FLAG3_Y_HOMED);
-        updateHomedAll();
-    }
-
-    static INLINE uint8_t isZHomed() {
-        return flag3 & PRINTER_FLAG3_Z_HOMED;
-    }
-
-    static INLINE void setZHomed(uint8_t b) {
-        flag3 = (b ? flag3 | PRINTER_FLAG3_Z_HOMED : flag3 & ~PRINTER_FLAG3_Z_HOMED);
-        updateHomedAll();
-    }
     static INLINE uint8_t isAutoreportTemp() {
         return flag3 & PRINTER_FLAG3_AUTOREPORT_TEMP;
     }
@@ -555,7 +533,7 @@ public:
 
     static INLINE void setColdExtrusionAllowed(uint8_t b) {
         flag1 = (b ? flag1 | PRINTER_FLAG1_ALLOW_COLD_EXTRUSION : flag1 & ~PRINTER_FLAG1_ALLOW_COLD_EXTRUSION);
-        if(b)
+        if (b)
             Com::printFLN(PSTR("Cold extrusion allowed"));
         else
             Com::printFLN(PSTR("Cold extrusion disallowed"));
@@ -636,7 +614,7 @@ public:
 
     static INLINE void setJamcontrolDisabled(uint8_t b) {
 #if EXTRUDER_JAM_CONTROL
-        if(b)
+        if (b)
             Extruder::markAllUnjammed();
 #endif
         flag2 = (b ? flag2 | PRINTER_FLAG2_JAMCONTROL_DISABLED : flag2 & ~PRINTER_FLAG2_JAMCONTROL_DISABLED);
@@ -689,10 +667,10 @@ public:
     }
 
     /** \brief copies currentPosition to parameter. */
-    static void realPosition(float &xp, float &yp, float &zp);
+    static void realPosition(float& xp, float& yp, float& zp);
 
     static INLINE void insertStepperHighDelay() {
-#if STEPPER_HIGH_DELAY>0
+#if STEPPER_HIGH_DELAY > 0
         HAL::delayMicroseconds(STEPPER_HIGH_DELAY);
 #endif
     }
@@ -706,7 +684,7 @@ public:
     position to destinationSteps including rotation and offsets, excluding distortion correction (which gets added on move queuing).
     \param com g-code with new destination position.
      */
-    static void setDestinationStepsFromGCode(GCode *com);
+    static void setDestinationStepsFromGCode(GCode* com);
     /** \brief Move to position without considering transformations.
 
     Computes the destinationSteps without rotating but including active offsets!
@@ -759,12 +737,12 @@ public:
 #endif
     // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on
     // system without Z-probe
-    static void transformToPrinter(float x, float y, float z, float &transX, float &transY, float &transZ);
-    static void transformFromPrinter(float x, float y, float z, float &transX, float &transY, float &transZ);
+    static void transformToPrinter(float x, float y, float z, float& transX, float& transY, float& transZ);
+    static void transformFromPrinter(float x, float y, float z, float& transX, float& transY, float& transZ);
 #if FEATURE_AUTOLEVEL || defined(DOXYGEN)
     static void resetTransformationMatrix(bool silent);
     //static void buildTransformationMatrix(float h1,float h2,float h3);
-    static void buildTransformationMatrix(Plane &plane);
+    static void buildTransformationMatrix(Plane& plane);
 #endif
 #if DISTORTION_CORRECTION || defined(DOXYGEN)
     static void measureDistortion(void);

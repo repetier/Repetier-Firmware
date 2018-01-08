@@ -15,5 +15,5 @@ BraceWrapping:
   AfterUnion: false
   SplitEmptyFunction: false
   BeforeCatch: false
-BreakBeforeBraces: WebKit
+BreakBeforeBraces: Attach
 SortIncludes: false
