@@ -42,7 +42,7 @@ public:
     Motion2State state;
     Motion1Buffer* motion1;
     float t1, t2, t3;
-    float s1, s2, s3;
+    float s1, s2, s3, soff;
     // float sScale1,sScale2,sScale3;
     // float sOffset2, sOffset3;
     int32_t stepsRemaining[NUM_AXES]; // Steps remaining when testing endstops

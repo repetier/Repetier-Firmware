@@ -38,6 +38,8 @@ bool VelocityProfile::start(float vstart, float vend, float time) {
     ds2 = vdif * h * h;
     d1 = vdif * h;
     f = vstart + 0.5 * d1;
+    h *= time;
+    ds2 *= time;
     s = h * vstart + 0.5 * ds2;
     ds1 = vstart * h + 0.5 * ds2;
     return segmentsLeft <= 0;
@@ -91,9 +93,9 @@ bool VelocityProfile::start(float vstart, float vend, float time) {
 
     // Now update perfect s after the timeperiod
 
-    float c0dt = vstart * h;
-    float c2dt3 = c2 * h3;
-    float c3dt4 = c3 * h4;
+    float c0dt = vstart * h * time;
+    float c2dt3 = c2 * h3 * time;
+    float c3dt4 = c3 * h4 * time;
 
     s = c3dt4 * 0.25 + c2dt3 * 0.3333333333333 + c0dt;
     ds1 = 3.75 * c3dt4 + 2.3333333333 * c2dt3 + c0dt;
@@ -133,7 +135,7 @@ int VelocityProfile::segmentsLeft, VelocityProfile::segments, VelocityProfile::s
 bool VelocityProfile::start(float vstart, float vend, float time) {
     /*
     Divisions: 1
-    Multiplication: 42
+    Multiplication: 46
     Add/sub: 23
     Total: 66 Operations
     */
@@ -158,6 +160,10 @@ bool VelocityProfile::start(float vstart, float vend, float time) {
     d4 = 1800.0f * h5v10 - 360.0f * h4v10;
     d5 = 720.0f * h5v10;
 
+    h6v10 *= time;
+    h5v10 *= time;
+    h4v10 *= time;
+    hv0 *= time;
     s = h6v10 - 3.0f * h5v10 + 2.5f * h4v10 + hv0;
     ds1 = 63.0f * h6v10 - 93.0f * h5v10 + 37.5f * h4v10 + hv0;
     ds2 = 602.0f * h6v10 - 540.0f * h5v10 + 125.0f * h4v10;

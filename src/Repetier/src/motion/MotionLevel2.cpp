@@ -82,35 +82,35 @@ void Motion2::timer() {
                 act->nextState();
             }
             // DEBUG_MSG2_FAST("se:", VelocityProfile::segments);
-            sFactor = act->t1 * VelocityProfile::s;
+            sFactor = VelocityProfile::s;
         } else if (act->state == Motion2State::ACCELERATING) {
             if (VelocityProfile::next()) {
                 act->nextState();
             }
-            sFactor = act->t1 * VelocityProfile::s;
+            sFactor = VelocityProfile::s;
         } else if (act->state == Motion2State::PLATEU_INIT) {
             act->state = Motion2State::PLATEU;
             if (VelocityProfile::start(actM1->feedrate, actM1->feedrate, act->t2)) {
                 act->nextState();
             }
-            sFactor = act->t2 * VelocityProfile::s + act->s1;
+            sFactor = VelocityProfile::s + act->s1;
         } else if (act->state == Motion2State::PLATEU) {
             if (VelocityProfile::next()) {
                 act->nextState();
             }
-            sFactor = act->t2 * VelocityProfile::s + act->s1;
+            sFactor = VelocityProfile::s + act->s1;
         } else if (act->state == Motion2State::DECCELERATE_INIT) {
             act->state = Motion2State::DECELERATING;
-            act->s1 += act->s2;
+            act->soff = act->s1 + act->s2;
             if (VelocityProfile::start(actM1->feedrate, actM1->endSpeed, act->t3)) {
                 act->nextState();
             }
-            sFactor = act->t3 * VelocityProfile::s + act->s1;
+            sFactor = VelocityProfile::s + act->soff;
         } else if (act->state == Motion2State::DECELERATING) {
             if (VelocityProfile::next()) {
                 act->nextState();
             }
-            sFactor = act->t3 * VelocityProfile::s + act->s1;
+            sFactor = VelocityProfile::s + act->soff;
         } else if (act->state == Motion2State::FINISHED) {
             DEBUG_MSG("finished")
             m3->directions = 0;
@@ -119,6 +119,17 @@ void Motion2::timer() {
             // Need to add this move to handle finished state correctly
             Motion3::pushReserved();
             return;
+        }
+        m3->last = Motion3::skipParentId == act->id;
+        if (act->state == Motion2State::FINISHED) {
+            // prevent rounding errors
+            sFactor = actM1->length;
+            m3->last = 1;
+        } else {
+            if (sFactor > actM1->length) {
+                sFactor = actM1->length;
+                m3->last = 1;
+            }
         }
         // Com::printFLN("sf:", sFactor, 4);
         // Convert float position to integer motor position
@@ -135,7 +146,6 @@ void Motion2::timer() {
         // Fill structures used to update bresenham
         m3->directions = 0;
         m3->usedAxes = 0;
-        m3->last = (act->state == Motion2State::FINISHED) || (Motion3::skipParentId == act->id);
         if ((m3->stepsRemaining = VelocityProfile::stepsPerSegment) == 0) {
             if (m3->last) { // extreme case, normally never happens
                 m3->usedAxes = 0;
@@ -176,37 +186,36 @@ void Motion2::timer() {
                 act->nextState();
             }
             // DEBUG_MSG2_FAST("se:", VelocityProfile::segments);
-            sFactor = act->t1 * VelocityProfile::s;
+            sFactor = VelocityProfile::s;
         } else if (act->state == Motion2State::ACCELERATING) {
             if (VelocityProfile::next()) {
                 act->nextState();
             }
-            sFactor = act->t1 * VelocityProfile::s;
+            sFactor = VelocityProfile::s;
         } else if (act->state == Motion2State::PLATEU_INIT) {
             act->state = Motion2State::PLATEU;
             if (VelocityProfile::start(actM1->feedrate, actM1->feedrate, act->t2)) {
                 act->nextState();
             }
-            sFactor = act->t2 * VelocityProfile::s + act->s1;
+            sFactor = VelocityProfile::s + act->s1;
         } else if (act->state == Motion2State::PLATEU) {
             if (VelocityProfile::next()) {
                 act->nextState();
             }
-            sFactor = act->t2 * VelocityProfile::s + act->s1;
+            sFactor = VelocityProfile::s + act->s1;
         } else if (act->state == Motion2State::DECCELERATE_INIT) {
             act->state = Motion2State::DECELERATING;
-            act->s1 += act->s2;
+            act->soff = act->s1 + act->s2;
             if (VelocityProfile::start(actM1->feedrate, actM1->endSpeed, act->t3)) {
                 act->nextState();
             }
-            sFactor = act->t3 * VelocityProfile::s + act->s1;
+            sFactor = VelocityProfile::s + act->soff;
         } else if (act->state == Motion2State::DECELERATING) {
             if (VelocityProfile::next()) {
                 act->nextState();
             }
-            sFactor = act->t3 * VelocityProfile::s + act->s1;
+            sFactor = VelocityProfile::s + act->soff;
         } else if (act->state == Motion2State::FINISHED) {
-            DEBUG_MSG("finished")
             m3->directions = 0;
             m3->usedAxes = 0;
             m3->stepsRemaining = 1;
@@ -214,10 +223,16 @@ void Motion2::timer() {
             Motion3::pushReserved();
             return;
         }
-        if (sFactor > 0.999 * actM1->length) { // prevent rounding errors
-            sFactor = 1.0;
+        m3->last = Motion3::skipParentId == act->id;
+        if (act->state == Motion2State::FINISHED) {
+            // prevent rounding errors
+            sFactor = actM1->length;
+            m3->last = 1;
         } else {
-            sFactor *= actM1->invLength;
+            if (sFactor > actM1->length) {
+                sFactor = actM1->length;
+                m3->last = 1;
+            }
         }
         // Com::printFLN("sf:", sFactor, 4);
         // Convert float position to integer motor position
@@ -233,7 +248,6 @@ void Motion2::timer() {
         // Fill structures used to update bresenham
         m3->directions = 0;
         m3->usedAxes = 0;
-        m3->last = (act->state == Motion2State::FINISHED) || (Motion3::skipParentId == act->id);
         if ((m3->stepsRemaining = VelocityProfile::stepsPerSegment) == 0) {
             if (m3->last) { // extreme case, normally never happens
                 m3->usedAxes = 0;

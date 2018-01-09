@@ -722,14 +722,23 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
             }
             if (m2->s1 + m2->s3 > f->length) {
                 float div = 0.5 * invAcceleration;
-                float sterm = sqrtf(f->startSpeed * f->startSpeed + f->endSpeed * f->endSpeed + f->sa2) * 1.414213562;
+                float sq = f->startSpeed * f->startSpeed + f->endSpeed * f->endSpeed;
+                float vmax = RMath::max(f->startSpeed, f->endSpeed);
+                float fmin = (2.0f * vmax * vmax - sq) / f->sa2;
+                float fmid = (2.0 + fmin) * 0.3333333333333f;
+                float sterm = sqrtf(sq + f->sa2 * fmid) * 1.414213562f;
                 m2->t1 = RMath::max(0.0f, (sterm - 2.0f * f->startSpeed) * div);
                 m2->t3 = RMath::max(0.0f, (sterm - 2.0f * f->endSpeed) * div);
-                m2->t2 = 0;
-                m2->s2 = 0;
+                f->feedrate = f->startSpeed + m2->t1 * f->acceleration;
+                m2->s2 = f->length * (1.0 - fmid);
+                m2->t2 = m2->s2 / f->feedrate;
                 m2->s1 = (0.5 * f->acceleration * m2->t1 + f->startSpeed) * m2->t1;
                 // Acceleration stops at feedrate so make sure it is set to right limit
-                f->feedrate = f->startSpeed + m2->t1 * f->acceleration;
+                /*Com::printF(" f:", f->feedrate, 0);
+                Com::printF(" t1:", m2->t1, 4);
+                Com::printF(" t2:", m2->t2, 4);
+                Com::printF(" t3:", m2->t3, 4);
+                Com::printF(" fm:", fmid, 4);*/
             } else {
                 m2->s2 = f->length - m2->s1 - m2->s3;
                 m2->t2 = m2->s2 / f->feedrate;

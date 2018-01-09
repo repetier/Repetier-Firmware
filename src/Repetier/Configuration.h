@@ -45,9 +45,9 @@
 #define USE_ADVANCE 1
 #define ENABLE_QUADRATIC_ADVANCE 1
 #define NUM_AXES 4 // X,Y,Z and E for extruder A,B,C would be 5,6,7
-#define STEPPER_FREQUENCY 250000
+#define STEPPER_FREQUENCY 200000
 #define PREPARE_FREQUENCY 600
-#define BLOCK_FREQUENCY 300
+#define BLOCK_FREQUENCY 250
 #define VELOCITY_PROFILE 5 // 1 = linear, 3 = cubic, 5 = quintic velocity shape
 
 // Next 7 lines are required to make the following work, do not change!
@@ -438,9 +438,9 @@ It also can add a delay to wait for spindle to run on full speed.
 #define DELTASEGMENTS_PER_PRINTLINE 24
 #define STEPPER_INACTIVE_TIME 360L
 #define MAX_INACTIVE_TIME 1200L
-#define MAX_FEEDRATE_X 200
-#define MAX_FEEDRATE_Y 200
-#define MAX_FEEDRATE_Z 30
+#define MAX_FEEDRATE_X 300
+#define MAX_FEEDRATE_Y 300
+#define MAX_FEEDRATE_Z 20
 #define HOMING_FEEDRATE_X 50
 #define HOMING_FEEDRATE_Y 50
 #define HOMING_FEEDRATE_Z 5
@@ -459,8 +459,8 @@ It also can add a delay to wait for spindle to run on full speed.
 #define RAMP_ACCELERATION 1
 #define STEPPER_HIGH_DELAY 0
 #define DIRECTION_DELAY 0
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1500
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1500
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1000
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 800
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 50
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 1100
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1100
