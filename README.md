@@ -15,7 +15,7 @@ options, add them to the official configuration.h file.
 3. We have two folders for different processor architectures. So for most
 changes modifications need to be in both folders. The general files are identical.
 In fact we develop on avr and just copy them to due. Only pins.h/fastio.h/hal.*
-and configuration.h are architecture dependend, so chnages there need to be made
+and configuration.h are architecture dependent, so changes there need to be made
 twice and not copied.
 4. Document what your pull request will change/fix/introduce. Please also mention
 new configurations since we need to add them also to our online tool, so users
@@ -26,7 +26,7 @@ moved to stable after a while as 1.0.x patch updates. With the release of the
 official 1.0 version we will start developing version 2.0 in the branch dev2
 where all the new features will be added.
 
-### Version 2.0 informations
+### Version 2.0 information
 
 Version 2 will be a incompatible refactoring of version 1.0. We will try to keep
 commands and communication identical to 1.0, but for the configuration we see
