@@ -89,20 +89,29 @@ extern bool cCustomParser(char c1, char c2);
 #define UI_ACTION_CZREFH_SUCC   1550
 
 #ifndef HALF_P1_X
+#ifdef TEC4
+#define HALF_P1_X 25.5
+#define HALF_P1_Y 40
+#define HALF_P2_X 25.5
+#define HALF_P2_Y 170
+#define HALF_FIX_X 132
+#define HALF_FIX_Y 98
+#define HALF_Z 3
+// Wheel position
+#define HALF_WHEEL_P1 -38
+#define HALF_WHEEL_P2 232
+#else // Pro 2 case
 #define HALF_P1_X 25
 #define HALF_P1_Y 40
 #define HALF_P2_X 25
 #define HALF_P2_Y 170
 #define HALF_FIX_X 132
 #define HALF_FIX_Y 110
-#ifdef TEC4
 #define HALF_Z 2.8
-#else
-#define HALF_Z 3
-#endif 
 // Wheel position
 #define HALF_WHEEL_P1 -71
 #define HALF_WHEEL_P2 199
+#endif 
 #endif
 #ifndef HALF_PITCH
 #define HALF_PITCH 0.7

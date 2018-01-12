@@ -159,8 +159,13 @@ void halfautomaticLevel2() {
   planeBuilder.createPlane(plane);
   // float z1 = p1 + (p2 - p1) / (HALF_P2_Y - HALF_P1_Y) * (HALF_WHEEL_P1 - HALF_P1_Y) - halfRefHeight; 
   // float z2 = p1 + (p2 - p1) / (HALF_P2_Y - HALF_P1_Y) * (HALF_WHEEL_P2 - HALF_P1_Y) - halfRefHeight;
+#ifdef TEC4  
+  float z1 =(plane.z(HALF_P1_X, HALF_WHEEL_P1) - halfRefHeight - .15) * 360 / HALF_PITCH;  //added by FELIX extra offset of 0.1
+  float z2 = (plane.z(HALF_P1_X, HALF_WHEEL_P2) - halfRefHeight - .15) * 360 / HALF_PITCH; //added by FELIX extra offset of 0.1
+#else
   float z1 =(plane.z(HALF_P1_X, HALF_WHEEL_P1) - halfRefHeight) * 360 / HALF_PITCH;
   float z2 = (plane.z(HALF_P1_X, HALF_WHEEL_P2) - halfRefHeight) * 360 / HALF_PITCH;
+#endif    
   Printer::wizardStack[0].f = z2; 
   Printer::wizardStack[1].f = z1; 
   uid.popMenu(false);

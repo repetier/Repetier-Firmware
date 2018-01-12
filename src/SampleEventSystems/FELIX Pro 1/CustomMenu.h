@@ -75,7 +75,7 @@ UI_MENU_ACTIONCOMMAND_T(ui_calex_z,UI_CTEXT_CALIBRATE_Z_ID,UI_ACTION_CALEX_Z)
 #define UI_CALEXTR_SUBITEMS {&ui_menu_back, &ui_calex_xy}
 UI_MENU(ui_calextr_sub,UI_CALEXTR_SUBITEMS,2)
 #else
-#define UI_CALEXTR_SUBITEMS {&ui_menu_back, &ui_calex_xy,&ui_calex_z}
+#define UI_CALEXTR_SUBITEMS {&ui_menu_back, &ui_calex_z, &ui_calex_xy}
 UI_MENU(ui_calextr_sub,UI_CALEXTR_SUBITEMS,3)
 #endif
 //====================
@@ -1020,12 +1020,12 @@ UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMEN
 UI_MENU_SUBMENU_FILTER_T(ui_menu_move, UI_TEXT_POSITION_ID, ui_menu_positions,0,MENU_MODE_PRINTING)
 #if NUM_EXTRUDER > 1
 #define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool2,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex ,&ui_menu_move \
-      , &ui_menu_quick_stopstepper, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
+      , &ui_menu_quick_stopstepper UI_FANSPEED, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
 #else
 #define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool1,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex ,&ui_menu_move \
-      , &ui_menu_quick_stopstepper, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
+      , &ui_menu_quick_stopstepper UI_FANSPEED, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
 #endif      
-UI_MENU(ui_menu_quick, UI_MENU_QUICK, 9 + UI_MENU_BACKCNT + UI_CHANGE_FIL_CNT+ UI_CALIB_PROBE_COUNT)
+UI_MENU(ui_menu_quick, UI_MENU_QUICK, 10 + UI_MENU_BACKCNT + UI_CHANGE_FIL_CNT+ UI_CALIB_PROBE_COUNT)
 
 UI_MENU_HEADLINE_T(ui_menu_askstop_head, UI_TEXT_STOP_PRINT_ID)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_sd_askstop_no, UI_TEXT_NO_ID, UI_ACTION_BACK)

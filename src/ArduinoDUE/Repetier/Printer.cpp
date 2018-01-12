@@ -623,6 +623,8 @@ uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
         destinationSteps[Z_AXIS] = (z + Printer::offsetZ) * axisStepsPerMM[Z_AXIS];
     if(e != IGNORE_COORDINATE)
         destinationSteps[E_AXIS] = e * axisStepsPerMM[E_AXIS];
+	else
+		destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS];
     if(f != IGNORE_COORDINATE)
         feedrate = f;
 #if NONLINEAR_SYSTEM
