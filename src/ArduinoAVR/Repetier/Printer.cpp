@@ -661,8 +661,11 @@ uint8_t Printer::moveToReal(float x, float y, float z, float e, float f, bool pa
 #if MIN_EXTRUDER_TEMP > 30
             && (Extruder::current->tempControl.currentTemperatureC > MIN_EXTRUDER_TEMP || Printer::isColdExtrusionAllowed() || Extruder::current->tempControl.sensorType == 0)
 #endif
-      )
+      ) {
         destinationSteps[E_AXIS] = e * axisStepsPerMM[E_AXIS];
+    } else {
+		destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS];
+	}
     if(f != IGNORE_COORDINATE)
         feedrate = f;
 
