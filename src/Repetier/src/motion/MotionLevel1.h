@@ -99,10 +99,32 @@ public:
         return flags & FLAG_CHECK_ENDSTOPS;
     }
 };
-
+#define EPR_M1_RESOLUTION 0
+#define EPR_M1_MAX_FEEDRATE 4 * (NUM_AXES - 1)
+#define EPR_M1_MAX_ACCELERATION EPR_M1_MAX_FEEDRATE + 4 * (NUM_AXES - 1)
+#define EPR_M1_HOMING_FEEDRATE EPR_M1_MAX_ACCELERATION + 4 * (NUM_AXES - 1)
+#define EPR_M1_MAX_YANK EPR_M1_HOMING_FEEDRATE + 4 * (NUM_AXES - 1)
+#define EPR_M1_MIN_POS EPR_M1_MAX_YANK + 4 * (NUM_AXES - 1)
+#define EPR_M1_MAX_POS EPR_M1_MIN_POS + 4 * (NUM_AXES - 1)
+#define EPR_M1_ENDSTOP_DISTANCE EPR_M1_MAX_POS + 4 * (NUM_AXES - 1)
+#define EPR_M1_ALWAYS_CHECK_ENDSTOPS EPR_M1_ENDSTOP_DISTANCE + 4 * (NUM_AXES - 1)
+#define EPR_M1_AUTOLEVEL_MATRXI +1
+#ifdef FEATURE_AXISCOMP
+#define EPR_M1_AXIS_COMP_XY EPR_M1_AUTOLEVEL_MATRXI + 36
+#define EPR_M1_AXIS_COMP_XZ EPR_M1_AXIS_COMP_XY + 4
+#define EPR_M1_AXIS_COMP_YZ EPR_M1_AXIS_COMP_XZ + 4
+#define EPR_M1_AXIS_COMP_END EPR_M1_AXIS_COMP_YZ + 4
+#else
+#define EPR_M1_AXIS_COMP_END EPR_M1_AUTOLEVEL_MATRXI + 36
+#endif
+#define EPR_M1_TOTAL EPR_M1_AXIS_COMP_END
 class Motion1 {
 public:
-    static float currentPosition[NUM_AXES]; // Current printer position
+#if EEPROM_MODE != 0
+    static uint eprStart;
+#endif
+    static float autolevelTransformation[9]; ///< Transformation matrix
+    static float currentPosition[NUM_AXES];  // Current printer position
     static float currentPositionTransformed[NUM_AXES];
     static float destinationPositionTransformed[NUM_AXES];
     static float tmpPosition[NUM_AXES];
@@ -117,6 +139,9 @@ public:
     static float homeRetestDistance[NUM_AXES];
     static float homeRetestReduction[NUM_AXES];
     static float homeEndstopDistance[NUM_AXES];
+#ifdef FEATURE_AXISCOMP
+    static float axisCompTanXY, axisCompTanXZ, axisCompTanYZ;
+#endif
     static fast8_t homeDir[NUM_AXES];
     static fast8_t homePriority[NUM_AXES]; // determines homing order, lower number first
     static StepperDriverBase* motors[NUM_AXES];
@@ -125,6 +150,7 @@ public:
     static fast8_t memoryPos;
     static EndstopMode endstopMode;
     static int32_t stepsRemaining[NUM_AXES]; // Steps remaining when testing endstops
+    static fast8_t alwaysCheckEndstops;
     static fast8_t axesTriggered;
     static fast8_t stopMask; // stop move if these axes are triggered
     /* Buffer is a bit special in the sense that end keeps
@@ -184,6 +210,19 @@ public:
     static void simpleHome(fast8_t axis);
     static void callBeforeHomingOnSteppers();
     static void callAfterHomingOnSteppers();
+    static PGM_P getAxisString(fast8_t axis);
+    // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on
+    // system without Z-probe
+    static void transformToPrinter(float x, float y, float z, float& transX, float& transY, float& transZ);
+    static void transformFromPrinter(float x, float y, float z, float& transX, float& transY, float& transZ);
+#if FEATURE_AUTOLEVEL || defined(DOXYGEN)
+    static void resetTransformationMatrix(bool silent);
+    //static void buildTransformationMatrix(float h1,float h2,float h3);
+    static void buildTransformationMatrix(Plane& plane);
+#endif
+    static void updateDerived();
+    static void eepromHandle();
+    static void eepromReset();
 
 private:
     static void backplan(fast8_t actId);

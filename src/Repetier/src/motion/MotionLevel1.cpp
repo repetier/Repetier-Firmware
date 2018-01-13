@@ -21,6 +21,9 @@
 uint8_t axisBits[NUM_AXES];
 uint8_t allAxes;
 
+#if EEPROM_MODE != 0
+uint Motion1::eprStart;
+#endif
 Motion1Buffer Motion1::buffers[PRINTLINE_CACHE_SIZE]; // Buffer storage
 float Motion1::currentPosition[NUM_AXES];             // Current printer position
 float Motion1::currentPositionTransformed[NUM_AXES];
@@ -38,6 +41,7 @@ float Motion1::homeRetestDistance[NUM_AXES];
 float Motion1::homeEndstopDistance[NUM_AXES];
 float Motion1::homeRetestReduction[NUM_AXES];
 float Motion1::memory[MEMORY_POS_SIZE][NUM_AXES + 1];
+float Motion1::autolevelTransformation[9]; ///< Transformation matrix
 fast8_t Motion1::memoryPos;
 StepperDriverBase* Motion1::motors[NUM_AXES];
 fast8_t Motion1::homeDir[NUM_AXES];
@@ -47,6 +51,10 @@ EndstopMode Motion1::endstopMode;
 int32_t Motion1::stepsRemaining[NUM_AXES]; // Steps remaining when testing endstops
 fast8_t Motion1::axesTriggered;
 fast8_t Motion1::stopMask;
+fast8_t Motion1::alwaysCheckEndstops;
+#ifdef FEATURE_AXISCOMP
+float Motion1::axisCompTanXY, Motion1::axisCompTanXZ, Motion1::axisCompTanYZ;
+#endif
 
 volatile fast8_t Motion1::last;    /// newest entry
 volatile fast8_t Motion1::first;   /// first entry
@@ -55,7 +63,9 @@ volatile fast8_t Motion1::length;  /// number of entries
 volatile fast8_t Motion1::lengthUnprocessed;
 
 void Motion1::init() {
+
     int i;
+    eprStart = EEPROM::reserve(1, 1, EPR_M1_TOTAL);
     for (i = 0; i < PRINTLINE_CACHE_SIZE; i++) {
         buffers[i].id = i;
         buffers[i].flags = 0;
@@ -75,6 +85,7 @@ void Motion1::init() {
     last = first = length = 0;
     process = lengthUnprocessed = 0;
     endstopMode = EndstopMode::DISABLED;
+    resetTransformationMatrix(true);
     setFromConfig(); // initial config
 }
 
@@ -150,6 +161,10 @@ void Motion1::setFromConfig() {
 #endif
 #if NUM_AXES > C_AXIS
 #endif
+
+    axisCompTanXY = AXISCOMP_TANXY;
+    axisCompTanXZ = AXISCOMP_TANXZ;
+    axisCompTanYZ = AXISCOMP_TANYZ;
 }
 
 void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback) {
@@ -326,12 +341,12 @@ void Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate) {
             currentPosition[i] = coords[i];
         }
     }
-    Printer::transformToPrinter(currentPosition[X_AXIS] + Printer::offsetX,
-                                currentPosition[Y_AXIS] + Printer::offsetY,
-                                currentPosition[Z_AXIS] + Printer::offsetZ,
-                                destinationPositionTransformed[X_AXIS],
-                                destinationPositionTransformed[Y_AXIS],
-                                destinationPositionTransformed[Z_AXIS]);
+    transformToPrinter(currentPosition[X_AXIS] + Printer::offsetX,
+                       currentPosition[Y_AXIS] + Printer::offsetY,
+                       currentPosition[Z_AXIS] + Printer::offsetZ,
+                       destinationPositionTransformed[X_AXIS],
+                       destinationPositionTransformed[Y_AXIS],
+                       destinationPositionTransformed[Z_AXIS]);
     destinationPositionTransformed[Z_AXIS] += Printer::offsetZ2;
     if (coords[E_AXIS] != IGNORE_COORDINATE && !Printer::debugDryrun()
 #if MIN_EXTRUDER_TEMP > 30
@@ -360,7 +375,7 @@ void Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate) {
             destinationPositionTransformed[i] = coords[i];
         }
     }
-    Printer::transformFromPrinter(
+    transformFromPrinter(
         destinationPositionTransformed[X_AXIS],
         destinationPositionTransformed[Y_AXIS],
         destinationPositionTransformed[Z_AXIS] - Printer::offsetZ2,
@@ -379,12 +394,12 @@ void Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate) {
 }
 
 void Motion1::updatePositionsFromCurrent() {
-    Printer::transformToPrinter(currentPosition[X_AXIS] + Printer::offsetX,
-                                currentPosition[Y_AXIS] + Printer::offsetY,
-                                currentPosition[Z_AXIS] + Printer::offsetZ,
-                                currentPositionTransformed[X_AXIS],
-                                currentPositionTransformed[Y_AXIS],
-                                currentPositionTransformed[Z_AXIS]);
+    transformToPrinter(currentPosition[X_AXIS] + Printer::offsetX,
+                       currentPosition[Y_AXIS] + Printer::offsetY,
+                       currentPosition[Z_AXIS] + Printer::offsetZ,
+                       currentPositionTransformed[X_AXIS],
+                       currentPositionTransformed[Y_AXIS],
+                       currentPositionTransformed[Z_AXIS]);
     currentPositionTransformed[Z_AXIS] += Printer::offsetZ2;
 #if NUM_AXES > E_AXIS
     for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
@@ -394,7 +409,7 @@ void Motion1::updatePositionsFromCurrent() {
 }
 
 void Motion1::updatePositionsFromCurrentTransformed() {
-    Printer::transformFromPrinter(
+    transformFromPrinter(
         currentPositionTransformed[X_AXIS],
         currentPositionTransformed[Y_AXIS],
         currentPositionTransformed[Z_AXIS] - Printer::offsetZ2,
@@ -1075,4 +1090,149 @@ void Motion1::reportBuffers() {
     Com::printFLN(PSTR("first:"), (int)first);
     Com::printFLN(PSTR("last:"), (int)last);
     Com::printFLN(PSTR("process:"), (int)process);
+}
+
+PGM_P Motion1::getAxisString(fast8_t axis) {
+    switch (axis) {
+    case X_AXIS:
+        return Com::tXAxis;
+    case Y_AXIS:
+        return Com::tYAxis;
+    case Z_AXIS:
+        return Com::tZAxis;
+    case E_AXIS:
+        return Com::tEAxis;
+    case A_AXIS:
+        return Com::tAAxis;
+    case B_AXIS:
+        return Com::tBAxis;
+    case C_AXIS:
+        return Com::tCAxis;
+    }
+    return Com::tXAxis; // make compiler happy
+}
+
+void Motion1::eepromHandle() {
+    int p = 0;
+    FOR_ALL_AXES(i) {
+        if (i == E_AXIS) {
+            continue;
+        }
+        EEPROM::handlePrefix(getAxisString(i));
+        EEPROM::handleFloat(eprStart + p + EPR_M1_RESOLUTION, PSTR("steps per mm"), 3, resolution[i]);
+        EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_FEEDRATE, PSTR("max. feedrate [mm/s]"), 3, maxFeedrate[i]);
+        EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_ACCELERATION, PSTR("max. acceleration [mm/s^2]"), 3, maxAcceleration[i]);
+        EEPROM::handleFloat(eprStart + p + EPR_M1_HOMING_FEEDRATE, PSTR("homing feedrate [mm/s]"), 3, homingFeedrate[i]);
+        EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_YANK, PSTR("max. yank(jerk) [mm/s]"), 3, maxYank[i]);
+        EEPROM::handleFloat(eprStart + p + EPR_M1_MIN_POS, PSTR("min. position [mm]"), 3, minPos[i]);
+        EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_POS, PSTR("max. position [mm]"), 3, maxPos[i]);
+        EEPROM::handleFloat(eprStart + p + EPR_M1_ENDSTOP_DISTANCE, PSTR("endstop distance after homing [mm]"), 3, homeEndstopDistance[i]);
+        p += 4;
+    }
+    EEPROM::removePrefix();
+    EEPROM::handleByte(EPR_M1_ALWAYS_CHECK_ENDSTOPS, PSTR("Always check endstops"), alwaysCheckEndstops);
+#if FEATURE_AXISCOMP
+    EEPROM::handleFloat(EPR_AXISCOMP_TANXY, Com::tAxisCompTanXY, 6, axisCompTanXY);
+    EEPROM::handleFloat(EPR_AXISCOMP_TANYZ, Com::tAxisCompTanYZ, 6, axisCompTanYZ);
+    EEPROM::handleFloat(EPR_AXISCOMP_TANXZ, Com::tAxisCompTanXZ, 6, axisCompTanXZ);
+#endif
+}
+void Motion1::updateDerived() {
+}
+
+void Motion1::eepromReset() {
+    setFromConfig();
+}
+
+/*
+ Transforms theoretical correct coordinates to corrected coordinates resulting from bed rotation
+ and shear transformations.
+
+ We have 2 coordinate systems. The printer step position where we want to be. These are the positions
+ we send to printers, the theoretical coordinates. In contrast we have the printer coordinates that
+ we need to be at to get the desired result, the real coordinates.
+*/
+void Motion1::transformToPrinter(float x, float y, float z, float& transX, float& transY, float& transZ) {
+#if FEATURE_AXISCOMP
+    // Axis compensation:
+    x = x + y * axisCompTanXY + z * axisCompTanXZ;
+    y = y + z * axisCompTanYZ;
+#endif
+#if BED_CORRECTION_METHOD != 1
+    if (Printer::isAutolevelActive()) {
+        transX = x * autolevelTransformation[0] + y * autolevelTransformation[3] + z * autolevelTransformation[6];
+        transY = x * autolevelTransformation[1] + y * autolevelTransformation[4] + z * autolevelTransformation[7];
+        transZ = x * autolevelTransformation[2] + y * autolevelTransformation[5] + z * autolevelTransformation[8];
+    } else {
+        transX = x;
+        transY = y;
+        transZ = z;
+    }
+#else
+    transX = x;
+    transY = y;
+    transZ = z;
+#endif
+}
+
+/* Transform back to real printer coordinates. */
+void Motion1::transformFromPrinter(float x, float y, float z, float& transX, float& transY, float& transZ) {
+#if BED_CORRECTION_METHOD != 1
+    if (Printer::isAutolevelActive()) {
+        transX = x * autolevelTransformation[0] + y * autolevelTransformation[1] + z * autolevelTransformation[2];
+        transY = x * autolevelTransformation[3] + y * autolevelTransformation[4] + z * autolevelTransformation[5];
+        transZ = x * autolevelTransformation[6] + y * autolevelTransformation[7] + z * autolevelTransformation[8];
+    } else {
+        transX = x;
+        transY = y;
+        transZ = z;
+    }
+#else
+    transX = x;
+    transY = y;
+    transZ = z;
+#endif
+#if FEATURE_AXISCOMP
+    // Axis compensation:
+    transY = transY - transZ * axisCompTanYZ;
+    transX = transX - transY * axisCompTanXY - transZ * axisCompTanXZ;
+#endif
+}
+
+void Motion1::resetTransformationMatrix(bool silent) {
+    autolevelTransformation[0] = autolevelTransformation[4] = autolevelTransformation[8] = 1;
+    autolevelTransformation[1] = autolevelTransformation[2] = autolevelTransformation[3] = autolevelTransformation[5] = autolevelTransformation[6] = autolevelTransformation[7] = 0;
+    if (!silent)
+        Com::printInfoFLN(Com::tAutolevelReset);
+}
+
+void Motion1::buildTransformationMatrix(Plane& plane) {
+    float z0 = plane.z(0, 0);
+    float az = z0 - plane.z(1, 0); // ax = 1, ay = 0
+    float bz = z0 - plane.z(0, 1); // bx = 0, by = 1
+    // First z direction
+    autolevelTransformation[6] = -az;
+    autolevelTransformation[7] = -bz;
+    autolevelTransformation[8] = 1;
+    float len = sqrt(az * az + bz * bz + 1);
+    autolevelTransformation[6] /= len;
+    autolevelTransformation[7] /= len;
+    autolevelTransformation[8] /= len;
+    autolevelTransformation[0] = 1;
+    autolevelTransformation[1] = 0;
+    autolevelTransformation[2] = -autolevelTransformation[6] / autolevelTransformation[8];
+    len = sqrt(autolevelTransformation[0] * autolevelTransformation[0] + autolevelTransformation[1] * autolevelTransformation[1] + autolevelTransformation[2] * autolevelTransformation[2]);
+    autolevelTransformation[0] /= len;
+    autolevelTransformation[1] /= len;
+    autolevelTransformation[2] /= len;
+    // cross(z,x) y,z)
+    autolevelTransformation[3] = autolevelTransformation[7] * autolevelTransformation[2] - autolevelTransformation[8] * autolevelTransformation[1];
+    autolevelTransformation[4] = autolevelTransformation[8] * autolevelTransformation[0] - autolevelTransformation[6] * autolevelTransformation[2];
+    autolevelTransformation[5] = autolevelTransformation[6] * autolevelTransformation[1] - autolevelTransformation[7] * autolevelTransformation[0];
+    len = sqrt(autolevelTransformation[3] * autolevelTransformation[3] + autolevelTransformation[4] * autolevelTransformation[4] + autolevelTransformation[5] * autolevelTransformation[5]);
+    autolevelTransformation[3] /= len;
+    autolevelTransformation[4] /= len;
+    autolevelTransformation[5] /= len;
+
+    Com::printArrayFLN(Com::tTransformationMatrix, autolevelTransformation, 9, 6);
 }

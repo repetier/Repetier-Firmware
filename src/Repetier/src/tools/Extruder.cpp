@@ -2652,6 +2652,8 @@ https://datasheets.maximintegrated.com/en/ds/MAX31855.pdf
 
 #if FEATURE_RETRACTION
     void Extruder::retractDistance(float dist, bool extraLength) {
+        // TODO: reactivate retract handling
+        /*
         float oldFeedrate = Printer::feedrate;
         int32_t distance = static_cast<int32_t>(dist * stepsPerMM / Printer::extrusionFactor);
         float oldEPos = Motion1::currentPosition[E_AXIS];
@@ -2668,9 +2670,11 @@ https://datasheets.maximintegrated.com/en/ds/MAX31855.pdf
 #endif
         Motion1::currentPosition[E_AXIS] = Motion1::currentPositionTransformed[E_AXIS] = oldEPos; // restore previous extruder position
         Printer::feedrate = oldFeedrate;
+        */
     }
 
     void Extruder::retract(bool isRetract, bool isLong) {
+        /*
         float oldFeedrate = Printer::feedrate;
         float distance = (isLong ? EEPROM_FLOAT(RETRACTION_LONG_LENGTH) : EEPROM_FLOAT(RETRACTION_LENGTH));
         float zLiftF = EEPROM_FLOAT(RETRACTION_Z_LIFT);
@@ -2706,6 +2710,7 @@ https://datasheets.maximintegrated.com/en/ds/MAX31855.pdf
             setRetracted(false);
         }
         Printer::feedrate = oldFeedrate;
+        */
     }
 #endif
 

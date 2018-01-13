@@ -71,6 +71,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     if (!executePeriodical)
         return; // gets true every 100ms
     executePeriodical = 0;
+    EEPROM::timerHandler(); // store changes after timeout
     EVENT_TIMER_100MS;
     Extruder::manageTemperatures();
     if (--counter500ms == 0) {
@@ -269,7 +270,7 @@ void Commands::setFan2Speed(int speed) {
 
 void Commands::reportPrinterUsage() {
 #if EEPROM_MODE != 0
-    float dist = Printer::filamentPrinted * 0.001 + HAL::eprGetFloat(EPR_PRINTING_DISTANCE);
+    float dist = Printer::filamentPrinted * 0.001 + Printer::filamentPrintedTotal;
     Com::printF(Com::tPrintedFilament, dist, 2);
     Com::printF(Com::tSpacem);
     bool alloff = true;
@@ -278,7 +279,7 @@ void Commands::reportPrinterUsage() {
         if (tempController[i]->targetTemperatureC > 15)
             alloff = false;
 #endif
-    int32_t seconds = (alloff ? 0 : (HAL::timeInMilliseconds() - Printer::msecondsPrinting) / 1000) + HAL::eprGetInt32(EPR_PRINTING_TIME);
+    int32_t seconds = (alloff ? 0 : (HAL::timeInMilliseconds() - Printer::msecondsPrinting) / 1000) + Printer::printingTime;
     int32_t tmp = seconds / 86400;
     seconds -= tmp * 86400;
     Com::printF(Com::tPrintingTime, tmp);
@@ -1978,7 +1979,8 @@ void Commands::processMCode(GCode* com) {
         L0 : List preheat temperatures. Returns
         PREHEAT_BED:temp PREHEAT0:extr0 PREHEAT1:extr1 PREHEAT_CHAMBER:temp
         */
-        {
+        // TODO preheat temperatures for extruders/bed
+        /*{
             bool mod = false;
 #if HAVE_HEATED_BED
             if (com->hasB()) {
@@ -2019,7 +2021,7 @@ void Commands::processMCode(GCode* com) {
                 EEPROM::updateChecksum();
 #endif
             }
-        }
+        }*/
         break;
     case 200: { // M200 T<extruder> D<diameter>
         uint8_t extruderId = Extruder::current->id;
@@ -2264,7 +2266,6 @@ void Commands::processMCode(GCode* com) {
 #endif
     } break;
 
-#if FEATURE_AUTOLEVEL
     case 320: // M320 Activate autolevel
         Printer::setAutolevelActive(true);
         if (com->hasS() && com->S) {
@@ -2275,17 +2276,16 @@ void Commands::processMCode(GCode* com) {
         Printer::setAutolevelActive(false);
         if (com->hasS() && com->S) {
             if (com->S == 3)
-                Printer::resetTransformationMatrix(false);
+                Motion1::resetTransformationMatrix(false);
             EEPROM::storeDataIntoEEPROM();
         }
         break;
     case 322: // M322 Reset auto leveling matrix
-        Printer::resetTransformationMatrix(false);
+        Motion1::resetTransformationMatrix(false);
         if (com->hasS() && com->S) {
             EEPROM::storeDataIntoEEPROM();
         }
         break;
-#endif // FEATURE_AUTOLEVEL
 #if DISTORTION_CORRECTION
     case 323: // M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
         if (com->hasS()) {
@@ -2386,7 +2386,7 @@ void Commands::processMCode(GCode* com) {
             Printer::thermoMaxTemp = com->Y;
         break;
 #endif
-    case 500: { // M500
+    case 500: { // M500 store to eeprom
 #if EEPROM_MODE != 0
         EEPROM::storeDataIntoEEPROM(false);
         Com::printInfoFLN(Com::tConfigStoredEEPROM);
@@ -2394,16 +2394,16 @@ void Commands::processMCode(GCode* com) {
         Com::printErrorFLN(Com::tNoEEPROMSupport);
 #endif
     } break;
-    case 501: { // M501
+    case 501: { // M501 read from eeprom
 #if EEPROM_MODE != 0
-        EEPROM::readDataFromEEPROM(true);
+        EEPROM::readDataFromEEPROM();
         Extruder::selectExtruderById(Extruder::current->id);
         Com::printInfoFLN(Com::tConfigLoadedEEPROM);
 #else
         Com::printErrorFLN(Com::tNoEEPROMSupport);
 #endif
     } break;
-    case 502: // M502
+    case 502: // M502 restore from configuration
         EEPROM::restoreEEPROMSettingsFromConfiguration();
         break;
 #if EXTRUDER_JAM_CONTROL
@@ -2563,14 +2563,6 @@ void Commands::processMCode(GCode* com) {
             ext.jamSlowdownTo = static_cast<uint8_t>(com->Z);
     } break;
 #endif
-    case 670:
-#if EEPROM_MODE != 0
-        if (com->hasS()) {
-            HAL::eprSetByte(EPR_VERSION, static_cast<uint8_t>(com->S));
-            HAL::eprSetByte(EPR_INTEGRITY_BYTE, EEPROM::computeChecksum());
-        }
-#endif
-        break;
     case 907: { // M907 Set digital trimpot/DAC motor current using axis codes.
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
         // If "S" is specified, use that as initial default value, then update each axis w/ specific values as found later.

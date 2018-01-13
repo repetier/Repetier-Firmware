@@ -261,7 +261,7 @@ void HAL::importEEPROM() {
     } else {
         Com::printFLN("EEPROM read from sd card.");
     }
-    EEPROM::readDataFromEEPROM(true);
+    EEPROM::readDataFromEEPROM();
 }
 
 #endif

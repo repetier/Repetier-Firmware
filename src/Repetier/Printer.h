@@ -269,13 +269,13 @@ public:
     static uint8_t mode;
     static uint8_t fanSpeed; // Last fan speed set with M106/M107
     static fast8_t stepsPerTimerCall;
-    static float zBedOffset;
     static uint8_t flag0, flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t flag2, flag3;
     static uint32_t interval;   ///< Last step duration in ticks.
     static uint32_t timer;      ///< used for acceleration/deceleration timing
     static uint32_t stepNumber; ///< Step number in current move.
     static millis_t lastTempReport;
+    static int32_t printingTime; ///< Printing time in seconds
     static float extrudeMultiplyError; ///< Accumulated error during extrusion
     static float extrusionFactor;      ///< Extrusion multiply factor
 #if NONLINEAR_SYSTEM || defined(DOXYGEN)
@@ -341,6 +341,7 @@ public:
     static speed_t vMaxReached;          ///< Maximum reached speed
     static uint32_t msecondsPrinting;    ///< Milliseconds of printing time (means time with heated extruder)
     static float filamentPrinted;        ///< mm of filament printed since counting started
+    static float filamentPrintedTotal;   ///< Total amount of filament printed in meter
 #if ENABLE_BACKLASH_COMPENSATION || defined(DOXYGEN)
     static float backlashX;
     static float backlashY;
@@ -734,15 +735,6 @@ public:
     static void measureZProbeHeight(float curHeight);
     static void waitForZProbeStart();
     static float bendingCorrectionAt(float x, float y);
-#endif
-    // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on
-    // system without Z-probe
-    static void transformToPrinter(float x, float y, float z, float& transX, float& transY, float& transZ);
-    static void transformFromPrinter(float x, float y, float z, float& transX, float& transY, float& transZ);
-#if FEATURE_AUTOLEVEL || defined(DOXYGEN)
-    static void resetTransformationMatrix(bool silent);
-    //static void buildTransformationMatrix(float h1,float h2,float h3);
-    static void buildTransformationMatrix(Plane& plane);
 #endif
 #if DISTORTION_CORRECTION || defined(DOXYGEN)
     static void measureDistortion(void);

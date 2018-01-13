@@ -66,7 +66,7 @@ int VelocityProfile::segmentsLeft, VelocityProfile::segments, VelocityProfile::s
 bool VelocityProfile::start(float vstart, float vend, float time) {
     /*
     Divisions: 1
-    Multiplication: 27
+    Multiplication: 30
     Add/sub: 13
     Total: 41 Operations
     */

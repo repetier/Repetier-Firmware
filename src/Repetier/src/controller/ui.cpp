@@ -1155,7 +1155,7 @@ void UIDisplay::addLong(long value, int8_t digits) {
     }
 }
 
-const float roundingTable[] PROGMEM = {0.5, 0.05, 0.005, 0.0005, 0.00005, , 0.000005};
+const float roundingTable[] PROGMEM = {0.5, 0.05, 0.005, 0.0005, 0.00005, 0.000005};
 
 UI_STRING(ui_selected, UI_TEXT_SEL);
 UI_STRING(ui_unselected, UI_TEXT_NOSEL);
@@ -1326,7 +1326,7 @@ void UIDisplay::parse(const char *txt, bool ram) {
             break;
         case 'B':
             if(c2 == 'C') {  //Custom coating
-                addFloat(Printer::zBedOffset, 3, 2);
+                addFloat(ZProbeHandler::getCoating(), 3, 2);
                 break;
             }
             break;
@@ -2979,6 +2979,7 @@ ZPOS2:
     break;
 #if UI_BED_COATING
     case UI_ACTION_COATING_CUSTOM:
+        // coating
         INCREMENT_MIN_MAX(Printer::zBedOffset, 0.01, -1.0, 199.0);
         break;
 #endif
@@ -3184,7 +3185,7 @@ void UIDisplay::menuAdjustHeight(const UIMenu *men, float offset) {
         EEPROM::storeDataIntoEEPROM(false);
     }
 #endif
-    Printer::zBedOffset = offset;
+    ZProbeHandler::setCoating(offset);
     //Display message
     pushMenu(men, false);
     BEEP_SHORT;
@@ -3202,6 +3203,7 @@ void UIDisplay::finishAction(unsigned int action) {
     switch(action) {
 #if UI_BED_COATING
     case UI_ACTION_COATING_CUSTOM:
+        // coating
         menuAdjustHeight(&ui_menu_coating_custom, Printer::zBedOffset);
         break;
 #endif
@@ -3462,7 +3464,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
             BEEP_LONG;
             break;
         case UI_ACTION_LOAD_EEPROM:
-            EEPROM::readDataFromEEPROM(true);
+            EEPROM::readDataFromEEPROM();
             Extruder::selectExtruderById(Extruder::current->id);
             pushMenu(&ui_menu_eeprom_loaded, false);
             BEEP_LONG;

@@ -183,8 +183,7 @@ uint8_t GCode::computeBinarySize(char* ptr) // unsigned int bitfield) {
     return s;
 }
 
-void GCode::keepAlive(enum FirmwareState state, int id)
-{
+void GCode::keepAlive(enum FirmwareState state, int id) {
     millis_t now = HAL::timeInMilliseconds();
 
     if (state != NotBusy && keepAliveInterval != 0) {
@@ -205,8 +204,7 @@ void GCode::keepAlive(enum FirmwareState state, int id)
     lastBusySignal = now;
 }
 
-void GCode::requestResend()
-{
+void GCode::requestResend() {
     HAL::serialFlush();
     commandsReceivingWritePosition = 0;
 #if NEW_COMMUNICATION
@@ -231,8 +229,7 @@ void GCode::requestResend()
   Check if result is plausible. If it is, an ok is send and the command is stored in queue.
   If not, a resend and ok is send.
 */
-void GCode::checkAndPushCommand()
-{
+void GCode::checkAndPushCommand() {
     if (hasM()) {
         if (M == 110) // Reset line number
         {
@@ -354,8 +351,7 @@ void GCode::checkAndPushCommand()
 #endif
 }
 
-void GCode::pushCommand()
-{
+void GCode::pushCommand() {
 #if !ECHO_ON_EXECUTE
     commandsBuffered[bufferWriteIndex].echoCommand();
 #endif
@@ -368,16 +364,14 @@ void GCode::pushCommand()
   Get the next buffered command. Returns 0 if no more commands are buffered. For each
   returned command, the gcode_command_finished() function must be called.
 */
-GCode* GCode::peekCurrentCommand()
-{
+GCode* GCode::peekCurrentCommand() {
     if (bufferLength == 0)
         return NULL; // No more data
     return &commandsBuffered[bufferReadIndex];
 }
 
 /** \brief Removes the last returned command from cache. */
-void GCode::popCurrentCommand()
-{
+void GCode::popCurrentCommand() {
     if (!bufferLength)
         return; // Should not happen, but safety first
 #if ECHO_ON_EXECUTE
@@ -388,16 +382,14 @@ void GCode::popCurrentCommand()
     bufferLength--;
 }
 
-void GCode::echoCommand()
-{
+void GCode::echoCommand() {
     if (Printer::debugEcho()) {
         Com::printF(Com::tEcho);
         printCommand();
     }
 }
 
-void GCode::debugCommandBuffer()
-{
+void GCode::debugCommandBuffer() {
     Com::printF(PSTR("CommandBuffer"));
     for (int i = 0; i < commandsReceivingWritePosition; i++)
         Com::printF(Com::tColon, (int)commandReceiving[i]);
@@ -413,8 +405,7 @@ void GCode::debugCommandBuffer()
 Used to execute memory stored parts called from gcodes. For new commands use the
 flash sender instead.
 */
-void GCode::executeFString(FSTRINGPARAM(cmd))
-{
+void GCode::executeFString(FSTRINGPARAM(cmd)) {
     char buf[80];
     uint8_t buflen;
     char c = 0;
@@ -458,8 +449,7 @@ void GCode::executeFString(FSTRINGPARAM(cmd))
 This function is the main function to read the commands from serial console or from sd card.
 It must be called frequently to empty the incoming buffer.
 */
-void GCode::readFromSerial()
-{
+void GCode::readFromSerial() {
 #if defined(DOOR_PIN) && DOOR_PIN > -1
     if (Printer::isDoorOpen()) {
         keepAlive(DoorOpen);
@@ -766,8 +756,7 @@ void GCode::readFromSerial()
   Converts a binary uint8_tfield containing one GCode line into a GCode structure.
   Returns true if checksum was correct.
 */
-bool GCode::parseBinary(uint8_t* buffer, bool fromSerial)
-{
+bool GCode::parseBinary(uint8_t* buffer, bool fromSerial) {
     internalCommand = !fromSerial;
     unsigned int sum1 = 0, sum2 = 0; // for fletcher-16 checksum
     // first do fletcher-16 checksum tests see
@@ -775,16 +764,15 @@ bool GCode::parseBinary(uint8_t* buffer, bool fromSerial)
     uint8_t* p = buffer;
     uint8_t len = binaryCommandSize - 2;
     while (len) {
-        uint8_t tlen = len > 21 ? 21 : len;
-        len -= tlen;
-        do {
-            sum1 += *p++;
-            if (sum1 >= 255)
-                sum1 -= 255;
-            sum2 += sum1;
-            if (sum2 >= 255)
-                sum2 -= 255;
-        } while (--tlen);
+        sum1 += *p++;
+        if(sum1 >= 255) {
+            sum1 -= 255; // modulo 255
+        }
+        sum2 += sum1;
+        if(sum2 >= 255) {
+            sum2 -= 255; // modulo 255
+        }
+        len--;        
     }
     sum1 -= *p++;
     sum2 -= *p;
@@ -916,8 +904,7 @@ bool GCode::parseBinary(uint8_t* buffer, bool fromSerial)
 /**
   Converts a ASCII GCode line into a GCode structure.
 */
-bool GCode::parseAscii(char* line, bool fromSerial)
-{
+bool GCode::parseAscii(char* line, bool fromSerial) {
     char* pos = line;
     params = 0;
     params2 = 0;
@@ -1144,8 +1131,7 @@ bool GCode::parseAscii(char* line, bool fromSerial)
 }
 
 /** \brief Print command on serial console */
-void GCode::printCommand()
-{
+void GCode::printCommand() {
     if (hasN()) {
         Com::print('N');
         Com::print((int32_t)N);
@@ -1226,8 +1212,7 @@ void GCode::printCommand()
     Com::println();
 }
 
-void GCode::fatalError(FSTRINGPARAM(message))
-{
+void GCode::fatalError(FSTRINGPARAM(message)) {
     fatalErrorMsg = message;
     Printer::stopPrint();
     if (Motion1::currentPosition[Z_AXIS] < Motion1::maxPos[Z_AXIS] - 15) {
@@ -1240,8 +1225,7 @@ void GCode::fatalError(FSTRINGPARAM(message))
     reportFatalError();
 }
 
-void GCode::reportFatalError()
-{
+void GCode::reportFatalError() {
     Com::writeToAll = true;
     Com::printF(Com::tFatal);
     Com::printF(fatalErrorMsg);
@@ -1249,8 +1233,7 @@ void GCode::reportFatalError()
     UI_ERROR_P(fatalErrorMsg)
 }
 
-void GCode::resetFatalError()
-{
+void GCode::resetFatalError() {
     Com::writeToAll = true;
     TemperatureController::resetAllErrorStates();
     Printer::debugReset(8); // disable dry run
@@ -1282,8 +1265,7 @@ GCodeSource* GCodeSource::writeableSources[MAX_DATA_SOURCES] = { &serial0Source 
 #endif
 GCodeSource* GCodeSource::activeSource = &serial0Source;
 
-void GCodeSource::registerSource(GCodeSource* newSource)
-{
+void GCodeSource::registerSource(GCodeSource* newSource) {
     for (fast8_t i = 0; i < numSources; i++) { // skip register if already contained
         if (sources[i] == newSource) {
             return;
@@ -1295,8 +1277,7 @@ void GCodeSource::registerSource(GCodeSource* newSource)
         writeableSources[numWriteSources++] = newSource;
 }
 
-void GCodeSource::removeSource(GCodeSource* delSource)
-{
+void GCodeSource::removeSource(GCodeSource* delSource) {
     fast8_t i;
     for (i = 0; i < numSources; i++) {
         if (sources[i] == delSource) {
@@ -1315,9 +1296,8 @@ void GCodeSource::removeSource(GCodeSource* delSource)
         rotateSource();
 }
 
-void GCodeSource::rotateSource()
-{                        ///< Move active to next source
-    fast8_t bestIdx = 0; //,oldIdx = 0;
+void GCodeSource::rotateSource() { ///< Move active to next source
+    fast8_t bestIdx = 0;           //,oldIdx = 0;
     fast8_t i;
     for (i = 0; i < numSources; i++) {
         if (sources[i] == activeSource) {
@@ -1338,8 +1318,7 @@ void GCodeSource::rotateSource()
     GCode::commandsReceivingWritePosition = 0;
 }
 
-void GCodeSource::writeToAll(uint8_t byte)
-{ ///< Write to all listening sources
+void GCodeSource::writeToAll(uint8_t byte) { ///< Write to all listening sources
 #if NEW_COMMUNICATION
     if (Com::writeToAll) {
         fast8_t i;
@@ -1354,23 +1333,20 @@ void GCodeSource::writeToAll(uint8_t byte)
 #endif
 }
 
-void GCodeSource::printAllFLN(FSTRINGPARAM(text))
-{
+void GCodeSource::printAllFLN(FSTRINGPARAM(text)) {
     bool old = Com::writeToAll;
     Com::writeToAll = true;
     Com::printFLN(text);
     Com::writeToAll = old;
 }
-void GCodeSource::printAllFLN(FSTRINGPARAM(text), int32_t v)
-{
+void GCodeSource::printAllFLN(FSTRINGPARAM(text), int32_t v) {
     bool old = Com::writeToAll;
     Com::writeToAll = true;
     Com::printFLN(text, v);
     Com::writeToAll = old;
 }
 
-GCodeSource::GCodeSource()
-{
+GCodeSource::GCodeSource() {
     lastLineNumber = 0;
     wasLastCommandReceivedAsBinary = false;
     waitingForResend = -1;
@@ -1378,54 +1354,42 @@ GCodeSource::GCodeSource()
 
 // ----- serial connection source -----
 
-SerialGCodeSource::SerialGCodeSource(Stream* p)
-{
+SerialGCodeSource::SerialGCodeSource(Stream* p) {
     stream = p;
 }
-bool SerialGCodeSource::isOpen()
-{
+bool SerialGCodeSource::isOpen() {
     return true;
 }
-bool SerialGCodeSource::supportsWrite()
-{ ///< true if write is a non dummy function
+bool SerialGCodeSource::supportsWrite() { ///< true if write is a non dummy function
     return true;
 }
-bool SerialGCodeSource::closeOnError()
-{ // return true if the channel can not interactively correct errors.
+bool SerialGCodeSource::closeOnError() { // return true if the channel can not interactively correct errors.
     return false;
 }
-bool SerialGCodeSource::dataAvailable()
-{ // would read return a new byte?
+bool SerialGCodeSource::dataAvailable() { // would read return a new byte?
     return stream->available();
 }
-int SerialGCodeSource::readByte()
-{
+int SerialGCodeSource::readByte() {
     return stream->read();
 }
-void SerialGCodeSource::writeByte(uint8_t byte)
-{
+void SerialGCodeSource::writeByte(uint8_t byte) {
     stream->write(byte);
 }
-void SerialGCodeSource::close()
-{
+void SerialGCodeSource::close() {
 }
     // ----- SD card source -----
 
 #if SDSUPPORT
-bool SDCardGCodeSource::isOpen()
-{
+bool SDCardGCodeSource::isOpen() {
     return (sd.sdmode > 0 && sd.sdmode < 100);
 }
-bool SDCardGCodeSource::supportsWrite()
-{ ///< true if write is a non dummy function
+bool SDCardGCodeSource::supportsWrite() { ///< true if write is a non dummy function
     return false;
 }
-bool SDCardGCodeSource::closeOnError()
-{ // return true if the channel can not interactively correct errors.
+bool SDCardGCodeSource::closeOnError() { // return true if the channel can not interactively correct errors.
     return true;
 }
-bool SDCardGCodeSource::dataAvailable()
-{ // would read return a new byte?
+bool SDCardGCodeSource::dataAvailable() { // would read return a new byte?
     if (sd.sdmode == 1) {
         if (sd.sdpos == sd.filesize) {
             close();
@@ -1435,8 +1399,7 @@ bool SDCardGCodeSource::dataAvailable()
     }
     return false;
 }
-int SDCardGCodeSource::readByte()
-{
+int SDCardGCodeSource::readByte() {
     int n = sd.file.read();
     if (n == -1) {
         Com::printFLN(Com::tSDReadError);
@@ -1455,12 +1418,10 @@ int SDCardGCodeSource::readByte()
     sd.sdpos++; // = file.curPosition();
     return n;
 }
-void SDCardGCodeSource::writeByte(uint8_t byte)
-{
+void SDCardGCodeSource::writeByte(uint8_t byte) {
     // dummy
 }
-void SDCardGCodeSource::close()
-{
+void SDCardGCodeSource::close() {
     sd.sdmode = 0;
     GCodeSource::removeSource(this);
     Printer::setPrinting(false);
@@ -1471,28 +1432,22 @@ void SDCardGCodeSource::close()
 #endif
 
 FlashGCodeSource::FlashGCodeSource()
-    : GCodeSource()
-{
+    : GCodeSource() {
     finished = true;
 }
-bool FlashGCodeSource::isOpen()
-{
+bool FlashGCodeSource::isOpen() {
     return !finished;
 }
-bool FlashGCodeSource::supportsWrite()
-{ ///< true if write is a non dummy function
+bool FlashGCodeSource::supportsWrite() { ///< true if write is a non dummy function
     return false;
 }
-bool FlashGCodeSource::closeOnError()
-{ // return true if the channel can not interactively correct errors.
+bool FlashGCodeSource::closeOnError() { // return true if the channel can not interactively correct errors.
     return true;
 }
-bool FlashGCodeSource::dataAvailable()
-{ // would read return a new byte?
+bool FlashGCodeSource::dataAvailable() { // would read return a new byte?
     return !finished;
 }
-int FlashGCodeSource::readByte()
-{
+int FlashGCodeSource::readByte() {
     if (finished) {
         return 0;
     }
@@ -1503,8 +1458,7 @@ int FlashGCodeSource::readByte()
     }
     return data;
 }
-void FlashGCodeSource::close()
-{
+void FlashGCodeSource::close() {
     if (!finished) {
         finished = true;
         //printAllFLN(PSTR("FlashFinished"));
@@ -1513,16 +1467,14 @@ void FlashGCodeSource::close()
     }
 }
 
-void FlashGCodeSource::writeByte(uint8_t byte)
-{
+void FlashGCodeSource::writeByte(uint8_t byte) {
     // dummy
 }
 
 /** Execute the commands at the given memory. If already an other string is
 running, the command will wait until that command finishes. If wait is true it
 will also wait for given command to be enqueued completely. */
-void FlashGCodeSource::executeCommands(FSTRINGPARAM(data), bool waitFinish, int action)
-{
+void FlashGCodeSource::executeCommands(FSTRINGPARAM(data), bool waitFinish, int action) {
     while (!finished) {
         Commands::commandLoop(); // might get trouble as we are called from command loop, but it's the only way to keep communication going
     }

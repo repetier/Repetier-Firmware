@@ -27,7 +27,9 @@ IO_TARGET with following meanings:
 5: Endstop update
 6: define variables
 7: Visualization for config
-
+8: eepromHandle calls
+9: updateDerived calls
+10: restore from config
 */
 
 // #pragma message(VAR_NAME_VALUE(IO_TARGET))

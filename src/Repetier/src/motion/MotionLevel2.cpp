@@ -44,6 +44,7 @@ void Motion2::init() {
 // precompute up to 16 such tiny buffers and with the double frequency We
 // should be on the safe side of never getting an underflow.
 void Motion2::timer() {
+    static float lastL = 0;
     // First check if can push anything into next level
     Motion3Buffer* m3 = Motion3::tryReserve();
     if (m3 == nullptr) { // no free space, do nothing until free
@@ -67,6 +68,7 @@ void Motion2::timer() {
         }
         act->motion1 = actM1;
         act->state = Motion2State::NOT_INITIALIZED;
+        lastL = 0;
         // DEBUG_MSG2_FAST("new ",(int)actM1->action);
         InterruptProtectedBlock ip;
         length++;
@@ -135,6 +137,10 @@ void Motion2::timer() {
         // Convert float position to integer motor position
         // This step catches all nonlinear behaviour from
         // acceleration profile and printer geometry
+        if (sFactor < lastL) {
+            Com::printFLN(PSTR("reversal:"), sFactor - lastL, 6);
+        }
+        lastL = sFactor;
         float pos[NUM_AXES];
         for (fast8_t i = 0; i < NUM_AXES; i++) {
             pos[i] = actM1->start[i] + sFactor * actM1->unitDir[i];

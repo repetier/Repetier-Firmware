@@ -31,38 +31,37 @@ void Printer::measureDistortion(void) {
     prepareForProbing();
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
     float actTemp[NUM_EXTRUDER];
-    for(int i = 0; i < NUM_EXTRUDER; i++)
+    for (int i = 0; i < NUM_EXTRUDER; i++)
         actTemp[i] = extruder[i].tempControl.targetTemperatureC;
     Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::max(EEPROM::zProbeHeight(), static_cast<float>(ZHOME_HEAT_HEIGHT)), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
     Commands::waitUntilEndOfAllMoves();
 #if ZHOME_HEAT_ALL
-    for(int i = 0; i < NUM_EXTRUDER; i++) {
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
         Extruder::setTemperatureForExtruder(RMath::max(actTemp[i], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), i, false, false);
     }
-    for(int i = 0; i < NUM_EXTRUDER; i++) {
-        if(extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
+        if (extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
             Extruder::setTemperatureForExtruder(RMath::max(actTemp[i], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), i, false, true);
     }
 #else
-    if(extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
+    if (extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
         Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), Extruder::current->id, false, true);
 #endif
 #endif
     float oldFeedrate = Printer::feedrate;
 
-
     Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
 
-    if(!distortion.measure()) {
+    if (!distortion.measure()) {
         GCode::fatalError(PSTR("G33 failed!"));
         return;
     }
     Printer::feedrate = oldFeedrate;
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
 #if ZHOME_HEAT_ALL
-    for(int i = 0; i < NUM_EXTRUDER; i++)
+    for (int i = 0; i < NUM_EXTRUDER; i++)
         Extruder::setTemperatureForExtruder(actTemp[i], i, false, false);
-    for(int i = 0; i < NUM_EXTRUDER; i++)
+    for (int i = 0; i < NUM_EXTRUDER; i++)
         Extruder::setTemperatureForExtruder(actTemp[i], i, false, actTemp[i] > MAX_ROOM_TEMPERATURE);
 #else
     Extruder::setTemperatureForExtruder(actTemp[Extruder::current->id], Extruder::current->id, false, actTemp[Extruder::current->id] > MAX_ROOM_TEMPERATURE);
@@ -104,7 +103,7 @@ void Distortion::updateDerived() {
 void Distortion::enable(bool permanent) {
     enabled = true;
 #if DISTORTION_PERMANENT && EEPROM_MODE != 0
-    if(permanent)
+    if (permanent)
         EEPROM::setZCorrectionEnabled(enabled);
 #endif
     Com::printFLN(Com::tZCorrectionEnabled);
@@ -113,7 +112,7 @@ void Distortion::enable(bool permanent) {
 void Distortion::disable(bool permanent) {
     enabled = false;
 #if DISTORTION_PERMANENT && EEPROM_MODE != 0
-    if(permanent)
+    if (permanent)
         EEPROM::setZCorrectionEnabled(enabled);
 #endif
 #if DRIVE_SYSTEM != DELTA
@@ -128,7 +127,7 @@ void Distortion::reportStatus() {
 
 void Distortion::resetCorrection(void) {
     Com::printInfoFLN(PSTR("Resetting Z correction"));
-    for(int i = 0; i < DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS; i++)
+    for (int i = 0; i < DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS; i++)
         setMatrix(0, i);
 }
 
@@ -155,7 +154,7 @@ void Distortion::setMatrix(int32_t val, int index) {
 
 bool Distortion::isCorner(fast8_t i, fast8_t j) const {
     return (i == 0 || i == DISTORTION_CORRECTION_POINTS - 1)
-           && (j == 0 || j == DISTORTION_CORRECTION_POINTS - 1);
+        && (j == 0 || j == DISTORTION_CORRECTION_POINTS - 1);
 }
 
 /**
@@ -182,11 +181,11 @@ bool Distortion::measure(void) {
     fast8_t ix, iy;
 
     disable(false);
-	Printer::prepareForProbing();
+    Printer::prepareForProbing();
     float z = RMath::max(EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0), static_cast<float>(ZHOME_HEAT_HEIGHT)); //EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0);
     Com::printFLN(PSTR("Reference Z for measurement:"), z, 3);
     updateDerived();
-/*
+    /*
 #if DRIVE_SYSTEM == DELTA
     // It is not possible to go to the edges at the top, also users try
     // it often and wonder why the coordinate system is then wrong.
@@ -203,7 +202,7 @@ bool Distortion::measure(void) {
     //Com::printFLN(PSTR("steps:"), step);
     int32_t zCorrection = 0;
 #if Z_PROBE_Z_OFFSET_MODE == 1
-    zCorrection -= Printer::zBedOffset * Printer::axisStepsPerMM[Z_AXIS];
+    zCorrection -= ZProbeHandler::getCoating() * Motion1::resolution[Z_AXIS];
 #endif
 
     Printer::startProbing(true);
@@ -211,7 +210,8 @@ bool Distortion::measure(void) {
     for (iy = DISTORTION_CORRECTION_POINTS - 1; iy >= 0; iy--)
         for (ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++) {
 #if (DRIVE_SYSTEM == DELTA) && DISTORTION_EXTRAPOLATE_CORNERS
-            if (isCorner(ix, iy)) continue;
+            if (isCorner(ix, iy))
+                continue;
 #endif
 #if DRIVE_SYSTEM == DELTA
             float mtx = Printer::invAxisStepsPerMM[X_AXIS] * (ix * step - radiusCorrectionSteps);
@@ -227,9 +227,9 @@ bool Distortion::measure(void) {
             Printer::moveToReal(mtx, mty, z, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
             float zp = Printer::runZProbe(false, false, Z_PROBE_REPETITIONS);
 #if defined(DISTORTION_LIMIT_TO) && DISTORTION_LIMIT_TO != 0
-            if(zp == ILLEGAL_Z_PROBE || fabs(z - zp + zCorrection * Printer::invAxisStepsPerMM[Z_AXIS]) > DISTORTION_LIMIT_TO) {
+            if (zp == ILLEGAL_Z_PROBE || fabs(z - zp + zCorrection * Printer::invAxisStepsPerMM[Z_AXIS]) > DISTORTION_LIMIT_TO) {
 #else
-            if(zp == ILLEGAL_Z_PROBE) {
+            if (zp == ILLEGAL_Z_PROBE) {
 #endif
                 Com::printErrorFLN(PSTR("Stopping distortion measurement due to errors."));
                 Printer::finishProbing();
@@ -257,10 +257,10 @@ bool Distortion::measure(void) {
 #if EEPROM_MODE
     EEPROM::storeDataIntoEEPROM();
 #endif
-// print matrix
+    // print matrix
     Com::printInfoFLN(PSTR("Distortion correction matrix:"));
-    for (iy = DISTORTION_CORRECTION_POINTS - 1; iy >= 0 ; iy--) {
-        for(ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++)
+    for (iy = DISTORTION_CORRECTION_POINTS - 1; iy >= 0; iy--) {
+        for (ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++)
             Com::printF(ix ? PSTR(", ") : PSTR(""), getMatrix(matrixIndex(ix, iy)));
         Com::println();
     }
@@ -270,12 +270,11 @@ bool Distortion::measure(void) {
     //Printer::homeAxis(false, false, true);
 }
 
-
 int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const {
-	if (!enabled || Printer::isZProbingActive()) {
-		return 0;
-	}
-	z += Printer::offsetZ * Printer::axisStepsPerMM[Z_AXIS] - Printer::zMinSteps;
+    if (!enabled || Printer::isZProbingActive()) {
+        return 0;
+    }
+    z += Printer::offsetZ * Printer::axisStepsPerMM[Z_AXIS] - Printer::zMinSteps;
     if (z > zEnd) {
         /* Com::printF(PSTR("NoCor z:"),z);
          Com::printF(PSTR(" zEnd:"),zEnd);
@@ -283,9 +282,9 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const {
          Com::printFLN(PSTR(" zp:"),(int)Printer::isZProbingActive());*/
         return 0;
     }
-	x -= Printer::offsetX * Printer::axisStepsPerMM[X_AXIS]; // correct active tool offset
-	y -= Printer::offsetY * Printer::axisStepsPerMM[Y_AXIS];
-    if(false) {
+    x -= Printer::offsetX * Printer::axisStepsPerMM[X_AXIS]; // correct active tool offset
+    y -= Printer::offsetY * Printer::axisStepsPerMM[Y_AXIS];
+    if (false) {
         Com::printF(PSTR("correcting ("), x);
         Com::printF(PSTR(","), y);
     }
@@ -328,7 +327,7 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const {
     int32_t zx1 = m11 + ((m12 - m11) * fx) / step;
     int32_t zx2 = m21 + ((m22 - m21) * fx) / step;
     int32_t correction_z = zx1 + ((zx2 - zx1) * fy) / step;
-	/*if(z == Printer::zMinSteps) {
+    /*if(z == Printer::zMinSteps) {
 	Com::printF(PSTR("DT M11:"),m11);
 	Com::printF(PSTR(" M12:"),m12);
 	Com::printF(PSTR(" M21:"),m21);
@@ -396,7 +395,7 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const {
 
 void Distortion::set(float x, float y, float z) {
 #if defined(DISTORTION_LIMIT_TO) && DISTORTION_LIMIT_TO != 0
-    if(fabs(z) > DISTORTION_LIMIT_TO) {
+    if (fabs(z) > DISTORTION_LIMIT_TO) {
         Com::printWarningFLN(PSTR("Max. distortion value exceeded - not setting this value."));
         return;
     }
@@ -408,17 +407,21 @@ void Distortion::set(float x, float y, float z) {
     int ix = (x * Printer::axisStepsPerMM[X_AXIS] - xOffsetSteps + xCorrectionSteps / 2) / xCorrectionSteps;
     int iy = (y * Printer::axisStepsPerMM[Y_AXIS] - yOffsetSteps + yCorrectionSteps / 2) / yCorrectionSteps;
 #endif
-    if(ix < 0) ix = 0;
-    if(iy < 0) iy = 0;
-    if(ix >= DISTORTION_CORRECTION_POINTS - 1) ix = DISTORTION_CORRECTION_POINTS - 1;
-    if(iy >= DISTORTION_CORRECTION_POINTS - 1) iy = DISTORTION_CORRECTION_POINTS - 1;
+    if (ix < 0)
+        ix = 0;
+    if (iy < 0)
+        iy = 0;
+    if (ix >= DISTORTION_CORRECTION_POINTS - 1)
+        ix = DISTORTION_CORRECTION_POINTS - 1;
+    if (iy >= DISTORTION_CORRECTION_POINTS - 1)
+        iy = DISTORTION_CORRECTION_POINTS - 1;
     int32_t idx = matrixIndex(ix, iy);
     setMatrix(z * Printer::axisStepsPerMM[Z_AXIS], idx);
 }
 
 void Distortion::showMatrix() {
-    for(int ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++) {
-        for(int iy = 0; iy < DISTORTION_CORRECTION_POINTS; iy++) {
+    for (int ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++) {
+        for (int iy = 0; iy < DISTORTION_CORRECTION_POINTS; iy++) {
 #if DRIVE_SYSTEM == DELTA
             float x = (-radiusCorrectionSteps + ix * step) * Printer::invAxisStepsPerMM[Z_AXIS];
             float y = (-radiusCorrectionSteps + iy * step) * Printer::invAxisStepsPerMM[Z_AXIS];

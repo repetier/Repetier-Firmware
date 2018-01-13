@@ -1,4 +1,5 @@
 {
     "editor.formatOnSave": true,
-    "files.autoSave": "onWindowChange"
+    "files.autoSave": "onWindowChange",
+    "editor.quickSuggestions": true
 }

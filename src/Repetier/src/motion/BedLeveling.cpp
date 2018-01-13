@@ -793,98 +793,6 @@ void Printer::waitForZProbeStart() {
 #endif
 
 /*
- Transforms theoretical correct coordinates to corrected coordinates resulting from bed rotation
- and shear transformations.
-
- We have 2 coordinate systems. The printer step position where we want to be. These are the positions
- we send to printers, the theoretical coordinates. In contrast we have the printer coordinates that
- we need to be at to get the desired result, the real coordinates.
-*/
-void Printer::transformToPrinter(float x, float y, float z, float& transX, float& transY, float& transZ) {
-#if FEATURE_AXISCOMP
-    // Axis compensation:
-    x = x + y * EEPROM::axisCompTanXY() + z * EEPROM::axisCompTanXZ();
-    y = y + z * EEPROM::axisCompTanYZ();
-#endif
-#if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
-    if (isAutolevelActive()) {
-        transX = x * autolevelTransformation[0] + y * autolevelTransformation[3] + z * autolevelTransformation[6];
-        transY = x * autolevelTransformation[1] + y * autolevelTransformation[4] + z * autolevelTransformation[7];
-        transZ = x * autolevelTransformation[2] + y * autolevelTransformation[5] + z * autolevelTransformation[8];
-    } else {
-        transX = x;
-        transY = y;
-        transZ = z;
-    }
-#else
-    transX = x;
-    transY = y;
-    transZ = z;
-#endif
-}
-
-/* Transform back to real printer coordinates. */
-void Printer::transformFromPrinter(float x, float y, float z, float& transX, float& transY, float& transZ) {
-#if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
-    if (isAutolevelActive()) {
-        transX = x * autolevelTransformation[0] + y * autolevelTransformation[1] + z * autolevelTransformation[2];
-        transY = x * autolevelTransformation[3] + y * autolevelTransformation[4] + z * autolevelTransformation[5];
-        transZ = x * autolevelTransformation[6] + y * autolevelTransformation[7] + z * autolevelTransformation[8];
-    } else {
-        transX = x;
-        transY = y;
-        transZ = z;
-    }
-#else
-    transX = x;
-    transY = y;
-    transZ = z;
-#endif
-#if FEATURE_AXISCOMP
-    // Axis compensation:
-    transY = transY - transZ * EEPROM::axisCompTanYZ();
-    transX = transX - transY * EEPROM::axisCompTanXY() - transZ * EEPROM::axisCompTanXZ();
-#endif
-}
-#if FEATURE_AUTOLEVEL
-void Printer::resetTransformationMatrix(bool silent) {
-    autolevelTransformation[0] = autolevelTransformation[4] = autolevelTransformation[8] = 1;
-    autolevelTransformation[1] = autolevelTransformation[2] = autolevelTransformation[3] = autolevelTransformation[5] = autolevelTransformation[6] = autolevelTransformation[7] = 0;
-    if (!silent)
-        Com::printInfoFLN(Com::tAutolevelReset);
-}
-
-void Printer::buildTransformationMatrix(Plane& plane) {
-    float z0 = plane.z(0, 0);
-    float az = z0 - plane.z(1, 0); // ax = 1, ay = 0
-    float bz = z0 - plane.z(0, 1); // bx = 0, by = 1
-    // First z direction
-    autolevelTransformation[6] = -az;
-    autolevelTransformation[7] = -bz;
-    autolevelTransformation[8] = 1;
-    float len = sqrt(az * az + bz * bz + 1);
-    autolevelTransformation[6] /= len;
-    autolevelTransformation[7] /= len;
-    autolevelTransformation[8] /= len;
-    autolevelTransformation[0] = 1;
-    autolevelTransformation[1] = 0;
-    autolevelTransformation[2] = -autolevelTransformation[6] / autolevelTransformation[8];
-    len = sqrt(autolevelTransformation[0] * autolevelTransformation[0] + autolevelTransformation[1] * autolevelTransformation[1] + autolevelTransformation[2] * autolevelTransformation[2]);
-    autolevelTransformation[0] /= len;
-    autolevelTransformation[1] /= len;
-    autolevelTransformation[2] /= len;
-    // cross(z,x) y,z)
-    autolevelTransformation[3] = autolevelTransformation[7] * autolevelTransformation[2] - autolevelTransformation[8] * autolevelTransformation[1];
-    autolevelTransformation[4] = autolevelTransformation[8] * autolevelTransformation[0] - autolevelTransformation[6] * autolevelTransformation[2];
-    autolevelTransformation[5] = autolevelTransformation[6] * autolevelTransformation[1] - autolevelTransformation[7] * autolevelTransformation[0];
-    len = sqrt(autolevelTransformation[3] * autolevelTransformation[3] + autolevelTransformation[4] * autolevelTransformation[4] + autolevelTransformation[5] * autolevelTransformation[5]);
-    autolevelTransformation[3] /= len;
-    autolevelTransformation[4] /= len;
-    autolevelTransformation[5] /= len;
-
-    Com::printArrayFLN(Com::tTransformationMatrix, autolevelTransformation, 9, 6);
-}
-/*
 void Printer::buildTransformationMatrix(float h1,float h2,float h3) {
     float ax = EEPROM::zProbeX2() - EEPROM::zProbeX1();
     float ay = EEPROM::zProbeY2() - EEPROM::zProbeY1();
@@ -918,4 +826,3 @@ void Printer::buildTransformationMatrix(float h1,float h2,float h3) {
     Com::printArrayFLN(Com::tTransformationMatrix,autolevelTransformation, 9, 6);
 }
 */
-#endif

@@ -38,7 +38,8 @@
 
 // The follwing variables are required early to decide on the right modules.
 #define NUM_EXTRUDER 2
-#define MOTHERBOARD 405 // 405
+#define MOTHERBOARD 402 // 405
+#define EEPROM_MODE 2
 #define RFSERIAL Serial
 #define FEATURE_SERVO 1
 #define FEATURE_WATCHDOG 0
@@ -508,7 +509,6 @@ It also can add a delay to wait for spindle to run on full speed.
 #define KEEP_ALIVE_INTERVAL 2000
 #define WAITING_IDENTIFIER "wait"
 #define ECHO_ON_EXECUTE 1
-#define EEPROM_MODE 2
 #undef PS_ON_PIN
 #define PS_ON_PIN -1
 #define JSON_OUTPUT 1

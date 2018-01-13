@@ -127,7 +127,6 @@ public:
     }
 };
 
-#define EEPROM_OFFSET               0
 #define SECONDS_TO_TICKS(s) (unsigned long)(s*(float)F_CPU)
 #define ANALOG_INPUT_SAMPLE 5
 // Bits of the ADC converter
@@ -529,36 +528,36 @@ public:
     }
     static inline void eprSetByte(unsigned int pos,uint8_t value)
     {
-        eeprom_write_byte((unsigned char *)(EEPROM_OFFSET + pos), value);
+        eeprom_write_byte((unsigned char *)(pos), value);
     }
     static inline void eprSetInt16(unsigned int pos,int16_t value)
     {
-        eeprom_write_word((unsigned int*)(EEPROM_OFFSET + pos),value);
+        eeprom_write_word((unsigned int*)(pos),value);
     }
     static inline void eprSetInt32(unsigned int pos,int32_t value)
     {
-        eeprom_write_dword((uint32_t*)(EEPROM_OFFSET + pos),value);
+        eeprom_write_dword((uint32_t*)(pos),value);
     }
     static inline void eprSetFloat(unsigned int pos,float value)
     {
-        eeprom_write_block(&value,(void*)(EEPROM_OFFSET + pos), 4);
+        eeprom_write_block(&value,(void*)(pos), 4);
     }
     static inline uint8_t eprGetByte(unsigned int pos)
     {
-        return eeprom_read_byte ((unsigned char *)(EEPROM_OFFSET + pos));
+        return eeprom_read_byte ((unsigned char *)(pos));
     }
     static inline int16_t eprGetInt16(unsigned int pos)
     {
-        return eeprom_read_word((uint16_t *)(EEPROM_OFFSET + pos));
+        return eeprom_read_word((uint16_t *)(pos));
     }
     static inline int32_t eprGetInt32(unsigned int pos)
     {
-        return eeprom_read_dword((uint32_t*)(EEPROM_OFFSET + pos));
+        return eeprom_read_dword((uint32_t*)(pos));
     }
     static inline float eprGetFloat(unsigned int pos)
     {
         float v;
-        eeprom_read_block(&v,(void *)(EEPROM_OFFSET + pos),4); // newer gcc have eeprom_read_block but not arduino 22
+        eeprom_read_block(&v,(void *)(pos),4); // newer gcc have eeprom_read_block but not arduino 22
         return v;
     }
 

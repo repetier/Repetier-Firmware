@@ -26,7 +26,7 @@ moved to stable after a while as 1.0.x patch updates. With the release of the
 official 1.0 version we will start developing version 2.0 in the branch dev2
 where all the new features will be added.
 
-### Version 2.0 informations
+### Version 2.0 information
 
 #### Status
 

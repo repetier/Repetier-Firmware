@@ -55,6 +55,13 @@ FSTRINGVALUE(Com::tWrongChecksum, "Wrong checksum")
 FSTRINGVALUE(Com::tMissingChecksum, "Missing checksum")
 FSTRINGVALUE(Com::tFormatError, "Format error")
 FSTRINGVALUE(Com::tDonePrinting, "Done printing file")
+FSTRINGVALUE(Com::tXAxis, "X axis")
+FSTRINGVALUE(Com::tYAxis, "Y axis")
+FSTRINGVALUE(Com::tZAxis, "Z axis")
+FSTRINGVALUE(Com::tEAxis, "E axis")
+FSTRINGVALUE(Com::tAAxis, "A axis")
+FSTRINGVALUE(Com::tBAxis, "B axis")
+FSTRINGVALUE(Com::tCAxis, "C axis")
 FSTRINGVALUE(Com::tX, " X")
 FSTRINGVALUE(Com::tY, " Y")
 FSTRINGVALUE(Com::tZ, " Z")
@@ -189,7 +196,7 @@ FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment, "No move in segment with > 1 segmen
 #endif
 #endif
 
-#if DRIVE_SYSTEM==TUGA
+#if DRIVE_SYSTEM == TUGA
 FSTRINGVALUE(Com::tEPRDiagonalRodLength, "Long arm length [mm]")
 #endif // DRIVE_SYSTEM
 #ifdef DEBUG_GENERIC
@@ -336,7 +343,7 @@ FSTRINGVALUE(Com::tEPRAccelerationFactorAtTop, "Acceleration factor at top [%,10
 FSTRINGVALUE(Com::tEPRSegmentsPerSecondPrint, "Segments/s for printing")
 FSTRINGVALUE(Com::tEPRSegmentsPerSecondTravel, "Segments/s for travel")
 #endif
-#if DRIVE_SYSTEM==DELTA
+#if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tEPRZAcceleration, "Acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZTravelAcceleration, "Travel acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZStepsPerMM, "Steps per mm")
@@ -456,7 +463,7 @@ FSTRINGVALUE(Com::tConfig, "Config:")
 FSTRINGVALUE(Com::tExtrDot, "Extr.")
 
 #if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
-FSTRINGVALUE(Com::tMCPEpromSettings,  "MCP4728 DAC EEPROM Settings:")
+FSTRINGVALUE(Com::tMCPEpromSettings, "MCP4728 DAC EEPROM Settings:")
 FSTRINGVALUE(Com::tMCPCurrentSettings, "MCP4728 DAC Current Settings:")
 #endif
 FSTRINGVALUE(Com::tPrinterModeFFF, "PrinterMode:FFF")
@@ -480,7 +487,7 @@ void Com::config(FSTRINGPARAM(text), int value) {
     printF(tConfig);
     printFLN(text, value);
 }
-void Com::config(FSTRINGPARAM(text), const char *msg) {
+void Com::config(FSTRINGPARAM(text), const char* msg) {
     printF(tConfig);
     printF(text);
     print(msg);
@@ -527,7 +534,7 @@ void Com::printFLN(FSTRINGPARAM(text)) {
     printF(text);
     println();
 }
-void Com::printFLN(FSTRINGPARAM(text), const char *msg) {
+void Com::printFLN(FSTRINGPARAM(text), const char* msg) {
     printF(text);
     print(msg);
     println();
@@ -538,7 +545,7 @@ void Com::printF(FSTRINGPARAM(ptr)) {
     while ((c = HAL::readFlashByte(ptr++)) != 0)
         GCodeSource::writeToAll(c);
 }
-void Com::printF(FSTRINGPARAM(text), const char *msg) {
+void Com::printF(FSTRINGPARAM(text), const char* msg) {
     printF(text);
     print(msg);
 }
@@ -580,13 +587,13 @@ void Com::printF(FSTRINGPARAM(text), float value, uint8_t digits) {
     printFloat(value, digits);
 }
 
-void Com::print(const char *text) {
-    while(*text) {
+void Com::print(const char* text) {
+    while (*text) {
         GCodeSource::writeToAll(*text++);
     }
 }
 void Com::print(long value) {
-    if(value < 0) {
+    if (value < 0) {
         GCodeSource::writeToAll('-');
         value = -value;
     }
@@ -595,25 +602,25 @@ void Com::print(long value) {
 
 void Com::printNumber(uint32_t n) {
     char buf[11]; // Assumes 8-bit chars plus zero byte.
-    char *str = &buf[10];
+    char* str = &buf[10];
     *str = '\0';
     do {
         unsigned long m = n;
         n /= 10;
         *--str = '0' + (m - 10 * n);
-    } while(n);
+    } while (n);
 
     print(str);
 }
-void Com::printArrayFLN(FSTRINGPARAM(text), float *arr, uint8_t n, uint8_t digits) {
+void Com::printArrayFLN(FSTRINGPARAM(text), float* arr, uint8_t n, uint8_t digits) {
     printF(text);
-    for(uint8_t i = 0; i < n; i++)
+    for (uint8_t i = 0; i < n; i++)
         printF(Com::tSpace, arr[i], digits);
     println();
 }
-void Com::printArrayFLN(FSTRINGPARAM(text), int32_t *arr, uint8_t n) {
+void Com::printArrayFLN(FSTRINGPARAM(text), int32_t* arr, uint8_t n) {
     printF(text);
-    for(uint8_t i = 0; i < n; i++)
+    for (uint8_t i = 0; i < n; i++)
         printF(Com::tSpace, arr[i]);
     println();
 }
@@ -656,4 +663,3 @@ void Com::printFloat(float number, uint8_t digits) {
         remainder -= toPrint;
     }
 }
-

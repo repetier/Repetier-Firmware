@@ -52,15 +52,8 @@ int Printer::maxLayer = -1;       // -1 = unknown
 char Printer::printName[21] = ""; // max. 20 chars + 0
 float Printer::progress = 0;
 millis_t Printer::lastTempReport = 0;
+int32_t Printer::printingTime = 0;
 
-#if EEPROM_MODE != 0
-float Printer::zBedOffset = HAL::eprGetFloat(EPR_Z_PROBE_Z_OFFSET);
-#else
-float Printer::zBedOffset = Z_PROBE_Z_OFFSET;
-#endif
-#if FEATURE_AUTOLEVEL
-float Printer::autolevelTransformation[9]; ///< Transformation matrix
-#endif
 uint32_t Printer::interval = 30000; ///< Last step duration in ticks.
 uint32_t Printer::timer;            ///< used for acceleration/deceleration timing
 uint32_t Printer::stepNumber;       ///< Step number in current move.
@@ -114,6 +107,7 @@ float Printer::offsetZ2 = 0;           ///< Z-offset without rotation correction
 speed_t Printer::vMaxReached;          ///< Maximum reached speed
 uint32_t Printer::msecondsPrinting;    ///< Milliseconds of printing time (means time with heated extruder)
 float Printer::filamentPrinted;        ///< mm of filament printed since counting started
+float Printer::filamentPrintedTotal = 0;        ///< mm of filament printed since counting started
 #if ENABLE_BACKLASH_COMPENSATION
 float Printer::backlashX;
 float Printer::backlashY;
@@ -553,6 +547,7 @@ void Printer::setup() {
     Motion1::init();
     Motion2::init();
     Motion3::init();
+    ZProbeHandler::init();
     for (uint8_t i = 0; i < NUM_PWM; i++)
         pwm_pos[i] = 0;
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
@@ -568,7 +563,7 @@ void Printer::setup() {
 #if defined(EEPROM_AVAILABLE) && defined(EEPROM_SPI_ALLIGATOR) && EEPROM_AVAILABLE == EEPROM_SPI_ALLIGATOR
     HAL::spiBegin();
 #endif
-    HAL::hwSetup();
+//    HAL::hwSetup();
     EVENT_INITIALIZE_EARLY
 #ifdef ANALYZER
 // Channel->pin assignments
@@ -778,9 +773,6 @@ void Printer::setup() {
     initializeAllMotorDrivers();
 #endif // defined
     microstepInit();
-#if FEATURE_AUTOLEVEL
-    resetTransformationMatrix(true);
-#endif             // FEATURE_AUTOLEVEL
     feedrate = 50; ///< Current feedrate in mm/s.
     feedrateMultiply = 100;
     extrudeMultiply = 100;
@@ -818,9 +810,10 @@ void Printer::setup() {
     HAL::serialSetBaudrate(baudrate);
     Com::printFLN(Com::tStart);
     HAL::showStartReason();
+    HAL::hwSetup();
+    EEPROM::init(); // Read settings from eeprom if wanted
     Extruder::initExtruder();
     // sets auto leveling in eeprom init
-    EEPROM::init(); // Read settings from eeprom if wanted
     UI_INITIALIZE;
     //Commands::printCurrentPosition();
 #if DISTORTION_CORRECTION
@@ -1033,13 +1026,14 @@ void Printer::showConfiguration() {
     Com::config(PSTR("JerkZ:"), Motion1::maxYank[Z_AXIS]);
 #endif
 #if FEATURE_RETRACTION
-    Com::config(PSTR("RetractionLength:"), EEPROM_FLOAT(RETRACTION_LENGTH));
+    // TODO: Report retraction
+    /* Com::config(PSTR("RetractionLength:"), EEPROM_FLOAT(RETRACTION_LENGTH));
     Com::config(PSTR("RetractionLongLength:"), EEPROM_FLOAT(RETRACTION_LONG_LENGTH));
     Com::config(PSTR("RetractionSpeed:"), EEPROM_FLOAT(RETRACTION_SPEED));
     Com::config(PSTR("RetractionZLift:"), EEPROM_FLOAT(RETRACTION_Z_LIFT));
     Com::config(PSTR("RetractionUndoExtraLength:"), EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LENGTH));
     Com::config(PSTR("RetractionUndoExtraLongLength:"), EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LONG_LENGTH));
-    Com::config(PSTR("RetractionUndoSpeed:"), EEPROM_FLOAT(RETRACTION_UNDO_SPEED));
+    Com::config(PSTR("RetractionUndoSpeed:"), EEPROM_FLOAT(RETRACTION_UNDO_SPEED));*/
 #endif // FEATURE_RETRACTION
     Com::config(PSTR("XMin:"), Motion1::minPos[X_AXIS]);
     Com::config(PSTR("YMin:"), Motion1::minPos[Y_AXIS]);
