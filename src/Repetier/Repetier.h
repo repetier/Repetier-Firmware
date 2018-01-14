@@ -628,7 +628,6 @@ typedef uint8_t secondspeed_t;
 #define LONG_FILENAME_LENGTH (13 * MAX_VFAT_ENTRIES + 1)
 #define SD_MAX_FOLDER_DEPTH 2
 
-#include "src/communication/Communication.h"
 #include "src/controller/ui.h"
 
 #if UI_DISPLAY_TYPE != DISPLAY_U8G

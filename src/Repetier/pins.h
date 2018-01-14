@@ -108,4 +108,6 @@ MOTHERBOARD == 412 || MOTHERBOARD == 414 || MOTHERBOARD == 500 || MOTHERBOARD ==
 #include "src/due/HAL.h"
 #endif
 
+#include "src/communication/Communication.h"
+
 #endif

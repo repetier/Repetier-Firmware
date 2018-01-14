@@ -874,6 +874,9 @@ void TIMER1_COMPA_VECTOR () {
     */
 }
 
+fast8_t pwmSteps[] = {1,2,4,8,16};
+fast8_t pwmMasks[] = {255,254,252,248,240};
+
 #if !defined(HEATER_PWM_SPEED)
 #define HEATER_PWM_SPEED 0
 #endif
@@ -940,10 +943,20 @@ void PWM_TIMER_VECTOR () {
     // apparently have to read status register
     TC_GetStatus(PWM_TIMER, PWM_TIMER_CHANNEL);
 
+    static uint8_t pwm_count0 = 0;
+    static uint8_t pwm_count1 = 0;
+    static uint8_t pwm_count2 = 0;
+    static uint8_t pwm_count3 = 0;
+    static uint8_t pwm_count4 = 0;
     static uint8_t pwm_count_cooler = 0;
     static uint8_t pwm_count_heater = 0;
     static uint8_t pwm_pos_set[NUM_PWM];
     static uint8_t pwm_cooler_pos_set[NUM_EXTRUDER];
+
+// Add all generated pwm handlers
+#undef IO_TARGET
+#define IO_TARGET 2
+#include "../io/redefine.h"
 
     if (pwm_count_heater == 0 && !PDM_FOR_EXTRUDER) {
 #if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1
@@ -1000,12 +1013,12 @@ void PWM_TIMER_VECTOR () {
 #if FAN_BOARD_PIN > -1 && SHARED_COOLER_BOARD_EXT == 0
         if((pwm_pos_set[PWM_BOARD_FAN] = (pwm_pos[PWM_BOARD_FAN] & COOLER_PWM_MASK)) > 0) WRITE(FAN_BOARD_PIN, 1);
 #endif
-#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
+/*#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
         if((pwm_pos_set[PWM_FAN1] = (pwm_pos[PWM_FAN1] & COOLER_PWM_MASK)) > 0) WRITE(FAN_PIN, 1);
 #endif
 #if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
         if((pwm_pos_set[PWM_FAN2] = (pwm_pos[PWM_FAN2] & COOLER_PWM_MASK)) > 0) WRITE(FAN2_PIN, 1);
-#endif
+#endif */
 #if defined(FAN_THERMO_PIN) && FAN_THERMO_PIN > -1
         if((pwm_pos_set[PWM_FAN_THERMO] = (pwm_pos[PWM_FAN_THERMO] & COOLER_PWM_MASK)) > 0) WRITE(FAN_THERMO_PIN, 1);
 #endif
@@ -1101,7 +1114,7 @@ void PWM_TIMER_VECTOR () {
     if(pwm_pos_set[PWM_BOARD_FAN] == pwm_count_cooler && pwm_pos_set[PWM_BOARD_FAN] != COOLER_PWM_MASK) WRITE(FAN_BOARD_PIN, 0);
 #endif
 #endif
-#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
+/* #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
     if(fanKickstart == 0) {
 #if PDM_FOR_COOLER
         pulseDensityModulate(FAN_PIN, pwm_pos[PWM_FAN1], pwm_pos_set[PWM_FAN1], false);
@@ -1131,7 +1144,7 @@ void PWM_TIMER_VECTOR () {
 #endif
     }
 #endif
-
+*/
 #if defined(FAN_THERMO_PIN) && FAN_THERMO_PIN > -1
 #if PDM_FOR_COOLER
     pulseDensityModulate(FAN_THERMO_PIN, pwm_pos[PWM_FAN_THERMO], pwm_pos_set[PWM_FAN_THERMO], false);
@@ -1191,6 +1204,11 @@ void PWM_TIMER_VECTOR () {
 #endif // ANALOG_INPUTS > 0
     pwm_count_cooler += COOLER_PWM_STEP;
     pwm_count_heater += HEATER_PWM_STEP;
+    pwm_count0++;
+    pwm_count1+=2;
+    pwm_count2+=4;
+    pwm_count3+=8;
+    pwm_count4+=16;
     UI_FAST; // Short timed user interface action
 #if FEATURE_WATCHDOG
     if(HAL::wdPinged) {

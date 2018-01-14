@@ -82,7 +82,7 @@ void Motion3::activateNext() {
         nextActId = 0;
     }
     if (Printer::mode == PRINTER_MODE_FFF) {
-        Printer::setFanSpeedDirectly(static_cast<uint8_t>(act->secondSpeed));
+        Printer::setFanSpeedDirectly(static_cast<uint8_t>(act->secondSpeed), 0);
     }
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
     else if (Printer::mode == PRINTER_MODE_LASER) {

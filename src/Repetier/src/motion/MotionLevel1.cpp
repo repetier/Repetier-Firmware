@@ -526,7 +526,7 @@ void Motion1::queueMove(float feedrate) {
     }
 
     if (Printer::mode == PRINTER_MODE_FFF) {
-        buf.secondSpeed = Printer::fanSpeed;
+        buf.secondSpeed = Printer::getFanSpeed(0);
     }
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
     else if (Printer::mode == PRINTER_MODE_LASER) {

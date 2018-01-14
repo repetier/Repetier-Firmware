@@ -38,11 +38,16 @@
 
 // The follwing variables are required early to decide on the right modules.
 #define NUM_EXTRUDER 2
-#define MOTHERBOARD 402 // 405
+#define MOTHERBOARD 405 // 405
 #define EEPROM_MODE 2
 #define RFSERIAL Serial
+#define WAITING_IDENTIFIER "wait"
+#define JSON_OUTPUT 1
 #define FEATURE_SERVO 1
 #define FEATURE_WATCHDOG 0
+#define FEATURE_Z_PROBE 0
+#define FEATURE_RETRACTION 1
+#define DISTORTION_CORRECTION 0
 #define USE_ADVANCE 1
 #define ENABLE_QUADRATIC_ADVANCE 1
 #define NUM_AXES 4 // X,Y,Z and E for extruder A,B,C would be 5,6,7
@@ -82,6 +87,11 @@ CONFIG_VARIABLE(E0MOTOR_TYPE, E0Motor, E0MOTOR_PARAMS)
 #define X_HOME_PRIORITY 0
 #define Y_HOME_PRIORITY 1
 #define Z_HOME_PRIORITY 2
+
+// All fans in this list list become controllable with M106/M107
+// by selecteing the fan number with P0..P<NUM_FANS-1>
+#define NUM_FANS 1
+#define FAN_LIST {&Fan1PWM}
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 // ################ END MANUAL SETTINGS ##########################
@@ -211,7 +221,6 @@ CONFIG_VARIABLE(E0MOTOR_TYPE, E0Motor, E0MOTOR_PARAMS)
 #define EXT1_JAM_PIN 33
 #define EXT1_JAM_PULLUP 0
 
-#define FEATURE_RETRACTION 1
 #define AUTORETRACT_ENABLED 0
 #define RETRACTION_LENGTH 3
 #define RETRACTION_LONG_LENGTH 13
@@ -408,7 +417,6 @@ It also can add a delay to wait for spindle to run on full speed.
 #define Z_MIN_POS 0
 #define Z2_MINMAX_PIN -1
 
-#define DISTORTION_CORRECTION 0
 #define DISTORTION_CORRECTION_POINTS 5
 #define DISTORTION_LIMIT_TO 2
 #define DISTORTION_CORRECTION_R 100
@@ -507,11 +515,9 @@ It also can add a delay to wait for spindle to run on full speed.
 #define KILL_METHOD 1
 #define ACK_WITH_LINENUMBER 1
 #define KEEP_ALIVE_INTERVAL 2000
-#define WAITING_IDENTIFIER "wait"
 #define ECHO_ON_EXECUTE 1
 #undef PS_ON_PIN
 #define PS_ON_PIN -1
-#define JSON_OUTPUT 1
 
 /* ======== Servos =======
 Control the servos with
@@ -528,7 +534,6 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define SERVO2_NEUTRAL_POS -1
 #define SERVO3_NEUTRAL_POS -1
 #define UI_SERVO_CONTROL 1
-#define FAN_KICKSTART_TIME 200
 
 #define FEATURE_SERVO 1
 
@@ -537,7 +542,6 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define Z_PROBE_Z_OFFSET 0.05
 #define Z_PROBE_Z_OFFSET_MODE 1
 #define UI_BED_COATING 1
-#define FEATURE_Z_PROBE 0
 #define EXTRUDER_IS_Z_PROBE 1
 #define Z_PROBE_DISABLE_HEATERS 1
 #define Z_PROBE_BED_DISTANCE 3

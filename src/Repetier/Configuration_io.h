@@ -62,3 +62,10 @@ IO_INPUT(IOEndstopZMin, ORIG_Z_MIN_PIN)
 ENDSTOP_SWITCH(endstopXMin, IOEndstopXMin)
 ENDSTOP_SWITCH(endstopYMax, IOEndstopYMax)
 ENDSTOP_SWITCH(endstopZMin, IOEndstopZMin)
+
+// Define fans
+
+IO_OUTPUT_FULL(IOFan1, ORIG_FAN_PIN)
+IO_PWM_SOFTWARE(Fan1NoKSPWM, IOFan1, 0)
+// IO_PDM_SOFTWARE(Fan1NoKSPWM, IOFan1) // alternative to PWM signals
+IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20)

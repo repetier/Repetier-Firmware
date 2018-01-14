@@ -36,6 +36,7 @@ IO_TARGET with following meanings:
 
 #include "io_input.h"
 #include "io_output_full.h"
+#include "io_pwm.h"
 #include "endstop_definitions.h"
 
 // Add user configuration

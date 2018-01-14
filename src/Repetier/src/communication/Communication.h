@@ -157,8 +157,6 @@ public:
     FSTRINGVAR(tColon)
     FSTRINGVAR(tSpeedMultiply)
     FSTRINGVAR(tFlowMultiply)
-    FSTRINGVAR(tFanspeed)
-    FSTRINGVAR(tFan2speed)
     FSTRINGVAR(tPrintedFilament)
     FSTRINGVAR(tPrintingTime)
     FSTRINGVAR(tSpacem)
@@ -332,9 +330,6 @@ public:
     FSTRINGVAR(zZProbeBendingCorB)
     FSTRINGVAR(zZProbeBendingCorC)
 #endif
-#if FEATURE_AUTOLEVEL
-    FSTRINGVAR(tAutolevelActive)
-#endif
 #if FEATURE_AXISCOMP
     FSTRINGVAR(tAxisCompTanXY)
     FSTRINGVAR(tAxisCompTanYZ)
@@ -373,9 +368,6 @@ public:
 #if DRIVE_SYSTEM != DELTA
     FSTRINGVAR(tEPRMaxZJerk)
     FSTRINGVAR(tEPRXStepsPerMM)
-#if DUAL_X_RESOLUTION
-    FSTRINGVAR(tEPRX2StepsPerMM)
-#endif
     FSTRINGVAR(tEPRYStepsPerMM)
     FSTRINGVAR(tEPRXMaxFeedrate)
     FSTRINGVAR(tEPRYMaxFeedrate)
@@ -479,10 +471,6 @@ public:
     FSTRINGVAR(tPrinterModeCNC)
 #ifdef STARTUP_GCODE
     FSTRINGVAR(tStartupGCode)
-#endif
-#if NONLINEAR_SYSTEM
-    FSTRINGVAR(tEPRSegmentsPerSecondPrint)
-    FSTRINGVAR(tEPRSegmentsPerSecondTravel)
 #endif
 
     static void cap(FSTRINGPARAM(text));

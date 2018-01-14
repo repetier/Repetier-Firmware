@@ -125,8 +125,6 @@ FSTRINGVALUE(Com::tJSONFileInfoName, ",\"fileName\":\"");
 #endif // JSON_OUTPUT
 FSTRINGVALUE(Com::tSpeedMultiply, "SpeedMultiply:")
 FSTRINGVALUE(Com::tFlowMultiply, "FlowMultiply:")
-FSTRINGVALUE(Com::tFanspeed, "Fanspeed:")
-FSTRINGVALUE(Com::tFan2speed, "Fanspeed2:")
 FSTRINGVALUE(Com::tPrintedFilament, "Printed filament:")
 FSTRINGVALUE(Com::tPrintingTime, "Printing time:")
 FSTRINGVALUE(Com::tSpacem, "m ")
@@ -311,9 +309,6 @@ FSTRINGVALUE(Com::tAxisCompTanYZ, "tanYZ Axis Compensation")
 FSTRINGVALUE(Com::tAxisCompTanXZ, "tanXZ Axis Compensation")
 #endif
 
-#if FEATURE_AUTOLEVEL
-FSTRINGVALUE(Com::tAutolevelActive, "Autolevel active (1/0)")
-#endif
 FSTRINGVALUE(Com::tConfigStoredEEPROM, "Configuration stored to EEPROM.")
 FSTRINGVALUE(Com::tConfigLoadedEEPROM, "Configuration loaded from EEPROM.")
 FSTRINGVALUE(Com::tEPRConfigResetDefaults, "Configuration reset to defaults.")
@@ -339,10 +334,6 @@ FSTRINGVALUE(Com::tEPRYBacklash, "Y backlash [mm]")
 FSTRINGVALUE(Com::tEPRZBacklash, "Z backlash [mm]")
 FSTRINGVALUE(Com::tEPRMaxJerk, "Max. jerk [mm/s]")
 FSTRINGVALUE(Com::tEPRAccelerationFactorAtTop, "Acceleration factor at top [%,100=like bottom]")
-#if NONLINEAR_SYSTEM
-FSTRINGVALUE(Com::tEPRSegmentsPerSecondPrint, "Segments/s for printing")
-FSTRINGVALUE(Com::tEPRSegmentsPerSecondTravel, "Segments/s for travel")
-#endif
 #if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tEPRZAcceleration, "Acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZTravelAcceleration, "Travel acceleration [mm/s^2]")
@@ -365,9 +356,6 @@ FSTRINGVALUE(Com::tDeltaDiagonalCorrectionC, "Corr. diagonal C [mm]")
 #else
 FSTRINGVALUE(Com::tEPRMaxZJerk, "Max. Z-jerk [mm/s]")
 FSTRINGVALUE(Com::tEPRXStepsPerMM, "X-axis steps per mm")
-#if DUAL_X_RESOLUTION
-FSTRINGVALUE(Com::tEPRX2StepsPerMM, "X2-axis steps per mm")
-#endif
 FSTRINGVALUE(Com::tEPRYStepsPerMM, "Y-axis steps per mm")
 FSTRINGVALUE(Com::tEPRZStepsPerMM, "Z-axis steps per mm")
 FSTRINGVALUE(Com::tEPRXMaxFeedrate, "X-axis max. feedrate [mm/s]")

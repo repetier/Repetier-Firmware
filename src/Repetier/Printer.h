@@ -267,7 +267,6 @@ public:
 
     static uint8_t unitIsInches;
     static uint8_t mode;
-    static uint8_t fanSpeed; // Last fan speed set with M106/M107
     static fast8_t stepsPerTimerCall;
     static uint8_t flag0, flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t flag2, flag3;
@@ -439,9 +438,7 @@ public:
     static void enablePowerIfNeeded();
 #endif
     /** Sets the pwm for the fan speed. Gets called by motion control or Commands::setFanSpeed. */
-    static void setFanSpeedDirectly(uint8_t speed);
-    /** Sets the pwm for the fan 2 speed. Gets called by motion control or Commands::setFan2Speed. */
-    static void setFan2SpeedDirectly(uint8_t speed);
+    static void setFanSpeedDirectly(uint8_t speed,int fanId);
 
     /** For large machines, the nonlinear transformation can exceed integer 32bit range, so floating point math is needed. */
     static INLINE uint8_t isLargeMachine() {
@@ -719,12 +716,8 @@ public:
     static void defaultLoopActions();
     static void homeAxis(bool xaxis, bool yaxis, bool zaxis); /// Home axis
     static void setOrigin(float xOff, float yOff, float zOff);
-    static INLINE int getFanSpeed() {
-        return (int)pwm_pos[PWM_FAN1];
-    }
-    static INLINE int getFan2Speed() {
-        return (int)pwm_pos[PWM_FAN2];
-    }
+    static int getFanSpeed(int fanId);
+
 #if MAX_HARDWARE_ENDSTOP_Z || defined(DOXYGEN)
     static float runZMaxProbe();
 #endif

@@ -72,6 +72,11 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
         return; // gets true every 100ms
     executePeriodical = 0;
     EEPROM::timerHandler(); // store changes after timeout
+    // include generic 100ms calls
+#undef IO_TARGET
+#define IO_TARGET 3
+#include "../io/redefine.h"
+
     EVENT_TIMER_100MS;
     Extruder::manageTemperatures();
     if (--counter500ms == 0) {
@@ -243,29 +248,25 @@ uint8_t fanKickstart;
 uint8_t fan2Kickstart;
 #endif
 
-void Commands::setFanSpeed(int speed, bool immediately) {
-#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
-    if (Printer::fanSpeed == speed)
+void Commands::setFanSpeed(int speed, bool immediately,int fanId) {
+    if(fanId < 0 || fanId >= NUM_FANS) {
         return;
-    speed = constrain(speed, 0, 255);
-    Printer::setMenuMode(MENU_MODE_FAN_RUNNING, speed != 0);
-    Printer::fanSpeed = speed;
-    if (Motion1::length == 0 || immediately) {
-        if (Printer::mode == PRINTER_MODE_FFF) {
-            for (fast8_t i = 0; i < PRINTLINE_CACHE_SIZE; i++)
-                Motion1::buffers[i].secondSpeed = speed; // fill all printline buffers with new fan speed value
-        }
-        Printer::setFanSpeedDirectly(speed);
     }
-    Com::printFLN(Com::tFanspeed, speed); // send only new values to break update loops!
-#endif
-}
-void Commands::setFan2Speed(int speed) {
-#if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
     speed = constrain(speed, 0, 255);
-    Printer::setFan2SpeedDirectly(speed);
-    Com::printFLN(Com::tFan2speed, speed); // send only new values to break update loops!
-#endif
+    if (Printer::getFanSpeed(fanId) == speed)
+        return;
+    if(fanId == 0) {        
+        Printer::setMenuMode(MENU_MODE_FAN_RUNNING, speed != 0);
+        if (Motion1::length == 0 || immediately) {
+            if (Printer::mode == PRINTER_MODE_FFF) {
+                for (fast8_t i = 0; i < PRINTLINE_CACHE_SIZE; i++)
+                    Motion1::buffers[i].secondSpeed = speed; // fill all printline buffers with new fan speed value
+            }
+        }
+    }
+    Printer::setFanSpeedDirectly(speed, fanId);
+    Com::printF(PSTR("Fanspeed"), fanId);
+    Com::printFLN(Com::tColon, speed);
 }
 
 void Commands::reportPrinterUsage() {
@@ -1846,18 +1847,20 @@ void Commands::processMCode(GCode* com) {
                 Printer::flag2 &= ~PRINTER_FLAG2_IGNORE_M106_COMMAND;
         }
         if (!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND)) {
-            if (com->hasP() && com->P == 1)
-                setFan2Speed(com->hasS() ? com->S : 255);
-            else
-                setFanSpeed(com->hasS() ? com->S : 255);
+            int p = 0;
+            if(com->hasP()) {
+                p = static_cast<int>(com->P);
+            }
+            setFanSpeed(com->hasS() ? com->S : 255, false, p);
         }
         break;
     case 107: // M107 Fan Off
         if (!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND)) {
-            if (com->hasP() && com->P == 1)
-                setFan2Speed(0);
-            else
-                setFanSpeed(0);
+            int p = 0;
+            if(com->hasP()) {
+                p = static_cast<int>(com->P);
+            }
+            setFanSpeed(0, false, p);
         }
         break;
 #endif
