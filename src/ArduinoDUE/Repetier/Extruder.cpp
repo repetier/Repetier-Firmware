@@ -2450,6 +2450,12 @@ void TemperatureController::autotunePID(float temp, uint8_t controllerId, int ma
                             Kd = Kp * Tu * 3.0 / 20.0;
                             Com::printFLN(Com::tAPIDPessen);
                         }
+						if(method == 4) { //Tyreus-Lyben
+						   Kp = 0.4545f*Ku;      //1/2.2 KRkrit
+			               Ki = Kp/Tu/2.2f;        //2.2 Tkrit
+	                       Kd = Kp*Tu/6.3f;      //1/6.3 Tkrit[/code]
+	                       Com::printFLN(Com::tAPIDTyreusLyben);
+						}
                         Com::printFLN(Com::tAPIDKp, Kp);
                         Com::printFLN(Com::tAPIDKi, Ki);
                         Com::printFLN(Com::tAPIDKd, Kd);

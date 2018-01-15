@@ -142,7 +142,7 @@ Custom M Codes
 - M300 S<Frequency> P<DurationMillis> play frequency
 - M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will allow, S0 will disallow.
 - M303 P<extruder/bed> S<printTemerature> X0 R<Repetitions> C<method>- Auto detect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM. R is number of cycles.
-				method 0 = classic, 1 = some overshoot, 2 = no overshoot
+				method 0 = classic, 1 = some overshoot, 2 = no overshoot, 3 = pessen, 4 = Tyreus-Lyben
 - M320 S<0/1> - Activate auto level, S1 stores it in eeprom
 - M321 S<0/1> - Deactivate auto level, S1 stores it in eeprom
 - M322 - Reset auto level matrix
