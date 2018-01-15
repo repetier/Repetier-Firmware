@@ -40,9 +40,11 @@ Done:
 - Due boards support new motion system.
 - First tests of the new modular configuration scheme.
 - Pure cartesian printer system.
+- Core XYZ printer system.
 - Linear, cubic and quintic velocity shape.
 - No minimum speed required any more.
 - Homing
+- new analog value reading
 
 ToDo:
 - Dual X axis printer type

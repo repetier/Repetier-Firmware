@@ -18,7 +18,7 @@
 
 #include "../../Repetier.h"
 
-#if PRINTER_TYPE == 1
+#if PRINTER_TYPE == 0
 
 void PrinterType::homeAxis(fast8_t axis) {
     Motion1::simpleHome(axis);
@@ -42,7 +42,10 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
 }
 
 void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]) {
-    for (fast8_t i = 0; i < NUM_AXES; i++) {
+    motor[X_AXIS] = COREXYZ_X_X * pos[X_AXIS] + COREXYZ_X_Y * pos[Y_AXIS] + COREXYZ_X_Z * pos[Z_AXIS];
+    motor[Y_AXIS] = COREXYZ_Y_X * pos[X_AXIS] + COREXYZ_Y_Y * pos[Y_AXIS] + COREXYZ_Y_Z * pos[Z_AXIS];
+    motor[Z_AXIS] = COREXYZ_Z_X * pos[X_AXIS] + COREXYZ_Z_Y * pos[Y_AXIS] + COREXYZ_Z_Z * pos[Z_AXIS];
+    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
         motor[i] = static_cast<int32_t>(floor(pos[i] * Motion1::resolution[i] + 0.5f));
     }
 }

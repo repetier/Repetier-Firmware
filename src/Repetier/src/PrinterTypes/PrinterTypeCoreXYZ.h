@@ -16,31 +16,24 @@
 
 */
 
-/*
-Reset all defines for target dependent IO pin handling. Handling is defined by
-IO_TARGET with following meanings:
+#if PRINTER_TYPE == 1
 
-1: Init at firmware start
-2: PWM Interrupt
-3: 100ms call
-4: Define class
-5: Endstop update
-6: define variables
-7: Visualization for config
-8: eepromHandle calls
-9: updateDerived calls
-10: restore from config
-11: analog input loop
-*/
+class PrinterType {
+public:
+    // Are subdivisions required due to nonlinear kinematics
+    static bool subdivisionsRequired() {
+        return false;
+    }
 
-// #pragma message(VAR_NAME_VALUE(IO_TARGET))
+    static void transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]);
 
-#include "io_input.h"
-#include "io_output_full.h"
-#include "io_pwm.h"
-#include "io_analog.h"
-#include "endstop_definitions.h"
+    static void homeAxis(fast8_t axis);
 
-// Add user configuration
-
-#include "../../Configuration_io.h"
+    static bool positionAllowed(float pos[NUM_AXES]);
+    static void disableAllowedStepper();
+    /** During probing or homing a move in steps might be needed.
+     * This returns the acceleration to use. */
+    static float accelerationForMoveSteps(fast8_t axes);
+    static float feedrateForMoveSteps(fast8_t axes);
+};
+#endif

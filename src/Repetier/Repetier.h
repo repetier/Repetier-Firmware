@@ -675,13 +675,13 @@ typedef uint8_t secondspeed_t;
 #define TRIM_FAN_PWM(x) static_cast<uint8_t>(static_cast<unsigned int>(x) * MAX_FAN_PWM / 255)
 #endif
 
-extern const uint8 osAnalogInputChannels[] PROGMEM;
+// extern const uint8 osAnalogInputChannels[] PROGMEM;
 //extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
 //extern uint osAnalogInputBuildup[ANALOG_INPUTS];
 //extern uint8 osAnalogInputPos; // Current sampling position
-#if ANALOG_INPUTS > 0
-extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
-#endif
+//#if ANALOG_INPUTS > 0
+//extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
+//#endif
 #define PWM_HEATED_BED NUM_EXTRUDER
 #define PWM_BOARD_FAN PWM_HEATED_BED + 1
 #define PWM_FAN1 PWM_BOARD_FAN + 1
@@ -730,6 +730,7 @@ extern void microstepInit();
 #include "src/motion/MotionLevel2.h"
 #include "src/motion/MotionLevel3.h"
 #include "src/PrinterTypes/PrinterTypeCartesian.h"
+#include "src/PrinterTypes/PrinterTypeCoreXYZ.h"
 #include "src/motion/VelocityProfile.h"
 // #include "src/motion/motion.h"
 
@@ -739,12 +740,6 @@ extern unsigned int counterPeriodical;
 extern volatile uint8_t executePeriodical;
 extern uint8_t counter500ms;
 extern void writeMonitor();
-#if FEATURE_FAN_CONTROL
-extern uint8_t fanKickstart;
-#endif
-#if FEATURE_FAN2_CONTROL
-extern uint8_t fan2Kickstart;
-#endif
 
 #if SDSUPPORT
 extern char tempLongFilename[LONG_FILENAME_LENGTH + 1];

@@ -35,7 +35,8 @@ class TemperatureController
 public:
     uint8_t pwmIndex; ///< pwm index for output control. 0-2 = Extruder, 3 = Fan, 4 = Heated Bed
     uint8_t sensorType; ///< Type of temperature sensor.
-    uint8_t sensorPin; ///< Pin to read extruder temperature.
+    //uint8_t sensorPin; ///< Pin to read extruder temperature.
+    AnalogInput *analogInput;
     int8_t heatManager; ///< How is temperature controlled. 0 = on/off, 1 = PID-Control, 3 = dead time control
     int16_t currentTemperature; ///< Current temperature value read from sensor.
     //int16_t targetTemperature; ///< Target temperature value in units of sensor.

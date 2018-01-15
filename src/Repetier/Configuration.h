@@ -56,6 +56,24 @@
 #define BLOCK_FREQUENCY 250
 #define VELOCITY_PROFILE 5 // 1 = linear, 3 = cubic, 5 = quintic velocity shape
 
+// 0 = Cartesian, 1 = CoreXYZ, 2 = delta
+#define PRINTER_TYPE 0
+/* Ratios for core xyz. First index denotes motor and second axis.
+For each motor you can set the ratio of x,y,z position that adds
+to the position. 0 = no contribution. */
+// X motor = x + y
+#define COREXYZ_X_X 1
+#define COREXYZ_X_Y 1
+#define COREXYZ_X_Z 0
+// Y motor = x - y
+#define COREXYZ_Y_X 1
+#define COREXYZ_Y_Y -1
+#define COREXYZ_Y_Z 0
+// Z motor = z
+#define COREXYZ_Z_X 0
+#define COREXYZ_Z_Y 0
+#define COREXYZ_Z_Z 1
+
 // Next 7 lines are required to make the following work, do not change!
 #include "pins.h"
 #undef IO_TARGET
@@ -1173,7 +1191,6 @@ Values must be in range 1..255
     "filamentChangeRehome": 1,
     "filamentChangeShortRetract": 2.5,
     "filamentChangeLongRetract": 50,
-    "fanKickstart": 200,
     "servo0StartPos": "1050",
     "servo1StartPos": -1,
     "servo2StartPos": -1,

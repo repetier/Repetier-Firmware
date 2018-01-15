@@ -241,13 +241,6 @@ void Commands::changeFlowrateMultiply(int factor) {
     Com::printFLN(Com::tFlowMultiply, factor);
 }
 
-#if FEATURE_FAN_CONTROL
-uint8_t fanKickstart;
-#endif
-#if FEATURE_FAN2_CONTROL
-uint8_t fan2Kickstart;
-#endif
-
 void Commands::setFanSpeed(int speed, bool immediately,int fanId) {
     if(fanId < 0 || fanId >= NUM_FANS) {
         return;

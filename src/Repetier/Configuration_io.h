@@ -69,3 +69,12 @@ IO_OUTPUT_FULL(IOFan1, ORIG_FAN_PIN)
 IO_PWM_SOFTWARE(Fan1NoKSPWM, IOFan1, 0)
 // IO_PDM_SOFTWARE(Fan1NoKSPWM, IOFan1) // alternative to PWM signals
 IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20)
+
+// Define temperature sensors
+
+// Typically they requre an analog input (12 bit) so define
+// them first.
+
+IO_ANALOG_INPUT(IOAnalogBed0, TEMP_1_PIN, 5)
+IO_ANALOG_INPUT(IOAnalogExt0, TEMP_0_PIN, 5)
+IO_ANALOG_INPUT(IOAnalogExt1, TEMP_2_PIN, 5)

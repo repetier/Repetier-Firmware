@@ -40,10 +40,11 @@ extern int16_t read_max6675(uint8_t ss_pin, fast8_t idx);
 extern int16_t read_max31855(uint8_t ss_pin, fast8_t idx);
 #endif
 
-#if ANALOG_INPUTS > 0
+/* #if ANALOG_INPUTS > 0
 const uint8 osAnalogInputChannels[] PROGMEM = ANALOG_INPUT_CHANNELS;
 volatile uint osAnalogInputValues[ANALOG_INPUTS];
 #endif
+*/
 
 #ifdef USE_GENERIC_THERMISTORTABLE_1
 short temptable_generic1[GENERIC_THERM_NUM_ENTRIES][2];
@@ -655,9 +656,9 @@ void Extruder::initExtruder() {
     WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
     Extruder::initHeatedBed();
 #endif
-#if ANALOG_INPUTS > 0
+// #if ANALOG_INPUTS > 0
     HAL::analogStart();
-#endif
+// #endif
 }
 
 void TemperatureController::updateTempControlVars() {
@@ -2190,7 +2191,7 @@ void TemperatureController::updateCurrentTemperature() {
     case 97:
     case 98:
     case 99:
-        currentTemperature = (1023 << (2 - ANALOG_REDUCE_BITS)) - (osAnalogInputValues[sensorPin] >> (ANALOG_REDUCE_BITS)); // Convert to 10 bit result
+        currentTemperature = 4095 - analogInput->get(); //(1023 << (2 - ANALOG_REDUCE_BITS)) - (osAnalogInputValues[sensorPin] >> (ANALOG_REDUCE_BITS)); // Convert to 10 bit result
         break;
     case 13: // PT100 E3D
     case 50: // User defined PTC table
@@ -2199,24 +2200,27 @@ void TemperatureController::updateCurrentTemperature() {
     case 60:  // HEATER_USES_AD8495 (Delivers 5mV/degC)
     case 61:  // HEATER_USES_AD8495 (Delivers 5mV/degC) 1.25v offset
     case 100: // AD595 / AD597
-        currentTemperature = (osAnalogInputValues[sensorPin] >> (ANALOG_REDUCE_BITS));
+        currentTemperature = analogInput->get(); // (osAnalogInputValues[sensorPin] >> (ANALOG_REDUCE_BITS));
         break;
 #endif
 #ifdef SUPPORT_MAX6675
     case 101: // MAX6675
     {
-        int newTemp = read_max6675(sensorPin, pwmIndex);
+        // TODO: max6675
+        /* int newTemp = read_max6675(sensorPin, pwmIndex);
         if (newTemp != 2000) {
             currentTemperature = newTemp;
         }
+        */
         break;
 #endif
 #ifdef SUPPORT_MAX31855
     case 102: { // MAX31855
-        int16_t newTemp = read_max31855(sensorPin, pwmIndex);
+    // TODO: max31855
+        /* int16_t newTemp = read_max31855(sensorPin, pwmIndex);
         if (newTemp != 20000) { // don't use error read
             currentTemperature = newTemp;
-        }
+        }*/
     } break;
 #endif
     default:
@@ -2492,6 +2496,12 @@ void TemperatureController::updateCurrentTemperature() {
                                 Kd = Kp * Tu * 3.0 / 20.0;
                                 Com::printFLN(Com::tAPIDPessen);
                             }
+       						if(method == 4) { //Tyreus-Lyben
+						        Kp = 0.4545f*Ku;      //1/2.2 KRkrit
+			                    Ki = Kp/Tu/2.2f;        //2.2 Tkrit
+	                            Kd = Kp*Tu/6.3f;      //1/6.3 Tkrit[/code]
+	                            Com::printFLN(Com::tAPIDTyreusLyben);
+						    }
                             Com::printFLN(Com::tAPIDKp, Kp);
                             Com::printFLN(Com::tAPIDKi, Ki);
                             Com::printFLN(Com::tAPIDKd, Kd);
@@ -2764,7 +2774,7 @@ Extruder extruder[NUM_EXTRUDER] = {
       { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 }
 #endif
       ,
-      { 0, EXT0_TEMPSENSOR_TYPE, EXT0_SENSOR_INDEX, EXT0_HEAT_MANAGER, 0, 0, 0, 0, 0, 0, 0, EXT0_PID_INTEGRAL_DRIVE_MAX, EXT0_PID_INTEGRAL_DRIVE_MIN, EXT0_PID_PGAIN_OR_DEAD_TIME, EXT0_PID_I, EXT0_PID_D, EXT0_PID_MAX, 0, 0, 0, 0, 0, EXT0_DECOUPLE_TEST_PERIOD, 0, EXT0_PREHEAT_TEMP },
+      { 0, EXT0_TEMPSENSOR_TYPE, &IOAnalogExt0 /*EXT0_SENSOR_INDEX*/, EXT0_HEAT_MANAGER, 0, 0, 0, 0, 0, 0, 0, EXT0_PID_INTEGRAL_DRIVE_MAX, EXT0_PID_INTEGRAL_DRIVE_MIN, EXT0_PID_PGAIN_OR_DEAD_TIME, EXT0_PID_I, EXT0_PID_D, EXT0_PID_MAX, 0, 0, 0, 0, 0, EXT0_DECOUPLE_TEST_PERIOD, 0, EXT0_PREHEAT_TEMP },
       ext0_select_cmd,
       ext0_deselect_cmd,
       EXT0_EXTRUDER_COOLER_SPEED,
@@ -2804,7 +2814,7 @@ Extruder extruder[NUM_EXTRUDER] = {
       { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 }
 #endif
       ,
-      { 1, EXT1_TEMPSENSOR_TYPE, EXT1_SENSOR_INDEX, EXT1_HEAT_MANAGER, 0, 0, 0, 0, 0, 0, 0, EXT1_PID_INTEGRAL_DRIVE_MAX, EXT1_PID_INTEGRAL_DRIVE_MIN, EXT1_PID_PGAIN_OR_DEAD_TIME, EXT1_PID_I, EXT1_PID_D, EXT1_PID_MAX, 0, 0, 0, 0, 0, EXT1_DECOUPLE_TEST_PERIOD, 0, EXT1_PREHEAT_TEMP },
+      { 1, EXT1_TEMPSENSOR_TYPE, &IOAnalogExt1 /*EXT1_SENSOR_INDEX*/, EXT1_HEAT_MANAGER, 0, 0, 0, 0, 0, 0, 0, EXT1_PID_INTEGRAL_DRIVE_MAX, EXT1_PID_INTEGRAL_DRIVE_MIN, EXT1_PID_PGAIN_OR_DEAD_TIME, EXT1_PID_I, EXT1_PID_D, EXT1_PID_MAX, 0, 0, 0, 0, 0, EXT1_DECOUPLE_TEST_PERIOD, 0, EXT1_PREHEAT_TEMP },
       ext1_select_cmd,
       ext1_deselect_cmd,
       EXT1_EXTRUDER_COOLER_SPEED,
@@ -2989,7 +2999,7 @@ Extruder extruder[NUM_EXTRUDER] = {
 
 #if HAVE_HEATED_BED
     TemperatureController heatedBedController = {
-        PWM_HEATED_BED, HEATED_BED_SENSOR_TYPE, BED_SENSOR_INDEX, HEATED_BED_HEAT_MANAGER, 0, 0, 0, 0, 0, 0, 0, HEATED_BED_PID_INTEGRAL_DRIVE_MAX, HEATED_BED_PID_INTEGRAL_DRIVE_MIN, HEATED_BED_PID_PGAIN_OR_DEAD_TIME, HEATED_BED_PID_IGAIN, HEATED_BED_PID_DGAIN, HEATED_BED_PID_MAX, 0, 0, 0, 0, 0, HEATED_BED_DECOUPLE_TEST_PERIOD, 0, HEATED_BED_PREHEAT_TEMP
+        PWM_HEATED_BED, HEATED_BED_SENSOR_TYPE, &IOAnalogBed0 /*BED_SENSOR_INDEX*/, HEATED_BED_HEAT_MANAGER, 0, 0, 0, 0, 0, 0, 0, HEATED_BED_PID_INTEGRAL_DRIVE_MAX, HEATED_BED_PID_INTEGRAL_DRIVE_MIN, HEATED_BED_PID_PGAIN_OR_DEAD_TIME, HEATED_BED_PID_IGAIN, HEATED_BED_PID_DGAIN, HEATED_BED_PID_MAX, 0, 0, 0, 0, 0, HEATED_BED_DECOUPLE_TEST_PERIOD, 0, HEATED_BED_PREHEAT_TEMP
     };
 #endif
 

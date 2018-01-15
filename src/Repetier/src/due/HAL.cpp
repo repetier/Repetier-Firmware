@@ -33,7 +33,12 @@
 extern "C" char *sbrk(int i);
 extern long bresenham_step();
 
-#define NUM_ADC_SAMPLES 2 + (1 << ANALOG_INPUT_SAMPLE)
+// New adc handling
+bool analogEnabled[MAX_ANALOG_INPUTS] = {false,false,false,false,false,false,false,false,false,false,false,false};
+// end adc handling
+
+// #define NUM_ADC_SAMPLES 2 + (1 << ANALOG_INPUT_SAMPLE)
+/*
 #if ANALOG_INPUTS > 0
 int32_t osAnalogInputBuildup[ANALOG_INPUTS];
 int32_t osAnalogSamples[ANALOG_INPUTS][ANALOG_INPUT_MEDIAN];
@@ -42,6 +47,7 @@ static int32_t adcSamplesMin[ANALOG_INPUTS];
 static int32_t adcSamplesMax[ANALOG_INPUTS];
 static int adcCounter = 0, adcSamplePos = 0;
 #endif
+*/
 
 static   uint32_t  adcEnable = 0;
 
@@ -157,7 +163,7 @@ void HAL::setupTimer() {
 
 
 
-#if ANALOG_INPUTS > 0
+//#if ANALOG_INPUTS > 0
 // Initialize ADC channels
 void HAL::analogStart(void) {
 
@@ -178,7 +184,13 @@ void HAL::analogStart(void) {
     ADC->ADC_WPMR = 0x41444300u; //ADC_WPMR_WPKEY(0);
     pmc_enable_periph_clk(ID_ADC);  // enable adc clock
 
-    for (int i = 0; i < ANALOG_INPUTS; i++) {
+    for(int i=0; i< MAX_ANALOG_INPUTS; i++) {
+        if(analogEnabled[i] == false) {
+            continue;
+        }
+        adcEnable |= (0x1u << i);
+    }
+    /*for (int i = 0; i < ANALOG_INPUTS; i++) {
         osAnalogInputValues[i] = 0;
         adcSamplesMin[i] = 100000;
         adcSamplesMax[i] = 0;
@@ -186,7 +198,7 @@ void HAL::analogStart(void) {
         osAnalogSamplesSum[i] = 2048 * ANALOG_INPUT_MEDIAN;
         for (int j = 0; j < ANALOG_INPUT_MEDIAN; j++)
             osAnalogSamples[i][j] = 2048; // we want to prevent early error from bad starting values
-    }
+    }*/
     // enable channels
     ADC->ADC_CHER = adcEnable;
     ADC->ADC_CHDR = !adcEnable;
@@ -215,7 +227,7 @@ void HAL::analogStart(void) {
     ADC->ADC_CR = ADC_CR_START;
 }
 
-#endif
+//#endif
 
 #if EEPROM_AVAILABLE == EEPROM_SDCARD
 
@@ -822,56 +834,13 @@ TcChannel *stepperChannel = (TIMER1_TIMER->TC_CHANNEL + TIMER1_TIMER_CHANNEL);
 void TIMER1_COMPA_VECTOR () {    
     // apparently have to read status register
     stepperChannel->TC_SR;
-    static bool inside = false; // prevent double call when not finished
+  /*  static bool inside = false; // prevent double call when not finished
     if(inside) {
         return;
     }    
-    inside = true;
+    inside = true;*/
     Motion3::timer();
-    inside = false;
-/*    
-    stepperChannel->TC_RC = 1000000;
-    uint32_t delay;
-    if (PrintLine::hasLines()) {
-        delay = PrintLine::bresenhamStep();
-    }
-#if FEATURE_BABYSTEPPING
-    else if (Printer::zBabystepsMissing != 0) {
-        Printer::zBabystep();
-        delay = Printer::interval;
-    }
-#endif
-    else {
-        if (waitRelax == 0) {
-#if USE_ADVANCE
-            if (Printer::advanceStepsSet) {
-                Printer::extruderStepsNeeded -= Printer::advanceStepsSet;
-#if ENABLE_QUADRATIC_ADVANCE
-                Printer::advanceExecuted = 0;
-#endif
-                Printer::advanceStepsSet = 0;
-            }
-            if ((!Printer::extruderStepsNeeded) && (DISABLE_E))
-                Extruder::disableCurrentExtruderMotor();
-#else
-            if (DISABLE_E) Extruder::disableCurrentExtruderMotor();
-#endif
-        } else waitRelax--;
-
-        delay = 10000;
-    }
-    // convert old AVR timer delay value for SAM timers
-    uint32_t timer_count = (delay * TIMER1_PRESCALE);
-    //if (timer_count < 210) // max. 200 khz timer frequency
-    //  timer_count = 210;
-    InterruptProtectedBlock noInt; // prevent interruption or we might get 102s delay
-    if ( stepperChannel->TC_CV + STEPPERTIMER_EXIT_TICKS > timer_count) {
-        stepperChannel->TC_RC = stepperChannel->TC_CV + STEPPERTIMER_EXIT_TICKS; // should end after exiting timer interrupt
-        //stepperChannel->TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG ;
-    } else {
-        stepperChannel->TC_RC = timer_count;
-    }
-    */
+    // inside = false;
 }
 
 fast8_t pwmSteps[] = {1,2,4,8,16};
@@ -1013,12 +982,7 @@ void PWM_TIMER_VECTOR () {
 #if FAN_BOARD_PIN > -1 && SHARED_COOLER_BOARD_EXT == 0
         if((pwm_pos_set[PWM_BOARD_FAN] = (pwm_pos[PWM_BOARD_FAN] & COOLER_PWM_MASK)) > 0) WRITE(FAN_BOARD_PIN, 1);
 #endif
-/*#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
-        if((pwm_pos_set[PWM_FAN1] = (pwm_pos[PWM_FAN1] & COOLER_PWM_MASK)) > 0) WRITE(FAN_PIN, 1);
-#endif
-#if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
-        if((pwm_pos_set[PWM_FAN2] = (pwm_pos[PWM_FAN2] & COOLER_PWM_MASK)) > 0) WRITE(FAN2_PIN, 1);
-#endif */
+
 #if defined(FAN_THERMO_PIN) && FAN_THERMO_PIN > -1
         if((pwm_pos_set[PWM_FAN_THERMO] = (pwm_pos[PWM_FAN_THERMO] & COOLER_PWM_MASK)) > 0) WRITE(FAN_THERMO_PIN, 1);
 #endif
@@ -1114,37 +1078,7 @@ void PWM_TIMER_VECTOR () {
     if(pwm_pos_set[PWM_BOARD_FAN] == pwm_count_cooler && pwm_pos_set[PWM_BOARD_FAN] != COOLER_PWM_MASK) WRITE(FAN_BOARD_PIN, 0);
 #endif
 #endif
-/* #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
-    if(fanKickstart == 0) {
-#if PDM_FOR_COOLER
-        pulseDensityModulate(FAN_PIN, pwm_pos[PWM_FAN1], pwm_pos_set[PWM_FAN1], false);
-#else
-        if(pwm_pos_set[PWM_FAN1] == pwm_count_cooler && pwm_pos_set[PWM_FAN1] != COOLER_PWM_MASK) WRITE(FAN_PIN, 0);
-#endif
-    } else {
-#if PDM_FOR_COOLER
-        pulseDensityModulate(FAN_PIN, MAX_FAN_PWM, pwm_pos_set[PWM_FAN1], false);
-#else
-        if((MAX_FAN_PWM & COOLER_PWM_MASK) == pwm_count_cooler && (MAX_FAN_PWM & COOLER_PWM_MASK) != COOLER_PWM_MASK) WRITE(FAN_PIN, 0);
-#endif
-    }
-#endif
-#if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
-    if(fan2Kickstart == 0) {
-#if PDM_FOR_COOLER
-        pulseDensityModulate(FAN2_PIN, pwm_pos[PWM_FAN2], pwm_pos_set[PWM_FAN2], false);
-#else
-        if(pwm_pos_set[PWM_FAN2] == pwm_count_cooler && pwm_pos_set[PWM_FAN2] != COOLER_PWM_MASK) WRITE(FAN2_PIN, 0);
-#endif
-    } else {
-#if PDM_FOR_COOLER
-        pulseDensityModulate(FAN2_PIN, MAX_FAN_PWM,pwm_pos_set[PWM_FAN2], false);
-#else
-        if((MAX_FAN_PWM & COOLER_PWM_MASK) == pwm_count_cooler && (MAX_FAN_PWM & COOLER_PWM_MASK) != COOLER_PWM_MASK) WRITE(FAN2_PIN, 0);
-#endif
-    }
-#endif
-*/
+
 #if defined(FAN_THERMO_PIN) && FAN_THERMO_PIN > -1
 #if PDM_FOR_COOLER
     pulseDensityModulate(FAN_THERMO_PIN, pwm_pos[PWM_FAN_THERMO], pwm_pos_set[PWM_FAN_THERMO], false);
@@ -1163,18 +1097,18 @@ void PWM_TIMER_VECTOR () {
     if (counterPeriodical >= PWM_COUNTER_100MS) { //  (int)(F_CPU/40960))
         counterPeriodical = 0;
         executePeriodical = 1;
-#if FEATURE_FAN_CONTROL
-        if (fanKickstart) fanKickstart--;
-#endif
-#if FEATURE_FAN2_CONTROL
-        if (fan2Kickstart) fan2Kickstart--;
-#endif
     }
     // read analog values -- only read one per interrupt
-#if ANALOG_INPUTS > 0
+//#if ANALOG_INPUTS > 0
     // conversion finished?
     if ((ADC->ADC_ISR & adcEnable) == adcEnable) {
-        adcCounter++;
+#undef IO_TARGET
+#define IO_TARGET 11
+#include "../io/redefine.h"
+        /*if (executePeriodical) {
+            Com::printFLN("bed:",IOAnalogBed0.value);
+        }*/
+        /*adcCounter++;
         for (int i = 0; i < ANALOG_INPUTS; i++) {
             int32_t cur = ADC->ADC_CDR[osAnalogInputChannels[i]];
             osAnalogInputBuildup[i] += cur;
@@ -1198,10 +1132,10 @@ void PWM_TIMER_VECTOR () {
             adcSamplePos++;
             if (adcSamplePos >= ANALOG_INPUT_MEDIAN)
                 adcSamplePos = 0;
-        }
+        }*/
         ADC->ADC_CR = ADC_CR_START; // reread values
     }
-#endif // ANALOG_INPUTS > 0
+// #endif // ANALOG_INPUTS > 0
     pwm_count_cooler += COOLER_PWM_STEP;
     pwm_count_heater += HEATER_PWM_STEP;
     pwm_count0++;
