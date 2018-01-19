@@ -235,6 +235,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define CONFIG_VARIABLE_EQ(tp, name, values) extern tp name;
 #endif
 
+#include "src/io/temperature_tables.h"
 #include "Configuration.h"
 
 #if (LASER_PWM_MAX > 255 && SUPPORT_LASER) || (CNC_PWM_MAX > 255 && SUPPORT_CNC)

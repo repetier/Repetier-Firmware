@@ -39,6 +39,7 @@ IO_TARGET with following meanings:
 #include "io_output_full.h"
 #include "io_pwm.h"
 #include "io_analog.h"
+#include "io_temperature.h"
 #include "endstop_definitions.h"
 
 // Add user configuration

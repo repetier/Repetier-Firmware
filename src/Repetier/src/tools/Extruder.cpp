@@ -1959,214 +1959,10 @@ void Extruder::disableAllExtruderMotors() {
     WRITE(EXT5_ENABLE2_PIN, !EXT5_ENABLE_ON);
 #endif
 }
-#define NUMTEMPS_1 28
-// Epcos B57560G0107F000
-const short temptable_1[NUMTEMPS_1][2] PROGMEM = {
-    { 0, 4000 }, { 92, 2400 }, { 105, 2320 }, { 121, 2240 }, { 140, 2160 }, { 162, 2080 }, { 189, 2000 }, { 222, 1920 }, { 261, 1840 }, { 308, 1760 }, { 365, 1680 }, { 434, 1600 }, { 519, 1520 }, { 621, 1440 }, { 744, 1360 }, { 891, 1280 }, { 1067, 1200 }, { 1272, 1120 }, { 1771, 960 }, { 2357, 800 }, { 2943, 640 }, { 3429, 480 }, { 3760, 320 }, { 3869, 240 }, { 3912, 200 }, { 3948, 160 }, { 4077, -160 }, { 4094, -440 }
-};
-#define NUMTEMPS_2 21
-const short temptable_2[NUMTEMPS_2][2] PROGMEM = {
-    { 1 * 4, 848 * 8 }, { 54 * 4, 275 * 8 }, { 107 * 4, 228 * 8 }, { 160 * 4, 202 * 8 }, { 213 * 4, 185 * 8 }, { 266 * 4, 171 * 8 }, { 319 * 4, 160 * 8 }, { 372 * 4, 150 * 8 }, { 425 * 4, 141 * 8 }, { 478 * 4, 133 * 8 }, { 531 * 4, 125 * 8 }, { 584 * 4, 118 * 8 }, { 637 * 4, 110 * 8 }, { 690 * 4, 103 * 8 }, { 743 * 4, 95 * 8 }, { 796 * 4, 86 * 8 }, { 849 * 4, 77 * 8 }, { 902 * 4, 65 * 8 }, { 955 * 4, 49 * 8 }, { 1008 * 4, 17 * 8 }, { 1020 * 4, 0 * 8 } //safety
-};
-
-#define NUMTEMPS_3 28
-const short temptable_3[NUMTEMPS_3][2] PROGMEM = {
-    { 1 * 4, 864 * 8 }, { 21 * 4, 300 * 8 }, { 25 * 4, 290 * 8 }, { 29 * 4, 280 * 8 }, { 33 * 4, 270 * 8 }, { 39 * 4, 260 * 8 }, { 46 * 4, 250 * 8 }, { 54 * 4, 240 * 8 }, { 64 * 4, 230 * 8 }, { 75 * 4, 220 * 8 }, { 90 * 4, 210 * 8 }, { 107 * 4, 200 * 8 }, { 128 * 4, 190 * 8 }, { 154 * 4, 180 * 8 }, { 184 * 4, 170 * 8 }, { 221 * 4, 160 * 8 }, { 265 * 4, 150 * 8 }, { 316 * 4, 140 * 8 }, { 375 * 4, 130 * 8 }, { 441 * 4, 120 * 8 }, { 513 * 4, 110 * 8 }, { 588 * 4, 100 * 8 }, { 734 * 4, 80 * 8 }, { 856 * 4, 60 * 8 }, { 938 * 4, 40 * 8 }, { 986 * 4, 20 * 8 }, { 1008 * 4, 0 * 8 }, { 1018 * 4, -20 * 8 }
-};
-
-#define NUMTEMPS_4 20
-const short temptable_4[NUMTEMPS_4][2] PROGMEM = {
-    { 1 * 4, 430 * 8 }, { 54 * 4, 137 * 8 }, { 107 * 4, 107 * 8 }, { 160 * 4, 91 * 8 }, { 213 * 4, 80 * 8 }, { 266 * 4, 71 * 8 }, { 319 * 4, 64 * 8 }, { 372 * 4, 57 * 8 }, { 425 * 4, 51 * 8 }, { 478 * 4, 46 * 8 }, { 531 * 4, 41 * 8 }, { 584 * 4, 35 * 8 }, { 637 * 4, 30 * 8 }, { 690 * 4, 25 * 8 }, { 743 * 4, 20 * 8 }, { 796 * 4, 14 * 8 }, { 849 * 4, 7 * 8 }, { 902 * 4, 0 * 8 }, { 955 * 4, -11 * 8 }, { 1008 * 4, -35 * 8 }
-};
-// ATC 104GT
-#define NUMTEMPS_8 34
-const short temptable_8[NUMTEMPS_8][2] PROGMEM = {
-    { 0, 8000 }, { 69, 2400 }, { 79, 2320 }, { 92, 2240 }, { 107, 2160 }, { 125, 2080 }, { 146, 2000 }, { 172, 1920 }, { 204, 1840 }, { 244, 1760 }, { 291, 1680 }, { 350, 1600 }, { 422, 1520 }, { 511, 1440 }, { 621, 1360 }, { 755, 1280 }, { 918, 1200 }, { 1114, 1120 }, { 1344, 1040 }, { 1608, 960 }, { 1902, 880 }, { 2216, 800 }, { 2539, 720 }, { 2851, 640 }, { 3137, 560 }, { 3385, 480 }, { 3588, 400 }, { 3746, 320 }, { 3863, 240 }, { 3945, 160 }, { 4002, 80 }, { 4038, 0 }, { 4061, -80 }, { 4075, -160 }
-};
-#define NUMTEMPS_9 67 // 100k Honeywell 135-104LAG-J01
-const short temptable_9[NUMTEMPS_9][2] PROGMEM = {
-    { 1 * 4, 941 * 8 }, { 19 * 4, 362 * 8 }, { 37 * 4, 299 * 8 }, //top rating 300C
-    { 55 * 4, 266 * 8 },
-    { 73 * 4, 245 * 8 },
-    { 91 * 4, 229 * 8 },
-    { 109 * 4, 216 * 8 },
-    { 127 * 4, 206 * 8 },
-    { 145 * 4, 197 * 8 },
-    { 163 * 4, 190 * 8 },
-    { 181 * 4, 183 * 8 },
-    { 199 * 4, 177 * 8 },
-    { 217 * 4, 171 * 8 },
-    { 235 * 4, 166 * 8 },
-    { 253 * 4, 162 * 8 },
-    { 271 * 4, 157 * 8 },
-    { 289 * 4, 153 * 8 },
-    { 307 * 4, 149 * 8 },
-    { 325 * 4, 146 * 8 },
-    { 343 * 4, 142 * 8 },
-    { 361 * 4, 139 * 8 },
-    { 379 * 4, 135 * 8 },
-    { 397 * 4, 132 * 8 },
-    { 415 * 4, 129 * 8 },
-    { 433 * 4, 126 * 8 },
-    { 451 * 4, 123 * 8 },
-    { 469 * 4, 121 * 8 },
-    { 487 * 4, 118 * 8 },
-    { 505 * 4, 115 * 8 },
-    { 523 * 4, 112 * 8 },
-    { 541 * 4, 110 * 8 },
-    { 559 * 4, 107 * 8 },
-    { 577 * 4, 105 * 8 },
-    { 595 * 4, 102 * 8 },
-    { 613 * 4, 99 * 8 },
-    { 631 * 4, 97 * 8 },
-    { 649 * 4, 94 * 8 },
-    { 667 * 4, 92 * 8 },
-    { 685 * 4, 89 * 8 },
-    { 703 * 4, 86 * 8 },
-    { 721 * 4, 84 * 8 },
-    { 739 * 4, 81 * 8 },
-    { 757 * 4, 78 * 8 },
-    { 775 * 4, 75 * 8 },
-    { 793 * 4, 72 * 8 },
-    { 811 * 4, 69 * 8 },
-    { 829 * 4, 66 * 8 },
-    { 847 * 4, 62 * 8 },
-    { 865 * 4, 59 * 8 },
-    { 883 * 4, 55 * 8 },
-    { 901 * 4, 51 * 8 },
-    { 919 * 4, 46 * 8 },
-    { 937 * 4, 41 * 8 },
-    { 955 * 4, 35 * 8 },
-    { 973 * 4, 27 * 8 },
-    { 991 * 4, 17 * 8 },
-    { 1009 * 4, 1 * 8 },
-    { 1023 * 4, 0 } //to allow internal 0 degrees C
-};
-#define NUMTEMPS_10 20 // 100k 0603 SMD Vishay NTCS0603E3104FXT (4.7k pullup)
-const short temptable_10[NUMTEMPS_10][2] PROGMEM = {
-    { 1 * 4, 704 * 8 }, { 54 * 4, 216 * 8 }, { 107 * 4, 175 * 8 }, { 160 * 4, 152 * 8 }, { 213 * 4, 137 * 8 }, { 266 * 4, 125 * 8 }, { 319 * 4, 115 * 8 }, { 372 * 4, 106 * 8 }, { 425 * 4, 99 * 8 }, { 478 * 4, 91 * 8 }, { 531 * 4, 85 * 8 }, { 584 * 4, 78 * 8 }, { 637 * 4, 71 * 8 }, { 690 * 4, 65 * 8 }, { 743 * 4, 58 * 8 }, { 796 * 4, 50 * 8 }, { 849 * 4, 42 * 8 }, { 902 * 4, 31 * 8 }, { 955 * 4, 17 * 8 }, { 1008 * 4, 0 }
-};
-#define NUMTEMPS_11 31 // 100k GE Sensing AL03006-58.2K-97-G1 (4.7k pullup)
-const short temptable_11[NUMTEMPS_11][2] PROGMEM = {
-    { 1 * 4, 936 * 8 }, { 36 * 4, 300 * 8 }, { 71 * 4, 246 * 8 }, { 106 * 4, 218 * 8 }, { 141 * 4, 199 * 8 }, { 176 * 4, 185 * 8 }, { 211 * 4, 173 * 8 }, { 246 * 4, 163 * 8 }, { 281 * 4, 155 * 8 }, { 316 * 4, 147 * 8 }, { 351 * 4, 140 * 8 }, { 386 * 4, 134 * 8 }, { 421 * 4, 128 * 8 }, { 456 * 4, 122 * 8 }, { 491 * 4, 117 * 8 }, { 526 * 4, 112 * 8 }, { 561 * 4, 107 * 8 }, { 596 * 4, 102 * 8 }, { 631 * 4, 97 * 8 }, { 666 * 4, 92 * 8 }, { 701 * 4, 87 * 8 }, { 736 * 4, 81 * 8 }, { 771 * 4, 76 * 8 }, { 806 * 4, 70 * 8 }, { 841 * 4, 63 * 8 }, { 876 * 4, 56 * 8 }, { 911 * 4, 48 * 8 }, { 946 * 4, 38 * 8 }, { 981 * 4, 23 * 8 }, { 1005 * 4, 5 * 8 }, { 1016 * 4, 0 }
-};
-#define NUMTEMPS_12 31 // 100k RS thermistor 198-961 (4.7k pullup)
-const short temptable_12[NUMTEMPS_12][2] PROGMEM = {
-    { 1 * 4, 929 * 8 }, { 36 * 4, 299 * 8 }, { 71 * 4, 246 * 8 }, { 106 * 4, 217 * 8 }, { 141 * 4, 198 * 8 }, { 176 * 4, 184 * 8 }, { 211 * 4, 173 * 8 }, { 246 * 4, 163 * 8 }, { 281 * 4, 154 * 8 }, { 316 * 4, 147 * 8 }, { 351 * 4, 140 * 8 }, { 386 * 4, 134 * 8 }, { 421 * 4, 128 * 8 }, { 456 * 4, 122 * 8 }, { 491 * 4, 117 * 8 }, { 526 * 4, 112 * 8 }, { 561 * 4, 107 * 8 }, { 596 * 4, 102 * 8 }, { 631 * 4, 97 * 8 }, { 666 * 4, 91 * 8 }, { 701 * 4, 86 * 8 }, { 736 * 4, 81 * 8 }, { 771 * 4, 76 * 8 }, { 806 * 4, 70 * 8 }, { 841 * 4, 63 * 8 }, { 876 * 4, 56 * 8 }, { 911 * 4, 48 * 8 }, { 946 * 4, 38 * 8 }, { 981 * 4, 23 * 8 }, { 1005 * 4, 5 * 8 }, { 1016 * 4, 0 * 8 }
-};
-#if CPU_ARCH == ARCH_AVR
-#define NUMTEMPS_13 19
-const short temptable_13[NUMTEMPS_13][2] PROGMEM = {
-    { 0, 0 }, { 908, 8 }, { 942, 10 * 8 }, { 982, 20 * 8 }, { 1015, 8 * 30 }, { 1048, 8 * 40 }, { 1080, 8 * 50 }, { 1113, 8 * 60 }, { 1146, 8 * 70 }, { 1178, 8 * 80 }, { 1211, 8 * 90 }, { 1276, 8 * 110 }, { 1318, 8 * 120 }, { 1670, 8 * 230 }, { 2455, 8 * 500 }, { 3445, 8 * 900 }, { 3666, 8 * 1000 }, { 3871, 8 * 1100 }, { 4095, 8 * 2000 }
-};
-#else
-#define NUMTEMPS_13 9
-const short temptable_13[NUMTEMPS_13][2] PROGMEM = {
-    { 0, 0 }, { 1365, 8 }, { 1427, 10 * 8 }, { 1489, 20 * 8 }, { 2532, 8 * 230 }, { 2842, 8 * 300 }, { 3301, 8 * 400 }, { 3723, 8 * 500 }, { 4095, 8 * 600 }
-};
-#endif
-#define NUMTEMPS_14 46
-const short temptable_14[NUMTEMPS_14][2] PROGMEM = {
-    { 1 * 4, 8 * 938 }, { 31 * 4, 8 * 314 }, { 41 * 4, 8 * 290 }, { 51 * 4, 8 * 272 }, { 61 * 4, 8 * 258 }, { 71 * 4, 8 * 247 }, { 81 * 4, 8 * 237 }, { 91 * 4, 8 * 229 }, { 101 * 4, 8 * 221 }, { 111 * 4, 8 * 215 }, { 121 * 4, 8 * 209 }, { 131 * 4, 8 * 204 }, { 141 * 4, 8 * 199 }, { 151 * 4, 8 * 195 }, { 161 * 4, 8 * 190 }, { 171 * 4, 8 * 187 }, { 181 * 4, 8 * 183 }, { 191 * 4, 8 * 179 }, { 201 * 4, 8 * 176 }, { 221 * 4, 8 * 170 }, { 241 * 4, 8 * 165 }, { 261 * 4, 8 * 160 }, { 281 * 4, 8 * 155 }, { 301 * 4, 8 * 150 }, { 331 * 4, 8 * 144 }, { 361 * 4, 8 * 139 }, { 391 * 4, 8 * 133 }, { 421 * 4, 8 * 128 }, { 451 * 4, 8 * 123 }, { 491 * 4, 8 * 117 }, { 531 * 4, 8 * 111 }, { 571 * 4, 8 * 105 }, { 611 * 4, 8 * 100 }, { 681 * 4, 8 * 90 }, { 711 * 4, 8 * 85 }, { 811 * 4, 8 * 69 }, { 831 * 4, 8 * 65 }, { 881 * 4, 8 * 55 }, { 901 * 4, 8 * 51 }, { 941 * 4, 8 * 39 }, { 971 * 4, 8 * 28 }, { 981 * 4, 8 * 23 }, { 991 * 4, 8 * 17 }, { 1001 * 4, 8 * 9 }, { 1021 * 4, 8 * -27 }, { 1023 * 4, 8 * -200 }
-};
-#define NUMTEMPS_15 27 // DYZE DESIGN 500°C Thermistor
-const short temptable_15[NUMTEMPS_15][2] PROGMEM = {
-    { 18 * 4, 850 * 8 }, { 18 * 4, 500 * 8 }, { 22 * 4, 480 * 8 }, { 27 * 4, 460 * 8 }, { 33 * 4, 440 * 8 }, { 41 * 4, 420 * 8 }, { 52 * 4, 400 * 8 }, { 68 * 4, 380 * 8 }, { 86 * 4, 360 * 8 }, { 112 * 4, 340 * 8 }, { 147 * 4, 320 * 8 }, { 194 * 4, 300 * 8 }, { 254 * 4, 280 * 8 }, { 330 * 4, 260 * 8 }, { 428 * 4, 240 * 8 }, { 533 * 4, 220 * 8 }, { 646 * 4, 200 * 8 }, { 754 * 4, 180 * 8 }, { 844 * 4, 160 * 8 }, { 912 * 4, 140 * 8 }, { 959 * 4, 120 * 8 }, { 989 * 4, 100 * 8 }, { 1007 * 4, 80 * 8 }, { 1016 * 4, 60 * 8 }, { 1021 * 4, 30 * 8 }, { 4091, 25 * 8 }, { 4092, 20 * 8 }
-};
-// Contributed by Brandon Coates - May 2015
-// B3 Innovations Pico 500c Thermistor
-// B150/250 = 5300 K +/- 3%
-// R 250 = 2.705k Ohms +/- 2.5%
-#define NUMTEMPS_16 49
-const short temptable_16[NUMTEMPS_16][2] PROGMEM = {
-    { 37, 510 * 8 },
-    { 44, 500 * 8 },
-    { 51, 490 * 8 },
-    { 58, 480 * 8 },
-    { 67, 470 * 8 },
-    { 77, 460 * 8 },
-    { 88, 450 * 8 },
-    { 99, 440 * 8 },
-    { 112, 430 * 8 },
-    { 126, 420 * 8 },
-    { 144, 410 * 8 },
-    { 163, 400 * 8 },
-    { 185, 390 * 8 },
-    { 210, 380 * 8 },
-    { 240, 370 * 8 },
-    { 273, 360 * 8 },
-    { 311, 350 * 8 },
-    { 355, 340 * 8 },
-    { 408, 330 * 8 },
-    { 470, 320 * 8 },
-    { 542, 310 * 8 },
-    { 623, 300 * 8 },
-    { 720, 290 * 8 },
-    { 832, 280 * 8 },
-    { 961, 270 * 8 },
-    { 1108, 260 * 8 },
-    { 1276, 250 * 8 },
-    { 1463, 240 * 8 },
-    { 1676, 230 * 8 },
-    { 1896, 220 * 8 },
-    { 2133, 210 * 8 },
-    { 2382, 200 * 8 },
-    { 2635, 190 * 8 },
-    { 2866, 180 * 8 },
-    { 3092, 170 * 8 },
-    { 3288, 160 * 8 },
-    { 3468, 150 * 8 },
-    { 3608, 140 * 8 },
-    { 3727, 130 * 8 },
-    { 3824, 120 * 8 },
-    { 3898, 110 * 8 },
-    { 3955, 100 * 8 },
-    { 4029, 80 * 8 },
-    { 4060, 65 * 8 },
-    { 4073, 55 * 8 },
-    { 4082, 45 * 8 },
-    { 4088, 35 * 8 },
-    { 4092, 25 * 8 },
-    { 4095, 0 * 8 },
-};
-#if NUM_TEMPS_USERTHERMISTOR0 > 0
-const short temptable_5[NUM_TEMPS_USERTHERMISTOR0][2] PROGMEM = USER_THERMISTORTABLE0;
-#endif
-#if NUM_TEMPS_USERTHERMISTOR1 > 0
-const short temptable_6[NUM_TEMPS_USERTHERMISTOR1][2] PROGMEM = USER_THERMISTORTABLE1;
-#endif
-#if NUM_TEMPS_USERTHERMISTOR2 > 0
-const short temptable_7[NUM_TEMPS_USERTHERMISTOR2][2] PROGMEM = USER_THERMISTORTABLE2;
-#endif
-const short* const temptables[16] PROGMEM = { (short int*)&temptable_1[0][0], (short int*)&temptable_2[0][0], (short int*)&temptable_3[0][0], (short int*)&temptable_4[0][0]
-#if NUM_TEMPS_USERTHERMISTOR0 > 0
-                                              ,
-                                              (short int*)&temptable_5[0][0]
-#else
-                                              ,
-                                              0
-#endif
-#if NUM_TEMPS_USERTHERMISTOR1 > 0
-                                              ,
-                                              (short int*)&temptable_6[0][0]
-#else
-                                              ,
-                                              0
-#endif
-#if NUM_TEMPS_USERTHERMISTOR2 > 0
-                                              ,
-                                              (short int*)&temptable_7[0][0]
-#else
-                                              ,
-                                              0
-#endif
-                                              ,
-                                              (short int*)&temptable_8[0][0], (short int*)&temptable_9[0][0], (short int*)&temptable_10[0][0], (short int*)&temptable_11[0][0], (short int*)&temptable_12[0][0], (short int*)&temptable_13[0][0], (short int*)&temptable_14[0][0], (short int*)&temptable_15[0][0], (short int*)&temptable_16[0][0] };
-const uint8_t temptables_num[16] PROGMEM = { NUMTEMPS_1, NUMTEMPS_2, NUMTEMPS_3, NUMTEMPS_4, NUM_TEMPS_USERTHERMISTOR0, NUM_TEMPS_USERTHERMISTOR1, NUM_TEMPS_USERTHERMISTOR2, NUMTEMPS_8,
-                                             NUMTEMPS_9, NUMTEMPS_10, NUMTEMPS_11, NUMTEMPS_12, NUMTEMPS_13, NUMTEMPS_14, NUMTEMPS_15, NUMTEMPS_16 };
 
 void TemperatureController::updateCurrentTemperature() {
-    uint8_t type = sensorType;
+    currentTemperatureC = input->get();
+/*    uint8_t type = sensorType;
     // get raw temperature
     switch (type) {
     case 0:
@@ -2207,20 +2003,11 @@ void TemperatureController::updateCurrentTemperature() {
     case 101: // MAX6675
     {
         // TODO: max6675
-        /* int newTemp = read_max6675(sensorPin, pwmIndex);
-        if (newTemp != 2000) {
-            currentTemperature = newTemp;
-        }
-        */
         break;
 #endif
 #ifdef SUPPORT_MAX31855
     case 102: { // MAX31855
     // TODO: max31855
-        /* int16_t newTemp = read_max31855(sensorPin, pwmIndex);
-        if (newTemp != 20000) { // don't use error read
-            currentTemperature = newTemp;
-        }*/
     } break;
 #endif
     default:
@@ -2376,6 +2163,7 @@ void TemperatureController::updateCurrentTemperature() {
         }
 #endif
         }
+        */
     }
 
     void TemperatureController::setTargetTemperature(float target) {
@@ -2774,7 +2562,7 @@ Extruder extruder[NUM_EXTRUDER] = {
       { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 }
 #endif
       ,
-      { 0, EXT0_TEMPSENSOR_TYPE, &IOAnalogExt0 /*EXT0_SENSOR_INDEX*/, EXT0_HEAT_MANAGER, 0, 0, 0, 0, 0, 0, 0, EXT0_PID_INTEGRAL_DRIVE_MAX, EXT0_PID_INTEGRAL_DRIVE_MIN, EXT0_PID_PGAIN_OR_DEAD_TIME, EXT0_PID_I, EXT0_PID_D, EXT0_PID_MAX, 0, 0, 0, 0, 0, EXT0_DECOUPLE_TEST_PERIOD, 0, EXT0_PREHEAT_TEMP },
+      { 0, EXT0_TEMPSENSOR_TYPE, &TempExt0 /*EXT0_SENSOR_INDEX*/, EXT0_HEAT_MANAGER, 0, 0, 0, 0, 0, 0, 0, EXT0_PID_INTEGRAL_DRIVE_MAX, EXT0_PID_INTEGRAL_DRIVE_MIN, EXT0_PID_PGAIN_OR_DEAD_TIME, EXT0_PID_I, EXT0_PID_D, EXT0_PID_MAX, 0, 0, 0, 0, 0, EXT0_DECOUPLE_TEST_PERIOD, 0, EXT0_PREHEAT_TEMP },
       ext0_select_cmd,
       ext0_deselect_cmd,
       EXT0_EXTRUDER_COOLER_SPEED,
@@ -2814,7 +2602,7 @@ Extruder extruder[NUM_EXTRUDER] = {
       { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 }
 #endif
       ,
-      { 1, EXT1_TEMPSENSOR_TYPE, &IOAnalogExt1 /*EXT1_SENSOR_INDEX*/, EXT1_HEAT_MANAGER, 0, 0, 0, 0, 0, 0, 0, EXT1_PID_INTEGRAL_DRIVE_MAX, EXT1_PID_INTEGRAL_DRIVE_MIN, EXT1_PID_PGAIN_OR_DEAD_TIME, EXT1_PID_I, EXT1_PID_D, EXT1_PID_MAX, 0, 0, 0, 0, 0, EXT1_DECOUPLE_TEST_PERIOD, 0, EXT1_PREHEAT_TEMP },
+      { 1, EXT1_TEMPSENSOR_TYPE, &TempExt1 /*EXT1_SENSOR_INDEX*/, EXT1_HEAT_MANAGER, 0, 0, 0, 0, 0, 0, 0, EXT1_PID_INTEGRAL_DRIVE_MAX, EXT1_PID_INTEGRAL_DRIVE_MIN, EXT1_PID_PGAIN_OR_DEAD_TIME, EXT1_PID_I, EXT1_PID_D, EXT1_PID_MAX, 0, 0, 0, 0, 0, EXT1_DECOUPLE_TEST_PERIOD, 0, EXT1_PREHEAT_TEMP },
       ext1_select_cmd,
       ext1_deselect_cmd,
       EXT1_EXTRUDER_COOLER_SPEED,
@@ -2999,7 +2787,7 @@ Extruder extruder[NUM_EXTRUDER] = {
 
 #if HAVE_HEATED_BED
     TemperatureController heatedBedController = {
-        PWM_HEATED_BED, HEATED_BED_SENSOR_TYPE, &IOAnalogBed0 /*BED_SENSOR_INDEX*/, HEATED_BED_HEAT_MANAGER, 0, 0, 0, 0, 0, 0, 0, HEATED_BED_PID_INTEGRAL_DRIVE_MAX, HEATED_BED_PID_INTEGRAL_DRIVE_MIN, HEATED_BED_PID_PGAIN_OR_DEAD_TIME, HEATED_BED_PID_IGAIN, HEATED_BED_PID_DGAIN, HEATED_BED_PID_MAX, 0, 0, 0, 0, 0, HEATED_BED_DECOUPLE_TEST_PERIOD, 0, HEATED_BED_PREHEAT_TEMP
+        PWM_HEATED_BED, HEATED_BED_SENSOR_TYPE, &TempBed /*BED_SENSOR_INDEX*/, HEATED_BED_HEAT_MANAGER, 0, 0, 0, 0, 0, 0, 0, HEATED_BED_PID_INTEGRAL_DRIVE_MAX, HEATED_BED_PID_INTEGRAL_DRIVE_MIN, HEATED_BED_PID_PGAIN_OR_DEAD_TIME, HEATED_BED_PID_IGAIN, HEATED_BED_PID_DGAIN, HEATED_BED_PID_MAX, 0, 0, 0, 0, 0, HEATED_BED_DECOUPLE_TEST_PERIOD, 0, HEATED_BED_PREHEAT_TEMP
     };
 #endif
 

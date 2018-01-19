@@ -78,3 +78,12 @@ IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20)
 IO_ANALOG_INPUT(IOAnalogBed0, TEMP_1_PIN, 5)
 IO_ANALOG_INPUT(IOAnalogExt0, TEMP_0_PIN, 5)
 IO_ANALOG_INPUT(IOAnalogExt1, TEMP_2_PIN, 5)
+
+// Need a conversion table for epcos NTC
+IO_TEMP_TABLE_NTC(TempTableEpcos, Epcos_B57560G0107F000)
+
+// Now create the temperature inputs
+
+IO_TEMPERATURE_TABLE(TempBed, IOAnalogBed0, TempTableEpcos)
+IO_TEMPERATURE_TABLE(TempExt0, IOAnalogExt0, TempTableEpcos)
+IO_TEMPERATURE_TABLE(TempExt1, IOAnalogExt1, TempTableEpcos)

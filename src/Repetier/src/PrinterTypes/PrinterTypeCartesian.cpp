@@ -18,7 +18,7 @@
 
 #include "../../Repetier.h"
 
-#if PRINTER_TYPE == 1
+#if PRINTER_TYPE == 0
 
 void PrinterType::homeAxis(fast8_t axis) {
     Motion1::simpleHome(axis);

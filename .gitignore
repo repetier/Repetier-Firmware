@@ -18,3 +18,5 @@ src/build
 c_cpp_properties.json
 src/private
 workspace.xml
+macrotest.cpp
+macrotest.txt
