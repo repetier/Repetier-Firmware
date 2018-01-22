@@ -22,6 +22,12 @@
 // speed 0 = slowest, 256 levels, 4 = fastest, 8 levels
  IO_PWM_SOFTWARE(name,pinname,speed)
  IO_PDM_SOFTWARE(name,pinname)
+ // Fake class doing nothing for places that require a pwm output
+ IO_PWM_FAKE(name)
+ // Convert pwm to digital io. Values from onLevel on turn it
+ // on, lower turn it off.
+ IO_PWM_SWITCH(name,pinname,onLevel)
+ IO_PWM_HARDWARE(name,pinid,frequency)
  // pwmname = name of a pwm output you want to add
  // kickstart functionality to.
  // time100ms = kickstart time in 100ms intervals.
@@ -37,8 +43,22 @@
 #undef IO_PWM_SOFTWARE
 #undef IO_PWM_KICKSTART
 #undef IO_PDM_SOFTWARE
+#undef IO_PWM_FAKE
+#undef IO_PWM_SWITCH
+#undef IO_PWM_HARDWARE
 
-#if IO_TARGET == 2 // PWM interrupt
+#if IO_TARGET == 1 // init
+
+#define IO_PWM_SOFTWARE(name,pinname,speed)
+#define IO_PDM_SOFTWARE(name,pinname)
+#define IO_PWM_FAKE(name)
+#define IO_PWM_SWITCH(name,pinname,onLevel)
+#define IO_PWM_HARDWARE(name,pinid,frequency) \
+    name.id = HAL::initHardwarePWM(pinid, frequency);
+
+#define IO_PWM_KICKSTART(name,pwmname,timems)
+
+#elif IO_TARGET == 2 // PWM interrupt
 
 #define IO_PWM_SOFTWARE(name,pinname,speed) \
   if(pwm_count ## speed == 0) { \
@@ -58,6 +78,9 @@
         pinname::set(carry < name.error); \
         name.error = carry; \
     }
+#define IO_PWM_FAKE(name)
+#define IO_PWM_SWITCH(name,pinname,onLevel)
+#define IO_PWM_HARDWARE(name,pinid,frequency)
 
 #define IO_PWM_KICKSTART(name,pwmname,timems)
 
@@ -65,6 +88,9 @@
 
 #define IO_PWM_SOFTWARE(name,pinname,speed)
 #define IO_PDM_SOFTWARE(name,pinname)
+#define IO_PWM_FAKE(name)
+#define IO_PWM_SWITCH(name,pinname,onLevel)
+#define IO_PWM_HARDWARE(name,pinid,frequency)
 #define IO_PWM_KICKSTART(name,pwmname,timems) \
     if(name.kickcount > 0) { \
         if(--name.kickcount == 0) { \
@@ -100,6 +126,42 @@ class PWMHandler {
     };\
     extern name##Class<pinname> name;
 
+#define IO_PWM_FAKE(name) \
+    class name##Class: public PWMHandler { \
+    public: \
+    fast8_t pwm;\
+    name##Class():pwm(0) {} \
+    void set(fast8_t _pwm) final {pwm = _pwm;} \
+    fast8_t get() final {return pwm;} \
+    };\
+    extern name##Class name;
+
+#define IO_PWM_SWITCH(name, pinname, onLevel) \
+    template<class pinname> class name##Class: public PWMHandler { \
+    public: \
+    fast8_t pwm;\
+    name##Class():pwm(0) {} \
+    void set(fast8_t _pwm) final {pwm = _pwm;pinname::set(_pwm >= onLevel);} \
+    fast8_t get() final {return pwm;} \
+    };\
+    extern name##Class<pinname> name;
+
+#define IO_PWM_HARDWARE(name, pinid, frequency) \
+    class name##Class: public PWMHandler { \
+    public: \
+    fast8_t pwm, id;\
+    name##Class():pwm(0) {} \
+    void set(fast8_t _pwm) final { \
+        if (pwm == _pwm) { \
+            return; \
+        } \
+        pwm = _pwm; \
+        HAL::setHardwarePWM(id, pwm); \
+    } \
+    fast8_t get() final {return pwm;} \
+    };\
+    extern name##Class name;
+
 #define IO_PWM_KICKSTART(name,pwmname,time100ms) \
     class name##Class: public PWMHandler { \
     public: \
@@ -129,6 +191,15 @@ class PWMHandler {
 #define IO_PDM_SOFTWARE(name,pinname) \
     name##Class<pinname> name;
 
+#define IO_PWM_FAKE(name) \
+    name##Class name;
+
+#define IO_PWM_SWITCH(name,pinname,onLevel) \
+    name##Class<pinname> name;
+
+#define IO_PWM_HARDWARE(name,pinid,frequency) \
+    name##Class name;
+
 #define IO_PWM_KICKSTART(name,pwmname,timems) \
     name##Class name;
 
@@ -136,6 +207,9 @@ class PWMHandler {
 
 #define IO_PWM_SOFTWARE(name,pinname,speed)
 #define IO_PDM_SOFTWARE(name,pinname)
+#define IO_PWM_FAKE(name)
+#define IO_PWM_SWITCH(name,pinname,onLevel)
+#define IO_PWM_HARDWARE(name,pinid,frequency)
 #define IO_PWM_KICKSTART(name,pwmname,timems)
 
 #endif
