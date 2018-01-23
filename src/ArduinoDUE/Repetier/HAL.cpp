@@ -155,6 +155,152 @@ void HAL::setupTimer() {
 #endif
 }
 
+struct PWMPin {
+    int pin;
+    Pio *pio;
+    uint32_t pio_pin;
+    int channel;
+    bool invert;
+};
+
+#define NUM_POSSIBLE_PWM_PINS 30
+static PWMPin pwm_pins[NUM_POSSIBLE_PWM_PINS] = {
+    {0,  PIOA, PIO_PA8B_PWMH0 , PWM_CH0, false}, // Channel 0
+    {20, PIOB, PIO_PB12B_PWMH0, PWM_CH0, false}, 
+    {35, PIOC, PIO_PC3B_PWMH0 , PWM_CH0, false},
+    {73, PIOA, PIO_PA21B_PWML0, PWM_CH0, true},
+    {67, PIOB, PIO_PB16B_PWML0, PWM_CH0, true},
+    {34, PIOC, PIO_PC2B_PWML0,  PWM_CH0, true},
+    {42, PIOA, PIO_PA19B_PWMH1, PWM_CH1, false}, // Channel 1
+    {21, PIOB, PIO_PB13B_PWMH1, PWM_CH1, false},
+    {37, PIOC, PIO_PC5B_PWMH1 , PWM_CH1, false},
+    {64, PIOA, PIO_PA12B_PWML1, PWM_CH1, true}, 
+    {62, PIOB, PIO_PB17B_PWML1, PWM_CH1, true},
+    {36, PIOC, PIO_PC4B_PWML1 , PWM_CH1, true},
+    {16, PIOA, PIO_PA13B_PWMH2, PWM_CH2, false}, // Channel 2
+    {53, PIOB, PIO_PB14B_PWMH2, PWM_CH2, false},
+    {39, PIOC, PIO_PC7B_PWMH2 , PWM_CH2, false},
+    {43, PIOA, PIO_PA20B_PWML2, PWM_CH2, true},
+    {63, PIOB, PIO_PB18B_PWML2, PWM_CH2, true},
+    {38, PIOC, PIO_PC6B_PWML2 , PWM_CH2, true},
+    {1 , PIOA, PIO_PA9B_PWMH3 , PWM_CH3, false}, // Channel 3
+    {66, PIOB, PIO_PB15B_PWMH3, PWM_CH3, false},
+    {41, PIOC, PIO_PC9B_PWMH3 , PWM_CH3, false},
+    {69, PIOA, PIO_PA0B_PWML3 , PWM_CH3, true},
+    {64, PIOB, PIO_PB19B_PWML3, PWM_CH3, true},
+    {40, PIOC, PIO_PC8B_PWML3 , PWM_CH3, true},
+    // {??, PIOC, PIO_PC20B_PWMH4, PWM_CH4, false} // Channel 4
+    {9,  PIOC, PIO_PC21B_PWML4, PWM_CH4, true},
+    {44, PIOC, PIO_PC19B_PWMH5, PWM_CH5, false}, // Channel 5
+    {8,  PIOC, PIO_PC22B_PWML5, PWM_CH5, true}, 
+    {45, PIOC, PIO_PC18B_PWMH6, PWM_CH6, false}, // Channel 6
+    {7,  PIOC, PIO_PC23B_PWML6, PWM_CH6, true}, 
+    {6,  PIOC, PIO_PC24B_PWML7, PWM_CH7, true} // Channel 7
+};
+
+struct PWMChannel {
+    bool used;
+    PWMPin *pwm; // table index
+    uint32_t scale;
+};
+
+static PWMChannel pwm_channel[8] = {
+  {false, nullptr, 0},
+  {false, nullptr, 0},
+  {false, nullptr, 0},
+  {false, nullptr, 0},
+  {false, nullptr, 0},
+  {false, nullptr, 0},
+  {false, nullptr, 0},
+  {false, nullptr, 0}
+};
+
+static void computePWMDivider(uint32_t frequency, uint32_t &div, uint32_t &scale) {
+    uint32_t factor = 1;
+    div = 0;
+    do {
+        scale = VARIANT_MCK / (frequency * factor);
+        if(scale <= 65535) {
+            return;
+        }
+        div = factor;
+        factor <<= 1;
+    } while(factor <= 1024);
+}
+
+// Try to initialize pinNumber as hardware PWM. Returns internal
+// id if it succeeds or -1 if it fails. Typical reasons to fail
+// are no pwm support for that pin or an other pin uses same PWM
+// channel.
+int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
+    // Search pin mapping
+    int foundPin = -1;
+    for(int i = 0; i < NUM_POSSIBLE_PWM_PINS; i++) {
+        if(pwm_pins[i].pin == pinNumber) {
+            if (pwm_channel[pwm_pins[i].channel].used == false) { // ensure not used
+                foundPin = i;
+            }
+            break;
+        }
+    }
+    if(foundPin == -1) {
+        return -1;
+    }
+
+    PWMPin &p = pwm_pins[foundPin];
+    PWMChannel &c = pwm_channel[p.channel];
+    c.used = true;
+    c.pwm = &p;
+    uint32_t div;
+    computePWMDivider(frequency, div, c.scale);
+     pmc_enable_periph_clk(PWM_INTERFACE_ID);
+     // configuring the pwm pin
+     PIO_Configure(
+       p.pio,
+       PIO_PERIPH_B, // port E and F would be A
+       p.pio_pin,
+       PIO_DEFAULT
+     );
+
+     PWMC_ConfigureChannelExt(
+       PWM_INTERFACE,
+       p.channel, // channel
+       div, // clock divider
+       0, // left aligned
+       p.invert ? 0: (1<<9), // polarity
+       0, // interrupt on counter event at end's period
+       0, // dead-time disabled
+       0, // non inverted dead-time high output
+       0 // non inverted dead-time low output
+     );
+
+    PWMC_SetPeriod(
+       PWM_INTERFACE,
+       p.channel, // pin_info::channel,
+       c.scale
+    );
+    
+    PWMC_EnableChannel(PWM_INTERFACE,p.channel);
+    setHardwarePWM(p.channel, 0); // init disabled
+    return p.channel;    
+}
+// Set pwm output to value. id is id from initHardwarePWM.
+void HAL::setHardwarePWM(int id, int value) {
+    if (id < 0) { // illegal id
+        return;
+    }
+    if (id < 8) { // PWM channel 0..7
+        PWMChannel &c = pwm_channel[id];
+        uint32_t duty = (c.scale * value) / 255;
+        if ((PWM_INTERFACE->PWM_SR & (1 << id)) == 0) { // disabled, set value
+            PWM_INTERFACE->PWM_CH_NUM[id].PWM_CDTY = duty;
+        } else { // just update
+            PWM_INTERFACE->PWM_CH_NUM[id].PWM_CDTYUPD = duty;
+        }
+        return;
+    }
+    // TODO: timers can also produce PWM
+}
 
 
 #if ANALOG_INPUTS > 0

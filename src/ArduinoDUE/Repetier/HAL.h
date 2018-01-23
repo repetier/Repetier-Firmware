@@ -333,6 +333,14 @@ class HAL
     HAL();
     virtual ~HAL();
 
+    // Try to initialize pinNumber as hardware PWM. Returns internal
+    // id if it succeeds or -1 if it fails. Typical reasons to fail
+    // are no pwm support for that pin or an other pin uses same PWM
+    // channel.
+    static int initHardwarePWM(int pinNumber, uint32_t frequency);
+    // Set pwm output to value. id is id from initHardwarePWM.
+    static void setHardwarePWM(int id, int value);
+
     // do any hardware-specific initialization here
     static inline void hwSetup(void)
     {
