@@ -763,10 +763,10 @@ class HAL
       WRITE(MOSI_PIN, HIGH);
       WRITE(SCK_PIN, LOW);
     }
-    static inline uint8_t spiReceive()
+    static inline uint8_t spiReceive(uint8_t send=0xff)
     {
       // WRITE(SDSS, LOW);
-      uint8_t b = spiTransfer(0xff);
+      uint8_t b = spiTransfer(send);
       // WRITE(SDSS, HIGH);
       return b;
     }
