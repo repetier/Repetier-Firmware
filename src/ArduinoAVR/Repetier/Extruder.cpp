@@ -2165,9 +2165,10 @@ void TemperatureController::updateCurrentTemperature() {
 #ifdef SUPPORT_MAX6675
     case 101: // MAX6675
 		{
-		int newTemp = read_max6675(sensorPin, pwmIndex);
-		if(newTemp != 2000) {
-			currentTemperature = newTemp;
+			int newTemp = read_max6675(sensorPin, pwmIndex);
+			if(newTemp != 2000) {
+				currentTemperature = newTemp;
+			}
 		}
         break;
 #endif
