@@ -72,6 +72,7 @@ public:
     // Will stop all motions stored. For z probing and homing We
     // Also note the remainig z steps.
     static void endstopTriggered(Motion3Buffer* act, fast8_t axis);
+    static void motorEndstopTriggered(Motion3Buffer* act, fast8_t axis);
 
     /// Called from m3 timer when line is finished as planned
     static void pop() {

@@ -45,14 +45,12 @@ public:
     SimpleStepperDriver(EndstopDriver *minES, EndstopDriver *maxES):StepperDriverBase(minES, maxES) {}
     inline bool stepCond() final {        
         if(direction) {
-            maxEndstop->update();
-            if(!maxEndstop->triggered()) {
+            if(!maxEndstop->update()) {
                 stepCls::on();
                 return false;
             }
         } else {
-            minEndstop->update();
-            if(!minEndstop->triggered()) {
+            if(!minEndstop->update()) {
                 stepCls::on();
                 return false;
             }

@@ -66,7 +66,8 @@ public:
     fast8_t flags;
     Motion1State state;
     Motion1Action action;
-    uint8_t axisUsed;
+    fast8_t axisUsed;
+    fast8_t axisDir; // bit set = positive direction
     float start[NUM_AXES];
     float speed[NUM_AXES];
     float unitDir[NUM_AXES];
@@ -152,6 +153,7 @@ public:
     static int32_t stepsRemaining[NUM_AXES]; // Steps remaining when testing endstops
     static fast8_t alwaysCheckEndstops;
     static fast8_t axesTriggered;
+    static fast8_t motorTriggered;
     static fast8_t stopMask; // stop move if these axes are triggered
     /* Buffer is a bit special in the sense that end keeps
     stored until all low level functions are finished while

@@ -309,8 +309,28 @@ void Motion2::timer() {
 // Gets called when an end stop is triggered during motion.
 // Will stop all motions stored. For z probing and homing We
 // Also note the remainig z steps.
+void Motion2::motorEndstopTriggered(Motion3Buffer* act, fast8_t axis) {
+    Motion1::motorTriggered |= axisBits[axis];
+    /*Motion1::setAxisHomed(axis, false);
+    Motion2Buffer& m2 = Motion2::buffers[act->parentId];
+    if (Motion1::endstopMode == EndstopMode::STOP_AT_ANY_HIT || Motion1::endstopMode == EndstopMode::PROBING) {
+        for (fast8_t i = 0; i < NUM_AXES; i++) {
+            Motion1::stepsRemaining[i] = m2.stepsRemaining[i];
+        }
+        Motion3::skipParentId = act->parentId;
+        if (Motion1::endstopMode == EndstopMode::STOP_AT_ANY_HIT) {
+            // TODO: Trigger fatal error
+        }
+    } else { // only mark hit axis
+        Motion1::stepsRemaining[axis] = m2.stepsRemaining[axis];
+        if ((Motion1::stopMask & Motion1::axesTriggered) == Motion1::stopMask) {
+            Motion3::skipParentId = act->parentId;
+        }
+    }*/
+}
+
 void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis) {
-    Motion1::axesTriggered |= axisBits[axis];
+    Motion1::axesTriggered = axisBits[axis];
     Motion1::setAxisHomed(axis, false);
     Motion2Buffer& m2 = Motion2::buffers[act->parentId];
     if (Motion1::endstopMode == EndstopMode::STOP_AT_ANY_HIT || Motion1::endstopMode == EndstopMode::PROBING) {
@@ -328,7 +348,6 @@ void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis) {
         }
     }
 }
-
 void Motion2Buffer::nextState() {
     if (state == Motion2State::NOT_INITIALIZED) {
         if (t1 > 0) {

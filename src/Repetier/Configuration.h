@@ -89,16 +89,16 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 // Define xyz motors
 
 #define XMOTOR_TYPE SimpleStepperDriver<IOX1Step, IOX1Dir, IOX1Enable>
-#define XMOTOR_PARAMS (&endstopXMin, &endstopNone)
+#define XMOTOR_PARAMS (&endstopNone, &endstopNone)
 CONFIG_VARIABLE(XMOTOR_TYPE, XMotor, XMOTOR_PARAMS)
 #define YMOTOR_TYPE SimpleStepperDriver<IOY1Step, IOY1Dir, IOY1Enable>
-#define YMOTOR_PARAMS (&endstopNone, &endstopYMax)
+#define YMOTOR_PARAMS (&endstopNone, &endstopNone)
 CONFIG_VARIABLE(YMOTOR_TYPE, YMotor, YMOTOR_PARAMS)
 #define ZMOTOR_TYPE SimpleStepperDriver<IOZ1Step, IOZ1Dir, IOZ1Enable>
-#define ZMOTOR_PARAMS (&endstopZMin, &endstopNone)
+#define ZMOTOR_PARAMS (&endstopNone, &endstopNone)
 CONFIG_VARIABLE(ZMOTOR_TYPE, ZMotor, ZMOTOR_PARAMS)
 #define E0MOTOR_TYPE SimpleStepperDriver<IOE0Step, IOE0Dir, IOE0Enable>
-#define E0MOTOR_PARAMS (&endstopZMin, &endstopNone)
+#define E0MOTOR_PARAMS (&endstopNone, &endstopNone)
 CONFIG_VARIABLE(E0MOTOR_TYPE, E0Motor, E0MOTOR_PARAMS)
 
 /** Axes are homed in order of priority (0..10) if homing direction is not 0. */

@@ -58,10 +58,15 @@ IO_INPUT(IOEndstopYMax, ORIG_Y_MAX_PIN)
 IO_INPUT(IOEndstopZMin, ORIG_Z_MIN_PIN)
 
 // Define our endstops solutions
+// You need to define all min and max endstops for all
+// axes except E even if you have none!
 
 ENDSTOP_SWITCH(endstopXMin, IOEndstopXMin)
+ENDSTOP_NONE(endstopXMax)
+ENDSTOP_NONE(endstopYMin)
 ENDSTOP_SWITCH(endstopYMax, IOEndstopYMax)
 ENDSTOP_SWITCH(endstopZMin, IOEndstopZMin)
+ENDSTOP_NONE(endstopZMax)
 
 // Define fans
 

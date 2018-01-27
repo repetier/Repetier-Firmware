@@ -50,6 +50,7 @@ fast8_t Motion1::axesHomed;
 EndstopMode Motion1::endstopMode;
 int32_t Motion1::stepsRemaining[NUM_AXES]; // Steps remaining when testing endstops
 fast8_t Motion1::axesTriggered;
+fast8_t Motion1::motorTriggered;
 fast8_t Motion1::stopMask;
 fast8_t Motion1::alwaysCheckEndstops;
 #ifdef FEATURE_AXISCOMP
@@ -74,6 +75,7 @@ void Motion1::init() {
     allAxes = 0;
     axesHomed = 0;
     axesTriggered = 0;
+    motorTriggered = 0;
     FOR_ALL_AXES(i) {
         axisBits[i] = (uint8_t)1 << i;
         allAxes |= axisBits[i];
@@ -484,6 +486,7 @@ void Motion1::queueMove(float feedrate) {
     float delta[NUM_AXES];
     float e2 = 0, length2 = 0;
     fast8_t axisUsed = 0;
+    fast8_t dirUsed = 0;
     FOR_ALL_AXES(i) {
         if (motors[i] == nullptr) { // for E, A,B,C make motors removeable
             delta[i] = 0;
@@ -492,6 +495,9 @@ void Motion1::queueMove(float feedrate) {
         delta[i] = destinationPositionTransformed[i] - currentPositionTransformed[i];
         if (fabsf(delta[i]) > POSITION_EPSILON) {
             axisUsed += axisBits[i];
+            if (delta[i] >= 0) {
+                dirUsed += axisBits[i];
+            }
             float tmp = delta[i] * delta[i];
             length2 += tmp;
             if (i == E_AXIS) {
@@ -517,6 +523,7 @@ void Motion1::queueMove(float feedrate) {
         buf.flags = 0;
     }
     buf.axisUsed = axisUsed;
+    buf.axisDir = dirUsed;
 
     if ((buf.axisUsed & 15) > 8) { // not pure e move
         // Need to scale feedrate so E component is not part of speed
