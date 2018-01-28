@@ -8,9 +8,9 @@ The remainder of the pinout is resolved in the firmware configuration, and evert
 ## Screen pinout
 
 ```
-	  1 LCD CS    2 Encoder B
-	  3 LCD DATA  4 Encoder A
-KEY	5 LCD SCLK  6 Enc Pushbutton
+    1 LCD CS    2 Encoder B
+    3 LCD DATA  4 Encoder A
+KEY 5 LCD SCLK  6 Enc Pushbutton
     7 ESTOP     8 Beeper
     9 VCC (5v) 10 GND
              |
@@ -20,7 +20,7 @@ KEY	5 LCD SCLK  6 Enc Pushbutton
 
 ## Screen to RAMPS conversion 
 ```
-Screen  Melzi  Ramps		Mega 2560 Description
+Screen  Melzi  Ramps    Mega 2560 Description
 1       D17    A11/D65  Chip Select CS / CSE / RS	
 2       A1/30  A12/D66  Data 1 / ENC B				
 3       D16    D42      DN / MOSI / DATA / Display Enable
