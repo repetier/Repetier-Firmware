@@ -680,8 +680,8 @@
 #else
 #define UI_TEXT_MAINPAGE6_3_EN "Flow:\xfd %of%%%   Z:%x2"
 #endif
-#define UI_TEXT_MAINPAGE6_4_EN "Mul: %om%%% \xfd   E: %x4m"
-#define UI_TEXT_MAINPAGE6_5_EN "Buf: %oB"
+#define UI_TEXT_MAINPAGE6_4_EN "Mltply: %om%%%\xfd E: %x4m"
+#define UI_TEXT_MAINPAGE6_5_EN "Buffer: %oB"
 #define UI_TEXT_MAINPAGE6_6_EN "%os"
 #define UI_TEXT_MAINPAGE_TEMP_BED_EN cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG
 #define UI_TEXT_MAINPAGE_BED_EN "B%eB/%Eb" cDEG
@@ -1090,13 +1090,6 @@
 #define UI_TEXT_CLOSE_DE "Abbruch"
 #define UI_TEXT_EXTR_ZOFF_DE "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_DE "Messe ..."
-#define UI_TEXT_Z_PROBE_DE "Start Z-Probe"
-#define UI_TEXT_MAINPAGE6_1_C_DE "Xw:%x5   X:%x0"
-#define UI_TEXT_MAINPAGE6_2_C_DE "Yw:%x6   Y:%x1"
-#define UI_TEXT_MAINPAGE6_3_C_DE "Zw:%x7   Z:%x2"
-#define UI_TEXT_MAINPAGE6_4_L_DE "Mul: %om%%%    Las:%op W"
-#define UI_TEXT_MAINPAGE6_4_C_DE "Mul: %om%%%    Spi:%opRPM"
-#define UI_TEXT_JAMCONTROL_DE "%ej Blockaden" STR_uuml "berw."
 
 // Dutch translation
 
@@ -1123,10 +1116,8 @@
 #define UI_TEXT_HOME_X_NL           "Home X"
 #define UI_TEXT_HOME_Y_NL           "Home Y"
 #define UI_TEXT_HOME_Z_NL           "Home Z"
-#define UI_TEXT_PREHEAT_SINGLE_NL   "Voorverwarmen Enkel Extr."
 #define UI_TEXT_PREHEAT_ALL_NL      "Voorverwarmen Alle Extr."
 #define UI_TEXT_PREHEAT_PLA_NL      "Voorverwarmen PLA"
-#define UI_TEXT_PREHEAT_ABS_NL      "Voorverwarmen ABS"
 #define UI_TEXT_LIGHTS_ONOFF_NL     "Lichten:%lo"
 #define UI_TEXT_COOLDOWN_NL         "Koel af"
 #define UI_TEXT_SET_TO_ORIGIN_NL    "Zet nulpunt"
@@ -1261,7 +1252,6 @@
 #define UI_TEXT_EXTR_PMAX_NL         "PID max:%XD"
 #define UI_TEXT_EXTR_XOFF_NL         "X-Offset:%Xx"
 #define UI_TEXT_EXTR_YOFF_NL         "Y-Offset:%Xy"
-#define UI_TEXT_EXTR_ZOFF_NL         "Z-Offset:%Xz"
 #define UI_TEXT_STRING_HM_BANGBANG_NL "BangBang"
 #define UI_TEXT_STRING_HM_PID_NL     "PID"
 #define UI_TEXT_STRING_ACTION_NL     "Actie:%la"

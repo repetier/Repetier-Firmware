@@ -377,6 +377,8 @@ extern const int8_t encoder_table[16] PROGMEM ;
   if(r1>=0)WRITE(r1,LOW);if(r2>=0)WRITE(r2,LOW);if(r3>=0)WRITE(r3,LOW);if(r4>=0)WRITE(r4,LOW);
 //      out.print_int_P(PSTR("r4=>c1:"),READ(c1));out.print_int_P(PSTR(" c2:"),READ(c2));out.print_int_P(PSTR(" c3:"),READ(c3));out.println_int_P(PSTR(" c4:"),READ(c4));
 #define UI_KEYS_MATRIX(r1,r2,r3,r4,c1,c2,c3,c4) {uint8_t r = (c1>=0?READ(c1):1) && (c2>=0?READ(c2):1) && (c3>=0?READ(c3):1) && (c4>=0?READ(c4):1);\
+//TODO: Confirm if this old line of code was any better/different
+//#define UI_KEYS_MATRIX(r1,r2,r3,r4,c1,c2,c3,c4) {uint8_t r = (c1>=0?READ(c1):0) && (c2>=0?READ(c2):0) && (c3>=0?READ(c3):0) && (c4>=0?READ(c4):0);\
     if(!r) {\
       r = 255;\
       if(r2>=0)WRITE(r2,HIGH);if(r3>=0)WRITE(r3,HIGH);if(r4>=0)WRITE(r4,HIGH);\
@@ -561,6 +563,7 @@ const UIMenu name PROGMEM = {5,action,5,name ## _entries};
 #define SDSUPPORT 1
 #endif
 
+/*
 #if  FEATURE_CONTROLLER == CONTROLLER_RAMBO
 #undef SDCARDDETECT
 #define SDCARDDETECT 81
@@ -569,6 +572,7 @@ const UIMenu name PROGMEM = {5,action,5,name ## _entries};
 #undef SDSUPPORT
 #define SDSUPPORT 1
 #endif
+*/
 
 
 // Maximum size of a row - if row is larger, text gets scrolled

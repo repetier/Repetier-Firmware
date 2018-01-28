@@ -1038,8 +1038,8 @@ void UIDisplay::initialize() {
         u8g_DrawBitmapP(&u8g, 128 - LOGO_WIDTH, 0, ((LOGO_WIDTH + 7) / 8), LOGO_HEIGHT, logo);
 #endif
 #ifdef CUSTOM_LOGO
-        printRowP(4, PSTR("Repetier"));
-        printRowP(5, PSTR("Ver " REPETIER_VERSION));
+//        printRowP(4, PSTR("Repetier"));
+//        printRowP(5, PSTR("Ver " REPETIER_VERSION));
 #else
         printRowP(0, PSTR("Repetier"));
         printRowP(1, PSTR("Ver " REPETIER_VERSION));

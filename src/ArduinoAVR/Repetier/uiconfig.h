@@ -78,7 +78,7 @@ works, use the ascii charset 0 as fallback. Not the nicest for everything but wo
 #endif
 
 #if BEEPER_TYPE==1 && !defined(BEEPER_PIN)
-#define BEEPER_PIN 37
+#define BEEPER_PIN 59
 #endif
 #if BEEPER_TYPE==2
 #define BEEPER_ADDRESS 0x40 // I2C address of the chip with the beeper pin
@@ -98,7 +98,7 @@ What display type do you use?
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 5 = U8G supported display
 */
-#define UI_DISPLAY_TYPE 5
+#define UI_DISPLAY_TYPE DISPLAY_U8G
 
 #if UI_DISPLAY_TYPE == DISPLAY_U8G // Special case for graphic displays
 
@@ -109,14 +109,23 @@ What display type do you use?
 // Mosi Pin: UI_DISPLAY_ENABLE_PIN
 // CD Pin:   UI_DISPLAY_RS_PIN
 
-// ST7920 with software SPI
 #define U8GLIB_ST7920
+#define BEEPER_PIN             59
+#define UI_DISPLAY_RS_PIN      65
+#define UI_DISPLAY_ENABLE_PIN  42
+#define UI_DISPLAY_D4_PIN      40
+#define UI_ENCODER_A           44
+#define UI_ENCODER_B           66
+#define UI_ENCODER_CLICK       64
+#define UI_RESET_PIN           63
+
+// ST7920 with software SPI
+//#define U8GLIB_ST7920
 // SSD1306 with software SPI
 //#define U8GLIB_SSD1306_SW_SPI
 // SH1106 with software SPI
 // U8GLIB_SH1106_SW_SPI
 // SSD1306 over I2C using hardware I2C pins
-// #define U8GLIB_MINI12864_2X_SW_SPI
 //#define U8GLIB_SSD1306_I2C
 // For the 8 bit ks0108 display you need to set these pins
 // UI_DISPLAY_D0_PIN,UI_DISPLAY_D1_PIN,UI_DISPLAY_D2_PIN,UI_DISPLAY_D3_PIN,UI_DISPLAY_D4_PIN,UI_DISPLAY_D5_PIN,UI_DISPLAY_D6_PIN,UI_DISPLAY_D7_PIN
@@ -145,7 +154,6 @@ What display type do you use?
 //calculate rows and cols available with current font
 #define UI_COLS (UI_LCD_WIDTH/UI_FONT_WIDTH)
 #define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
-#undef UI_DISPLAY_CHARSET
 #define UI_DISPLAY_CHARSET 3
 #else
 /** Number of columns per row
@@ -216,26 +224,26 @@ Define the pin
 #define UI_DISPLAY_D7_PIN _BV(9)*/
 
 #else // Direct display connections
-#define UI_DISPLAY_RS_PIN		63		// PINK.1, 88, D_RS
-#define UI_DISPLAY_RW_PIN		-1
-#define UI_DISPLAY_ENABLE_PIN	        65		// PINK.3, 86, D_E
-#define UI_DISPLAY_D0_PIN		59		// PINF.5, 92, D_D4
-#define UI_DISPLAY_D1_PIN		64		// PINK.2, 87, D_D5
-#define UI_DISPLAY_D2_PIN		44		// PINL.5, 40, D_D6
-#define UI_DISPLAY_D3_PIN		66		// PINK.4, 85, D_D7
-#define UI_DISPLAY_D4_PIN		59		// PINF.5, 92, D_D4
-#define UI_DISPLAY_D5_PIN		64		// PINK.2, 87, D_D5
-#define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
-#define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
+//#define UI_DISPLAY_RS_PIN		63		// PINK.1, 88, D_RS
+//#define UI_DISPLAY_RW_PIN		-1
+//#define UI_DISPLAY_ENABLE_PIN	        65		// PINK.3, 86, D_E
+//#define UI_DISPLAY_D0_PIN		59		// PINF.5, 92, D_D4
+//#define UI_DISPLAY_D1_PIN		64		// PINK.2, 87, D_D5
+//#define UI_DISPLAY_D2_PIN		44		// PINL.5, 40, D_D6
+//#define UI_DISPLAY_D3_PIN		66		// PINK.4, 85, D_D7
+//#define UI_DISPLAY_D4_PIN		59		// PINF.5, 92, D_D4
+//#define UI_DISPLAY_D5_PIN		64		// PINK.2, 87, D_D5
+//#define UI_DISPLAY_D6_PIN		44		// PINL.5, 40, D_D6
+//#define UI_DISPLAY_D7_PIN		66		// PINK.4, 85, D_D7
 #define UI_DELAYPERCHAR		   50
 
 // Special pins for some u8g driven display
 
-#define UI_DISPLAY_CS1 59
-#define UI_DISPLAY_CS2 59
-#define UI_DISPLAY_DI 59
-#define UI_DISPLAY_RW_PIN 59
-#define UI_DISPLAY_RESET_PIN 59
+//#define UI_DISPLAY_CS1 59
+//#define UI_DISPLAY_CS2 59
+//#define UI_DISPLAY_DI 59
+//#define UI_DISPLAY_RW_PIN 59
+//#define UI_DISPLAY_RESET_PIN 59
 #endif
 
 
@@ -244,7 +252,6 @@ Define the pin
 0 = No keys attached - disables also menu
 1 = Some keys attached
 */
-#undef UI_HAS_KEYS
 #define UI_HAS_KEYS 1
 
 
@@ -253,7 +260,7 @@ Define the pin
 If you have menus enabled, you need a method to leave it. If you have a back key, you can always go one level higher.
 Without a back key, you need to navigate to the back entry in the menu. Setting this value to 1 removes the back entry.
 */
-#define UI_HAS_BACK_KEY 1
+#define UI_HAS_BACK_KEY 0
 
 /* Then you have the next/previous keys more like up/down keys, it may be more intuitive to change the direction you skip through the menus.
 If you set it to true, next will go to previous menu instead of the next menu.
@@ -370,13 +377,10 @@ const int matrixActions[] PROGMEM = UI_MATRIX_ACTIONS;
 
 void uiInitKeys() {
 #if UI_HAS_KEYS!=0
-  //UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-  UI_KEYS_INIT_BUTTON_LOW(4); // push button, connects gnd to pin
-  UI_KEYS_INIT_BUTTON_LOW(5);
-  UI_KEYS_INIT_BUTTON_LOW(6);
-  UI_KEYS_INIT_BUTTON_LOW(11);
-  UI_KEYS_INIT_BUTTON_LOW(42);
-
+  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A, UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+  UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
+  UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN);
+  
 //  UI_KEYS_INIT_CLICKENCODER_LOW(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
 //  UI_KEYS_INIT_BUTTON_LOW(43); // push button, connects gnd to pin
 //  UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);
@@ -385,14 +389,9 @@ void uiInitKeys() {
 void uiCheckKeys(uint16_t &action) {
 #if UI_HAS_KEYS!=0
 
- //UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
- UI_KEYS_BUTTON_LOW(4,UI_ACTION_OK); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(5,UI_ACTION_NEXT); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(6,UI_ACTION_PREVIOUS); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(11,UI_ACTION_BACK); // push button, connects gnd to pin
- UI_KEYS_BUTTON_LOW(42,UI_ACTION_SD_PRINT ); // push button, connects gnd to pin
-//  UI_KEYS_CLICKENCODER_LOW_REV(47,45); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
-//  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin
+ UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A, UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+ UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK,UI_ACTION_OK); // push button, connects gnd to pin
+ UI_KEYS_BUTTON_LOW(UI_RESET_PIN, UI_ACTION_EMERGENCY_STOP);
 #endif
 }
 inline void uiCheckSlowEncoder() {
