@@ -1,5 +1,15 @@
 # Repetier-Firmware - the fast and user friendly firmware
 
+## About this fork
+
+This is my own fork of the Repetier firmware so that I keep my modifications somewhere safe in case of hard drive failure, etc.
+
+I have a MakerSelect 3 v2.1 printer which I have upgraded the Melzi to a Ramps 1.4 board.  To keep the conversion cost low, I figured out how to wire up the Melzi screen that comes with the printer so that it also works with Ramps.  See SCREEN NOTES for more information on how I got that to work.
+
+Please note that this fork is not really all that well-maintained and if you have issues, it is a good idea to watch the main Repetier repository.  Any issues outside of the modifications I've made will likely be ignored, because it's probably way out of my depth to fix them in the first place.
+
+Final note is that I was being super-picky about thermistor settings to try to calibrate as much as possible to what I have.  Since writing that configuration I have swapped out the heated bed with an AnyCubic heated glass bed and haven't noticed the thermistor settings reading too much outside of the expected range.  YMMV -- when in doubt use the values for your thermistor settings that you feel work best, don't take mine as the final authority!  I recommend you turn on the bed, use a digital thermometer to confirm.  Same for the hot end, but always note that there will be a considerable skew of measured temps depending on where you're reading it from.
+
 ## Notes for developers/pull requests
 
 This software is open source licensed under the GPL V3. As any free project we
