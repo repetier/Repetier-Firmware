@@ -35,4 +35,5 @@ Screen  Melzi  Ramps    Mega 2560 Description
 
 ## Misc notes on motor wire order:
 Melzi: Black Green Blue Red
+
 Ramps: Red Blue Green Black
