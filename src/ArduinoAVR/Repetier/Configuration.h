@@ -194,8 +194,8 @@
 #define HEATED_BED_PID_DGAIN 65.78
 #define HEATED_BED_PID_MAX 255
 #define HEATED_BED_DECOUPLE_TEST_PERIOD 300000
-#define MIN_EXTRUDER_TEMP 90
-#define MAXTEMP 250
+#define MIN_EXTRUDER_TEMP 50
+#define MAXTEMP 260
 #define MIN_DEFECT_TEMPERATURE -10
 #define MAX_DEFECT_TEMPERATURE 290
 #define MILLISECONDS_PREHEAT_TIME 30000
@@ -384,11 +384,11 @@ It also can add a delay to wait for spindle to run on full speed.
 #define DELTASEGMENTS_PER_PRINTLINE 24
 #define STEPPER_INACTIVE_TIME 360L
 #define MAX_INACTIVE_TIME 720L
-#define MAX_FEEDRATE_X 80
-#define MAX_FEEDRATE_Y 70
+#define MAX_FEEDRATE_X 100
+#define MAX_FEEDRATE_Y 100
 #define MAX_FEEDRATE_Z 2.5
-#define HOMING_FEEDRATE_X 60
-#define HOMING_FEEDRATE_Y 60
+#define HOMING_FEEDRATE_X 100
+#define HOMING_FEEDRATE_Y 100
 #define HOMING_FEEDRATE_Z 4
 #define HOMING_ORDER HOME_ORDER_XYZ
 #define ZHOME_PRE_RAISE 0
@@ -409,15 +409,15 @@ It also can add a delay to wait for spindle to run on full speed.
 #define STEP_DOUBLER_FREQUENCY 12000
 #define ALLOW_QUADSTEPPING 1
 #define DOUBLE_STEP_DELAY 1 // time in microseconds
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1000
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1000
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 600
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 600
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 1100
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1100
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
 #define INTERPOLATE_ACCELERATION_WITH_Z 0
 #define ACCELERATION_FACTOR_TOP 100
-#define MAX_JERK 9
+#define MAX_JERK 8.5
 #define MAX_ZJERK 0.3
 #define PRINTLINE_CACHE_SIZE 20
 #define MOVE_CACHE_LOW 10
@@ -462,7 +462,7 @@ It also can add a delay to wait for spindle to run on full speed.
 #define KEEP_ALIVE_INTERVAL 2000
 #define WAITING_IDENTIFIER "wait"
 #define ECHO_ON_EXECUTE 1
-#define EEPROM_MODE 0
+#define EEPROM_MODE 1
 #undef PS_ON_PIN
 #define PS_ON_PIN ORIG_PS_ON_PIN
 #define JSON_OUTPUT 0
@@ -554,7 +554,7 @@ WARNING: Servos can draw a considerable amount of current. Make sure your system
 #define FEATURE_CHECKSUM_FORCED 0
 #define FEATURE_FAN_CONTROL 1
 #define FEATURE_FAN2_CONTROL 0
-#define FEATURE_CONTROLLER UICONFIG_CONTROLLER
+#define FEATURE_CONTROLLER 1
 #define ADC_KEYPAD_PIN -1
 #define LANGUAGE_EN_ACTIVE 1
 #define LANGUAGE_DE_ACTIVE 0
@@ -606,6 +606,7 @@ Values must be in range 1..255
 
 #define GENERIC_THERM_VREF 5
 #define GENERIC_THERM_NUM_ENTRIES 33
+#define ALTERNATIVE_JERK true
 
 #endif
 
@@ -624,7 +625,7 @@ Values must be in range 1..255
     "xInvert": 0,
     "x2Invert": 0,
     "xInvertEnable": 0,
-    "eepromMode": 0,
+    "eepromMode": 1,
     "yInvert": 0,
     "y2Invert": 0,
     "yInvertEnable": 0,
@@ -703,14 +704,14 @@ Values must be in range 1..255
     "y2MaxEndstop": 0,
     "motherboard": 33,
     "driveSystem": 0,
-    "xMaxSpeed": 80,
-    "xHomingSpeed": 60,
+    "xMaxSpeed": 100,
+    "xHomingSpeed": 100,
     "xTravelAcceleration": 1100,
-    "xPrintAcceleration": 1000,
-    "yMaxSpeed": 70,
-    "yHomingSpeed": 60,
+    "xPrintAcceleration": 600,
+    "yMaxSpeed": 100,
+    "yHomingSpeed": 100,
     "yTravelAcceleration": 1100,
-    "yPrintAcceleration": 1000,
+    "yPrintAcceleration": 600,
     "zMaxSpeed": 2.5,
     "zHomingSpeed": 4,
     "zTravelAcceleration": 100,
@@ -780,7 +781,7 @@ Values must be in range 1..255
     "stepDoublerFrequency": 12000,
     "allowQuadstepping": "1",
     "doubleStepDelay": 1,
-    "maxJerk": 9,
+    "maxJerk": 8.5,
     "maxZJerk": 0.3,
     "moveCacheSize": 20,
     "moveCacheLow": 10,
@@ -839,7 +840,7 @@ Values must be in range 1..255
     "enableZProbing": "0",
     "extrudeMaxLength": 160,
     "homeOrder": "HOME_ORDER_XYZ",
-    "featureController": 11,
+    "featureController": 1,
     "uiPrinterName": "Duplicator i3",
     "uiPrinterCompany": "Wanhao",
     "uiPagesDuration": 4000,
@@ -857,7 +858,7 @@ Values must be in range 1..255
     "uiMinHeatedBed": 30,
     "uiMaxHeatedBed": 120,
     "uiMinEtxruderTemp": 50,
-    "uiMaxExtruderTemp": 250,
+    "uiMaxExtruderTemp": 260,
     "uiExtruderFeedrate": 2,
     "uiExtruderRetractDistance": 3,
     "uiSpeeddependentPositioning": "0",
@@ -921,8 +922,8 @@ Values must be in range 1..255
     "pidControlRange": 20,
     "skipM109Within": 2,
     "extruderFanCoolTemp": 50,
-    "minTemp": 90,
-    "maxTemp": 250,
+    "minTemp": 50,
+    "maxTemp": 260,
     "minDefectTemp": -10,
     "maxDefectTemp": 290,
     "arcSupport": "1",
@@ -1146,7 +1147,7 @@ Values must be in range 1..255
             "maxDistance": 20
         }
     ],
-    "manualConfig": "#define GENERIC_THERM_VREF 5\n#define GENERIC_THERM_NUM_ENTRIES 33",
+    "manualConfig": "#define GENERIC_THERM_VREF 5\n#define GENERIC_THERM_NUM_ENTRIES 33\n#define ALTERNATIVE_JERK true",
     "zHomeMinTemperature": 0,
     "zHomeXPos": 999999,
     "zHomeYPos": 999999,
