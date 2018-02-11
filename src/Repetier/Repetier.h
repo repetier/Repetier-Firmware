@@ -180,6 +180,9 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define ANALOG_REF_INT_2_56 _BV(REFS0) | _BV(REFS1)
 #define ANALOG_REF ANALOG_REF_AVCC
 
+#include "src/utilities/RMath.h"
+#include "src/utilities/RVector3.h"
+
 #define HOME_ORDER_XYZ 1
 #define HOME_ORDER_XZY 2
 #define HOME_ORDER_YXZ 3
@@ -320,7 +323,7 @@ typedef uint8_t secondspeed_t;
 #endif
 
 #ifndef MAX_ROOM_TEMPERATURE
-#define MAX_ROOM_TEMPERATURE 40
+#define MAX_ROOM_TEMPERATURE 25
 #endif
 #ifndef ZHOME_X_POS
 #define ZHOME_X_POS IGNORE_COORDINATE
@@ -664,9 +667,6 @@ typedef uint8_t secondspeed_t;
 
 #undef min
 #undef max
-
-#include "src/utilities/RMath.h"
-#include "src/utilities/RVector3.h"
 
 #if !defined(MAX_FAN_PWM) || MAX_FAN_PWM == 255
 #define TRIM_FAN_PWM(x) x

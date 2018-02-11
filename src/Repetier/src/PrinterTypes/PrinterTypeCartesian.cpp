@@ -75,4 +75,8 @@ float PrinterType::feedrateForMoveSteps(fast8_t axes) {
     }
     return feedrate;
 }
+
+void PrinterType::deactivatedTool(fast8_t id) {}
+void PrinterType::activatedTool(fast8_t id) {}
+
 #endif

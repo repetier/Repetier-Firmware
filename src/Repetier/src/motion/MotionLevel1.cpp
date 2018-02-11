@@ -155,13 +155,52 @@ void Motion1::setFromConfig() {
     motors[X_AXIS] = &XMotor;
     motors[Y_AXIS] = &YMotor;
     motors[Z_AXIS] = &ZMotor;
-    motors[E_AXIS] = &E0Motor;
+    motors[E_AXIS] = nullptr;
 
 #if NUM_AXES > A_AXIS
+    resolution[A_AXIS] = AAXIS_STEPS_PER_MM;
+    maxYank[A_AXIS] = MAX_AJERK;
+    maxFeedrate[A_AXIS] = MAX_FEEDRATE_A;
+    homingFeedrate[A_AXIS] = HOMING_FEEDRATE_A;
+    maxAcceleration[A_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_A;
+    homeRetestDistance[A_AXIS] = ENDSTOP_A_BACK_MOVE;
+    homeRetestReduction[A_AXIS] = ENDSTOP_A_RETEST_REDUCTION_FACTOR;
+    homeEndstopDistance[A_AXIS] = ENDSTOP_A_BACK_ON_HOME;
+    minPos[A_AXIS] = A_MIN_POS;
+    maxPos[A_AXIS] = A_MIN_POS + A_MAX_LENGTH;
+    homeDir[A_AXIS] = A_HOME_DIR;
+    homePriority[A_AXIS] = A_HOME_PRIORITY;
+    motors[A_AXIS] = &AMotor;
 #endif
 #if NUM_AXES > B_AXIS
+    resolution[B_AXIS] = BAXIS_STEPS_PER_MM;
+    maxYank[B_AXIS] = MAX_BJERK;
+    maxFeedrate[B_AXIS] = MAX_FEEDRATE_B;
+    homingFeedrate[B_AXIS] = HOMING_FEEDRATE_B;
+    maxAcceleration[B_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_B;
+    homeRetestDistance[B_AXIS] = ENDSTOP_B_BACK_MOVE;
+    homeRetestReduction[B_AXIS] = ENDSTOP_B_RETEST_REDUCTION_FACTOR;
+    homeEndstopDistance[B_AXIS] = ENDSTOP_B_BACK_ON_HOME;
+    minPos[B_AXIS] = B_MIN_POS;
+    maxPos[B_AXIS] = B_MIN_POS + B_MAX_LENGTH;
+    homeDir[B_AXIS] = B_HOME_DIR;
+    homePriority[B_AXIS] = B_HOME_PRIORITY;
+    motors[B_AXIS] = &BMotor;
 #endif
 #if NUM_AXES > C_AXIS
+    resolution[C_AXIS] = CAXIS_STEPS_PER_MM;
+    maxYank[C_AXIS] = MAX_CJERK;
+    maxFeedrate[C_AXIS] = MAX_FEEDRATE_C;
+    homingFeedrate[C_AXIS] = HOMING_FEEDRATE_C;
+    maxAcceleration[C_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_C;
+    homeRetestDistance[C_AXIS] = ENDSTOP_C_BACK_MOVE;
+    homeRetestReduction[C_AXIS] = ENDSTOP_C_RETEST_REDUCTION_FACTOR;
+    homeEndstopDistance[C_AXIS] = ENDSTOP_C_BACK_ON_HOME;
+    minPos[C_AXIS] = C_MIN_POS;
+    maxPos[C_AXIS] = C_MIN_POS + C_MAX_LENGTH;
+    homeDir[C_AXIS] = C_HOME_DIR;
+    homePriority[C_AXIS] = C_HOME_PRIORITY;
+    motors[C_AXIS] = &CMotor;
 #endif
 
     axisCompTanXY = AXISCOMP_TANXY;
@@ -274,6 +313,8 @@ fast8_t Motion1::buffersUsed() {
 void Motion1::waitForEndOfMoves() {
     while (buffersUsed() > 0) {
         Commands::checkForPeriodicalActions(false);
+        GCode::keepAlive(Processing, 3);
+        UI_MEDIUM;
     }
 }
 
@@ -366,6 +407,22 @@ void Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate) {
     }
 #endif
     queueMove(feedrate);
+}
+
+void Motion1::setToolOffset(float ox, float oy, float oz) {
+    setTmpPositionXYZ(currentPosition[X_AXIS] + ox - Printer::offsetX,
+                      currentPosition[Y_AXIS] + oy - Printer::offsetY,
+                      currentPosition[Z_AXIS]);
+    moveByOfficial(tmpPosition, XY_SPEED);
+    setTmpPositionXYZ(currentPosition[X_AXIS],
+                      currentPosition[Y_AXIS],
+                      currentPosition[Z_AXIS] + oz - Printer::offsetZ);
+    moveByOfficial(tmpPosition, Z_SPEED);
+    waitForEndOfMoves();
+    Printer::offsetX = ox;
+    Printer::offsetY = oy;
+    Printer::offsetZ = oz;
+    updatePositionsFromCurrentTransformed();
 }
 
 // Move to the printer coordinates (after offset, transform, ...)
@@ -1082,6 +1139,7 @@ void Motion1::callBeforeHomingOnSteppers() {
         }
     }
 }
+
 void Motion1::callAfterHomingOnSteppers() {
     FOR_ALL_AXES(i) {
         if (motors[i]) {
@@ -1134,7 +1192,7 @@ void Motion1::eepromHandle() {
         EEPROM::handleFloat(eprStart + p + EPR_M1_MIN_POS, PSTR("min. position [mm]"), 3, minPos[i]);
         EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_POS, PSTR("max. position [mm]"), 3, maxPos[i]);
         EEPROM::handleFloat(eprStart + p + EPR_M1_ENDSTOP_DISTANCE, PSTR("endstop distance after homing [mm]"), 3, homeEndstopDistance[i]);
-        p += 4;
+        p += EPR_M1_ENDSTOP_DISTANCE + 4;
     }
     EEPROM::removePrefix();
     EEPROM::handleByte(EPR_M1_ALWAYS_CHECK_ENDSTOPS, PSTR("Always check endstops"), alwaysCheckEndstops);

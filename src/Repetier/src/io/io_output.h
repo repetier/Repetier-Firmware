@@ -20,8 +20,8 @@
 
 Definies the following macros:
 
-IO_OUTPUT_FULL(name, pin)
-IO_OUTPUT_INVERTED_FULL(name, pin)
+IO_OUTPUT(name, pin)
+IO_OUTPUT_INVERTED(name, pin)
 
 */
 
@@ -29,30 +29,32 @@ IO_OUTPUT_INVERTED_FULL(name, pin)
 #error You need to set IO_TARGET before calling this file!
 #endif
 
-#undef IO_OUTPUT_FULL
-#undef IO_OUTPUT_INVERTED_FULL
-#undef IO_OUTPUT_SOFTWARE_PWM
-#undef IO_OUTPUT_HARDWARE_PWM
+#undef IO_OUTPUT
+#undef IO_OUTPUT_INVERTED
+#undef IO_OUTPUT_FAKE
 
 #if IO_TARGET == 1 // Init pins
 
-#define IO_OUTPUT_FULL(name, pin) \
+#define IO_OUTPUT(name, pin) \
     SET_OUTPUT(pin); \
     WRITE(pin, 0);
 
-#define IO_OUTPUT_INVERTED_FULL(name, pin) \
+#define IO_OUTPUT_INVERTED(name, pin) \
     SET_OUTPUT(pin); \
     WRITE(pin, 1);
 
+#define IO_OUTPUT_FAKE(name)
+
 #elif IO_TARGET == 2 // PWM interrupt
 
-#define IO_OUTPUT_FULL(name, pin)
-#define IO_OUTPUT_INVERTED_FULL(name, pin)
+#define IO_OUTPUT(name, pin)
+#define IO_OUTPUT_INVERTED(name, pin)
+#define IO_OUTPUT_FAKE(name)
 
 #elif IO_TARGET == 4 // define class
 
-//#define IO_OUTPUT_FULL(name, pin) class name {inline static void set(fast8_t val){}};
-#define IO_OUTPUT_FULL(name, pin) \
+//#define IO_OUTPUT(name, pin) class name {inline static void set(fast8_t val){}};
+#define IO_OUTPUT(name, pin) \
     class name { \
     public: \
         inline static void set(fast8_t val) \
@@ -65,10 +67,9 @@ IO_OUTPUT_INVERTED_FULL(name, pin)
         } \
         inline static void on() { WRITE(pin, 1); } \
         inline static void off() { WRITE(pin, 0); } \
-        inline static void pwm(uint8_t frequency) { name::set(frequency >= 128); } \
     };
 
-#define IO_OUTPUT_INVERTED_FULL(name, pin) \
+#define IO_OUTPUT_INVERTED(name, pin) \
     class name { \
     public: \
         inline static void set(fast8_t val) \
@@ -81,14 +82,22 @@ IO_OUTPUT_INVERTED_FULL(name, pin)
         } \
         inline static void on() { WRITE(pin, 0); } \
         inline static void off() { WRITE(pin, 1); } \
-        inline static void pwm(uint8_t frequency) { name::set(frequency >= 128); } \
+    };
+
+#define IO_OUTPUT_FAKE(name) \
+    class name { \
+    public: \
+        inline static void set(fast8_t val) { } \
+        inline static void on() { } \
+        inline static void off() { } \
     };
 
 #else
 
 // Fallback to remove unused macros preventing errors!
 
-#define IO_OUTPUT_FULL(name, pin)
-#define IO_OUTPUT_INVERTED_FULL(name, pin)
+#define IO_OUTPUT(name, pin)
+#define IO_OUTPUT_INVERTED(name, pin)
+#define IO_OUTPUT_FAKE(name)
 
 #endif

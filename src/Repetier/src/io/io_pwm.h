@@ -49,29 +49,29 @@
 
 #if IO_TARGET == 1 // init
 
-#define IO_PWM_SOFTWARE(name,pinname,speed)
-#define IO_PDM_SOFTWARE(name,pinname)
+#define IO_PWM_SOFTWARE(name, pinname, speed)
+#define IO_PDM_SOFTWARE(name, pinname)
 #define IO_PWM_FAKE(name)
-#define IO_PWM_SWITCH(name,pinname,onLevel)
-#define IO_PWM_HARDWARE(name,pinid,frequency) \
+#define IO_PWM_SWITCH(name, pinname, onLevel)
+#define IO_PWM_HARDWARE(name, pinid, frequency) \
     name.id = HAL::initHardwarePWM(pinid, frequency);
 
-#define IO_PWM_KICKSTART(name,pwmname,timems)
+#define IO_PWM_KICKSTART(name, pwmname, timems)
 
 #elif IO_TARGET == 2 // PWM interrupt
 
-#define IO_PWM_SOFTWARE(name,pinname,speed) \
-  if(pwm_count ## speed == 0) { \
-      if((name.val = (name.pwm & pwmMasks[speed])) > 0) { \
-          pinname::on(); \
-      } else { \
-          pinname::off(); \
-      } \
-  } else if(pwm_count ## speed == name.val && pwm_count ## speed != pwmMasks[speed]) { \
-      pinname::off(); \
-  } 
+#define IO_PWM_SOFTWARE(name, pinname, speed) \
+    if (pwm_count##speed == 0) { \
+        if ((name.val = (name.pwm & pwmMasks[speed])) > 0) { \
+            pinname::on(); \
+        } else { \
+            pinname::off(); \
+        } \
+    } else if (pwm_count##speed == name.val && pwm_count##speed != pwmMasks[speed]) { \
+        pinname::off(); \
+    }
 
-#define IO_PDM_SOFTWARE(name,pinname) \
+#define IO_PDM_SOFTWARE(name, pinname) \
     { \
         uint8_t carry; \
         carry = name.error + name.pwm; \
@@ -79,96 +79,105 @@
         name.error = carry; \
     }
 #define IO_PWM_FAKE(name)
-#define IO_PWM_SWITCH(name,pinname,onLevel)
-#define IO_PWM_HARDWARE(name,pinid,frequency)
+#define IO_PWM_SWITCH(name, pinname, onLevel)
+#define IO_PWM_HARDWARE(name, pinid, frequency)
 
-#define IO_PWM_KICKSTART(name,pwmname,timems)
+#define IO_PWM_KICKSTART(name, pwmname, timems)
 
 #elif IO_TARGET == 3 // 100ms
 
-#define IO_PWM_SOFTWARE(name,pinname,speed)
-#define IO_PDM_SOFTWARE(name,pinname)
+#define IO_PWM_SOFTWARE(name, pinname, speed)
+#define IO_PDM_SOFTWARE(name, pinname)
 #define IO_PWM_FAKE(name)
-#define IO_PWM_SWITCH(name,pinname,onLevel)
-#define IO_PWM_HARDWARE(name,pinid,frequency)
-#define IO_PWM_KICKSTART(name,pwmname,timems) \
-    if(name.kickcount > 0) { \
-        if(--name.kickcount == 0) { \
+#define IO_PWM_SWITCH(name, pinname, onLevel)
+#define IO_PWM_HARDWARE(name, pinid, frequency)
+#define IO_PWM_KICKSTART(name, pwmname, timems) \
+    if (name.kickcount > 0) { \
+        if (--name.kickcount == 0) { \
             pwmname.set(name.pwm); \
         } \
-    } 
+    }
 
 #elif IO_TARGET == 4 // class
 
-class PWMHandler {
-    public:
-    virtual void set(fast8_t pwm) = 0;
-    virtual fast8_t get() = 0;
-};
-
-#define IO_PWM_SOFTWARE(name,pinname,speed) \
-    template<class pinname> class name##Class: public PWMHandler { \
+#define IO_PWM_SOFTWARE(name, pinname, speed) \
+    template <class pinname> \
+    class name##Class : public PWMHandler { \
     public: \
-    fast8_t pwm, val;\
-    name##Class():pwm(0),val(0) {} \
-    void set(fast8_t _pwm) final {pwm = _pwm;} \
-    fast8_t get() final {return pwm;} \
-    };\
+        fast8_t pwm, val; \
+        name##Class() \
+            : pwm(0) \
+            , val(0) {} \
+        void set(fast8_t _pwm) final { pwm = _pwm; } \
+        fast8_t get() final { return pwm; } \
+    }; \
     extern name##Class<pinname> name;
 
-#define IO_PDM_SOFTWARE(name,pinname) \
-    template<class pinname> class name##Class: public PWMHandler { \
+#define IO_PDM_SOFTWARE(name, pinname) \
+    template <class pinname> \
+    class name##Class : public PWMHandler { \
     public: \
-    fast8_t pwm, error;\
-    name##Class():pwm(0),error(0) {} \
-    void set(fast8_t _pwm) final {pwm = _pwm;} \
-    fast8_t get() final {return pwm;} \
-    };\
+        fast8_t pwm, error; \
+        name##Class() \
+            : pwm(0) \
+            , error(0) {} \
+        void set(fast8_t _pwm) final { pwm = _pwm; } \
+        fast8_t get() final { return pwm; } \
+    }; \
     extern name##Class<pinname> name;
 
 #define IO_PWM_FAKE(name) \
-    class name##Class: public PWMHandler { \
+    class name##Class : public PWMHandler { \
     public: \
-    fast8_t pwm;\
-    name##Class():pwm(0) {} \
-    void set(fast8_t _pwm) final {pwm = _pwm;} \
-    fast8_t get() final {return pwm;} \
-    };\
+        fast8_t pwm; \
+        name##Class() \
+            : pwm(0) {} \
+        void set(fast8_t _pwm) final { pwm = _pwm; } \
+        fast8_t get() final { return pwm; } \
+    }; \
     extern name##Class name;
 
 #define IO_PWM_SWITCH(name, pinname, onLevel) \
-    template<class pinname> class name##Class: public PWMHandler { \
+    template <class pinname> \
+    class name##Class : public PWMHandler { \
     public: \
-    fast8_t pwm;\
-    name##Class():pwm(0) {} \
-    void set(fast8_t _pwm) final {pwm = _pwm;pinname::set(_pwm >= onLevel);} \
-    fast8_t get() final {return pwm;} \
-    };\
+        fast8_t pwm; \
+        name##Class() \
+            : pwm(0) {} \
+        void set(fast8_t _pwm) final { \
+            pwm = _pwm; \
+            pinname::set(_pwm >= onLevel); \
+        } \
+        fast8_t get() final { return pwm; } \
+    }; \
     extern name##Class<pinname> name;
 
 #define IO_PWM_HARDWARE(name, pinid, frequency) \
-    class name##Class: public PWMHandler { \
+    class name##Class : public PWMHandler { \
     public: \
-    fast8_t pwm, id;\
-    name##Class():pwm(0) {} \
-    void set(fast8_t _pwm) final { \
-        if (pwm == _pwm) { \
-            return; \
+        fast8_t pwm, id; \
+        name##Class() \
+            : pwm(0) {} \
+        void set(fast8_t _pwm) final { \
+            if (pwm == _pwm) { \
+                return; \
+            } \
+            pwm = _pwm; \
+            HAL::setHardwarePWM(id, pwm); \
         } \
-        pwm = _pwm; \
-        HAL::setHardwarePWM(id, pwm); \
-    } \
-    fast8_t get() final {return pwm;} \
-    };\
+        fast8_t get() final { return pwm; } \
+    }; \
     extern name##Class name;
 
-#define IO_PWM_KICKSTART(name,pwmname,time100ms) \
-    class name##Class: public PWMHandler { \
+#define IO_PWM_KICKSTART(name, pwmname, time100ms) \
+    class name##Class : public PWMHandler { \
     public: \
-        fast8_t pwm, kickcount;\
-        name##Class():pwm(0),kickcount(0) {} \
+        fast8_t pwm, kickcount; \
+        name##Class() \
+            : pwm(0) \
+            , kickcount(0) {} \
         void set(fast8_t _pwm) final { \
-            if(kickcount == 0 && _pwm < 85 && _pwm > pwm && time100ms > 0) { \
+            if (kickcount == 0 && _pwm < 85 && _pwm > pwm && time100ms > 0) { \
                 pwm = _pwm; \
                 kickcount = time100ms; \
                 pwmname.set(255); \
@@ -179,37 +188,37 @@ class PWMHandler {
                 } \
             } \
         } \
-        fast8_t get() final {return pwm;} \
-    };\
+        fast8_t get() final { return pwm; } \
+    }; \
     extern name##Class name;
 
 #elif IO_TARGET == 6 // variable
 
-#define IO_PWM_SOFTWARE(name,pinname,speed) \
+#define IO_PWM_SOFTWARE(name, pinname, speed) \
     name##Class<pinname> name;
 
-#define IO_PDM_SOFTWARE(name,pinname) \
+#define IO_PDM_SOFTWARE(name, pinname) \
     name##Class<pinname> name;
 
 #define IO_PWM_FAKE(name) \
     name##Class name;
 
-#define IO_PWM_SWITCH(name,pinname,onLevel) \
+#define IO_PWM_SWITCH(name, pinname, onLevel) \
     name##Class<pinname> name;
 
-#define IO_PWM_HARDWARE(name,pinid,frequency) \
+#define IO_PWM_HARDWARE(name, pinid, frequency) \
     name##Class name;
 
-#define IO_PWM_KICKSTART(name,pwmname,timems) \
+#define IO_PWM_KICKSTART(name, pwmname, timems) \
     name##Class name;
 
 #else
 
-#define IO_PWM_SOFTWARE(name,pinname,speed)
-#define IO_PDM_SOFTWARE(name,pinname)
+#define IO_PWM_SOFTWARE(name, pinname, speed)
+#define IO_PDM_SOFTWARE(name, pinname)
 #define IO_PWM_FAKE(name)
-#define IO_PWM_SWITCH(name,pinname,onLevel)
-#define IO_PWM_HARDWARE(name,pinid,frequency)
-#define IO_PWM_KICKSTART(name,pwmname,timems)
+#define IO_PWM_SWITCH(name, pinname, onLevel)
+#define IO_PWM_HARDWARE(name, pinid, frequency)
+#define IO_PWM_KICKSTART(name, pwmname, timems)
 
 #endif

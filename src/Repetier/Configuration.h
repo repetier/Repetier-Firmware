@@ -55,6 +55,10 @@
 #define PREPARE_FREQUENCY 600
 #define BLOCK_FREQUENCY 250
 #define VELOCITY_PROFILE 5 // 1 = linear, 3 = cubic, 5 = quintic velocity shape
+#define Z_SPEED 10         // Z positioning speed
+#define XY_SPEED 100       // XY positioning speed for normal operations
+#define MAX_ROOM_TEMPERATURE 25
+#define TEMPERATURE_CONTROL_RANGE 20
 
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta
 #define PRINTER_TYPE 0
@@ -86,21 +90,6 @@ to the position. 0 = no contribution. */
 // Define ZProbe by referencing a endstop defined
 CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 
-// Define xyz motors
-
-#define XMOTOR_TYPE SimpleStepperDriver<IOX1Step, IOX1Dir, IOX1Enable>
-#define XMOTOR_PARAMS (&endstopNone, &endstopNone)
-CONFIG_VARIABLE(XMOTOR_TYPE, XMotor, XMOTOR_PARAMS)
-#define YMOTOR_TYPE SimpleStepperDriver<IOY1Step, IOY1Dir, IOY1Enable>
-#define YMOTOR_PARAMS (&endstopNone, &endstopNone)
-CONFIG_VARIABLE(YMOTOR_TYPE, YMotor, YMOTOR_PARAMS)
-#define ZMOTOR_TYPE SimpleStepperDriver<IOZ1Step, IOZ1Dir, IOZ1Enable>
-#define ZMOTOR_PARAMS (&endstopNone, &endstopNone)
-CONFIG_VARIABLE(ZMOTOR_TYPE, ZMotor, ZMOTOR_PARAMS)
-#define E0MOTOR_TYPE SimpleStepperDriver<IOE0Step, IOE0Dir, IOE0Enable>
-#define E0MOTOR_PARAMS (&endstopNone, &endstopNone)
-CONFIG_VARIABLE(E0MOTOR_TYPE, E0Motor, E0MOTOR_PARAMS)
-
 /** Axes are homed in order of priority (0..10) if homing direction is not 0. */
 #define X_HOME_PRIORITY 0
 #define Y_HOME_PRIORITY 1
@@ -109,7 +98,20 @@ CONFIG_VARIABLE(E0MOTOR_TYPE, E0Motor, E0MOTOR_PARAMS)
 // All fans in this list list become controllable with M106/M107
 // by selecteing the fan number with P0..P<NUM_FANS-1>
 #define NUM_FANS 1
-#define FAN_LIST {&Fan1PWM}
+#define FAN_LIST \
+    { &Fan1PWM }
+
+#define NUM_HEATED_BEDS 1
+#define HEATED_BED_LIST \
+    { &HeatedBed1 }
+
+#define NUM_HEATED_CHAMBERS 0
+#define HEATED_CHAMBER_LIST \
+    {}
+
+#define NUM_TOOLS 2
+#define TOOLS \
+    { &ToolExtruder1, &ToolExtruder2 }
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 // ################ END MANUAL SETTINGS ##########################

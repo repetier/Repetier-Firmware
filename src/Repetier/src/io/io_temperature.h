@@ -51,41 +51,35 @@ IO_TEMPERATURE_TABLE(name,analog,table)
 
 #elif IO_TARGET == 4 // class
 
-class IOTemperature {
-    public:
-    virtual float get() = 0; /// Return current temperature
-    virtual bool isDefect() = 0; /// Return true if sensor is defect
-};
-
 class IOTemperatureTable {
 public:
-    float interpolateNTC(int value, fast8_t num, const short *temptable);
-    float interpolatePTC(int value, fast8_t num, const short *temptable);
+    float interpolateNTC(int value, fast8_t num, const short* temptable);
+    float interpolatePTC(int value, fast8_t num, const short* temptable);
     virtual float interpolateFor(int value) = 0; // Converts 0..4095 input into a temperature
 };
 
 #define IO_TEMP_TABLE_NTC(name, dataname) \
     extern const short dataname##_table[NUM_##dataname][2] PROGMEM; \
-    class name##Class: public IOTemperatureTable {\
-    public:\
+    class name##Class : public IOTemperatureTable { \
+    public: \
         float interpolateFor(int value) final { \
-            return interpolateNTC(value,NUM_##dataname,(const short *)&dataname##_table[0][0]); \
+            return interpolateNTC(value, NUM_##dataname, (const short*)&dataname##_table[0][0]); \
         } \
     }; \
     extern name##Class name;
 
 #define IO_TEMP_TABLE_PTC(name, dataname) \
     extern const short dataname##_table[NUM_##dataname][2] PROGMEM; \
-    class name##Class: public IOTemperatureTable {\
-    public:\
+    class name##Class : public IOTemperatureTable { \
+    public: \
         float interpolateFor(int value) final { \
-            return  interpolatePTC(value,NUM_##dataname,(const short *)&dataname##_table[0][0]); \
+            return interpolatePTC(value, NUM_##dataname, (const short*)&dataname##_table[0][0]); \
         } \
     }; \
     extern name##Class name;
 
 #define IO_TEMPERATURE_TABLE(name, analog, table) \
-    class name##Class: public IOTemperature { \
+    class name##Class : public IOTemperature { \
     public: \
         float get() { \
             return table.interpolateFor(analog.get()); \
@@ -100,20 +94,20 @@ public:
 #elif IO_TARGET == 6 // variable
 
 #define IO_TEMP_TABLE_NTC(name, dataname) \
-    const short dataname##_table[NUM_##dataname][2] PROGMEM = {dataname}; \
+    const short dataname##_table[NUM_##dataname][2] PROGMEM = { dataname }; \
     name##Class name;
 
 #define IO_TEMP_TABLE_PTC(name, dataname) \
-    const short dataname##_table[NUM_##dataname][2] PROGMEM = {dataname}; \
+    const short dataname##_table[NUM_##dataname][2] PROGMEM = { dataname }; \
     name##Class name;
 
-#define IO_TEMPERATURE_TABLE(name,analog,table) \
+#define IO_TEMPERATURE_TABLE(name, analog, table) \
     name##Class name;
 
 #else
 
 #define IO_TEMP_TABLE_NTC(name, dataname)
 #define IO_TEMP_TABLE_PTC(name, dataname)
-#define IO_TEMPERATURE_TABLE(name,analog,table)
+#define IO_TEMPERATURE_TABLE(name, analog, table)
 
 #endif

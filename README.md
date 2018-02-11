@@ -43,8 +43,10 @@ Done:
 - Core XYZ printer system.
 - Linear, cubic and quintic velocity shape.
 - No minimum speed required any more.
-- Homing
-- new analog value reading
+- Homing.
+- new analog value reading.
+- Hardware PWM for due.
+- Tools instead of extruders.
 
 ToDo:
 - Dual X axis printer type
@@ -52,7 +54,8 @@ ToDo:
 - Core printer type
 - Convert PWM handling
 - Convert temperature handling
-- Convert Extruders
+- Add JAM detection
+- Add advance.
 - Make lcd work
 - Switch to latest sdfat library
 - Switch to u8g 2 library
@@ -108,6 +111,8 @@ at dozens of points where you might need extra cases.
 
 The complete firmware becomes more compact and easier to maintain and easier
 to extend.
+
+![Building Blocks](doc/BuildingBlocks.png)
 
 #### Developing
 

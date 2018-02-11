@@ -35,5 +35,7 @@ public:
      * This returns the acceleration to use. */
     static float accelerationForMoveSteps(fast8_t axes);
     static float feedrateForMoveSteps(fast8_t axes);
+    static void deactivatedTool(fast8_t id);
+    static void activatedTool(fast8_t id);
 };
 #endif

@@ -2,10 +2,13 @@ class EndstopDriver;
 
 class StepperDriverBase {
 public:
-    StepperDriverBase(EndstopDriver *minES, EndstopDriver *maxES):minEndstop(minES),maxEndstop(maxES),direction(true) {}
+    StepperDriverBase(EndstopDriver* minES, EndstopDriver* maxES)
+        : minEndstop(minES)
+        , maxEndstop(maxES)
+        , direction(true) {}
     virtual ~StepperDriverBase() {}
-    EndstopDriver *getMinEndstop();
-    EndstopDriver *getMaxEndstop();
+    EndstopDriver* getMinEndstop();
+    EndstopDriver* getMaxEndstop();
     /// Allows initialization of driver e.g. current, microsteps
     virtual void init() {}
     /// Executes the step if endstop is not triggered. Return tru eif endstop is triggered
@@ -21,9 +24,9 @@ public:
     /// Disable motor driver
     virtual void disable() = 0;
     // Return true if setting microsteps is supported
-    virtual bool implementSetMicrosteps() {return false;}
+    virtual bool implementSetMicrosteps() { return false; }
     // Return true if setting current in software is supported
-    virtual bool implementSetMaxCurrent() {return false;}
+    virtual bool implementSetMaxCurrent() { return false; }
     /// Set microsteps. Must be a power of 2.
     virtual void setMicrosteps(int microsteps) {}
     /// Set max current as range 0..255
@@ -32,25 +35,26 @@ public:
     // or otherwise prepare for endstop detection.
     virtual void beforeHoming() {}
     virtual void afterHoming() {}
-    EndstopDriver *minEndstop;
-    EndstopDriver *maxEndstop;
+    EndstopDriver* minEndstop;
+    EndstopDriver* maxEndstop;
     bool direction;
     // uint32_t position;
 };
 
 /// Plain stepper driver with optional endstops attached.
-template<class stepCls,class dirCls,class enableCls>
+template <class stepCls, class dirCls, class enableCls>
 class SimpleStepperDriver : public StepperDriverBase {
 public:
-    SimpleStepperDriver(EndstopDriver *minES, EndstopDriver *maxES):StepperDriverBase(minES, maxES) {}
-    inline bool stepCond() final {        
-        if(direction) {
-            if(!maxEndstop->update()) {
+    SimpleStepperDriver(EndstopDriver* minES, EndstopDriver* maxES)
+        : StepperDriverBase(minES, maxES) {}
+    inline bool stepCond() final {
+        if (direction) {
+            if (!maxEndstop->update()) {
                 stepCls::on();
                 return false;
             }
         } else {
-            if(!minEndstop->update()) {
+            if (!minEndstop->update()) {
                 stepCls::on();
                 return false;
             }
@@ -73,5 +77,4 @@ public:
     inline void disable() final {
         enableCls::off();
     }
-
 };

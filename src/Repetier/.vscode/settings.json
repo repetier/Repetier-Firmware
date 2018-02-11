@@ -1,5 +1,12 @@
 {
     "editor.formatOnSave": true,
     "files.autoSave": "onWindowChange",
-    "editor.quickSuggestions": true
+    "editor.quickSuggestions": {
+        "other": true,
+        "comments": false,
+        "strings": false
+    },
+    "clang-format.executable": "C:\\Program Files\\LLVM\\bin\\clang-format.exe",
+    "C_Cpp.clang_format_path": "C:\\Program Files\\LLVM\\bin\\clang-format.exe",
+    "C_Cpp.intelliSenseEngine": "Default"
 }

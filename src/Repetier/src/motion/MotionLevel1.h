@@ -100,6 +100,7 @@ public:
         return flags & FLAG_CHECK_ENDSTOPS;
     }
 };
+
 #define EPR_M1_RESOLUTION 0
 #define EPR_M1_MAX_FEEDRATE 4 * (NUM_AXES - 1)
 #define EPR_M1_MAX_ACCELERATION EPR_M1_MAX_FEEDRATE + 4 * (NUM_AXES - 1)
@@ -108,17 +109,18 @@ public:
 #define EPR_M1_MIN_POS EPR_M1_MAX_YANK + 4 * (NUM_AXES - 1)
 #define EPR_M1_MAX_POS EPR_M1_MIN_POS + 4 * (NUM_AXES - 1)
 #define EPR_M1_ENDSTOP_DISTANCE EPR_M1_MAX_POS + 4 * (NUM_AXES - 1)
-#define EPR_M1_ALWAYS_CHECK_ENDSTOPS EPR_M1_ENDSTOP_DISTANCE + 4 * (NUM_AXES - 1)
-#define EPR_M1_AUTOLEVEL_MATRXI +1
+#define EPR_M1_ALWAYS_CHECK_ENDSTOPS ((EPR_M1_ENDSTOP_DISTANCE + 4) * (NUM_AXES - 1))
+#define EPR_M1_AUTOLEVEL_MATRIX EPR_M1_ALWAYS_CHECK_ENDSTOPS + 1
 #ifdef FEATURE_AXISCOMP
-#define EPR_M1_AXIS_COMP_XY EPR_M1_AUTOLEVEL_MATRXI + 36
+#define EPR_M1_AXIS_COMP_XY EPR_M1_AUTOLEVEL_MATRIX + 36
 #define EPR_M1_AXIS_COMP_XZ EPR_M1_AXIS_COMP_XY + 4
 #define EPR_M1_AXIS_COMP_YZ EPR_M1_AXIS_COMP_XZ + 4
 #define EPR_M1_AXIS_COMP_END EPR_M1_AXIS_COMP_YZ + 4
 #else
-#define EPR_M1_AXIS_COMP_END EPR_M1_AUTOLEVEL_MATRXI + 36
+#define EPR_M1_AXIS_COMP_END EPR_M1_AUTOLEVEL_MATRIX + 36
 #endif
 #define EPR_M1_TOTAL EPR_M1_AXIS_COMP_END
+
 class Motion1 {
 public:
 #if EEPROM_MODE != 0
@@ -181,6 +183,8 @@ public:
     // Move to the printer coordinates (after offset, transform, ...)
     static void moveRelativeByPrinter(float coords[NUM_AXES], float feedrate);
     static void moveRelativeByStepsRelative(int32_t coords[NUM_AXES]);
+    /// Update position to new offsets
+    static void setToolOffset(float ox, float oy, float oz);
     static void updatePositionsFromCurrent();
     static void updatePositionsFromCurrentTransformed();
     // Sets A,B,C coordinates to ignore for easy use.

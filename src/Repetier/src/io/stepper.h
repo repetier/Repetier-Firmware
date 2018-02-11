@@ -16,37 +16,20 @@
 
 */
 
-/*
-Reset all defines for target dependent IO pin handling. Handling is defined by
-IO_TARGET with following meanings:
+#undef STEPPER_SIMPLE
 
-1: Init at firmware start
-2: PWM Interrupt
-3: 100ms call
-4: Define class
-5: Endstop update
-6: define variables
-7: Visualization for config
-8: eepromHandle calls
-9: updateDerived calls
-10: restore from config
-11: analog input loop
-12: 500ms timer
-*/
+#if IO_TARGET == 4 // declare variable
 
-// #pragma message(VAR_NAME_VALUE(IO_TARGET))
+#define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop) \
+    extern SimpleStepperDriver<stepPin, dirPin, enablePin> name;
 
-#include "io_input.h"
-#include "io_output.h"
-#include "io_pwm.h"
-#include "io_analog.h"
-#include "io_temperature.h"
-#include "endstop_definitions.h"
-#include "stepper.h"
-#include "heatManager.h"
-#include "coolerManager.h"
-#include "tools.h"
+#elif IO_TARGET == 6
 
-// Add user configuration
+#define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop) \
+    SimpleStepperDriver<stepPin, dirPin, enablePin> name(&minEndstop, &maxEndstop);
 
-#include "../../Configuration_io.h"
+#else
+
+#define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop)
+
+#endif

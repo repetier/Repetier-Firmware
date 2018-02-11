@@ -765,14 +765,14 @@ bool GCode::parseBinary(uint8_t* buffer, bool fromSerial) {
     uint8_t len = binaryCommandSize - 2;
     while (len) {
         sum1 += *p++;
-        if(sum1 >= 255) {
+        if (sum1 >= 255) {
             sum1 -= 255; // modulo 255
         }
         sum2 += sum1;
-        if(sum2 >= 255) {
+        if (sum2 >= 255) {
             sum2 -= 255; // modulo 255
         }
-        len--;        
+        len--;
     }
     sum1 -= *p++;
     sum2 -= *p;

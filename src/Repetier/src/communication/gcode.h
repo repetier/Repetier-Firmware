@@ -125,132 +125,100 @@ public:
     // True if origin did not come from serial console. That way we can send status messages to
     // a host only if he would normally not know about the mode switch.
     bool internalCommand;
-    inline bool hasM()
-    {
+    inline bool hasM() {
         return ((params & 2) != 0);
     }
-    inline bool hasN()
-    {
+    inline bool hasN() {
         return ((params & 1) != 0);
     }
-    inline bool hasG()
-    {
+    inline bool hasG() {
         return ((params & 4) != 0);
     }
-    inline bool hasX()
-    {
+    inline bool hasX() {
         return ((params & 8) != 0);
     }
-    inline void unsetX()
-    {
+    inline void unsetX() {
         params &= ~8;
     }
-    inline bool hasY()
-    {
+    inline bool hasY() {
         return ((params & 16) != 0);
     }
-    inline void unsetY()
-    {
+    inline void unsetY() {
         params &= ~16;
     }
-    inline bool hasZ()
-    {
+    inline bool hasZ() {
         return ((params & 32) != 0);
     }
-    inline void unsetZ()
-    {
+    inline void unsetZ() {
         params &= ~32;
     }
-    inline bool hasNoXYZ()
-    {
+    inline bool hasNoXYZ() {
         return ((params & 56) == 0);
     }
-    inline bool hasE()
-    {
+    inline bool hasE() {
         return ((params & 64) != 0);
     }
-    inline bool hasF()
-    {
+    inline bool hasF() {
         return ((params & 256) != 0);
     }
-    inline bool hasT()
-    {
+    inline bool hasT() {
         return ((params & 512) != 0);
     }
-    inline bool hasS()
-    {
+    inline bool hasS() {
         return ((params & 1024) != 0);
     }
-    inline bool hasP()
-    {
+    inline bool hasP() {
         return ((params & 2048) != 0);
     }
-    inline bool isV2()
-    {
+    inline bool isV2() {
         return ((params & 4096) != 0);
     }
-    inline bool hasString()
-    {
+    inline bool hasString() {
         return ((params & 32768) != 0);
     }
-    inline bool hasI()
-    {
+    inline bool hasI() {
         return ((params2 & 1) != 0);
     }
-    inline bool hasJ()
-    {
+    inline bool hasJ() {
         return ((params2 & 2) != 0);
     }
-    inline bool hasR()
-    {
+    inline bool hasR() {
         return ((params2 & 4) != 0);
     }
-    inline bool hasD()
-    {
+    inline bool hasD() {
         return ((params2 & 8) != 0);
     }
-    inline bool hasC()
-    {
+    inline bool hasC() {
         return ((params2 & 16) != 0);
     }
-    inline bool hasH()
-    {
+    inline bool hasH() {
         return ((params2 & 32) != 0);
     }
-    inline bool hasA()
-    {
+    inline bool hasA() {
         return ((params2 & 64) != 0);
     }
-    inline bool hasB()
-    {
+    inline bool hasB() {
         return ((params2 & 128) != 0);
     }
-    inline bool hasK()
-    {
+    inline bool hasK() {
         return ((params2 & 256) != 0);
     }
-    inline bool hasL()
-    {
+    inline bool hasL() {
         return ((params2 & 512) != 0);
     }
-    inline bool hasO()
-    {
+    inline bool hasO() {
         return ((params2 & 1024) != 0);
     }
-    inline long getS(long def)
-    {
+    inline long getS(long def) {
         return (hasS() ? S : def);
     }
-    inline long getP(long def)
-    {
+    inline long getP(long def) {
         return (hasP() ? P : def);
     }
-    inline void setFormatError()
-    {
+    inline void setFormatError() {
         params2 |= 32768;
     }
-    inline bool hasFormatError()
-    {
+    inline bool hasFormatError() {
         return ((params2 & 32768) != 0);
     }
     void printCommand();
@@ -268,8 +236,7 @@ public:
     static void fatalError(FSTRINGPARAM(message));
     static void reportFatalError();
     static void resetFatalError();
-    inline static bool hasFatalError()
-    {
+    inline static bool hasFatalError() {
         return fatalErrorMsg != NULL;
     }
     static void keepAlive(enum FirmwareState state, int id = 0);
@@ -283,8 +250,7 @@ protected:
     void debugCommandBuffer();
     void checkAndPushCommand();
     static void requestResend();
-    inline float parseFloatValue(char* s)
-    {
+    inline float parseFloatValue(char* s) {
         char* endPtr;
         while (*s == 32)
             s++; // skip spaces
@@ -293,8 +259,7 @@ protected:
             f = 0.0; // treat empty string "x " as "x0"
         return f;
     }
-    inline long parseLongValue(char* s)
-    {
+    inline long parseLongValue(char* s) {
         char* endPtr;
         while (*s == 32)
             s++; // skip spaces

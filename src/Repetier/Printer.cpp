@@ -347,9 +347,12 @@ void Printer::kill(uint8_t onlySteppers) {
     setAllSteppersDiabled();
     unsetHomedAll();
     if (!onlySteppers) {
-        for (uint8_t i = 0; i < NUM_EXTRUDER; i++)
-            Extruder::setTemperatureForExtruder(0, i);
-        Extruder::setHeatedBedTemperature(0);
+        for (uint8_t i = 0; i < NUM_TOOLS; i++) {
+            Tool::getTool(i)->shutdown();
+        }
+        for (uint8_t i = 0; i < NUM_HEATED_BEDS; i++) {
+            heatedBeds[i]->setTargetTemperature(0);
+        }
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_STANDBY_ID));
 #if defined(PS_ON_PIN) && PS_ON_PIN > -1 && !defined(NO_POWER_TIMEOUT)
         //pinMode(PS_ON_PIN,INPUT);
@@ -490,10 +493,11 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
     }
     if (com->hasE() && !Printer::debugDryrun()) {
         p = com->E;
+        HeatManager *heater = Tool::getActiveTool()->getHeater();
         if (relativeCoordinateMode || relativeExtruderCoordinateMode) {
             if (
 #if MIN_EXTRUDER_TEMP > 20
-                (Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed() && Extruder::current->tempControl.sensorType != 0) ||
+                (heater != nullptr && heater->getCurrentTemperature() < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()) ||
 #endif
                 fabs(com->E) * extrusionFactor > EXTRUDE_MAXLENGTH)
                 p = 0;
@@ -501,7 +505,7 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
         } else {
             if (
 #if MIN_EXTRUDER_TEMP > 20
-                (Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed() && Extruder::current->tempControl.sensorType != 0) ||
+                (heater != nullptr && heater->getCurrentTemperature() < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()) ||
 #endif
                 fabs(p - Motion1::currentPosition[E_AXIS]) * extrusionFactor > EXTRUDE_MAXLENGTH)
                 Motion1::currentPosition[E_AXIS] = p;
@@ -614,71 +618,7 @@ void Printer::setup() {
     PULLUP(Z_PROBE_PIN, HIGH);
 #endif
 #endif // FEATURE_FEATURE_Z_PROBE
-#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
-    SET_OUTPUT(FAN_PIN);
-    WRITE(FAN_PIN, LOW);
-#endif
-#if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
-    SET_OUTPUT(FAN2_PIN);
-    WRITE(FAN2_PIN, LOW);
-#endif
-#if FAN_THERMO_PIN > -1
-    SET_OUTPUT(FAN_THERMO_PIN);
-    WRITE(FAN_THERMO_PIN, LOW);
-#endif
-#if FAN_BOARD_PIN > -1
-    SET_OUTPUT(FAN_BOARD_PIN);
-    WRITE(FAN_BOARD_PIN, LOW);
-    pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_MIN_SPEED;
-#endif
-#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1
-    SET_OUTPUT(EXT0_HEATER_PIN);
-    WRITE(EXT0_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
-    SET_OUTPUT(EXT1_HEATER_PIN);
-    WRITE(EXT1_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2
-    SET_OUTPUT(EXT2_HEATER_PIN);
-    WRITE(EXT2_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3
-    SET_OUTPUT(EXT3_HEATER_PIN);
-    WRITE(EXT3_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4
-    SET_OUTPUT(EXT4_HEATER_PIN);
-    WRITE(EXT4_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5
-    SET_OUTPUT(EXT5_HEATER_PIN);
-    WRITE(EXT5_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT0_EXTRUDER_COOLER_PIN) && EXT0_EXTRUDER_COOLER_PIN > -1
-    SET_OUTPUT(EXT0_EXTRUDER_COOLER_PIN);
-    WRITE(EXT0_EXTRUDER_COOLER_PIN, LOW);
-#endif
-#if defined(EXT1_EXTRUDER_COOLER_PIN) && EXT1_EXTRUDER_COOLER_PIN > -1 && NUM_EXTRUDER > 1
-    SET_OUTPUT(EXT1_EXTRUDER_COOLER_PIN);
-    WRITE(EXT1_EXTRUDER_COOLER_PIN, LOW);
-#endif
-#if defined(EXT2_EXTRUDER_COOLER_PIN) && EXT2_EXTRUDER_COOLER_PIN > -1 && NUM_EXTRUDER > 2
-    SET_OUTPUT(EXT2_EXTRUDER_COOLER_PIN);
-    WRITE(EXT2_EXTRUDER_COOLER_PIN, LOW);
-#endif
-#if defined(EXT3_EXTRUDER_COOLER_PIN) && EXT3_EXTRUDER_COOLER_PIN > -1 && NUM_EXTRUDER > 3
-    SET_OUTPUT(EXT3_EXTRUDER_COOLER_PIN);
-    WRITE(EXT3_EXTRUDER_COOLER_PIN, LOW);
-#endif
-#if defined(EXT4_EXTRUDER_COOLER_PIN) && EXT4_EXTRUDER_COOLER_PIN > -1 && NUM_EXTRUDER > 4
-    SET_OUTPUT(EXT4_EXTRUDER_COOLER_PIN);
-    WRITE(EXT4_EXTRUDER_COOLER_PIN, LOW);
-#endif
-#if defined(EXT5_EXTRUDER_COOLER_PIN) && EXT5_EXTRUDER_COOLER_PIN > -1 && NUM_EXTRUDER > 5
-    SET_OUTPUT(EXT5_EXTRUDER_COOLER_PIN);
-    WRITE(EXT5_EXTRUDER_COOLER_PIN, LOW);
-#endif
+
 // Initialize jam sensors
 #if defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
     SET_INPUT(EXT0_JAM_PIN);
@@ -738,10 +678,6 @@ void Printer::setup() {
     CNCDriver::initialize();
 #endif // defined
 
-#if GANTRY && !defined(FAST_COREXYZ)
-    Printer::motorX = 0;
-    Printer::motorYorZ = 0;
-#endif
 #ifdef RED_BLUE_STATUS_LEDS
     SET_OUTPUT(RED_STATUS_LED);
     SET_OUTPUT(BLUE_STATUS_LED);
@@ -794,7 +730,8 @@ void Printer::setup() {
     HAL::showStartReason();
     HAL::hwSetup();
     EEPROM::init(); // Read settings from eeprom if wanted
-    Extruder::initExtruder();
+    HAL::analogStart();
+    // Extruder::initExtruder();
     // sets auto leveling in eeprom init
     UI_INITIALIZE;
     //Commands::printCurrentPosition();
@@ -805,10 +742,8 @@ void Printer::setup() {
     updateDerivedParameter();
     Commands::checkFreeMemory();
     Commands::writeLowestFreeRAM();
-    Com::printFLN(PSTR("init1"));
     HAL::delayMilliseconds(20);
     HAL::setupTimer();
-    Com::printFLN(PSTR("init1b"));
     HAL::delayMilliseconds(20);
 
 #if FEATURE_WATCHDOG
@@ -817,7 +752,6 @@ void Printer::setup() {
 #if SDSUPPORT
     sd.mount();
 #endif
-    Com::printFLN(PSTR("init2"));
     HAL::delayMilliseconds(20);
 
 #if NONLINEAR_SYSTEM
@@ -829,8 +763,8 @@ void Printer::setup() {
     setAutoretract(EEPROM_BYTE(AUTORETRACT_ENABLED));
     Commands::printCurrentPosition();
 #endif // DRIVE_SYSTEM
-    Extruder::selectExtruderById(0);
-    Com::printFLN(PSTR("init3"));
+    Tool::selectTool(0);
+    // Extruder::selectExtruderById(0);
     HAL::delayMilliseconds(20);
 
 #if FEATURE_SERVO // set servos to neutral positions at power_up
@@ -857,7 +791,6 @@ void Printer::setup() {
         uid.showLanguageSelectionWizard();
     }
 #endif // EEPROM_MODE
-    Com::printFLN(PSTR("init4"));
     HAL::delayMilliseconds(20);
 }
 
@@ -1069,54 +1002,74 @@ void Printer::showJSONStatus(int type) {
 
     //  "heaters": [27.5, 30.3, 30.6],
     Com::printF(PSTR("\",\"heaters\":["));
-#if HAVE_HEATED_BED
-    Com::print(heatedBedController.currentTemperatureC);
+#if NUM_HEATED_BEDS > 0
+    Com::print(heatedBeds[0]->getCurrentTemperature());
 #else
     Com::print((int)0);
 #endif
-    for (int i = 0; i < NUM_EXTRUDER; i++) {
+    for (int i = 0; i < NUM_TOOLS; i++) {
         Com::print(',');
-        Com::print(extruder[i].tempControl.currentTemperatureC);
+        if(Tool::getTool(i)->getHeater() != nullptr) {
+            Com::print(Tool::getTool(i)->getHeater()->getCurrentTemperature());
+        } else {
+            Com::print('0');            
+        }
     }
     //  "active": [65.0, 195.0, 0.0],
     Com::printF(PSTR("],\"active\":["));
-#if HAVE_HEATED_BED
-    Com::print(heatedBedController.targetTemperatureC);
+#if NUM_HEATED_BEDS > 0
+    Com::print(heatedBeds[0]->getTargetTemperature());
 #else
     Com::print((int)0);
 #endif
-    for (int i = 0; i < NUM_EXTRUDER; i++) {
+    for (int i = 0; i < NUM_TOOLS; i++) {
         Com::print(',');
-        Com::print(extruder[i].tempControl.targetTemperatureC);
+        if(Tool::getTool(i)->getHeater() != nullptr) {
+            Com::print(Tool::getTool(i)->getHeater()->getTargetTemperature());
+        } else {
+            Com::print('0');            
+        }
     }
     //  "standby": [-273.1, 0.0, 150.0],
     Com::printF(PSTR("],\"standby\":["));
-#if HAVE_HEATED_BED
-    Com::print(heatedBedController.targetTemperatureC);
+#if NUM_HEATED_BEDS > 0
+    Com::print(heatedBeds[0]->getTargetTemperature());
 #else
     Com::print((int)0);
 #endif
-    for (int i = 0; i < NUM_EXTRUDER; i++) {
+    for (int i = 0; i < NUM_TOOLS; i++) {
         Com::print(',');
-        Com::print(extruder[i].tempControl.targetTemperatureC);
+        if(Tool::getTool(i)->getHeater() != nullptr) {
+            Com::print(Tool::getTool(i)->getHeater()->getTargetTemperature());
+        } else {
+            Com::print('0');            
+        }
     }
     //  "hstat": [0, 0, 0],
     //  hstat is 0 for heater off, 1 for standby, 2 for active and 3 for fault. We have just added 4 for "being auto-tuned'
     Com::printF(PSTR("],\"hstat\":["));
-#if HAVE_HEATED_BED
-    if (heatedBedController.isSensorDefect() || heatedBedController.isSensorDecoupled())
-        Com::print((int)3);
-    else
-        Com::print((int)(heatedBedController.targetTemperatureC < 30 ? 0 : 2));
+
+#if NUM_HEATED_BEDS > 0
+    if(heatedBeds[0]->getError() != HeaterError::NO_ERROR) {
+        Com::print('3');
+    } else {
+        Com::print(heatedBeds[0]->getTargetTemperature() < MAX_ROOM_TEMPERATURE ? 0 : 2);
+    }    
 #else
     Com::print((int)0);
 #endif
-    for (int i = 0; i < NUM_EXTRUDER; i++) {
+    for (int i = 0; i < NUM_TOOLS; i++) {
         Com::print(',');
-        if (extruder[i].tempControl.isSensorDefect() || extruder[i].tempControl.isSensorDecoupled())
-            Com::print((int)3);
-        else
-            Com::print((int)(extruder[i].tempControl.targetTemperatureC < 30 ? 0 : 2));
+        if(Tool::getTool(i)->getHeater() != nullptr) {
+    if(Tool::getTool(i)->getHeater()->getError() != HeaterError::NO_ERROR) {
+        Com::print('3');
+    } else {
+        Com::print(Tool::getTool(i)->getHeater()->getTargetTemperature() < MAX_ROOM_TEMPERATURE ? 0 : 2);
+    }    
+            Com::print(Tool::getTool(i)->getHeater()->getTargetTemperature());
+        } else {
+            Com::print('0');            
+        }
     }
     //  "pos": [1.00, 205.00, 6.48],
     Com::printF(PSTR("],\"pos\":["));
@@ -1127,10 +1080,14 @@ void Printer::showJSONStatus(int type) {
     Com::print(Motion1::currentPosition[Z_AXIS]); // Z
     //  "extr": [0.0, 0.0],
     Com::printF(PSTR("],\"extr\":["));
-    for (int i = 0; i < NUM_EXTRUDER; i++) {
+    for (int i = 0; i < NUM_TOOLS; i++) {
         if (i)
             Com::print(',');
-        Com::printFloat(extruder[i].tempControl.currentTemperatureC, 1);
+        if(Tool::getTool(i)->getHeater() != nullptr) {
+            Com::print(Tool::getTool(i)->getHeater()->getCurrentTemperature());
+        } else {
+            Com::print('0');            
+        }
     }
     //  "sfactor": 100.00,
     Com::printF(PSTR("],\"sfactor\":"), Printer::feedrateMultiply);
