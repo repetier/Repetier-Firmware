@@ -140,90 +140,108 @@ void Motion3::timer() {
         Motion1Buffer& m1 = *(m2.motion1);
 
         if (stepDone) { // last interrupt we had a step, so check endstops
-            if(m1.axisUsed & 1) {
-                if(m1.axisDir & 1) {
-                    if(endstopXMax.update()) {
+#if !defined(NO_XMIN_ENDSTOP_TEST) || !defined(NO_XMAX_ENDSTOP_TEST)
+            if (m1.axisUsed & 1) {
+                if (m1.axisDir & 1) {
+#ifndef NO_XMAX_ENDSTOP_TEST
+                    if (endstopXMax.update()) {
                         Motion2::endstopTriggered(act, X_AXIS);
                         return;
                     }
+#endif
                 } else {
-                    if(endstopXMin.update()) {
+#ifndef NO_XMIN_ENDSTOP_TEST
+                    if (endstopXMin.update()) {
                         Motion2::endstopTriggered(act, X_AXIS);
                         return;
-                    }                    
+                    }
+#endif
                 }
             }
-            if(m1.axisUsed & 2) {
-                if(m1.axisDir & 2) {
-                    if(endstopYMax.update()) {
+#endif
+#if !defined(NO_YMIN_ENDSTOP_TEST) || !defined(NO_YMAX_ENDSTOP_TEST)
+            if (m1.axisUsed & 2) {
+                if (m1.axisDir & 2) {
+#ifndef NO_YMAX_ENDSTOP_TEST
+                    if (endstopYMax.update()) {
                         Motion2::endstopTriggered(act, Y_AXIS);
                         return;
                     }
+#endif
                 } else {
-                    if(endstopYMin.update()) {
+#ifndef NO_YMIN_ENDSTOP_TEST
+                    if (endstopYMin.update()) {
                         Motion2::endstopTriggered(act, Y_AXIS);
                         return;
-                    }                    
+                    }
+#endif
                 }
             }
-            if(m1.axisUsed & 4) {
-                if(m1.axisDir & 4) {
-                    if(endstopZMax.update()) {
+#endif
+#if !defined(NO_ZMIN_ENDSTOP_TEST) || !defined(NO_ZMAX_ENDSTOP_TEST)
+            if (m1.axisUsed & 4) {
+                if (m1.axisDir & 4) {
+#ifndef NO_ZMAX_ENDSTOP_TEST
+                    if (endstopZMax.update()) {
                         Motion2::endstopTriggered(act, Z_AXIS);
                         return;
                     }
+#endif
                 } else {
-                    if(endstopZMin.update()) {
+#ifndef NO_ZMIN_ENDSTOP_TEST
+                    if (endstopZMin.update()) {
                         Motion2::endstopTriggered(act, Z_AXIS);
                         return;
-                    }                    
+                    }
+#endif
                 }
             }
-#if NUM_AXES > A_AXIS            
-            if(m1.axisUsed & 16) {
-                if(m1.axisDir & 16) {
-                    if(endstopAMax.update()) {
+#endif
+#if NUM_AXES > A_AXIS
+            if (m1.axisUsed & 16) {
+                if (m1.axisDir & 16) {
+                    if (endstopAMax.update()) {
                         Motion2::endstopTriggered(act, A_AXIS);
                         return;
                     }
                 } else {
-                    if(endstopAMin.update()) {
+                    if (endstopAMin.update()) {
                         Motion2::endstopTriggered(act, A_AXIS);
                         return;
-                    }                    
+                    }
                 }
             }
-#endif            
-#if NUM_AXES > B_AXIS            
-            if(m1.axisUsed & 32) {
-                if(m1.axisDir & 32) {
-                    if(endstopBMax.update()) {
+#endif
+#if NUM_AXES > B_AXIS
+            if (m1.axisUsed & 32) {
+                if (m1.axisDir & 32) {
+                    if (endstopBMax.update()) {
                         Motion2::endstopTriggered(act, B_AXIS);
                         return;
                     }
                 } else {
-                    if(endstopBMin.update()) {
+                    if (endstopBMin.update()) {
                         Motion2::endstopTriggered(act, B_AXIS);
                         return;
-                    }                    
+                    }
                 }
             }
-#endif            
-#if NUM_AXES > C_AXIS            
-            if(m1.axisUsed & 32) {
-                if(m1.axisDir & 32) {
-                    if(endstopCMax.update()) {
+#endif
+#if NUM_AXES > C_AXIS
+            if (m1.axisUsed & 32) {
+                if (m1.axisDir & 32) {
+                    if (endstopCMax.update()) {
                         Motion2::endstopTriggered(act, C_AXIS);
                         return;
                     }
                 } else {
-                    if(endstopCMin.update()) {
+                    if (endstopCMin.update()) {
                         Motion2::endstopTriggered(act, C_AXIS);
                         return;
-                    }                    
+                    }
                 }
             }
-#endif            
+#endif
             stepDone = false;
         }
 
@@ -232,11 +250,11 @@ void Motion3::timer() {
                 stepDone = true;
 #ifdef XMOTOR_SWITCHABLE
                 if (Motion1::motors[X_AXIS]->stepCond()) {
-                    Motion2::motorEndstopTriggered(act, X_AXIS);
+                    Motion2::motorEndstopTriggered(X_AXIS);
                 }
 #else
                 if (XMotor.stepCond()) {
-                    Motion2::motorEndstopTriggered(act, X_AXIS);
+                    Motion2::motorEndstopTriggered(X_AXIS);
                 }
 #endif
                 m2.stepsRemaining[X_AXIS]--;
@@ -247,7 +265,7 @@ void Motion3::timer() {
             if ((act->error[Y_AXIS] += act->delta[Y_AXIS]) > 0) {
                 stepDone = true;
                 if (YMotor.stepCond()) {
-                    Motion2::motorEndstopTriggered(act, Y_AXIS);
+                    Motion2::motorEndstopTriggered(Y_AXIS);
                 }
                 m2.stepsRemaining[Y_AXIS]--;
                 act->error[Y_AXIS] -= act->errorUpdate;
@@ -259,13 +277,13 @@ void Motion3::timer() {
                 if (Motion1::endstopMode == PROBING) { // ignore z endstop here
                     ZProbe->update();
                     if (ZProbe->triggered()) {
-                        Motion2::motorEndstopTriggered(act, Z_AXIS);
+                        Motion2::motorEndstopTriggered(Z_AXIS);
                     } else {
                         Motion1::motors[Z_AXIS]->step();
                     }
                 } else {
                     if (ZMotor.stepCond()) {
-                        Motion2::motorEndstopTriggered(act, Z_AXIS);
+                        Motion2::motorEndstopTriggered(Z_AXIS);
                     }
                 }
                 m2.stepsRemaining[Z_AXIS]--;
@@ -277,7 +295,7 @@ void Motion3::timer() {
             if ((act->error[E_AXIS] += act->delta[E_AXIS]) > 0) {
                 stepDone = true;
                 if (Motion1::motors[E_AXIS]->stepCond()) {
-                    Motion2::motorEndstopTriggered(act, E_AXIS);
+                    Motion2::motorEndstopTriggered(E_AXIS);
                 }
                 m2.stepsRemaining[E_AXIS]--;
                 act->error[E_AXIS] -= act->errorUpdate;
@@ -289,7 +307,7 @@ void Motion3::timer() {
             if ((act->error[A_AXIS] += act->delta[A_AXIS]) > 0) {
                 stepDone = true;
                 if (Motion1::motors[A_AXIS]->stepCond()) {
-                    Motion2::motorEndstopTriggered(act, A_AXIS);
+                    Motion2::motorEndstopTriggered(A_AXIS);
                 }
                 m2.stepsRemaining[A_AXIS]--;
                 act->error[A_AXIS] -= act->errorUpdate;
@@ -301,7 +319,7 @@ void Motion3::timer() {
             if ((act->error[B_AXIS] += act->delta[B_AXIS]) > 0) {
                 stepDone = true;
                 if (Motion1::motors[B_AXIS]->stepCond()) {
-                    Motion2::motorEndstopTriggered(act, B_AXIS);
+                    Motion2::motorEndstopTriggered(B_AXIS);
                 }
                 m2.stepsRemaining[B_AXIS]--;
                 act->error[B_AXIS] -= act->errorUpdate;
@@ -313,7 +331,7 @@ void Motion3::timer() {
             if ((act->error[C_AXIS] += act->delta[C_AXIS]) > 0) {
                 stepDone = true;
                 if (Motion1::motors[C_AXIS]->stepCond()) {
-                    Motion2::motorEndstopTriggered(act, C_AXIS);
+                    Motion2::motorEndstopTriggered(C_AXIS);
                 }
                 m2.stepsRemaining[C_AXIS]--;
                 act->error[C_AXIS] -= act->errorUpdate;

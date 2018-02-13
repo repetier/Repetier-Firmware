@@ -69,7 +69,7 @@ void Motion2::timer() {
         act->motion1 = actM1;
         act->state = Motion2State::NOT_INITIALIZED;
         lastL = 0;
-        // DEBUG_MSG2_FAST("new ",(int)actM1->action);
+        // DEBUG_MSG2_FAST("new ", (int)actM1->action);
         InterruptProtectedBlock ip;
         length++;
     }
@@ -114,7 +114,7 @@ void Motion2::timer() {
             }
             sFactor = VelocityProfile::s + act->soff;
         } else if (act->state == Motion2State::FINISHED) {
-            DEBUG_MSG("finished")
+            // DEBUG_MSG("finished")
             m3->directions = 0;
             m3->usedAxes = 0;
             m3->stepsRemaining = 1;
@@ -161,6 +161,7 @@ void Motion2::timer() {
             }
             return; // don't add empty moves
         }
+        // DEBUG_MSG2_FAST("stp ", np[0] - lp[0]);
         m3->errorUpdate = (m3->stepsRemaining << 1);
         for (fast8_t i = 0; i < NUM_AXES; i++) {
             if ((m3->delta[i] = ((np[i] - lp[i]) << 1)) < 0) {
@@ -309,7 +310,11 @@ void Motion2::timer() {
 // Gets called when an end stop is triggered during motion.
 // Will stop all motions stored. For z probing and homing We
 // Also note the remainig z steps.
-void Motion2::motorEndstopTriggered(Motion3Buffer* act, fast8_t axis) {
+
+void motorEndstopTriggered(fast8_t axis) {
+    Motion1::motorTriggered |= axisBits[axis];
+}
+void Motion2::motorEndstopTriggered(fast8_t axis) {
     Motion1::motorTriggered |= axisBits[axis];
     /*Motion1::setAxisHomed(axis, false);
     Motion2Buffer& m2 = Motion2::buffers[act->parentId];
@@ -328,8 +333,14 @@ void Motion2::motorEndstopTriggered(Motion3Buffer* act, fast8_t axis) {
         }
     }*/
 }
-
+void endstopTriggered(fast8_t axis) {
+    InterruptProtectedBlock noInt;
+    Motion2::endstopTriggered(Motion3::act, axis);
+}
 void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis) {
+    if (act == nullptr || act->checkEndstops == false) {
+        return;
+    }
     Motion1::axesTriggered = axisBits[axis];
     Motion1::setAxisHomed(axis, false);
     Motion2Buffer& m2 = Motion2::buffers[act->parentId];

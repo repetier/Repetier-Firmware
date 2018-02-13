@@ -62,24 +62,24 @@ enum EndstopMode {
 // 158 byte for 7 axes
 class Motion1Buffer {
 public:
-    fast8_t id;
-    fast8_t flags;
-    Motion1State state;
-    Motion1Action action;
-    fast8_t axisUsed;
-    fast8_t axisDir; // bit set = positive direction
-    float start[NUM_AXES];
-    float speed[NUM_AXES];
-    float unitDir[NUM_AXES];
-    float feedrate;
-    float acceleration;
-    float sa2; // s * a * 2 = v1² - v0²
-    secondspeed_t secondSpeed;
-    float maxJoinSpeed;
-    float startSpeed;
-    float endSpeed;
-    float length;
-    float invLength;
+    fast8_t id;                ///< Id of move for backreference
+    fast8_t flags;             ///< Flags for blocks and end stop handling
+    Motion1State state;        ///< State of preperation for buffer entry.
+    Motion1Action action;      ///< Type of action (wait, move float, move steps)
+    fast8_t axisUsed;          ///< Bitset of used axes
+    fast8_t axisDir;           ///< Axes directions: bit set = positive direction
+    float start[NUM_AXES];     ///< Start position in mm
+    float speed[NUM_AXES];     ///< Speed per axis in mm/s
+    float unitDir[NUM_AXES];   ///< Movement direction as vector
+    float feedrate;            ///< Target feedrate in mm/s
+    float acceleration;        ///< Acceleration in mm/s^2
+    float sa2;                 ///< s * a * 2 = endSpeed^2 - startSpeed^2
+    secondspeed_t secondSpeed; ///< Speed for fan or laser
+    float maxJoinSpeed;        ///< Max. join speed between this and next move
+    float startSpeed;          ///< Starting speed in mm/s
+    float endSpeed;            ///< End speed in mm/s
+    float length;              ///< Length of move in mm
+    float invLength;           ///< 1/length for faster computations
 
     void computeMaxJunctionSpeed();
     inline bool isAxisMoving(fast8_t axis) {
@@ -217,6 +217,7 @@ public:
     static void callBeforeHomingOnSteppers();
     static void callAfterHomingOnSteppers();
     static PGM_P getAxisString(fast8_t axis);
+    static EndstopDriver& endstopFoxAxisDir(fast8_t axis, bool maxDir);
     // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on
     // system without Z-probe
     static void transformToPrinter(float x, float y, float z, float& transX, float& transY, float& transZ);

@@ -63,40 +63,40 @@ IO_INPUT_INVERTED_PULLUP(name, pin)
 
 #elif IO_TARGET == 4 // define class
 
-#define IO_INPUT(name, pin) \
+#define IO_INPUT(name, _pin) \
     class name { \
     public: \
-        inline static fast8_t get() \
-        { \
-            return READ(pin); \
+        inline static fast8_t get() { \
+            return READ(_pin); \
         } \
+        inline static uint8_t pin() { return _pin; } \
     };
 
-#define IO_INPUT_INVERTED(name, pin) \
+#define IO_INPUT_INVERTED(name, _pin) \
     class name { \
     public: \
-        inline static fast8_t get() \
-        { \
-            return !READ(pin); \
+        inline static fast8_t get() { \
+            return !READ(_pin); \
         } \
+        inline static uint8_t pin() { return _pin; } \
     };
 
-#define IO_INPUT_PULLUP(name, pin) \
+#define IO_INPUT_PULLUP(name, _pin) \
     class name { \
     public: \
-        inline static fast8_t get() \
-        { \
-            return READ(pin); \
+        inline static fast8_t get() { \
+            return READ(_pin); \
         } \
+        inline static uint8_t pin() { return _pin; } \
     };
 
-#define IO_INPUT_INVERTED_PULLUP(name, pin) \
+#define IO_INPUT_INVERTED_PULLUP(name, _pin) \
     class name { \
     public: \
-        inline static fast8_t get() \
-        { \
-            return READ(pin); \
+        inline static fast8_t get() { \
+            return READ(_pin); \
         } \
+        inline static uint8_t pin() { return _pin; } \
     };
 
 #else

@@ -23,10 +23,14 @@
 #define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop) \
     extern SimpleStepperDriver<stepPin, dirPin, enablePin> name;
 
-#elif IO_TARGET == 6
+#elif IO_TARGET == 6 // define variables
 
 #define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop) \
     SimpleStepperDriver<stepPin, dirPin, enablePin> name(&minEndstop, &maxEndstop);
+
+#elif IO_TARGET == 1 // Init drivers at startup
+
+#define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop)
 
 #else
 

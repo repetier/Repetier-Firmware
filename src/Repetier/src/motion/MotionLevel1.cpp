@@ -568,7 +568,7 @@ void Motion1::queueMove(float feedrate) {
     }
 
     insertWaitIfNeeded();           // for buffer fillup on first move
-    Motion1Buffer& buf = reserve(); // Buffer is blockes because state is set to FREE!
+    Motion1Buffer& buf = reserve(); // Buffer is blocked because state is set to FREE!
 
     buf.length = sqrtf(length2);
     buf.invLength = 1.0 / buf.length;
@@ -813,7 +813,7 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
                 m2->t2 = m2->s2 / f->feedrate;
                 m2->s1 = (0.5 * f->acceleration * m2->t1 + f->startSpeed) * m2->t1;
                 // Acceleration stops at feedrate so make sure it is set to right limit
-                /*Com::printF(" f:", f->feedrate, 0);
+                /* Com::printF(" f:", f->feedrate, 0);
                 Com::printF(" t1:", m2->t1, 4);
                 Com::printF(" t2:", m2->t2, 4);
                 Com::printF(" t3:", m2->t3, 4);
@@ -823,6 +823,9 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
                 m2->t2 = m2->s2 / f->feedrate;
                 // Com::printFLN(" s2:", m2->s2,2);
             }
+            //Com::printF("ss:", f->startSpeed, 0);
+            //Com::printF(" es:", f->endSpeed, 0);
+            //Com::printFLN(" l:", f->length, 4);
         } else if (f->action == Motion1Action::MOVE_STEPS) {
             float invAcceleration = 1.0 / f->acceleration;
             // Where do we hit if we accelerate from both speed
@@ -848,13 +851,13 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
                 m2->t2 = m2->s2 / f->feedrate;
                 // Com::printFLN(" s2:", m2->s2,2);
             }
-            /* Com::printF("ss:", f->startSpeed, 0);
-            Com::printF(" es:", f->endSpeed, 0);
-            Com::printF(" f:", f->feedrate, 0);
+            //Com::printF("ss:", f->startSpeed, 0);
+            //Com::printF(" es:", f->endSpeed, 0);
+            /* Com::printF(" f:", f->feedrate, 0);
             Com::printF(" t1:", m2->t1, 4);
             Com::printF(" t2:", m2->t2, 4);
-            Com::printF(" t3:", m2->t3, 4);
-            Com::printFLN(" l:", f->length, 4);*/
+            Com::printF(" t3:", m2->t3, 4); */
+            //Com::printFLN(" l:", f->length, 4);
             //Com::printFLN(" a:", f->acceleration, 4);
         }
         f->state = Motion1State::FORWARD_PLANNED;
@@ -897,6 +900,7 @@ void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next) {
     state = Motion1State::JUNCTION_COMPUTED;
     float vStart, vEnd, factor = 1.0, corrFactor, yank;
     bool limited = false, prevSmaller;
+    // Smallest of joining target feed rates is maximum limit
     if (next.feedrate < feedrate) {
         prevSmaller = true;
         corrFactor = next.feedrate / feedrate;
@@ -906,6 +910,7 @@ void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next) {
         corrFactor = feedrate / next.feedrate;
         maxJoinSpeed = next.feedrate;
     }
+    // Check per axis for violation of yank contraint
     FOR_ALL_AXES(i) {
         if ((axisUsed & axisBits[i]) || (next.axisUsed & axisBits[i])) {
             if (prevSmaller) {
@@ -1077,6 +1082,75 @@ void Motion1::homeAxes(fast8_t axes) {
     Printer::setHomedAll(ok);
 }
 
+EndstopDriver& Motion1::endstopFoxAxisDir(fast8_t axis, bool maxDir) {
+    if (maxDir) {
+        switch (axis) {
+        case X_AXIS:
+            return endstopXMax;
+            break;
+        case Y_AXIS:
+            return endstopYMax;
+            break;
+        case Z_AXIS:
+            return endstopZMax;
+            break;
+        case E_AXIS:
+            if (motors[E_AXIS] != nullptr) {
+                return *motors[E_AXIS]->getMaxEndstop();
+            }
+            break;
+#if NUM_AXES > A_AXIS
+        case A_AXIS:
+            return endstopAMax;
+            break;
+#endif
+#if NUM_AXES > B_AXIS
+        case A_AXIS:
+            return endstopBMax;
+            break;
+#endif
+#if NUM_AXES > C_AXIS
+        case C_AXIS:
+            return endstopCMax;
+            break;
+#endif
+        }
+    } else {
+        switch (axis) {
+        case X_AXIS:
+            return endstopXMin;
+            break;
+        case Y_AXIS:
+            return endstopYMin;
+            break;
+        case Z_AXIS:
+            return endstopZMin;
+            break;
+        case E_AXIS:
+            if (motors[E_AXIS] != nullptr) {
+                return *motors[E_AXIS]->getMinEndstop();
+            }
+            break;
+#if NUM_AXES > A_AXIS
+        case A_AXIS:
+            return endstopAMin;
+            break;
+#endif
+#if NUM_AXES > B_AXIS
+        case A_AXIS:
+            return endstopBMin;
+            break;
+#endif
+#if NUM_AXES > C_AXIS
+        case C_AXIS:
+            return endstopCMin;
+            break;
+#endif
+        }
+    }
+    return endstopNone;
+}
+
 void Motion1::simpleHome(fast8_t axis) {
     if (homeDir[axis] == 0) { // nothing to do, just set to min
         setAxisHomed(axis, true);
@@ -1085,6 +1159,7 @@ void Motion1::simpleHome(fast8_t axis) {
         Motion2::setMotorPositionFromTransformed();
         return;
     }
+    EndstopDriver& eStop = endstopFoxAxisDir(axis, homeDir[axis] > 0);
     float secureDistance = (maxPos[axis] - minPos[axis]) * 1.5f;
     EndstopMode oldMode = endstopMode;
     EndstopMode newMode = EndstopMode::STOP_HIT_AXES;
@@ -1100,23 +1175,26 @@ void Motion1::simpleHome(fast8_t axis) {
     waitForEndOfMoves(); // defined starting condition
     dest[axis] = homeDir[axis] * secureDistance;
     Motion1::axesTriggered = 0;
-    moveRelativeByOfficial(dest, homingFeedrate[axis]);
-    waitForEndOfMoves();
-    //Motion3::reportBuffers();
-    HAL::delayMilliseconds(100);
+    if (!eStop.triggered()) { // don't test if we are still there
+        moveRelativeByOfficial(dest, homingFeedrate[axis]);
+        waitForEndOfMoves();
+        updatePositionsFromCurrent();
+        Motion2::setMotorPositionFromTransformed();
+        HAL::delayMilliseconds(50);
+    }
     endstopMode = EndstopMode::DISABLED;
     dest[axis] = -homeDir[axis] * homeRetestDistance[axis];
     Motion1::axesTriggered = 0;
     moveRelativeByOfficial(dest, homingFeedrate[axis]);
     waitForEndOfMoves();
-    //Motion3::reportBuffers();
     endstopMode = newMode;
     dest[axis] = homeDir[axis] * homeRetestDistance[axis] * 1.5;
     Motion1::axesTriggered = 0;
     moveRelativeByOfficial(dest, homingFeedrate[axis] / homeRetestReduction[axis]);
     waitForEndOfMoves();
-    // Motion3::reportBuffers();
-    HAL::delayMilliseconds(100);
+    updatePositionsFromCurrent();
+    Motion2::setMotorPositionFromTransformed();
+    HAL::delayMilliseconds(30);
     dest[axis] = -homeDir[axis] * homeEndstopDistance[axis];
     if (axis == Z_AXIS && ZProbe != nullptr && homeDir[Z_AXIS] < 0) {
         dest[axis] -= ZProbeHandler::getZProbeHeight();

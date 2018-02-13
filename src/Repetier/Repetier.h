@@ -182,6 +182,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 
 #include "src/utilities/RMath.h"
 #include "src/utilities/RVector3.h"
+extern void updateEndstops();
 
 #define HOME_ORDER_XYZ 1
 #define HOME_ORDER_XZY 2
@@ -733,6 +734,7 @@ extern void microstepInit();
 #include "src/PrinterTypes/PrinterTypeCartesian.h"
 #include "src/PrinterTypes/PrinterTypeCoreXYZ.h"
 #include "src/motion/VelocityProfile.h"
+
 // #include "src/motion/motion.h"
 
 extern long baudrate;

@@ -7,8 +7,8 @@ public:
         , maxEndstop(maxES)
         , direction(true) {}
     virtual ~StepperDriverBase() {}
-    EndstopDriver* getMinEndstop();
-    EndstopDriver* getMaxEndstop();
+    inline EndstopDriver* getMinEndstop() { return minEndstop; }
+    inline EndstopDriver* getMaxEndstop() { return maxEndstop; }
     /// Allows initialization of driver e.g. current, microsteps
     virtual void init() {}
     /// Executes the step if endstop is not triggered. Return tru eif endstop is triggered

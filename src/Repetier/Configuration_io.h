@@ -55,17 +55,17 @@ IO_OUTPUT_INVERTED(IOE2Enable, ORIG_E1_ENABLE_PIN)
 
 IO_INPUT(IOEndstopXMin, ORIG_X_MIN_PIN)
 IO_INPUT(IOEndstopYMax, ORIG_Y_MAX_PIN)
-IO_INPUT(IOEndstopZMin, ORIG_Z_MIN_PIN)
+IO_INPUT_PULLUP(IOEndstopZMin, ORIG_Z_MIN_PIN)
 
 // Define our endstops solutions
 // You need to define all min and max endstops for all
 // axes except E even if you have none!
 
-ENDSTOP_SWITCH(endstopXMin, IOEndstopXMin)
+ENDSTOP_SWITCH_HW(endstopXMin, IOEndstopXMin, X_AXIS)
 ENDSTOP_NONE(endstopXMax)
 ENDSTOP_NONE(endstopYMin)
-ENDSTOP_SWITCH(endstopYMax, IOEndstopYMax)
-ENDSTOP_SWITCH(endstopZMin, IOEndstopZMin)
+ENDSTOP_SWITCH_HW(endstopYMax, IOEndstopYMax, Y_AXIS)
+ENDSTOP_SWITCH_HW(endstopZMin, IOEndstopZMin, Z_AXIS)
 ENDSTOP_NONE(endstopZMax)
 
 // Define fans

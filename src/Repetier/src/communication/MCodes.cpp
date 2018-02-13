@@ -451,12 +451,26 @@ void MCode_117(GCode* com) {
     }
 }
 
+void reportEndstop(EndstopDriver& d, PGM_P text) {
+    if (d.implemented()) {
+        Com::printF(text);
+        Com::printF(d.triggered() ? Com::tHSpace : Com::tLSpace);
+    }
+}
 void MCode_119(GCode* com) {
     Com::writeToAll = false;
     Motion1::waitForEndOfMoves();
-    Endstops::update();
-    Endstops::update(); // double test to get right signal. Needed for crosstalk protection.
-    Endstops::report();
+    updateEndstops();
+    updateEndstops();
+    Com::printF(PSTR("endstops hit: "));
+    reportEndstop(endstopXMin, Com::tXMinColon);
+    reportEndstop(endstopXMax, Com::tXMaxColon);
+    reportEndstop(endstopYMin, Com::tYMinColon);
+    reportEndstop(endstopYMax, Com::tYMaxColon);
+    reportEndstop(endstopZMin, Com::tZMinColon);
+    reportEndstop(endstopZMax, Com::tZMaxColon);
+    reportEndstop(*ZProbe, Com::tZProbeState);
+    Com::println();
 }
 
 void MCode_120(GCode* com) {

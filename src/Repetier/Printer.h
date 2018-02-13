@@ -146,8 +146,6 @@ public:
 
 #include "src/motion/Distortion.h"
 
-#include "src/motion/Endstops.h"
-
 #ifndef DEFAULT_PRINTER_MODE
 #if NUM_EXTRUDER > 0
 #define DEFAULT_PRINTER_MODE PRINTER_MODE_FFF
@@ -274,7 +272,7 @@ public:
     static uint32_t timer;      ///< used for acceleration/deceleration timing
     static uint32_t stepNumber; ///< Step number in current move.
     static millis_t lastTempReport;
-    static int32_t printingTime; ///< Printing time in seconds
+    static int32_t printingTime;       ///< Printing time in seconds
     static float extrudeMultiplyError; ///< Accumulated error during extrusion
     static float extrusionFactor;      ///< Extrusion multiply factor
 #if NONLINEAR_SYSTEM || defined(DOXYGEN)
@@ -438,7 +436,7 @@ public:
     static void enablePowerIfNeeded();
 #endif
     /** Sets the pwm for the fan speed. Gets called by motion control or Commands::setFanSpeed. */
-    static void setFanSpeedDirectly(uint8_t speed,int fanId);
+    static void setFanSpeedDirectly(uint8_t speed, int fanId);
 
     /** For large machines, the nonlinear transformation can exceed integer 32bit range, so floating point math is needed. */
     static INLINE uint8_t isLargeMachine() {

@@ -28,9 +28,9 @@ public:
     virtual void set(bool triggered) {}
 };
 
-class EndstopNoneDriver: public EndstopDriver {
-public:    
-    inline virtual bool update() final {return false;}
+class EndstopNoneDriver : public EndstopDriver {
+public:
+    inline virtual bool update() final { return false; }
     inline virtual bool implemented() final {
         return false;
     }
@@ -43,11 +43,13 @@ public:
   Input based on a digital switch. Input class must have a 
   get function to detect state.
  */
-template<class inp>
-class EndstopSwitchDriver: public EndstopDriver {
+template <class inp>
+class EndstopSwitchDriver : public EndstopDriver {
     fast8_t state;
+
 public:
-    EndstopSwitchDriver():state(false) {}
+    EndstopSwitchDriver()
+        : state(false) {}
     inline virtual bool update() final {
         return (state = inp::get());
     }
@@ -59,13 +61,42 @@ public:
     }
 };
 
-template<class inp, int level>
-class EndstopSwitchDebounceDriver: public EndstopDriver {
+template <class inp, int axis>
+class EndstopSwitchHardwareDriver : public EndstopDriver {
     fast8_t state;
-public:    
+
+public:
+    EndstopSwitchHardwareDriver()
+        : state(false) {}
+    inline void updateReal() {
+        fast8_t newState = inp::get();
+        if (state != newState) {
+            if (axis >= 0 && newState) { // tell motion planner
+                endstopTriggered(axis);
+            }
+            state = newState;
+        }
+    }
+
     inline virtual bool update() final {
-        if(inp::get()) {
-            if(state < level) {
+        return state;
+    }
+    inline virtual bool triggered() final {
+        return state;
+    }
+    inline virtual bool implemented() final {
+        return true;
+    }
+};
+
+template <class inp, int level>
+class EndstopSwitchDebounceDriver : public EndstopDriver {
+    fast8_t state;
+
+public:
+    inline virtual bool update() final {
+        if (inp::get()) {
+            if (state < level) {
                 state++;
             }
         } else {
@@ -85,10 +116,12 @@ public:
   Input based on a digital switch. Input class must have a 
   get function to detect state.
  */
-class EndstopStepperControlledDriver: public EndstopDriver {
+class EndstopStepperControlledDriver : public EndstopDriver {
     fast8_t state;
+
 public:
-    EndstopStepperControlledDriver():state(false) {}
+    EndstopStepperControlledDriver()
+        : state(false) {}
     inline virtual bool update() final {
         return state;
     }
@@ -104,12 +137,16 @@ public:
 };
 
 /** Merge 2 endstops into 1. Returns only true if both endstops are triggered. */
-class EndstopMerge2: public EndstopDriver {
+class EndstopMerge2 : public EndstopDriver {
     fast8_t state;
     EndstopDriver *e1, *e2;
+
 public:
-    EndstopMerge2(EndstopDriver *_e1, EndstopDriver *_e2):state(false),e1(_e1),e2(_e2) {}
-    inline virtual bool update() final {        
+    EndstopMerge2(EndstopDriver* _e1, EndstopDriver* _e2)
+        : state(false)
+        , e1(_e1)
+        , e2(_e2) {}
+    inline virtual bool update() final {
         return (state = (e1->triggered() && e2->triggered()));
     }
     inline virtual bool triggered() final {
@@ -123,13 +160,17 @@ public:
 /** Merge 3 endstops into 1. Returns only true if both endstops are triggered. 
  * This is required for z max endstop of deltas that merge the 3 motor max endstops.
 */
-class EndstopMerge3: public EndstopDriver {
+class EndstopMerge3 : public EndstopDriver {
     fast8_t state;
     EndstopDriver *e1, *e2, *e3;
+
 public:
-    EndstopMerge3(EndstopDriver *_e1, EndstopDriver *_e2, EndstopDriver *_e3):
-        state(false),e1(_e1),e2(_e2),e3(_e3) {}
-    inline virtual bool update() final {        
+    EndstopMerge3(EndstopDriver* _e1, EndstopDriver* _e2, EndstopDriver* _e3)
+        : state(false)
+        , e1(_e1)
+        , e2(_e2)
+        , e3(_e3) {}
+    inline virtual bool update() final {
         return (state = (e1->triggered() && e2->triggered() && e3->triggered()));
     }
     inline virtual bool triggered() final {
@@ -142,14 +183,19 @@ public:
 
 /** Merge 4 endstops into 1. Returns only true if both endstops are triggered. 
 */
-class EndstopMerge4: public EndstopDriver {
+class EndstopMerge4 : public EndstopDriver {
     fast8_t state;
     EndstopDriver *e1, *e2, *e3, *e4;
+
 public:
-    EndstopMerge4(EndstopDriver *_e1, EndstopDriver *_e2,
-         EndstopDriver *_e3, EndstopDriver *_e4):
-        state(false),e1(_e1),e2(_e2),e3(_e3),e4(_e4) {}
-    inline virtual bool update() final {        
+    EndstopMerge4(EndstopDriver* _e1, EndstopDriver* _e2,
+                  EndstopDriver* _e3, EndstopDriver* _e4)
+        : state(false)
+        , e1(_e1)
+        , e2(_e2)
+        , e3(_e3)
+        , e4(_e4) {}
+    inline virtual bool update() final {
         return (state = (e1->triggered() && e2->triggered() && e3->triggered() && e4->triggered()));
     }
     inline virtual bool triggered() final {

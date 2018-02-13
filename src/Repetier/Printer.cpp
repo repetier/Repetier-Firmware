@@ -18,7 +18,7 @@
 
 #include "Repetier.h"
 
-PWMHandler *fans[] = FAN_LIST;
+PWMHandler* fans[] = FAN_LIST;
 #if USE_ADVANCE
 ufast8_t Printer::maxExtruderSpeed;        ///< Timer delay for end extruder speed
 volatile int Printer::extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
@@ -97,17 +97,17 @@ int32_t Printer::levelingP1[3];
 int32_t Printer::levelingP2[3];
 int32_t Printer::levelingP3[3];
 #endif
-float Printer::feedrate;               ///< Last requested feedrate.
-int Printer::feedrateMultiply;         ///< Multiplier for feedrate in percent (factor 1 = 100)
-unsigned int Printer::extrudeMultiply; ///< Flow multiplier in percent (factor 1 = 100)
-float Printer::offsetX;                ///< X-offset for different extruder positions.
-float Printer::offsetY;                ///< Y-offset for different extruder positions.
-float Printer::offsetZ;                ///< Z-offset for different extruder positions.
-float Printer::offsetZ2 = 0;           ///< Z-offset without rotation correction.
-speed_t Printer::vMaxReached;          ///< Maximum reached speed
-uint32_t Printer::msecondsPrinting;    ///< Milliseconds of printing time (means time with heated extruder)
-float Printer::filamentPrinted;        ///< mm of filament printed since counting started
-float Printer::filamentPrintedTotal = 0;        ///< mm of filament printed since counting started
+float Printer::feedrate;                 ///< Last requested feedrate.
+int Printer::feedrateMultiply;           ///< Multiplier for feedrate in percent (factor 1 = 100)
+unsigned int Printer::extrudeMultiply;   ///< Flow multiplier in percent (factor 1 = 100)
+float Printer::offsetX;                  ///< X-offset for different extruder positions.
+float Printer::offsetY;                  ///< Y-offset for different extruder positions.
+float Printer::offsetZ;                  ///< Z-offset for different extruder positions.
+float Printer::offsetZ2 = 0;             ///< Z-offset without rotation correction.
+speed_t Printer::vMaxReached;            ///< Maximum reached speed
+uint32_t Printer::msecondsPrinting;      ///< Milliseconds of printing time (means time with heated extruder)
+float Printer::filamentPrinted;          ///< mm of filament printed since counting started
+float Printer::filamentPrintedTotal = 0; ///< mm of filament printed since counting started
 #if ENABLE_BACKLASH_COMPENSATION
 float Printer::backlashX;
 float Printer::backlashY;
@@ -182,15 +182,15 @@ void Printer::toggleEndStop() {
 }
 
 int Printer::getFanSpeed(int fanId) {
-    if(fanId < 0 || fanId >= NUM_FANS) {
+    if (fanId < 0 || fanId >= NUM_FANS) {
         return 0;
     }
     return (int)fans[fanId]->get();
 }
 
-void Printer::setFanSpeedDirectly(uint8_t speed,int fanId) {
+void Printer::setFanSpeedDirectly(uint8_t speed, int fanId) {
     uint8_t trimmedSpeed = TRIM_FAN_PWM(speed);
-    if(fanId < 0 || fanId >= NUM_FANS) {
+    if (fanId < 0 || fanId >= NUM_FANS) {
         return;
     }
     fans[fanId]->set(trimmedSpeed);
@@ -493,7 +493,7 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
     }
     if (com->hasE() && !Printer::debugDryrun()) {
         p = com->E;
-        HeatManager *heater = Tool::getActiveTool()->getHeater();
+        HeatManager* heater = Tool::getActiveTool()->getHeater();
         if (relativeCoordinateMode || relativeExtruderCoordinateMode) {
             if (
 #if MIN_EXTRUDER_TEMP > 20
@@ -549,7 +549,7 @@ void Printer::setup() {
 #if defined(EEPROM_AVAILABLE) && defined(EEPROM_SPI_ALLIGATOR) && EEPROM_AVAILABLE == EEPROM_SPI_ALLIGATOR
     HAL::spiBegin();
 #endif
-//    HAL::hwSetup();
+    //    HAL::hwSetup();
     EVENT_INITIALIZE_EARLY
 #ifdef ANALYZER
 // Channel->pin assignments
@@ -610,7 +610,6 @@ void Printer::setup() {
     PULLUP(DOOR_PIN, HIGH);
 #endif
 #endif
-    Endstops::setup();
 
 #if FEATURE_Z_PROBE && Z_PROBE_PIN > -1
     SET_INPUT(Z_PROBE_PIN);
@@ -1009,10 +1008,10 @@ void Printer::showJSONStatus(int type) {
 #endif
     for (int i = 0; i < NUM_TOOLS; i++) {
         Com::print(',');
-        if(Tool::getTool(i)->getHeater() != nullptr) {
+        if (Tool::getTool(i)->getHeater() != nullptr) {
             Com::print(Tool::getTool(i)->getHeater()->getCurrentTemperature());
         } else {
-            Com::print('0');            
+            Com::print('0');
         }
     }
     //  "active": [65.0, 195.0, 0.0],
@@ -1024,10 +1023,10 @@ void Printer::showJSONStatus(int type) {
 #endif
     for (int i = 0; i < NUM_TOOLS; i++) {
         Com::print(',');
-        if(Tool::getTool(i)->getHeater() != nullptr) {
+        if (Tool::getTool(i)->getHeater() != nullptr) {
             Com::print(Tool::getTool(i)->getHeater()->getTargetTemperature());
         } else {
-            Com::print('0');            
+            Com::print('0');
         }
     }
     //  "standby": [-273.1, 0.0, 150.0],
@@ -1039,10 +1038,10 @@ void Printer::showJSONStatus(int type) {
 #endif
     for (int i = 0; i < NUM_TOOLS; i++) {
         Com::print(',');
-        if(Tool::getTool(i)->getHeater() != nullptr) {
+        if (Tool::getTool(i)->getHeater() != nullptr) {
             Com::print(Tool::getTool(i)->getHeater()->getTargetTemperature());
         } else {
-            Com::print('0');            
+            Com::print('0');
         }
     }
     //  "hstat": [0, 0, 0],
@@ -1050,25 +1049,25 @@ void Printer::showJSONStatus(int type) {
     Com::printF(PSTR("],\"hstat\":["));
 
 #if NUM_HEATED_BEDS > 0
-    if(heatedBeds[0]->getError() != HeaterError::NO_ERROR) {
+    if (heatedBeds[0]->getError() != HeaterError::NO_ERROR) {
         Com::print('3');
     } else {
         Com::print(heatedBeds[0]->getTargetTemperature() < MAX_ROOM_TEMPERATURE ? 0 : 2);
-    }    
+    }
 #else
     Com::print((int)0);
 #endif
     for (int i = 0; i < NUM_TOOLS; i++) {
         Com::print(',');
-        if(Tool::getTool(i)->getHeater() != nullptr) {
-    if(Tool::getTool(i)->getHeater()->getError() != HeaterError::NO_ERROR) {
-        Com::print('3');
-    } else {
-        Com::print(Tool::getTool(i)->getHeater()->getTargetTemperature() < MAX_ROOM_TEMPERATURE ? 0 : 2);
-    }    
+        if (Tool::getTool(i)->getHeater() != nullptr) {
+            if (Tool::getTool(i)->getHeater()->getError() != HeaterError::NO_ERROR) {
+                Com::print('3');
+            } else {
+                Com::print(Tool::getTool(i)->getHeater()->getTargetTemperature() < MAX_ROOM_TEMPERATURE ? 0 : 2);
+            }
             Com::print(Tool::getTool(i)->getHeater()->getTargetTemperature());
         } else {
-            Com::print('0');            
+            Com::print('0');
         }
     }
     //  "pos": [1.00, 205.00, 6.48],
@@ -1083,10 +1082,10 @@ void Printer::showJSONStatus(int type) {
     for (int i = 0; i < NUM_TOOLS; i++) {
         if (i)
             Com::print(',');
-        if(Tool::getTool(i)->getHeater() != nullptr) {
+        if (Tool::getTool(i)->getHeater() != nullptr) {
             Com::print(Tool::getTool(i)->getHeater()->getCurrentTemperature());
         } else {
-            Com::print('0');            
+            Com::print('0');
         }
     }
     //  "sfactor": 100.00,
@@ -1102,17 +1101,17 @@ void Printer::showJSONStatus(int type) {
     Com::printF(PSTR("],\"tool\":"), Extruder::current->id);
     //"probe": "4",
     Com::printF(PSTR(",\"probe\":"));
-    if (Endstops::zProbe())
+    if (ZProbe->triggered())
         Com::print((int)0);
     else
         Com::print((int)1000);
     //  "fanPercent": [0.00, 100.00],
     Com::printF(PSTR(",\"fanPercent\":["));
-    for(int i = 0; i < NUM_FANS;i++) {
-        if(i > 0) {
+    for (int i = 0; i < NUM_FANS; i++) {
+        if (i > 0) {
             Com::printF(Com::tComma);
         }
-        Com::print(getFanSpeed(i) / 2.55f);    
+        Com::print(getFanSpeed(i) / 2.55f);
     }
     Com::printF(PSTR("]"));
     //  "fanRPM": 0,
@@ -1161,11 +1160,11 @@ void Printer::showJSONStatus(int type) {
     Com::printF(PSTR(",\"params\": {\"atxPower\":"));
     Com::print(isPowerOn() ? '1' : '0');
     Com::printF(PSTR(",\"fanPercent\":["));
-    for(int i = 0; i < NUM_FANS;i++) {
-        if(i > 0) {
+    for (int i = 0; i < NUM_FANS; i++) {
+        if (i > 0) {
             Com::printF(Com::tComma);
         }
-        Com::print(getFanSpeed(i) / 2.55f);    
+        Com::print(getFanSpeed(i) / 2.55f);
     }
     Com::printF(PSTR("],\"speedFactor\":"));
     Com::print(Printer::feedrateMultiply);

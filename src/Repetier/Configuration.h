@@ -78,6 +78,16 @@ to the position. 0 = no contribution. */
 #define COREXYZ_Z_Y 0
 #define COREXYZ_Z_Z 1
 
+// Set all directions where no explicit test is required.
+// This is for dummy endstops and for hardware endstops.
+// NOt disabling them is just a speed penalty
+#define NO_XMIN_ENDSTOP_TEST
+#define NO_XMAX_ENDSTOP_TEST
+#define NO_YMIN_ENDSTOP_TEST
+#define NO_YMAX_ENDSTOP_TEST
+#define NO_ZMIN_ENDSTOP_TEST
+#define NO_ZMAX_ENDSTOP_TEST
+
 // Next 7 lines are required to make the following work, do not change!
 #include "pins.h"
 #undef IO_TARGET
