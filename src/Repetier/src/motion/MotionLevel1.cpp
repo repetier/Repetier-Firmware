@@ -391,12 +391,17 @@ void Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate) {
                        destinationPositionTransformed[Y_AXIS],
                        destinationPositionTransformed[Z_AXIS]);
     destinationPositionTransformed[Z_AXIS] += Printer::offsetZ2;
+    Tool* tool = Tool::getActiveTool();
     if (coords[E_AXIS] != IGNORE_COORDINATE && !Printer::debugDryrun()
-#if MIN_EXTRUDER_TEMP > 30
-        && (Extruder::current->tempControl.currentTemperatureC > MIN_EXTRUDER_TEMP || Printer::isColdExtrusionAllowed() || Extruder::current->tempControl.sensorType == 0)
+#if MIN_EXTRUDER_TEMP > MAX_ROOM_TEMPERATURE
+        && (tool->getHeater() != nullptr
+            && (tool->getHeater()->getCurrentTemperature() > MIN_EXTRUDER_TEMP
+                || Printer::isColdExtrusionAllowed()))
 #endif
-    ) {
+    ) { // set position
         destinationPositionTransformed[E_AXIS] = coords[E_AXIS];
+    } else { // ignore
+        destinationPositionTransformed[E_AXIS] = currentPositionTransformed[E_AXIS];
     }
     if (feedrate == IGNORE_COORDINATE) {
         feedrate = Printer::feedrate;
@@ -444,6 +449,16 @@ void Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate) {
     currentPosition[X_AXIS] -= Printer::offsetX; // Offset from active extruder or z probe
     currentPosition[Y_AXIS] -= Printer::offsetY;
     currentPosition[Z_AXIS] -= Printer::offsetZ;
+    Tool* tool = Tool::getActiveTool();
+    if (coords[E_AXIS] == IGNORE_COORDINATE || Printer::debugDryrun()
+#if MIN_EXTRUDER_TEMP > MAX_ROOM_TEMPERATURE
+        || !(tool->getHeater() != nullptr
+             && (tool->getHeater()->getCurrentTemperature() > MIN_EXTRUDER_TEMP
+                 || Printer::isColdExtrusionAllowed()))
+#endif
+    ) {
+        destinationPositionTransformed[E_AXIS] = currentPositionTransformed[E_AXIS];
+    }
 #if NUM_AXES > A_AXIS
     for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
         currentPosition[i] = destinationPositionTransformed[i];
@@ -564,6 +579,7 @@ void Motion1::queueMove(float feedrate) {
     }
 
     if (length2 == 0) { // no move, ignore it
+        DEBUG_MSG_FAST("0 move");
         return;
     }
 
@@ -800,18 +816,36 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
                 m2->s3 = m2->t3 * (f->endSpeed + 0.5 * f->acceleration * m2->t3);
             }
             if (m2->s1 + m2->s3 > f->length) {
-                float div = 0.5 * invAcceleration;
-                float sq = f->startSpeed * f->startSpeed + f->endSpeed * f->endSpeed;
-                float vmax = RMath::max(f->startSpeed, f->endSpeed);
-                float fmin = (2.0f * vmax * vmax - sq) / f->sa2;
-                float fmid = (2.0 + fmin) * 0.3333333333333f;
-                float sterm = sqrtf(sq + f->sa2 * fmid) * 1.414213562f;
-                m2->t1 = RMath::max(0.0f, (sterm - 2.0f * f->startSpeed) * div);
-                m2->t3 = RMath::max(0.0f, (sterm - 2.0f * f->endSpeed) * div);
-                f->feedrate = f->startSpeed + m2->t1 * f->acceleration;
-                m2->s2 = f->length * (1.0 - fmid);
-                m2->t2 = m2->s2 / f->feedrate;
-                m2->s1 = (0.5 * f->acceleration * m2->t1 + f->startSpeed) * m2->t1;
+                if ((f->axisUsed & 3) != 0 && f->startSpeed >= 9.99) { // reduce acceleration to minimum for smooth curves
+                    if(f->startSpeed > f->endSpeed) { // decelerate at end
+                        m2->t1 = 0;
+                        m2->t3 = (f->startSpeed - f->endSpeed) * invAcceleration;
+                        f->feedrate = f->startSpeed;
+                        m2->s1 = 0;
+                        m2->s3 = m2->t3 * (f->endSpeed + 0.5 * f->acceleration * m2->t3);
+                    } else { // accelerate only at start
+                        m2->t1 = (f->endSpeed - f->startSpeed) * invAcceleration;
+                        m2->t3 = 0;
+                        f->feedrate = f->endSpeed;
+                        m2->s3 = 0;
+                        m2->s1 = (0.5 * f->acceleration * m2->t1 + f->startSpeed) * m2->t1;
+                    }
+                    m2->s2 = f->length - m2->s1 - m2->s3;
+                    m2->t2 = m2->s2 / f->feedrate;
+                } else { // we are slow, try to optimize
+                    float div = 0.5 * invAcceleration;
+                    float sq = f->startSpeed * f->startSpeed + f->endSpeed * f->endSpeed;
+                    float vmax = RMath::max(f->startSpeed, f->endSpeed);
+                    float fmin = (2.0f * vmax * vmax - sq) / f->sa2;
+                    float fmid = (2.0 + fmin) * 0.3333333333333f;
+                    float sterm = sqrtf(sq + f->sa2 * fmid) * 1.414213562f;
+                    m2->t1 = RMath::max(0.0f, (sterm - 2.0f * f->startSpeed) * div);
+                    m2->t3 = RMath::max(0.0f, (sterm - 2.0f * f->endSpeed) * div);
+                    f->feedrate = f->startSpeed + m2->t1 * f->acceleration;
+                    m2->s2 = f->length * (1.0 - fmid);
+                    m2->t2 = m2->s2 / f->feedrate;
+                    m2->s1 = (0.5 * f->acceleration * m2->t1 + f->startSpeed) * m2->t1;
+                }
                 // Acceleration stops at feedrate so make sure it is set to right limit
                 /* Com::printF(" f:", f->feedrate, 0);
                 Com::printF(" t1:", m2->t1, 4);
@@ -823,9 +857,12 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
                 m2->t2 = m2->s2 / f->feedrate;
                 // Com::printFLN(" s2:", m2->s2,2);
             }
-            //Com::printF("ss:", f->startSpeed, 0);
-            //Com::printF(" es:", f->endSpeed, 0);
-            //Com::printFLN(" l:", f->length, 4);
+           /*     Com::printF(" t1:", m2->t1, 4);
+                Com::printF(" t2:", m2->t2, 4);
+                Com::printF(" t3:", m2->t3, 4);
+            Com::printF("ss:", f->startSpeed, 0);
+            Com::printF(" es:", f->endSpeed, 0);
+            Com::printFLN(" l:", f->length, 4);*/
         } else if (f->action == Motion1Action::MOVE_STEPS) {
             float invAcceleration = 1.0 / f->acceleration;
             // Where do we hit if we accelerate from both speed
@@ -908,7 +945,7 @@ void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next) {
     } else {
         prevSmaller = false;
         corrFactor = feedrate / next.feedrate;
-        maxJoinSpeed = next.feedrate;
+        maxJoinSpeed = feedrate;
     }
     // Check per axis for violation of yank contraint
     FOR_ALL_AXES(i) {

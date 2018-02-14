@@ -76,6 +76,7 @@ void Motion2::timer() {
     if (actM1->action == Motion1Action::MOVE) {
         if (act->state == Motion2State::NOT_INITIALIZED) {
             act->nextState();
+            lastMotorPos[lastMotorIdx][E_AXIS] = static_cast<int32_t>(floor(actM1->start[E_AXIS] * Motion1::resolution[E_AXIS] + 0.5f));
         }
         float sFactor = 1.0;
         if (act->state == Motion2State::ACCELERATE_INIT) {
@@ -161,7 +162,6 @@ void Motion2::timer() {
             }
             return; // don't add empty moves
         }
-        // DEBUG_MSG2_FAST("stp ", np[0] - lp[0]);
         m3->errorUpdate = (m3->stepsRemaining << 1);
         for (fast8_t i = 0; i < NUM_AXES; i++) {
             if ((m3->delta[i] = ((np[i] - lp[i]) << 1)) < 0) {

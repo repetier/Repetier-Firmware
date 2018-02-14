@@ -366,7 +366,7 @@ public:
         TimeTick_Configure(F_CPU_TRUE);
 
         // setup microsecond delay timer
-      /* pmc_enable_periph_clk(DELAY_TIMER_IRQ);
+        /* pmc_enable_periph_clk(DELAY_TIMER_IRQ);
         TC_Configure(DELAY_TIMER, DELAY_TIMER_CHANNEL, TC_CMR_WAVSEL_UP | TC_CMR_WAVE | DELAY_TIMER_CLOCK);
         TC_Start(DELAY_TIMER, DELAY_TIMER_CHANNEL);*/
 #if EEPROM_AVAILABLE && EEPROM_MODE != EEPROM_NONE
@@ -646,8 +646,8 @@ public:
     static inline void forbidInterrupts() {
         //__disable_irq();
     }
-    static inline unsigned long timeInMilliseconds() {
-        return millis();
+    static inline millis_t timeInMilliseconds() {
+        return GetTickCount(); // millis();
     }
     static inline char readFlashByte(PGM_P ptr) {
         return pgm_read_byte(ptr);

@@ -220,10 +220,11 @@ void Commands::changeFlowrateMultiply(int factor) {
     if (factor > 200)
         factor = 200;
     Printer::extrudeMultiply = factor;
-    if (Extruder::current->diameter <= 0)
-        Printer::extrusionFactor = 0.01f * static_cast<float>(factor);
-    else
-        Printer::extrusionFactor = 0.01f * static_cast<float>(factor) * 4.0f / (Extruder::current->diameter * Extruder::current->diameter * 3.141592654f);
+    // TODO: volumetric extrusion
+    //if (Extruder::current->diameter <= 0)
+    Printer::extrusionFactor = 0.01f * static_cast<float>(factor);
+    //else
+    //    Printer::extrusionFactor = 0.01f * static_cast<float>(factor) * 4.0f / (Extruder::current->diameter * Extruder::current->diameter * 3.141592654f);
     Com::printFLN(Com::tFlowMultiply, factor);
 }
 

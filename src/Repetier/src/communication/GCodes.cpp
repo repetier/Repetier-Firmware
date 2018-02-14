@@ -350,7 +350,7 @@ void GCode_92(GCode* com) {
         zOff = Printer::convertToMM(com->Z) - Motion1::currentPosition[Z_AXIS];
     Printer::setOrigin(xOff, yOff, zOff);
     if (com->hasE()) {
-        Motion1::currentPosition[E_AXIS] = Motion1::currentPositionTransformed[E_AXIS] = Printer::convertToMM(com->E);
+        Motion1::destinationPositionTransformed[E_AXIS] = Motion1::currentPosition[E_AXIS] = Motion1::currentPositionTransformed[E_AXIS] = Printer::convertToMM(com->E);
     }
     if (com->hasX() || com->hasY() || com->hasZ()) {
         Com::printF(PSTR("X_OFFSET:"), Motion1::g92Offsets[X_AXIS], 3);

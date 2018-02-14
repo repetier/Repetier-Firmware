@@ -474,6 +474,18 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
         if (!Motion1::isAxisHomed(Z_AXIS))
             com->unsetZ();
 #endif
+#if NUM_AXES > A_AXIS && MOVE_A_WHEN_HOMED
+        if (!Motion1::isAxisHomed(A_AXIS))
+            com->unsetA();
+#endif
+#if NUM_AXES > B_AXIS && MOVE_B_WHEN_HOMED
+        if (!Motion1::isAxisHomed(B_AXIS))
+            com->unsetB();
+#endif
+#if NUM_AXES > C_AXIS && MOVE_C_WHEN_HOMED
+        if (!Motion1::isAxisHomed(C_AXIS))
+            com->unsetC();
+#endif
     }
 #endif
     if (!relativeCoordinateMode) {
@@ -483,6 +495,18 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
             coords[Y_AXIS] = convertToMM(com->Y) - Motion1::g92Offsets[Y_AXIS];
         if (com->hasZ())
             coords[Z_AXIS] = convertToMM(com->Z) - Motion1::g92Offsets[Z_AXIS];
+#if NUM_AXES > A_AXIS
+        if (com->hasA())
+            coords[A_AXIS] = convertToMM(com->A) - Motion1::g92Offsets[A_AXIS];
+#endif
+#if NUM_AXES > B_AXIS
+        if (com->hasB())
+            coords[B_AXIS] = convertToMM(com->B) - Motion1::g92Offsets[B_AXIS];
+#endif
+#if NUM_AXES > C_AXIS
+        if (com->hasC())
+            coords[C_AXIS] = convertToMM(com->C) - Motion1::g92Offsets[C_AXIS];
+#endif
     } else {
         if (com->hasX())
             coords[X_AXIS] += convertToMM(com->X);
@@ -490,29 +514,36 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
             coords[Y_AXIS] += convertToMM(com->Y);
         if (com->hasZ())
             coords[Z_AXIS] += convertToMM(com->Z);
+#if NUM_AXES > A_AXIS
+        if (com->hasA())
+            coords[A_AXIS] += convertToMM(com->A);
+#endif
+#if NUM_AXES > B_AXIS
+        if (com->hasB())
+            coords[B_AXIS] += convertToMM(com->B);
+#endif
+#if NUM_AXES > C_AXIS
+        if (com->hasC())
+            coords[C_AXIS] += convertToMM(com->C);
+#endif
     }
     if (com->hasE() && !Printer::debugDryrun()) {
-        p = com->E;
+        p = convertToMM(com->E);
         HeatManager* heater = Tool::getActiveTool()->getHeater();
         if (relativeCoordinateMode || relativeExtruderCoordinateMode) {
-            if (
-#if MIN_EXTRUDER_TEMP > 20
-                (heater != nullptr && heater->getCurrentTemperature() < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()) ||
-#endif
-                fabs(com->E) * extrusionFactor > EXTRUDE_MAXLENGTH)
+            if (fabs(com->E) * extrusionFactor > EXTRUDE_MAXLENGTH) {
                 p = 0;
+            }
             coords[E_AXIS] = Motion1::currentPosition[E_AXIS] + p;
         } else {
-            if (
-#if MIN_EXTRUDER_TEMP > 20
-                (heater != nullptr && heater->getCurrentTemperature() < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()) ||
-#endif
-                fabs(p - Motion1::currentPosition[E_AXIS]) * extrusionFactor > EXTRUDE_MAXLENGTH)
-                Motion1::currentPosition[E_AXIS] = p;
+            if (fabs(p - Motion1::currentPosition[E_AXIS]) * extrusionFactor > EXTRUDE_MAXLENGTH) {
+                p = Motion1::currentPosition[E_AXIS];
+            }
             coords[E_AXIS] = p;
         }
-    } else
+    } else {
         coords[E_AXIS] = Motion1::currentPosition[E_AXIS];
+    }
     if (com->hasF() && com->F > 0.1) {
         if (unitIsInches)
             feedrate = com->F * 0.0042333f * (float)feedrateMultiply; // Factor is 25.5/60/100
