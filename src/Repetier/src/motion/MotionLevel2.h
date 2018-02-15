@@ -84,6 +84,7 @@ public:
 
     static void copyMotorPos(int32_t pos[NUM_AXES]);
 
-    /// Assume we are at Motion1::currentPositionTransformed.
+    /// Assume we are at Motion1::currentPositionTransformed and set motor possitions accordingly.
+    /// Use with care or positions might get wrong!
     static void setMotorPositionFromTransformed();
 };

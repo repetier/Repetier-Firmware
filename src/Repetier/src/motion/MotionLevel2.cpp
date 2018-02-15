@@ -119,6 +119,7 @@ void Motion2::timer() {
             m3->directions = 0;
             m3->usedAxes = 0;
             m3->stepsRemaining = 1;
+            m3->last = 1;
             // Need to add this move to handle finished state correctly
             Motion3::pushReserved();
             return;
@@ -143,8 +144,12 @@ void Motion2::timer() {
         }
         lastL = sFactor;
         float pos[NUM_AXES];
-        for (fast8_t i = 0; i < NUM_AXES; i++) {
-            pos[i] = actM1->start[i] + sFactor * actM1->unitDir[i];
+        FOR_ALL_AXES(i) {
+            if(actM1->axisUsed & axisBits[i]) {
+                pos[i] = actM1->start[i] + sFactor * actM1->unitDir[i];
+            } else {
+                pos[i] = actM1->start[i];
+            }
         }
         fast8_t nextMotorIdx = 1 - lastMotorIdx;
         int32_t* np = lastMotorPos[nextMotorIdx];
@@ -162,17 +167,22 @@ void Motion2::timer() {
             }
             return; // don't add empty moves
         }
-        m3->errorUpdate = (m3->stepsRemaining << 1);
-        for (fast8_t i = 0; i < NUM_AXES; i++) {
-            if ((m3->delta[i] = ((np[i] - lp[i]) << 1)) < 0) {
-                m3->delta[i] = -m3->delta[i];
-            } else {
-                m3->directions |= axisBits[i];
+        m3->errorUpdate = m3->stepsRemaining << 1;
+        int *delta = m3->delta;
+        uint8_t *bits = axisBits;        
+        FOR_ALL_AXES(i) {
+            if ((*delta = ((*np - *lp) << 1)) < 0) {
+                *delta = -*delta;
+                m3->usedAxes |= *bits;
+            } else if(*delta != 0) {
+                m3->directions |= *bits;
+                m3->usedAxes |= *bits;
             }
-            if (m3->delta[i]) {
-                m3->usedAxes |= axisBits[i];
-            }
-            m3->error[i] = -(m3->stepsRemaining);
+            m3->error[i] = -m3->stepsRemaining;
+            delta++;
+            np++;
+            lp++;
+            bits++;
         }
         lastMotorIdx = nextMotorIdx;
         m3->parentId = act->id;
@@ -249,7 +259,7 @@ void Motion2::timer() {
         fast8_t nextMotorIdx = 1 - lastMotorIdx;
         int32_t* np = lastMotorPos[nextMotorIdx];
         int32_t* lp = lastMotorPos[lastMotorIdx];
-        for (fast8_t i = 0; i < NUM_AXES; i++) {
+        FOR_ALL_AXES(i) {
             np[i] = roundf(actM1->start[i] + sFactor * actM1->unitDir[i]);
         }
         // Fill structures used to update bresenham
@@ -265,13 +275,12 @@ void Motion2::timer() {
             return; // don't add empty moves
         }
         m3->errorUpdate = (m3->stepsRemaining << 1);
-        for (fast8_t i = 0; i < NUM_AXES; i++) {
+        FOR_ALL_AXES(i) {
             if ((m3->delta[i] = ((np[i] - lp[i]) << 1)) < 0) {
                 m3->delta[i] = -m3->delta[i];
-            } else {
+                m3->usedAxes |= axisBits[i];
+            } else if(m3->delta[i] != 0) {
                 m3->directions |= axisBits[i];
-            }
-            if (m3->delta[i]) {
                 m3->usedAxes |= axisBits[i];
             }
             m3->error[i] = -(m3->stepsRemaining);
@@ -290,12 +299,10 @@ void Motion2::timer() {
         m3->checkEndstops = 0;
         m3->secondSpeed = actM1->secondSpeed;
         if (actM1->feedrate > 32000) {
-            // DEBUG_MSG2_FAST("m3wti", actM1->feedrate);
             m3->stepsRemaining = 32000;
             m3->last = 0;
             actM1->feedrate -= 32000;
         } else {
-            // DEBUG_MSG_FAST("m3we")
             m3->stepsRemaining = static_cast<unsigned int>(actM1->feedrate);
             m3->last = 1;
             actM1 = nullptr; // select next on next interrupt
@@ -333,10 +340,12 @@ void Motion2::motorEndstopTriggered(fast8_t axis) {
         }
     }*/
 }
+
 void endstopTriggered(fast8_t axis) {
     InterruptProtectedBlock noInt;
     Motion2::endstopTriggered(Motion3::act, axis);
 }
+
 void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis) {
     if (act == nullptr || act->checkEndstops == false) {
         return;
@@ -359,6 +368,7 @@ void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis) {
         }
     }
 }
+
 void Motion2Buffer::nextState() {
     if (state == Motion2State::NOT_INITIALIZED) {
         if (t1 > 0) {

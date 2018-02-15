@@ -61,10 +61,14 @@ void Motion3::activateNext() {
     }*/
     act = &buffers[nextActId++];
     // Set direction first to give driver some time
+#ifdef XMOTOR_SWITCHABLE
     Motion1::motors[X_AXIS]->dir(act->directions & 1);
-    Motion1::motors[Y_AXIS]->dir(act->directions & 2);
-    Motion1::motors[Z_AXIS]->dir(act->directions & 4);
-    for (fast8_t i = 3; i < NUM_AXES; i++) {
+#else
+    XMotor.dir(act->directions & 1);
+#endif    
+    YMotor.dir(act->directions & 2);
+    ZMotor.dir(act->directions & 4);
+    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
         if (act->usedAxes & axisBits[i]) {
             Motion1::motors[i]->dir(act->directions & axisBits[i]);
         }
@@ -106,10 +110,14 @@ void Motion3::unstepMotors() {
 void Motion3::timer() {
     static bool stepDone = false;
 
+#ifdef XMOTOR_SWITCHABLE
+    Motion1::motors[X_AXIS]->unstep();
+#else    
     XMotor.unstep();
+#endif    
     YMotor.unstep();
     ZMotor.unstep();
-    for (fast8_t i = 3; i < NUM_AXES; i++) {
+    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
         if (Motion1::motors[i] != nullptr) {
             Motion1::motors[i]->unstep();
         }
@@ -119,6 +127,10 @@ void Motion3::timer() {
             return;
         }
         activateNext();
+#ifdef SLOW_DIRECTION_CHANGE
+        // Give timer one stepper count to settle direction
+        return;
+#endif                
     }
     // Run bresenham algorithm for stepping forward
 
@@ -395,7 +407,7 @@ void Motion3::timer() {
 #endif
     }
     // Test if we are finished
-    if (act->stepsRemaining-- == 0) {
+    if (--act->stepsRemaining == 0) {        
         if (act->last) {
             Motion2::pop();
         }
