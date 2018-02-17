@@ -42,6 +42,7 @@ float Motion1::homeEndstopDistance[NUM_AXES];
 float Motion1::homeRetestReduction[NUM_AXES];
 float Motion1::memory[MEMORY_POS_SIZE][NUM_AXES + 1];
 float Motion1::autolevelTransformation[9]; ///< Transformation matrix
+StepperDriverBase* Motion1::drivers[NUM_MOTORS];
 fast8_t Motion1::memoryPos;
 StepperDriverBase* Motion1::motors[NUM_AXES];
 fast8_t Motion1::homeDir[NUM_AXES];
@@ -320,6 +321,7 @@ void Motion1::waitForEndOfMoves() {
 
 void Motion1::waitForXFreeMoves(fast8_t n, bool allowMoves) {
     while (buffersUsed() >= PRINTLINE_CACHE_SIZE - n) {
+        GCode::keepAlive(Processing, 3);
         Commands::checkForPeriodicalActions(allowMoves);
     }
 }
@@ -579,7 +581,6 @@ void Motion1::queueMove(float feedrate) {
     }
 
     if (length2 == 0) { // no move, ignore it
-        DEBUG_MSG_FAST("0 move");
         return;
     }
 
@@ -817,7 +818,7 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
             }
             if (m2->s1 + m2->s3 > f->length) {
                 if ((f->axisUsed & 3) != 0 && f->startSpeed >= 9.99) { // reduce acceleration to minimum for smooth curves
-                    if(f->startSpeed > f->endSpeed) { // decelerate at end
+                    if (f->startSpeed > f->endSpeed) {                 // decelerate at end
                         m2->t1 = 0;
                         m2->t3 = (f->startSpeed - f->endSpeed) * invAcceleration;
                         f->feedrate = f->startSpeed;
@@ -857,12 +858,12 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
                 m2->t2 = m2->s2 / f->feedrate;
                 // Com::printFLN(" s2:", m2->s2,2);
             }
-           /*     Com::printF(" t1:", m2->t1, 4);
-                Com::printF(" t2:", m2->t2, 4);
-                Com::printF(" t3:", m2->t3, 4);
-            Com::printF("ss:", f->startSpeed, 0);
-            Com::printF(" es:", f->endSpeed, 0);
-            Com::printFLN(" l:", f->length, 4);*/
+            /* Com::printF(" t1:", m2->t1, 4);
+            Com::printF(" t2:", m2->t2, 4);
+            Com::printF(" t3:", m2->t3, 4);
+            Com::printF(" ss:", f->startSpeed, 1);
+            Com::printF(" es:", f->endSpeed, 1);
+            Com::printFLN(" l:", f->length, 4); */
         } else if (f->action == Motion1Action::MOVE_STEPS) {
             float invAcceleration = 1.0 / f->acceleration;
             // Where do we hit if we accelerate from both speed
@@ -947,6 +948,7 @@ void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next) {
         corrFactor = feedrate / next.feedrate;
         maxJoinSpeed = feedrate;
     }
+    // Com::printF("j:", maxJoinSpeed, 1);
     // Check per axis for violation of yank contraint
     FOR_ALL_AXES(i) {
         if ((axisUsed & axisBits[i]) || (next.axisUsed & axisBits[i])) {
@@ -970,6 +972,9 @@ void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next) {
             yank = fabs(vStart - vEnd);
             if (yank > Motion1::maxYank[i]) {
                 factor *= Motion1::maxYank[i] / yank;
+                // Com::printF(" a:", (int)i);
+                // Com::printF(" y:", yank, 2);
+                // Com::printF(" m:", Motion1::maxYank[i], 2);
                 limited = true;
             }
         }
@@ -978,11 +983,11 @@ void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next) {
         maxJoinSpeed *= factor;
     }
     // check if safe speeds are higher, e.g. because we switch x with z move
-    if (next.endSpeed > maxJoinSpeed || startSpeed > maxJoinSpeed) {
+    if (next.startSpeed > maxJoinSpeed || endSpeed > maxJoinSpeed) {
         maxJoinSpeed = endSpeed;
         state = Motion1State::BACKWARD_FINISHED;
     }
-    //Com::printFLN("mj:", maxJoinSpeed, 1);
+    // Com::printFLN("mj:", maxJoinSpeed, 1);
     //Com::printFLN(" v0:", speed[0], 1);
     //Com::printFLN(" v1:", next.speed[0], 1);
 }

@@ -198,7 +198,6 @@ void GCode::keepAlive(enum FirmwareState state, int id) {
             UI_STATUS_F(Com::tDoorOpen);
         } else { // processing and uncaught cases
             GCodeSource::printAllFLN(PSTR("busy:processing"));
-            DEBUG_MSG2_FAST("PRC:", id)
         }
     }
     lastBusySignal = now;

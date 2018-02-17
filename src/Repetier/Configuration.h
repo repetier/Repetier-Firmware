@@ -123,6 +123,12 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define TOOLS \
     { &ToolExtruder1, &ToolExtruder2 }
 
+// Array to call motor related commands like microstepping/current if supported.
+// Id's start at 0 and depend on position in this array.
+#define NUM_MOTORS 3
+#define MOTORS \
+    { &XMotor, &YMotor, &ZMotor }
+
 // ################## EDIT THESE SETTINGS MANUALLY ################
 // ################ END MANUAL SETTINGS ##########################
 

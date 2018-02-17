@@ -64,6 +64,7 @@ Tool* Tool::getTool(fast8_t id) {
 /// Called when the tool gets activated.
 void ToolExtruder::activate() {
     Motion1::setMotorForAxis(stepper, E_AXIS);
+    Motion1::maxYank[E_AXIS] = yank;
     Motion1::resolution[E_AXIS] = stepsPerMM;
     Motion1::currentPosition[E_AXIS] = Motion1::currentPositionTransformed[E_AXIS] = 0.0f;
     GCode::executeFString(startScript);

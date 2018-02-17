@@ -946,22 +946,13 @@ void MCode_340(GCode* com) {
 }
 
 void MCode_350(GCode* com) {
-#if defined(X_MS1_PIN) && X_MS1_PIN > -1
-    if (com->hasS())
-        for (int i = 0; i <= 4; i++)
-            microstepMode(i, com->S);
-    if (com->hasX())
-        microstepMode(0, (uint8_t)com->X);
-    if (com->hasY())
-        microstepMode(1, (uint8_t)com->Y);
-    if (com->hasZ())
-        microstepMode(2, (uint8_t)com->Z);
-    if (com->hasE())
-        microstepMode(3, (uint8_t)com->E);
-    if (com->hasP())
-        microstepMode(4, com->P); // Original B but is not supported here
-    microstepReadings();
-#endif
+    if (com->hasP() && com->hasS() && com->P >= 0 && com->P < NUM_MOTORS) {
+        if (Motion1::drivers[com->P]->implementSetMicrosteps()) {
+            Motion1::drivers[com->P]->setMicrosteps((int)com->S);
+        } else {
+            Com::printWarningFLN(PSTR("This driver does not support setting microsteps by software!"));
+        }
+    }
 }
 
 void MCode_355(GCode* com) {
@@ -1184,11 +1175,13 @@ void MCode_907(GCode* com) {
 }
 
 void MCode_908(GCode* com) {
-#if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
-    uint8_t channel, current;
-    if (com->hasP() && com->hasS())
-        setMotorCurrent((uint8_t)com->P, (unsigned int)com->S);
-#endif
+    if (com->hasP() && com->hasS() && com->P >= 0 && com->P < NUM_MOTORS) {
+        if (Motion1::drivers[com->P]->implementSetMaxCurrent()) {
+            Motion1::drivers[com->P]->setMaxCurrent((int)com->S);
+        } else {
+            Com::printWarningFLN(PSTR("This driver does not support setting current by software!"));
+        }
+    }
 }
 
 void MCode_909(GCode* com) {

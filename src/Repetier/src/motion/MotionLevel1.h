@@ -142,6 +142,7 @@ public:
     static float homeRetestDistance[NUM_AXES];
     static float homeRetestReduction[NUM_AXES];
     static float homeEndstopDistance[NUM_AXES];
+    static StepperDriverBase* drivers[NUM_MOTORS];
 #ifdef FEATURE_AXISCOMP
     static float axisCompTanXY, axisCompTanXZ, axisCompTanYZ;
 #endif
