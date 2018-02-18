@@ -55,7 +55,7 @@ j_max = 6 * a_linear
 class VelocityProfile {
 public:
     static float f, d1, d2, d3;
-    static float dt; // perfect dt for s compuation
+    static float dt; // perfect dt for s computation
     static float s, ds1, ds2, ds3, ds4;
     // static float tTotal;
 
@@ -82,7 +82,7 @@ j_max = 5.625 * a_linear
 class VelocityProfile {
 public:
     static float f, d1, d2, d3, d4, d5;
-    static float dt; // perfect dt for s compuation
+    static float dt; // perfect dt for s computation
     static float s, ds1, ds2, ds3, ds4, ds5, ds6;
     // static float tTotal;
 

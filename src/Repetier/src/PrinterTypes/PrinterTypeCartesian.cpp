@@ -43,7 +43,7 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
 
 void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]) {
     for (fast8_t i = 0; i < NUM_AXES; i++) {
-        motor[i] = static_cast<int32_t>(floor(pos[i] * Motion1::resolution[i] + 0.5f));
+        motor[i] = lroundf(pos[i] * Motion1::resolution[i]);
     }
 }
 
@@ -78,5 +78,8 @@ float PrinterType::feedrateForMoveSteps(fast8_t axes) {
 
 void PrinterType::deactivatedTool(fast8_t id) {}
 void PrinterType::activatedTool(fast8_t id) {}
+void PrinterType::eepromHandle() {}
+void PrinterType::init() {}
+void PrinterType::updateDerived() {}
 
 #endif

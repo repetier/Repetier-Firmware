@@ -768,19 +768,6 @@ void MCode_232(GCode* com) {
     maxadvspeed = 0;
 }
 
-void MCode_233(GCode* com) {
-    if (com->hasY())
-        Extruder::current->advanceL = com->Y;
-    Com::printF(Com::tLinearLColon, Extruder::current->advanceL);
-#if ENABLE_QUADRATIC_ADVANCE
-    if (com->hasX())
-        Extruder::current->advanceK = com->X;
-    Com::printF(Com::tQuadraticKColon, Extruder::current->advanceK);
-#endif
-    Com::println();
-    Printer::updateAdvanceFlags();
-}
-
 void MCode_251(GCode* com) {
 #if Z_HOME_DIR > 0 && MAX_HARDWARE_ENDSTOP_Z
     Printer::zLength -= Printer::currentPosition[Z_AXIS];
@@ -1152,6 +1139,32 @@ void MCode_890(GCode* com) {
         Com::printFLN(PSTR(") = "), c);
     }
 #endif
+}
+
+void MCode_900(GCode* com) {
+    Tool* t = Tool::getActiveTool();
+    if (com->hasT() && com->T < NUM_TOOLS) {
+        t = Tool::getTool(com->T);
+    }
+    if (com->hasK() && com->K >= 0) {
+        t->setAdvance(com->K);
+    } else if (com->hasL() && com->L >= 0) {
+        t->setAdvance(com->L);
+    }
+    if (com->hasR() && com->R > 0) {
+        Motion1::advanceEDRatio = com->R;
+    } else if (com->hasD() && com->hasW() && com->hasH()) {
+        Motion1::advanceEDRatio = com->W * com->H / (com->D * com->D * 0.25f * M_PI);
+    }
+    Com::printF(PSTR("Advance K="));
+    Com::printFloat(Motion1::advanceK, 2);
+    Com::printF(PSTR(" E/D="));
+    if (Motion1::advanceEDRatio == 0) {
+        Com::printFloat(Motion1::advanceEDRatio, 4);
+    } else {
+        Com::printF(PSTR("Auto"));
+    }
+    Com::println();
 }
 
 void MCode_907(GCode* com) {

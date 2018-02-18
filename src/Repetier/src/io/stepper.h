@@ -32,6 +32,14 @@
 
 #define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop)
 
+#elif IO_TARGET == 8 // call eepromHandle if required
+
+#define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop)
+
+#elif IO_TARGET == 9 // call updatedDerived to activate new settings
+
+#define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop)
+
 #else
 
 #define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop)

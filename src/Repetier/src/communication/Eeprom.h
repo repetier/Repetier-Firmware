@@ -30,9 +30,8 @@
 #define EPR_PRINTING_DISTANCE 20     // Filament length printed
 #define EPR_BAUDRATE2 24             // Connection baudrate for second connector
 #define EPR_SELECTED_LANGUAGE 25     // Active language
-#define EPR_VERSION 26 // Version id for updates in EEPROM storage
+#define EPR_VERSION 26               // Version id for updates in EEPROM storage
 #define EEPROM_PROTOCOL_VERSION 1    // Protocol version
-
 
 #define EPR_START_RESERVE 40
 
@@ -77,7 +76,9 @@ public:
     static void timerHandler(); // gets aclled every 100ms
     /** Reserve memory in eeprom to store data. sig and version
      * are used to compute a variation checksum to reinit eeprom
-     * on configuration changes. */
+     * on configuration changes.
+     * sig = 1: Motion1, 2: Tool Extruder, 3: Tool Lase, 4: Tool cnc
+     *  */
     static uint reserve(uint8_t sig, uint8_t version, uint length);
     static void storeDataIntoEEPROM(uint8_t corrupted = 0);
     static void readDataFromEEPROM();

@@ -37,5 +37,8 @@ public:
     static float feedrateForMoveSteps(fast8_t axes);
     static void deactivatedTool(fast8_t id);
     static void activatedTool(fast8_t id);
+    static void eepromHandle();
+    static void init();
+    static void updateDerived();
 };
 #endif

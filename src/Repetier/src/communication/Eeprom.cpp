@@ -119,7 +119,8 @@ void EEPROM::callHandle() {
 #endif
     Motion1::eepromHandle();
     ZProbeHandler::eepromHandle();
-
+    PrinterType::eepromHandle();
+    Tool::eepromHandleTools();
     // Add generic eepromHandle calls
 #undef IO_TARGET
 #define IO_TARGET 8
@@ -127,6 +128,8 @@ void EEPROM::callHandle() {
     if (mode == 1 || mode == 3) {
         // Update derived data if needed
         Motion1::updateDerived();
+        PrinterType::updateDerived();
+        Tool::updateDerivedTools();
         // Add generic updateDerived calls
 #undef IO_TARGET
 #define IO_TARGET 9
@@ -146,11 +149,11 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted) {
     Com::printFLN(PSTR("Storing data to eeprom"));
     mode = 2;
     callHandle();
-        // Save version and build checksum
+    // Save version and build checksum
     HAL::eprSetByte(EPR_VERSION, EEPROM_PROTOCOL_VERSION);
-    HAL::eprSetByte(EPR_MAGIC_BYTE, EEPROM_MODE); // Make data change permanent
-    HAL::eprSetByte(EPR_VARIATION1, static_cast<uint8_t>(variation1));  // Make data change permanent
-    HAL::eprSetByte(EPR_VARIATION2, static_cast<uint8_t>(variation2));  // Make data change permanent
+    HAL::eprSetByte(EPR_MAGIC_BYTE, EEPROM_MODE);                      // Make data change permanent
+    HAL::eprSetByte(EPR_VARIATION1, static_cast<uint8_t>(variation1)); // Make data change permanent
+    HAL::eprSetByte(EPR_VARIATION2, static_cast<uint8_t>(variation2)); // Make data change permanent
     HAL::eprSetByte(EPR_INTEGRITY_BYTE, computeChecksum());
 #endif
 }
@@ -177,11 +180,11 @@ void EEPROM::initBaudrate() {
 #if EEPROM_MODE != 0
 void EEPROM::updateVariation(fast8_t data) {
     variation1 += data;
-    if(variation1 >= 255) {
+    if (variation1 >= 255) {
         variation1 -= 255;
     }
     variation2 += variation1;
-    if(variation2 >= 255) {
+    if (variation2 >= 255) {
         variation2 -= 255;
     }
 }
@@ -198,11 +201,7 @@ void EEPROM::init() {
     prefix[0] = 0;
     var1 = HAL::eprGetByte(EPR_VARIATION1);
     var2 = HAL::eprGetByte(EPR_VARIATION2);
-    if (HAL::eprGetByte(EPR_MAGIC_BYTE) == EEPROM_MODE && 
-        storedcheck == check && 
-        var1 == variation1 && 
-        var2 == variation2 && 
-        HAL::eprGetByte(EPR_VERSION) == EEPROM_PROTOCOL_VERSION) {
+    if (HAL::eprGetByte(EPR_MAGIC_BYTE) == EEPROM_MODE && storedcheck == check && var1 == variation1 && var2 == variation2 && HAL::eprGetByte(EPR_VERSION) == EEPROM_PROTOCOL_VERSION) {
         readDataFromEEPROM();
         if (USE_CONFIGURATION_BAUD_RATE) {
             // Used if eeprom gets unusable baud rate set and communication wont work at all.
@@ -340,7 +339,7 @@ void EEPROM::handleFloat(uint pos, PGM_P text, uint8_t digits, float& var) {
 #if EEPROM_MODE != 0
     else if (mode == 2) {
         HAL::eprSetFloat(pos, var);
-    } else if(mode == 3) {
+    } else if (mode == 3) {
         var = HAL::eprGetFloat(pos);
     }
 #endif
@@ -370,7 +369,7 @@ void EEPROM::handleLong(uint pos, PGM_P text, int32_t& var) {
 #if EEPROM_MODE != 0
     else if (mode == 2) {
         HAL::eprSetInt32(pos, var);
-    } else if(mode == 3) {
+    } else if (mode == 3) {
         var = HAL::eprGetInt32(pos);
     }
 #endif
@@ -400,7 +399,7 @@ void EEPROM::handleLong(uint pos, PGM_P text, uint32_t& var) {
 #if EEPROM_MODE != 0
     else if (mode == 2) {
         HAL::eprSetInt32(pos, static_cast<int32_t>(var));
-    } else if(mode == 3) {
+    } else if (mode == 3) {
         var = static_cast<uint32_t>(HAL::eprGetInt32(pos));
     }
 #endif
@@ -430,7 +429,7 @@ void EEPROM::handleInt(uint pos, PGM_P text, int16_t& var) {
 #if EEPROM_MODE != 0
     else if (mode == 2) {
         HAL::eprSetInt16(pos, var);
-    } else if(mode == 3) {
+    } else if (mode == 3) {
         var = HAL::eprGetInt16(pos);
     }
 #endif
@@ -460,7 +459,7 @@ void EEPROM::handleByte(uint pos, PGM_P text, uint8_t& var) {
 #if EEPROM_MODE != 0
     else if (mode == 2) {
         HAL::eprSetByte(pos, var);
-    } else if(mode == 3) {
+    } else if (mode == 3) {
         var = HAL::eprGetByte(pos);
     }
 #endif
@@ -490,7 +489,7 @@ void EEPROM::handleByte(uint pos, PGM_P text, int32_t& var) {
 #if EEPROM_MODE != 0
     else if (mode == 2) {
         HAL::eprSetByte(pos, static_cast<uint8_t>(var));
-    } else if(mode == 3) {
+    } else if (mode == 3) {
         var = HAL::eprGetByte(pos);
     }
 #endif

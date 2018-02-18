@@ -1158,8 +1158,8 @@ void Commands::processMCode(GCode* com) {
     case 232: // M232
         MCode_232(com);
         break;
-    case 233: // M233
-        MCode_233(com);
+    case 233: // M233 now use M900 like Marlin
+        MCode_900(com);
         break;
     case 251: // M251
         MCode_251(com);
@@ -1277,6 +1277,9 @@ void Commands::processMCode(GCode* com) {
         break;
     case 604:
         MCode_604(com);
+        break;
+    case 900: // M233 now use M900 like Marlin
+        MCode_900(com);
         break;
     case 907: // M907 Set digital trimpot/DAC motor current using axis codes.
         MCode_907(com);

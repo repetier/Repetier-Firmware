@@ -116,6 +116,9 @@ public:
     float K;    ///< G-code K value if set
     float L;    ///< G-code L value if set
     float O;    ///< G-code O value if set
+    float U;    ///< G-code U value if set
+    float V;    ///< G-code V value if set
+    float W;    ///< G-code W value if set
 
     char* text; ///< Text message of g-code if present.
     //moved the byte to the end and aligned ints on short boundary
@@ -208,6 +211,15 @@ public:
     }
     inline bool hasO() {
         return ((params2 & 1024) != 0);
+    }
+    inline bool hasU() {
+        return ((params2 & 2048) != 0);
+    }
+    inline bool hasV() {
+        return ((params2 & 4096) != 0);
+    }
+    inline bool hasW() {
+        return ((params2 & 8192) != 0);
     }
     inline long getS(long def) {
         return (hasS() ? S : def);

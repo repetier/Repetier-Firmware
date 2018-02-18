@@ -29,6 +29,11 @@
 #ifdef DUE_BOARD
 #include <malloc.h>
 
+#define DEBUG_TIMING 0
+#define DEBUG_ISR_STEPPER_PIN 37
+#define DEBUG_ISR_MOTION_PIN 35
+#define DEBUG_ISR_TEMP_PIN 33
+
 //extern "C" void __cxa_pure_virtual() { }
 extern "C" char* sbrk(int i);
 extern long bresenham_step();
@@ -68,9 +73,14 @@ HAL::~HAL() {
 
 // Set up all timer interrupts
 void HAL::setupTimer() {
+#if DEBUG_TIMING
+    SET_OUTPUT(DEBUG_ISR_STEPPER_PIN);
+    SET_OUTPUT(DEBUG_ISR_MOTION_PIN);
+    SET_OUTPUT(DEBUG_ISR_TEMP_PIN);
+#endif
+
     uint32_t tc_count, tc_clock;
     pmc_set_writeprotect(false);
-
     // set 3 bits for interrupt group priority, 1 bits for sub-priority
     //NVIC_SetPriorityGrouping(4);
 
@@ -152,8 +162,6 @@ void HAL::setupTimer() {
     SERVO_TIMER->TC_CHANNEL[SERVO_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
     NVIC_EnableIRQ((IRQn_Type)SERVO_TIMER_IRQ);
 #endif
-    Com::printFLN(PSTR("tm5"));
-    HAL::delayMilliseconds(20);
 }
 
 struct PWMPin {
@@ -980,6 +988,9 @@ TcChannel* stepperChannel = (TIMER1_TIMER->TC_CHANNEL + TIMER1_TIMER_CHANNEL);
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
 void TIMER1_COMPA_VECTOR() {
+#if DEBUG_TIMING
+    WRITE(DEBUG_ISR_STEPPER_PIN, 1);
+#endif
     // apparently have to read status register
     stepperChannel->TC_SR;
     /*  static bool inside = false; // prevent double call when not finished
@@ -989,6 +1000,9 @@ void TIMER1_COMPA_VECTOR() {
     inside = true;*/
     Motion3::timer();
     // inside = false;
+#if DEBUG_TIMING
+    WRITE(DEBUG_ISR_STEPPER_PIN, 0);
+#endif
 }
 
 fast8_t pwmSteps[] = { 1, 2, 4, 8, 16 };
@@ -1007,6 +1021,9 @@ This timer is called 3906 times per second. It is used to update
 pwm values for heater and some other frequent jobs.
 */
 void PWM_TIMER_VECTOR() {
+#if DEBUG_TIMING
+    WRITE(DEBUG_ISR_TEMP_PIN, 1);
+#endif
     //InterruptProtectedBlock noInt;
     // apparently have to read status register
     TC_GetStatus(PWM_TIMER, PWM_TIMER_CHANNEL);
@@ -1081,6 +1098,9 @@ void PWM_TIMER_VECTOR() {
         HAL::wdPinged = false;
     }
 #endif
+#if DEBUG_TIMING
+    WRITE(DEBUG_ISR_TEMP_PIN, 0);
+#endif
 }
 
 /** \brief Timer routine for extruder stepper.
@@ -1105,6 +1125,9 @@ void HAL::resetExtruderDirection() {
 }
 // MOTION2_TIMER IRQ handler
 void MOTION2_TIMER_VECTOR() {
+#if DEBUG_TIMING
+    WRITE(DEBUG_ISR_MOTION_PIN, 1);
+#endif
     static bool inside = false; // prevent double call when not finished
     motion2Channel->TC_SR;      // faster replacement for above line!
     if (inside) {
@@ -1113,6 +1136,9 @@ void MOTION2_TIMER_VECTOR() {
     inside = true;
     Motion2::timer();
     inside = false;
+#if DEBUG_TIMING
+    WRITE(DEBUG_ISR_MOTION_PIN, 0);
+#endif
 }
 
 // IRQ handler for tone generator

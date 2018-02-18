@@ -1,3 +1,10 @@
+Version 2.0.0
+  New motion planner.
+  New configuration system.
+  Velocity profile can be linear, cubic or 5th grade for smooth operation.
+  No minimum speed limit.
+  New more flexible EEPROM handling.
+
 Version 1.0.0
   Keep alive/busy signal for host timeout improvement.
   M303 now keeps heaters/fans on.

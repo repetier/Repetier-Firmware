@@ -309,7 +309,6 @@ void Printer::updateDerivedParameter() {
 #if DISTORTION_CORRECTION
     distortion.updateDerived();
 #endif // DISTORTION_CORRECTION
-    Printer::updateAdvanceFlags();
     EVENT_UPDATE_DERIVED;
 }
 #if AUTOMATIC_POWERUP
@@ -370,21 +369,6 @@ void Printer::kill(uint8_t onlySteppers) {
         pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_MIN_SPEED;
 #endif // FAN_BOARD_PIN
     Commands::printTemperatures(false);
-}
-
-void Printer::updateAdvanceFlags() {
-    Printer::setAdvanceActivated(false);
-#if USE_ADVANCE
-    for (uint8_t i = 0; i < NUM_EXTRUDER; i++) {
-        if (extruder[i].advanceL != 0) {
-            Printer::setAdvanceActivated(true);
-        }
-#if ENABLE_QUADRATIC_ADVANCE
-        if (extruder[i].advanceK != 0)
-            Printer::setAdvanceActivated(true);
-#endif
-    }
-#endif
 }
 
 // This is for untransformed move to coordinates in printers absolute Cartesian space
@@ -565,6 +549,8 @@ void Printer::setup() {
     Motion2::init();
     Motion3::init();
     ZProbeHandler::init();
+    PrinterType::init();
+    Tool::initTools();
     for (uint8_t i = 0; i < NUM_PWM; i++)
         pwm_pos[i] = 0;
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI

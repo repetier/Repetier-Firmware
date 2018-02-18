@@ -33,6 +33,7 @@ class Motion2Buffer;
 
 #define FLAG_CHECK_ENDSTOPS 1
 #define FLAG_BLOCKED 2
+#define FLAG_ADVANCE 4
 
 enum Motion1State {
     FREE = 0,              // Not used currenty
@@ -80,6 +81,7 @@ public:
     float endSpeed;            ///< End speed in mm/s
     float length;              ///< Length of move in mm
     float invLength;           ///< 1/length for faster computations
+    float eAdv;                ///< eAdv = veclocity * eAdv used for advance
 
     void computeMaxJunctionSpeed();
     inline bool isAxisMoving(fast8_t axis) {
@@ -98,6 +100,12 @@ public:
     }
     inline bool isCheckEndstops() {
         return flags & FLAG_CHECK_ENDSTOPS;
+    }
+    inline bool isAdvance() {
+        return flags & FLAG_ADVANCE;
+    }
+    inline void setAdvance() {
+        flags |= FLAG_ADVANCE;
     }
 };
 
@@ -143,6 +151,8 @@ public:
     static float homeRetestReduction[NUM_AXES];
     static float homeEndstopDistance[NUM_AXES];
     static StepperDriverBase* drivers[NUM_MOTORS];
+    static float advanceK;       // advance spring constant
+    static float advanceEDRatio; // Ratio of extrusion
 #ifdef FEATURE_AXISCOMP
     static float axisCompTanXY, axisCompTanXZ, axisCompTanYZ;
 #endif

@@ -54,6 +54,7 @@ IO_OUTPUT_INVERTED(IOE2Enable, ORIG_E1_ENABLE_PIN)
 // Define your endstops inputs
 
 IO_INPUT(IOEndstopXMin, ORIG_X_MIN_PIN)
+// IO_INPUT_INVERTED(IOEndstopXMin, ORIG_X_MIN_PIN)
 IO_INPUT(IOEndstopYMax, ORIG_Y_MAX_PIN)
 IO_INPUT_PULLUP(IOEndstopZMin, ORIG_Z_MIN_PIN)
 
@@ -98,15 +99,18 @@ IO_TEMPERATURE_TABLE(TempExt2, IOAnalogExt2, TempTableEpcos)
 // that the selected pin can be used as hardware pwm otherwise
 // select a software pwm model whcih works on all pins.
 
+#if MOTHERBOARD == 405
 IO_PWM_HARDWARE(PWMExtruder1, HEATER_0_PIN, 1000)
 IO_PWM_HARDWARE(PWMExtruder2, HEATER_2_PIN, 1000)
 IO_PWM_HARDWARE(PWMBed1, HEATER_1_PIN, 1000)
-/*IO_OUTPUT(IOExtr1, HEATER_0_PIN)
+#else
+IO_OUTPUT(IOExtr1, HEATER_0_PIN)
 IO_OUTPUT(IOExtr2, HEATER_2_PIN)
 IO_OUTPUT(IOBed1, HEATER_1_PIN)
 IO_PWM_SOFTWARE(PWMExtruder1, IOExtr1, 1)
 IO_PWM_SOFTWARE(PWMExtruder2, IOExtr2, 1)
-IO_PWM_SOFTWARE(PWMBed1, IOBed1, 1) */
+IO_PWM_SOFTWARE(PWMBed1, IOBed1, 1)
+#endif
 // IO_OUTPUT(IOCooler1, FAN2_PIN)
 // IO_PWM_SOFTWARE(PWMCoolerExt1, FAN2_PIN, 0)
 
@@ -137,4 +141,4 @@ HEAT_MANAGER_PID(HeaterExtruder2, TempExt2, PWMExtruder2, 255, 10, 20000, 20.0, 
 // TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript)
 
 TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "")
-TOOL_EXTRUDER(ToolExtruder2, -16.0, 0, -0.85, HeaterExtruder2, E2Motor, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1950 R600\nG4 P300", "M340 P0 S1050 R600\nG4 P300")
+TOOL_EXTRUDER(ToolExtruder2, 16.0, 0, -0.85, HeaterExtruder2, E2Motor, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1950 R600\nG4 P300", "M340 P0 S1050 R600\nG4 P300")

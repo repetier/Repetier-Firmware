@@ -49,7 +49,26 @@ F : Bit 8 :  32-Bit Float
 T : Bit 9 :  8 Bit Integer
 S : Bit 10 : 16 Bit Value
 P : Bit 11 : 32 Bit Integer
+Extend : Bit 12 : A second bit block with more letters follows
 Text : Bit 15 : 8 Bit size + Data
+
+Second 2 byte bitblock
+
+I : Bit 0 : 22 Bit Float
+J : Bit 1 : 22 Bit Float
+R : Bit 2 : 22 Bit Float
+D : Bit 3 : 22 Bit Float
+C : Bit 4 : 22 Bit Float
+H : Bit 5 : 22 Bit Float
+A : Bit 6 : 22 Bit Float
+B : Bit 7 : 22 Bit Float
+K : Bit 8 : 22 Bit Float
+L : Bit 9 : 22 Bit Float
+O : Bit 10 : 22 Bit Float
+U : Bit 11 : 22 Bit Float
+V : Bit 12 : 22 Bit Float
+W : Bit 13 : 22 Bit Float
+
 
 A GCode line is transformed into a binary parameterization. 
 16 bit integer with given parameter set

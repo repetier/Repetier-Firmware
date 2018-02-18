@@ -709,7 +709,6 @@ public:
     */
     static uint8_t moveToReal(float x, float y, float z, float e, float f, bool pathOptimize = true);
     static void kill(uint8_t only_steppers);
-    static void updateAdvanceFlags();
     static void setup();
     static void defaultLoopActions();
     static void homeAxis(bool xaxis, bool yaxis, bool zaxis); /// Home axis

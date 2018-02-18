@@ -47,6 +47,7 @@ Done:
 - new analog value reading.
 - Hardware PWM for due.
 - Tools instead of extruders.
+- Linear advance
 
 ToDo:
 - Dual X axis printer type
@@ -76,6 +77,10 @@ the first printer can already move around we note many advantages:
 - Most special cases can now be catched by the module system.
 - Support of up to 7 axes (X,Y, Z, E, A, B, C)
 
+We tested a cartesian printer on a Arduino DUE. The limit for the motion planner
+was at 250000 Steps/s with precomputed segments of 1ms length using 5th grade
+velocity profiles. At this speed it makes a big difference if endstops get tested
+or not. 250kHz is including end stop tests. Without we could go even higher.
 
 #### What does module system mean
 
@@ -112,7 +117,7 @@ at dozens of points where you might need extra cases.
 The complete firmware becomes more compact and easier to maintain and easier
 to extend.
 
-![Building Blocks](doc/BuildingBlocks.png)
+![Building Blocks](doc/images/BuildingBlocks.png)
 
 #### Developing
 

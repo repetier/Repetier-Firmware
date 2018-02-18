@@ -43,15 +43,20 @@ public:
     int getEepromStart() {
         return eepromStart;
     }
-    virtual void eepromHandle() {
-    }
+    virtual void eepromHandle();
     virtual int eepromSize() {
         return 12;
     }
+    virtual void init() {}
+    virtual void setAdvance(float adv) {}
+    virtual void updateDerived();
     inline static Tool* getActiveTool() { return activeTool; }
     inline static fast8_t getActiveToolId() { return activeToolId; }
     static void selectTool(fast8_t id);
     static Tool* getTool(fast8_t id);
+    static void initTools();
+    static void eepromHandleTools();
+    static void updateDerivedTools();
 };
 
 /** Defines a simple extruder with one motor.
@@ -98,5 +103,9 @@ public:
     void shutdown();
     /// Set temperature in case tool supports temperatures.
     HeatManager* getHeater() final { return heater; }
+    void eepromHandle();
+    void init();
+    void setAdvance(float adv);
+    void updateDerived();
     /// Sets intensity or similar value e.g. laser intensity or mill speed
 };

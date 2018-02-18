@@ -46,7 +46,7 @@ void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]) {
     motor[Y_AXIS] = COREXYZ_Y_X * pos[X_AXIS] + COREXYZ_Y_Y * pos[Y_AXIS] + COREXYZ_Y_Z * pos[Z_AXIS];
     motor[Z_AXIS] = COREXYZ_Z_X * pos[X_AXIS] + COREXYZ_Z_Y * pos[Y_AXIS] + COREXYZ_Z_Z * pos[Z_AXIS];
     for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
-        motor[i] = static_cast<int32_t>(floor(pos[i] * Motion1::resolution[i] + 0.5f));
+        motor[i] = lroundf(pos[i] * Motion1::resolution[i]);
     }
 }
 
@@ -81,5 +81,8 @@ float PrinterType::feedrateForMoveSteps(fast8_t axes) {
 
 void PrinterType::deactivatedTool(fast8_t id) {}
 void PrinterType::activatedTool(fast8_t id) {}
+void PrinterType::eepromHandle() {}
+void PrinterType::init() {}
+void PrinterType::updateDerived() {}
 
 #endif

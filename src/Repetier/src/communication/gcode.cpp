@@ -1087,6 +1087,27 @@ bool GCode::parseAscii(char* line, bool fromSerial) {
             params |= 4096; // Needs V2 for saving
             break;
         }
+        case 'U':
+        case 'u': {
+            U = parseFloatValue(pos);
+            params2 |= 2048;
+            params |= 4096; // Needs V2 for saving
+            break;
+        }
+        case 'V':
+        case 'v': {
+            V = parseFloatValue(pos);
+            params2 |= 4096;
+            params |= 4096; // Needs V2 for saving
+            break;
+        }
+        case 'W':
+        case 'w': {
+            W = parseFloatValue(pos);
+            params2 |= 8192;
+            params |= 4096; // Needs V2 for saving
+            break;
+        }
         case '*': //checksum
         {
             uint8_t checksum_given = parseLongValue(pos);
@@ -1204,6 +1225,15 @@ void GCode::printCommand() {
     }
     if (hasO()) {
         Com::printF(Com::tO, O);
+    }
+    if (hasU()) {
+        Com::printF(Com::tU, U);
+    }
+    if (hasV()) {
+        Com::printF(Com::tV, V);
+    }
+    if (hasW()) {
+        Com::printF(Com::tW, W);
     }
     if (hasString()) {
         Com::print(text);

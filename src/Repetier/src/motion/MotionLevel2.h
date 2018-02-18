@@ -59,7 +59,7 @@ public:
     static volatile fast8_t length;
     static int32_t lastMotorPos[2][NUM_AXES];
     static fast8_t lastMotorIdx; // index to last pos
-
+    static int advanceSteps;     // already included advance steps
     static void init();
     // Timer gets called at PREPARE_FREQUENCY so it has enough time to
     // prefill data structures required by stepper interrupt. Each segment planned

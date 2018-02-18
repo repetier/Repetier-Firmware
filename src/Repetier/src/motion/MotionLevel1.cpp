@@ -42,6 +42,9 @@ float Motion1::homeEndstopDistance[NUM_AXES];
 float Motion1::homeRetestReduction[NUM_AXES];
 float Motion1::memory[MEMORY_POS_SIZE][NUM_AXES + 1];
 float Motion1::autolevelTransformation[9]; ///< Transformation matrix
+float Motion1::advanceK = 0;               // advance spring constant
+float Motion1::advanceEDRatio = 0;         // Ratio of extrusion
+
 StepperDriverBase* Motion1::drivers[NUM_MOTORS];
 fast8_t Motion1::memoryPos;
 StepperDriverBase* Motion1::motors[NUM_AXES];
@@ -96,22 +99,22 @@ void Motion1::setFromConfig() {
     resolution[X_AXIS] = XAXIS_STEPS_PER_MM;
     resolution[Y_AXIS] = YAXIS_STEPS_PER_MM;
     resolution[Z_AXIS] = ZAXIS_STEPS_PER_MM;
-    resolution[E_AXIS] = EXT0_STEPS_PER_MM;
+    resolution[E_AXIS] = 100;
 
     maxYank[X_AXIS] = MAX_JERK;
     maxYank[Y_AXIS] = MAX_JERK;
     maxYank[Z_AXIS] = MAX_ZJERK;
-    maxYank[E_AXIS] = EXT0_MAX_START_FEEDRATE;
+    maxYank[E_AXIS] = 10;
 
     maxFeedrate[X_AXIS] = MAX_FEEDRATE_X;
     maxFeedrate[Y_AXIS] = MAX_FEEDRATE_Y;
     maxFeedrate[Z_AXIS] = MAX_FEEDRATE_Z;
-    maxFeedrate[E_AXIS] = EXT0_MAX_FEEDRATE;
+    maxFeedrate[E_AXIS] = 10;
 
     homingFeedrate[X_AXIS] = HOMING_FEEDRATE_X;
     homingFeedrate[Y_AXIS] = HOMING_FEEDRATE_Y;
     homingFeedrate[Z_AXIS] = HOMING_FEEDRATE_Z;
-    homingFeedrate[E_AXIS] = EXT0_MAX_FEEDRATE;
+    homingFeedrate[E_AXIS] = 10;
 
     maxAcceleration[X_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X;
     maxAcceleration[Y_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
@@ -131,7 +134,7 @@ void Motion1::setFromConfig() {
     homeEndstopDistance[X_AXIS] = ENDSTOP_X_BACK_ON_HOME;
     homeEndstopDistance[Y_AXIS] = ENDSTOP_Y_BACK_ON_HOME;
     homeEndstopDistance[Z_AXIS] = ENDSTOP_Z_BACK_ON_HOME;
-    homeEndstopDistance[E_AXIS] = EXT0_MAX_ACCELERATION;
+    homeEndstopDistance[E_AXIS] = 1000;
 
     minPos[X_AXIS] = X_MIN_POS;
     minPos[Y_AXIS] = Y_MIN_POS;
@@ -601,9 +604,21 @@ void Motion1::queueMove(float feedrate) {
 
     if ((buf.axisUsed & 15) > 8) { // not pure e move
         // Need to scale feedrate so E component is not part of speed
-        buf.feedrate = feedrate * buf.length / sqrt(length2 - e2);
+        float exceptE = 1.0f / sqrt(length2 - e2);
+        buf.feedrate = feedrate * buf.length * exceptE;
+        if (dirUsed & axisBits[E_AXIS] && delta[E_AXIS] > 0) {
+            if (advanceEDRatio > 0.000001) {
+                buf.eAdv = advanceEDRatio * advanceK * resolution[E_AXIS] * 0.001;
+            } else {
+                buf.eAdv = delta[E_AXIS] * exceptE * advanceK * resolution[E_AXIS] * 0.001;
+            }
+            buf.setAdvance();
+        } else {
+            buf.eAdv = 0;
+        }
     } else {
         buf.feedrate = feedrate;
+        buf.eAdv = 0.0;
     }
 
     if (Printer::mode == PRINTER_MODE_FFF) {
@@ -650,7 +665,12 @@ void Motion1::queueMove(float feedrate) {
         }
     }
     buf.sa2 = 2.0f * buf.length * buf.acceleration;
-    buf.startSpeed = buf.endSpeed = buf.maxJoinSpeed = buf.calculateSaveStartEndSpeed();
+    if (buf.isAdvance()) {
+        buf.startSpeed = buf.endSpeed = 0;
+        buf.maxJoinSpeed = buf.calculateSaveStartEndSpeed();
+    } else {
+        buf.startSpeed = buf.endSpeed = buf.maxJoinSpeed = buf.calculateSaveStartEndSpeed();
+    }
     // Destination becomes new current
     float timeForMove = length / feedrate;
     for (fast8_t i = 0; i < NUM_AXES; i++) {
@@ -935,6 +955,12 @@ float Motion1Buffer::calculateSaveStartEndSpeed() {
  change now yank to prevent name conflicts.
 */
 void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next) {
+    if (isAdvance() != next.isAdvance()) {
+        // ensure starting with 0 velocity for advance
+        maxJoinSpeed = endSpeed;
+        state = Motion1State::BACKWARD_FINISHED;
+        return;
+    }
     state = Motion1State::JUNCTION_COMPUTED;
     float vStart, vEnd, factor = 1.0, corrFactor, yank;
     bool limited = false, prevSmaller;

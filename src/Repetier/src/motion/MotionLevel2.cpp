@@ -25,6 +25,7 @@ Motion2Buffer* Motion2::act;
 Motion1Buffer* Motion2::actM1;
 int32_t Motion2::lastMotorPos[2][NUM_AXES];
 fast8_t Motion2::lastMotorIdx; // index to last pos
+int Motion2::advanceSteps = 0; // already included advance steps
 
 void Motion2::init() {
     length = nextActId = 0;
@@ -76,7 +77,7 @@ void Motion2::timer() {
     if (actM1->action == Motion1Action::MOVE) {
         if (act->state == Motion2State::NOT_INITIALIZED) {
             act->nextState();
-            lastMotorPos[lastMotorIdx][E_AXIS] = static_cast<int32_t>(floor(actM1->start[E_AXIS] * Motion1::resolution[E_AXIS] + 0.5f));
+            lastMotorPos[lastMotorIdx][E_AXIS] = lroundf(actM1->start[E_AXIS] * Motion1::resolution[E_AXIS]);
         }
         float sFactor = 1.0;
         if (act->state == Motion2State::ACCELERATE_INIT) {
@@ -145,7 +146,7 @@ void Motion2::timer() {
         lastL = sFactor;
         float pos[NUM_AXES];
         FOR_ALL_AXES(i) {
-            if(actM1->axisUsed & axisBits[i]) {
+            if (actM1->axisUsed & axisBits[i]) {
                 pos[i] = actM1->start[i] + sFactor * actM1->unitDir[i];
             } else {
                 pos[i] = actM1->start[i];
@@ -168,15 +169,51 @@ void Motion2::timer() {
             return; // don't add empty moves
         }
         m3->errorUpdate = m3->stepsRemaining << 1;
-        int *delta = m3->delta;
-        uint8_t *bits = axisBits;        
+        int* delta = m3->delta;
+        uint8_t* bits = axisBits;
         FOR_ALL_AXES(i) {
-            if ((*delta = ((*np - *lp) << 1)) < 0) {
-                *delta = -*delta;
-                m3->usedAxes |= *bits;
-            } else if(*delta != 0) {
-                m3->directions |= *bits;
-                m3->usedAxes |= *bits;
+            if (i == E_AXIS && (advanceSteps != 0 || actM1->eAdv != 0)) {
+                // handle advance of E
+                *delta = *np - *lp;
+                int advTarget = VelocityProfile::f * actM1->eAdv;
+                int advDiff = advTarget - advanceSteps;
+                /* Com::printF("adv:", advTarget);
+                Com::printF(" d:", *delta);
+                Com::printF(" as:", advanceSteps);
+                Com::printF(" f:", VelocityProfile::f, 2);
+                Com::printFLN(" ea:", actM1->eAdv, 4); */
+
+                *delta += advDiff;
+                if (*delta > 0) { // extruding
+                    /* if (*delta < 0) { // prevent reversal, add later
+                        advDiff -= *delta;
+                        *delta = 0;
+                    } */
+                    *delta <<= 1;
+                    m3->directions |= *bits;
+                    m3->usedAxes |= *bits;
+                } else { // retracting, advDiff is always negative
+                    /* int half = *delta >> 1;
+                    if (half < 1) {
+                        half = 1;
+                    }
+                    if (half < advDiff) { // last correction
+                        half = advDiff;
+                    }
+                    advDiff = half;
+                    *delta += half;*/
+                    *delta = (-*delta) << 1;
+                    m3->usedAxes |= *bits;
+                }
+                advanceSteps += advDiff;
+            } else {
+                if ((*delta = ((*np - *lp) << 1)) < 0) {
+                    *delta = -*delta;
+                    m3->usedAxes |= *bits;
+                } else if (*delta != 0) {
+                    m3->directions |= *bits;
+                    m3->usedAxes |= *bits;
+                }
             }
             m3->error[i] = -m3->stepsRemaining;
             delta++;
@@ -279,7 +316,7 @@ void Motion2::timer() {
             if ((m3->delta[i] = ((np[i] - lp[i]) << 1)) < 0) {
                 m3->delta[i] = -m3->delta[i];
                 m3->usedAxes |= axisBits[i];
-            } else if(m3->delta[i] != 0) {
+            } else if (m3->delta[i] != 0) {
                 m3->directions |= axisBits[i];
                 m3->usedAxes |= axisBits[i];
             }
