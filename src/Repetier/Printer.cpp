@@ -124,15 +124,6 @@ float Printer::maxRealSegmentLength = 0;
 #ifdef DEBUG_REAL_JERK
 float Printer::maxRealJerk = 0;
 #endif
-#if MULTI_XENDSTOP_HOMING
-fast8_t Printer::multiXHomeFlags; // 1 = move X0, 2 = move X1
-#endif
-#if MULTI_YENDSTOP_HOMING
-fast8_t Printer::multiYHomeFlags; // 1 = move Y0, 2 = move Y1
-#endif
-#if MULTI_ZENDSTOP_HOMING
-fast8_t Printer::multiZHomeFlags; // 1 = move Z0, 2 = move Z1
-#endif
 #ifdef DEBUG_PRINT
 int debugWaitLoop = 0;
 #endif
@@ -147,7 +138,7 @@ void Printer::setDebugLevel(uint8_t newLevel) {
         debugLevel = newLevel;
         if (debugDryrun()) {
             // Disable all heaters in case they were on
-            Extruder::disableAllHeater();
+            HeatManager::disableAllHeaters();
         }
     }
     Com::printFLN(PSTR("DebugLevel:"), (int)newLevel);
@@ -342,7 +333,7 @@ void Printer::kill(uint8_t onlySteppers) {
     if (!onlySteppers)
         ZMotor.disable();
 #endif
-    Extruder::disableAllExtruderMotors();
+    Tool::disableMotors();
     setAllSteppersDiabled();
     unsetHomedAll();
     if (!onlySteppers) {
@@ -360,31 +351,14 @@ void Printer::kill(uint8_t onlySteppers) {
         Printer::setPowerOn(false);
 #endif
         Printer::setAllKilled(true);
-    } else
+    } else {
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_STEPPER_DISABLED_ID));
-#if FAN_BOARD_PIN > -1
-#if HAVE_HEATED_BED
-    if (heatedBedController.targetTemperatureC < 15) // turn off FAN_BOARD only if bed heater is off
-#endif
-        pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_MIN_SPEED;
-#endif // FAN_BOARD_PIN
+    }
     Commands::printTemperatures(false);
 }
 
 // This is for untransformed move to coordinates in printers absolute Cartesian space
 uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
-    if (x == IGNORE_COORDINATE)
-        x = Motion1::currentPositionTransformed[X_AXIS];
-    if (y == IGNORE_COORDINATE)
-        y = Motion1::currentPositionTransformed[Y_AXIS];
-    if (z == IGNORE_COORDINATE)
-        z = Motion1::currentPositionTransformed[Z_AXIS];
-    if (e == IGNORE_COORDINATE || !Printer::debugDryrun()
-#if MIN_EXTRUDER_TEMP > 30
-        || (Extruder::current->tempControl.currentTemperatureC > MIN_EXTRUDER_TEMP || Printer::isColdExtrusionAllowed() || Extruder::current->tempControl.sensorType == 0)
-#endif
-    )
-        e = Motion1::currentPositionTransformed[E_AXIS];
     if (f != IGNORE_COORDINATE)
         feedrate = f;
     Motion1::setTmpPositionXYZE(x, y, z, e);
@@ -393,18 +367,6 @@ uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
 }
 
 uint8_t Printer::moveToReal(float x, float y, float z, float e, float f, bool pathOptimize) {
-    if (x == IGNORE_COORDINATE)
-        x = Motion1::currentPosition[X_AXIS];
-    if (y == IGNORE_COORDINATE)
-        y = Motion1::currentPosition[Y_AXIS];
-    if (z == IGNORE_COORDINATE)
-        z = Motion1::currentPosition[Z_AXIS];
-    if (e == IGNORE_COORDINATE || !Printer::debugDryrun()
-#if MIN_EXTRUDER_TEMP > 30
-        || (Extruder::current->tempControl.currentTemperatureC > MIN_EXTRUDER_TEMP || Printer::isColdExtrusionAllowed() || Extruder::current->tempControl.sensorType == 0)
-#endif
-    )
-        e = Motion1::currentPosition[E_AXIS];
     if (f != IGNORE_COORDINATE)
         feedrate = f;
     Motion1::setTmpPositionXYZE(x, y, z, e);
@@ -433,17 +395,6 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
     float coords[NUM_AXES];
     Motion1::copyCurrentOfficial(coords);
 
-#if FEATURE_RETRACTION
-    if (com->hasNoXYZ() && com->hasE() && isAutoretract()) { // convert into auto retract
-        if (relativeCoordinateMode || relativeExtruderCoordinateMode) {
-            Extruder::current->retract(com->E < 0, false);
-        } else {
-            p = convertToMM(com->E); // target position
-            Extruder::current->retract(p < Motion1::currentPosition[E_AXIS], false);
-        }
-        return; // Fake no move so nothing gets added
-    }
-#endif
 #if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
     if (!isNoDestinationCheck()) {
 #if MOVE_X_WHEN_HOMED
@@ -516,6 +467,7 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
         HeatManager* heater = Tool::getActiveTool()->getHeater();
         if (relativeCoordinateMode || relativeExtruderCoordinateMode) {
             if (fabs(com->E) * extrusionFactor > EXTRUDE_MAXLENGTH) {
+                Com::printWarningF(PSTR("MAx. extrusion distance per move exceeded - ignoring move."));
                 p = 0;
             }
             coords[E_AXIS] = Motion1::currentPosition[E_AXIS] + p;
@@ -551,8 +503,6 @@ void Printer::setup() {
     ZProbeHandler::init();
     PrinterType::init();
     Tool::initTools();
-    for (uint8_t i = 0; i < NUM_PWM; i++)
-        pwm_pos[i] = 0;
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
 #endif // FEATURE_CONTROLLER
@@ -635,50 +585,6 @@ void Printer::setup() {
 #endif
 #endif // FEATURE_FEATURE_Z_PROBE
 
-// Initialize jam sensors
-#if defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
-    SET_INPUT(EXT0_JAM_PIN);
-    PULLUP(EXT0_JAM_PIN, EXT0_JAM_PULLUP);
-#endif // defined
-#if defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1
-    SET_INPUT(EXT1_JAM_PIN);
-    PULLUP(EXT1_JAM_PIN, EXT1_JAM_PULLUP);
-#endif // defined
-#if defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1
-    SET_INPUT(EXT2_JAM_PIN);
-    PULLUP(EXT2_JAM_PIN, EXT2_JAM_PULLUP);
-#endif // defined
-#if defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1
-    SET_INPUT(EXT3_JAM_PIN);
-    PULLUP(EXT3_JAM_PIN, EXT3_JAM_PULLUP);
-#endif // defined
-#if defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1
-    SET_INPUT(EXT4_JAM_PIN);
-    PULLUP(EXT4_JAM_PIN, EXT4_JAM_PULLUP);
-#endif // defined
-#if defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1
-    SET_INPUT(EXT5_JAM_PIN);
-    PULLUP(EXT5_JAM_PIN, EXT5_JAM_PULLUP);
-#endif // defined
-    HAL::delayMilliseconds(1);
-#if defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1
-    extruder[0].jamLastSignal = READ(EXT0_JAM_PIN);
-#endif // defined
-#if defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1
-    extruder[1].jamLastSignal = READ(EXT1_JAM_PIN);
-#endif // defined
-#if defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1
-    extruder[2].jamLastSignal = READ(EXT2_JAM_PIN);
-#endif // defined
-#if defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1
-    extruder[3].jamLastSignal = READ(EXT3_JAM_PIN);
-#endif // defined
-#if defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1
-    extruder[4].jamLastSignal = READ(EXT4_JAM_PIN);
-#endif // defined
-#if defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1
-    extruder[5].jamLastSignal = READ(EXT5_JAM_PIN);
-#endif // defined
 #if CASE_LIGHTS_PIN >= 0
     SET_OUTPUT(CASE_LIGHTS_PIN);
     WRITE(CASE_LIGHTS_PIN, CASE_LIGHT_DEFAULT_ON);
@@ -888,7 +794,8 @@ void Printer::handleInterruptEvent() {
     case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL3:
     case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL4:
     case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL5: {
-        if (isJamcontrolDisabled())
+        // TODO: Jam control
+       /* if (isJamcontrolDisabled())
             break;
         fast8_t extruderIndex = event - PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0;
         Extruder& ext = extruder[extruderIndex];
@@ -905,7 +812,7 @@ void Printer::handleInterruptEvent() {
             int32_t percent = static_cast<int32_t>(steps) * 100 / JAM_STEPS;
             Com::printF(PSTR(" / "), percent);
             Com::printFLN(PSTR("% on "), (int)extruderIndex);
-        }
+        } */
     } break;
 #endif // EXTRUDER_JAM_CONTROL    case PRINTER_INTERRUPT_EVENT_JAM_DETECTED:
     }
@@ -922,27 +829,28 @@ void Printer::showConfiguration() {
 #endif
     Com::config(PSTR("NumExtruder:"), NUM_EXTRUDER);
     Com::config(PSTR("MixingExtruder:"), MIXING_EXTRUDER);
-    Com::config(PSTR("HeatedBed:"), HAVE_HEATED_BED);
+    Com::config(PSTR("HeatedBed:"), NUM_HEATED_BEDS);
     Com::config(PSTR("SDCard:"), SDSUPPORT);
-    Com::config(PSTR("Fan:"), FAN_PIN > -1 && FEATURE_FAN_CONTROL);
-#if FEATURE_FAN2_CONTROL && defined(FAN2_PIN) && FAN2_PIN > -1
+    Com::config(PSTR("Fan:"), NUM_FANS > 0);
+#if NUM_FANS > 1
     Com::config(PSTR("Fan2:1"));
 #else
     Com::config(PSTR("Fan2:0"));
 #endif
+    Com::config(PSTR("NumFans:"),(int)NUM_FANS);
     Com::config(PSTR("LCD:"), FEATURE_CONTROLLER != NO_CONTROLLER);
     Com::config(PSTR("SoftwarePowerSwitch:"), PS_ON_PIN > -1);
-    Com::config(PSTR("XHomeDir:"), X_HOME_DIR);
-    Com::config(PSTR("YHomeDir:"), Y_HOME_DIR);
-    Com::config(PSTR("ZHomeDir:"), Z_HOME_DIR);
+    Com::config(PSTR("XHomeDir:"), Motion1::homeDir[X_AXIS]);
+    Com::config(PSTR("YHomeDir:"), Motion1::homeDir[Y_AXIS]);
+    Com::config(PSTR("ZHomeDir:"), Motion1::homeDir[Z_AXIS]);
 #if DRIVE_SYSTEM == DELTA
     Com::config(PSTR("XHomePos:"), 0, 2);
     Com::config(PSTR("YHomePos:"), 0, 2);
     Com::config(PSTR("ZHomePos:"), Motion1::maxPos[Z_AXIS], 3);
 #else
-    Com::config(PSTR("XHomePos:"), (X_HOME_DIR > 0 ? Motion1::maxPos[X_AXIS] : Motion1::minPos[X_AXIS]), 2);
-    Com::config(PSTR("YHomePos:"), (Y_HOME_DIR > 0 ? Motion1::maxPos[Y_AXIS] : Motion1::minPos[Y_AXIS]), 2);
-    Com::config(PSTR("ZHomePos:"), (Z_HOME_DIR > 0 ? Motion1::maxPos[Z_AXIS] : Motion1::minPos[Z_AXIS]), 3);
+    Com::config(PSTR("XHomePos:"), (Motion1::homeDir[X_AXIS] > 0 ? Motion1::maxPos[X_AXIS] : Motion1::minPos[X_AXIS]), 2);
+    Com::config(PSTR("YHomePos:"), (Motion1::homeDir[Y_AXIS] > 0 ? Motion1::maxPos[Y_AXIS] : Motion1::minPos[Y_AXIS]), 2);
+    Com::config(PSTR("ZHomePos:"), (Motion1::homeDir[Z_AXIS] > 0 ? Motion1::maxPos[Z_AXIS] : Motion1::minPos[Z_AXIS]), 3);
 #endif
     Com::config(PSTR("SupportG10G11:"), FEATURE_RETRACTION);
     Com::config(PSTR("SupportLocalFilamentchange:"), FEATURE_RETRACTION);
@@ -981,23 +889,26 @@ void Printer::showConfiguration() {
     Com::config(PSTR("XTravelAccel:"), Motion1::maxAcceleration[X_AXIS]);
     Com::config(PSTR("YTravelAccel:"), Motion1::maxAcceleration[Y_AXIS]);
     Com::config(PSTR("ZTravelAccel:"), Motion1::maxAcceleration[Z_AXIS]);
-#if DRIVE_SYSTEM == DELTA
+#if PRINTER_TYPE == 2
     Com::config(PSTR("PrinterType:Delta"));
 #else
     Com::config(PSTR("PrinterType:Cartesian"));
-#endif // DRIVE_SYSTEM
-    Com::config(PSTR("MaxBedTemp:"), HEATED_BED_MAX_TEMP);
-    for (fast8_t i = 0; i < NUM_EXTRUDER; i++) {
+#endif // PRINTER_TYPE
+    if (NUM_HEATED_BEDS > 0) {
+        Com::config(PSTR("MaxBedTemp:"), heatedBeds[0]->getMaxTemperature());
+    }
+    for (fast8_t i = 0; i < NUM_TOOLS; i++) {
+        Tool *t = Tool::getTool(i);
         START_EXTRUDER_CONFIG(i)
-        Com::printFLN(PSTR("Jerk:"), extruder[i].maxStartFeedrate);
+        Com::printFLN(PSTR("Jerk:"), t->getMaxYank());
         START_EXTRUDER_CONFIG(i)
-        Com::printFLN(PSTR("MaxSpeed:"), extruder[i].maxFeedrate);
+        Com::printFLN(PSTR("MaxSpeed:"), t->getMaxSpeed());
         START_EXTRUDER_CONFIG(i)
-        Com::printFLN(PSTR("Acceleration:"), extruder[i].maxAcceleration);
+        Com::printFLN(PSTR("Acceleration:"), t->getAcceleration());
         START_EXTRUDER_CONFIG(i)
-        Com::printFLN(PSTR("Diameter:"), extruder[i].diameter);
+        Com::printFLN(PSTR("Diameter:"), t->getDiameter());
         START_EXTRUDER_CONFIG(i)
-        Com::printFLN(PSTR("MaxTemp:"), MAXTEMP);
+        Com::printFLN(PSTR("MaxTemp:"), t->getMaxTemp());
     }
 }
 
@@ -1109,13 +1020,13 @@ void Printer::showJSONStatus(int type) {
     Com::printF(PSTR("],\"sfactor\":"), Printer::feedrateMultiply);
     //  "efactor": [100.00, 100.00],
     Com::printF(PSTR(",\"efactor\":["));
-    for (int i = 0; i < NUM_EXTRUDER; i++) {
+    for (int i = 0; i < NUM_TOOLS; i++) {
         if (i)
             Com::print(',');
         Com::print((int)Printer::extrudeMultiply);
     }
     //  "tool": 0,
-    Com::printF(PSTR("],\"tool\":"), Extruder::current->id);
+    Com::printF(PSTR("],\"tool\":"), Tool::getActiveToolId());
     //"probe": "4",
     Com::printF(PSTR(",\"probe\":"));
     if (ZProbe->triggered())
@@ -1160,10 +1071,10 @@ void Printer::showJSONStatus(int type) {
     Com::print(Motion1::isAxisHomed(Z_AXIS));
     Com::printF(PSTR("],\"extr\":["));
     firstOccurrence = true;
-    for (int i = 0; i < NUM_EXTRUDER; i++) {
+    for (int i = 0; i < NUM_TOOLS; i++) {
         if (!firstOccurrence)
             Com::print(',');
-        Com::print(extruder[i].extrudePosition / extruder[i].stepsPerMM);
+        Com::print(Motion1::currentPosition[Z_AXIS]);
         firstOccurrence = false;
     }
     Com::printF(PSTR("],\"xyz\":["));
@@ -1173,7 +1084,7 @@ void Printer::showJSONStatus(int type) {
     Com::print(',');
     Com::print(Motion1::currentPosition[Z_AXIS]); // Z
     Com::printF(PSTR("]},\"currentTool\":"));
-    Com::print(Extruder::current->id);
+    Com::print(Tool::getActiveToolId());
     Com::printF(PSTR(",\"params\": {\"atxPower\":"));
     Com::print(isPowerOn() ? '1' : '0');
     Com::printF(PSTR(",\"fanPercent\":["));
@@ -1187,7 +1098,7 @@ void Printer::showJSONStatus(int type) {
     Com::print(Printer::feedrateMultiply);
     Com::printF(PSTR(",\"extrFactors\":["));
     firstOccurrence = true;
-    for (int i = 0; i < NUM_EXTRUDER; i++) {
+    for (int i = 0; i < NUM_TOOLS; i++) {
         if (!firstOccurrence)
             Com::print(',');
         Com::print((int)Printer::extrudeMultiply); // Really *100? 100 is normal
@@ -1196,37 +1107,61 @@ void Printer::showJSONStatus(int type) {
     Com::printF(PSTR("]},"));
     // SEQ??
     Com::printF(PSTR("\"temps\": {"));
-#if HAVE_HEATED_BED
-    Com::printF(PSTR("\"bed\": {\"current\":"));
-    Com::print(heatedBedController.currentTemperatureC);
-    Com::printF(PSTR(",\"active\":"));
-    Com::print(heatedBedController.targetTemperatureC);
-    Com::printF(PSTR(",\"state\":"));
-    Com::print(heatedBedController.targetTemperatureC > 0 ? '2' : '1');
-    Com::printF(PSTR("},"));
-#endif
+    for(int i = 0; i < NUM_HEATERS; i++) {
+        HeatManager *h = heaters[i];
+        if (!h->isBedHeater()) {
+            continue;
+        }
+        Com::printF(PSTR("\"bed\": {\"current\":"));
+        Com::print(h->getCurrentTemperature());
+        Com::printF(PSTR(",\"active\":"));
+        Com::print(h->getTargetTemperature());
+        Com::printF(PSTR(",\"state\":"));
+        Com::print(h->getTargetTemperature() > 0 ? '2' : '1');
+        Com::printF(PSTR("},"));
+        break;
+    }
     Com::printF(PSTR("\"heads\": {\"current\": ["));
     firstOccurrence = true;
-    for (int i = 0; i < NUM_EXTRUDER; i++) {
+    for (int i = 0; i < NUM_TOOLS; i++) {
         if (!firstOccurrence)
             Com::print(',');
-        Com::print(extruder[i].tempControl.currentTemperatureC);
+        Tool *t = Tool::getTool(i);
+        HeatManager *h = t->getHeater();
+        if (h == nullptr) {
+            Com::print(0);
+        } else { 
+            Com::print(h->getCurrentTemperature());
+        }
         firstOccurrence = false;
     }
     Com::printF(PSTR("],\"active\": ["));
     firstOccurrence = true;
-    for (int i = 0; i < NUM_EXTRUDER; i++) {
+    for (int i = 0; i < NUM_TOOLS; i++) {
         if (!firstOccurrence)
             Com::print(',');
-        Com::print(extruder[i].tempControl.targetTemperatureC);
+        Tool *t = Tool::getTool(i);
+        HeatManager *h = t->getHeater();
+        if (h == nullptr) {
+            Com::print(0);
+        } else { 
+            Com::print(h->getTargetTemperature());
+        }
         firstOccurrence = false;
     }
     Com::printF(PSTR("],\"state\": ["));
     firstOccurrence = true;
-    for (int i = 0; i < NUM_EXTRUDER; i++) {
+    for (int i = 0; i < NUM_TOOLS; i++) {
         if (!firstOccurrence)
             Com::print(',');
-        Com::print(extruder[i].tempControl.targetTemperatureC > EXTRUDER_FAN_COOL_TEMP ? '2' : '1');
+        Tool *t = Tool::getTool(i);
+        HeatManager *h = t->getHeater();
+        if (h == nullptr) {
+            Com::print(0);
+        } else { // Don't have that information, so fake it to make some sense
+            Com::print(h->getTargetTemperature() > 50 ? '2' : '1');            
+        //Com::print(extruder[i].tempControl.targetTemperatureC > EXTRUDER_FAN_COOL_TEMP ? '2' : '1');
+        }
         firstOccurrence = false;
     }
     Com::printF(PSTR("]}},\"time\":"));
@@ -1277,10 +1212,10 @@ void Printer::showJSONStatus(int type) {
 #endif
         Com::printF(PSTR(",\"extrRaw\":["));
         firstOccurrence = true;
-        for (int i = 0; i < NUM_EXTRUDER; i++) {
+        for (int i = 0; i < NUM_TOOLS; i++) {
             if (!firstOccurrence)
                 Com::print(',');
-            Com::print(extruder[i].extrudePosition * Printer::extrudeMultiply);
+            Com::print(Motion1::currentPosition[E_AXIS]);
             firstOccurrence = false;
         }
         Com::printF(PSTR("],"));
@@ -1309,26 +1244,26 @@ void Printer::showJSONStatus(int type) {
     case 4:
     case 5:
         Com::printF(PSTR(",\"axisMins\":["));
-        Com::print((int)X_MIN_POS);
+        Com::print((int)Motion1::minPos[X_AXIS]);
         Com::print(',');
-        Com::print((int)Y_MIN_POS);
+        Com::print((int)Motion1::minPos[Y_AXIS]);
         Com::print(',');
-        Com::print((int)Z_MIN_POS);
+        Com::print((int)Motion1::minPos[Z_AXIS]);
         Com::printF(PSTR("],\"axisMaxes\":["));
-        Com::print((int)X_MAX_LENGTH);
+        Com::print((int)Motion1::maxPos[X_AXIS]);
         Com::print(',');
-        Com::print((int)Y_MAX_LENGTH);
+        Com::print((int)Motion1::maxPos[Y_AXIS]);
         Com::print(',');
-        Com::print((int)Z_MAX_LENGTH);
+        Com::print((int)Motion1::maxPos[Z_AXIS]);
         Com::printF(PSTR("],\"accelerations\":["));
         Com::print(Motion1::maxAcceleration[X_AXIS]);
         Com::print(',');
         Com::print(Motion1::maxAcceleration[Y_AXIS]);
         Com::print(',');
         Com::print(Motion1::maxAcceleration[Z_AXIS]);
-        for (int i = 0; i < NUM_EXTRUDER; i++) {
+        for (int i = 0; i < NUM_TOOLS; i++) {
             Com::print(',');
-            Com::print(extruder[i].maxAcceleration);
+            Com::print(Tool::getTool(i)->getAcceleration());
         }
         Com::printF(PSTR("],\"firmwareElectronics\":\""));
 #ifdef RAMPS_V_1_3
@@ -1341,7 +1276,7 @@ void Printer::showJSONStatus(int type) {
         Com::printF(PSTR("\",\"firmwareName\":\"Repetier\",\"firmwareVersion\":\""));
         Com::printF(PSTR(REPETIER_VERSION));
         Com::printF(PSTR("\",\"minFeedrates\":[0,0,0"));
-        for (int i = 0; i < NUM_EXTRUDER; i++) {
+        for (int i = 0; i < NUM_TOOLS; i++) {
             Com::printF(PSTR(",0"));
         }
         Com::printF(PSTR("],\"maxFeedrates\":["));
@@ -1350,9 +1285,9 @@ void Printer::showJSONStatus(int type) {
         Com::print(Motion1::maxFeedrate[Y_AXIS]);
         Com::print(',');
         Com::print(Motion1::maxFeedrate[Z_AXIS]);
-        for (int i = 0; i < NUM_EXTRUDER; i++) {
+        for (int i = 0; i < NUM_TOOLS; i++) {
             Com::print(',');
-            Com::print(extruder[i].maxFeedrate);
+            Com::print(Tool::getTool(i)->getMaxSpeed());
         }
         Com::printF(PSTR("]"));
         break;

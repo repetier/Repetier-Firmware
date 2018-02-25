@@ -61,7 +61,7 @@ uint16_t servoPosition = 1500;
 #endif
 #endif
 
-static TemperatureController *currHeaterForSetup;    // pointer to extruder or heatbed temperature controller
+// static TemperatureController *currHeaterForSetup;    // pointer to extruder or heatbed temperature controller
 
 #if UI_AUTORETURN_TO_MENU_AFTER != 0
 millis_t ui_autoreturn_time = 0;

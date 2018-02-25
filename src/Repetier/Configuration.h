@@ -50,15 +50,15 @@
 #define DISTORTION_CORRECTION 0
 #define USE_ADVANCE 1
 #define ENABLE_QUADRATIC_ADVANCE 1
-#define NUM_AXES 4 // X,Y,Z and E for extruder A,B,C would be 5,6,7
-#define STEPPER_FREQUENCY 250000
-#define PREPARE_FREQUENCY 2000
-#define BLOCK_FREQUENCY 1000
-#define VELOCITY_PROFILE 5 // 1 = linear, 3 = cubic, 5 = quintic velocity shape
-#define Z_SPEED 10         // Z positioning speed
-#define XY_SPEED 100       // XY positioning speed for normal operations
-#define MAX_ROOM_TEMPERATURE 25
-#define TEMPERATURE_CONTROL_RANGE 20
+#define NUM_AXES 4                   // X,Y,Z and E for extruder A,B,C would be 5,6,7
+#define STEPPER_FREQUENCY 250000     // Maximum stepper frequency.
+#define PREPARE_FREQUENCY 2000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
+#define BLOCK_FREQUENCY 1000         // Number of blocks with constant stepper rate per second.
+#define VELOCITY_PROFILE 5           // 1 = linear, 3 = cubic, 5 = quintic velocity shape
+#define Z_SPEED 10                   // Z positioning speed
+#define XY_SPEED 100                 // XY positioning speed for normal operations
+#define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
+#define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
 
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta
 #define PRINTER_TYPE 0
@@ -87,6 +87,10 @@ to the position. 0 = no contribution. */
 #define NO_YMAX_ENDSTOP_TEST
 #define NO_ZMIN_ENDSTOP_TEST
 #define NO_ZMAX_ENDSTOP_TEST
+
+#define DISABLE_X 0
+#define DISABLE_Y 0
+#define DISABLE_Z 0
 
 // Next 7 lines are required to make the following work, do not change!
 #include "pins.h"
@@ -123,11 +127,39 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define TOOLS \
     { &ToolExtruder1, &ToolExtruder2 }
 
+// Heaters enumerate all heaters, so we can loop over them
+// or call commands on a specific heater number.
+// Suggested order: extruder heaters, heated beds, heated chambers, additional heaters
+#define NUM_HEATERS 3
+#define HEATERS \
+    { &HeaterExtruder1, &HeaterExtruder2, &HeatedBed1 }
+
 // Array to call motor related commands like microstepping/current if supported.
 // Id's start at 0 and depend on position in this array.
 #define NUM_MOTORS 3
 #define MOTORS \
     { &XMotor, &YMotor, &ZMotor }
+
+
+#define X_HOME_DIR -1
+#define Y_HOME_DIR 1
+#define Z_HOME_DIR -1
+#define X_MAX_LENGTH 240
+#define Y_MAX_LENGTH 245
+#define Z_MAX_LENGTH 225
+#define X_MIN_POS 0
+#define Y_MIN_POS 0
+#define Z_MIN_POS 0
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1100
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1100
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 1100
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1100
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
+#define XAXIS_STEPS_PER_MM 610
+#define YAXIS_STEPS_PER_MM 610
+#define ZAXIS_STEPS_PER_MM 6400
+
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 // ################ END MANUAL SETTINGS ##########################
@@ -161,101 +193,12 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define MIXING_EXTRUDER 0
 
 #define DRIVE_SYSTEM 0
-#define XAXIS_STEPS_PER_MM 610
-#define YAXIS_STEPS_PER_MM 610
-#define ZAXIS_STEPS_PER_MM 6400
 #define EXTRUDER_FAN_COOL_TEMP 50
-#define PDM_FOR_EXTRUDER 0
-#define PDM_FOR_COOLER 0
-#define DECOUPLING_TEST_MAX_HOLD_VARIANCE 15
-#define DECOUPLING_TEST_MIN_TEMP_RISE 1
 #define KILL_IF_SENSOR_DEFECT 0
 #define RETRACT_ON_PAUSE 2
 #define PAUSE_START_COMMANDS ""
 #define PAUSE_END_COMMANDS ""
 #define SHARED_EXTRUDER_HEATER 0
-#define EXT0_X_OFFSET 0
-#define EXT0_Y_OFFSET 0
-#define EXT0_Z_OFFSET 0
-#define EXT0_STEPS_PER_MM 147
-#define EXT0_TEMPSENSOR_TYPE 1
-#define EXT0_TEMPSENSOR_PIN TEMP_0_PIN
-#define EXT0_HEATER_PIN HEATER_0_PIN
-#define EXT0_STEP_PIN ORIG_E0_STEP_PIN
-#define EXT0_DIR_PIN ORIG_E0_DIR_PIN
-#define EXT0_INVERSE 1
-#define EXT0_ENABLE_PIN ORIG_E0_ENABLE_PIN
-#define EXT0_ENABLE_ON 0
-#define EXT0_MIRROR_STEPPER 0
-#define EXT0_STEP2_PIN ORIG_E0_STEP_PIN
-#define EXT0_DIR2_PIN ORIG_E0_DIR_PIN
-#define EXT0_INVERSE2 0
-#define EXT0_ENABLE2_PIN ORIG_E0_ENABLE_PIN
-#define EXT0_MAX_FEEDRATE 30
-#define EXT0_MAX_START_FEEDRATE 5
-#define EXT0_MAX_ACCELERATION 10000
-#define EXT0_HEAT_MANAGER 1
-#define EXT0_PREHEAT_TEMP 190
-#define EXT0_WATCHPERIOD 1
-#define EXT0_PID_INTEGRAL_DRIVE_MAX 220
-#define EXT0_PID_INTEGRAL_DRIVE_MIN 40
-#define EXT0_PID_PGAIN_OR_DEAD_TIME 20
-#define EXT0_PID_I 0.6
-#define EXT0_PID_D 65
-#define EXT0_PID_MAX 255
-#define EXT0_ADVANCE_K 0
-#define EXT0_ADVANCE_L 0
-#define EXT0_ADVANCE_BACKLASH_STEPS 0
-#define EXT0_WAIT_RETRACT_TEMP 150
-#define EXT0_WAIT_RETRACT_UNITS 0
-#define EXT0_SELECT_COMMANDS "M117 Extruder 1"
-#define EXT0_DESELECT_COMMANDS ""
-#define EXT0_EXTRUDER_COOLER_PIN -1
-#define EXT0_EXTRUDER_COOLER_SPEED 255
-#define EXT0_DECOUPLE_TEST_PERIOD 20000
-#define EXT0_JAM_PIN 35
-#define EXT0_JAM_PULLUP 0
-#define EXT1_X_OFFSET 9760
-#define EXT1_Y_OFFSET 0
-#define EXT1_Z_OFFSET -5440
-#define EXT1_STEPS_PER_MM 147
-#define EXT1_TEMPSENSOR_TYPE 1
-#define EXT1_TEMPSENSOR_PIN TEMP_2_PIN
-#define EXT1_HEATER_PIN HEATER_2_PIN
-#define EXT1_STEP_PIN ORIG_E1_STEP_PIN
-#define EXT1_DIR_PIN ORIG_E1_DIR_PIN
-#define EXT1_INVERSE 0
-#define EXT1_ENABLE_PIN ORIG_E1_ENABLE_PIN
-#define EXT1_ENABLE_ON 0
-#define EXT1_MIRROR_STEPPER 0
-#define EXT1_STEP2_PIN ORIG_E1_STEP_PIN
-#define EXT1_DIR2_PIN ORIG_E1_DIR_PIN
-#define EXT1_INVERSE2 0
-#define EXT1_ENABLE2_PIN ORIG_E1_ENABLE_PIN
-#define EXT1_MAX_FEEDRATE 30
-#define EXT1_MAX_START_FEEDRATE 5
-#define EXT1_MAX_ACCELERATION 10000
-#define EXT1_HEAT_MANAGER 1
-#define EXT1_PREHEAT_TEMP 190
-#define EXT1_WATCHPERIOD 1
-#define EXT1_PID_INTEGRAL_DRIVE_MAX 220
-#define EXT1_PID_INTEGRAL_DRIVE_MIN 40
-#define EXT1_PID_PGAIN_OR_DEAD_TIME 20
-#define EXT1_PID_I 0.6
-#define EXT1_PID_D 65
-#define EXT1_PID_MAX 255
-#define EXT1_ADVANCE_K 0
-#define EXT1_ADVANCE_L 0
-#define EXT1_ADVANCE_BACKLASH_STEPS 0
-#define EXT1_WAIT_RETRACT_TEMP 150
-#define EXT1_WAIT_RETRACT_UNITS 0
-#define EXT1_SELECT_COMMANDS "M117 Extruder 2\nM400\nM340 P0 S1950 R600\nG4 P300"
-#define EXT1_DESELECT_COMMANDS "M340 P0 S1050 R600\nG4 P300"
-#define EXT1_EXTRUDER_COOLER_PIN -1
-#define EXT1_EXTRUDER_COOLER_SPEED 255
-#define EXT1_DECOUPLE_TEST_PERIOD 20000
-#define EXT1_JAM_PIN 33
-#define EXT1_JAM_PULLUP 0
 
 #define AUTORETRACT_ENABLED 0
 #define RETRACTION_LENGTH 3
@@ -285,18 +228,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define SCALE_PID_TO_MAX 0
 #define TEMP_HYSTERESIS 0
 #define EXTRUDE_MAXLENGTH 160
-#define NUM_TEMPS_USERTHERMISTOR0 0
-#define USER_THERMISTORTABLE0 \
-    { \
-    }
-#define NUM_TEMPS_USERTHERMISTOR1 0
-#define USER_THERMISTORTABLE1 \
-    { \
-    }
-#define NUM_TEMPS_USERTHERMISTOR2 0
-#define USER_THERMISTORTABLE2 \
-    { \
-    }
+
 #define GENERIC_THERM_VREF 5
 #define GENERIC_THERM_NUM_ENTRIES 33
 #define HEATER_PWM_SPEED 0
@@ -304,26 +236,8 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 
 // ############# Heated bed configuration ########################
 
-#define HAVE_HEATED_BED 1
-#define HEATED_BED_PREHEAT_TEMP 55
-#define HEATED_BED_MAX_TEMP 120
 #define SKIP_M190_IF_WITHIN 5
-#define HEATED_BED_SENSOR_TYPE 1
-#define HEATED_BED_SENSOR_PIN TEMP_1_PIN
-#define HEATED_BED_HEATER_PIN HEATER_1_PIN
-#define HEATED_BED_SET_INTERVAL 5000
-#define HEATED_BED_HEAT_MANAGER 3
-#define HEATED_BED_PID_INTEGRAL_DRIVE_MAX 255
-#define HEATED_BED_PID_INTEGRAL_DRIVE_MIN 80
-#define HEATED_BED_PID_PGAIN_OR_DEAD_TIME 12
-#define HEATED_BED_PID_IGAIN 33
-#define HEATED_BED_PID_DGAIN 290
-#define HEATED_BED_PID_MAX 255
-#define HEATED_BED_DECOUPLE_TEST_PERIOD 60000
 #define MIN_EXTRUDER_TEMP 150
-#define MAXTEMP 275
-#define MIN_DEFECT_TEMPERATURE -10
-#define MAX_DEFECT_TEMPERATURE 290
 #define MILLISECONDS_PREHEAT_TIME 30000
 
 // ##########################################################################################
@@ -382,36 +296,6 @@ It also can add a delay to wait for spindle to run on full speed.
 
 // ################ Endstop configuration #####################
 
-#define MULTI_ZENDSTOP_HOMING 0
-#define ENDSTOP_PULLUP_X_MIN false
-#define ENDSTOP_X_MIN_INVERTING false
-#define MIN_HARDWARE_ENDSTOP_X true
-#define ENDSTOP_PULLUP_Y_MIN true
-#define ENDSTOP_Y_MIN_INVERTING false
-#define MIN_HARDWARE_ENDSTOP_Y false
-#define ENDSTOP_PULLUP_Z_MIN true
-#define ENDSTOP_Z_MIN_INVERTING false
-#define MIN_HARDWARE_ENDSTOP_Z true
-#define ENDSTOP_PULLUP_Z2_MINMAX true
-#define ENDSTOP_Z2_MINMAX_INVERTING false
-#define MINMAX_HARDWARE_ENDSTOP_Z2 false
-#define ENDSTOP_PULLUP_X_MAX true
-#define ENDSTOP_X_MAX_INVERTING false
-#define MAX_HARDWARE_ENDSTOP_X false
-#define ENDSTOP_PULLUP_Y_MAX false
-#define ENDSTOP_Y_MAX_INVERTING false
-#define MAX_HARDWARE_ENDSTOP_Y true
-#define ENDSTOP_PULLUP_Z_MAX true
-#define ENDSTOP_Z_MAX_INVERTING false
-#define MAX_HARDWARE_ENDSTOP_Z false
-#define max_software_endstop_r true
-
-#define min_software_endstop_x false
-#define min_software_endstop_y true
-#define min_software_endstop_z false
-#define max_software_endstop_x true
-#define max_software_endstop_y false
-#define max_software_endstop_z true
 #define DOOR_PIN -1
 #define DOOR_PULLUP 1
 #define DOOR_INVERTING 1
@@ -431,27 +315,7 @@ It also can add a delay to wait for spindle to run on full speed.
 
 // ################# XYZ movements ###################
 
-#define X_ENABLE_ON 1
-#define Y_ENABLE_ON 1
-#define Z_ENABLE_ON 1
-#define DISABLE_X 0
-#define DISABLE_Y 0
-#define DISABLE_Z 0
-#define DISABLE_E 0
 #define PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT
-#define INVERT_X_DIR 1
-#define INVERT_Y_DIR 0
-#define INVERT_Z_DIR 1
-#define X_HOME_DIR -1
-#define Y_HOME_DIR 1
-#define Z_HOME_DIR -1
-#define X_MAX_LENGTH 240
-#define Y_MAX_LENGTH 245
-#define Z_MAX_LENGTH 225
-#define X_MIN_POS 0
-#define Y_MIN_POS 0
-#define Z_MIN_POS 0
-#define Z2_MINMAX_PIN -1
 
 #define DISTORTION_CORRECTION_POINTS 5
 #define DISTORTION_LIMIT_TO 2
@@ -504,12 +368,6 @@ It also can add a delay to wait for spindle to run on full speed.
 #define RAMP_ACCELERATION 1
 #define STEPPER_HIGH_DELAY 0
 #define DIRECTION_DELAY 0
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 800
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 800
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 50
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 1100
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1100
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
 #define INTERPOLATE_ACCELERATION_WITH_Z 1
 #define ACCELERATION_FACTOR_TOP 75
 #define MAX_JERK 5

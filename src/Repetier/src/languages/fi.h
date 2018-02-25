@@ -242,12 +242,12 @@
 #endif // NUM_EXTRUDER
 #if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_2_FI "\xa %e1/%E1\xb0 Y:%x1"
-#elif HAVE_HEATED_BED
+#elif NUM_HEATED_BEDS > 0
 #define UI_TEXT_MAINPAGE6_2_FI "\xe %eb/%Eb\xb0 Y:%x1"
 #else
 #define UI_TEXT_MAINPAGE6_2_FI "             Y:%x1"
 #endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#if NUM_HEATED_BEDS > 0 && NUM_TOOLS == 2 && MIXING_EXTRUDER == 0
 #define UI_TEXT_MAINPAGE6_3_FI "\xe %eb/%Eb\xb0 Z:%x2"
 #elif FEATURE_DITTO_PRINTING
 #define UI_TEXT_MAINPAGE6_3_FI "Kopiot: %ed    Z:%x2"

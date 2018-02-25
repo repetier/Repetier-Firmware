@@ -58,13 +58,5 @@
 millis_t previousMillisCmd = 0;
 millis_t maxInactiveTime = MAX_INACTIVE_TIME * 1000L;
 millis_t stepperInactiveTime = STEPPER_INACTIVE_TIME * 1000L;
-long baudrate = BAUDRATE; ///< Communication speed rate.
-#if USE_ADVANCE
-#if ENABLE_QUADRATIC_ADVANCE
-int maxadv = 0;
-#endif
-int maxadv2 = 0;
-float maxadvspeed = 0;
-#endif
-uint8_t pwm_pos[NUM_PWM];   // 0-NUM_EXTRUDER = Heater 0-NUM_EXTRUDER of extruder, NUM_EXTRUDER = Heated bed, NUM_EXTRUDER+1 Board fan, NUM_EXTRUDER+2 = Fan
+long baudrate = BAUDRATE;   ///< Communication speed rate.
 volatile int waitRelax = 0; // Delay filament relax at the end of print, could be a simple timeout

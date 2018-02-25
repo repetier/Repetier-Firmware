@@ -140,14 +140,17 @@ If you have once setup the system, you will never look back to the Arduino-IDE.
 
 ## Installation
 
-Please use your configuration tool at 
-[http://www.repetier.com/firmware/v100](http://www.repetier.com/firmware/v100)
-or for latest 1.0.x development version at
-[http://www.repetier.com/firmware/dev](http://www.repetier.com/firmware/dev)
-for easy and fast configuration. You get the complete sources you need to compile from the online configurator.
-This system also allows it to upload configurations created with this tool and modify the configuration. This is handy for updates as you get all newly introduced parameter just by uploading the old version and downloading the
-latest version. New parameter are initalized with default values.
+For version 2.0 there is currently no configuration tool, so you need to edit
+Configuration.h and COnfiguration_io.h manually.
+You can compile it using Arduino IDE or Visual Studio Code with Arduino plugin.
 
+## Version 2.0.0
+* New motion planner.
+* New configuration system.
+* Velocity profile can be linear, cubic or 5th grade for smooth operation.
+* No minimum speed limit.
+* New more flexible EEPROM handling.
+  
 ## Version 1.0.0
 * Fixed many autoleveling bugs.
 * More supported boards and displays.

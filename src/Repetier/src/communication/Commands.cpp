@@ -23,6 +23,9 @@ which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 
 int Commands::lowestRAMValue = MAX_RAM;
 int Commands::lowestRAMValueSend = MAX_RAM;
+volatile uint8_t executePeriodical = 0;
+unsigned int counterPeriodical = 0;
+uint8_t counter500ms = 5;
 
 void Commands::commandLoop() {
 //while(true) {
@@ -91,8 +94,6 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     EVENT_TIMER_100MS;
     // Extruder::manageTemperatures();
     if (--counter500ms == 0) {
-        if (manageMonitor)
-            writeMonitor();
         counter500ms = 5;
 #undef IO_TARGET
 #define IO_TARGET 12
@@ -255,11 +256,12 @@ void Commands::reportPrinterUsage() {
     Com::printF(Com::tPrintedFilament, dist, 2);
     Com::printF(Com::tSpacem);
     bool alloff = true;
-#if NUM_EXTRUDER > 0
-    for (uint8_t i = 0; i < NUM_EXTRUDER; i++)
-        if (tempController[i]->targetTemperatureC > 15)
+    for (uint8_t i = 0; i < NUM_TOOLS; i++) {
+        Tool *t = Tool::getTool(i);
+        if (t->getHeater() != nullptr && t->getHeater()->isEnabled()) {
             alloff = false;
-#endif
+        }
+    }
     int32_t seconds = (alloff ? 0 : (HAL::timeInMilliseconds() - Printer::msecondsPrinting) / 1000) + Printer::printingTime;
     int32_t tmp = seconds / 86400;
     seconds -= tmp * 86400;
@@ -1124,9 +1126,6 @@ void Commands::processMCode(GCode* com) {
     case 202: // M202 travel acceleration, but no difference atm
         MCode_202(com);
         break;
-    case 203: // M203 Temperature monitor
-        MCode_203(com);
-        break;
     case 204: // M204
         MCode_204(com);
         break;
@@ -1380,33 +1379,6 @@ void Commands::emergencyStop() {
 #else
     //HAL::forbidInterrupts(); // Don't allow interrupts to do their work
     Printer::kill(false);
-    /* Extruder::manageTemperatures();
-        for (uint8_t i = 0; i < NUM_EXTRUDER + 3; i++)
-            pwm_pos[i] = 0;
-#if EXT0_HEATER_PIN > -1 && NUM_EXTRUDER > 0
-        WRITE(EXT0_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
-        WRITE(EXT1_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2
-        WRITE(EXT2_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3
-        WRITE(EXT3_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4
-        WRITE(EXT4_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5
-        WRITE(EXT5_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
-        WRITE(FAN_PIN, 0);
-#endif
-#if HAVE_HEATED_BED && HEATED_BED_HEATER_PIN > -1
-        WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif*/
     UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_KILLED_ID));
     Commands::checkForPeriodicalActions(false);
     HAL::delayMilliseconds(200);

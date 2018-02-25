@@ -69,6 +69,12 @@ void Tool::initTools() {
     }
 }
 
+void Tool::disableMotors() {
+    for (fast8_t i = 0; i < NUM_TOOLS; i++) {
+        tools[i]->disableMotor();
+    }
+}
+
 void Tool::eepromHandleTools() {
     for (fast8_t i = 0; i < NUM_TOOLS; i++) {
         EEPROM::handlePrefix(PSTR("Tool"), i + 1);
@@ -112,7 +118,7 @@ void ToolExtruder::shutdown() {
 }
 
 void ToolExtruder::init() {
-    setEepromStart(EEPROM::reserve(2, 1, Tool::eepromSize() + 5 * 4));
+    setEepromStart(EEPROM::reserve(2, 1, Tool::eepromSize() + 6 * 4));
 }
 
 void ToolExtruder::eepromHandle() {
@@ -123,6 +129,7 @@ void ToolExtruder::eepromHandle() {
     EEPROM::handleFloat(pos + 8, PSTR("Max Speed [mm/s]"), 2, maxSpeed);
     EEPROM::handleFloat(pos + 12, PSTR("Acceleration [mm/s^3]"), 2, acceleration);
     EEPROM::handleFloat(pos + 16, PSTR("Advance [steps/mm]"), 2, advance);
+    EEPROM::handleFloat(pos + 20, PSTR("Diameter [mm]"), 2, diameter);
 }
 
 void ToolExtruder::setAdvance(float adv) {
@@ -137,4 +144,8 @@ void ToolExtruder::updateDerived() {
     Tool* t = Tool::getActiveTool();
     Motion1::setMotorForAxis(stepper, E_AXIS);
     Motion1::setToolOffset(-t->getOffsetX(), -t->getOffsetY(), -t->getOffsetZ());
+}
+
+void ToolExtruder::disableMotor() {
+    stepper->disable();
 }

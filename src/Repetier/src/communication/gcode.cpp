@@ -1264,7 +1264,7 @@ void GCode::reportFatalError() {
 
 void GCode::resetFatalError() {
     Com::writeToAll = true;
-    TemperatureController::resetAllErrorStates();
+    HeatManager::resetAllErrorStates();
     Printer::debugReset(8); // disable dry run
     fatalErrorMsg = NULL;
     UI_ERROR_P(PSTR(""));

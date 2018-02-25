@@ -79,14 +79,17 @@ void MCode_18(GCode* com) {
     }
     if (com->hasE() && Motion1::motors[E_AXIS] != nullptr) {
         named = true;
-        Motion1::motors[E_AXIS]->disable();
-        Extruder::disableCurrentExtruderMotor();
+        if (Motion1::motors[E_AXIS]) {
+            Motion1::motors[E_AXIS]->disable();
+        }
     }
     if (!named) {
         Motion1::motors[X_AXIS]->disable();
         Motion1::motors[Y_AXIS]->disable();
         Motion1::motors[Z_AXIS]->disable();
-        Extruder::disableAllExtruderMotors();
+        if (Motion1::motors[E_AXIS]) {
+            Motion1::motors[E_AXIS]->disable();
+        }
     }
 }
 void MCode_20(GCode* com) {
@@ -247,8 +250,7 @@ void MCode_92(GCode* com) {
     Motion1::fillPosFromGCode(*com, Motion1::resolution, Motion1::resolution);
     Printer::updateDerivedParameter();
     if (com->hasE()) {
-        Extruder::current->stepsPerMM = com->E;
-        Extruder::selectExtruderById(Extruder::current->id);
+        Tool::getActiveTool()->setResolution(com->E);
     }
 }
 void MCode_99(GCode* com) {
@@ -278,7 +280,7 @@ void MCode_99(GCode* com) {
 void MCode_104(GCode* com) {
 #if NUM_TOOLS > 0
     previousMillisCmd = HAL::timeInMilliseconds();
-    if (reportTempsensorError() || Printer::debugDryrun()) {
+    if (HeatManager::reportTempsensorError() || Printer::debugDryrun()) {
         return;
     }
 #ifdef EXACT_TEMPERATURE_TIMING
@@ -331,7 +333,7 @@ void MCode_107(GCode* com) {
 }
 void MCode_109(GCode* com) {
 #if NUM_TOOLS > 0
-    if (reportTempsensorError())
+    if (HeatManager::reportTempsensorError())
         return;
     previousMillisCmd = HAL::timeInMilliseconds();
     if (Printer::debugDryrun()) {
@@ -434,10 +436,10 @@ void MCode_115(GCode* com) {
     Printer::reportPrinterMode();
 }
 void MCode_116(GCode* com) {
-    for (fast8_t h = 0; h <= HEATED_BED_INDEX; h++) {
-        EVENT_WAITING_HEATER(h < NUM_EXTRUDER ? h : -1);
-        tempController[h]->waitForTargetTemperature();
-        EVENT_HEATING_FINISHED(h < NUM_EXTRUDER ? h : -1);
+    for (fast8_t h = 0; h <= NUM_HEATERS; h++) {
+        EVENT_WAITING_HEATER(h);
+        heaters[h]->waitForTargetTemperature();
+        EVENT_HEATING_FINISHED(h);
     }
 }
 
@@ -487,7 +489,7 @@ void MCode_140(GCode* com) {
         if (Printer::debugDryrun()) {
             return;
         }
-        if (reportTempsensorError()) {
+        if (HeatManager::reportTempsensorError()) {
             return;
         }
         if (com->hasH()) { // one bed
@@ -598,7 +600,7 @@ void MCode_190(GCode* com) {
 #if NUM_HEATED_BEDS > 0
     {
         previousMillisCmd = HAL::timeInMilliseconds();
-        if (Printer::debugDryrun() || reportTempsensorError()) {
+        if (Printer::debugDryrun() || HeatManager::reportTempsensorError()) {
             return;
         }
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HEATING_BED_ID));
@@ -635,16 +637,16 @@ void MCode_190(GCode* com) {
 }
 
 void MCode_200(GCode* com) {
-    uint8_t extruderId = Extruder::current->id;
-    if (com->hasT() && com->T < NUM_EXTRUDER)
+    uint8_t extruderId = Tool::getActiveToolId();
+    if (com->hasT() && com->T < NUM_TOOLS)
         extruderId = com->T;
     float d = 0;
     if (com->hasR())
         d = com->R;
     if (com->hasD())
         d = com->D;
-    extruder[extruderId].diameter = d;
-    if (extruderId == Extruder::current->id)
+        Tool::getTool(extruderId)->setDiameter(d);
+    if (extruderId == Tool::getActiveToolId())
         Commands::changeFlowrateMultiply(Printer::extrudeMultiply);
     if (d == 0) {
         Com::printFLN(PSTR("Disabled volumetric extrusion for extruder "), static_cast<int>(extruderId));
@@ -664,37 +666,21 @@ void MCode_202(GCode* com) {
     Printer::updateDerivedParameter();
 }
 
-void MCode_203(GCode* com) {
-    // TODO: check and remove, M155 is better
-    if (com->hasS())
-        manageMonitor = com->S != 255;
-    else
-        manageMonitor = 0;
-}
-
 void MCode_204(GCode* com) {
     // Convert to new system
-    TemperatureController* temp = &Extruder::current->tempControl;
+    HeatManager* pid = Tool::getActiveTool()->getHeater();
     if (com->hasS()) {
         if (com->S < 0)
             return;
-        if (com->S < NUM_EXTRUDER)
-            temp = &extruder[com->S].tempControl;
-#if HAVE_HEATED_BED
-        else
-            temp = &heatedBedController;
-#else
-        else
-            return;
-#endif
+        if (com->S < NUM_HEATERS)
+            pid = heaters[com->S];
     }
-    if (com->hasX())
-        temp->pidPGain = com->X;
-    if (com->hasY())
-        temp->pidIGain = com->Y;
-    if (com->hasZ())
-        temp->pidDGain = com->Z;
-    temp->updateTempControlVars();
+    if (pid == nullptr) {
+        return;
+    }
+    pid->setPID(com->hasX() ? com->X : pid->getP(),
+        com->hasY() ? com->Y : pid->getI(),
+        com->hasZ() ? com->Z : pid->getD());
 }
 
 void MCode_205(GCode* com) {
@@ -709,10 +695,6 @@ void MCode_206(GCode* com) {
 
 void MCode_207(GCode* com) {
     Motion1::fillPosFromGCode(*com, Motion1::maxYank, Motion1::maxYank);
-    if (com->hasE()) {
-        Extruder::current->maxStartFeedrate = com->E;
-        Extruder::selectExtruderById(Extruder::current->id);
-    }
     Com::printF(Com::tJerkColon, Motion1::maxYank[X_AXIS]);
     Com::printFLN(Com::tZJerkColon, Motion1::maxYank[Z_AXIS]);
 }
@@ -756,16 +738,7 @@ void MCode_223(GCode* com) { // M223 Extruder interrupt test
 }
 
 void MCode_232(GCode* com) {
-    Com::printF(Com::tLinearStepsColon, maxadv2);
-#if ENABLE_QUADRATIC_ADVANCE
-    Com::printF(Com::tQuadraticStepsColon, maxadv);
-#endif
-    Com::printFLN(Com::tCommaSpeedEqual, maxadvspeed);
-#if ENABLE_QUADRATIC_ADVANCE
-    maxadv = 0;
-#endif
-    maxadv2 = 0;
-    maxadvspeed = 0;
+    // Report max advance has been removed
 }
 
 void MCode_251(GCode* com) {
@@ -786,6 +759,8 @@ void MCode_251(GCode* com) {
 }
 
 void MCode_280(GCode* com) {
+    // TODO: Ditto printing
+    /*
 #if FEATURE_DITTO_PRINTING
 #if DUAL_X_AXIS
     Extruder::dittoMode = 0;
@@ -808,6 +783,7 @@ void MCode_280(GCode* com) {
     }
 #endif
 #endif
+*/
 }
 
 void MCode_281(GCode* com) {
@@ -860,25 +836,15 @@ void MCode_302(GCode* com) {
 }
 
 void MCode_303(GCode* com) {
-#if NUM_TEMPERATURE_LOOPS > 0
-    int temp = 150;
-    int cont = 0;
-    int cycles = 5;
-    int method = 0;
-    if (com->hasS())
-        temp = com->S;
-    if (com->hasP())
-        cont = com->P;
-    if (com->hasR())
-        cycles = static_cast<int>(com->R);
-    if (com->hasC())
-        method = static_cast<int>(com->C);
-    if (cont >= HEATED_BED_INDEX)
-        cont = HEATED_BED_INDEX;
-    if (cont < 0)
-        cont = 0;
-    tempController[cont]->autotunePID(temp, cont, cycles, com->hasX(), method);
-#endif
+    int t = 0;
+    if (com->hasT()) {
+        t = com->T;
+    }
+    if (t >= 0 && t < NUM_HEATERS) {
+        heaters[t]->autocalibrate(com);
+    } else {
+        Com::printWarningFLN(PSTR("Bad heater id."));
+    }
 }
 
 void MCode_320(GCode* com) {
@@ -1021,7 +987,7 @@ void MCode_500(GCode* com) {
 void MCode_501(GCode* com) {
 #if EEPROM_MODE != 0
     EEPROM::readDataFromEEPROM();
-    Extruder::selectExtruderById(Extruder::current->id);
+    // Extruder::selectExtruderById(Extruder::current->id);
     Com::printInfoFLN(Com::tConfigLoadedEEPROM);
 #else
     Com::printErrorFLN(Com::tNoEEPROMSupport);
@@ -1033,7 +999,8 @@ void MCode_502(GCode* com) {
 }
 
 void MCode_513(GCode* com) {
-    Extruder::markAllUnjammed();
+    // TODO: jam
+    // Extruder::markAllUnjammed();
 }
 
 void MCode_530(GCode* com) {
@@ -1091,10 +1058,36 @@ void MCode_600(GCode* com) {
 }
 
 void MCode_601(GCode* com) {
-    if (com->hasS() && com->S > 0)
-        Extruder::pauseExtruders(com->hasB() && com->B != 0);
-    else
-        Extruder::unpauseExtruders(com->hasP() && com->P != 1);
+    bool extruder = com->hasE() ? com->E != 0 : true;
+    bool bed = com->hasB() && com->B != 0;
+    bool chamber = com->hasC() && com->C != 0;
+    bool all = extruder && !bed && !chamber;
+    extruder |= all;
+    chamber |= all;
+    bed |= all;
+    if (com->hasS() && com->S > 0) {
+        for (fast8_t i = 0; i < NUM_HEATERS; i++) {
+            HeatManager* h = heaters[i];
+            if ((h->isExtruderHeater() && extruder) || (h->isBedHeater() && bed) || (h->isChamberHeater() && chamber)) {
+                h->pause();
+            }
+        }
+    } else {
+        for (fast8_t i = 0; i < NUM_HEATERS; i++) {
+            HeatManager* h = heaters[i];
+            if ((h->isExtruderHeater() && extruder) || (h->isBedHeater() && bed) || (h->isChamberHeater() && chamber)) {
+                h->unpause();
+            }
+        }
+        if (com->hasP() && com->P != 0) {
+            for (fast8_t i = 0; i < NUM_HEATERS; i++) {
+                HeatManager* h = heaters[i];
+                if ((h->isExtruderHeater() && extruder) || (h->isBedHeater() && bed) || (h->isChamberHeater() && chamber)) {
+                    h->waitForTargetTemperature();
+                }
+            }
+        }
+    }
 }
 
 void MCode_602(GCode* com) {
@@ -1114,6 +1107,8 @@ void MCode_603(GCode* com) {
 }
 
 void MCode_604(GCode* com) {
+    // TODO: Jam handling
+    /*    
 #if EXTRUDER_JAM_CONTROL && NUM_EXTRUDER > 0
     uint8_t extId = Extruder::current->id;
     if (com->hasT())
@@ -1128,6 +1123,7 @@ void MCode_604(GCode* com) {
     if (com->hasZ())
         ext.jamSlowdownTo = static_cast<uint8_t>(com->Z);
 #endif
+*/
 }
 
 void MCode_890(GCode* com) {

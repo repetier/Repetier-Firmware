@@ -113,21 +113,21 @@ void GCode_4(GCode* com) {
 }
 
 void GCode_10(GCode* com) {
-#if FEATURE_RETRACTION && NUM_EXTRUDER > 0
-#if NUM_EXTRUDER > 1
-    Extruder::current->retract(true, com->hasS() && com->S > 0);
+#if FEATURE_RETRACTION && NUM_TOOLS > 0
+#if NUM_TOOLS > 1
+    Tool::getActiveTool()->retract(true, com->hasS() && com->S > 0);
 #else
-    Extruder::current->retract(true, false);
+    Tool::getActiveTool()->retract(true, false);
 #endif
 #endif
 }
 
 void GCode_11(GCode* com) {
-#if FEATURE_RETRACTION && NUM_EXTRUDER > 0
-#if NUM_EXTRUDER > 1
-    Extruder::current->retract(false, com->hasS() && com->S > 0);
+#if FEATURE_RETRACTION && NUM_TOOLS > 0
+#if NUM_TOOLS > 1
+    Tool::getActiveTool()->retract(false, com->hasS() && com->S > 0);
 #else
-    Extruder::current->retract(false, false);
+    Tool::getActiveTool()->retract(false, false);
 #endif
 #endif
 }

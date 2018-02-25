@@ -125,9 +125,9 @@ STEPPER_SIMPLE(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, endstopNone, endstopNone)
 // control temperature. Higher level classes take these as input
 // and simple heater like a heated bed use it directly.
 
-HEAT_MANAGER_PID(HeatedBed1, TempBed1, PWMBed1, 255, 5, 30000, 12.0, 33.0, 290.0, 80, 255)
-HEAT_MANAGER_PID(HeaterExtruder1, TempExt1, PWMExtruder1, 255, 10, 20000, 20.0, 0.6, 65.0, 40, 220)
-HEAT_MANAGER_PID(HeaterExtruder2, TempExt2, PWMExtruder2, 255, 10, 20000, 20.0, 0.6, 65.0, 40, 220)
+HEAT_MANAGER_PID('B', HeatedBed1, TempBed1, PWMBed1, 120, 255, 5, 30000, 12.0, 33.0, 290.0, 80, 255)
+HEAT_MANAGER_PID('E', HeaterExtruder1, TempExt1, PWMExtruder1, 260, 255, 10, 20000, 20.0, 0.6, 65.0, 40, 220)
+HEAT_MANAGER_PID('E', HeaterExtruder2, TempExt2, PWMExtruder2, 260, 255, 10, 20000, 20.0, 0.6, 65.0, 40, 220)
 
 // Coolers are stand alone functions that allow it to control
 // a fan with external sensors. Many extruders require a cooling
@@ -140,5 +140,5 @@ HEAT_MANAGER_PID(HeaterExtruder2, TempExt2, PWMExtruder2, 255, 10, 20000, 20.0, 
 // Typical tools are:
 // TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript)
 
-TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "")
-TOOL_EXTRUDER(ToolExtruder2, 16.0, 0, -0.85, HeaterExtruder2, E2Motor, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1950 R600\nG4 P300", "M340 P0 S1050 R600\nG4 P300")
+TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "")
+TOOL_EXTRUDER(ToolExtruder2, 16.0, 0, -0.85, HeaterExtruder2, E2Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1950 R600\nG4 P300", "M340 P0 S1050 R600\nG4 P300")

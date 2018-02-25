@@ -96,11 +96,6 @@ void EEPROM::update(GCode* com) {
         }
         callHandle();
     }
-#if MIXING_EXTRUDER
-    Extruder::selectExtruderById(Extruder::activeMixingExtruder);
-#else
-    Extruder::selectExtruderById(Extruder::current->id);
-#endif
 #else
     Com::printErrorF(Com::tNoEEPROMSupport);
 #endif

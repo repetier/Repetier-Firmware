@@ -686,20 +686,6 @@ ISR(TIMER1_COMPA_vect) {
 #endif
     else {
         if(waitRelax == 0) {
-#if USE_ADVANCE
-            if(Printer::advanceStepsSet) {
-                Printer::extruderStepsNeeded -= Printer::advanceStepsSet;
-#if ENABLE_QUADRATIC_ADVANCE
-                Printer::advanceExecuted = 0;
-#endif
-                Printer::advanceStepsSet = 0;
-            }
-#endif
-#if USE_ADVANCE
-            if(!Printer::extruderStepsNeeded) if(DISABLE_E) Extruder::disableCurrentExtruderMotor();
-#else
-            if(DISABLE_E) Extruder::disableCurrentExtruderMotor();
-#endif
         } else waitRelax--;
         stepperWait = 0; // Important because of optimization in asm at begin
         OCR1A = 65500; // Wait for next move

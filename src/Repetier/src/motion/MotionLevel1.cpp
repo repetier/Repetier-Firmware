@@ -45,7 +45,7 @@ float Motion1::autolevelTransformation[9]; ///< Transformation matrix
 float Motion1::advanceK = 0;               // advance spring constant
 float Motion1::advanceEDRatio = 0;         // Ratio of extrusion
 
-StepperDriverBase* Motion1::drivers[NUM_MOTORS];
+StepperDriverBase* Motion1::drivers[NUM_MOTORS] = MOTORS;
 fast8_t Motion1::memoryPos;
 StepperDriverBase* Motion1::motors[NUM_AXES];
 fast8_t Motion1::homeDir[NUM_AXES];
@@ -119,7 +119,7 @@ void Motion1::setFromConfig() {
     maxAcceleration[X_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X;
     maxAcceleration[Y_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
     maxAcceleration[Z_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
-    maxAcceleration[E_AXIS] = EXT0_MAX_ACCELERATION;
+    maxAcceleration[E_AXIS] = 1000;
 
     homeRetestDistance[X_AXIS] = ENDSTOP_X_BACK_MOVE;
     homeRetestDistance[Y_AXIS] = ENDSTOP_Y_BACK_MOVE;
@@ -406,7 +406,7 @@ void Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate) {
     ) { // set position
         destinationPositionTransformed[E_AXIS] = coords[E_AXIS];
     } else { // ignore
-        destinationPositionTransformed[E_AXIS] = currentPositionTransformed[E_AXIS];
+        currentPositionTransformed[E_AXIS] = destinationPositionTransformed[E_AXIS] = coords[E_AXIS];
     }
     if (feedrate == IGNORE_COORDINATE) {
         feedrate = Printer::feedrate;
@@ -462,7 +462,7 @@ void Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate) {
                  || Printer::isColdExtrusionAllowed()))
 #endif
     ) {
-        destinationPositionTransformed[E_AXIS] = currentPositionTransformed[E_AXIS];
+        currentPositionTransformed[E_AXIS] = destinationPositionTransformed[E_AXIS];
     }
 #if NUM_AXES > A_AXIS
     for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {

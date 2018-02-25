@@ -345,15 +345,6 @@ public:
     static float backlashZ;
     static uint8_t backlashDir;
 #endif
-#if MULTI_XENDSTOP_HOMING || defined(DOXYGEN)
-    static fast8_t multiXHomeFlags; // 1 = move X0, 2 = move X1
-#endif
-#if MULTI_YENDSTOP_HOMING || defined(DOXYGEN)
-    static fast8_t multiYHomeFlags; // 1 = move Y0, 2 = move Y1
-#endif
-#if MULTI_ZENDSTOP_HOMING || defined(DOXYGEN)
-    static fast8_t multiZHomeFlags; // 1 = move Z0, 2 = move Z1
-#endif
 #ifdef DEBUG_REAL_JERK
     static float maxRealJerk;
 #endif
@@ -609,9 +600,10 @@ public:
     }
 
     static INLINE void setJamcontrolDisabled(uint8_t b) {
+    // TODO: add jam control
 #if EXTRUDER_JAM_CONTROL
-        if (b)
-            Extruder::markAllUnjammed();
+    //if (b)
+    //    Extruder::markAllUnjammed();
 #endif
         flag2 = (b ? flag2 | PRINTER_FLAG2_JAMCONTROL_DISABLED : flag2 & ~PRINTER_FLAG2_JAMCONTROL_DISABLED);
         Com::printFLN(PSTR("Jam control disabled:"), b);
@@ -631,9 +623,6 @@ public:
     }
     static INLINE void unsetAllSteppersDisabled() {
         flag0 &= ~PRINTER_FLAG0_STEPPER_DISABLED;
-#if FAN_BOARD_PIN > -1
-        pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_SPEED;
-#endif // FAN_BOARD_PIN
     }
     static INLINE bool isAnyTempsensorDefect() {
         return (flag0 & PRINTER_FLAG0_TEMPSENSOR_DEFECT);

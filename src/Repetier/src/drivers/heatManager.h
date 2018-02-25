@@ -27,14 +27,18 @@ enum DecoupleMode {
     FAST_RISING = 1, // Full power until control range is reached
     SWING_IN = 2,    // Closing target temperature
     HOLDING = 3,     // Holding temperature
-    COOLING = 4      // Target was dropped but not off
+    COOLING = 4,     // Target was dropped but not off
+    CALIBRATING = 5, // Signal that no updates should happen
+    PAUSED = 6
 };
 
+class GCode;
 class HeatManager {
 protected:
     HeaterError error;
     float targetTemperature;
     float currentTemperature;
+    float maxTemperature;
     IOTemperature* input;
     PWMHandler* output;
     fast8_t maxPWM;
@@ -48,20 +52,31 @@ protected:
     DecoupleMode decoupleMode; // 0 = no heating, 1
     fast8_t errorCount;
     fast8_t wasOutsideRange; // 1 = if was above range, 2 = was below range
+    char heaterType;         // E = Extruder, B = bed, C = Chamber, O = Other
 public:
-    HeatManager(IOTemperature* i, PWMHandler* o, fast8_t maxPwm, float decVariance, millis_t decPeriod)
+    HeatManager(char htType, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod)
         : error(HeaterError::NO_ERROR)
         , targetTemperature(0)
         , currentTemperature(0)
+        , maxTemperature(maxTemp)
         , input(i)
         , output(o)
         , maxPWM(maxPwm)
         , decoupleVariance(decVariance)
         , decouplePeriod(decPeriod)
         , decoupleMode(DecoupleMode::NO_HEATING)
-        , errorCount(0) {}
+        , errorCount(0)
+        , heaterType(htType) {}
     virtual void setTargetTemperature(float temp) {
-        if (temp < currentTemperature) {
+        if (temp > maxTemperature) {
+            Com::printWarningF(PSTR("Selected temp. was higher then max. temperaure. Max. Temp:"));
+            Com::print(maxTemperature);
+            Com::println();
+            return;
+        }
+        if (temp == 0) {
+            decoupleMode = DecoupleMode::NO_HEATING;
+        } else if (temp < currentTemperature) {
             decoupleMode = DecoupleMode::COOLING;
         } else {
             decoupleMode = DecoupleMode::FAST_RISING;
@@ -69,6 +84,16 @@ public:
             lastDecoupleTemp = currentTemperature;
         }
         targetTemperature = temp;
+    }
+    inline bool isEnabled() {
+        return decoupleMode != DecoupleMode::PAUSED && targetTemperature > MAX_ROOM_TEMPERATURE;
+    }
+    inline void pause() {
+        decoupleMode = DecoupleMode::PAUSED;
+        output->set(0);
+    }
+    inline void unpause() {
+        setTargetTemperature(targetTemperature);
     }
     inline float getTargetTemperature() { return targetTemperature; }
     inline void setCurrentTemperature(float temp) {
@@ -86,6 +111,11 @@ public:
             decoupleMode = DecoupleMode::NO_HEATING;
         }
     }
+    virtual float getP() { return 0; }
+    virtual float getI() { return 0; }
+    virtual float getD() { return 0; }
+    virtual void setPID(float p, float i, float d) {}
+
     virtual void updateLocal(float tempError) = 0;
     int eepromSize() {
         return eepromSizeLocal() + 9;
@@ -101,7 +131,19 @@ public:
     virtual void updateDerived() {}
     /** Waits until the set target temperature is reached */
     void waitForTargetTemperature();
+    inline float getMaxTemperature() { return maxTemperature;}
     void reportTemperature(char c, int idx);
+    virtual void autocalibrate(GCode* g) {
+        Com::printWarningFLN(PSTR("Autocalibration for this tool not supported!"));
+    }
+    bool isExtruderHeater() { return heaterType == 'E'; }
+    bool isBedHeater() { return heaterType == 'B'; }
+    bool isChamberHeater() { return heaterType == 'C'; }
+    bool isOtherHeater() { return heaterType == 'O'; }
+
+    static bool reportTempsensorError();
+    static void disableAllHeaters();
+    static void resetAllErrorStates();
 };
 
 class HeatManagerBangBang : public HeatManager {
@@ -131,11 +173,12 @@ class HeatManagerPID : public HeatManager {
     float lastTemperature;
     float actTemperature;
     fast8_t counter;
+
 public:
-    HeatManagerPID(IOTemperature* input, PWMHandler* output, fast8_t maxPwm, float decVariance, millis_t decPeriod,
+    HeatManagerPID(char htType, IOTemperature* input, PWMHandler* output, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod,
                    float p, float i, float d, float _driveMin, float _driveMax)
-        : HeatManager(input,
-                      output, maxPwm, decVariance, decPeriod)
+        : HeatManager(htType, input,
+                      output, maxTemp, maxPwm, decVariance, decPeriod)
         , P(p)
         , I(i)
         , D(d)
@@ -153,4 +196,11 @@ public:
     void eepromHandleLocal(int adr);
     void eepromResetLocal();
     int eepromSizeLocal();
+    void autocalibrate(GCode* g);
+    float getP() { return P; }
+    float getI() { return I; }
+    float getD() { return D; }
+    void setPID(float p, float i, float d);
 };
+
+extern HeatManager* heaters[];
