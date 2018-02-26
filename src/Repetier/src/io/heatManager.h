@@ -26,6 +26,14 @@
 #define HEAT_MANAGER_PID(tp, name, input, output, maxTemp, maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax) \
     name.update();
 
+#elif IO_TARGET == 1 // init
+
+#define HEAT_MANAGER_BANG_BANG(tp, name, input, output, maxTemp, maxPwm, decVariance, decPeriod) \
+    name.init();
+    
+#define HEAT_MANAGER_PID(tp, name, input, output, maxTemp, maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax) \
+    name.init();
+
 #elif IO_TARGET == 4
 
 #define HEAT_MANAGER_BANG_BANG(tp, name, input, output, maxTemp, maxPwm, decVariance, decPeriod) \
@@ -37,6 +45,7 @@
 
 #define HEAT_MANAGER_BANG_BANG(tp, name, input, output, maxTemp, maxPwm, decVariance, decPeriod) \
     HeatManagerBangBang name(tp, &input, &output, maxTemp, maxPwm, decVariance, decPeriod);
+
 #define HEAT_MANAGER_PID(tp, name, input, output, maxTemp, maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax) \
     HeatManagerPID name(tp, &input, &output, maxTemp, maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax);
 

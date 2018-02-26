@@ -41,7 +41,7 @@ protected:
     float maxTemperature;
     IOTemperature* input;
     PWMHandler* output;
-    fast8_t maxPWM;
+    uint8_t maxPWM;
     float decoupleVariance;
     millis_t decouplePeriod;
 
@@ -53,20 +53,10 @@ protected:
     fast8_t errorCount;
     fast8_t wasOutsideRange; // 1 = if was above range, 2 = was below range
     char heaterType;         // E = Extruder, B = bed, C = Chamber, O = Other
+    uint16_t eepromPos; // Start position in eeprom
 public:
-    HeatManager(char htType, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod)
-        : error(HeaterError::NO_ERROR)
-        , targetTemperature(0)
-        , currentTemperature(0)
-        , maxTemperature(maxTemp)
-        , input(i)
-        , output(o)
-        , maxPWM(maxPwm)
-        , decoupleVariance(decVariance)
-        , decouplePeriod(decPeriod)
-        , decoupleMode(DecoupleMode::NO_HEATING)
-        , errorCount(0)
-        , heaterType(htType) {}
+    HeatManager(char htType, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod);
+    void init();
     virtual void setTargetTemperature(float temp) {
         if (temp > maxTemperature) {
             Com::printWarningF(PSTR("Selected temp. was higher then max. temperaure. Max. Temp:"));
@@ -117,16 +107,9 @@ public:
     virtual void setPID(float p, float i, float d) {}
 
     virtual void updateLocal(float tempError) = 0;
-    int eepromSize() {
-        return eepromSizeLocal() + 9;
-    }
-    void eepromHandle(int adr) {
-
-        eepromHandleLocal(adr + eepromSize());
-    }
-    virtual void eepromHandleLocal(int adr) = 0;
-    virtual void eepromResetLocal() = 0;
-    virtual int eepromSizeLocal() = 0;
+    void eepromHandle();
+    virtual void eepromHandleLocal(int pos) = 0;
+    virtual int eepromSizeLocal() {return 0;};
     void update();
     virtual void updateDerived() {}
     /** Waits until the set target temperature is reached */
@@ -161,7 +144,6 @@ public:
         decouplePeriod = decPeriod;
     }
     void eepromHandleLocal(int adr);
-    void eepromResetLocal();
     int eepromSizeLocal();
 };
 
@@ -194,7 +176,6 @@ public:
     void resetFromConfig(fast8_t _maxPwm, float decVariance, millis_t decPeriod,
                          float p, float i, float d, float _driveMin, float _driveMax);
     void eepromHandleLocal(int adr);
-    void eepromResetLocal();
     int eepromSizeLocal();
     void autocalibrate(GCode* g);
     float getP() { return P; }

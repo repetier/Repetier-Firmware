@@ -1148,6 +1148,7 @@ void Motion1::homeAxes(fast8_t axes) {
         }
     }
     Printer::setHomedAll(ok);
+    Commands::printCurrentPosition();
 }
 
 EndstopDriver& Motion1::endstopFoxAxisDir(fast8_t axis, bool maxDir) {

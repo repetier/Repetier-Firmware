@@ -2,6 +2,23 @@
 
 HeatManager* heaters[] = HEATERS;
 
+HeatManager::HeatManager(char htType, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod)
+        : error(HeaterError::NO_ERROR)
+        , targetTemperature(0)
+        , currentTemperature(0)
+        , maxTemperature(maxTemp)
+        , input(i)
+        , output(o)
+        , maxPWM(maxPwm)
+        , decoupleVariance(decVariance)
+        , decouplePeriod(decPeriod)
+        , decoupleMode(DecoupleMode::NO_HEATING)
+        , errorCount(0)
+        , heaterType(htType) {
+}
+void HeatManager::init() {
+    eepromPos = EEPROM::reserve(5, 1, eepromSizeLocal() + 13);
+}
 void HeatManager::update() {
     if (error != HeaterError::NO_ERROR) {
         return; // do nothing in error state
@@ -91,6 +108,14 @@ void HeatManager::update() {
     updateLocal(tempError);
 }
 
+void HeatManager::eepromHandle() {
+    EEPROM::handleFloat(eepromPos + 0, PSTR("Max. Temperature [deg C]"), 2, maxTemperature);
+    EEPROM::handleByte(eepromPos + 4, PSTR("Max. PWM [0-255]"), maxPWM);
+    EEPROM::handleLong(eepromPos + 5, PSTR("Decouple test period [ms]"), decouplePeriod);
+    EEPROM::handleFloat(eepromPos + 9, PSTR("Decouple variance [K]"), 2, decoupleVariance);
+    eepromHandleLocal(eepromPos + 13);
+}
+
 void HeatManager::disableAllHeaters() {
     for (fast8_t i = 0; i < NUM_HEATERS; i++) {
         heaters[i]->setTargetTemperature(0);
@@ -177,9 +202,6 @@ bool HeatManager::reportTempsensorError() {
 void HeatManagerBangBang::eepromHandleLocal(int adr) {
 }
 
-void HeatManagerBangBang::eepromResetLocal() {
-}
-
 int HeatManagerBangBang::eepromSizeLocal() {
     return 0;
 }
@@ -227,14 +249,16 @@ void HeatManagerPID::resetFromConfig(fast8_t _maxPwm, float decVariance, millis_
     updateDerived();
 }
 
-void HeatManagerPID::eepromHandleLocal(int adr) {
-}
-
-void HeatManagerPID::eepromResetLocal() {
+void HeatManagerPID::eepromHandleLocal(int pos) {
+    EEPROM::handleFloat(pos, PSTR("P [-]"), 2, P);
+    EEPROM::handleFloat(pos, PSTR("I [-]"), 2, I);
+    EEPROM::handleFloat(pos, PSTR("D [-]"), 2, D);
+    EEPROM::handleFloat(pos, PSTR("Min. I Part [-]"), 2, driveMin);
+    EEPROM::handleFloat(pos, PSTR("Max. I Part [-]"), 2, driveMax);
 }
 
 int HeatManagerPID::eepromSizeLocal() {
-    return 0;
+    return 5 * 4;
 }
 
 void HeatManagerPID::setPID(float p, float i, float d) {

@@ -78,6 +78,7 @@ public:
      * are used to compute a variation checksum to reinit eeprom
      * on configuration changes.
      * sig = 1: Motion1, 2: Tool Extruder, 3: Tool Lase, 4: Tool cnc
+     *       5: Heater
      *  */
     static uint reserve(uint8_t sig, uint8_t version, uint length);
     static void storeDataIntoEEPROM(uint8_t corrupted = 0);

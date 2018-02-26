@@ -130,6 +130,24 @@ void EEPROM::callHandle() {
 #define IO_TARGET 9
 #include "../io/redefine.h"
     }
+    int eCnt = 1, bCnt = 1, cCnt = 1, oCnt = 1;
+    for(int i = 0; i < NUM_HEATERS; i++) {
+        HeatManager *h = heaters[i];
+        if (h->isExtruderHeater()) {
+            EEPROM::handlePrefix(PSTR("Extr."), eCnt++);
+        }
+        if (h->isBedHeater()) {
+            EEPROM::handlePrefix(PSTR("Bed"), bCnt++);
+        }
+        if (h->isChamberHeater()) {
+            EEPROM::handlePrefix(PSTR("Chamber"), cCnt++);
+        }
+        if (h->isOtherHeater()) {
+            EEPROM::handlePrefix(PSTR("Misc Heater"), oCnt++);
+        }
+        h->eepromHandle();
+        EEPROM::removePrefix();
+    }
 }
 
 void EEPROM::restoreEEPROMSettingsFromConfiguration() {
