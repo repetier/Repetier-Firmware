@@ -384,8 +384,8 @@ It also can add a delay to wait for spindle to run on full speed.
 #define DELTASEGMENTS_PER_PRINTLINE 24
 #define STEPPER_INACTIVE_TIME 360L
 #define MAX_INACTIVE_TIME 720L
-#define MAX_FEEDRATE_X 100
-#define MAX_FEEDRATE_Y 100
+#define MAX_FEEDRATE_X 60
+#define MAX_FEEDRATE_Y 60
 #define MAX_FEEDRATE_Z 2.5
 #define HOMING_FEEDRATE_X 100
 #define HOMING_FEEDRATE_Y 100
@@ -412,8 +412,8 @@ It also can add a delay to wait for spindle to run on full speed.
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 600
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 600
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 1100
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1100
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 800
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 800
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
 #define INTERPOLATE_ACCELERATION_WITH_Z 0
 #define ACCELERATION_FACTOR_TOP 100
@@ -606,7 +606,7 @@ Values must be in range 1..255
 
 #define GENERIC_THERM_VREF 5
 #define GENERIC_THERM_NUM_ENTRIES 33
-#define ALTERNATIVE_JERK true
+#define ALTERNATIVE_JERK false
 
 #endif
 
@@ -704,13 +704,13 @@ Values must be in range 1..255
     "y2MaxEndstop": 0,
     "motherboard": 33,
     "driveSystem": 0,
-    "xMaxSpeed": 100,
+    "xMaxSpeed": 60,
     "xHomingSpeed": 100,
-    "xTravelAcceleration": 1100,
+    "xTravelAcceleration": 800,
     "xPrintAcceleration": 600,
-    "yMaxSpeed": 100,
+    "yMaxSpeed": 60,
     "yHomingSpeed": 100,
-    "yTravelAcceleration": 1100,
+    "yTravelAcceleration": 800,
     "yPrintAcceleration": 600,
     "zMaxSpeed": 2.5,
     "zHomingSpeed": 4,
@@ -1147,7 +1147,7 @@ Values must be in range 1..255
             "maxDistance": 20
         }
     ],
-    "manualConfig": "#define GENERIC_THERM_VREF 5\n#define GENERIC_THERM_NUM_ENTRIES 33\n#define ALTERNATIVE_JERK true",
+    "manualConfig": "#define GENERIC_THERM_VREF 5\n#define GENERIC_THERM_NUM_ENTRIES 33\n#define ALTERNATIVE_JERK false",
     "zHomeMinTemperature": 0,
     "zHomeXPos": 999999,
     "zHomeYPos": 999999,
