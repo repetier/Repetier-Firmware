@@ -102,7 +102,7 @@ What display type do you use?
 
 #if UI_DISPLAY_TYPE == DISPLAY_U8G // Special case for graphic displays
 
-// You need to define which controller you use and set pins accodringly
+// You need to define which controller you use and set pins accordingly
 
 // For software spi assign these definitions
 // SCK Pin:  UI_DISPLAY_D4_PIN

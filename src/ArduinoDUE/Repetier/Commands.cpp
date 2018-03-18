@@ -63,9 +63,11 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     EVENT_PERIODICAL;
 #if defined(DOOR_PIN) && DOOR_PIN > -1
     if(Printer::updateDoorOpen()) {
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
         if(Printer::mode == PRINTER_MODE_LASER) {
             LaserDriver::changeIntensity(0);
         }
+#endif
     }
 #endif
     if(!executePeriodical) return; // gets true every 100ms

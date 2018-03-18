@@ -1168,7 +1168,7 @@ bool GCode::parseAscii(char *line,bool fromSerial)
 #else    
 	if(wasLastCommandReceivedAsBinary && !hasChecksum && fromSerial && !waitUntilAllCommandsAreParsed) {
 #endif        
-		Com::printErrorFLN("Checksum required when switching back to ASCII protocol.");
+		Com::printErrorFLN(PSTR("Checksum required when switching back to ASCII protocol."));
 		return false;
 	}
     if(hasFormatError() /*|| (params & 518) == 0*/)   // Must contain G, M or T command and parameter need to have variables!

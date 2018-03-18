@@ -825,20 +825,6 @@ void Extruder::selectExtruderById(uint8_t extruderId) {
     Printer::offsetY = -next->yOffset * Printer::invAxisStepsPerMM[Y_AXIS];
     Printer::offsetZ = -next->zOffset * Printer::invAxisStepsPerMM[Z_AXIS];
     Commands::changeFlowrateMultiply(Printer::extrudeMultiply); // needed to adjust extrusionFactor to possibly different diameter
-#if DUAL_X_AXIS == 0 || LAZY_DUAL_X_AXIS == 0
-#if RAISE_Z_ON_TOOLCHANGE > 0 && !LAZY_DUAL_X_AXIS
-    if (Printer::isZHomed()) {
-        Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, cz, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
-        Printer::lastCmdPos[Z_AXIS] = lastZ;
-    }
-#endif
-
-    if(Printer::isHomedAll()) {
-        Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
-    }
-#endif
-    Printer::feedrate = oldfeedrate;
-    Printer::updateCurrentPosition(true);
 #if USE_ADVANCE
     HAL::resetExtruderDirection();
 #endif // USE_ADVANCE
@@ -849,6 +835,20 @@ void Extruder::selectExtruderById(uint8_t extruderId) {
         GCode::executeFString(next->selectCommands);
     }
 #endif
+#if DUAL_X_AXIS == 0 || LAZY_DUAL_X_AXIS == 0
+#if RAISE_Z_ON_TOOLCHANGE > 0 && !LAZY_DUAL_X_AXIS
+	if (Printer::isZHomed()) {
+		Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, cz, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+		Printer::lastCmdPos[Z_AXIS] = lastZ;
+	}
+#endif
+
+	if(Printer::isHomedAll()) {
+		Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
+	}
+#endif
+	Printer::feedrate = oldfeedrate;
+	Printer::updateCurrentPosition(true);
 #endif
 }
 
@@ -2357,7 +2357,7 @@ void Extruder::disableAllHeater() {
 
 void TemperatureController::autotunePID(float temp, uint8_t controllerId, int maxCycles, bool storeValues, int method) {
     if(method < 0) method = 0;
-    if(method > 3) method = 3;
+    if(method > 4) method = 4;
     float currentTemp;
     int cycles = 0;
     bool heating = true;
