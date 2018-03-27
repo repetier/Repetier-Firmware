@@ -63,7 +63,7 @@
 // Due analog pin #56
 #define TEMP_3_PIN 4
 // Due analog pin #57
-//#define TEMP_4_PIN       4
+#define TEMP_4_PIN 3
 
 // Due analog pin #59 = A5 -> AD 2
 #define THERMOCOUPLE_0_PIN 2

@@ -298,7 +298,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #undef SDCARDDETECTINVERTED
 #define SDCARDDETECTINVERTED   0
 
-#elif MOTHERBOARD == 413 // RURAMPS4D
+#elif MOTHERBOARD == 414 // RURAMPS4D
 
 #undef BEEPER_PIN
 #define BEEPER_PIN        62
