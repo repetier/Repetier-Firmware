@@ -361,6 +361,9 @@ public:
 #if EEPROM_AVAILABLE == EEPROM_I2C || UI_DISPLAY_TYPE == 3 //init i2c when EEprom installed or using i2c display
         HAL::i2cInit(TWI_CLOCK_FREQ);
 #endif
+#if defined(EEPROM_AVAILABLE) && defined(EEPROM_SPI_ALLIGATOR) && EEPROM_AVAILABLE == EEPROM_SPI_ALLIGATOR
+        HAL::spiBegin();
+#endif
         // make debugging startup easier
         //Serial.begin(115200);
         TimeTick_Configure(F_CPU_TRUE);
@@ -369,7 +372,7 @@ public:
         /* pmc_enable_periph_clk(DELAY_TIMER_IRQ);
         TC_Configure(DELAY_TIMER, DELAY_TIMER_CHANNEL, TC_CMR_WAVSEL_UP | TC_CMR_WAVE | DELAY_TIMER_CLOCK);
         TC_Start(DELAY_TIMER, DELAY_TIMER_CHANNEL);*/
-#if EEPROM_AVAILABLE && EEPROM_MODE != EEPROM_NONE
+#if EEPROM_AVAILABLE && EEPROM_MODE != EEPROM_NONE && EEPROM_AVAILABLE != EEPROM_SDCARD
         // Copy eeprom to ram for faster access
         int i;
         for (i = 0; i < EEPROM_BYTES; i += 4) {

@@ -67,11 +67,11 @@ For each motor you can set the ratio of x,y,z position that adds
 to the position. 0 = no contribution. */
 // X motor = x + y
 #define COREXYZ_X_X 1
-#define COREXYZ_X_Y 0
+#define COREXYZ_X_Y 1
 #define COREXYZ_X_Z 0
 // Y motor = x - y
-#define COREXYZ_Y_X 0
-#define COREXYZ_Y_Y 1
+#define COREXYZ_Y_X 1
+#define COREXYZ_Y_Y -1
 #define COREXYZ_Y_Z 0
 // Z motor = z
 #define COREXYZ_Z_X 0

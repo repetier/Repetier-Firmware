@@ -492,60 +492,17 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
 void Printer::setup() {
     HAL::stopWatchdog();
 
-// Define io functions
-#undef IO_TARGET
-#define IO_TARGET 1
-#include "src/io/redefine.h"
-
-    Motion1::init();
-    Motion2::init();
-    Motion3::init();
-    ZProbeHandler::init();
-    PrinterType::init();
-    Tool::initTools();
-#if FEATURE_CONTROLLER == CONTROLLER_VIKI
-    HAL::delayMilliseconds(100);
-#endif // FEATURE_CONTROLLER
+    // Start serial
+    HAL::hwSetup();
+    // Main board specific extra initialization
 #if defined(MB_SETUP)
     MB_SETUP;
 #endif
-#if UI_DISPLAY_TYPE != NO_DISPLAY
-    Com::selectLanguage(0); // just make sure we have a language in case someone uses it early
-#endif
-    //HAL::delayMilliseconds(500);  // add a delay at startup to give hardware time for initalization
-#if defined(EEPROM_AVAILABLE) && defined(EEPROM_SPI_ALLIGATOR) && EEPROM_AVAILABLE == EEPROM_SPI_ALLIGATOR
-    HAL::spiBegin();
-#endif
-    //    HAL::hwSetup();
-    EVENT_INITIALIZE_EARLY
-#ifdef ANALYZER
-// Channel->pin assignments
-#if ANALYZER_CH0 >= 0
-    SET_OUTPUT(ANALYZER_CH0);
-#endif
-#if ANALYZER_CH1 >= 0
-    SET_OUTPUT(ANALYZER_CH1);
-#endif
-#if ANALYZER_CH2 >= 0
-    SET_OUTPUT(ANALYZER_CH2);
-#endif
-#if ANALYZER_CH3 >= 0
-    SET_OUTPUT(ANALYZER_CH3);
-#endif
-#if ANALYZER_CH4 >= 0
-    SET_OUTPUT(ANALYZER_CH4);
-#endif
-#if ANALYZER_CH5 >= 0
-    SET_OUTPUT(ANALYZER_CH5);
-#endif
-#if ANALYZER_CH6 >= 0
-    SET_OUTPUT(ANALYZER_CH6);
-#endif
-#if ANALYZER_CH7 >= 0
-    SET_OUTPUT(ANALYZER_CH7);
-#endif
-#endif
 
+    EEPROM::initBaudrate();
+    HAL::serialSetBaudrate(baudrate);
+    Com::printFLN(Com::tStart);
+    HAL::showStartReason();
 #if defined(ENABLE_POWER_ON_STARTUP) && ENABLE_POWER_ON_STARTUP && (PS_ON_PIN > -1)
     SET_OUTPUT(PS_ON_PIN); //GND
     WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
@@ -570,6 +527,26 @@ void Printer::setup() {
     PULLUP(SDCARDDETECT, HIGH);
 #endif
 #endif
+    // Define io functions
+#undef IO_TARGET
+#define IO_TARGET 1
+#include "src/io/redefine.h"
+
+    Motion1::init();
+    Motion2::init();
+    Motion3::init();
+    ZProbeHandler::init();
+    PrinterType::init();
+    Tool::initTools();
+#if FEATURE_CONTROLLER == CONTROLLER_VIKI
+    HAL::delayMilliseconds(100);
+#endif // FEATURE_CONTROLLER
+#if UI_DISPLAY_TYPE != NO_DISPLAY
+    Com::selectLanguage(0); // just make sure we have a language in case someone uses it early
+#endif
+    //HAL::delayMilliseconds(500);  // add a delay at startup to give hardware time for initalization
+
+    EVENT_INITIALIZE_EARLY
 
 #if defined(DOOR_PIN) && DOOR_PIN > -1
     SET_INPUT(DOOR_PIN);
@@ -646,12 +623,7 @@ void Printer::setup() {
     SET_INPUT(MOTOR_FAULT_PIN);
     SET_INPUT(MOTOR_FAULT_PIGGY_PIN);
 #endif //(MOTHERBOARD == 501) || (MOTHERBOARD == 502)
-    EEPROM::initBaudrate();
-    HAL::serialSetBaudrate(baudrate);
-    Com::printFLN(Com::tStart);
-    HAL::showStartReason();
-    HAL::hwSetup();
-    EEPROM::init(); // Read settings from eeprom if wanted
+    EEPROM::init(); // Read settings from eeprom if wanted, run after initialization!
     HAL::analogStart();
     // Extruder::initExtruder();
     // sets auto leveling in eeprom init

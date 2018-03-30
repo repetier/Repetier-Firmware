@@ -75,12 +75,12 @@ void SDCard::initsd() {
 #endif
     HAL::pingWatchdog();
     HAL::delayMilliseconds(50);      // wait for stabilization of contacts, bootup ...
-    fat.begin(SDSS, SPI_FULL_SPEED); // dummy init of SD_CARD
+    fat.begin(SDSS, SD_SCK_MHZ(50)); // dummy init of SD_CARD
     HAL::delayMilliseconds(50);      // wait for init end
     HAL::pingWatchdog();
     /*if(dir[0].isOpen())
         dir[0].close();*/
-    if (!fat.begin(SDSS, SPI_FULL_SPEED)) {
+    if (!fat.begin(SDSS, SD_SCK_MHZ(50))) {
         Com::printFLN(Com::tSDInitFail);
         sdmode = 100; // prevent automount loop!
         return;
@@ -229,7 +229,7 @@ void SDCard::writeCommand(GCode* code) {
     unsigned int sum1 = 0, sum2 = 0; // for fletcher-16 checksum
     uint8_t buf[100];
     uint8_t p = 2;
-    file.writeError = false;
+    file.clearWriteError();
     uint16_t params = 128 | (code->params & ~1);
     memcopy2(buf, &params);
     //*(int*)buf = params;
@@ -403,7 +403,7 @@ void SDCard::writeCommand(GCode* code) {
         Com::printErrorFLN(Com::tAPIDFinished);
     } else
         file.write(buf, p);
-    if (file.writeError) {
+    if (file.getWriteError()) {
         Com::printFLN(Com::tErrorWritingToFile);
     }
 }
@@ -472,7 +472,8 @@ void SDCard::lsJSON(const char* filename) {
     Com::printF(Com::tJSONDir);
     SDCard::printEscapeChars(filename);
     Com::printF(Com::tJSONFiles);
-    dir.lsJSON();
+    // TODO: Implement lsJson again
+    // dir.lsJSON();
     Com::printFLN(Com::tJSONArrayEnd);
 }
 
@@ -495,7 +496,7 @@ void SDCard::printEscapeChars(const char* s) {
 }
 
 void SDCard::JSONFileInfo(const char* filename) {
-    SdBaseFile targetFile;
+    SdFile targetFile;
     GCodeFileInfo *info, tmpInfo;
     if (strlen(filename) == 0) {
         targetFile = file;
@@ -541,7 +542,6 @@ void SDCard::JSONFileInfo(const char* filename) {
 #endif
 
 bool SDCard::selectFile(const char* filename, bool silent) {
-    SdBaseFile parent;
     const char* oldP = filename;
 
     if (!sdactive)
@@ -552,8 +552,7 @@ bool SDCard::selectFile(const char* filename, bool silent) {
     // Filename for progress view
     strncpy(Printer::printName, filename, 20);
     Printer::printName[20] = 0;
-    parent = *fat.vwd();
-    if (file.open(&parent, filename, O_READ)) {
+    if (file.open(fat.vwd(), filename, O_READ)) {
         if ((oldP = strrchr(filename, '/')) != NULL)
             oldP++;
         else
@@ -664,7 +663,7 @@ void SDCard::writeToFile() {
 // Copy date: 15 Nov 2015                                          //
 // --------------------------------------------------------------- //
 
-void GCodeFileInfo::init(SdBaseFile& file) {
+void GCodeFileInfo::init(SdFile& file) {
     this->fileSize = file.fileSize();
     this->filamentNeeded = 0.0;
     this->objectHeight = 0.0;

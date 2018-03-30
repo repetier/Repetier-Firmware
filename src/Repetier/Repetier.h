@@ -508,7 +508,7 @@ typedef uint8_t secondspeed_t;
 #endif
 
 #if SDSUPPORT
-#include "src/sdcard/SdFat.h"
+#include "libraries/SdFat/SdFat.h"
 #endif
 
 #include "src/communication/gcode.h"
@@ -595,7 +595,6 @@ extern void writeMonitor();
 extern char tempLongFilename[LONG_FILENAME_LENGTH + 1];
 extern char fullName[LONG_FILENAME_LENGTH * SD_MAX_FOLDER_DEPTH + SD_MAX_FOLDER_DEPTH + 1];
 #define SHORT_FILENAME_LENGTH 14
-#include "src/sdcard/SdFat.h"
 
 enum LsAction { LS_SerialPrint,
                 LS_Count,

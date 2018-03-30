@@ -79,7 +79,7 @@ IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20)
 
 // Define temperature sensors
 
-// Typically they requre an analog input (12 bit) so define
+// Typically they require an analog input (12 bit) so define
 // them first.
 
 IO_ANALOG_INPUT(IOAnalogBed1, TEMP_1_PIN, 5)
