@@ -111,7 +111,7 @@
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
-#define EEPROM_AVAILABLE 1
+#define EEPROM_AVAILABLE EEPROM_I2C
 #endif
 //End DUE3DOM Board
 
@@ -225,6 +225,6 @@
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
-#define EEPROM_AVAILABLE 1
+#define EEPROM_AVAILABLE EEPROM_I2C
 #endif
 //End DUE3DOM MINI Board

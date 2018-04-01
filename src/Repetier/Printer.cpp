@@ -640,23 +640,14 @@ void Printer::setup() {
     HAL::setupTimer();
     HAL::delayMilliseconds(20);
 
-#if FEATURE_WATCHDOG
-    HAL::startWatchdog();
-#endif // FEATURE_WATCHDOG
 #if SDSUPPORT
     sd.mount();
 #endif
+#if FEATURE_WATCHDOG
+    HAL::startWatchdog();
+#endif // FEATURE_WATCHDOG
     HAL::delayMilliseconds(20);
 
-#if NONLINEAR_SYSTEM
-    transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
-
-#if DELTA_HOME_ON_POWER
-    homeAxis(true, true, true);
-#endif
-    setAutoretract(EEPROM_BYTE(AUTORETRACT_ENABLED));
-    Commands::printCurrentPosition();
-#endif // DRIVE_SYSTEM
     Tool::selectTool(0);
     // Extruder::selectExtruderById(0);
     HAL::delayMilliseconds(20);

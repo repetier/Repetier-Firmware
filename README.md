@@ -48,6 +48,7 @@ Done:
 - Hardware PWM for due.
 - Tools instead of extruders.
 - Linear advance
+- Upgraded to SdFat 1.0.5 for better name handling.
 
 ToDo:
 - Dual X axis printer type

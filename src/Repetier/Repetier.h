@@ -508,7 +508,7 @@ typedef uint8_t secondspeed_t;
 #endif
 
 #if SDSUPPORT
-#include "libraries/SdFat/SdFat.h"
+#include "src/SdFat/SdFat.h"
 #endif
 
 #include "src/communication/gcode.h"
@@ -613,8 +613,8 @@ public:
     uint32_t filesize;
     uint32_t sdpos;
     //char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
-    char* shortname; // Pointer to start of filename itself
-    char* pathend;   // File to char where pathname in fullname ends
+    // char* shortname; // Pointer to start of filename itself
+    // char* pathend;   // File to char where pathname in fullname ends
     uint8_t sdmode;  // 1 if we are printing from sd card, 2 = stop accepting new commands
     bool sdactive;
     //int16_t n;

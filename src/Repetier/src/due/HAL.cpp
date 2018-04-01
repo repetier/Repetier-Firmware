@@ -474,7 +474,7 @@ uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
     }
     return res;
 }
-
+#ifdef OLD_SPI
 #ifndef DUE_SOFTWARE_SPI
 // hardware SPI
 #if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD == 502)
@@ -687,6 +687,7 @@ void HAL::spiSendBlock(uint8_t token, const uint8_t* buf) {
     }
     spiSend(buf[511]);
 }
+#endif
 #endif
 
 /****************************************************************************************

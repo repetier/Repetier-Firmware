@@ -701,7 +701,7 @@ public:
     static void resetHardware();
 
     // SPI related functions
-
+#ifdef OLD_SPI
 #ifdef DUE_SOFTWARE_SPI
     // bitbanging transfer
     // run at ~100KHz (necessary for init)
@@ -808,7 +808,7 @@ public:
 
     static void spiSendBlock(uint8_t token, const uint8_t* buf);
 #endif /*DUE_SOFTWARE_SPI*/
-
+#endif
     // I2C Support
     static void i2cSetClockspeed(uint32_t clockSpeedHz);
     static void i2cInit(unsigned long clockSpeedHz);

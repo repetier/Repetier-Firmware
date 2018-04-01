@@ -131,48 +131,6 @@ class FatFile {
   }
 #endif  // DESTRUCTOR_CLOSES_FILE
 
-#if ENABLE_ARDUINO_FEATURES
-  /** List directory contents.
-   *
-   * \param[in] flags The inclusive OR of
-   *
-   * LS_DATE - %Print file modification date
-   *
-   * LS_SIZE - %Print file size.
-   *
-   * LS_R - Recursive list of subdirectories.
-   */
-  void ls(uint8_t flags = 0) {
-    ls(&Serial, flags);
-  }
-  /** %Print a directory date field.
-   *
-   *  Format is yyyy-mm-dd.
-   *
-   * \param[in] fatDate The date field from a directory entry.
-   */
-  static void printFatDate(uint16_t fatDate) {
-    printFatDate(&Serial, fatDate);
-  }
-  /** %Print a directory time field.
-   *
-   * Format is hh:mm:ss.
-   *
-   * \param[in] fatTime The time field from a directory entry.
-   */
-  static void printFatTime(uint16_t fatTime) {
-    printFatTime(&Serial, fatTime);
-  }
-  /** Print a file's name.
-   *
-   * \return The value true is returned for success and
-   * the value false is returned for failure.
-   */
-  size_t printName() {
-    return FatFile::printName(&Serial);
-  }
-#endif  // ENABLE_ARDUINO_FEATURES
-
   /** \return value of writeError */
   bool getWriteError() {
     return m_error & WRITE_ERROR;
@@ -319,7 +277,7 @@ class FatFile {
    * \param[in] pos Start position in file.
    * \param[in] n number of locations to dump.
    */
-  void dmpFile(print_t* pr, uint32_t pos, size_t n);
+  void dmpFile(uint32_t pos, size_t n);
   /** Test for the existence of a file in a directory
    *
    * \param[in] path Path of the file to be tested for.
@@ -428,6 +386,11 @@ class FatFile {
   bool isSystem() const {
     return m_attr & FILE_ATTR_SYSTEM;
   }
+  void lsRecursive(uint8_t level, bool isJson);
+  #if JSON_OUTPUT
+    void lsJSON();
+  #endif
+
   /** Check for a legal 8.3 character.
    * \param[in] c Character to be checked.
    * \return true for a legal 8.3 character else false.
@@ -465,7 +428,7 @@ class FatFile {
    * \param[in] indent Amount of space before file name. Used for recursive
    * list to indicate subdirectory level.
    */
-  void ls(print_t* pr, uint8_t flags = 0, uint8_t indent = 0);
+  void ls(uint8_t flags = 0, uint8_t indent = 0);
   /** Make a new directory.
    *
    * \param[in] dir An open FatFile instance for the directory that will
@@ -597,7 +560,7 @@ class FatFile {
    * \return The value true is returned for success and
    * the value false is returned for failure.
    */
-  bool printCreateDateTime(print_t* pr);
+  bool printCreateDateTime();
   /** %Print a directory date field.
    *
    *  Format is yyyy-mm-dd.
@@ -605,7 +568,7 @@ class FatFile {
    * \param[in] pr Print stream for output.
    * \param[in] fatDate The date field from a directory entry.
    */
-  static void printFatDate(print_t* pr, uint16_t fatDate);
+  static void printFatDate(uint16_t fatDate);
   /** %Print a directory time field.
    *
    * Format is hh:mm:ss.
@@ -613,7 +576,7 @@ class FatFile {
    * \param[in] pr Print stream for output.
    * \param[in] fatTime The time field from a directory entry.
    */
-  static void printFatTime(print_t* pr, uint16_t fatTime);
+  static void printFatTime(uint16_t fatTime);
   /** Print a number followed by a field terminator.
    * \param[in] value The number to be printed.
    * \param[in] term The field terminator.  Use '\\n' for CR LF.
@@ -652,7 +615,7 @@ class FatFile {
    * \return The value true is returned for success and
    * the value false is returned for failure.
    */
-  bool printModifyDateTime(print_t* pr);
+  bool printModifyDateTime();
   /** Print a file's name
    *
    * \param[in] pr Print stream for output.
@@ -660,7 +623,7 @@ class FatFile {
    * \return The value true is returned for success and
    * the value false is returned for failure.
    */
-  size_t printName(print_t* pr);
+  void printName();
   /** Print a file's size.
    *
    * \param[in] pr Print stream for output.
@@ -668,7 +631,7 @@ class FatFile {
    * \return The number of characters printed is returned
    *         for success and zero is returned for failure.
    */
-  size_t printFileSize(print_t* pr);
+  void printFileSize();
   /** Print a file's Short File Name.
    *
    * \param[in] pr Print stream for output.
@@ -676,7 +639,7 @@ class FatFile {
    * \return The number of characters printed is returned
    *         for success and zero is returned for failure.
    */
-  size_t printSFN(print_t* pr);
+  void printSFN();
   /** Read the next byte from a file.
    *
    * \return For success read returns the next byte in the file as an int.

@@ -22,12 +22,13 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#include "../../../Repetier.h"
 #include <math.h>
 #include "FatFile.h"
 #include "FmtNumber.h"
 //------------------------------------------------------------------------------
 // print uint8_t with width 2
-static void print2u(print_t* pr, uint8_t v) {
+static void print2u(uint8_t v) {
   char c0 = '?';
   char c1 = '?';
   if (v < 100) {
@@ -35,18 +36,18 @@ static void print2u(print_t* pr, uint8_t v) {
     c0 = v - 10*c1 + '0';
     c1 += '0';
   }
-  pr->write(c1);
-  pr->write(c0);
+  Com::print(c1);
+  Com::print(c0);
 }
 //------------------------------------------------------------------------------
-static void printU32(print_t* pr, uint32_t v) {
+static void printU32(uint32_t v) {
   char buf[11];
   char* ptr = buf + sizeof(buf);
   *--ptr = 0;
-  pr->write(fmtDec(v, ptr));
+  Com::print(fmtDec(v, ptr));
 }
 //------------------------------------------------------------------------------
-static void printHex(print_t* pr, uint8_t w, uint16_t h) {
+static void printHex(uint8_t w, uint16_t h) {
   char buf[5];
   char* ptr = buf + sizeof(buf);
   *--ptr = 0;
@@ -55,10 +56,10 @@ static void printHex(print_t* pr, uint8_t w, uint16_t h) {
     *--ptr = c < 10 ? c + '0' : c + 'A' - 10;
     h >>= 4;
   }
-  pr->write(ptr);
+  Com::print(ptr);
 }
 //------------------------------------------------------------------------------
-void FatFile::dmpFile(print_t* pr, uint32_t pos, size_t n) {
+void FatFile::dmpFile(uint32_t pos, size_t n) {
   char text[17];
   text[16] = 0;
   if (n >= 0XFFF0) {
@@ -70,92 +71,210 @@ void FatFile::dmpFile(print_t* pr, uint32_t pos, size_t n) {
   for (size_t i = 0; i <= n; i++) {
     if ((i & 15) == 0) {
       if (i) {
-        pr->write(' ');
-        pr->write(text);
+        Com::print(' ');
+        Com::print(text);
         if (i == n) {
           break;
         }
       }
-      pr->write('\r');
-      pr->write('\n');
+      Com::println();
       if (i >= n) {
         break;
       }
-      printHex(pr, 4, i);
-      pr->write(' ');
+      printHex(4, i);
+      Com::print(' ');
     }
     int16_t h = read();
     if (h < 0) {
       break;
     }
-    pr->write(' ');
-    printHex(pr, 2, h);
+    Com::print(' ');
+    printHex(2, h);
     text[i&15] = ' ' <= h && h < 0X7F ? h : '.';
   }
-  pr->write('\r');
-  pr->write('\n');
+  Com::println();
 }
 //------------------------------------------------------------------------------
-void FatFile::ls(print_t* pr, uint8_t flags, uint8_t indent) {
+
+/*
+void FatFile::ls(uint8_t flags, uint8_t indent) {
   FatFile file;
   rewind();
   while (file.openNext(this, O_READ)) {
     // indent for dir level
     if (!file.isHidden() || (flags & LS_A)) {
       for (uint8_t i = 0; i < indent; i++) {
-        pr->write(' ');
+        Com::print(' ');
       }
       if (flags & LS_DATE) {
-        file.printModifyDateTime(pr);
-        pr->write(' ');
+        file.printModifyDateTime();
+        Com::print(' ');
       }
       if (flags & LS_SIZE) {
-        file.printFileSize(pr);
-        pr->write(' ');
+        file.printFileSize();
+        Com::print(' ');
       }
-      file.printName(pr);
+      file.printName();
       if (file.isDir()) {
-        pr->write('/');
+        Com::print('/');
       }
-      pr->write('\r');
-      pr->write('\n');
+      Com::println();
       if ((flags & LS_R) && file.isDir()) {
-        file.ls(pr, flags, indent + 2);
+        file.ls(flags, indent + 2);
       }
     }
     file.close();
   }
 }
+*/
+extern int8_t RFstricmp(const char* s1, const char* s2);
+extern int8_t RFstrnicmp(const char* s1, const char* s2, size_t n);
+
+void FatFile::lsRecursive(uint8_t level, bool isJson)
+{
+  FatFile file;
+#if JSON_OUTPUT
+  bool firstFile = true;
+#endif
+  rewind();
+
+  while (file.openNext(this, O_READ)) {
+    file.getName(tempLongFilename, LONG_FILENAME_LENGTH);
+    HAL::pingWatchdog();
+    if(file.isHidden()) {
+      file.close();
+      continue;
+    }
+    // if (! (file.isFile() || file.isDir())) continue;
+    if (strcmp(tempLongFilename, "..") == 0) {
+      file.close();
+      continue;
+    }
+    if (tempLongFilename[0] == '.') {
+      file.close();
+      continue; // MAC CRAP
+    }
+    if (file.isDir()) {
+      if (level >= SD_MAX_FOLDER_DEPTH) {
+        file.close();
+        continue; // can't go deeper
+      }
+      if (level && !isJson) {
+        Com::print(fullName);
+        Com::printF(Com::tSlash);
+      }
+#if JSON_OUTPUT
+      if (isJson) {
+        if (!firstFile) Com::print(',');
+	      Com::print('"');Com::print('*');
+        SDCard::printEscapeChars(tempLongFilename);
+	      Com::print('"');
+        firstFile = false;
+      } else {
+        Com::print(tempLongFilename);
+        Com::printFLN(Com::tSlash); // End with / to mark it as directory entry, so we can see empty directories.
+      }
+#else
+      Com::print(tempLongFilename);
+      Com::printFLN(Com::tSlash); // End with / to mark it as directory entry, so we can see empty directories.
+#endif
+      char *tmp;
+      // Add directory name
+      if(level) strcat(fullName, "/");
+      strcat(fullName, tempLongFilename);
+      if(!isJson) {
+        file.lsRecursive(level + 1, false);
+      }
+      // remove added directory name
+      if ((tmp = strrchr(fullName, '/')) != NULL)
+        *tmp = 0;
+      else
+        *fullName = 0;
+    } else { // is filename
+      if(level && !isJson) {
+        Com::print(fullName);
+        Com::printF(Com::tSlash);
+      }
+#if JSON_OUTPUT
+      if (isJson) {
+        if (!firstFile) Com::printF(Com::tComma);
+		    Com::print('"');
+        SDCard::printEscapeChars(tempLongFilename);
+		    Com::print('"');
+        firstFile = false;
+      } else
+#endif
+      {
+        Com::print(tempLongFilename);
+#if SD_EXTENDED_DIR
+        Com::printF(Com::tSpace, (long) file.fileSize());
+#endif
+        Com::println();
+      }
+    }
+    file.close();
+  }
+}
+
 //------------------------------------------------------------------------------
-bool FatFile::printCreateDateTime(print_t* pr) {
+/** List directory contents.
+ *
+ * \param[in] pr Print stream for list.
+ *
+ * \param[in] flags The inclusive OR of
+ *
+ * LS_DATE - %Print file modification date
+ *
+ * LS_SIZE - %Print file size.
+ *
+ * LS_R - Recursive list of subdirectories.
+ *
+ * \param[in] indent Amount of space before file name. Used for recursive
+ * list to indicate subdirectory level.
+ */
+void FatFile::ls(uint8_t flags, uint8_t indent) {
+  *fullName = 0;
+  lsRecursive(0, false);
+}
+
+#if JSON_OUTPUT
+void FatFile::lsJSON() {
+  *fullName = 0;
+  lsRecursive(0, true);
+}
+#endif
+
+
+//------------------------------------------------------------------------------
+bool FatFile::printCreateDateTime() {
   dir_t dir;
   if (!dirEntry(&dir)) {
     DBG_FAIL_MACRO;
     goto fail;
   }
-  printFatDate(pr, dir.creationDate);
-  pr->write(' ');
-  printFatTime(pr, dir.creationTime);
+  printFatDate(dir.creationDate);
+  Com::print(' ');
+  printFatTime(dir.creationTime);
   return true;
 
 fail:
   return false;
 }
 //------------------------------------------------------------------------------
-void FatFile::printFatDate(print_t* pr, uint16_t fatDate) {
-  printU32(pr, FAT_YEAR(fatDate));
-  pr->write('-');
-  print2u(pr, FAT_MONTH(fatDate));
-  pr->write('-');
-  print2u(pr, FAT_DAY(fatDate));
+void FatFile::printFatDate(uint16_t fatDate) {
+  printU32(FAT_YEAR(fatDate));
+  Com::print('-');
+  print2u(FAT_MONTH(fatDate));
+  Com::print('-');
+  print2u(FAT_DAY(fatDate));
 }
 //------------------------------------------------------------------------------
-void FatFile::printFatTime(print_t* pr, uint16_t fatTime) {
-  print2u(pr, FAT_HOUR(fatTime));
-  pr->write(':');
-  print2u(pr, FAT_MINUTE(fatTime));
-  pr->write(':');
-  print2u(pr, FAT_SECOND(fatTime));
+void FatFile::printFatTime(uint16_t fatTime) {
+  print2u(FAT_HOUR(fatTime));
+  Com::print(':');
+  print2u(FAT_MINUTE(fatTime));
+  Com::print(':');
+  print2u(FAT_SECOND(fatTime));
 }
 //------------------------------------------------------------------------------
 /** Template for FatFile::printField() */
@@ -225,22 +344,22 @@ int FatFile::printField(int32_t value, char term) {
   return printFieldT(this, sign, (uint32_t)value, term);
 }
 //------------------------------------------------------------------------------
-bool FatFile::printModifyDateTime(print_t* pr) {
+bool FatFile::printModifyDateTime() {
   dir_t dir;
   if (!dirEntry(&dir)) {
     DBG_FAIL_MACRO;
     goto fail;
   }
-  printFatDate(pr, dir.lastWriteDate);
-  pr->write(' ');
-  printFatTime(pr, dir.lastWriteTime);
+  printFatDate(dir.lastWriteDate);
+  Com::print(' ');
+  printFatTime(dir.lastWriteTime);
   return true;
 
 fail:
   return false;
 }
 //------------------------------------------------------------------------------
-size_t FatFile::printFileSize(print_t* pr) {
+void FatFile::printFileSize() {
   char buf[11];
   char *ptr = buf + sizeof(buf);
   *--ptr = 0;
@@ -248,5 +367,5 @@ size_t FatFile::printFileSize(print_t* pr) {
   while (ptr > buf) {
     *--ptr = ' ';
   }
-  return pr->write(buf);
+  Com::print(buf);
 }

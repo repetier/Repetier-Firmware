@@ -22,6 +22,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+ 
+#include "../../../Repetier.h"
 #include <string.h>
 #include "FatVolume.h"
 //------------------------------------------------------------------------------
@@ -529,7 +531,7 @@ fail:
   return false;
 }
 //------------------------------------------------------------------------------
-bool FatVolume::wipe(print_t* pr) {
+bool FatVolume::wipe() {
   cache_t* cache;
   uint16_t count;
   uint32_t lbn;
@@ -561,8 +563,8 @@ bool FatVolume::wipe(print_t* pr) {
   count = 2*m_blocksPerFat;
   lbn = m_fatStartBlock;
   for (uint32_t nb = 0; nb < count; nb++) {
-    if (pr && (nb & 0XFF) == 0) {
-      pr->write('.');
+    if ((nb & 0XFF) == 0) {
+      Com::print('.');
     }
     if (!writeBlock(lbn + nb, cache->data)) {
       DBG_FAIL_MACRO;
@@ -594,10 +596,7 @@ bool FatVolume::wipe(print_t* pr) {
       goto fail;
     }
   }
-  if (pr) {
-    pr->write('\r');
-    pr->write('\n');
-  }
+  Com::println();
   m_fatType = 0;
   return true;
 

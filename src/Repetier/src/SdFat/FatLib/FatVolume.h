@@ -31,7 +31,7 @@
 #include <stddef.h>
 #include "FatLibConfig.h"
 #include "FatStructs.h"
-#include "BlockDriver.h"
+#include "../BlockDriver.h"
 //------------------------------------------------------------------------------
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 /** Macro for debug. */
@@ -50,18 +50,18 @@
 //------------------------------------------------------------------------------
 #if ENABLE_ARDUINO_FEATURES
 /** Use Print for Arduino */
-typedef Print print_t;
+// typedef Print print_t;
 #else  // ENABLE_ARDUINO_FEATURES
 /**
  * \class CharWriter
  * \brief Character output - often serial port.
  */
-class CharWriter {
+/*class CharWriter {
  public:
   virtual size_t write(char c) = 0;
   virtual size_t write(const char* s) = 0;
 };
-typedef CharWriter print_t;
+typedef CharWriter print_t;*/
 #endif  // ENABLE_ARDUINO_FEATURES
 //------------------------------------------------------------------------------
 // Forward declaration of FatVolume.
@@ -250,7 +250,7 @@ class FatVolume {
    * \param[in] pr print stream for status dots.
    * \return true for success else false.
    */
-  bool wipe(print_t* pr = 0);
+  bool wipe();
   /** Debug access to FAT table
    *
    * \param[in] n cluster number.

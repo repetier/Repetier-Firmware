@@ -306,7 +306,7 @@ public:
 };
 
 #if JSON_OUTPUT
-#include "../../libraries/SdFat/SdFat.h"
+#include "../SdFat/SdFat.h"
 // Struct to hold Gcode file information 32 bytes
 #define GENBY_SIZE 16
 class GCodeFileInfo {

@@ -23,7 +23,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wall -Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include "SdSpiDriver.h"

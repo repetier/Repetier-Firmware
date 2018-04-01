@@ -83,9 +83,28 @@ void SDCard::initsd() {
     if (!fat.begin(SDSS, SD_SCK_MHZ(50))) {
         Com::printFLN(Com::tSDInitFail);
         sdmode = 100; // prevent automount loop!
+        if (fat.card()->errorCode()) {
+            Com::printFLN(PSTR(
+             "\nSD initialization failed.\n"
+             "Do not reformat the card!\n"
+             "Is the card correctly inserted?\n"
+             "Is chipSelect set to the correct value?\n"
+             "Does another SPI device need to be disabled?\n"
+             "Is there a wiring/soldering problem?"));
+            Com::printFLN(PSTR("errorCode: "), int(fat.card()->errorCode()));
+            return;
+        }
+        if (fat.vol()->fatType() == 0) {
+            Com::printFLN(PSTR("Can't find a valid FAT16/FAT32 partition.\n"));
+            return;
+        }
+        if (!fat.vwd()->isOpen()) {
+            Com::printFLN(PSTR("Can't open root directory.\n"));
+            return;
+        }
         return;
     }
-
+    Com::printFLN(PSTR("Card successfully initialized."));
     sdactive = true;
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED, true);
     HAL::pingWatchdog();
@@ -450,7 +469,7 @@ void SDCard::ls() {
     fat.chdir();
 
     file.openRoot(fat.vol());
-    file.ls(0, 0);
+    file.ls(LS_R | LS_SIZE,0);
     Com::printFLN(Com::tEndFileList);
 }
 
@@ -472,8 +491,7 @@ void SDCard::lsJSON(const char* filename) {
     Com::printF(Com::tJSONDir);
     SDCard::printEscapeChars(filename);
     Com::printF(Com::tJSONFiles);
-    // TODO: Implement lsJson again
-    // dir.lsJSON();
+    dir.lsJSON();
     Com::printFLN(Com::tJSONArrayEnd);
 }
 
