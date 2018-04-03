@@ -591,9 +591,9 @@ extern volatile uint8_t executePeriodical;
 extern uint8_t counter500ms;
 extern void writeMonitor();
 
-#if SDSUPPORT
 extern char tempLongFilename[LONG_FILENAME_LENGTH + 1];
 extern char fullName[LONG_FILENAME_LENGTH * SD_MAX_FOLDER_DEPTH + SD_MAX_FOLDER_DEPTH + 1];
+#if SDSUPPORT
 #define SHORT_FILENAME_LENGTH 14
 
 enum LsAction { LS_SerialPrint,

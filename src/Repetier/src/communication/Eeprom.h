@@ -56,7 +56,6 @@ class EEPROM {
     static EEPROMVar storeVar;
     static void callHandle();
     static char prefix[20];
-#if EEPROM_MODE != 0
     static void updateVariation(fast8_t data);
     static uint reservedEnd; // Last position for reserved data
     static unsigned int variation1, variation2;
@@ -67,7 +66,6 @@ class EEPROM {
 public:
     /// Start a timer to store everything to eeprom
 
-#endif
 public:
     static void init();
     static void markChanged();

@@ -314,9 +314,7 @@ public:
     FSTRINGVAR(tWait)
 #endif // WAITING_IDENTIFIER
 
-#if EEPROM_MODE == 0
     FSTRINGVAR(tNoEEPROMSupport)
-#else
     FSTRINGVAR(tZProbeOffsetZ)
 #if FEATURE_Z_PROBE
     FSTRINGVAR(tZProbeHeight)
@@ -424,7 +422,6 @@ public:
     FSTRINGVAR(tEPRAdvanceL)
     FSTRINGVAR(tEPRPreheatTemp)
     FSTRINGVAR(tEPRPreheatBedTemp)
-#endif
 #if SDSUPPORT
     //FSTRINGVAR(tSDRemoved)
     //FSTRINGVAR(tSDInserted)

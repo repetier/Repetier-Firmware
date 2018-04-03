@@ -39,7 +39,7 @@
 // The follwing variables are required early to decide on the right modules.
 #define NUM_EXTRUDER 2
 #define MOTHERBOARD 405 // 405
-#define EEPROM_MODE 2
+#define EEPROM_MODE 1
 #define RFSERIAL Serial
 #define WAITING_IDENTIFIER "wait"
 #define JSON_OUTPUT 1
@@ -150,6 +150,16 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
+// Park position used when pausing from firmware side
+#if PRINTER_TYPE == 2
+#define PARK_POSITION_X (0)
+#define PARK_POSITION_Y (70)
+#else 
+#define PARK_POSITION_X (X_MIN_POS)
+#define PARK_POSITION_Y (Y_MIN_POS + Y_MAX_LENGTH)
+#endif
+#define PARK_POSITION_Z_RAISE 10
+
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1100
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1100
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100

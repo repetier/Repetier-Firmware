@@ -21,9 +21,7 @@
 uint8_t axisBits[NUM_AXES];
 uint8_t allAxes;
 
-#if EEPROM_MODE != 0
 uint Motion1::eprStart;
-#endif
 Motion1Buffer Motion1::buffers[PRINTLINE_CACHE_SIZE]; // Buffer storage
 float Motion1::currentPosition[NUM_AXES];             // Current printer position
 float Motion1::currentPositionTransformed[NUM_AXES];
@@ -41,6 +39,7 @@ float Motion1::homeRetestDistance[NUM_AXES];
 float Motion1::homeEndstopDistance[NUM_AXES];
 float Motion1::homeRetestReduction[NUM_AXES];
 float Motion1::memory[MEMORY_POS_SIZE][NUM_AXES + 1];
+float Motion1::parkPosition[3];
 float Motion1::autolevelTransformation[9]; ///< Transformation matrix
 float Motion1::advanceK = 0;               // advance spring constant
 float Motion1::advanceEDRatio = 0;         // Ratio of extrusion
@@ -160,6 +159,10 @@ void Motion1::setFromConfig() {
     motors[Y_AXIS] = &YMotor;
     motors[Z_AXIS] = &ZMotor;
     motors[E_AXIS] = nullptr;
+
+    parkPosition[X_AXIS] = PARK_POSITION_X;
+    parkPosition[Y_AXIS] = PARK_POSITION_Y;
+    parkPosition[Z_AXIS] = PARK_POSITION_Z_RAISE;
 
 #if NUM_AXES > A_AXIS
     resolution[A_AXIS] = AAXIS_STEPS_PER_MM;
@@ -1055,6 +1058,13 @@ void Motion1Buffer::unblock() {
     // Com::printFLN(" f ", (int)flags);
 }
 
+void Motion1::moveToParkPosition() {
+    setTmpPositionXYZ(parkPosition[X_AXIS], parkPosition[Y_AXIS], IGNORE_COORDINATE);
+    moveByOfficial(tmpPosition, XY_SPEED);
+    setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::min(maxPos[Z_AXIS], parkPosition[Z_AXIS] + currentPosition[Z_AXIS]) );
+    moveByOfficial(tmpPosition, Z_SPEED);
+}
+
 /// Pushes current position to memory stack. Return true on success.
 bool Motion1::pushToMemory() {
     if (memoryPos == MEMORY_POS_SIZE) {
@@ -1342,11 +1352,14 @@ void Motion1::eepromHandle() {
         p += EPR_M1_ENDSTOP_DISTANCE + 4;
     }
     EEPROM::removePrefix();
-    EEPROM::handleByte(EPR_M1_ALWAYS_CHECK_ENDSTOPS, PSTR("Always check endstops"), alwaysCheckEndstops);
+    EEPROM::handleFloat(eprStart + EPR_M1_PARK_X, PSTR("Park position X [mm]"), 2, parkPosition[X_AXIS]);
+    EEPROM::handleFloat(eprStart + EPR_M1_PARK_Y, PSTR("Park position Y [mm]"), 2, parkPosition[Y_AXIS]);
+    EEPROM::handleFloat(eprStart + EPR_M1_PARK_Z, PSTR("Park position Z raise [mm]"), 2, parkPosition[Z_AXIS]);
+    EEPROM::handleByte(eprStart + EPR_M1_ALWAYS_CHECK_ENDSTOPS, PSTR("Always check endstops"), alwaysCheckEndstops);
 #if FEATURE_AXISCOMP
-    EEPROM::handleFloat(EPR_AXISCOMP_TANXY, Com::tAxisCompTanXY, 6, axisCompTanXY);
-    EEPROM::handleFloat(EPR_AXISCOMP_TANYZ, Com::tAxisCompTanYZ, 6, axisCompTanYZ);
-    EEPROM::handleFloat(EPR_AXISCOMP_TANXZ, Com::tAxisCompTanXZ, 6, axisCompTanXZ);
+    EEPROM::handleFloat(eprStart + EPR_AXISCOMP_TANXY, Com::tAxisCompTanXY, 6, axisCompTanXY);
+    EEPROM::handleFloat(eprStart + EPR_AXISCOMP_TANYZ, Com::tAxisCompTanYZ, 6, axisCompTanYZ);
+    EEPROM::handleFloat(eprStart + EPR_AXISCOMP_TANXZ, Com::tAxisCompTanXZ, 6, axisCompTanXZ);
 #endif
 }
 void Motion1::updateDerived() {

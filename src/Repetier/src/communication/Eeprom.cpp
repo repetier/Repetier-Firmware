@@ -28,21 +28,17 @@ uint EEPROM::storePos; // where does M206 want to store
 EEPROMType EEPROM::storeType;
 EEPROMVar EEPROM::storeVar;
 char EEPROM::prefix[20];
-#if EEPROM_MODE != 0
 uint EEPROM::reservedEnd = EPR_START_RESERVE; // Last position for reserved data
 unsigned int EEPROM::variation1 = 0, EEPROM::variation2 = 0;
 fast8_t EEPROM::changedTimer = 0;
-#endif
 
 uint EEPROM::reserve(uint8_t sig, uint8_t version, uint length) {
-#if EEPROM_MODE != 0
     uint r = reservedEnd;
     reservedEnd += length;
     updateVariation(sig);
     updateVariation(version);
     updateVariation(static_cast<uint8_t>(length & 255));
     return r;
-#endif
 }
 
 void EEPROM::timerHandler() {
@@ -51,7 +47,7 @@ void EEPROM::timerHandler() {
         return;
     }
     changedTimer--;
-    if (changedTimer == 0) {
+    if (changedTimer == 0) {        
         storeDataIntoEEPROM();
     }
 #endif
@@ -64,7 +60,6 @@ void EEPROM::markChanged() {
 }
 
 void EEPROM::update(GCode* com) {
-#if EEPROM_MODE != 0
     if (com->hasT() && com->hasP()) {
         storePos = com->P;
         mode = 1;
@@ -96,9 +91,6 @@ void EEPROM::update(GCode* com) {
         }
         callHandle();
     }
-#else
-    Com::printErrorF(Com::tNoEEPROMSupport);
-#endif
 }
 
 void EEPROM::callHandle() {
@@ -190,7 +182,6 @@ void EEPROM::initBaudrate() {
     }
 #endif
 }
-#if EEPROM_MODE != 0
 void EEPROM::updateVariation(fast8_t data) {
     variation1 += data;
     if (variation1 >= 255) {
@@ -201,7 +192,6 @@ void EEPROM::updateVariation(fast8_t data) {
         variation2 -= 255;
     }
 }
-#endif
 
 #ifndef USE_CONFIGURATION_BAUD_RATE
 #define USE_CONFIGURATION_BAUD_RATE 0
@@ -264,13 +254,8 @@ With
 - description = Definition of the value
 */
 void EEPROM::writeSettings() {
-#if EEPROM_MODE != 0
     mode = 0;
     callHandle();
-
-#else
-    Com::printErrorF(Com::tNoEEPROMSupport);
-#endif
 }
 
 #if EEPROM_MODE != 0

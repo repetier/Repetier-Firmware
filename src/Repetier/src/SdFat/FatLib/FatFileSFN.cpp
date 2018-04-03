@@ -25,6 +25,7 @@
 #include "../../../Repetier.h"
 #include "FatFile.h"
 #include "FatFileSystem.h"
+#if SDSUPPORT
 //------------------------------------------------------------------------------
 bool FatFile::getSFN(char* name) {
   dir_t* dir;
@@ -275,3 +276,4 @@ fail:
   return false;
 }
 #endif  // !USE_LONG_FILE_NAMES
+#endif

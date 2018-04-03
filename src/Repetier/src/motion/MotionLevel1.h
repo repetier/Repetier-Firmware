@@ -127,13 +127,14 @@ public:
 #else
 #define EPR_M1_AXIS_COMP_END EPR_M1_AUTOLEVEL_MATRIX + 36
 #endif
-#define EPR_M1_TOTAL EPR_M1_AXIS_COMP_END
+#define EPR_M1_PARK_X EPR_M1_AXIS_COMP_END
+#define EPR_M1_PARK_Y EPR_M1_AXIS_COMP_END + 4
+#define EPR_M1_PARK_Z EPR_M1_AXIS_COMP_END + 8
+#define EPR_M1_TOTAL EPR_M1_AXIS_COMP_END + 12
 
 class Motion1 {
 public:
-#if EEPROM_MODE != 0
     static uint eprStart;
-#endif
     static float autolevelTransformation[9]; ///< Transformation matrix
     static float currentPosition[NUM_AXES];  // Current printer position
     static float currentPositionTransformed[NUM_AXES];
@@ -150,6 +151,7 @@ public:
     static float homeRetestDistance[NUM_AXES];
     static float homeRetestReduction[NUM_AXES];
     static float homeEndstopDistance[NUM_AXES];
+    static float parkPosition[3];
     static StepperDriverBase* drivers[NUM_MOTORS];
     static float advanceK;       // advance spring constant
     static float advanceEDRatio; // Ratio of extrusion
@@ -216,6 +218,7 @@ public:
     static void insertWaitIfNeeded();
     static void LaserWarmUp(uint32_t wait);
     static void reportBuffers();
+    static void moveToParkPosition();
     /// Pushes current position to memory stack. Return true on success.
     static bool pushToMemory();
     /// Pop memorized position to tmpPosition

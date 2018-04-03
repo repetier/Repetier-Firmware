@@ -286,9 +286,7 @@ FSTRINGVALUE(Com::tZProbePrinterHeight, "Printer height:")
 #ifdef WAITING_IDENTIFIER
 FSTRINGVALUE(Com::tWait, WAITING_IDENTIFIER)
 #endif // WAITING_IDENTIFIER
-#if EEPROM_MODE == 0
 FSTRINGVALUE(Com::tNoEEPROMSupport, "No EEPROM support compiled.\r\n")
-#else
 FSTRINGVALUE(Com::tZProbeOffsetZ, "Coating thickness [mm]")
 #if FEATURE_Z_PROBE
 FSTRINGVALUE(Com::tZProbeHeight, "Z-probe height [mm]")
@@ -412,7 +410,6 @@ FSTRINGVALUE(Com::tEPRAdvanceL, "advance L [0=off]")
 FSTRINGVALUE(Com::tEPRPreheatTemp, "Preheat temp. [�C]")
 FSTRINGVALUE(Com::tEPRPreheatBedTemp, "Bed Preheat temp. [�C]")
 
-#endif
 #if SDSUPPORT
 //FSTRINGVALUE(Com::tSDRemoved,UI_TEXT_SD_REMOVED)
 //FSTRINGVALUE(Com::tSDInserted,UI_TEXT_SD_INSERTED)
