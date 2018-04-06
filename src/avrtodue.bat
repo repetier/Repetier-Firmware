@@ -6,12 +6,12 @@ copy ArduinoAVR\Repetier\Commands.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\Communication.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\Eeprom.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\Extruder.*  ArduinoDue\Repetier
-copy ArduinoAVR\Repetier\FatStructs.h  ArduinoDue\Repetier
+REM copy ArduinoAVR\Repetier\FatStructs.h  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\gcode.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\motion.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\Printer.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\SDCard.cpp  ArduinoDue\Repetier
-copy ArduinoAVR\Repetier\SdFat.*  ArduinoDue\Repetier
+REM copy ArduinoAVR\Repetier\SdFat.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\ui.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\Drivers.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\uiconfig.h  ArduinoDue\Repetier
@@ -24,6 +24,7 @@ copy ArduinoAVR\Repetier\BedLeveling.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\DisplayList.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\Endstops.*  ArduinoDue\Repetier
 copy ArduinoAVR\Repetier\Distortion.*  ArduinoDue\Repetier
+xcopy ArduinoAVR\Repetier\src  ArduinoDue\Repetier\src  /S /E /Y
 
 echo Copying finished. DUE tree is now up to date.
 REM pause

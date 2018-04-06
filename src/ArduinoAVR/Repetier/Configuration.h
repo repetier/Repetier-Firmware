@@ -984,6 +984,16 @@ on this endstop.
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
 
+// Park position used when pausing from firmware side
+#if DRIVE_SYSTEM == DELTA
+#define PARK_POSITION_X (0)
+#define PARK_POSITION_Y (70)
+#else 
+#define PARK_POSITION_X (X_MIN_POS)
+#define PARK_POSITION_Y (Y_MIN_POS + Y_MAX_LENGTH)
+#endif
+#define PARK_POSITION_Z_RAISE 10
+
 // ##########################################################################################
 // ##                           Movement settings                                          ##
 // ##########################################################################################

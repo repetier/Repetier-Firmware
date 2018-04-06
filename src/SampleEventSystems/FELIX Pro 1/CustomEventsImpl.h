@@ -1,4 +1,5 @@
 extern const char extzCalibGCode[] PROGMEM;
+extern const char extzCalibGCode2[] PROGMEM;
 extern const char calibrationGCode[] PROGMEM;
 extern const char removeBedGCode[] PROGMEM;
  
@@ -348,14 +349,116 @@ bool cExecuteOverride(int action,bool allowMoves) {
       uid.pushMenu(&ui_msg_calibrating_bed, true);
       Printer::homeAxis(true, true, true);
       Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, 3, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
-      runBedLeveling(2);
+      if(!runBedLeveling(2)) {
+        uid.popMenu(false);
+        uid.pushMenu(&cui_msg_autolevel_failed, true);    
+      } else {
+        uid.popMenu(true);
+      }
       Extruder::disableAllHeater();
-      uid.popMenu(true);
       return true;
 #endif      
   }
   return false;
 }
+
+#ifndef TEC4
+bool zDiffCalib() {       // G134 P0 S1\n
+        // - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
+        float z = 0;
+        int p = 0;
+        int s = 1;
+        int startExtruder = Extruder::current->id;
+        extruder[p].zOffset = 0;
+        float mins[NUM_EXTRUDER], maxs[NUM_EXTRUDER], avg[NUM_EXTRUDER];
+        for(int i = 0; i < NUM_EXTRUDER; i++) { // silence unnecessary compiler warning
+            avg[i] = 0;
+        }
+        bool bigError = false;
+
+#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
+        float actTemp[NUM_EXTRUDER];
+        for(int i = 0; i < NUM_EXTRUDER; i++)
+            actTemp[i] = extruder[i].tempControl.targetTemperatureC;
+        Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+        Commands::waitUntilEndOfAllMoves();
+#if ZHOME_HEAT_ALL
+        for(int i = 0; i < NUM_EXTRUDER; i++) {
+            Extruder::setTemperatureForExtruder(RMath::max(actTemp[i], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), i, false, false);
+        }
+        for(int i = 0; i < NUM_EXTRUDER; i++) {
+            if(extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
+                Extruder::setTemperatureForExtruder(RMath::max(actTemp[i], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), i, false, true);
+        }
+#else
+        if(extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
+            Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), Extruder::current->id, false, true);
+#endif
+#endif
+
+#ifndef G134_REPETITIONS
+#define G134_REPETITIONS 3
+#endif
+#ifndef G134_PRECISION
+#define G134_PRECISION 0.05
+#endif
+        Printer::startProbing(true);
+        for(int r = 0; r < G134_REPETITIONS && !bigError; r++) {
+            Extruder::selectExtruderById(p);
+            float refHeight = Printer::runZProbe(false, false);
+            if(refHeight == ILLEGAL_Z_PROBE) {
+                bigError = true;
+                break;
+            }
+            for(int i = 0; i < NUM_EXTRUDER && !bigError; i++) {
+                if(i == p) continue;
+                if(s >= 0 && i != s) continue;
+                extruder[i].zOffset = 0;
+                Extruder::selectExtruderById(i);
+                float height = Printer::runZProbe(false, false);
+                if(height == ILLEGAL_Z_PROBE) {
+                    bigError = true;
+                    break;
+                }
+                float off = (height - refHeight + z);
+                if(r == 0) {
+                    avg[i] = mins[i] = maxs[i] = off;
+                } else {
+                    avg[i] += off;
+                    if(off < mins[i]) mins[i] = off;
+                    if(off > maxs[i]) maxs[i] = off;
+                    if(maxs[i] - mins[i] > G134_PRECISION) {
+                        Com::printErrorFLN(PSTR("Deviation between measurements were too big, please repeat."));
+                        bigError = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if(!bigError) {
+            for(int i = 0; i < NUM_EXTRUDER; i++) {
+                if(s >= 0 && i != s) continue;
+                extruder[i].zOffset = avg[i] * Printer::axisStepsPerMM[Z_AXIS] / G134_REPETITIONS;
+            }
+#if EEPROM_MODE != 0
+            EEPROM::storeDataIntoEEPROM(0);
+#endif
+        }
+        Extruder::selectExtruderById(startExtruder);
+        Printer::finishProbing();
+#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
+#if ZHOME_HEAT_ALL
+        for(int i = 0; i < NUM_EXTRUDER; i++)
+            Extruder::setTemperatureForExtruder(actTemp[i], i, false, false);
+        for(int i = 0; i < NUM_EXTRUDER; i++)
+            Extruder::setTemperatureForExtruder(actTemp[i], i, false, actTemp[i] > MAX_ROOM_TEMPERATURE);
+#else
+        Extruder::setTemperatureForExtruder(actTemp[Extruder::current->id], Extruder::current->id, false, actTemp[Extruder::current->id] > MAX_ROOM_TEMPERATURE);
+#endif
+#endif
+  return bigError;
+}
+#endif
 
 void cExecute(int action,bool allowMoves) {
   switch(action) {
@@ -574,7 +677,23 @@ void cExecute(int action,bool allowMoves) {
   case UI_ACTION_START_CZREFH:
     cZPHeight1();
     break;
-#endif        
+#endif
+  case UI_ACTION_RESET_EEPROM:
+#if EEPROM_MODE != 0  
+    EEPROM::restoreEEPROMSettingsFromConfiguration();
+    EEPROM::storeDataIntoEEPROM(false);
+#endif    
+    break;   
+  case UI_ACTION_EXTRXY_V2:
+    uid.pushMenu(&cui_msg_preparing,true);
+    if (!Printer::isHomedAll()) {
+      Printer::homeAxis(true,true,true);
+    }
+    Extruder::selectExtruderById(0);
+    Printer::moveToReal(0,240,40,IGNORE_COORDINATE,100);
+    uid.popMenu(false);
+    uid.pushMenu(&cui_msg_ext_xy_1, true);
+    break;       
   }
 }
 
@@ -610,16 +729,150 @@ void cNextPrevious(int action,bool allowMoves,int increment) {
     break;   
   }
 }
+
+bool measureXEdge(float x, float y, float width, float treshhold,float &result) {
+  float xleft = x - width;
+  float xright = x + width;
+  float zleft, zright, zcenter, zopt;
+  Printer::moveToReal(xleft,y,2,IGNORE_COORDINATE,100);
+  zleft = Printer::runZProbe(true, true, 1, true, false);
+  if (zleft == ILLEGAL_Z_PROBE) {
+    return false;
+  }
+  Printer::moveToReal(xright,y,2,IGNORE_COORDINATE,100);
+  zright = Printer::runZProbe(true, true, 1, true, false);
+  if (zright == ILLEGAL_Z_PROBE) {
+    return false;
+  }
+  if (fabs(zright - zleft) < treshhold) {
+    Com::printFLN(PSTR("No card detected, aborting."));
+    return false;
+  }
+  zopt = 0.5 * (zleft + zright);
+  do {
+    Printer::moveToReal(xleft + width,y,2,IGNORE_COORDINATE,40);
+    zcenter = Printer::runZProbe(true, true, 1, true, false);
+    if (zcenter == ILLEGAL_Z_PROBE) {
+      return false;
+    }
+    if (zcenter < zopt) {
+      xright = xleft + width;
+    } else {
+      xleft += width;
+    }
+    width *= 0.5;
+  } while(width > 0.005);
+  result = xleft + width;
+  return true;
+} 
+ 
+bool measureYEdge(float x, float y, float width, float treshhold,float &result) {
+  float xleft = y - width;
+  float xright = y + width;
+  float zleft, zright, zcenter, zopt;
+  Printer::moveToReal(x, xleft,2,IGNORE_COORDINATE,100);
+  zleft = Printer::runZProbe(true, true, 1, true, false);
+  if (zleft == ILLEGAL_Z_PROBE) {
+    return false;
+  }
+  Printer::moveToReal(x,xright,2,IGNORE_COORDINATE,100);
+  zright = Printer::runZProbe(true, true, 1, true, false);
+  if (zright == ILLEGAL_Z_PROBE) {
+    return false;
+  }
+  if (fabs(zright - zleft) < treshhold) {
+    Com::printFLN(PSTR("No card detected, aborting."));
+    return false;
+  }
+  zopt = 0.5 * (zleft + zright);
+  do {
+    Printer::moveToReal(x,xleft + width,2,IGNORE_COORDINATE,100);
+    zcenter = Printer::runZProbe(true, true, 1, true, false);
+    if (zcenter == ILLEGAL_Z_PROBE) {
+      return false;
+    }
+    if (zcenter > zopt) {
+      xright = xleft + width;
+    } else {
+      xleft += width;
+    }
+    width *= 0.5;
+  } while(width > 0.005);
+  result = xleft + width;
+  return true;
+}
  
 void cOkWizard(int action) {
   switch(action) {
+  case UI_ACTION_EXTRXY_V2_1:
+    {
+      float x1,x2,y1,y2;
+      uid.popMenu(false);
+      uid.pushMenu(&cui_msg_ext_xy_info, true);
+      extruder[1].xOffset = static_cast<int32_t>(Printer::axisStepsPerMM[X_AXIS] * 16);
+      extruder[1].yOffset = 0;
+      Printer::setBlockingReceive(true);
+      if (!measureXEdge(CARD_EDGE_X, CARD_EDGE_Y - 30, 30, CARD_TRESHHOLD, x1)) {
+        uid.popMenu(false);
+        uid.pushMenu(&cui_msg_ext_xy_error, true);
+        Printer::setBlockingReceive(false);
+        break;
+      }
+      Com::printFLN(PSTR("Extruder 1 X Edge:"), x1);
+      Extruder::selectExtruderById(1);
+      if (!measureXEdge(CARD_EDGE_X, CARD_EDGE_Y - 30, 30, CARD_TRESHHOLD, x2)) {
+        uid.popMenu(false);
+        uid.pushMenu(&cui_msg_ext_xy_error, true);
+        Printer::setBlockingReceive(false);
+        break;
+      }
+      Extruder::selectExtruderById(0);
+      Com::printFLN(PSTR("Extruder 2 X Edge:"), x2);
+      if (!measureYEdge(CARD_EDGE_X + 30, CARD_EDGE_Y, 30, CARD_TRESHHOLD, y1)) {
+        uid.popMenu(false);
+        uid.pushMenu(&cui_msg_ext_xy_error, true);
+        Printer::setBlockingReceive(false);
+        break;
+      }
+      Com::printFLN(PSTR("Extruder 1 Y Edge:"), y1);
+      Extruder::selectExtruderById(1);
+      if (!measureYEdge(CARD_EDGE_X + 30, CARD_EDGE_Y, 30, CARD_TRESHHOLD, y2)) {
+        uid.popMenu(false);
+        uid.pushMenu(&cui_msg_ext_xy_error, true);
+        Printer::setBlockingReceive(false);
+        break;
+      }
+      Com::printFLN(PSTR("Extruder 2 Y Edge:"), y2);
+      Extruder::selectExtruderById(0);
+      Printer::moveToReal(0,240,40,IGNORE_COORDINATE,100);
+
+      int32_t xcor = static_cast<int32_t>(Printer::axisStepsPerMM[X_AXIS] * (x2 - x1));
+      int32_t ycor = static_cast<int32_t>(Printer::axisStepsPerMM[Y_AXIS] * (y2 - y1));
+      extruder[1].xOffset += xcor;
+      extruder[1].yOffset += ycor;
+      Com::printF(PSTR("Calibration result xOffset_after:"),extruder[1].xOffset,3);
+      Com::printFLN(PSTR(" yOffset_after:"),extruder[1].yOffset,3);
+      if(xcor != 0 || ycor != 0)
+        EEPROM::storeDataIntoEEPROM(false);
+      uid.popMenu(false);
+      uid.pushMenu(&cui_msg_ext_xy_success, true);
+      Printer::setBlockingReceive(false);
+    }
+    break;
   case UI_ACTION_CZREFH_SUCC:
     uid.menuLevel = 0;
     break;
-  case UI_ACTION_CALEX_Z2:
-     uid.popMenu(false);
-     uid.pushMenu(&ui_msg_extzcalib,true);
-     flashSource.executeCommands(extzCalibGCode,false,UI_ACTION_CALEX_Z3);
+  case UI_ACTION_CALEX_Z2:  {
+      uid.popMenu(false);
+      uid.pushMenu(&ui_msg_extzcalib,true);
+      flashSource.executeCommands(extzCalibGCode,true,0);
+      bool err = zDiffCalib();
+      flashSource.executeCommands(extzCalibGCode2,false,err ? 0 : UI_ACTION_CALEX_Z3);
+      if(err) {
+        uid.popMenu(false);
+        uid.pushMenu(&cui_msg_exzautolevel_failed, true);
+      }
+     }
      break;
   case UI_ACTION_FC_CUSTOM_SET:
     setPreheatTemps(Printer::wizardStack[0].l, 55, false, false);
@@ -761,7 +1014,12 @@ FSTRINGVALUE(extzCalibGCode,
 "M109 S190 T1\n"
 "G28\n"
 "G1 X137 Y45 Z10 F9000\n"
-"G134 P0 S1\n" //G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
+//"G134 P0 S1\n" //G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
+//"M104 S0 T0\n"
+//"M104 S0 T1\n"
+//"M400"
+);
+FSTRINGVALUE(extzCalibGCode2,
 "M104 S0 T0\n"
 "M104 S0 T1\n"
 "M400"

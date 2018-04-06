@@ -1249,6 +1249,7 @@ public:
     static void pausePrint();
     static void continuePrint();
     static void stopPrint();
+	static void moveToParkPosition();
 #if FEATURE_Z_PROBE || defined(DOXYGEN)
     /** \brief Prepares printer for probing commands.
 

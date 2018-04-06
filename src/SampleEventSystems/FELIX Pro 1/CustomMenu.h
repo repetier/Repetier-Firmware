@@ -64,6 +64,7 @@ UI_STICKYMENU(ui_exy3,UI_EXY3_ITEMS,5)
 
 UI_MENU_ACTIONCOMMAND_T(ui_calex,UI_CTEXT_CALIBRATE_EXTRUDERS_ID,UI_ACTION_CALEX)
 UI_MENU_ACTIONCOMMAND_T(ui_calex_xy,UI_CTEXT_CALIBRATE_XY_ID,UI_ACTION_CALEX_XY)
+UI_MENU_ACTIONCOMMAND(ui_calex_xyv2,"Calibrate XY w. Card",UI_ACTION_EXTRXY_V2)
 //added by FELIX
 //====================
 #ifdef TEC4
@@ -75,8 +76,8 @@ UI_MENU_ACTIONCOMMAND_T(ui_calex_z,UI_CTEXT_CALIBRATE_Z_ID,UI_ACTION_CALEX_Z)
 #define UI_CALEXTR_SUBITEMS {&ui_menu_back, &ui_calex_xy}
 UI_MENU(ui_calextr_sub,UI_CALEXTR_SUBITEMS,2)
 #else
-#define UI_CALEXTR_SUBITEMS {&ui_menu_back, &ui_calex_z, &ui_calex_xy}
-UI_MENU(ui_calextr_sub,UI_CALEXTR_SUBITEMS,3)
+#define UI_CALEXTR_SUBITEMS {&ui_menu_back, &ui_calex_z, &ui_calex_xy, &ui_calex_xyv2}
+UI_MENU(ui_calextr_sub,UI_CALEXTR_SUBITEMS,4)
 #endif
 //====================
 //added by FELIX
@@ -92,6 +93,13 @@ UI_MENU_ACTIONCOMMAND_T(ui_preheatcool2,UI_CTEXT_PREHEATCOOL2_ID,UI_ACTION_PRECO
 UI_MENU_ACTIONCOMMAND_T(ui_removebed,UI_CTEXT_REMOVEBED_ID,UI_ACTION_REMOVEBED)
 
 UI_WIZARD4_T(cui_msg_measuring, UI_ACTION_STATE,UI_TEXT_EMPTY_ID, UI_TEXT_MEASURING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
+UI_WIZARD4(cui_msg_ext_xy_1, UI_ACTION_EXTRXY_V2_1,"Place card at the", "marked spot.", "", "     >>> OK <<<")
+UI_WIZARD4(cui_msg_ext_xy_error, UI_ACTION_MESSAGE,"Calibration failed", "", "", "     >>> OK <<<")
+UI_WIZARD4(cui_msg_ext_xy_success, UI_ACTION_MESSAGE,"Extruder Offset", "Calibration Finished.", "", "     >>> OK <<<")
+UI_WIZARD4(cui_msg_ext_xy_info, UI_ACTION_STATE,"XY Offset Calibration", "   Measuring ...", "", "   Please wait")
+UI_WIZARD4(cui_msg_autolevel_failed, UI_ACTION_MESSAGE,"Autoleveling failed", "Plate is not leveled!", "", "     >>> OK <<<")
+UI_WIZARD4(cui_msg_exzautolevel_failed, UI_ACTION_MESSAGE,"Autoleveling failed", "Extruder offsets", " not leveled!", "     >>> OK <<<")
+
 #ifndef TEC4
 UI_WIZARD4(cui_msg_preparing, UI_ACTION_STATE,"", "   Preparing ...", "", "   Please wait")
 #else
@@ -112,6 +120,7 @@ UI_STICKYMENU(ui_half_show,UI_HALF_ITEMS,5)
 
 
 // Define precision for temperatures. With small displays only integer values fit.
+#undef UI_TEMP_PRECISION
 #define UI_TEMP_PRECISION 0
 
 // Define precision for temperatures. With small displays only integer values fit.
@@ -1232,8 +1241,9 @@ UI_MENU_SUBMENU_T(ui_menu_conf_bed,    UI_TEXT_HEATING_BED_ID,  ui_menu_bedconf)
 #if EEPROM_MODE!=0
 UI_MENU_ACTIONCOMMAND_T(ui_menu_conf_to_eeprom, UI_TEXT_STORE_TO_EEPROM_ID, UI_ACTION_STORE_EEPROM)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_conf_from_eeprom, UI_TEXT_LOAD_EEPROM_ID, UI_ACTION_LOAD_EEPROM)
-#define UI_MENU_EEPROM_COND ,&ui_menu_conf_to_eeprom,&ui_menu_conf_from_eeprom
-#define UI_MENU_EEPROM_CNT 2
+UI_MENU_ACTIONCOMMAND(ui_menu_conf_reset_eeeprom, "Reset EEPROM", UI_ACTION_RESET_EEPROM)
+#define UI_MENU_EEPROM_COND ,&ui_menu_conf_to_eeprom,&ui_menu_conf_from_eeprom, &ui_menu_conf_reset_eeeprom
+#define UI_MENU_EEPROM_CNT 3
 UI_MENU_ACTION2_T(ui_menu_eeprom_saved,  UI_ACTION_DUMMY, UI_TEXT_EEPROM_STOREDA_ID, UI_TEXT_EEPROM_STOREDB_ID)
 UI_MENU_ACTION2_T(ui_menu_eeprom_loaded, UI_ACTION_DUMMY, UI_TEXT_EEPROM_LOADEDA_ID, UI_TEXT_EEPROM_LOADEDB_ID)
 #else

@@ -613,6 +613,13 @@ void Printer::updateAdvanceFlags() {
 #endif
 }
 
+void Printer::moveToParkPosition() {
+  if(Printer::isHomedAll()) { // for safety move only when homed!
+	moveToReal(EEPROM::parkX(),EEPROM::parkY(),IGNORE_COORDINATE,IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS], true);
+	moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,RMath::min(zMin + zLength, currentPosition[Z_AXIS] + EEPROM::parkZ()),IGNORE_COORDINATE, Printer::maxFeedrate[Z_AXIS], true);
+  }
+}
+
 // This is for untransformed move to coordinates in printers absolute Cartesian space
 uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
     if(x != IGNORE_COORDINATE)

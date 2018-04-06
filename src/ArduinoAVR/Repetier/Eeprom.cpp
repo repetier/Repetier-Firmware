@@ -516,6 +516,9 @@ void EEPROM::initalizeUncached()
     HAL::eprSetFloat(EPR_BENDING_CORRECTION_B,BENDING_CORRECTION_B);
     HAL::eprSetFloat(EPR_BENDING_CORRECTION_C,BENDING_CORRECTION_C);
     HAL::eprSetFloat(EPR_ACCELERATION_FACTOR_TOP,ACCELERATION_FACTOR_TOP);
+    HAL::eprSetFloat(EPR_PARK_X,PARK_POSITION_X);
+    HAL::eprSetFloat(EPR_PARK_Y,PARK_POSITION_Y);
+    HAL::eprSetFloat(EPR_PARK_Z,PARK_POSITION_Z_RAISE);
 
 }
 
@@ -775,6 +778,11 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
             Printer::axisX2StepsPerMM = X2AXIS_STEPS_PER_MM;
         }
 #endif        
+		if(version < 19) {
+		    HAL::eprSetFloat(EPR_PARK_X,PARK_POSITION_X);
+		    HAL::eprSetFloat(EPR_PARK_Y,PARK_POSITION_Y);
+		    HAL::eprSetFloat(EPR_PARK_Z,PARK_POSITION_Z_RAISE);
+		}
         /*        if (version<8) {
         #if DRIVE_SYSTEM==DELTA
                   // Prior to version 8, the Cartesian max was stored in the zmax
@@ -916,6 +924,10 @@ writeFloat(EPR_X2AXIS_STEPS_PER_MM, Com::tEPRX2StepsPerMM, 4);
     writeFloat(EPR_X_LENGTH, Com::tEPRXMaxLength);
     writeFloat(EPR_Y_LENGTH, Com::tEPRYMaxLength);
     writeFloat(EPR_Z_LENGTH, Com::tEPRZMaxLength);
+	writeFloat(EPR_PARK_X, PSTR("Park position X [mm]"));
+	writeFloat(EPR_PARK_Y, PSTR("Park position Y [mm]"));
+	writeFloat(EPR_PARK_Z, PSTR("Park position Z raise [mm]"));
+
 #if ENABLE_BACKLASH_COMPENSATION
     writeFloat(EPR_BACKLASH_X, Com::tEPRXBacklash);
     writeFloat(EPR_BACKLASH_Y, Com::tEPRYBacklash);

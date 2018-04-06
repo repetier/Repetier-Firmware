@@ -25,7 +25,7 @@
 #include <math.h>
 #include <stdint.h>
 //#define REPETIER_VERSION "0.92.10"
-#define REPETIER_VERSION "1.0.1"
+#define REPETIER_VERSION "1.0.2"
 
 // Use new communication model for multiple channels - only until stable, then old version gets deleted
 #define NEW_COMMUNICATION 1
@@ -620,7 +620,7 @@ inline void memcopy4(void *dest,void *source) {
 #endif
 
 #if SDSUPPORT
-#include "SdFat.h"
+#include "src/SdFat/SdFat.h"
 #endif
 
 #include "gcode.h"
@@ -970,11 +970,11 @@ extern uint8_t fanKickstart;
 extern uint8_t fan2Kickstart;
 #endif
 
-#if SDSUPPORT
 extern char tempLongFilename[LONG_FILENAME_LENGTH+1];
 extern char fullName[LONG_FILENAME_LENGTH*SD_MAX_FOLDER_DEPTH+SD_MAX_FOLDER_DEPTH+1];
+#if SDSUPPORT
 #define SHORT_FILENAME_LENGTH 14
-#include "SdFat.h"
+#include "src/SdFat/SdFat.h"
 
 enum LsAction {LS_SerialPrint,LS_Count,LS_GetFilename};
 class SDCard

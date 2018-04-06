@@ -144,7 +144,8 @@
   totals
   %Ut : Shows printing time in days hours:minutes
   %Uh : Shows printing time in hours
-  %Uf : Shows total filament usage
+  %Uf : Shows total filament usage in m
+  %Uk : Shows total filament usage in km
 
   extruder position
   %x0 : X position

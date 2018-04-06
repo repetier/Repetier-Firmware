@@ -1391,7 +1391,7 @@ void UIDisplay::parse(const char *txt, bool ram) {
                 //char c2 = (ram ? *(txt++) : pgm_read_byte(txt++));
                 txt++; // just skip c sign
                 ivalue = 0;
-				c2 = 'c';
+                c2 = 'c';
             } else ivalue = UI_TEMP_PRECISION;
 
             if(c2 == 'r') { // Extruder relative mode
@@ -1516,9 +1516,9 @@ void UIDisplay::parse(const char *txt, bool ram) {
                         uid.printCols[col++] = '%';
                 } else
 #endif
-{
+                {
                     parse(statusMsg, true);
-					}
+                }
                 break;
             }
             if(c2 == 'c') {
@@ -1678,6 +1678,13 @@ void UIDisplay::parse(const char *txt, bool ram) {
                 float dist = Printer::filamentPrinted * 0.001;
 #endif
                 addFloat(dist, (dist > 9999 ? 6 : 4), (dist > 9999 ? 0 : 1));
+            } else if(c2 == 'k') { // Filament usage in km
+#if EEPROM_MODE
+                float dist = 0.001 * (Printer::filamentPrinted * 0.001 + HAL::eprGetFloat(EPR_PRINTING_DISTANCE));
+#else
+                float dist = 0.001 * (Printer::filamentPrinted * 0.001);
+#endif
+                addFloat(dist, (dist > 999 ? 5 : 3), (dist > 9999 ? 1 : 2));
             } else if(c2 == 'h') { // Printing time in hours
 #if EEPROM_MODE
                 bool alloff = true;
@@ -1888,16 +1895,25 @@ uint16_t nFilesOnCard;
 void UIDisplay::updateSDFileCount() {
 #if SDSUPPORT
     dir_t* p = NULL;
-    SdBaseFile *root = sd.fat.vwd();
-
+    FatFile *root = sd.fat.vwd();
+    FatFile file;
     root->rewind();
     nFilesOnCard = 0;
-    while ((p = root->getLongFilename(p, NULL, 0, NULL))) {
-        if (! (DIR_IS_FILE(p) || DIR_IS_SUBDIR(p)))
+    while (file.openNext(root, O_READ)) {
+        HAL::pingWatchdog();
+        file.getName(tempLongFilename, LONG_FILENAME_LENGTH);
+        //while ((p = root->getLongFilename(p, NULL, 0, NULL))) {
+        // if (! (file.isFile() || file.isDir())) continue;
+        if (folderLevel >= SD_MAX_FOLDER_DEPTH && strcmp(tempLongFilename, "..") == 0) {
+            file.close();
             continue;
-        if (folderLevel >= SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0] == '.' && p->name[1] == '.'))
-            continue;
+        }
+        if (tempLongFilename[0] == '.' && tempLongFilename[1] != '.') {
+            file.close();
+            continue; // MAC CRAP
+        }
         nFilesOnCard++;
+        file.close();
         if (nFilesOnCard > 5000) // Arbitrary maximum, limited only by how long someone would scroll
             return;
     }
@@ -1907,17 +1923,29 @@ void UIDisplay::updateSDFileCount() {
 void getSDFilenameAt(uint16_t filePos, char *filename) {
 #if SDSUPPORT
     dir_t* p = NULL;
-    SdBaseFile *root = sd.fat.vwd();
-
+    FatFile *root = sd.fat.vwd();
+    FatFile file;
     root->rewind();
-    while ((p = root->getLongFilename(p, tempLongFilename, 0, NULL)) != NULL) {
+    while (file.openNext(root, O_READ)) {
         HAL::pingWatchdog();
-        if (!DIR_IS_FILE(p) && !DIR_IS_SUBDIR(p)) continue;
-        if(uid.folderLevel >= SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0] == '.' && p->name[1] == '.')) continue;
-        if (filePos--)
+        file.getName(tempLongFilename, LONG_FILENAME_LENGTH);
+        //while ((p = root->getLongFilename(p, NULL, 0, NULL))) {
+        // if (! (file.isFile() || file.isDir())) continue;
+        if (uid.folderLevel >= SD_MAX_FOLDER_DEPTH && strcmp(tempLongFilename, "..") == 0) {
+            file.close();
             continue;
+        }
+        if (tempLongFilename[0] == '.' && tempLongFilename[1] != '.') {
+            file.close();
+            continue; // MAC CRAP
+        }
+        if (filePos--) {
+            file.close();
+            continue;
+        }
         strcpy(filename, tempLongFilename);
-        if(DIR_IS_SUBDIR(p)) strcat(filename, "/"); // Set marker for directory
+        if(file.isDir()) strcat(filename, "/"); // Set marker for directory
+        file.close();
         break;
     }
 #endif
@@ -1956,7 +1984,8 @@ void sdrefresh(uint16_t &r, char cache[UI_ROWS][MAX_COLS + 1]) {
 #if SDSUPPORT
     dir_t* p = NULL;
     uint16_t offset = uid.menuTop[uid.menuLevel];
-    SdBaseFile *root;
+    FatFile *root;
+    FatFile file;
     uint16_t length, skip;
 
     sd.fat.chdir(uid.cwd);
@@ -1965,32 +1994,41 @@ void sdrefresh(uint16_t &r, char cache[UI_ROWS][MAX_COLS + 1]) {
 
     skip = (offset > 0 ? offset - 1 : 0);
 
-    while (r + offset < nFilesOnCard + 1 && r < UI_ROWS && (p = root->getLongFilename(p, tempLongFilename, 0, NULL))) {
+    while (r + offset < nFilesOnCard + 1 && r < UI_ROWS && file.openNext(root, O_READ)) {
         HAL::pingWatchdog();
+        file.getName(tempLongFilename, LONG_FILENAME_LENGTH);
+        //while ((p = root->getLongFilename(p, NULL, 0, NULL))) {
+        // if (! (file.isFile() || file.isDir())) continue;
+        if (uid.folderLevel >= SD_MAX_FOLDER_DEPTH && strcmp(tempLongFilename, "..") == 0) {
+            file.close();
+            continue;
+        }
+        if (tempLongFilename[0] == '.' && tempLongFilename[1] != '.') {
+            file.close();
+            continue; // MAC CRAP
+        }
         // done if past last used entry
         // skip deleted entry and entries for . and  ..
         // only list subdirectories and files
-        if ((DIR_IS_FILE(p) || DIR_IS_SUBDIR(p))) {
-            if(uid.folderLevel >= SD_MAX_FOLDER_DEPTH && DIR_IS_SUBDIR(p) && !(p->name[0] == '.' && p->name[1] == '.'))
-                continue;
-            if(skip > 0) {
-                skip--;
-                continue;
-            }
-            uid.col = 0;
-            if(r + offset == uid.menuPos[uid.menuLevel])
-                uid.printCols[uid.col++] = CHAR_SELECTOR;
-            else
-                uid.printCols[uid.col++] = ' ';
-            // print file name with possible blank fill
-            if(DIR_IS_SUBDIR(p))
-                uid.printCols[uid.col++] = bFOLD; // Prepend folder symbol
-            length = RMath::min((int)strlen(tempLongFilename), MAX_COLS - uid.col);
-            memcpy(uid.printCols + uid.col, tempLongFilename, length);
-            uid.col += length;
-            uid.printCols[uid.col] = 0;
-            strcpy(cache[r++], uid.printCols);
+        if(skip > 0) {
+            skip--;
+            file.close();
+            continue;
         }
+        uid.col = 0;
+        if(r + offset == uid.menuPos[uid.menuLevel])
+            uid.printCols[uid.col++] = CHAR_SELECTOR;
+        else
+            uid.printCols[uid.col++] = ' ';
+        // print file name with possible blank fill
+        if(DIR_IS_SUBDIR(p))
+            uid.printCols[uid.col++] = bFOLD; // Prepend folder symbol
+        length = RMath::min((int)strlen(tempLongFilename), MAX_COLS - uid.col);
+        memcpy(uid.printCols + uid.col, tempLongFilename, length);
+        uid.col += length;
+        uid.printCols[uid.col] = 0;
+        strcpy(cache[r++], uid.printCols);
+        file.close();
     }
 #endif
 }
@@ -2420,7 +2458,7 @@ void UIDisplay::popMenu(bool refresh) {
 
 void UIDisplay::showMessage(int id) {
     uid.menuLevel = 0;
-	Printer::setUIErrorMessage(true);
+    Printer::setUIErrorMessage(true);
     switch(id) {
     case 1:
         uid.pushMenu(&ui_msg_leveling_error, true);
@@ -3640,15 +3678,11 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
             Printer::pushWizardVar(Printer::coordinateOffset[X_AXIS]);
             Printer::pushWizardVar(Printer::coordinateOffset[Y_AXIS]);
             Printer::pushWizardVar(Printer::coordinateOffset[Z_AXIS]);
-			if(!Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED))
-				Printer::MemoryPosition();
+            if(!Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED))
+                Printer::MemoryPosition();
             Extruder::current->retractDistance(FILAMENTCHANGE_SHORTRETRACT);
-            float newZ = FILAMENTCHANGE_Z_ADD + Printer::currentPosition[Z_AXIS];
             Printer::currentPositionSteps[E_AXIS] = 0;
-            if(Printer::isHomedAll()) { // for safety move only when homed!
-                Printer::moveToReal(Printer::currentPosition[X_AXIS], Printer::currentPosition[Y_AXIS], newZ, 0, Printer::homingFeedrate[Z_AXIS]);
-                Printer::moveToReal(FILAMENTCHANGE_X_POS, FILAMENTCHANGE_Y_POS, newZ, 0, Printer::homingFeedrate[X_AXIS]);
-            }
+            Printer::moveToParkPosition();
             Extruder::current->retractDistance(FILAMENTCHANGE_LONGRETRACT);
             Extruder::current->disableCurrentExtruderMotor();
         }
@@ -3664,12 +3698,8 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
             Printer::pushWizardVar(Printer::coordinateOffset[Z_AXIS]);
             Printer::MemoryPosition();
             Extruder::current->retractDistance(FILAMENTCHANGE_SHORTRETRACT);
-            float newZ = FILAMENTCHANGE_Z_ADD + Printer::currentPosition[Z_AXIS];
             Printer::currentPositionSteps[E_AXIS] = 0;
-            if(Printer::isHomedAll()) { // for safety move only when homed!
-                Printer::moveToReal(Printer::currentPosition[X_AXIS], Printer::currentPosition[Y_AXIS], newZ, 0, Printer::homingFeedrate[Z_AXIS]);
-                Printer::moveToReal(FILAMENTCHANGE_X_POS, FILAMENTCHANGE_Y_POS, newZ, 0, Printer::homingFeedrate[X_AXIS]);
-            }
+            Printer::moveToParkPosition();
             //Extruder::current->retractDistance(FILAMENTCHANGE_LONGRETRACT);
             Extruder::pauseExtruders(false);
             Commands::waitUntilEndOfAllMoves();
