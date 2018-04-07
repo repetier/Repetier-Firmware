@@ -98,14 +98,7 @@ class SdFileSystem : public FatFileSystem {
   }
   /** %Print any SD error code to Serial and halt. */
   void errorHalt() {
-    errorHalt(&Serial);
-  }
-  /** %Print any SD error code and halt.
-   *
-   * \param[in] pr Print destination.
-   */
-  void errorHalt(Print* pr) {
-    errorPrint(pr);
+    errorPrint();
     SysCall::halt();
   }
   /** %Print msg, any SD error code and halt.
@@ -113,60 +106,31 @@ class SdFileSystem : public FatFileSystem {
    * \param[in] msg Message to print.
    */
   void errorHalt(char const* msg) {
-    errorHalt(&Serial, msg);
-  }
-  /** %Print msg, any SD error code, and halt.
-   *
-   * \param[in] pr Print destination.
-   * \param[in] msg Message to print.
-   */
-  void errorHalt(Print* pr, char const* msg) {
-    errorPrint(pr, msg);
-    SysCall::halt();
+    errorHalt(msg);
   }
   /** %Print any SD error code to Serial */
   void errorPrint() {
-    errorPrint(&Serial);
-  }
-  /** %Print any SD error code.
-   * \param[in] pr Print device.
-   */
-  void errorPrint(Print* pr) {
     if (!cardErrorCode()) {
       return;
     }
-    pr->print(F("SD errorCode: 0X"));
-    pr->print(cardErrorCode(), HEX);
-    pr->print(F(",0X"));
-    pr->println(cardErrorData(), HEX);
+    Com::printF(PSTR("SD errorCode: 0X"));
+    Com::print((int32_t)cardErrorCode());
+    Com::printF(PSTR(",0X"));
+    Com::print((int32_t)cardErrorData());
+    Com::println();
   }
   /** %Print msg, any SD error code.
    *
    * \param[in] msg Message to print.
    */
   void errorPrint(const char* msg) {
-    errorPrint(&Serial, msg);
-  }
-  /** %Print msg, any SD error code.
-   *
-   * \param[in] pr Print destination.
-   * \param[in] msg Message to print.
-   */
-  void errorPrint(Print* pr, char const* msg) {
-    pr->print(F("error: "));
-    pr->println(msg);
-    errorPrint(pr);
+    Com::printF(PSTR("error: "));
+    Com::printFLN(msg);
+    errorPrint();
   }
   /** %Print any SD error code and halt. */
   void initErrorHalt() {
-    initErrorHalt(&Serial);
-  }
-  /** %Print error details and halt after begin fails.
-   *
-   * \param[in] pr Print destination.
-   */
-  void initErrorHalt(Print* pr) {
-    initErrorPrint(pr);
+    initErrorPrint();
     SysCall::halt();
   }
   /**Print message, error details, and halt after begin() fails.
@@ -174,38 +138,23 @@ class SdFileSystem : public FatFileSystem {
    * \param[in] msg Message to print.
    */
   void initErrorHalt(char const *msg) {
-    initErrorHalt(&Serial, msg);
+    initErrorHalt(msg);
   }
-  /**Print message, error details, and halt after begin() fails.
-   * \param[in] pr Print device.
-   * \param[in] msg Message to print.
-   */
-  void initErrorHalt(Print* pr, char const *msg) {
-    pr->println(msg);
-    initErrorHalt(pr);
-  }
-
+  
   /** Print error details after begin() fails. */
   void initErrorPrint() {
-    initErrorPrint(&Serial);
-  }
-  /** Print error details after begin() fails.
-   *
-   * \param[in] pr Print destination.
-   */
-  void initErrorPrint(Print* pr) {
     if (cardErrorCode()) {
-      pr->println(F("Can't access SD card. Do not reformat."));
+      Com::printFLN(PSTR("Can't access SD card. Do not reformat."));
       if (cardErrorCode() == SD_CARD_ERROR_CMD0) {
-        pr->println(F("No card, wrong chip select pin, or SPI problem?"));
+        Com::printFLN(PSTR("No card, wrong chip select pin, or SPI problem?"));
       }
-      errorPrint(pr);
+      errorPrint();
     } else if (vol()->fatType() == 0) {
-      pr->println(F("Invalid format, reformat SD."));
+      Com::printFLN(PSTR("Invalid format, reformat SD."));
     } else if (!vwd()->isOpen()) {
-      pr->println(F("Can't open root directory."));
+      Com::printFLN(PSTR("Can't open root directory."));
     } else {
-      pr->println(F("No error found."));
+      Com::printFLN(PSTR("No error found."));
     }
   }
   /**Print message and error details and halt after begin() fails.
@@ -213,16 +162,8 @@ class SdFileSystem : public FatFileSystem {
    * \param[in] msg Message to print.
    */
   void initErrorPrint(char const *msg) {
-    initErrorPrint(&Serial, msg);
-  }
-  /**Print message and error details and halt after begin() fails.
-   *
-   * \param[in] pr Print destination.
-   * \param[in] msg Message to print.
-   */
-  void initErrorPrint(Print* pr, char const *msg) {
-    pr->println(msg);
-    initErrorPrint(pr);
+    Com::printFLN(msg);
+    initErrorPrint();
   }
 #if defined(ARDUINO) || defined(DOXYGEN)
   /** %Print msg, any SD error code, and halt.
@@ -230,15 +171,7 @@ class SdFileSystem : public FatFileSystem {
    * \param[in] msg Message to print.
    */
   void errorHalt(const __FlashStringHelper* msg) {
-    errorHalt(&Serial, msg);
-  }
-  /** %Print msg, any SD error code, and halt.
-   *
-   * \param[in] pr Print destination.
-   * \param[in] msg Message to print.
-   */
-  void errorHalt(Print* pr, const __FlashStringHelper* msg) {
-    errorPrint(pr, msg);
+    errorPrint(reinterpret_cast<const char*>(msg));
     SysCall::halt();
   }
 
@@ -247,48 +180,25 @@ class SdFileSystem : public FatFileSystem {
    * \param[in] msg Message to print.
    */
   void errorPrint(const __FlashStringHelper* msg) {
-    errorPrint(&Serial, msg);
-  }
-  /** %Print msg, any SD error code.
-   *
-   * \param[in] pr Print destination.
-   * \param[in] msg Message to print.
-   */
-  void errorPrint(Print* pr, const __FlashStringHelper* msg) {
-    pr->print(F("error: "));
-    pr->println(msg);
-    errorPrint(pr);
+    Com::printF(PSTR("error: "));
+    Com::printFLN(reinterpret_cast<const char*>(msg));
+    errorPrint();
   }
   /**Print message, error details, and halt after begin() fails.
     *
     * \param[in] msg Message to print.
     */
   void initErrorHalt(const __FlashStringHelper* msg) {
-    initErrorHalt(&Serial, msg);
-  }
-  /**Print message, error details, and halt after begin() fails.
-   * \param[in] pr Print device for message.
-   * \param[in] msg Message to print.
-   */
-  void initErrorHalt(Print* pr, const __FlashStringHelper* msg) {
-    pr->println(msg);
-    initErrorHalt(pr);
+    Com::printFLN(reinterpret_cast<const char*>(msg));
+    initErrorHalt();
   }
   /**Print message and error details and halt after begin() fails.
    *
    * \param[in] msg Message to print.
    */
   void initErrorPrint(const __FlashStringHelper* msg) {
-    initErrorPrint(&Serial, msg);
-  }
-  /**Print message and error details and halt after begin() fails.
-   *
-   * \param[in] pr Print destination.
-   * \param[in] msg Message to print.
-   */
-  void initErrorPrint(Print* pr, const __FlashStringHelper* msg) {
-    pr->println(msg);
-    initErrorPrint(pr);
+    Com::printFLN(reinterpret_cast<const char*>(msg));
+    initErrorPrint();
   }
 #endif  // defined(ARDUINO) || defined(DOXYGEN)
   /** \return The card error code */
