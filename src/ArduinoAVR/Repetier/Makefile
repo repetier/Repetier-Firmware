@@ -32,33 +32,49 @@
 #
 # $Id$
 
-TARGET = $(notdir $(CURDIR))
-INSTALL_DIR = D:/arduino/arduino-0022
+#TARGET = $(notdir $(CURDIR))
+FORMAT:=ihex
+TARGET = Repetier
+PDEFILE=$(TARGET).ino
+#INSTALL_DIR = D:/arduino/arduino-0022
 UPLOAD_RATE = 38400
-AVRDUDE_PROGRAMMER = stk500v1
+#AVRDUDE_PROGRAMMER = stk500v1
+AVRDUDE_PROGRAMMER = 2232hio
 PORT = COM10
-#MCU = atmega2560
+MCU = atmega2560
 #For "old" Arduino Mega
 #MCU = atmega1280
 #For Sanguinololu
-MCU = atmega644p 
+#MCU = atmega644p 
 F_CPU = 16000000
 
 
 ############################################################################
 # Below here nothing should be changed...
 
-ARDUINO = $(INSTALL_DIR)/hardware/arduino/cores/arduino
-#AVR_TOOLS_PATH = /usr/bin
-AVR_TOOLS_PATH = d:/WinAVR/bin
+#ARDUINO = (INSTALL_DIR)/hardware/arduino/cores/arduino.lib
+# apt-get download  arduino-core
+# dpkg -x arduino-core2_1.0.5.deb  core
+# mv core/usr/share/arduino/hardware/arduino/cores/arduino arduino.lib
+# cp core/usr/share/arduino/hardware/arduino/variants/mega/pins_arduino.h arduino.lib
+# echo '#include "pins_arduino.h"' > $(ARDUINO)/pins_arduino.c
+# cp -a /core/usr/share/arduino/libraries arduino.libraries
+# for f in $(find arduino.libraries -name '*.h'); do dirname $f; done|sort|uniq|sed 's!^!-I!'|tr '\n' ' '>includes
+
+# look in core/usr/share/arduino/revisions.txt, use ARDUINO def from there
+ARDUINO_VER = ARDUINO=105
+ARDUINO = arduino.lib
+AVR_TOOLS_PATH = /usr/bin
+#AVR_TOOLS_PATH = d:/WinAVR/bin
 SRC =  $(ARDUINO)/pins_arduino.c $(ARDUINO)/wiring.c \
 $(ARDUINO)/wiring_analog.c $(ARDUINO)/wiring_digital.c \
 $(ARDUINO)/wiring_pulse.c \
-$(ARDUINO)/wiring_shift.c $(ARDUINO)/WInterrupts.c
+$(ARDUINO)/wiring_shift.c $(ARDUINO)/WInterrupts.c 
 CXXSRC = $(ARDUINO)/HardwareSerial.cpp $(ARDUINO)/WMath.cpp \
-$(ARDUINO)/Print.cpp ./SdFile.cpp ./SdVolume.cpp ./Sd2Card.cpp ./gcode.cpp \
-./Eeprom.cpp ./Extruder.cpp ./Commands.cpp
-FORMAT = ihex
+$(ARDUINO)/Print.cpp  $(shell ls *.cpp) \
+$(ARDUINO)/WString.cpp
+
+#$(ARDUINO)/Print.cpp ./SdFile.cpp ./SdVolume.cpp ./Sd2Card.cpp ./gcode.cpp \
 
 
 # Name of this Makefile (used for "make depend").
@@ -76,8 +92,8 @@ CDEFS = -DF_CPU=$(F_CPU)
 CXXDEFS = -DF_CPU=$(F_CPU)
 
 # Place -I options here
-CINCS = -I$(ARDUINO)
-CXXINCS = -I$(ARDUINO)
+CINCS = -I$(ARDUINO) $(shell cat includes)
+CXXINCS = -I$(ARDUINO) $(shell cat includes)
 
 # Compiler flag to set the C Standard level.
 # c89   - "ANSI" C
@@ -90,16 +106,17 @@ CWARN = -Wall
 CTUNING = -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
 #CEXTRA = -Wa,-adhlns=$(<:.c=.lst)
 
-CFLAGS = $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CWARN) $(CSTANDARD) $(CEXTRA) -MD -MP
-CXXFLAGS = $(CDEFS) $(CINCS) -O$(OPT) -MD -MP
+CFLAGS = $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CWARN) $(CSTANDARD) $(CEXTRA) -MD -MP -D$(ARDUINO_VER)
+CXXFLAGS = $(CDEFS) $(CINCS) -O$(OPT) -MD -MP -D$(ARDUINO_VER)
 #ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs 
-LDFLAGS = -lm -lC -Wl,-Map=applet/$(TARGET).map
+#LDFLAGS = -lm -lC -Wl,-Map=applet/$(TARGET).map
+LDFLAGS = -lm -Wl,-Map=applet/$(TARGET).map
 
 
 # Programming support using avrdude. Settings and variables.
 AVRDUDE_PORT = $(PORT)
 AVRDUDE_WRITE_FLASH = -U flash:w:applet/$(TARGET).hex:i
-AVRDUDE_FLAGS = -D -C $(INSTALL_DIR)/hardware/tools/avrdude.conf \
+AVRDUDE_FLAGS = -D -C $(AVRDUDE_CONF) \
 -p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER) \
 -b $(UPLOAD_RATE)
 
@@ -111,10 +128,13 @@ OBJDUMP = $(AVR_TOOLS_PATH)/avr-objdump
 AR  = $(AVR_TOOLS_PATH)/avr-ar
 SIZE = $(AVR_TOOLS_PATH)/avr-size
 NM = $(AVR_TOOLS_PATH)/avr-nm
-AVRDUDE = $(INSTALL_DIR)/hardware/tools/avrdude
+#AVRDUDE = $(INSTALL_DIR)/hardware/tools/avrdude
+AVRDUDE = /usr/bin/avrdude
+AVRDUDE_CONF = /etc/avrdude.conf
 REMOVE = rm -f
 MV = mv -f
 
+VPATH=.
 # Define all object files.
 OBJ = $(SRC:.c=.o) $(CXXSRC:.cpp=.o) $(ASRC:.S=.o) 
 
@@ -129,11 +149,14 @@ ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
 
 
 # Default target.
-all: applet_files build sizeafter
+all:  build sizeafter
 
-build: elf hex lss
+build: applet/$(TARGET).cpp elf hex lss
 
-applet_files: $(TARGET).pde
+applet:
+	mkdir $@
+
+applet/$(TARGET).cpp: $(PDEFILE) | applet
 	# Here is the "preprocessing".
 	# It creates a .cpp file based with the same name as the .pde file.
 	# On top of the new .cpp file comes the WProgram.h header.
@@ -141,9 +164,8 @@ applet_files: $(TARGET).pde
 	# Then the .cpp file will be compiled. Errors during compile will
 	# refer to this new, automatically generated, file. 
 	# Not the original .pde file you actually edit...
-	test -d applet || mkdir applet
-	echo '#include "WProgram.h"' > applet/$(TARGET).cpp
-	cat $(TARGET).pde >> applet/$(TARGET).cpp
+	#echo '#include "WProgram.h"' > applet/$(TARGET).cpp
+	cat $(PDEFILE) >> applet/$(TARGET).cpp
 	cat $(ARDUINO)/main.cpp >> applet/$(TARGET).cpp
 
 elf: applet/$(TARGET).elf
@@ -185,56 +207,57 @@ extcoff: $(TARGET).elf
 
 .SUFFIXES: .elf .hex .eep .lss .sym
 
-.elf.hex:
+%.hex:%.elf
 	$(OBJCOPY) -O $(FORMAT) -R .eeprom $< $@
 
-.elf.eep:
+%.eep:%.elf
 	-$(OBJCOPY) -j .eeprom --set-section-flags=.eeprom="alloc,load" \
 	--change-section-lma .eeprom=0 -O $(FORMAT) $< $@
 
 # Create extended listing file from ELF output file.
-.elf.lss:
+%.lss:%.elf
 	$(OBJDUMP) -h -S $< > $@
 
 # Create a symbol table from ELF output file.
-.elf.sym:
+%.sym:%.elf
 	$(NM) -n $< > $@
 
+fake_new_delete.o: fake_new_delete.c
+	$(CXX) -c -mmcu=$(MCU) -Wall --pedantic  -fno-exceptions  -Wl,--gc-sections -ffunction-sections -Os -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -ansi -o $@ $<
+
 	# Link: create ELF output file from library.
-applet/$(TARGET).elf: $(TARGET).pde applet/core.a 
-	$(CXX) $(ALL_CXXFLAGS) -o $@ applet/$(TARGET).cpp -L. applet/core.a $(LDFLAGS)
+applet/$(TARGET).elf: $(PDEFILE) applet/core.a fake_new_delete.o
+	$(CXX) $(ALL_CXXFLAGS) -o $@ applet/$(TARGET).cpp -L. applet/core.a fake_new_delete.o $(LDFLAGS) 
 	$(ELFSIZE)
 
-applet/core.a: $(OBJ)
+applet/core.a: $(OBJ) | applet
 	@for i in $(OBJ); do echo $(AR) rcs applet/core.a $$i; $(AR) rcs applet/core.a $$i; done
 
 
 
 # Compile: create object files from C++ source files.
-.cpp.o:
+%.o:%.cpp
 	$(CXX) -c $(ALL_CXXFLAGS) $< -o $@ 
 
 # Compile: create object files from C source files.
-.c.o:
+%.o:%.c
 	$(CC) -c $(ALL_CFLAGS) $< -o $@ 
 
 
 # Compile: create assembler files from C source files.
-.c.s:
+%.s:%.c
 	$(CC) -S $(ALL_CFLAGS) $< -o $@
 
 
 # Assemble: create object files from assembler source files.
-.S.o:
+%.o:%S
 	$(CC) -c $(ALL_ASFLAGS) $< -o $@
 
 
 
 # Target: clean project.
 clean:
-	$(REMOVE) applet/$(TARGET).hex applet/$(TARGET).eep applet/$(TARGET).cof applet/$(TARGET).elf \
-	applet/$(TARGET).map applet/$(TARGET).sym applet/$(TARGET).lss applet/core.a \
-	$(OBJ) $(LST) $(SRC:.c=.s) $(SRC:.c=.d) $(CXXSRC:.cpp=.s) $(CXXSRC:.cpp=.d)
+	$(REMOVE) -r applet	$(OBJ) $(LST) $(SRC:.c=.s) $(SRC:.c=.d) $(CXXSRC:.cpp=.s) $(CXXSRC:.cpp=.d)
 
 depend:
 	if grep '^# DO NOT DELETE' $(MAKEFILE) >/dev/null; \
