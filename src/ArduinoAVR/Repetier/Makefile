@@ -162,6 +162,10 @@ applet:
 
 $(ARDUINO):
 	./get_arduino_libs.sh
+
+fake_new_delete.c fake_new_delete.h:
+	./build_fake_cplus.sh 
+
 applet/core.a applet/$(TARGET).cpp (OBJ): | $(ARDUINO)
 
 applet/$(TARGET).cpp: $(PDEFILE) | applet
@@ -265,7 +269,8 @@ applet/core.a: $(OBJ) | applet
 
 # Target: clean project.
 clean:
-	$(REMOVE) -r applet	$(OBJ) $(LST) $(SRC:.c=.s) $(SRC:.c=.d) $(CXXSRC:.cpp=.s) $(CXXSRC:.cpp=.d)
+	$(REMOVE) -r applet $(OBJ) $(LST) $(SRC:.c=.s) $(SRC:.c=.d) $(CXXSRC:.cpp=.s) $(CXXSRC:.cpp=.d) 
+	$(REMOVE) fake_new_delete*
 
 depend:
 	if grep '^# DO NOT DELETE' $(MAKEFILE) >/dev/null; \
