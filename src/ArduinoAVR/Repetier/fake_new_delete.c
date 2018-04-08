@@ -1,3 +1,6 @@
+/* All credit for this goes to:
+https://www.avrfreaks.net/forum/avr-c-micro-how
+*/
 #include <stdlib.h>
 __extension__ typedef int __guard __attribute__((mode (__DI__)));
 /**To quote Linus - You are Stupid and Ugly if you use C++ in embedded **/
