@@ -37,10 +37,11 @@ FORMAT:=ihex
 TARGET = Repetier
 PDEFILE=$(TARGET).ino
 #INSTALL_DIR = D:/arduino/arduino-0022
-UPLOAD_RATE = 38400
-#AVRDUDE_PROGRAMMER = stk500v1
-AVRDUDE_PROGRAMMER = 2232hio
-PORT = COM10
+#UPLOAD_RATE = 38400
+AVRDUDE_PROGRAMMER = stk500v2
+#AVRDUDE_PROGRAMMER = 2232HIO
+#PORT = COM10
+PORT = /dev/ttyUSB4
 MCU = atmega2560
 #For "old" Arduino Mega
 #MCU = atmega1280
@@ -116,8 +117,8 @@ LDFLAGS = -lm -Wl,-Map=applet/$(TARGET).map
 AVRDUDE_PORT = $(PORT)
 AVRDUDE_WRITE_FLASH = -U flash:w:applet/$(TARGET).hex:i
 AVRDUDE_FLAGS = -D -C $(AVRDUDE_CONF) \
--p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER) \
--b $(UPLOAD_RATE)
+-p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER) 
+#-b $(UPLOAD_RATE)
 
 # Program settings
 CC = $(AVR_TOOLS_PATH)/avr-gcc
@@ -154,6 +155,10 @@ build: applet/$(TARGET).cpp elf hex lss
 
 applet:
 	mkdir $@
+
+$(ARDUINO):
+	./get_arduino_libs.sh
+applet/core.a applet/$(TARGET).cpp (OBJ): | $(ARDUINO)
 
 applet/$(TARGET).cpp: $(PDEFILE) | applet
 	# Here is the "preprocessing".
