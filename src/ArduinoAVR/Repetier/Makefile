@@ -41,7 +41,7 @@ PDEFILE=$(TARGET).ino
 AVRDUDE_PROGRAMMER = stk500v2
 #AVRDUDE_PROGRAMMER = 2232HIO
 #PORT = COM10
-PORT = /dev/ttyUSB4
+PORT?=/dev/ttyUSB4
 MCU = atmega2560
 #For "old" Arduino Mega
 #MCU = atmega1280
@@ -147,6 +147,10 @@ ALL_CFLAGS = -mmcu=$(MCU) -I. $(CFLAGS)
 ALL_CXXFLAGS = -mmcu=$(MCU) -I. $(CXXFLAGS)
 ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
 
+help:
+	@echo "Targets are build, sizeafter, and upload"
+	@echo "for upload, set PORT for the serial terminal"
+	@echo " ex: make PORT=$(PORT) upload"
 
 # Default target.
 all:  build sizeafter
