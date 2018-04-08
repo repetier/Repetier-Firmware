@@ -58,8 +58,7 @@ F_CPU = 16000000
 # mv core/usr/share/arduino/hardware/arduino/cores/arduino arduino.lib
 # cp core/usr/share/arduino/hardware/arduino/variants/mega/pins_arduino.h arduino.lib
 # echo '#include "pins_arduino.h"' > $(ARDUINO)/pins_arduino.c
-# cp -a /core/usr/share/arduino/libraries arduino.libraries
-# for f in $(find arduino.libraries -name '*.h'); do dirname $f; done|sort|uniq|sed 's!^!-I!'|tr '\n' ' '>includes
+# cp -a /core/usr/share/arduino/libraries/SPI/SPI.h $(ARDUINO)
 
 # look in core/usr/share/arduino/revisions.txt, use ARDUINO def from there
 ARDUINO_VER = ARDUINO=105
@@ -92,8 +91,8 @@ CDEFS = -DF_CPU=$(F_CPU)
 CXXDEFS = -DF_CPU=$(F_CPU)
 
 # Place -I options here
-CINCS = -I$(ARDUINO) $(shell cat includes)
-CXXINCS = -I$(ARDUINO) $(shell cat includes)
+CINCS = -I$(ARDUINO) 
+CXXINCS = -I$(ARDUINO)
 
 # Compiler flag to set the C Standard level.
 # c89   - "ANSI" C
