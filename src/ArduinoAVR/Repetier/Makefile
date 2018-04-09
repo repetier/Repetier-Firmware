@@ -79,7 +79,8 @@ $(ARDUINO)/WString.cpp
 
 # Name of this Makefile (used for "make depend").
 MAKEFILE = Makefile
-GCC_WORKAROUND=$(shell _v=$$($(CC) --version|grep GCC|sed 's!.* !!'|tr -d '.'); let v=_v; if [ $$v -ge 480 ]; then echo "0"; else echo "1"; fi )
+GCC_VER=$(shell $(CC) --version|grep GCC|sed 's!.* !!'|tr -d '.' )
+GCC_WORKAROUND=$(shell if [ $(GCC_VER) -ge 480 ]; then echo "0"; else echo "1"; fi 2>/dev/null)
 # Debugging format.
 # Native formats for AVR-GCC's -g are stabs [default], or dwarf-2.
 # AVR (extended) COFF requires stabs, plus an avr-objcopy run.
@@ -242,6 +243,7 @@ fake_new_delete.o: fake_new_delete.c
 
 	# Link: create ELF output file from library.
 applet/$(TARGET).elf: $(PDEFILE) applet/core.a fake_new_delete.o
+	@echo "GCC_VER=$(GCC_VER) GCC_W=$(GCC_WORKAROUND)"
 	$(CXX) $(ALL_CXXFLAGS) -o $@ applet/$(TARGET).cpp -L. applet/core.a fake_new_delete.o $(LDFLAGS) 
 	$(ELFSIZE)
 
