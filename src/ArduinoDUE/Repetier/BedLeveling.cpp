@@ -291,7 +291,9 @@ S = 2 : Like s = 1 plus store results in EEPROM for next connection.
 */
 bool runBedLeveling(int s) {
 	bool success = true;
+#if DRIVE_SYSTEM != DELTA
     Printer::prepareForProbing();
+#endif
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
     float actTemp[NUM_EXTRUDER];
     for(int i = 0; i < NUM_EXTRUDER; i++)
