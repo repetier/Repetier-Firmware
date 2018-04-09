@@ -79,7 +79,7 @@ $(ARDUINO)/WString.cpp
 
 # Name of this Makefile (used for "make depend").
 MAKEFILE = Makefile
-
+GCC_WORKAROUND=$(shell _v=$$($(CC) --version|grep GCC|sed 's!.* !!'|tr -d '.'); let v=_v; if [ $$v -ge 480 ]; then echo "0"; else echo "1"; fi )
 # Debugging format.
 # Native formats for AVR-GCC's -g are stabs [default], or dwarf-2.
 # AVR (extended) COFF requires stabs, plus an avr-objcopy run.
@@ -110,8 +110,11 @@ CFLAGS = $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CWARN) $(CSTANDARD) $(CEXTRA) -M
 CXXFLAGS = $(CDEFS) $(CINCS) -O$(OPT) -MD -MP -D$(ARDUINO_VER)
 #ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs 
 #LDFLAGS = -lm -lC -Wl,-Map=applet/$(TARGET).map
+ifeq ($(GCC_WORKAROUND),1)
+LDFLAGS = -lm -lc -Wl,-Map=applet/$(TARGET).map -lc
+else
 LDFLAGS = -lm -Wl,-Map=applet/$(TARGET).map
-
+endif
 
 # Programming support using avrdude. Settings and variables.
 AVRDUDE_PORT = $(PORT)
