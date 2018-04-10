@@ -1,4 +1,9 @@
 #!/bin/bash
+ARD_VER="1.0.5"
+LAST_OLD="1.0.6"
+
+#Which struct we use
+
 # This is to get the files we need from Arduino to build.
 URL="https://github.com/arduino/Arduino.git"
 # backup
@@ -13,15 +18,15 @@ clone_arduino () {
 		exit 1
 	fi
 	cd ard.all
-	git checkout 1.0.5
+	git checkout $ARD_VER
 	cd ..
 }
 # Grab the 236M beastie
 get_arduino_tag () {
-	wget -O ard.zip 'https://github.com/arduino/Arduino/archive/1.0.5.zip'
+	wget -O ard.zip "https://github.com/arduino/Arduino/archive/$ARD_VER.zip"
 	# unzips to Arduino-1.0.5
 	unzip ard.zip
-	idir="Arduino-1.0.5"
+	idir="Arduino-$ARD_VER"
 }
 # Just get the few files we need. 
 get_short_arduino_libs() {
@@ -33,9 +38,23 @@ mkdir $odir
 #latest version paths:
 #cp ard.all/hardware/arduino/avr/cores/arduino/* $odir
 #cp ard.all/hardware/arduino/avr/variants/mega/* $odir
+#cp ard.all/hardware/arduino/avr/libraries/SPI/src/* $odir
+L=$(echo "$LAST_OLD"|tr -d '.')
+A=$(echo "$ARD_VER"|tr -d '.')
+let l=L
+let a=A
+if [ $a -gt $l ]; then
+	PA="ard.all/hardware/arduino/avr/cores/arduino"
+	PM="ard.all/hardware/arduino/avr/variants/mega"
+	PS="ard.all/hardware/arduino/avr/libraries/SPI/src/SPI.h"
+else
+	PA="ard.all/hardware/arduino/cores/arduino"
+	PM="ard.all/hardware/arduino/variants/mega"
+	PS="ard.all/libraries/SPI/SPI.h"
+fi
 
-cp -a ard.all/hardware/arduino/cores/arduino/* $odir
-cp ard.all/hardware/arduino/variants/mega/* $odir
-cp ard.all/libraries/SPI/SPI.h $odir 
+cp -a $PA/* $odir
+cp $PM/* $odir
+cp $PS $odir 
 echo '#include "pins_arduino.h"' > $odir/pins_arduino.c
 
