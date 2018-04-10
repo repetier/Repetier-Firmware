@@ -80,7 +80,6 @@ $(ARDUINO)/WString.cpp
 # Name of this Makefile (used for "make depend").
 MAKEFILE = Makefile
 GCC_VER=$(shell $(CC) --version|grep GCC|sed 's!.* !!'|tr -d '.' )
-GCC_WORKAROUND=$(shell if [ $(GCC_VER) -ge 480 ]; then echo "0"; else echo "1"; fi 2>/dev/null)
 # Debugging format.
 # Native formats for AVR-GCC's -g are stabs [default], or dwarf-2.
 # AVR (extended) COFF requires stabs, plus an avr-objcopy run.
@@ -111,11 +110,6 @@ CFLAGS = $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CWARN) $(CSTANDARD) $(CEXTRA) -M
 CXXFLAGS = $(CDEFS) $(CINCS) -O$(OPT) -MD -MP -D$(ARDUINO_VER)
 #ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs 
 #LDFLAGS = -lm -lC -Wl,-Map=applet/$(TARGET).map
-ifeq ($(GCC_WORKAROUND),1)
-LDFLAGS = -lm -lc -Wl,-Map=applet/$(TARGET).map -lc
-else
-LDFLAGS = -lm -Wl,-Map=applet/$(TARGET).map
-endif
 
 # Programming support using avrdude. Settings and variables.
 AVRDUDE_PORT = $(PORT)
@@ -125,7 +119,7 @@ AVRDUDE_FLAGS = -D -C $(AVRDUDE_CONF) \
 #-b $(UPLOAD_RATE)
 
 # Program settings
-CC = $(AVR_TOOLS_PATH)/avr-gcc
+CC := $(AVR_TOOLS_PATH)/avr-gcc
 CXX = $(AVR_TOOLS_PATH)/avr-g++
 OBJCOPY = $(AVR_TOOLS_PATH)/avr-objcopy
 OBJDUMP = $(AVR_TOOLS_PATH)/avr-objdump
@@ -139,6 +133,13 @@ REMOVE = rm -f
 MV = mv -f
 
 VPATH=.
+
+GCC_WORKAROUND:=$(shell $(CC) --version|grep GCC|sed 's!.* !!'|tr -d '.'|sed 's!$$!<480!'|bc)
+ifeq ($(GCC_WORKAROUND),1)
+LDFLAGS = -lm -lc -Wl,-Map=applet/$(TARGET).map -lc
+else
+LDFLAGS = -lm -Wl,-Map=applet/$(TARGET).map
+endif
 # Define all object files.
 OBJ = $(SRC:.c=.o) $(CXXSRC:.cpp=.o) $(ASRC:.S=.o) 
 
