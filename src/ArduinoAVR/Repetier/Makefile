@@ -32,6 +32,7 @@
 #
 # $Id$
 
+ARDUINO_TAG?=1.0.5
 #TARGET = $(notdir $(CURDIR))
 FORMAT:=ihex
 TARGET = Repetier
@@ -64,16 +65,22 @@ F_CPU = 16000000
 # look in core/usr/share/arduino/revisions.txt, use ARDUINO def from there
 ARDUINO_VER = ARDUINO=105
 ARDUINO = arduino.lib
+
+HW_SER1:=$(shell echo "$(ARDUINO_TAG)"|tr -d '.'|sed 's!$$!>165!'|bc)
+ifeq ($(HW_SER1),1)
+HW_SER1_SRC:=$(ARDUINO)/HardwareSerial1.cpp $(ARDUINO)/HardwareSerial0.cpp
+HW_C_SRC:=$(ARDUINO)/hooks.c
+endif
+
 AVR_TOOLS_PATH = /usr/bin
 #AVR_TOOLS_PATH = d:/WinAVR/bin
 SRC =  $(ARDUINO)/pins_arduino.c $(ARDUINO)/wiring.c \
 $(ARDUINO)/wiring_analog.c $(ARDUINO)/wiring_digital.c \
-$(ARDUINO)/wiring_pulse.c \
+$(ARDUINO)/wiring_pulse.c $(HW_C_SRC)\
 $(ARDUINO)/wiring_shift.c $(ARDUINO)/WInterrupts.c 
 CXXSRC = $(ARDUINO)/HardwareSerial.cpp $(ARDUINO)/WMath.cpp \
 $(ARDUINO)/Print.cpp  $(shell ls *.cpp) \
-$(ARDUINO)/WString.cpp
-
+$(ARDUINO)/WString.cpp $(HW_SER1_SRC)
 #$(ARDUINO)/Print.cpp ./SdFile.cpp ./SdVolume.cpp ./Sd2Card.cpp ./gcode.cpp \
 
 
@@ -151,22 +158,30 @@ LST = $(ASRC:.S=.lst) $(CXXSRC:.cpp=.lst) $(SRC:.c=.lst)
 ALL_CFLAGS = -mmcu=$(MCU) -I. $(CFLAGS)
 ALL_CXXFLAGS = -mmcu=$(MCU) -I. $(CXXFLAGS)
 ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
-
+RELIB?=0
 help:
-	@echo "Targets are build, sizeafter, and upload"
+	@echo "Targets are build, clean, cleanall, sizeafter, and upload"
 	@echo "for upload, set PORT for the serial terminal"
 	@echo " ex: make PORT=$(PORT) upload"
+	@echo " to use a different ARDUINO tag, set ARDUINO_TAG to tag, i.e. ARDUINO_TAG=$(ARDUINO_TAG)"
+	@echo " Set RELIB to just check out a differene ARDUINO tag and rebuild"
 
 # Default target.
 all:  build sizeafter
-
+ifeq ($(RELIB),1)
+build: cleanlib
+endif
 build: applet/$(TARGET).cpp elf hex lss
 
 applet:
 	mkdir $@
 
 $(ARDUINO):
-	./get_arduino_libs.sh
+ifeq ($(RELIB),1)
+	./get_arduino_libs.sh $(ARDUINO_TAG) 1
+else
+	./get_arduino_libs.sh $(ARDUINO_TAG) 
+endif
 
 fake_new_delete.c fake_new_delete.h:
 	./build_fake_cplus.sh 
@@ -278,6 +293,12 @@ clean:
 	$(REMOVE) -r applet $(OBJ) $(LST) $(SRC:.c=.s) $(SRC:.c=.d) $(CXXSRC:.cpp=.s) $(CXXSRC:.cpp=.d) 
 	$(REMOVE) fake_new_delete*
 
+cleanlib: clean
+	$(REMOVE) -r arduino.lib
+
+cleanall: clean cleanlib
+	$(REMOVE) -r   ard.all
+
 depend:
 	if grep '^# DO NOT DELETE' $(MAKEFILE) >/dev/null; \
 	then \
@@ -289,4 +310,4 @@ depend:
 		>> $(MAKEFILE); \
 	$(CC) -M -mmcu=$(MCU) $(CDEFS) $(CINCS) $(SRC) $(ASRC) >> $(MAKEFILE)
 
-.PHONY:	all build elf hex eep lss sym program coff extcoff clean depend applet_files sizebefore sizeafter
+.PHONY:	all build elf hex eep lss sym program coff extcoff clean cleanlib cleanall depend applet_files sizebefore sizeafter
