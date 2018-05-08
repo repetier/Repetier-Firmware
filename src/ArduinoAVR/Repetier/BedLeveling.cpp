@@ -186,14 +186,15 @@ bool measureAutolevelPlane(Plane &plane) {
     float delta = 1.0 / (BED_LEVELING_GRID_SIZE - 1);
     float ox = EEPROM::zProbeX1();
     float oy = EEPROM::zProbeY1();
-    float ax = delta * (EEPROM::zProbeX2() - EEPROM::zProbeX1());
-    float ay = delta * (EEPROM::zProbeY2() - EEPROM::zProbeY1());
-    float bx = delta * (EEPROM::zProbeX3() - EEPROM::zProbeX1());
-    float by = delta * (EEPROM::zProbeY3() - EEPROM::zProbeY1());
+    float xmax = EEPROM::zProbeX2();
+    float ymax = EEPROM::zProbeY3();
+
+    float deltax = delta * (xmax - ox);
+    float deltay = delta * (ymax - oy);
     for(int ix = 0; ix < BED_LEVELING_GRID_SIZE; ix++) {
         for(int iy = 0; iy < BED_LEVELING_GRID_SIZE; iy++) {
-            float px = ox + static_cast<float>(ix) * ax + static_cast<float>(iy) * bx;
-            float py = oy + static_cast<float>(ix) * ay + static_cast<float>(iy) * by;
+            float px = ox + static_cast<float>(ix) * deltax;
+            float py = oy + static_cast<float>(iy) * deltay;
             Printer::moveTo(px, py, IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
             float h = Printer::runZProbe(false, false);
             if(h == ILLEGAL_Z_PROBE)
