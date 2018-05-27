@@ -330,7 +330,6 @@ STEPPER_CURRENT_CONTROL
 #define SDSS		   4 
 //#define SDSS		   -1
 //#define ORIG_SDCARDDETECT   -1
-#define SDCARDDETECTINVERTED false
 #define LED_PIN 	   -1
 #define ORIG_FAN_PIN 	   12 
 #define ORIG_FAN2_PIN       2
