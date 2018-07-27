@@ -433,19 +433,19 @@ public:
 
     static void handleInterruptEvent();
 
-    static INLINE void setInterruptEvent(uint8_t evt, bool highPriority) {
+    static void setInterruptEvent(uint8_t evt, bool highPriority) {
         if(highPriority || interruptEvent == 0)
             interruptEvent = evt;
     }
     static void reportPrinterMode();
-    static INLINE void setMenuMode(uint16_t mode, bool on) {
+    static void setMenuMode(uint16_t mode, bool on) {
         if(on)
             menuMode |= mode;
         else
             menuMode &= ~mode;
     }
 
-    static INLINE bool isMenuMode(uint8_t mode) {
+    static bool isMenuMode(uint8_t mode) {
         return (menuMode & mode) == mode;
     }
     static void setDebugLevel(uint8_t newLevel);
@@ -456,10 +456,10 @@ public:
     static void toggleCommunication();
     static void toggleNoMoves();
     static void toggleEndStop();
-    static INLINE uint8_t getDebugLevel() {
+    static uint8_t getDebugLevel() {
         return debugLevel;
     }
-    static INLINE bool debugEcho() {
+    static bool debugEcho() {
         return ((debugLevel & 1) != 0);
     }
 

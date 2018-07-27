@@ -2194,7 +2194,7 @@ void Printer::showConfiguration() {
     Com::config(PSTR("NumExtruder:"), NUM_EXTRUDER);
     Com::config(PSTR("MixingExtruder:"), MIXING_EXTRUDER);
     Com::config(PSTR("HeatedBed:"), HAVE_HEATED_BED);
-    Com::config(PSTR("SDCard:"), SDSUPPORT);
+//    Com::config(PSTR("SDCard:"), SDSUPPORT);
     Com::config(PSTR("Fan:"), FAN_PIN > -1 && FEATURE_FAN_CONTROL);
 #if FEATURE_FAN2_CONTROL && defined(FAN2_PIN) && FAN2_PIN > -1
     Com::config(PSTR("Fan2:1"));

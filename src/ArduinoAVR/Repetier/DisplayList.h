@@ -187,11 +187,11 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_CLICK       78
 #define UI_RESET_PIN           80
 #undef SDCARDDETECT
-#define SDCARDDETECT           81
+//#define SDCARDDETECT           81
 #undef SDCARDDETECTINVERTED
-#define SDCARDDETECTINVERTED   0
+//#define SDCARDDETECTINVERTED   0
 #undef SDSUPPORT
-#define SDSUPPORT              1
+//#define SDSUPPORT              1
 
 #elif MOTHERBOARD == 501 // Alligator has own pins layout
 
@@ -488,11 +488,11 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_B      22
 #define UI_RESET_PIN      32
 // Set to -1 if you have not connected that pin
-#define SDCARDDETECT      49
+//#define SDCARDDETECT      49
 #define SDSS              53
 
 #undef SDSUPPORT
-#define SDSUPPORT 1
+//#define SDSUPPORT 1
 #define SDCARDDETECTINVERTED 0
 
 #define UI_HAS_KEYS 1
@@ -910,7 +910,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 
 #if FEATURE_CONTROLLER == CONTROLLER_OPENHARDWARE_LCD2004
 #undef SDSUPPORT
-#define SDSUPPORT 1
+//#define SDSUPPORT 1
 #define SDCARDDETECT -1
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 1
@@ -1430,7 +1430,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #elif MOTHERBOARD == 402 // RADDS
 
 #undef SDCARDDETECT
-#define SDCARDDETECT 14 // sd card detect as shown on drawing
+//#define SDCARDDETECT 14 // sd card detect as shown on drawing
 //#undef SDSS
 //#define SDSS          4
 //#define SPI_PIN         87

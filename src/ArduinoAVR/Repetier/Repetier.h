@@ -612,11 +612,11 @@ inline void memcopy4(void *dest,void *source) {
 
 
 #ifndef SDCARDDETECT
-#define SDCARDDETECT       -1
+//#define SDCARDDETECT       -1
 #endif
 
 #ifndef SDSUPPORT
-#define SDSUPPORT 0
+//#define SDSUPPORT 1
 #endif
 
 #if SDSUPPORT

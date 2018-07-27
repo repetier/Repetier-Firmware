@@ -488,9 +488,9 @@ STEPPER_CURRENT_CONTROL
 #define MAX6675_SS       53
 
 #ifdef AZTEEG_X3
-#define SDSUPPORT 1
-#define SDCARDDETECTINVERTED 0
-#define ORIG_SDCARDDETECT 49
+//#define SDSUPPORT 1
+//#define SDCARDDETECTINVERTED 0
+//#define ORIG_SDCARDDETECT 49
 #undef ORIG_FAN_PIN
 #define ORIG_FAN_PIN           4
 #define ORIG_FAN2_PIN          5
@@ -521,9 +521,9 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 #ifdef AZTEEG_X3_PRO
-#define SDSUPPORT 1
-#define SDCARDDETECTINVERTED false
-#define ORIG_SDCARDDETECT 49
+//#define SDSUPPORT 1
+//#define SDCARDDETECTINVERTED false
+//#define ORIG_SDCARDDETECT 49
 #define SDSS               53
 #undef ORIG_FAN_PIN
 #define ORIG_FAN_PIN           5
@@ -1033,8 +1033,8 @@ STEPPER_CURRENT_CONTROL
 #define SCK_PIN          7
 #define MISO_PIN         6
 #define MOSI_PIN         5
-#define SDSUPPORT 1  // sd card reader on board
-#define ORIG_SDCARDDETECT -1
+//#define SDSUPPORT 1  // sd card reader on board
+//#define ORIG_SDCARDDETECT -1
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS
@@ -1390,8 +1390,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_PS_ON_PIN 15
 
 #define LED_PIN -1
-#define SDSUPPORT 1  // sd card reader on board
-#define ORIG_SDCARDDETECT -1
+//#define SDSUPPORT 1  // sd card reader on board
+//#define ORIG_SDCARDDETECT -1
 
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
@@ -1690,8 +1690,8 @@ STEPPER_CURRENT_CONTROL
 // On board beeper, so define values already here
 #define BEEPER_PIN 23
 #define BEEPER_TYPE 1
-#define SDSUPPORT 1  // sd card reader on board
-#define ORIG_SDCARDDETECT -1
+//#define SDSUPPORT 1  // sd card reader on board
+//#define ORIG_SDCARDDETECT -1
 
 // digital pin mappings
 // PINF.0, 97, STP_DRV1
@@ -1853,7 +1853,7 @@ STEPPER_CURRENT_CONTROL
 // Beeper on AUX-4
 #define BEEPER_PIN 33			
 #define BEEPER_TYPE 1
-#define SDSUPPORT 1  // sd card reader on board
+//#define SDSUPPORT 1  // sd card reader on board
 #define ORIG_SDCARDDETECT -1
 
 
@@ -1950,11 +1950,11 @@ STEPPER_CURRENT_CONTROL
 #define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
 
-#define SDPOWER            1
-#define SDSS               53
-#define ORIG_SDCARDDETECT 	   6
-#define SDSUPPORT 1            // already defined in config.h
-#define SDCARDDETECTINVERTED 1 // already defined in config.h
+//#define SDPOWER            1
+//#define SDSS               53
+//#define ORIG_SDCARDDETECT 	   6
+//#define SDSUPPORT 1            // already defined in config.h
+//#define SDCARDDETECTINVERTED 1 // already defined in config.h
 
 // these pins are defined in the SD library if building with SD support
 // PINB.1, 20, SCK
@@ -2261,7 +2261,7 @@ S3(ext)=9
 
 // Beeper on AUX-4
 #define BEEPER_PIN 61	 
-#define SDSUPPORT 1 // sd card reader on board
+//#define SDSUPPORT 1 // sd card reader on board
 
 // #define UI_DISPLAY_RS_PIN 32
 // #define UI_DISPLAY_ENABLE_PIN 31
