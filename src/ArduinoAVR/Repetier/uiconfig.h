@@ -98,7 +98,7 @@ What display type do you use?
                If you have Sanguino and want to use the library, you need to have Arduino 023 or older. (13.04.2012)
 5 = U8G supported display
 */
-#define UI_DISPLAY_TYPE 5
+//#define UI_DISPLAY_TYPE 5
 
 #if UI_DISPLAY_TYPE == DISPLAY_U8G // Special case for graphic displays
 

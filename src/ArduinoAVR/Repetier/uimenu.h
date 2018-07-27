@@ -30,7 +30,7 @@
 /*
   The menu configuration uses dynamic strings. These dynamic strings can contain
   a placeholder for special values. During print these placeholder are exchanged
-  by their current value. Everything else is printed exactly as written.
+  by their current value. Everything else is printØd exactly as written.
 
   A placeholder always has 3 chars. It starts with a % followed by 2 characters
   defining the value. You can use any placeholder in any position, also it doesn't
@@ -439,7 +439,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_setlang_en, "English", UI_ACTION_LANGUAGE_EN | UI_
 #define ADD_LANG_EN
 #endif // LANGUAGE_EN_ACTIVE
 #if LANGUAGE_DE_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_de, "Deutsch", UI_ACTION_LANGUAGE_DE | UI_ACTION_TOPMENU)
+//UI_MENU_ACTIONCOMMAND(ui_menu_setlang_de, "Deutsch", UI_ACTION_LANGUAGE_DE | UI_ACTION_TOPMENU)
 #if FIRSTLANG
 #define ADD_LANG_DE &ui_menu_setlang_de
 #undef FIRSTLANG
@@ -451,7 +451,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_setlang_de, "Deutsch", UI_ACTION_LANGUAGE_DE | UI_
 #define ADD_LANG_DE
 #endif // LANGUAGE_DE_ACTIVE
 #if LANGUAGE_ES_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_es, "Espanol", UI_ACTION_LANGUAGE_ES | UI_ACTION_TOPMENU)
+//UI_MENU_ACTIONCOMMAND(ui_menu_setlang_es, "Espanol", UI_ACTION_LANGUAGE_ES | UI_ACTION_TOPMENU)
 #if FIRSTLANG
 #define ADD_LANG_ES &ui_menu_setlang_es
 #undef FIRSTLANG
@@ -463,7 +463,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_setlang_es, "Espanol", UI_ACTION_LANGUAGE_ES | UI_
 #define ADD_LANG_ES
 #endif // LANGUAGE_ES_ACTIVE
 #if LANGUAGE_PT_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_pt, "Portugues", UI_ACTION_LANGUAGE_PT | UI_ACTION_TOPMENU)
+//UI_MENU_ACTIONCOMMAND(ui_menu_setlang_pt, "Portugues", UI_ACTION_LANGUAGE_PT | UI_ACTION_TOPMENU)
 #if FIRSTLANG
 #define ADD_LANG_PT &ui_menu_setlang_pt
 #undef FIRSTLANG
@@ -475,7 +475,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_setlang_pt, "Portugues", UI_ACTION_LANGUAGE_PT | U
 #define ADD_LANG_PT
 #endif // LANGUAGE_PT_ACTIVE
 #if LANGUAGE_FR_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_fr, "Francais", UI_ACTION_LANGUAGE_FR | UI_ACTION_TOPMENU)
+//UI_MENU_ACTIONCOMMAND(ui_menu_setlang_fr, "Francais", UI_ACTION_LANGUAGE_FR | UI_ACTION_TOPMENU)
 #if FIRSTLANG
 #define ADD_LANG_FR &ui_menu_setlang_fr
 #undef FIRSTLANG
@@ -487,7 +487,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_setlang_fr, "Francais", UI_ACTION_LANGUAGE_FR | UI
 #define ADD_LANG_FR
 #endif // LANGUAGE_FR_ACTIVE
 #if LANGUAGE_NL_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_nl, "Nederlandse", UI_ACTION_LANGUAGE_NL | UI_ACTION_TOPMENU)
+//UI_MENU_ACTIONCOMMAND(ui_menu_setlang_nl, "Nederlandse", UI_ACTION_LANGUAGE_NL | UI_ACTION_TOPMENU)
 #if FIRSTLANG
 #define ADD_LANG_NL &ui_menu_setlang_nl
 #undef FIRSTLANG
@@ -499,7 +499,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_setlang_nl, "Nederlandse", UI_ACTION_LANGUAGE_NL |
 #define ADD_LANG_NL
 #endif // LANGUAGE_NL_ACTIVE
 #if LANGUAGE_IT_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_it, "Italiano", UI_ACTION_LANGUAGE_IT | UI_ACTION_TOPMENU)
+//UI_MENU_ACTIONCOMMAND(ui_menu_setlang_it, "Italiano", UI_ACTION_LANGUAGE_IT | UI_ACTION_TOPMENU)
 #if FIRSTLANG
 #define ADD_LANG_IT &ui_menu_setlang_it
 #undef FIRSTLANG
@@ -511,7 +511,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_setlang_it, "Italiano", UI_ACTION_LANGUAGE_IT | UI
 #define ADD_LANG_IT
 #endif // LANGUAGE_IT_ACTIVE
 #if LANGUAGE_FI_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_fi, "Suomi", UI_ACTION_LANGUAGE_FI | UI_ACTION_TOPMENU)
+//UI_MENU_ACTIONCOMMAND(ui_menu_setlang_fi, "Suomi", UI_ACTION_LANGUAGE_FI | UI_ACTION_TOPMENU)
 #if FIRSTLANG
 #define ADD_LANG_SE &ui_menu_setlang_fi
 #undef FIRSTLANG
@@ -523,7 +523,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_setlang_fi, "Suomi", UI_ACTION_LANGUAGE_FI | UI_AC
 #define ADD_LANG_FI
 #endif // LANGUAGE_FI_ACTIVE
 #if LANGUAGE_SE_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_se, "Svenska", UI_ACTION_LANGUAGE_SE | UI_ACTION_TOPMENU)
+//UI_MENU_ACTIONCOMMAND(ui_menu_setlang_se, "Svenska", UI_ACTION_LANGUAGE_SE | UI_ACTION_TOPMENU)
 #if FIRSTLANG
 #define ADD_LANG_SE &ui_menu_setlang_se
 #undef FIRSTLANG
@@ -535,7 +535,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_setlang_se, "Svenska", UI_ACTION_LANGUAGE_SE | UI_
 #define ADD_LANG_SE
 #endif // LANGUAGE_SE_ACTIVE
 #if LANGUAGE_CZ_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_cz, "Cestina", UI_ACTION_LANGUAGE_CZ | UI_ACTION_TOPMENU)
+//UI_MENU_ACTIONCOMMAND(ui_menu_setlang_cz, "Cestina", UI_ACTION_LANGUAGE_CZ | UI_ACTION_TOPMENU)
 #if FIRSTLANG
 #define ADD_LANG_CZ &ui_menu_setlang_cz
 #undef FIRSTLANG
@@ -547,7 +547,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_setlang_cz, "Cestina", UI_ACTION_LANGUAGE_CZ | UI_
 #define ADD_LANG_CZ
 #endif // LANGUAGE_CZ_ACTIVE
 #if LANGUAGE_PL_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_pl, "Polski", UI_ACTION_LANGUAGE_PL | UI_ACTION_TOPMENU)
+//UI_MENU_ACTIONCOMMAND(ui_menu_setlang_pl, "Polski", UI_ACTION_LANGUAGE_PL | UI_ACTION_TOPMENU)
 #if FIRSTLANG
 #define ADD_LANG_PL &ui_menu_setlang_pl
 #undef FIRSTLANG
@@ -559,7 +559,7 @@ UI_MENU_ACTIONCOMMAND(ui_menu_setlang_pl, "Polski", UI_ACTION_LANGUAGE_PL | UI_A
 #define ADD_LANG_PL
 #endif // LANGUAGE_PL_ACTIVE
 #if LANGUAGE_TR_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_tr, "T" STR_uuml "rk", UI_ACTION_LANGUAGE_TR | UI_ACTION_TOPMENU)
+//UI_MENU_ACTIONCOMMAND(ui_menu_setlang_tr, "T" STR_uuml "rk", UI_ACTION_LANGUAGE_TR | UI_ACTION_TOPMENU)
 #if FIRSTLANG
 #define ADD_LANG_TR &ui_menu_setlang_tr
 #undef FIRSTLANG
@@ -571,11 +571,11 @@ UI_MENU_ACTIONCOMMAND(ui_menu_setlang_tr, "T" STR_uuml "rk", UI_ACTION_LANGUAGE_
 #define ADD_LANG_TR
 #endif // LANGUAGE_TR_ACTIVE
 
-#define UI_MENU_LANGUAGES {UI_MENU_ADDCONDBACK ADD_LANG_EN ADD_LANG_DE ADD_LANG_ES ADD_LANG_PT ADD_LANG_FR ADD_LANG_NL ADD_LANG_IT ADD_LANG_FI ADD_LANG_SE ADD_LANG_CZ ADD_LANG_PL ADD_LANG_TR}
-#define UI_MENU_LANGUAGES_WIZ {ADD_LANG_EN ADD_LANG_DE ADD_LANG_ES ADD_LANG_PT ADD_LANG_FR ADD_LANG_NL ADD_LANG_IT ADD_LANG_FI ADD_LANG_SE ADD_LANG_CZ ADD_LANG_PL ADD_LANG_TR}
-UI_MENU(ui_menu_languages, UI_MENU_LANGUAGES, UI_MENU_BACKCNT + LANGUAGE_EN_ACTIVE + LANGUAGE_DE_ACTIVE + LANGUAGE_ES_ACTIVE + LANGUAGE_PT_ACTIVE + LANGUAGE_FR_ACTIVE + LANGUAGE_NL_ACTIVE + LANGUAGE_IT_ACTIVE + LANGUAGE_FI_ACTIVE + LANGUAGE_SE_ACTIVE + LANGUAGE_CZ_ACTIVE + LANGUAGE_PL_ACTIVE + LANGUAGE_TR_ACTIVE)
+#define UI_MENU_LANGUAGES {UI_MENU_ADDCONDBACK ADD_LANG_EN}
+#define UI_MENU_LANGUAGES_WIZ {ADD_LANG_EN}
+UI_MENU(ui_menu_languages, UI_MENU_LANGUAGES, UI_MENU_BACKCNT + LANGUAGE_EN_ACTIVE)
 UI_MENU_SUBMENU_T(ui_menu_conf_lang, UI_TEXT_LANGUAGE_ID, ui_menu_languages)
-UI_STICKYMENU(ui_menu_languages_wiz, UI_MENU_LANGUAGES_WIZ, LANGUAGE_EN_ACTIVE + LANGUAGE_DE_ACTIVE + LANGUAGE_ES_ACTIVE + LANGUAGE_PT_ACTIVE + LANGUAGE_FR_ACTIVE + LANGUAGE_NL_ACTIVE + LANGUAGE_IT_ACTIVE + LANGUAGE_FI_ACTIVE + LANGUAGE_SE_ACTIVE + LANGUAGE_CZ_ACTIVE + LANGUAGE_PL_ACTIVE + LANGUAGE_TR_ACTIVE)
+UI_STICKYMENU(ui_menu_languages_wiz, UI_MENU_LANGUAGES_WIZ, LANGUAGE_EN_ACTIVE)
 #define LANGMENU_ENTRY &ui_menu_conf_lang,
 #define LANGMENU_COUNT 1
 #else
