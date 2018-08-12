@@ -126,5 +126,9 @@ extern bool cCustomParser(char c1, char c2);
 
 #define CARD_EDGE_X 90
 #define CARD_EDGE_Y 105
-#define CARD_TRESHHOLD 0.1
+#define CARD_CENTER_X 136
+#define CARD_CENTER_Y 38
+#define CARD_WIDTH 10
+#define CARD_HEIGHT 10
+#define CARD_TRESHHOLD 0.03
 

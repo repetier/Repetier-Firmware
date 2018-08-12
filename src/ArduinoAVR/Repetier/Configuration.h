@@ -1744,6 +1744,7 @@ Always hard to say since the other angle is 89° in this case!
 #undef SDCARDDETECT
 #define SDCARDDETECT -1
 // Change to true if you get a inserted message on removal.
+#undef SDCARDDETECTINVERTED
 #define SDCARDDETECTINVERTED false
 #endif
 /** Show extended directory including file length. Don't use this with Pronterface! */

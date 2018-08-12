@@ -956,7 +956,7 @@ extern void microstepInit();
 #include "motion.h"
 extern long baudrate;
 
-#include "HAL.h"
+// #include "HAL.h"
 
 
 extern unsigned int counterPeriodical;

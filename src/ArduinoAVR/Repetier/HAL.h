@@ -77,7 +77,8 @@ All known Arduino boards use 64. This value is needed for the extruder timing. *
 #include <inttypes.h>
 #include "Stream.h"
 #ifdef EXTERNALSERIAL
-#define SERIAL_RX_BUFFER_SIZE 128
+// Can not change buffer size here, need add build flag -D SERIAL_RX_BUFFER_SIZE=128
+//#define SERIAL_RX_BUFFER_SIZE 128
 #endif
 #if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"

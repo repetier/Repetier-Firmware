@@ -8101,7 +8101,7 @@ void twi_send(uint8_t adr, uint8_t data1, uint8_t data2)
 
 #elif defined(ARDUINO) && defined(__SAM3X8E__)
 /* Arduino Due */
-#include "Arduino.h"
+//#include "Arduino.h"
 #include "sam.h"
 
 /*

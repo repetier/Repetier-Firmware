@@ -2022,6 +2022,7 @@ uint8_t PrintLine::queueNonlinearMove(uint8_t check_endstops, uint8_t pathOptimi
                 Com::printErrorFLN(Com::tDBGDeltaNoMoveinDSegment);
                 return false;  // Line too short in low precision area
             }
+			break;
         }
         fast8_t drivingAxis = X_AXIS;
         p->primaryAxis = VIRTUAL_AXIS; // Virtual axis will lead Bresenham step either way

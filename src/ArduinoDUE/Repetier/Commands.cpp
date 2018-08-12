@@ -1554,7 +1554,8 @@ void Commands::processGCode(GCode *com) {
                     if(off < mins[i]) mins[i] = off;
                     if(off > maxs[i]) maxs[i] = off;
                     if(maxs[i] - mins[i] > G134_PRECISION) {
-                        Com::printErrorFLN(PSTR("Deviation between measurements were too big, please repeat."));
+                        Com::printWarningFLN(PSTR("Deviation between measurements were too big, please repeat."));
+						Com::printFLN(PSTR("Z Offset not computed due to errors"));
                         bigError = true;
                         break;
                     }
@@ -1569,7 +1570,10 @@ void Commands::processGCode(GCode *com) {
 #if EEPROM_MODE != 0
             EEPROM::storeDataIntoEEPROM(0);
 #endif
-        }
+			Com::printFLN(PSTR("Z Offset stored"));
+        } else {
+			Com::printFLN(PSTR("Z Offset not computed due to errors"));
+		}
         Extruder::selectExtruderById(startExtruder);
         Printer::finishProbing();
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
@@ -2200,6 +2204,28 @@ void Commands::processMCode(GCode *com) {
         if(com->hasS())
             Printer::setAutoretract(com->S != 0);
         break;
+	case 218:
+		{
+		 int extId = 0;
+		 if(com->hasT()) extId = com->T;
+		 if(extId >= 0 && extId < NUM_EXTRUDER) {
+			if(com->hasX()) {
+				extruder[extId].xOffset = com->X * Printer::axisStepsPerMM[X_AXIS];
+			}
+			if(com->hasY()) {
+				 extruder[extId].yOffset = com->Y * Printer::axisStepsPerMM[Y_AXIS];
+			}
+			if(com->hasZ()) {
+				extruder[extId].zOffset = com->Z * Printer::axisStepsPerMM[Z_AXIS];
+			}
+#if EEPROM_MODE > 0
+			if(com->hasS() && com->S > 0) {
+				EEPROM::storeDataIntoEEPROM(false);
+			}
+#endif
+		  }
+		}
+		break;
     case 220: // M220 S<Feedrate multiplier in percent>
         changeFeedrateMultiply(com->getS(100));
         break;

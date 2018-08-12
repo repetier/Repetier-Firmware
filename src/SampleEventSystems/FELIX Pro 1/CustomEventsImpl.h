@@ -731,8 +731,9 @@ void cNextPrevious(int action,bool allowMoves,int increment) {
 }
 
 bool measureXEdge(float x, float y, float width, float treshhold,float &result) {
-  float xleft = x - width;
+  float xleft = x; // - width;
   float xright = x + width;
+  width *= 0.5;
   float zleft, zright, zcenter, zopt;
   Printer::moveToReal(xleft,y,2,IGNORE_COORDINATE,100);
   zleft = Printer::runZProbe(true, true, 1, true, false);
@@ -749,16 +750,25 @@ bool measureXEdge(float x, float y, float width, float treshhold,float &result) 
     return false;
   }
   zopt = 0.5 * (zleft + zright);
+  bool leftSide = zleft > zright;
   do {
     Printer::moveToReal(xleft + width,y,2,IGNORE_COORDINATE,40);
     zcenter = Printer::runZProbe(true, true, 1, true, false);
     if (zcenter == ILLEGAL_Z_PROBE) {
       return false;
     }
-    if (zcenter < zopt) {
-      xright = xleft + width;
+    if(leftSide) {
+      if (zcenter < zopt) {
+        xright = xleft + width;
+      } else {
+        xleft += width;
+      }
     } else {
-      xleft += width;
+      if (zcenter > zopt) {
+        xright = xleft + width;
+      } else {
+        xleft += width;
+      }
     }
     width *= 0.5;
   } while(width > 0.005);
@@ -767,8 +777,9 @@ bool measureXEdge(float x, float y, float width, float treshhold,float &result) 
 } 
  
 bool measureYEdge(float x, float y, float width, float treshhold,float &result) {
-  float xleft = y - width;
+  float xleft = y; // - width;
   float xright = y + width;
+  width *= 0.5;
   float zleft, zright, zcenter, zopt;
   Printer::moveToReal(x, xleft,2,IGNORE_COORDINATE,100);
   zleft = Printer::runZProbe(true, true, 1, true, false);
@@ -785,16 +796,25 @@ bool measureYEdge(float x, float y, float width, float treshhold,float &result) 
     return false;
   }
   zopt = 0.5 * (zleft + zright);
+  bool leftSide = zleft > zright;
   do {
     Printer::moveToReal(x,xleft + width,2,IGNORE_COORDINATE,100);
     zcenter = Printer::runZProbe(true, true, 1, true, false);
     if (zcenter == ILLEGAL_Z_PROBE) {
       return false;
     }
-    if (zcenter > zopt) {
-      xright = xleft + width;
+    if(leftSide) {
+      if (zcenter < zopt) {
+        xright = xleft + width;
+      } else {
+        xleft += width;
+      }
     } else {
-      xleft += width;
+      if (zcenter > zopt) {
+        xright = xleft + width;
+      } else {
+        xleft += width;
+      }
     }
     width *= 0.5;
   } while(width > 0.005);
@@ -806,52 +826,82 @@ void cOkWizard(int action) {
   switch(action) {
   case UI_ACTION_EXTRXY_V2_1:
     {
-      float x1,x2,y1,y2;
+      float x1, x2, x3, x4, y1, y2, y3, y4;
       uid.popMenu(false);
       uid.pushMenu(&cui_msg_ext_xy_info, true);
       extruder[1].xOffset = static_cast<int32_t>(Printer::axisStepsPerMM[X_AXIS] * 16);
       extruder[1].yOffset = 0;
       Printer::setBlockingReceive(true);
-      if (!measureXEdge(CARD_EDGE_X, CARD_EDGE_Y - 30, 30, CARD_TRESHHOLD, x1)) {
+      if (!measureXEdge(CARD_CENTER_X, CARD_CENTER_Y, CARD_WIDTH, CARD_TRESHHOLD, x1)) {
         uid.popMenu(false);
         uid.pushMenu(&cui_msg_ext_xy_error, true);
         Printer::setBlockingReceive(false);
         break;
       }
       Com::printFLN(PSTR("Extruder 1 X Edge:"), x1);
-      Extruder::selectExtruderById(1);
-      if (!measureXEdge(CARD_EDGE_X, CARD_EDGE_Y - 30, 30, CARD_TRESHHOLD, x2)) {
+      if (!measureXEdge(CARD_CENTER_X - CARD_WIDTH, CARD_CENTER_Y, CARD_WIDTH, CARD_TRESHHOLD, x3)) {
         uid.popMenu(false);
         uid.pushMenu(&cui_msg_ext_xy_error, true);
         Printer::setBlockingReceive(false);
         break;
       }
-      Extruder::selectExtruderById(0);
+      Com::printFLN(PSTR("Extruder 1 X Edge 2:"), x3);
+      Extruder::selectExtruderById(1);
+      if (!measureXEdge(CARD_CENTER_X, CARD_CENTER_Y, CARD_WIDTH, CARD_TRESHHOLD, x2)) {
+        uid.popMenu(false);
+        uid.pushMenu(&cui_msg_ext_xy_error, true);
+        Printer::setBlockingReceive(false);
+        break;
+      }
       Com::printFLN(PSTR("Extruder 2 X Edge:"), x2);
-      if (!measureYEdge(CARD_EDGE_X + 30, CARD_EDGE_Y, 30, CARD_TRESHHOLD, y1)) {
+      if (!measureXEdge(CARD_CENTER_X - CARD_WIDTH, CARD_CENTER_Y, CARD_WIDTH, CARD_TRESHHOLD, x4)) {
+        uid.popMenu(false);
+        uid.pushMenu(&cui_msg_ext_xy_error, true);
+        Printer::setBlockingReceive(false);
+        break;
+      }
+      Com::printFLN(PSTR("Extruder 2 X Edge 2:"), x4);
+      Extruder::selectExtruderById(0);
+      if (!measureYEdge(CARD_CENTER_X, CARD_CENTER_Y, CARD_HEIGHT, CARD_TRESHHOLD, y1)) {
         uid.popMenu(false);
         uid.pushMenu(&cui_msg_ext_xy_error, true);
         Printer::setBlockingReceive(false);
         break;
       }
       Com::printFLN(PSTR("Extruder 1 Y Edge:"), y1);
+      if (!measureYEdge(CARD_CENTER_X, CARD_CENTER_Y - CARD_HEIGHT, CARD_HEIGHT, CARD_TRESHHOLD, y3)) {
+        uid.popMenu(false);
+        uid.pushMenu(&cui_msg_ext_xy_error, true);
+        Printer::setBlockingReceive(false);
+        break;
+      }
+      Com::printFLN(PSTR("Extruder 1 Y Edge 2:"), y3);
       Extruder::selectExtruderById(1);
-      if (!measureYEdge(CARD_EDGE_X + 30, CARD_EDGE_Y, 30, CARD_TRESHHOLD, y2)) {
+      if (!measureYEdge(CARD_CENTER_X, CARD_CENTER_Y, CARD_HEIGHT, CARD_TRESHHOLD, y2)) {
         uid.popMenu(false);
         uid.pushMenu(&cui_msg_ext_xy_error, true);
         Printer::setBlockingReceive(false);
         break;
       }
       Com::printFLN(PSTR("Extruder 2 Y Edge:"), y2);
+      if (!measureYEdge(CARD_CENTER_X, CARD_CENTER_Y - CARD_HEIGHT, CARD_HEIGHT, CARD_TRESHHOLD, y4)) {
+        uid.popMenu(false);
+        uid.pushMenu(&cui_msg_ext_xy_error, true);
+        Printer::setBlockingReceive(false);
+        break;
+      }
+      Com::printFLN(PSTR("Extruder 2 Y Edge 2:"), y4);
       Extruder::selectExtruderById(0);
       Printer::moveToReal(0,240,40,IGNORE_COORDINATE,100);
 
-      int32_t xcor = static_cast<int32_t>(Printer::axisStepsPerMM[X_AXIS] * (x2 - x1));
-      int32_t ycor = static_cast<int32_t>(Printer::axisStepsPerMM[Y_AXIS] * (y2 - y1));
+      int32_t xcor = static_cast<int32_t>(Printer::axisStepsPerMM[X_AXIS] * -0.5 * (x2 + x4 - x1 - x3));
+      int32_t ycor = static_cast<int32_t>(Printer::axisStepsPerMM[Y_AXIS] * -0.5 * (y2 + y4 - y1 - y3));
       extruder[1].xOffset += xcor;
       extruder[1].yOffset += ycor;
-      Com::printF(PSTR("Calibration result xOffset_after:"),extruder[1].xOffset,3);
-      Com::printFLN(PSTR(" yOffset_after:"),extruder[1].yOffset,3);
+      Com::printF(PSTR("Calibration result xcorr:"), xcor);
+      Com::printFLN(PSTR(" ycorr:"), ycor);      
+      Com::printF(PSTR("Calibration result xOffset_after:"),extruder[1].xOffset);
+      Com::printFLN(PSTR(" yOffset_after:"),extruder[1].yOffset);
       if(xcor != 0 || ycor != 0)
         EEPROM::storeDataIntoEEPROM(false);
       uid.popMenu(false);
@@ -2216,6 +2266,7 @@ FSTRINGVALUE(calibrationGCode,
 "M140 S0\n"
 "M107\n"
 "M84\n"
+"M4202\n"
 #else
 "M140 S55\n"
 "M104 T0 S190\n"
@@ -3375,16 +3426,40 @@ FSTRINGVALUE(calibrationGCode,
 "M107\n"
 "M84\n"
 "M117 Print Complete\n"
+"M4202\n"
 #endif
  );
 bool customMCode(GCode *com) {
   switch(com->M) {
   case 4200: // send calibration gcode
-     flashSource.executeCommands(calibrationGCode,false,0);
+     flashSource.executeCommands(calibrationGCode, false, 0);
      break;
   case 4201:
      uid.pushMenu(&ui_exy3,true);
      break;
+  case 4202:
+     Com::printFLN(PSTR("Calibration Printed"));
+     break;
+  case 4203: // M4203 X<offset> Y<offset> - Store xy calibration offset manually
+    if(com->hasX() && com->hasY()) {
+      int32_t xcor = static_cast<int32_t>((Printer::axisStepsPerMM[X_AXIS] * (com->X - 5)) / 10);
+      int32_t ycor = static_cast<int32_t>((Printer::axisStepsPerMM[Y_AXIS] * (com->Y - 5)) / 10);
+      Com::printF(PSTR(" xOffset_before:"),extruder[1].xOffset,3);
+      #ifdef TEC4
+      extruder[1].xOffset += xcor;
+      #else
+      extruder[1].xOffset -= xcor;
+      #endif
+      Com::printF(PSTR(" xCor:"),xcor,3);
+      Com::printF(PSTR(" xOffset_after:"),extruder[1].xOffset,3);
+      Com::printF(PSTR(" yOffset_before:"),extruder[1].yOffset,3);
+      extruder[1].yOffset += ycor;
+      Com::printF(PSTR(" yCor:"),ycor,3);
+      Com::printFLN(PSTR(" yOffset_after:"),extruder[1].yOffset,3);
+      if(xcor != 0 || ycor != 0)
+        EEPROM::storeDataIntoEEPROM(false);    
+    }
+    break;   
   default:
      return false;
   }

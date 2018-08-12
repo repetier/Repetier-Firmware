@@ -2634,6 +2634,7 @@ int UIDisplay::okAction(bool allowMoves) {
 #endif
 #if DISTORTION_CORRECTION
             case UI_ACTION_MEASURE_DISTORTION2:
+				uid.popMenu(false);
                 uid.pushMenu(&ui_msg_calibrating_bed, true);
                 Printer::measureDistortion();
                 uid.popMenu(true);
