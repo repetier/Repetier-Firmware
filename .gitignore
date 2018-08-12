@@ -30,3 +30,5 @@ activate*.bat
 src/Repetier-Atmel7/*
 src/ArduinoDUE/Repetier.zip
 src/ArduinoAVR/Repetier.zip
+
+workspace.xml

@@ -1,0 +1,42 @@
+Print/Pause handling
+
+Pause handling is a grown structure that has no well accepted general
+rules. That fact that hosts are sending gcode or it may come from
+sd card or flash makes it not easier. A special problem is the host side
+since the firmware has no direct control over it and not all hosts will
+understand the same hints or ignore them. 
+
+So first is what we can do:
+
+sd printing:
+   pause, continue, stop
+   
+host printing:
+  pause: send "RequestPause:"
+  continue: send "RequestContinue:"
+  stop: send "RequestStop:"
+  
+It is up to the host if it understands the requests and does what you expect.
+The pause request is quite old and understood by Repetier-Host and Repetier-Server.
+continue/stop will be available in Repetier-Host 2.0 and Repetier-Server 0.9
+
+There might be the case, for example when firmware senses out of filament
+that it is really important that a print pauses. During pause you need some
+way to continue so options differ if you have a lcd or not. If you have a lcd
+you can decide to stop communication. That way hosts can simply not send new
+commands also they will normally timeout and try again or go into fail state.
+To prevent this firmware will send "busy:reason" to indicate that it currently 
+can not accept new commands but is running normally.
+
+If you do not have a lcd display the solution is of course to send the
+pause requests and hope host will react. 
+
+
+Are we printing at all?
+
+The other question that exists is if we are printing and if the print has paused.
+
+For the firmware we are in paused state if we selected pause in the printer lcd.
+All other cases mean we just get no data. So if host starts a pause it is hosts
+responsibility to also continue. 
+  

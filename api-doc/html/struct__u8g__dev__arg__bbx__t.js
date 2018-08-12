@@ -1,7 +1,7 @@
 var struct__u8g__dev__arg__bbx__t =
 [
-    [ "h", "struct__u8g__dev__arg__bbx__t.html#a3f4daedecdf3e9d710c56dcb6e80cecb", null ],
-    [ "w", "struct__u8g__dev__arg__bbx__t.html#aea376a9f764f4a9cf33e2c9ae174001a", null ],
-    [ "x", "struct__u8g__dev__arg__bbx__t.html#a0bd126a4a84709451f22abb1c7c704d0", null ],
-    [ "y", "struct__u8g__dev__arg__bbx__t.html#a14d91862d05b147bd3ddaa61dec19f21", null ]
+    [ "h", "struct__u8g__dev__arg__bbx__t.html#aa804ffd03c1b566f7691edd37c251852", null ],
+    [ "w", "struct__u8g__dev__arg__bbx__t.html#a70cc8432220532a8e3de66a25bd3d052", null ],
+    [ "x", "struct__u8g__dev__arg__bbx__t.html#a5855c38fb8c7d14fb48fbc1c34a38d95", null ],
+    [ "y", "struct__u8g__dev__arg__bbx__t.html#acbd3c53a46d235ba3bbd8a4ad6dc33aa", null ]
 ];

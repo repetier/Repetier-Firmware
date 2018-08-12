@@ -1,11 +1,17 @@
 var class_r_math =
 [
-    [ "max", "class_r_math.html#abac49478ea4c53e716470bf24f760d65", null ],
-    [ "max", "class_r_math.html#a048ef06d98f1f926ccbec88d46bd55b0", null ],
-    [ "max", "class_r_math.html#aa5d960354774dc177393b360c0f90aa9", null ],
-    [ "max", "class_r_math.html#aa0136b6d9656d51323ec53ab10c13129", null ],
-    [ "min", "class_r_math.html#a0ab39f9cbf141700707689914d3a6769", null ],
-    [ "min", "class_r_math.html#aae78f234a48742ac10b1a231f771d809", null ],
-    [ "min", "class_r_math.html#a2f2bf96d77a187bd4446b4ba3864470d", null ],
-    [ "min", "class_r_math.html#a2c8b1cfa0a9557130c057fc4c8ad7e96", null ]
+    [ "absLong", "class_r_math.html#a934443debcceb483975bb6f473c1dd93", null ],
+    [ "max", "class_r_math.html#ad27f9bcd5691daeda34e020e7104dad2", null ],
+    [ "max", "class_r_math.html#aece34f4296accb6e4d9e032b54c53130", null ],
+    [ "max", "class_r_math.html#ad40cd3eedbc4e78b18f93861edae436c", null ],
+    [ "max", "class_r_math.html#a8932e3cf4f499b801ea223d09b0416d8", null ],
+    [ "min", "class_r_math.html#a44319afcaacd944bdca649894f0d70b1", null ],
+    [ "min", "class_r_math.html#a653c452d8efd0df2fb018041dda05810", null ],
+    [ "min", "class_r_math.html#a94ac506c78bb2dab8f9e48562412b26d", null ],
+    [ "min", "class_r_math.html#a041bc719bb4fb2f804c819c9ad095d41", null ],
+    [ "min", "class_r_math.html#a5983c7eb40b0fc22d8cadedac8c930f7", null ],
+    [ "min", "class_r_math.html#a7081f9bfdfab88153459aab520d59bda", null ],
+    [ "sqr", "class_r_math.html#ab6ac20fcdebcedd7929a3fff26434d6f", null ],
+    [ "sqr", "class_r_math.html#a11d270c10ec6e6e3670885c43861b7b5", null ],
+    [ "sqr", "class_r_math.html#a30c609c088c31aae1e0ce843097e3bcc", null ]
 ];

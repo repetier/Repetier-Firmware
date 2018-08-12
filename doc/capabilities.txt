@@ -1,0 +1,107 @@
+Capabilities detection
+----------------------
+
+While it is nice if a firmware supports some special features, it would be
+even better if hosts would detect that these are available so they
+start using them. Especially with the wild growth of firmware forks and
+versions, no host can know which variant can handle what. So at least
+for Repetier-Firmware we introduce with version 1.0 a new simple protocol
+to tell hosts what features are available, so they can activate them.
+
+To make it easy to detect, a standard M115 report gets now extended by
+one or more lines, each line telling what capability. These lines have the
+following format:
+Cap:<NameOfCapability>:<0 or 1>
+
+Notice: no spaces allowed, Name is upper case with underline to separate words.
+Lines MUST start with "Cap:" so it can be parsed very quickly by hosts.
+
+The last value indicates if that capability is supported or not. The simple
+absence of a message is not enough since it would be possible, that the
+firmware simply does not report capabilities at all and host has to make
+assumptions like showing eeprom editor even with the risk that it is not
+available. Whereas a 0 value shows that a function is known, but the
+functionality is not implemented/active.
+
+Knowing different developers will add other capabilities is no real problem
+as long as all names differ, so hosts can distinguish them by name. Hosts
+not understanding a name simply ignore them.
+
+Currently defined capabilities:
+
+Cap:EEPROM
+
+Defines if firmware is compiled with eeprom support.
+
+Cap:AUTOREPORT_TEMP
+
+Defines if firmware can automatically report temperatures. This feature
+needs to be enabled by M155 S1 so older hosts do not get double responses
+from own M105 requests and auto report feature.
+
+Cap:PROGRESS
+
+Firmware supports the progress protocol:
+- M530 S<printing> L<layer> - Enables explicit printing mode (S1) or disables it (S0). L can set layer count
+- M531 filename - Define filename being printed
+- M532 X<percent> L<curLayer> - update current print state progress (X=0..100) and layer L
+
+This allows a host to enable a special information mode on LCD display, so that
+users see progress in percent, model being printed and layer being printer and
+total layer. Hosts can also use M117 to send time remaining to status line.
+
+This feature should onely be enabled if a lcd is available to show it, otherwise
+the extra commands are useless.
+
+Cap:AUTOLEVEL
+
+Firmware supports autoleveling.
+
+Cap:Z_PROBE
+
+Firmware supports z probing.
+
+Cap:SOFTWARE_POWER
+
+Supports enabling/disabling power with M80/M81
+
+Cap:TOGGLE_LIGHTS
+
+Supports toggling lights on/off with M355.
+
+Cap:PAUSESTOP
+
+Supports bidirectional pause/stop handling. What this means is that this
+system allows it to pause a print controlled by a host from firmware and
+from host. It even allows to pause on printer and continue on host and
+vice versa.
+
+From the firmware side this is achieved by sending
+RequestPause:
+to request host to start pausing and
+RequestContinue:
+to ask hosts to continue printing. The real action is done by the host in any case.
+To stop the print from firmware it would send
+RequestStop:
+
+For the host side the M539 command is used.
+M539 S1 ; enable pause protocol so firmware knows it is supported by host
+M539 P0 ; Host did continue
+M539 P1 ; Host entered pause state
+
+Cap:PREHEAT
+
+Supports storage and retrieval of preheat temperatures. Also allows setting
+preheat temperatures instead of individual temperature. Therefore the M codes
+104,140,109 and 190 have to additional parameter:
+H1 - Set to preheat temperature. Not effective if gcode also contains S param.
+O<offset> - Add offset to temperature. Especially usefull with preheat temperature as base.
+
+M170 - Set or retrieve preheat temperatures
+Parameter:
+  B<bedPreheat> : Sets bed preheat temperature
+  C<chamberPreheat> : Sets heated chamber temperature
+  T<extruder> S<preheatTemp> : Sets preheat temperature for given extruder
+  L0 : List preheat temperatures. Returns
+  PREHEAT_BED:temp PREHEAT0:extr0 PREHEAT1:extr1 PREHEAT_CHAMBER:temp
+    

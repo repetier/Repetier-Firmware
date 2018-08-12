@@ -1,0 +1,59 @@
+Jam Detection
+
+Repetier-Firmware uses one signal jam detection/out of filament devices.
+For jam detection teh signal toggles after some extruder steps while pure
+out of filament sensors just have a signal state for filament in/out.
+
+The jam state is stored in the underlying temperature controller flags and
+can be accessed by
+isJammed():bool
+setJammed(bool):void
+isSlowedDown():bool
+setSlowedDown(bool):void
+
+On global level you have the functions
+
+Printer::isDebugJam():bool
+Printer::isDebugJamOrDisabled():bool
+Printer::setDebugJam(uint8_t b):void
+Printer::isJamcontrolDisabled():void
+Printer::setJamcontrolDisabled(bool):void
+
+Case Jam detection
+------------------
+
+#define EXTRUDER_JAM_CONTROL 1
+#define JAM_METHOD 1 
+
+#define _TEST_EXTRUDER_JAM(x,pin) {\
+        uint8_t sig = READ(pin);extruder[x].jamStepsSinceLastSignal += extruder[x].jamLastDir;\
+        if(extruder[x].jamLastSignal != sig && abs(extruder[x].jamStepsSinceLastSignal - extruder[x].jamLastChangeAt) > JAM_MIN_STEPS) {\
+          if(sig) {extruder[x].resetJamSteps();} \
+          extruder[x].jamLastSignal = sig;extruder[x].jamLastChangeAt = extruder[x].jamStepsSinceLastSignal;\
+        } else if(abs(extruder[x].jamStepsSinceLastSignal) > extruder[x].jamErrorSteps && !Printer::isDebugJamOrDisabled() && !extruder[x].tempControl.isJammed()) \
+            extruder[x].tempControl.setJammed(true);\
+    }
+#define RESET_EXTRUDER_JAM(x,dir) extruder[x].jamLastDir = dir ? 1 : -1;
+
+jamStepsSinceLastSignal counts the steps since last change and also considers
+directional changes reducing the value. If the signal changes at least 
+JAM_MIN_STEPS must be executed. This prevents a toggling signal near turn point.
+If the new signal is positive, the counter is reset.
+If we are not already jammed and the executed steps are >  jamErrorSteps we call
+setJammed(true) which marks extruder as jammed and triggers event PRINTER_INTERRUPT_EVENT_JAM_DETECTED
+
+
+
+Extruder error states
+---------------------
+M105 returns the error state for each extruder if any using the format
+Dx:<state> with x = extruder number or B for bed.
+
+Values for <state> are
+0: No error, normally omitted to reduce transfer size
+1: Sensor Defect
+2: Decoupled
+3: Slipping
+4: Jammed
+5: Jammed or out of filament
+6: Out of filament
