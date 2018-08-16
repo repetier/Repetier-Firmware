@@ -3007,6 +3007,133 @@ S3(ext)=9
 
 #endif
 
+#if MOTHERBOARD == 310
+#define KNOWN_BOARD
+/*****************************************************************
+* RAMBo Pin Assignments
+******************************************************************/
+
+#ifndef __AVR_ATmega2560__
+#error Oops!  Make sure you have 'Arduino Mega 2560' selected from the 'Tools -> Boards' menu.
+#endif
+
+#define TMC2130_X_CS_PIN 41     //PG0
+#define TMC2130_Y_CS_PIN 39     //PG2
+#define TMC2130_Z_CS_PIN 67     //PK5 A13 67
+#define TMC2130_EXT0_CS_PIN 66  //PK4 A12 66
+
+//#define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_MANUAL
+
+#define ORIG_X_STEP_PIN     37
+#define ORIG_X_DIR_PIN      49
+#define ORIG_X_MIN_PIN      12
+#define ORIG_X_MAX_PIN      -1
+#define ORIG_X_ENABLE_PIN   29
+
+#define ORIG_Y_STEP_PIN     36
+#define ORIG_Y_DIR_PIN      48
+#define ORIG_Y_MIN_PIN      11
+#define ORIG_Y_MAX_PIN      -1
+#define ORIG_Y_ENABLE_PIN   28
+
+#define ORIG_Z_STEP_PIN     35
+#define ORIG_Z_DIR_PIN      47
+#define ORIG_Z_MIN_PIN      10
+#define ORIG_Z_MAX_PIN      -1
+#define ORIG_Z_ENABLE_PIN   27
+
+#define HEATER_0_PIN   3
+#define TEMP_0_PIN     0
+
+#define HEATER_1_PIN   4
+// This is T2 on the board!
+#define TEMP_1_PIN     2
+
+#define HEATER_2_PIN   4
+// This is T1 on the board!
+#define TEMP_2_PIN     5
+// T3 on board
+#define TEMP_3_PIN     3
+
+#define ORIG_E0_STEP_PIN    34 // PC3
+#define ORIG_E0_DIR_PIN     43 // PL6
+#define ORIG_E0_ENABLE_PIN  26 // PA4
+
+
+#define SDPOWER        -1
+
+#define SDSS           77
+
+#define LED_PIN        13
+#define ORIG_FAN_PIN      6
+#define ORIG_FAN2_PIN    -1
+#define ORIG_FAN3_PIN    -1
+#define ORIG_PS_ON_PIN   -1
+#define SUICIDE_PIN    -1  //PIN that has to be turned on right after start, to keep power flowing.
+
+#define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,E0_MS1_PIN,E0_MS2_PIN,
+
+#define SCK_PIN          52
+#define MISO_PIN         50
+#define MOSI_PIN         51
+
+
+
+#define HEATER_BED_PIN       4 //PG5
+#define TEMP_BED_PIN         2 //A2
+
+#define HEATER_0_PIN         3 //PE5
+#define TEMP_0_PIN           0 //A0
+
+#define HEATER_1_PIN        -1
+#define TEMP_1_PIN           1 //A1
+
+#define HEATER_2_PIN        -1
+#define TEMP_2_PIN          -1
+
+#define TEMP_AMBIENT_PIN     5 //A5
+
+#define TEMP_PINDA_PIN       3 //A3
+
+#define VOLT_PWR_PIN         4 //A4
+#define VOLT_BED_PIN         9 //A9
+
+
+#define E0_TMC2130_CS       66
+#define E0_TMC2130_DIAG     65
+#define E0_STEP_PIN         34
+#define E0_DIR_PIN          43
+#define E0_ENABLE_PIN       26
+#define E0_MS1_PIN          -1
+#define E0_MS2_PIN          -1
+
+#define SDPOWER             -1
+#define SDSS                77
+#define LED_PIN             13
+#define FAN_PIN              6
+#define FAN_1_PIN           -1
+#define PS_ON_PIN           -1
+#define KILL_PIN            -1  // 80 with Smart Controller LCD
+#define SUICIDE_PIN         -1  // PIN that has to be turned on right after start, to keep power flowing.
+
+#define BEEPER_PIN              84  // Beeper on AUX-4
+#define UI_DISPLAY_RS_PIN       82
+#define UI_DISPLAY_RW_PIN       -1
+#define UI_DISPLAY_ENABLE_PIN   61 // !!! changed from 18 (EINY03)
+#define UI_DISPLAY_D4_PIN	    59 // !!! changed from 19 (EINY03)
+#define UI_DISPLAY_D5_PIN       70
+#define UI_DISPLAY_D6_PIN       85
+#define UI_DISPLAY_D7_PIN       71
+
+//buttons are directly attached using AUX-2
+#define UI_ENCODER_A                72
+#define UI_ENCODER_B                14
+#define UI_ENCODER_CLICK            9  // the click
+
+#define SDCARDDETECT           15
+
+#endif
+
 
 #if MOTHERBOARD == 999
 #define KNOWN_BOARD

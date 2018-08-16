@@ -82,6 +82,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // RUMBA                      = 80  // Get it from reprapdiscount
 // FELIXprinters              = 101
 // Rambo                      = 301
+// Rambo EInsy                = 310
 // PiBot for Repetier V1.0-1.3= 314
 // PiBot for Repetier V1.4    = 315
 // PiBot Controller V2.0      = 316
@@ -1467,15 +1468,29 @@ https://github.com/teemuatlut/TMC2130Stepper
 // #define SENSORLESS_HOMING
 
 // The drivers with set CS pin will be used, all others are normal step/dir/enable drivers
+#ifndef TMC2130_X_CS_PIN
 #define TMC2130_X_CS_PIN -1
+#endif
+#ifndef TMC2130_Y_CS_PIN
 #define TMC2130_Y_CS_PIN -1
+#endif
+#ifndef TMC2130_Z_CS_PIN
 #define TMC2130_Z_CS_PIN -1
+#endif
+#ifndef TMC2130_EXT0_CS_PIN
 #define TMC2130_EXT0_CS_PIN -1
+#endif
+#ifndef TMC2130_EXT1_CS_PIN
 #define TMC2130_EXT1_CS_PIN -1
+#endif
+#ifndef TMC2130_EXT2_CS_PIN
 #define TMC2130_EXT2_CS_PIN -1
+#endif
 
 // Per-axis current setting in mA { X, Y, Z, E0, E1, E2}
+#ifndef MOTOR_CURRENT
 #define MOTOR_CURRENT {1000,1000,1000,1000,1000,1000}
+#endif
 
 /**  Global settings - these apply to all configured drivers
      Per-axis values will override these
