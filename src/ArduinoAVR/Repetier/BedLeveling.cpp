@@ -608,7 +608,13 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
             return ILLEGAL_Z_PROBE;
     }
     Commands::waitUntilEndOfAllMoves();
-    int32_t sum = 0, probeDepth;
+#ifdef Z_PROBE_USE_MEDIAN
+    int32_t * measurements = malloc(repeat*sizeof(int32_t));
+#else
+    int32_t sum = 0;
+#endif
+    
+    int32_t probeDepth;
     int32_t shortMove = static_cast<int32_t>((float)Z_PROBE_SWITCHING_DISTANCE * axisStepsPerMM[Z_AXIS]); // distance to go up for repeated moves
     int32_t lastCorrection = currentPositionSteps[Z_AXIS]; // starting position
 #if NONLINEAR_SYSTEM
@@ -623,6 +629,9 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
     Endstops::update(); // need to call twice for full update!
     if(Endstops::zProbe()) {
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
+#ifdef Z_PROBE_USE_MEDIAN
+        free(measurements);
+#endif
         return ILLEGAL_Z_PROBE;
     }
 #if Z_PROBE_DISABLE_HEATERS
@@ -640,6 +649,9 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
         setZProbingActive(false);
         if(stepsRemainingAtZHit < 0) {
             Com::printErrorFLN(Com::tZProbeFailed);
+#ifdef Z_PROBE_USE_MEDIAN
+            free(measurements);
+#endif
             return ILLEGAL_Z_PROBE;
         }
 #if NONLINEAR_SYSTEM
@@ -653,7 +665,12 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
         currentNonlinearPositionSteps[Z_AXIS] += stepsRemainingAtZHit;
 #endif
         currentPositionSteps[Z_AXIS] += stepsRemainingAtZHit; // now current position is correct
+#ifdef Z_PROBE_USE_MEDIAN
+        measurements[r] = lastCorrection - currentPositionSteps[Z_AXIS];
+#else
         sum += lastCorrection - currentPositionSteps[Z_AXIS];
+#endif
+        
         //Com::printFLN(PSTR("ZHSteps:"),lastCorrection - currentPositionSteps[Z_AXIS]);
         if(r + 1 < repeat) {
             // go only shortest possible move up for repetitions
@@ -661,6 +678,9 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
             if(Endstops::zProbe()) {
                 Com::printErrorFLN(PSTR("z-probe did not untrigger on repetitive measurement - maybe you need to increase distance!"));
                 UI_MESSAGE(1);
+#ifdef Z_PROBE_USE_MEDIAN
+                free(measurements);
+#endif
                 return ILLEGAL_Z_PROBE;
             }
         }
@@ -677,12 +697,35 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
     if(Endstops::zProbe()) { // did we untrigger? If not don't trust result!
         Com::printErrorFLN(PSTR("z-probe did not untrigger on repetitive measurement - maybe you need to increase distance!"));
         UI_MESSAGE(1);
+#ifdef Z_PROBE_USE_MEDIAN
+        free(measurements);
+#endif
         return ILLEGAL_Z_PROBE;
     }
     updateCurrentPosition(false);
     //Com::printFLN(PSTR("after probe"));
     //Commands::printCurrentPosition();
+
+#ifdef Z_PROBE_USE_MEDIAN
+    // bubble sort the measurements
+    int32_t tmp;
+    for(uint8_t i=0 ; i < repeat-1; i++) {  // n numbers require at most n-1 rounds of swapping
+      for(uint8_t j=0; j < repeat-i-1; j++)  {  // 
+        if( measurements[j] > measurements[j+1] ) {   // out of order?
+          // swap them:
+          tmp = measurements[j];
+          measurements[j] = measurements[j+1];
+          measurements[j+1] = tmp;
+        }
+      }
+    }
+    // process result
+    float distance = static_cast<float>(measurements[repeat/2]) * invAxisStepsPerMM[Z_AXIS] + EEPROM::zProbeHeight();
+    free(measurements);
+#else
     float distance = static_cast<float>(sum) * invAxisStepsPerMM[Z_AXIS] / static_cast<float>(repeat) + EEPROM::zProbeHeight();
+#endif
+    
 #if FEATURE_AUTOLEVEL
     // we must change z for the z change from moving in rotated coordinates away from real position
     float dx, dy, dz;
