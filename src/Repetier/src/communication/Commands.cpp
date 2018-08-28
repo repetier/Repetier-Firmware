@@ -69,7 +69,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
         if (Printer::mode == PRINTER_MODE_LASER) {
             LaserDriver::changeIntensity(0);
         }
-#endif        
+#endif
     }
 #endif
     if (!executePeriodical)
@@ -165,12 +165,24 @@ void Commands::printCurrentPosition() {
     Com::printF(Com::tXColon, x * (Printer::unitIsInches ? 0.03937 : 1), 2);
     Com::printF(Com::tSpaceYColon, y * (Printer::unitIsInches ? 0.03937 : 1), 2);
     Com::printF(Com::tSpaceZColon, z * (Printer::unitIsInches ? 0.03937 : 1), 3);
-    Com::printFLN(Com::tSpaceEColon, Motion1::currentPosition[E_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 4);
+    if (Motion1::motors[E_AXIS]) {
+        Com::printF(Com::tSpaceEColon, Motion1::currentPosition[E_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 4);
+    }
+#if NUM_AXES > A_AXIS
+    Com::printF(Com::tSpaceAColon, Motion1::currentPosition[A_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 2);
+#endif
+#if NUM_AXES > B_AXIS
+    Com::printF(Com::tSpaceBColon, Motion1::currentPosition[B_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 2);
+#endif
+#if NUM_AXES > C_AXIS
+    Com::printF(Com::tSpaceCColon, Motion1::currentPosition[C_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 2);
+#endif
+    Com::println();
 #ifdef DEBUG_POS
-    Com::printF(PSTR("OffX:"), Printer::offsetX); // to debug offset handling
-    Com::printF(PSTR(" OffY:"), Printer::offsetY);
-    Com::printF(PSTR(" OffZ:"), Printer::offsetZ);
-    Com::printF(PSTR(" OffZ2:"), Printer::offsetZ2);
+    Com::printF(PSTR("OffX:"), Motion1::toolOffset[X_AXIS]); // to debug offset handling
+    Com::printF(PSTR(" OffY:"), Motion1::toolOffset[Y_AXIS]);
+    Com::printF(PSTR(" OffZ:"), Motion1::toolOffset[Z_AXIS]);
+    Com::printF(PSTR(" OffZ2:"), Motion1::zprobeZOffset);
     Com::printF(PSTR(" XS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][X_AXIS]);
     Com::printF(PSTR(" YS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Y_AXIS]);
     Com::printFLN(PSTR(" ZS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Z_AXIS]);
@@ -259,7 +271,7 @@ void Commands::reportPrinterUsage() {
     Com::printF(Com::tSpacem);
     bool alloff = true;
     for (uint8_t i = 0; i < NUM_TOOLS; i++) {
-        Tool *t = Tool::getTool(i);
+        Tool* t = Tool::getTool(i);
         if (t->getHeater() != nullptr && t->getHeater()->isEnabled()) {
             alloff = false;
         }

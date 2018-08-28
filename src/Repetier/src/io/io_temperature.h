@@ -42,12 +42,16 @@ IO_TEMPERATURE_TABLE(name,analog,table)
 #undef IO_TEMP_TABLE_NTC
 #undef IO_TEMP_TABLE_PTC
 #undef IO_TEMPERATURE_TABLE
+#undef IO_HOTTEST_OF_2
+#undef IO_COOLEST_OF_2
 
 #if IO_TARGET == 1 // hardware init
 
 #define IO_TEMP_TABLE_NTC(name, dataname)
 #define IO_TEMP_TABLE_PTC(name, dataname)
 #define IO_TEMPERATURE_TABLE(name, analog, table)
+#define IO_HOTTEST_OF_2(name, temp1, temp2)
+#define IO_COOLEST_OF_2(name, temp1, temp2)
 
 #elif IO_TARGET == 4 // class
 
@@ -91,6 +95,26 @@ public:
     }; \
     extern name##Class name;
 
+#define IO_HOTTEST_OF_2(name, temp1, temp2) \
+    class name##Class : public IOTemperature { \
+    public: \
+        float get() { \
+            return RMath::max(temp1.get(), temp2.get()); \
+        } \
+        bool isDefect() { return temp1.isDefect() || temp2.isDefect(); } \
+    }; \
+    extern name##Class name;
+
+#define IO_COOLEST_OF_2(name, temp1, temp2) \
+    class name##Class : public IOTemperature { \
+    public: \
+        float get() { \
+            return RMath::min(temp1.get(), temp2.get()); \
+        } \
+        bool isDefect() { return temp1.isDefect() || temp2.isDefect(); } \
+    }; \
+    extern name##Class name;
+
 #elif IO_TARGET == 6 // variable
 
 #define IO_TEMP_TABLE_NTC(name, dataname) \
@@ -104,10 +128,18 @@ public:
 #define IO_TEMPERATURE_TABLE(name, analog, table) \
     name##Class name;
 
+#define IO_HOTTEST_OF_2(name, temp1, temp2) \
+    name##Class name;
+
+#define IO_COOLEST_OF_2(name, temp1, temp2) \
+    name##Class name;
+
 #else
 
 #define IO_TEMP_TABLE_NTC(name, dataname)
 #define IO_TEMP_TABLE_PTC(name, dataname)
 #define IO_TEMPERATURE_TABLE(name, analog, table)
+#define IO_HOTTEST_OF_2(name, temp1, temp2)
+#define IO_COOLEST_OF_2(name, temp1, temp2)
 
 #endif

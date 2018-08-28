@@ -196,7 +196,7 @@ static PWMPin pwm_pins[NUM_POSSIBLE_PWM_PINS] = {
     { 66, PIOB, PIO_PB15B_PWMH3, PWM_CH3, false },
     { 41, PIOC, PIO_PC9B_PWMH3, PWM_CH3, false },
     { 69, PIOA, PIO_PA0B_PWML3, PWM_CH3, true },
-    { 64, PIOB, PIO_PB19B_PWML3, PWM_CH3, true },
+    { 64, PIOB, PIO_PB19B_PWML3, PWM_CH3, true }, // double value 64
     { 40, PIOC, PIO_PC8B_PWML3, PWM_CH3, true },
     // {??, PIOC, PIO_PC20B_PWMH4, PWM_CH4, false} // Channel 4
     { 9, PIOC, PIO_PC21B_PWML4, PWM_CH4, true },
@@ -547,9 +547,9 @@ void HAL::spiInit(uint8_t spiClock) {
                           SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) | SPI_CSR_DLYBCT(1));
         // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
         SPI_ConfigureNPCS(SPI0, SPI_CHAN_EEPROM1, SPI_CSR_NCPHA | SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) | SPI_CSR_DLYBCT(1));
-#endif // MOTHERBOARD==500 || MOTHERBOARD==501 || (MOTHERBOARD==502) 
+#endif // MOTHERBOARD==500 || MOTHERBOARD==501 || (MOTHERBOARD==502)
 
-    // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
+        // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
         SPI_ConfigureNPCS(SPI0, SPI_CHAN, SPI_CSR_NCPHA | SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) | SPI_CSR_DLYBCT(1));
         SPI_Enable(SPI0);
 #if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD == 502)

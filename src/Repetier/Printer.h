@@ -94,7 +94,7 @@ union wizardVar {
 #define PRINTER_FLAG0_MANUAL_MOVE_MODE 16
 #define PRINTER_FLAG0_AUTOLEVEL_ACTIVE 32
 #define PRINTER_FLAG0_ZPROBEING 64
-#define PRINTER_FLAG0_LARGE_MACHINE 128
+// #define PRINTER_FLAG0_LARGE_MACHINE 128
 #define PRINTER_FLAG1_HOMED_ALL 1
 #define PRINTER_FLAG1_AUTOMOUNT 2
 #define PRINTER_FLAG1_ANIMATION 4
@@ -147,7 +147,7 @@ public:
 #include "src/motion/Distortion.h"
 
 #ifndef DEFAULT_PRINTER_MODE
-#if NUM_EXTRUDER > 0
+#if NUM_TOOLS > 0
 #define DEFAULT_PRINTER_MODE PRINTER_MODE_FFF
 #elif defined(SUPPORT_LASER) && SUPPORT_LASER
 #define DEFAULT_PRINTER_MODE PRINTER_MODE_LASER
@@ -209,12 +209,12 @@ An additional transformation converts the CMC coordinates into NMC.
 Given:
 - Target position for tool: x_rwc, y_rwc, z_rwc
 - Tool offsets: offsetX, offsetY, offsetZ
-- Offset from bed leveling: offsetZ2
+- Offset from bed leveling: Motion1::zprobeZOffset
 
 Step 1: Convert to ROTC
 
-    transformToPrinter(x_rwc + Printer::offsetX, y_rwc + Printer::offsetY, z_rwc +  Printer::offsetZ, x_rotc, y_rotc, z_rotc);
-    z_rotc += offsetZ2
+    transformToPrinter(x_rwc + Motion1::toolOffset[X_AXIS], y_rwc + Motion1::toolOffset[Y_AXIS], z_rwc +  Motion1::toolOffset[Z_AXIS], x_rotc, y_rotc, z_rotc);
+    z_rotc += Motion1::zprobeZOffset
 
 Step 2: Compute CMC
 
@@ -232,17 +232,17 @@ Step 1: Convert to ROTC
     x_rotc = static_cast<float>(x_cmc) * invAxisStepsPerMM[X_AXIS];
     y_rotc = static_cast<float>(y_cmc) * invAxisStepsPerMM[Y_AXIS];
     #if NONLINEAR_SYSTEM
-    z_rotc = static_cast<float>(z_cmc * invAxisStepsPerMM[Z_AXIS] - offsetZ2;
+    z_rotc = static_cast<float>(z_cmc * invAxisStepsPerMM[Z_AXIS] - Motion1::zprobeZOffset;
     #else
-    z_rotc = static_cast<float>(z_cmc - zCorrectionStepsIncluded) * invAxisStepsPerMM[Z_AXIS] - offsetZ2;
+    z_rotc = static_cast<float>(z_cmc - zCorrectionStepsIncluded) * invAxisStepsPerMM[Z_AXIS] - Motion1::zprobeZOffset;
     #endif
 
 Step 2: Convert to RWC
 
     transformFromPrinter(x_rotc, y_rotc, z_rotc,x_rwc, y_rwc, z_rwc);
-    x_rwc -= Printer::offsetX; // Offset from active extruder or z probe
-    y_rwc -= Printer::offsetY;
-    z_rwc -= Printer::offsetZ;
+    x_rwc -= Motion1::toolOffset[X_AXIS]; // Offset from active extruder or z probe
+    y_rwc -= Motion1::toolOffset[Y_AXIS];
+    z_rwc -= Motion1::toolOffset[Z_AXIS];
 */
 class Printer {
     static uint8_t debugLevel;
@@ -253,9 +253,6 @@ public:
     static ufast8_t maxExtruderSpeed;        ///< Timer delay for end extruder speed
     //static uint8_t extruderAccelerateDelay;     ///< delay between 2 speec increases
     static int advanceStepsSet;
-#if ENABLE_QUADRATIC_ADVANCE || defined(DOXYGEN)
-    static long advanceExecuted; ///< Executed advance steps
-#endif
 #endif
     static uint16_t menuMode;
     static float homingFeedrate[]; // Feedrate in mm/s for homing.
@@ -265,7 +262,6 @@ public:
 
     static uint8_t unitIsInches;
     static uint8_t mode;
-    static fast8_t stepsPerTimerCall;
     static uint8_t flag0, flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t flag2, flag3;
     static uint32_t interval;   ///< Last step duration in ticks.
@@ -275,38 +271,11 @@ public:
     static int32_t printingTime;       ///< Printing time in seconds
     static float extrudeMultiplyError; ///< Accumulated error during extrusion
     static float extrusionFactor;      ///< Extrusion multiply factor
-#if NONLINEAR_SYSTEM || defined(DOXYGEN)
-    static int32_t maxDeltaPositionSteps;
-    static int32_t currentNonlinearPositionSteps[E_TOWER_ARRAY];
-    static floatLong deltaDiagonalStepsSquaredA;
-    static floatLong deltaDiagonalStepsSquaredB;
-    static floatLong deltaDiagonalStepsSquaredC;
-    static float deltaMaxRadiusSquared;
-    static int32_t deltaFloorSafetyMarginSteps;
-    static int32_t deltaAPosXSteps;
-    static int32_t deltaAPosYSteps;
-    static int32_t deltaBPosXSteps;
-    static int32_t deltaBPosYSteps;
-    static int32_t deltaCPosXSteps;
-    static int32_t deltaCPosYSteps;
-    static int32_t realDeltaPositionSteps[TOWER_ARRAY];
-    static int16_t travelMovesPerSecond;
-    static int16_t printMovesPerSecond;
-    static float radius0;
-#endif
-#if !NONLINEAR_SYSTEM || defined(FAST_COREXYZ) || defined(DOXYGEN)
-    static int32_t xMinStepsAdj, yMinStepsAdj, zMinStepsAdj; // adjusted to cover extruder/probe offsets
-    static int32_t xMaxStepsAdj, yMaxStepsAdj, zMaxStepsAdj;
-#endif
 #if DRIVE_SYSTEM != DELTA || defined(DOXYGEN)
     static int32_t zCorrectionStepsIncluded;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM || defined(DOXYGEN)
     static int32_t stepsRemainingAtZHit;
-#endif
-#if DRIVE_SYSTEM == DELTA || defined(DOXYGEN)
-    static int32_t stepsRemainingAtXHit;
-    static int32_t stepsRemainingAtYHit;
 #endif
 #if SOFTWARE_LEVELING || defined(DOXYGEN)
     static int32_t levelingP1[3];
@@ -320,9 +289,6 @@ public:
     static float thermoMinTemp;
     static float thermoMaxTemp;
 #endif
-#if LAZY_DUAL_X_AXIS || defined(DOXYGEN)
-    static bool sledParked;
-#endif
 #if FEATURE_BABYSTEPPING || defined(DOXYGEN)
     static int16_t zBabystepsMissing;
     static int16_t zBabysteps;
@@ -331,10 +297,6 @@ public:
     static int feedrateMultiply;         ///< Multiplier for feedrate in percent (factor 1 = 100)
     static unsigned int extrudeMultiply; ///< Flow multiplier in percent (factor 1 = 100)
     static uint8_t interruptEvent;       ///< Event generated in interrupts that should/could be handled in main thread
-    static float offsetX;                ///< X-offset for different tool positions.
-    static float offsetY;                ///< Y-offset for different tool positions.
-    static float offsetZ;                ///< Z-offset for different tool positions.
-    static float offsetZ2;               ///< Z-offset without rotation correction. Required for z probe corrections
     static speed_t vMaxReached;          ///< Maximum reached speed
     static uint32_t msecondsPrinting;    ///< Milliseconds of printing time (means time with heated extruder)
     static float filamentPrinted;        ///< mm of filament printed since counting started
@@ -430,13 +392,6 @@ public:
     static void setFanSpeedDirectly(uint8_t speed, int fanId);
 
     /** For large machines, the nonlinear transformation can exceed integer 32bit range, so floating point math is needed. */
-    static INLINE uint8_t isLargeMachine() {
-        return flag0 & PRINTER_FLAG0_LARGE_MACHINE;
-    }
-
-    static INLINE void setLargeMachine(uint8_t b) {
-        flag0 = (b ? flag0 | PRINTER_FLAG0_LARGE_MACHINE : flag0 & ~PRINTER_FLAG0_LARGE_MACHINE);
-    }
 
     static INLINE uint8_t isAdvanceActivated() {
         return flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT;

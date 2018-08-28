@@ -34,7 +34,7 @@ void Motion2::init() {
     for (fast8_t i = 0; i < NUM_MOTION2_BUFFER; i++) {
         buffers[i].id = i;
     }
-    for (fast8_t i = 0; i < NUM_AXES; i++) {
+    FOR_ALL_AXES(i) {
         lastMotorPos[0][i] = 0;
         lastMotorPos[1][i] = 0;
     }
@@ -92,7 +92,7 @@ void Motion2::timer() {
                 act->nextState();
             }
             sFactor = VelocityProfile::s;
-        } else if (act->state == Motion2State::PLATEU_INIT) {
+        } else if (act->state == Motion2State::PLATEAU_INIT) {
             act->state = Motion2State::PLATEU;
             if (VelocityProfile::start(actM1->feedrate, actM1->feedrate, act->t2)) {
                 act->nextState();
@@ -156,6 +156,9 @@ void Motion2::timer() {
         int32_t* np = lastMotorPos[nextMotorIdx];
         int32_t* lp = lastMotorPos[lastMotorIdx];
         PrinterType::transform(pos, np);
+        // Com::printFLN(PSTR("DS x="), np[0]); // TEST
+        /* Com::printF(PSTR(" y="), np[1]);
+        Com::printFLN(PSTR(" z="), np[2]);*/
         // Fill structures used to update bresenham
         m3->directions = 0;
         m3->usedAxes = 0;
@@ -220,12 +223,12 @@ void Motion2::timer() {
             np++;
             lp++;
             bits++;
-        }
+        } // FOR_ALL_AXES
         lastMotorIdx = nextMotorIdx;
         m3->parentId = act->id;
         m3->checkEndstops = actM1->isCheckEndstops();
         m3->secondSpeed = actM1->secondSpeed;
-        Motion1::enableMotors(m3->usedAxes);
+        PrinterType::enableMotors(m3->usedAxes);
         if (m3->last) {
             actM1 = nullptr; // select next on next interrupt
         }
@@ -246,7 +249,7 @@ void Motion2::timer() {
                 act->nextState();
             }
             sFactor = VelocityProfile::s;
-        } else if (act->state == Motion2State::PLATEU_INIT) {
+        } else if (act->state == Motion2State::PLATEAU_INIT) {
             act->state = Motion2State::PLATEU;
             if (VelocityProfile::start(actM1->feedrate, actM1->feedrate, act->t2)) {
                 act->nextState();
@@ -297,7 +300,7 @@ void Motion2::timer() {
         int32_t* np = lastMotorPos[nextMotorIdx];
         int32_t* lp = lastMotorPos[lastMotorIdx];
         FOR_ALL_AXES(i) {
-            np[i] = roundf(actM1->start[i] + sFactor * actM1->unitDir[i]);
+            np[i] = lroundf(actM1->start[i] + sFactor * actM1->unitDir[i]);
         }
         // Fill structures used to update bresenham
         m3->directions = 0;
@@ -326,7 +329,7 @@ void Motion2::timer() {
         m3->parentId = act->id;
         m3->checkEndstops = actM1->isCheckEndstops();
         m3->secondSpeed = actM1->secondSpeed;
-        Motion1::enableMotors(m3->usedAxes);
+        PrinterType::enableMotors(m3->usedAxes);
         if (m3->last) {
             actM1 = nullptr; // select next on next interrupt
         }
@@ -360,10 +363,11 @@ void motorEndstopTriggered(fast8_t axis) {
 }
 void Motion2::motorEndstopTriggered(fast8_t axis) {
     Motion1::motorTriggered |= axisBits[axis];
+    Com::printFLN(PSTR("MotorTrigger:"), (int)Motion1::motorTriggered); // TEST
     /*Motion1::setAxisHomed(axis, false);
     Motion2Buffer& m2 = Motion2::buffers[act->parentId];
     if (Motion1::endstopMode == EndstopMode::STOP_AT_ANY_HIT || Motion1::endstopMode == EndstopMode::PROBING) {
-        for (fast8_t i = 0; i < NUM_AXES; i++) {
+        FOR_ALL_AXES(i) {
             Motion1::stepsRemaining[i] = m2.stepsRemaining[i];
         }
         Motion3::skipParentId = act->parentId;
@@ -384,14 +388,16 @@ void endstopTriggered(fast8_t axis) {
 }
 
 void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis) {
+    // DEBUG_MSG2_FAST("EH:", (int)axis);
     if (act == nullptr || act->checkEndstops == false) {
+        // DEBUG_MSG_FAST("EHX");
         return;
     }
     Motion1::axesTriggered = axisBits[axis];
     Motion1::setAxisHomed(axis, false);
     Motion2Buffer& m2 = Motion2::buffers[act->parentId];
     if (Motion1::endstopMode == EndstopMode::STOP_AT_ANY_HIT || Motion1::endstopMode == EndstopMode::PROBING) {
-        for (fast8_t i = 0; i < NUM_AXES; i++) {
+        FOR_ALL_AXES(i) {
             Motion1::stepsRemaining[i] = m2.stepsRemaining[i];
         }
         Motion3::skipParentId = act->parentId;
@@ -404,6 +410,7 @@ void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis) {
             Motion3::skipParentId = act->parentId;
         }
     }
+    // DEBUG_MSG_FAST("EHF");
 }
 
 void Motion2Buffer::nextState() {
@@ -413,7 +420,7 @@ void Motion2Buffer::nextState() {
             return;
         }
         if (t2 > 0) {
-            state = Motion2State::PLATEU_INIT;
+            state = Motion2State::PLATEAU_INIT;
             return;
         }
         if (t3 > 0) {
@@ -423,7 +430,7 @@ void Motion2Buffer::nextState() {
     }
     if (state == Motion2State::ACCELERATING) {
         if (t2 > 0) {
-            state = Motion2State::PLATEU_INIT;
+            state = Motion2State::PLATEAU_INIT;
             return;
         }
         if (t3 > 0) {

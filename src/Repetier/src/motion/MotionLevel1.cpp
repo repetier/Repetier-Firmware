@@ -34,6 +34,7 @@ float Motion1::resolution[NUM_AXES];
 float Motion1::minPos[NUM_AXES];
 float Motion1::maxPos[NUM_AXES];
 float Motion1::g92Offsets[NUM_AXES];
+float Motion1::toolOffset[3];
 float Motion1::maxYank[NUM_AXES];
 float Motion1::homeRetestDistance[NUM_AXES];
 float Motion1::homeEndstopDistance[NUM_AXES];
@@ -43,6 +44,7 @@ float Motion1::parkPosition[3];
 float Motion1::autolevelTransformation[9]; ///< Transformation matrix
 float Motion1::advanceK = 0;               // advance spring constant
 float Motion1::advanceEDRatio = 0;         // Ratio of extrusion
+float Motion1::zprobeZOffset = 0;
 
 StepperDriverBase* Motion1::drivers[NUM_MOTORS] = MOTORS;
 fast8_t Motion1::memoryPos;
@@ -55,6 +57,8 @@ int32_t Motion1::stepsRemaining[NUM_AXES]; // Steps remaining when testing endst
 fast8_t Motion1::axesTriggered;
 fast8_t Motion1::motorTriggered;
 fast8_t Motion1::stopMask;
+fast8_t Motion1::dittoMode = 0;   // copy extrusion signals
+fast8_t Motion1::dittoMirror = 0; // mirror for dual x printer
 fast8_t Motion1::alwaysCheckEndstops;
 #ifdef FEATURE_AXISCOMP
 float Motion1::axisCompTanXY, Motion1::axisCompTanXZ, Motion1::axisCompTanYZ;
@@ -87,11 +91,14 @@ void Motion1::init() {
         destinationPositionTransformed[i] = 0;
         g92Offsets[i] = 0;
     }
+    toolOffset[X_AXIS] = toolOffset[Y_AXIS] = toolOffset[Z_AXIS] = 0;
     last = first = length = 0;
     process = lengthUnprocessed = 0;
     endstopMode = EndstopMode::DISABLED;
     resetTransformationMatrix(true);
     setFromConfig(); // initial config
+    updatePositionsFromCurrent();
+    Motion2::setMotorPositionFromTransformed();
 }
 
 void Motion1::setFromConfig() {
@@ -318,11 +325,16 @@ fast8_t Motion1::buffersUsed() {
 }
 
 void Motion1::waitForEndOfMoves() {
+    //DEBUG_MSG("BS");
     while (buffersUsed() > 0) {
+        // DEBUG_MSG2("BU", (int)buffersUsed());
         Commands::checkForPeriodicalActions(false);
+        // DEBUG_MSG("B2");
         GCode::keepAlive(Processing, 3);
+        // DEBUG_MSG("B3");
         UI_MEDIUM;
     }
+    //DEBUG_MSG("BE");
 }
 
 void Motion1::waitForXFreeMoves(fast8_t n, bool allowMoves) {
@@ -333,6 +345,7 @@ void Motion1::waitForXFreeMoves(fast8_t n, bool allowMoves) {
 }
 
 Motion1Buffer& Motion1::reserve() {
+    // DEBUG_MSG_FAST("RES");
     waitForXFreeMoves(1);
     InterruptProtectedBlock noInts;
     fast8_t idx = first;
@@ -348,6 +361,9 @@ Motion1Buffer& Motion1::reserve() {
 // Gets called by Motion2::pop only inside interrupt protected block
 void Motion1::pop() {
     Motion1Buffer& b = buffers[last];
+    /*if (b.action == MOVE) {
+        DEBUG_MSG_FAST("FREE");
+    }*/
     b.state = Motion1State::FREE;
     b.flags = 0; // unblock
                  //DEBUG_MSG2_FAST("pop1:",(int)b.id)
@@ -359,7 +375,7 @@ void Motion1::pop() {
 }
 
 void Motion1::setIgnoreABC(float coords[NUM_AXES]) {
-    for (fast8_t i = 4; i < NUM_AXES; i++) {
+    for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
         coords[i] = IGNORE_COORDINATE;
     }
 }
@@ -387,54 +403,63 @@ void Motion1::setTmpPositionXYZE(float x, float y, float z, float e) {
 }
 // Move with coordinates in official coordinates (before offset, transform, ...)
 void Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate) {
-    for (fast8_t i = 0; i < NUM_AXES; i++) {
+    FOR_ALL_AXES(i) {
         if (coords[i] != IGNORE_COORDINATE) {
             currentPosition[i] = coords[i];
         }
     }
-    transformToPrinter(currentPosition[X_AXIS] + Printer::offsetX,
-                       currentPosition[Y_AXIS] + Printer::offsetY,
-                       currentPosition[Z_AXIS] + Printer::offsetZ,
+    PrinterType::officialToTransformed(currentPosition, destinationPositionTransformed);
+    /* transformToPrinter(currentPosition[X_AXIS] + toolOffset[X_AXIS],
+                       currentPosition[Y_AXIS] + toolOffset[Y_AXIS],
+                       currentPosition[Z_AXIS] + toolOffset[Z_AXIS],
                        destinationPositionTransformed[X_AXIS],
                        destinationPositionTransformed[Y_AXIS],
                        destinationPositionTransformed[Z_AXIS]);
-    destinationPositionTransformed[Z_AXIS] += Printer::offsetZ2;
-    Tool* tool = Tool::getActiveTool();
-    if (coords[E_AXIS] != IGNORE_COORDINATE && !Printer::debugDryrun()
-#if MIN_EXTRUDER_TEMP > MAX_ROOM_TEMPERATURE
-        && (tool->getHeater() != nullptr
-            && (tool->getHeater()->getCurrentTemperature() > MIN_EXTRUDER_TEMP
-                || Printer::isColdExtrusionAllowed()))
+    destinationPositionTransformed[Z_AXIS] += zprobeZOffset;
+#if NUM_AXES > A_AXIS
+    for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
+        if (coords[i] != IGNORE_COORDINATE) {
+            destinationPositionTransformed[i] = coords[i];
+        } else {
+            destinationPositionTransformed[i] = currentPositionTransformed[i];
+        }
+    }
 #endif
-    ) { // set position
-        destinationPositionTransformed[E_AXIS] = coords[E_AXIS];
-    } else { // ignore
-        currentPositionTransformed[E_AXIS] = destinationPositionTransformed[E_AXIS] = coords[E_AXIS];
+*/
+    Tool* tool = Tool::getActiveTool();
+    if (coords[E_AXIS] == IGNORE_COORDINATE || Printer::debugDryrun()
+#if MIN_EXTRUDER_TEMP > MAX_ROOM_TEMPERATURE
+        || (tool != nullptr && tool->getHeater() != nullptr && (tool->getHeater()->getCurrentTemperature() < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()))
+#endif
+    ) { // ignore
+        destinationPositionTransformed[E_AXIS] = currentPositionTransformed[E_AXIS];
     }
     if (feedrate == IGNORE_COORDINATE) {
         feedrate = Printer::feedrate;
     }
-#if NUM_AXES > A_AXIS
-    for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
-        destinationPositionTransformed[i] = coords[i];
-    }
-#endif
-    queueMove(feedrate);
+    PrinterType::queueMove(feedrate);
 }
 
 void Motion1::setToolOffset(float ox, float oy, float oz) {
-    setTmpPositionXYZ(currentPosition[X_AXIS] + ox - Printer::offsetX,
-                      currentPosition[Y_AXIS] + oy - Printer::offsetY,
-                      currentPosition[Z_AXIS]);
-    moveByOfficial(tmpPosition, XY_SPEED);
-    setTmpPositionXYZ(currentPosition[X_AXIS],
-                      currentPosition[Y_AXIS],
-                      currentPosition[Z_AXIS] + oz - Printer::offsetZ);
-    moveByOfficial(tmpPosition, Z_SPEED);
-    waitForEndOfMoves();
-    Printer::offsetX = ox;
-    Printer::offsetY = oy;
-    Printer::offsetZ = oz;
+    if (Motion1::isAxisHomed(X_AXIS) && Motion1::isAxisHomed(Y_AXIS) && Motion1::isAxisHomed(Z_AXIS)) {
+        setTmpPositionXYZ(currentPosition[X_AXIS] + ox - toolOffset[X_AXIS],
+                          currentPosition[Y_AXIS] + oy - toolOffset[Y_AXIS],
+                          currentPosition[Z_AXIS]);
+        moveByOfficial(tmpPosition, XY_SPEED);
+        setTmpPositionXYZ(currentPosition[X_AXIS],
+                          currentPosition[Y_AXIS],
+                          currentPosition[Z_AXIS] + oz - toolOffset[Z_AXIS]);
+        moveByOfficial(tmpPosition, Z_SPEED);
+        waitForEndOfMoves();
+    } else {
+        currentPosition[X_AXIS] += ox - toolOffset[X_AXIS];
+        currentPosition[Y_AXIS] += oy - toolOffset[Y_AXIS];
+        currentPosition[Z_AXIS] += oz - toolOffset[Z_AXIS];
+        updatePositionsFromCurrent();
+    }
+    toolOffset[X_AXIS] = ox;
+    toolOffset[Y_AXIS] = oy;
+    toolOffset[Z_AXIS] = oz;
     updatePositionsFromCurrentTransformed();
 }
 
@@ -447,65 +472,69 @@ void Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate) {
             destinationPositionTransformed[i] = coords[i];
         }
     }
-    transformFromPrinter(
-        destinationPositionTransformed[X_AXIS],
-        destinationPositionTransformed[Y_AXIS],
-        destinationPositionTransformed[Z_AXIS] - Printer::offsetZ2,
-        currentPosition[X_AXIS],
-        currentPosition[Y_AXIS],
-        currentPosition[Z_AXIS]);
-    currentPosition[X_AXIS] -= Printer::offsetX; // Offset from active extruder or z probe
-    currentPosition[Y_AXIS] -= Printer::offsetY;
-    currentPosition[Z_AXIS] -= Printer::offsetZ;
     Tool* tool = Tool::getActiveTool();
     if (coords[E_AXIS] == IGNORE_COORDINATE || Printer::debugDryrun()
 #if MIN_EXTRUDER_TEMP > MAX_ROOM_TEMPERATURE
-        || !(tool->getHeater() != nullptr
-             && (tool->getHeater()->getCurrentTemperature() > MIN_EXTRUDER_TEMP
-                 || Printer::isColdExtrusionAllowed()))
+        || (tool != nullptr && tool->getHeater() != nullptr && (tool->getHeater()->getCurrentTemperature() < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()))
 #endif
     ) {
         currentPositionTransformed[E_AXIS] = destinationPositionTransformed[E_AXIS];
     }
+    PrinterType::transformedToOfficial(destinationPositionTransformed, currentPosition);
+    /* transformFromPrinter(
+        destinationPositionTransformed[X_AXIS],
+        destinationPositionTransformed[Y_AXIS],
+        destinationPositionTransformed[Z_AXIS] - zprobeZOffset,
+        currentPosition[X_AXIS],
+        currentPosition[Y_AXIS],
+        currentPosition[Z_AXIS]);
+    currentPosition[X_AXIS] -= toolOffset[X_AXIS]; // Offset from active extruder or z probe
+    currentPosition[Y_AXIS] -= toolOffset[Y_AXIS];
+    currentPosition[Z_AXIS] -= toolOffset[Z_AXIS];
 #if NUM_AXES > A_AXIS
     for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
         currentPosition[i] = destinationPositionTransformed[i];
     }
 #endif
-    queueMove(feedrate);
+*/
+    PrinterType::queueMove(feedrate);
 }
 
 void Motion1::updatePositionsFromCurrent() {
-    transformToPrinter(currentPosition[X_AXIS] + Printer::offsetX,
-                       currentPosition[Y_AXIS] + Printer::offsetY,
-                       currentPosition[Z_AXIS] + Printer::offsetZ,
+    PrinterType::officialToTransformed(currentPosition, currentPositionTransformed);
+    /* transformToPrinter(currentPosition[X_AXIS] + toolOffset[X_AXIS],
+                       currentPosition[Y_AXIS] + toolOffset[Y_AXIS],
+                       currentPosition[Z_AXIS] + toolOffset[Z_AXIS],
                        currentPositionTransformed[X_AXIS],
                        currentPositionTransformed[Y_AXIS],
                        currentPositionTransformed[Z_AXIS]);
-    currentPositionTransformed[Z_AXIS] += Printer::offsetZ2;
+    currentPositionTransformed[Z_AXIS] += zprobeZOffset;
 #if NUM_AXES > E_AXIS
     for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
         currentPositionTransformed[i] = currentPosition[i];
     }
 #endif
+*/
 }
 
 void Motion1::updatePositionsFromCurrentTransformed() {
-    transformFromPrinter(
+    PrinterType::transformedToOfficial(currentPositionTransformed, currentPosition);
+    /*transformFromPrinter(
         currentPositionTransformed[X_AXIS],
         currentPositionTransformed[Y_AXIS],
-        currentPositionTransformed[Z_AXIS] - Printer::offsetZ2,
+        currentPositionTransformed[Z_AXIS] - zprobeZOffset,
         currentPosition[X_AXIS],
         currentPosition[Y_AXIS],
         currentPosition[Z_AXIS]);
-    currentPosition[X_AXIS] -= Printer::offsetX; // Offset from active extruder or z probe
-    currentPosition[Y_AXIS] -= Printer::offsetY;
-    currentPosition[Z_AXIS] -= Printer::offsetZ;
+    currentPosition[X_AXIS] -= toolOffset[X_AXIS]; // Offset from active extruder or z probe
+    currentPosition[Y_AXIS] -= toolOffset[Y_AXIS];
+    currentPosition[Z_AXIS] -= toolOffset[Z_AXIS];
 #if NUM_AXES > E_AXIS
     for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
-        currentPosition[i] = destinationPositionTransformed[i];
+        currentPosition[i] = currentPositionTransformed[i];
     }
 #endif
+*/
 }
 
 // Move with coordinates in official coordinates (before offset, transform, ...)
@@ -573,19 +602,21 @@ void Motion1::queueMove(float feedrate) {
             continue;
         }
         delta[i] = destinationPositionTransformed[i] - currentPositionTransformed[i];
-        if (fabsf(delta[i]) > POSITION_EPSILON) {
+        if (fabsf(delta[i]) >= POSITION_EPSILON) {
             axisUsed += axisBits[i];
             if (delta[i] >= 0) {
                 dirUsed += axisBits[i];
             }
             float tmp = delta[i] * delta[i];
-            length2 += tmp;
+            if (!PrinterType::ignoreAxisForLength(i)) {
+                length2 += tmp;
+            }
             if (i == E_AXIS) {
                 e2 = tmp;
+                Printer::filamentPrinted += delta[i]; // Keep track of printer amount
             }
         }
     }
-
     if (length2 == 0) { // no move, ignore it
         return;
     }
@@ -596,11 +627,23 @@ void Motion1::queueMove(float feedrate) {
     buf.length = sqrtf(length2);
     buf.invLength = 1.0 / buf.length;
 
+    /* Com::printF("Move CX:", currentPositionTransformed[X_AXIS]);
+    Com::printF(" AX:", currentPositionTransformed[A_AXIS]);
+    Com::printF(" CY:", currentPositionTransformed[Y_AXIS]);
+    Com::printF(" CZ:", currentPositionTransformed[Z_AXIS]);
+    Com::printF(" l:", buf.length);
+    Com::printFLN(" f:", feedrate);
+    Com::printF("Move DX:", delta[X_AXIS]);
+    Com::printF(" DA:", delta[A_AXIS]);
+    Com::printF(" DE:", delta[E_AXIS]);
+    Com::printF(" DY:", delta[Y_AXIS]);
+    Com::printFLN(" DZ:", delta[Z_AXIS]);*/
+
     buf.action = Motion1Action::MOVE;
     if (endstopMode != EndstopMode::DISABLED) {
         buf.flags = FLAG_CHECK_ENDSTOPS;
     } else {
-        buf.flags = 0;
+        buf.flags = ALWAYS_CHECK_ENDSTOPS ? FLAG_CHECK_ENDSTOPS : 0;
     }
     buf.axisUsed = axisUsed;
     buf.axisDir = dirUsed;
@@ -635,7 +678,6 @@ void Motion1::queueMove(float feedrate) {
 
     // Check axis contraints like max. feedrate and acceleration
     float reduction = 1.0;
-    // float invTime = buf.feedrate * buf.invLength;
     FOR_ALL_AXES(i) {
         buf.start[i] = currentPositionTransformed[i];
         if (!buf.isAxisMoving(i)) { // no influence here
@@ -645,14 +687,13 @@ void Motion1::queueMove(float feedrate) {
         }
         buf.unitDir[i] = delta[i] * buf.invLength;
         buf.speed[i] = buf.unitDir[i] * buf.feedrate;
-        if (fabs(buf.speed[i]) > maxFeedrate[i]) {
-            reduction = RMath::min(reduction, fabs(buf.speed[i]) / maxFeedrate[i]);
+        if (fabsf(buf.speed[i]) > maxFeedrate[i]) {
+            reduction = RMath::min(reduction, maxFeedrate[i] / fabsf(buf.speed[i]));
         }
     }
     if (reduction != 1.0) {
         buf.feedrate *= reduction;
-        // invTime *= reduction;
-        for (fast8_t i = 0; i < NUM_AXES; i++) {
+        FOR_ALL_AXES(i) {
             buf.speed[i] *= reduction;
         }
     }
@@ -676,14 +717,13 @@ void Motion1::queueMove(float feedrate) {
     }
     // Destination becomes new current
     float timeForMove = length / feedrate;
-    for (fast8_t i = 0; i < NUM_AXES; i++) {
+    COPY_ALL_AXES(currentPositionTransformed, destinationPositionTransformed);
+    /* FOR_ALL_AXES(i) {
         currentPositionTransformed[i] = destinationPositionTransformed[i];
-    }
+    }*/
     buf.state = Motion1State::RESERVED; // make it accessible
 
     backplan(buf.id);
-    // Com::printF("aid:", (int)buf.id);
-    // Com::printFLN(" f:", (int)buf.flags);
 }
 
 void Motion1::insertWaitIfNeeded() {
@@ -884,6 +924,7 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
             /* Com::printF(" t1:", m2->t1, 4);
             Com::printF(" t2:", m2->t2, 4);
             Com::printF(" t3:", m2->t3, 4);
+            Com::printF(" f:", f->feedrate, 2);
             Com::printF(" ss:", f->startSpeed, 1);
             Com::printF(" es:", f->endSpeed, 1);
             Com::printFLN(" l:", f->length, 4); */
@@ -1061,7 +1102,7 @@ void Motion1Buffer::unblock() {
 void Motion1::moveToParkPosition() {
     setTmpPositionXYZ(parkPosition[X_AXIS], parkPosition[Y_AXIS], IGNORE_COORDINATE);
     moveByOfficial(tmpPosition, XY_SPEED);
-    setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::min(maxPos[Z_AXIS], parkPosition[Z_AXIS] + currentPosition[Z_AXIS]) );
+    setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::min(maxPos[Z_AXIS], parkPosition[Z_AXIS] + currentPosition[Z_AXIS]));
     moveByOfficial(tmpPosition, Z_SPEED);
 }
 
@@ -1090,15 +1131,6 @@ bool Motion1::popFromMemory() {
     return true;
 }
 
-void Motion1::enableMotors(fast8_t axes) {
-    FOR_ALL_AXES(i) {
-        if ((axes & axisBits[i]) != 0 && motors[i]) {
-            motors[i]->enable();
-        }
-    }
-    Printer::unsetAllSteppersDisabled();
-}
-
 bool Motion1::isAxisHomed(fast8_t axis) {
     return (axesHomed & axisBits[axis]) != 0;
 }
@@ -1112,7 +1144,11 @@ void Motion1::setAxisHomed(fast8_t axis, bool state) {
 }
 
 void Motion1::homeAxes(fast8_t axes) {
+    waitForEndOfMoves();
+    updatePositionsFromCurrent();
+    Motion2::setMotorPositionFromTransformed();
     Printer::setHoming(true);
+    fast8_t activeToolId = Tool::getActiveToolId();
     callBeforeHomingOnSteppers();
 #if ZHOME_PRE_RAISE
     if (!isAxisHomed(Z_AXIS) || currentPosition[Z_AXIS] + ZHOME_PRE_RAISE_DISTANCE < maxPos[Z_AXIS]) {
@@ -1126,9 +1162,14 @@ void Motion1::homeAxes(fast8_t axes) {
                 continue;
             }
             if (homePriority[i] == priority) {
+                if (i <= Z_AXIS) {
+                    toolOffset[i] = 0;
+                }
                 if (i == Z_AXIS) { // Special case if we want z homing at certain position
+#if FIXED_Z_HOME_POSITION
                     setTmpPositionXYZ(ZHOME_X_POS, ZHOME_Y_POS, IGNORE_COORDINATE);
                     moveByOfficial(tmpPosition, maxFeedrate[X_AXIS]);
+#endif
                     if (ZProbe != nullptr && homeDir[Z_AXIS] < 0) { // activate z probe
                         ZProbeHandler::activate();
                     }
@@ -1137,9 +1178,9 @@ void Motion1::homeAxes(fast8_t axes) {
                 if (i == Z_AXIS && ZProbe != nullptr && homeDir[Z_AXIS] < 0) {
                     ZProbeHandler::deactivate();
                 }
-#if ZHOME_HEAT_HEIGHT > 0
+#if ZHOME_HEIGHT > 0
                 if (i == Z_AXIS) {
-                    setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT);
+                    setTmpPositionXYZE(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEIGHT, IGNORE_COORDINATE);
                     moveByOfficial(tmpPosition, maxFeedrate[Z_AXIS]);
                 }
 #endif
@@ -1158,6 +1199,9 @@ void Motion1::homeAxes(fast8_t axes) {
         }
     }
     Printer::setHomedAll(ok);
+    if (Tool::getActiveTool() != nullptr) {
+        Tool::selectTool(activeToolId, true);
+    }
     Commands::printCurrentPosition();
 }
 
@@ -1261,13 +1305,14 @@ void Motion1::simpleHome(fast8_t axis) {
         Motion2::setMotorPositionFromTransformed();
         HAL::delayMilliseconds(50);
     }
+
     endstopMode = EndstopMode::DISABLED;
     dest[axis] = -homeDir[axis] * homeRetestDistance[axis];
     Motion1::axesTriggered = 0;
     moveRelativeByOfficial(dest, homingFeedrate[axis]);
     waitForEndOfMoves();
     endstopMode = newMode;
-    dest[axis] = homeDir[axis] * homeRetestDistance[axis] * 1.5;
+    dest[axis] = homeDir[axis] * homeRetestDistance[axis] * 1.5f;
     Motion1::axesTriggered = 0;
     moveRelativeByOfficial(dest, homingFeedrate[axis] / homeRetestReduction[axis]);
     waitForEndOfMoves();
@@ -1287,6 +1332,7 @@ void Motion1::simpleHome(fast8_t axis) {
     endstopMode = oldMode;
     setAxisHomed(axis, true);
     Motion1::axesTriggered = 0;
+    Commands::printCurrentPosition();
 }
 
 void Motion1::callBeforeHomingOnSteppers() {

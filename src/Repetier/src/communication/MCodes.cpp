@@ -87,9 +87,12 @@ void MCode_18(GCode* com) {
         Motion1::motors[X_AXIS]->disable();
         Motion1::motors[Y_AXIS]->disable();
         Motion1::motors[Z_AXIS]->disable();
-        if (Motion1::motors[E_AXIS]) {
-            Motion1::motors[E_AXIS]->disable();
+        for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
+            if (Motion1::motors[i]) {
+                Motion1::motors[i]->disable();
+            }
         }
+        Tool::disableMotors();
     }
 }
 void MCode_20(GCode* com) {
@@ -181,6 +184,8 @@ void MCode_36(GCode* com) {
 #endif
 }
 void MCode_42(GCode* com) {
+    // Tool::getTool(com->T)->unstepMotor();
+    // return;
     if (com->hasP()) {
         int pin_number = com->P;
         for (uint8_t i = 0; i < (uint8_t)sizeof(sensitive_pins); i++) {
@@ -296,10 +301,21 @@ void MCode_104(GCode* com) {
     if (tool == nullptr) {
         return;
     }
-    if (com->hasS()) {
-        tool->getHeater()->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
-    } else if (com->hasP()) {
-        tool->getHeater()->setTargetTemperature(tool->getHeater()->getPreheatTemperature() + (com->hasO() ? com->O : 0));
+    if (Motion1::dittoMode) {
+        for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
+            tool = Tool::getTool(i);
+            if (com->hasS()) {
+                tool->getHeater()->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
+            } else if (com->hasP()) {
+                tool->getHeater()->setTargetTemperature(tool->getHeater()->getPreheatTemperature() + (com->hasO() ? com->O : 0));
+            }
+        }
+    } else {
+        if (com->hasS()) {
+            tool->getHeater()->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
+        } else if (com->hasP()) {
+            tool->getHeater()->setTargetTemperature(tool->getHeater()->getPreheatTemperature() + (com->hasO() ? com->O : 0));
+        }
     }
 #endif // NUM_TOOLS > 0
 }
@@ -352,12 +368,27 @@ void MCode_109(GCode* com) {
     if (tool == nullptr) {
         return;
     }
-    if (com->hasS()) {
-        tool->getHeater()->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
-    } else if (com->hasH()) {
-        tool->getHeater()->setTargetTemperature(tool->getHeater()->getPreheatTemperature() + (com->hasO() ? com->O : 0));
+    if (Motion1::dittoMode) {
+        for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
+            tool = Tool::getTool(i);
+            if (com->hasS()) {
+                tool->getHeater()->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
+            } else if (com->hasH()) {
+                tool->getHeater()->setTargetTemperature(tool->getHeater()->getPreheatTemperature() + (com->hasO() ? com->O : 0));
+            }
+        }
+        for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
+            tool = Tool::getTool(i);
+            tool->getHeater()->waitForTargetTemperature();
+        }
+    } else {
+        if (com->hasS()) {
+            tool->getHeater()->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
+        } else if (com->hasH()) {
+            tool->getHeater()->setTargetTemperature(tool->getHeater()->getPreheatTemperature() + (com->hasO() ? com->O : 0));
+        }
+        tool->getHeater()->waitForTargetTemperature();
     }
-    tool->getHeater()->waitForTargetTemperature();
     previousMillisCmd = HAL::timeInMilliseconds();
 #endif
 }
@@ -405,7 +436,7 @@ void MCode_115(GCode* com) {
     Com::cap(PSTR("PROGRESS:0"));
 #endif
     Com::cap(PSTR("AUTOREPORT_TEMP:1"));
-//#if EEPROM_MODE != 0
+    //#if EEPROM_MODE != 0
     Com::cap(PSTR("EEPROM:1"));
 //#else
 //    Com::cap(PSTR("EEPROM:0"));
@@ -456,7 +487,7 @@ void MCode_117(GCode* com) {
 void reportEndstop(EndstopDriver& d, PGM_P text) {
     if (d.implemented()) {
         Com::printF(text);
-        Com::printF(d.triggered() ? Com::tHSpace : Com::tLSpace);
+        d.report();
     }
 }
 void MCode_119(GCode* com) {
@@ -471,7 +502,21 @@ void MCode_119(GCode* com) {
     reportEndstop(endstopYMax, Com::tYMaxColon);
     reportEndstop(endstopZMin, Com::tZMinColon);
     reportEndstop(endstopZMax, Com::tZMaxColon);
-    reportEndstop(*ZProbe, Com::tZProbeState);
+#if NUM_AXES > A_AXIS
+    reportEndstop(endstopAMin, Com::tAMinColon);
+    reportEndstop(endstopAMax, Com::tAMaxColon);
+#endif
+#if NUM_AXES > B_AXIS
+    reportEndstop(endstopBMin, Com::tBMinColon);
+    reportEndstop(endstopBMax, Com::tBMaxColon);
+#endif
+#if NUM_AXES > C_AXIS
+    reportEndstop(endstopCMin, Com::tCMinColon);
+    reportEndstop(endstopCMax, Com::tCMaxColon);
+#endif
+    if (ZProbe != nullptr) {
+        reportEndstop(*ZProbe, Com::tZProbeState);
+    }
     Com::println();
 }
 
@@ -645,7 +690,7 @@ void MCode_200(GCode* com) {
         d = com->R;
     if (com->hasD())
         d = com->D;
-        Tool::getTool(extruderId)->setDiameter(d);
+    Tool::getTool(extruderId)->setDiameter(d);
     if (extruderId == Tool::getActiveToolId())
         Commands::changeFlowrateMultiply(Printer::extrudeMultiply);
     if (d == 0) {
@@ -679,8 +724,8 @@ void MCode_204(GCode* com) {
         return;
     }
     pid->setPID(com->hasX() ? com->X : pid->getP(),
-        com->hasY() ? com->Y : pid->getI(),
-        com->hasZ() ? com->Z : pid->getD());
+                com->hasY() ? com->Y : pid->getI(),
+                com->hasZ() ? com->Z : pid->getD());
 }
 
 void MCode_205(GCode* com) {
@@ -759,50 +804,37 @@ void MCode_251(GCode* com) {
 }
 
 void MCode_280(GCode* com) {
-    // TODO: Ditto printing
-    /*
-#if FEATURE_DITTO_PRINTING
-#if DUAL_X_AXIS
-    Extruder::dittoMode = 0;
-    if (Extruder::current->id != 0)
-        Extruder::selectExtruderById(0);
-    Printer::homeXAxis();
-    if (com->hasS() && com->S > 0) {
-#if LAZY_DUAL_X_AXIS
-        PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, true);
-#endif
-        Extruder::current = &extruder[1];
-        PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset + static_cast<int32_t>(Printer::xLength * 0.5 * Printer::axisStepsPerMM[X_AXIS]), 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, true);
-        Printer::currentPositionSteps[X_AXIS] = Printer::xMinSteps;
-        Extruder::current = &extruder[0];
-        Extruder::dittoMode = 1;
+    bool mirror = false;
+    fast8_t count = 0;
+    if (com->hasS() && com->S > 0 && com->S < NUM_TOOLS) {
+        count = com->S;
     }
-#else
-    if (com->hasS()) { // Set ditto mode S: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
-        Extruder::dittoMode = com->S;
+    if (com->hasR()) {
+        mirror = com->R != 0 && PrinterType::supportsDittoMirror();
     }
-#endif
-#endif
-*/
+    if (com->hasS()) {
+        Tool::selectTool(0);
+        PrinterType::setDittoMode(count, mirror);
+    }
+    Com::printF(PSTR("DittoMode:"), (int)Motion1::dittoMode);
+    Com::printFLN(PSTR(" Mirror:"), (int)Motion1::dittoMirror);
 }
 
 void MCode_281(GCode* com) {
 #if FEATURE_WATCHDOG
-    {
-        if (com->hasX()) {
-            HAL::stopWatchdog();
-            Com::printFLN(PSTR("Watchdog disabled"));
-            break;
-        }
-        Com::printInfoFLN(PSTR("Triggering watchdog. If activated, the printer will reset."));
-        Printer::kill(false);
-        HAL::delayMilliseconds(200); // write output, make sure heaters are off for safety
-#if !defined(__AVR_ATmega1280__) && !defined(__AVR_ATmega2560__)
-        InterruptProtectedBlock noInts; // don't disable interrupts on mega2560 and mega1280 because of bootloader bug
-#endif
-        while (1) {
-        } // Endless loop
+    if (com->hasX()) {
+        HAL::stopWatchdog();
+        Com::printFLN(PSTR("Watchdog disabled"));
+        return;
     }
+    Com::printInfoFLN(PSTR("Triggering watchdog. If activated, the printer will reset."));
+    Printer::kill(false);
+    HAL::delayMilliseconds(200); // write output, make sure heaters are off for safety
+#if !defined(__AVR_ATmega1280__) && !defined(__AVR_ATmega2560__)
+    InterruptProtectedBlock noInts; // don't disable interrupts on mega2560 and mega1280 because of bootloader bug
+#endif
+    while (1) {
+    } // Endless loop to force triggering
 #else
     Com::printInfoFLN(PSTR("Watchdog feature was not compiled into this version!"));
 #endif

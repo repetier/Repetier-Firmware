@@ -448,19 +448,19 @@ void GCode_100(GCode* com) {
 }
 
 void GCode_131(GCode* com) {
-#if DRIVE_SYSTEM == DELTA
+#if false && PRINTER_TYPE == 2
     float cx, cy, cz;
     Printer::realPosition(cx, cy, cz);
     float oldfeedrate = Printer::feedrate;
-    Printer::offsetX = 0;
-    Printer::offsetY = 0;
+    Motion1::toolOffset[X_AXIS] = 0;
+    Motion1::toolOffset[Y_AXIS] = 0;
     Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, Printer::homingFeedrate[X_AXIS]);
     Printer::feedrate = oldfeedrate;
 #endif
 }
 
 void GCode_132(GCode* com) {
-#if DRIVE_SYSTEM == DELTA
+#if false && PRINTER_TYPE == 2
     // G132 Calibrate endstop offsets
     // This has the probably unintended side effect of turning off leveling.
     Printer::setAutolevelActive(false); // don't let transformations change result!
@@ -494,7 +494,7 @@ void GCode_132(GCode* com) {
 }
 
 void GCode_133(GCode* com) {
-#if DRIVE_SYSTEM == DELTA
+#if false && PRINTER_TYPE == 2
     // G133 Measure steps to top
     bool oldAuto = Printer::isAutolevelActive();
     Printer::setAutolevelActive(false); // don't let transformations change result!

@@ -1,4 +1,27 @@
 # Repetier-Firmware - the fast and user friendly firmware
+## The new Dimension of 3d printing. The ultimate upgrade for your printer!
+
+With Repetier-Firmware 2.0 you will get these benefits you'll never want to miss again:
+* Better prints with smoother surface
+* Faster printing speed
+* Extreme vibration and printing noise reduction
+* Simpler firmware configuration
+* Easily expandable due to modular design
+* Code is much easier to understand
+* Same handling for all printer types - no difference between linear and nonlinear systems
+* Less memory usage compared to old nonlinear handling
+* Easier to adjust z correction, babystepping and advance
+* No more delays for slower drivers wasting CPU time
+* Most special cases can now be catched by the module system
+Support of up to 7 axes (X, Y, Z, E, A, B, C)
+
+**The significant improvement of your printing experience is made possible by our new printing algorithm, which means that the print head is no longer using linear velocity profiles. Now we use ultra smooth 5th order polynominals to get a smooth velocity curve. This reduces printer vibrations and gives a better surface.**
+
+<div style="max-width:505px;margin: 0 auto;"><object data="https://www.repetier.com/images/polynomalvelocityprofile.svg" type="image/svg+xml"><img src="https://www.repetier.com/images/polynomalvelocityprofile.svg"></object></div>
+
+Although the development and testing of our firmware takes thousands of hours of development time and requires a lot of expensive hardware, we offer this freely accessible as open source software. However, this is only possible if you support us. If you are enthusiastic about our firmware and want to have it updated in the future, support us with an amount you think is appropriate.
+
+Many open source projects are discontinued or do not offer support, because the financing is not sufficient. We do not want to belong to this group! We think this is especially important for manufacturers, who deploy their printers with our firmware. Imagine at one point you get no more updates or help for the basic OS of your printer! So if you use our free software to generate good sales, it would only be fair and clever if you regularly support us. If you are interested in supporting us, you can donate via <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=UL49NW2JVQ98S" target="_blank">PayPal</a> or <a href="https://www.repetier.com/about-us/" target="_blank">contact us</a>.
 
 ## Notes for developers/pull requests
 
@@ -41,6 +64,8 @@ Done:
 - First tests of the new modular configuration scheme.
 - Pure cartesian printer system.
 - Core XYZ printer system.
+- Dual X axis printer type
+- Delta printer type
 - Linear, cubic and quintic velocity shape.
 - No minimum speed required any more.
 - Homing.
@@ -49,34 +74,21 @@ Done:
 - Tools instead of extruders.
 - Linear advance
 - Upgraded to SdFat 1.0.5 for better name handling.
+- Ditto printing/ ditto mirror
+- Mirror motors (2 - 4).
 
 ToDo:
-- Dual X axis printer type
-- Delta printer type
 - Core printer type
 - Convert PWM handling
 - Convert temperature handling
 - Add JAM detection
-- Add advance.
 - Make lcd work
-- Switch to latest sdfat library
 - Switch to u8g 2 library
 - Port AVR HAL to new system
 - recheck event system
 - New config tool
 
 #### Benefits of new system
-
-The new motion system will make a big impact on how firmware works. After
-the first printer can already move around we note many advantages:
-- Code is much easier to understand.
-- Same handling for all printer types. No difference between linear and nonlinear systems.
-- Less memory usage compared to old nonlinear handling.
-- Smoother moves.
-- Easier to adjust z correction, babystepping and advance.
-- No more delays for slower drivers wasting CPU time.
-- Most special cases can now be catched by the module system.
-- Support of up to 7 axes (X,Y, Z, E, A, B, C)
 
 We tested a cartesian printer on a Arduino DUE. The limit for the motion planner
 was at 250000 Steps/s with precomputed segments of 1ms length using 5th grade
@@ -144,6 +156,10 @@ If you have once setup the system, you will never look back to the Arduino-IDE.
 For version 2.0 there is currently no configuration tool, so you need to edit
 Configuration.h and COnfiguration_io.h manually.
 You can compile it using Arduino IDE or Visual Studio Code with Arduino plugin.
+
+Find the full documentation for the new version here:
+[https://docfirmwarev2.repetier.com/](https://docfirmwarev2.repetier.com/)
+
 
 ## Version 2.0.0
 * New motion planner.

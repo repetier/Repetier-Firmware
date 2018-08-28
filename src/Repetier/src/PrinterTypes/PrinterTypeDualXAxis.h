@@ -14,11 +14,21 @@
     You should have received a copy of the GNU General Public License
     along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
 
+    What you need to know about dual X axis:
+    We use the A axis to drive the right x axis, so define all settings for this!
+    We support ditto and also mirroring the ditto mode.
+    Lazy homing means that the tools remain inside homing position until an extrusion in positive direction happens.
 */
 
-#if PRINTER_TYPE == 0
+#if PRINTER_TYPE == 3
 
 class PrinterType {
+    static bool leftParked, rightParked;
+    static uint8_t lazyMode;
+    static int activeMotor;
+    static float posReal[2], targetReal;
+    static bool dontChangeCoords;
+    static uint16_t eeprom; // start position eeprom
 public:
     // Are subdivisions required due to nonlinear kinematics
     static bool subdivisionsRequired() {
@@ -42,12 +52,10 @@ public:
     static void init();
     static void updateDerived();
     static void enableMotors(fast8_t axes);
-    static inline void queueMove(float feedrate) {
-        Motion1::queueMove(feedrate);
-    }
-    static inline bool supportsDittoMirror() { return false; }
+    static void queueMove(float feedrate);
+    static inline bool supportsDittoMirror() { return true; }
     static void setDittoMode(fast8_t count, bool mirror);
-    static inline bool ignoreAxisForLength(fast8_t axis) { return false; }
+    static bool ignoreAxisForLength(fast8_t axis);
     static void transformedToOfficial(float trans[NUM_AXES], float official[NUM_AXES]);
     static void officialToTransformed(float official[NUM_AXES], float trans[NUM_AXES]);
 };

@@ -41,7 +41,6 @@ uint8_t Printer::flag1 = 0;
 uint8_t Printer::flag2 = 0;
 uint8_t Printer::flag3 = 0;
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
-fast8_t Printer::stepsPerTimerCall = 1;
 uint16_t Printer::menuMode = 0;
 uint8_t Printer::mode = DEFAULT_PRINTER_MODE;
 float Printer::extrudeMultiplyError = 0;
@@ -58,32 +57,7 @@ uint32_t Printer::interval = 30000; ///< Last step duration in ticks.
 uint32_t Printer::timer;            ///< used for acceleration/deceleration timing
 uint32_t Printer::stepNumber;       ///< Step number in current move.
 #if USE_ADVANCE
-#if ENABLE_QUADRATIC_ADVANCE
-int32_t Printer::advanceExecuted; ///< Executed advance steps
-#endif
 int Printer::advanceStepsSet;
-#endif
-#if NONLINEAR_SYSTEM
-int32_t Printer::maxDeltaPositionSteps;
-floatLong Printer::deltaDiagonalStepsSquaredA;
-floatLong Printer::deltaDiagonalStepsSquaredB;
-floatLong Printer::deltaDiagonalStepsSquaredC;
-float Printer::deltaMaxRadiusSquared;
-float Printer::radius0;
-int32_t Printer::deltaFloorSafetyMarginSteps = 0;
-int32_t Printer::deltaAPosXSteps;
-int32_t Printer::deltaAPosYSteps;
-int32_t Printer::deltaBPosXSteps;
-int32_t Printer::deltaBPosYSteps;
-int32_t Printer::deltaCPosXSteps;
-int32_t Printer::deltaCPosYSteps;
-int32_t Printer::realDeltaPositionSteps[TOWER_ARRAY];
-int16_t Printer::travelMovesPerSecond;
-int16_t Printer::printMovesPerSecond;
-#endif
-#if !NONLINEAR_SYSTEM || defined(FAST_COREXYZ)
-int32_t Printer::xMinStepsAdj, Printer::yMinStepsAdj, Printer::zMinStepsAdj; // adjusted to cover extruder/probe offsets
-int32_t Printer::xMaxStepsAdj, Printer::yMaxStepsAdj, Printer::zMaxStepsAdj;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
 int32_t Printer::stepsRemainingAtZHit;
@@ -100,10 +74,6 @@ int32_t Printer::levelingP3[3];
 float Printer::feedrate;                 ///< Last requested feedrate.
 int Printer::feedrateMultiply;           ///< Multiplier for feedrate in percent (factor 1 = 100)
 unsigned int Printer::extrudeMultiply;   ///< Flow multiplier in percent (factor 1 = 100)
-float Printer::offsetX;                  ///< X-offset for different extruder positions.
-float Printer::offsetY;                  ///< Y-offset for different extruder positions.
-float Printer::offsetZ;                  ///< Z-offset for different extruder positions.
-float Printer::offsetZ2 = 0;             ///< Z-offset without rotation correction.
 speed_t Printer::vMaxReached;            ///< Maximum reached speed
 uint32_t Printer::msecondsPrinting;      ///< Milliseconds of printing time (means time with heated extruder)
 float Printer::filamentPrinted;          ///< mm of filament printed since counting started
@@ -126,9 +96,6 @@ float Printer::maxRealJerk = 0;
 #endif
 #ifdef DEBUG_PRINT
 int debugWaitLoop = 0;
-#endif
-#if LAZY_DUAL_X_AXIS
-bool Printer::sledParked = false;
 #endif
 fast8_t Printer::wizardStackPos;
 wizardVar Printer::wizardStack[WIZARD_STACK_SIZE];
@@ -223,54 +190,6 @@ void Printer::reportPrinterMode() {
 }
 void Printer::updateDerivedParameter() {
 #if DRIVE_SYSTEM == DELTA
-    axisStepsPerMM[X_AXIS] = axisStepsPerMM[Y_AXIS] = axisStepsPerMM[Z_AXIS];
-    maxAccelerationMMPerSquareSecond[X_AXIS] = maxAccelerationMMPerSquareSecond[Y_AXIS] = maxAccelerationMMPerSquareSecond[Z_AXIS];
-    homingFeedrate[X_AXIS] = homingFeedrate[Y_AXIS] = homingFeedrate[Z_AXIS];
-    maxFeedrate[X_AXIS] = maxFeedrate[Y_AXIS] = maxFeedrate[Z_AXIS];
-    maxTravelAccelerationMMPerSquareSecond[X_AXIS] = maxTravelAccelerationMMPerSquareSecond[Y_AXIS] = maxTravelAccelerationMMPerSquareSecond[Z_AXIS];
-    zMaxSteps = axisStepsPerMM[Z_AXIS] * (zLength);
-    towerAMinSteps = axisStepsPerMM[A_TOWER] * xMin;
-    towerBMinSteps = axisStepsPerMM[B_TOWER] * yMin;
-    towerCMinSteps = axisStepsPerMM[C_TOWER] * zMin;
-    //radius0 = EEPROM::deltaHorizontalRadius();
-    float radiusA = radius0 + EEPROM::deltaRadiusCorrectionA();
-    float radiusB = radius0 + EEPROM::deltaRadiusCorrectionB();
-    float radiusC = radius0 + EEPROM::deltaRadiusCorrectionC();
-    deltaAPosXSteps = floor(radiusA * cos(EEPROM::deltaAlphaA() * M_PI / 180.0f) * axisStepsPerMM[Z_AXIS] + 0.5f);
-    deltaAPosYSteps = floor(radiusA * sin(EEPROM::deltaAlphaA() * M_PI / 180.0f) * axisStepsPerMM[Z_AXIS] + 0.5f);
-    deltaBPosXSteps = floor(radiusB * cos(EEPROM::deltaAlphaB() * M_PI / 180.0f) * axisStepsPerMM[Z_AXIS] + 0.5f);
-    deltaBPosYSteps = floor(radiusB * sin(EEPROM::deltaAlphaB() * M_PI / 180.0f) * axisStepsPerMM[Z_AXIS] + 0.5f);
-    deltaCPosXSteps = floor(radiusC * cos(EEPROM::deltaAlphaC() * M_PI / 180.0f) * axisStepsPerMM[Z_AXIS] + 0.5f);
-    deltaCPosYSteps = floor(radiusC * sin(EEPROM::deltaAlphaC() * M_PI / 180.0f) * axisStepsPerMM[Z_AXIS] + 0.5f);
-    deltaDiagonalStepsSquaredA.l = static_cast<uint32_t>((EEPROM::deltaDiagonalCorrectionA() + EEPROM::deltaDiagonalRodLength()) * axisStepsPerMM[Z_AXIS]);
-    deltaDiagonalStepsSquaredB.l = static_cast<uint32_t>((EEPROM::deltaDiagonalCorrectionB() + EEPROM::deltaDiagonalRodLength()) * axisStepsPerMM[Z_AXIS]);
-    deltaDiagonalStepsSquaredC.l = static_cast<uint32_t>((EEPROM::deltaDiagonalCorrectionC() + EEPROM::deltaDiagonalRodLength()) * axisStepsPerMM[Z_AXIS]);
-    if (deltaDiagonalStepsSquaredA.l > 65534 || 2 * radius0 * axisStepsPerMM[Z_AXIS] > 65534) {
-        setLargeMachine(true);
-#ifdef SUPPORT_64_BIT_MATH
-        deltaDiagonalStepsSquaredA.L = RMath::sqr(static_cast<uint64_t>(deltaDiagonalStepsSquaredA.l));
-        deltaDiagonalStepsSquaredB.L = RMath::sqr(static_cast<uint64_t>(deltaDiagonalStepsSquaredB.l));
-        deltaDiagonalStepsSquaredC.L = RMath::sqr(static_cast<uint64_t>(deltaDiagonalStepsSquaredC.l));
-#else
-        deltaDiagonalStepsSquaredA.f = RMath::sqr(static_cast<float>(deltaDiagonalStepsSquaredA.l));
-        deltaDiagonalStepsSquaredB.f = RMath::sqr(static_cast<float>(deltaDiagonalStepsSquaredB.l));
-        deltaDiagonalStepsSquaredC.f = RMath::sqr(static_cast<float>(deltaDiagonalStepsSquaredC.l));
-#endif
-    } else {
-        setLargeMachine(false);
-        deltaDiagonalStepsSquaredA.l = RMath::sqr(deltaDiagonalStepsSquaredA.l);
-        deltaDiagonalStepsSquaredB.l = RMath::sqr(deltaDiagonalStepsSquaredB.l);
-        deltaDiagonalStepsSquaredC.l = RMath::sqr(deltaDiagonalStepsSquaredC.l);
-    }
-    deltaMaxRadiusSquared = RMath::sqr(EEPROM::deltaMaxRadius());
-    long cart[Z_AXIS_ARRAY], delta[TOWER_ARRAY];
-    cart[X_AXIS] = cart[Y_AXIS] = 0;
-    cart[Z_AXIS] = zMaxSteps;
-    transformCartesianStepsToDeltaSteps(cart, delta);
-    maxDeltaPositionSteps = delta[0];
-    xMaxSteps = yMaxSteps = zMaxSteps;
-    xMinSteps = yMinSteps = zMinSteps = 0;
-    deltaFloorSafetyMarginSteps = DELTA_FLOOR_SAFETY_MARGIN_MM * axisStepsPerMM[Z_AXIS];
 #else
 // For which directions do we need backlash compensation
 #if ENABLE_BACKLASH_COMPENSATION
@@ -295,8 +214,8 @@ void Printer::updateDerivedParameter() {
         maxInterval = tmp;
 #endif
 */
-    //Com::printFLN(PSTR("Minimum Speed:"),minimumSpeed);
-    //Com::printFLN(PSTR("Minimum Speed Z:"),minimumZSpeed);
+//Com::printFLN(PSTR("Minimum Speed:"),minimumSpeed);
+//Com::printFLN(PSTR("Minimum Speed Z:"),minimumZSpeed);
 #if DISTORTION_CORRECTION
     distortion.updateDerived();
 #endif // DISTORTION_CORRECTION
@@ -327,12 +246,15 @@ void Printer::kill(uint8_t onlySteppers) {
 #endif // defined
     XMotor.disable();
     YMotor.disable();
-#if !defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT)
+#if defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT) && PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT == 0
     ZMotor.disable();
 #else
     if (!onlySteppers)
         ZMotor.disable();
 #endif
+    for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
+        Motion1::motors[i]->disable();
+    }
     Tool::disableMotors();
     setAllSteppersDiabled();
     unsetHomedAll();
@@ -594,14 +516,9 @@ void Printer::setup() {
     feedrateMultiply = 100;
     extrudeMultiply = 100;
 #if USE_ADVANCE
-#if ENABLE_QUADRATIC_ADVANCE
-    advanceExecuted = 0;
-#endif
     advanceStepsSet = 0;
 #endif
-    offsetX = offsetY = offsetZ = 0;
     interval = 5000;
-    stepsPerTimerCall = 1;
     msecondsPrinting = 0;
     filamentPrinted = 0;
     flag0 = PRINTER_FLAG0_STEPPER_DISABLED;
@@ -622,7 +539,7 @@ void Printer::setup() {
     SET_INPUT(ESP_WIFI_MODULE_COM);
     SET_INPUT(MOTOR_FAULT_PIN);
     SET_INPUT(MOTOR_FAULT_PIGGY_PIN);
-#endif //(MOTHERBOARD == 501) || (MOTHERBOARD == 502)
+#endif              //(MOTHERBOARD == 501) || (MOTHERBOARD == 502)
     EEPROM::init(); // Read settings from eeprom if wanted, run after initialization!
     HAL::analogStart();
     // Extruder::initExtruder();
@@ -758,7 +675,7 @@ void Printer::handleInterruptEvent() {
     case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL4:
     case PRINTER_INTERRUPT_EVENT_JAM_SIGNAL5: {
         // TODO: Jam control
-       /* if (isJamcontrolDisabled())
+        /* if (isJamcontrolDisabled())
             break;
         fast8_t extruderIndex = event - PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0;
         Extruder& ext = extruder[extruderIndex];
@@ -790,7 +707,7 @@ void Printer::showConfiguration() {
 #ifndef EXTERNALSERIAL
     Com::config(PSTR("InputBuffer:"), SERIAL_BUFFER_SIZE - 1);
 #endif
-    Com::config(PSTR("NumExtruder:"), NUM_EXTRUDER);
+    Com::config(PSTR("NumExtruder:"), NUM_TOOLS);
     Com::config(PSTR("MixingExtruder:"), MIXING_EXTRUDER);
     Com::config(PSTR("HeatedBed:"), NUM_HEATED_BEDS);
     Com::config(PSTR("SDCard:"), SDSUPPORT);
@@ -800,7 +717,7 @@ void Printer::showConfiguration() {
 #else
     Com::config(PSTR("Fan2:0"));
 #endif
-    Com::config(PSTR("NumFans:"),(int)NUM_FANS);
+    Com::config(PSTR("NumFans:"), (int)NUM_FANS);
     Com::config(PSTR("LCD:"), FEATURE_CONTROLLER != NO_CONTROLLER);
     Com::config(PSTR("SoftwarePowerSwitch:"), PS_ON_PIN > -1);
     Com::config(PSTR("XHomeDir:"), Motion1::homeDir[X_AXIS]);
@@ -861,7 +778,7 @@ void Printer::showConfiguration() {
         Com::config(PSTR("MaxBedTemp:"), heatedBeds[0]->getMaxTemperature());
     }
     for (fast8_t i = 0; i < NUM_TOOLS; i++) {
-        Tool *t = Tool::getTool(i);
+        Tool* t = Tool::getTool(i);
         START_EXTRUDER_CONFIG(i)
         Com::printFLN(PSTR("Jerk:"), t->getMaxYank());
         START_EXTRUDER_CONFIG(i)
@@ -1070,8 +987,8 @@ void Printer::showJSONStatus(int type) {
     Com::printF(PSTR("]},"));
     // SEQ??
     Com::printF(PSTR("\"temps\": {"));
-    for(int i = 0; i < NUM_HEATERS; i++) {
-        HeatManager *h = heaters[i];
+    for (int i = 0; i < NUM_HEATERS; i++) {
+        HeatManager* h = heaters[i];
         if (!h->isBedHeater()) {
             continue;
         }
@@ -1089,11 +1006,11 @@ void Printer::showJSONStatus(int type) {
     for (int i = 0; i < NUM_TOOLS; i++) {
         if (!firstOccurrence)
             Com::print(',');
-        Tool *t = Tool::getTool(i);
-        HeatManager *h = t->getHeater();
+        Tool* t = Tool::getTool(i);
+        HeatManager* h = t->getHeater();
         if (h == nullptr) {
             Com::print(0);
-        } else { 
+        } else {
             Com::print(h->getCurrentTemperature());
         }
         firstOccurrence = false;
@@ -1103,11 +1020,11 @@ void Printer::showJSONStatus(int type) {
     for (int i = 0; i < NUM_TOOLS; i++) {
         if (!firstOccurrence)
             Com::print(',');
-        Tool *t = Tool::getTool(i);
-        HeatManager *h = t->getHeater();
+        Tool* t = Tool::getTool(i);
+        HeatManager* h = t->getHeater();
         if (h == nullptr) {
             Com::print(0);
-        } else { 
+        } else {
             Com::print(h->getTargetTemperature());
         }
         firstOccurrence = false;
@@ -1117,13 +1034,13 @@ void Printer::showJSONStatus(int type) {
     for (int i = 0; i < NUM_TOOLS; i++) {
         if (!firstOccurrence)
             Com::print(',');
-        Tool *t = Tool::getTool(i);
-        HeatManager *h = t->getHeater();
+        Tool* t = Tool::getTool(i);
+        HeatManager* h = t->getHeater();
         if (h == nullptr) {
             Com::print(0);
         } else { // Don't have that information, so fake it to make some sense
-            Com::print(h->getTargetTemperature() > 50 ? '2' : '1');            
-        //Com::print(extruder[i].tempControl.targetTemperatureC > EXTRUDER_FAN_COOL_TEMP ? '2' : '1');
+            Com::print(h->getTargetTemperature() > 50 ? '2' : '1');
+            //Com::print(extruder[i].tempControl.targetTemperatureC > EXTRUDER_FAN_COOL_TEMP ? '2' : '1');
         }
         firstOccurrence = false;
     }

@@ -46,6 +46,8 @@
 #undef IO_PWM_FAKE
 #undef IO_PWM_SWITCH
 #undef IO_PWM_HARDWARE
+#undef IO_PWM_MIN_SPEED
+#undef IO_PWM_INVERTED
 
 #if IO_TARGET == 1 // init
 
@@ -55,8 +57,9 @@
 #define IO_PWM_SWITCH(name, pinname, onLevel)
 #define IO_PWM_HARDWARE(name, pinid, frequency) \
     name.id = HAL::initHardwarePWM(pinid, frequency);
-
+#define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow)
 #define IO_PWM_KICKSTART(name, pwmname, timems)
+#define IO_PWM_INVERTED(name, pwmname)
 
 #elif IO_TARGET == 2 // PWM interrupt
 
@@ -81,8 +84,9 @@
 #define IO_PWM_FAKE(name)
 #define IO_PWM_SWITCH(name, pinname, onLevel)
 #define IO_PWM_HARDWARE(name, pinid, frequency)
-
+#define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow)
 #define IO_PWM_KICKSTART(name, pwmname, timems)
+#define IO_PWM_INVERTED(name, pwmname)
 
 #elif IO_TARGET == 3 // 100ms
 
@@ -91,12 +95,14 @@
 #define IO_PWM_FAKE(name)
 #define IO_PWM_SWITCH(name, pinname, onLevel)
 #define IO_PWM_HARDWARE(name, pinid, frequency)
+#define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow)
 #define IO_PWM_KICKSTART(name, pwmname, timems) \
     if (name.kickcount > 0) { \
         if (--name.kickcount == 0) { \
             pwmname.set(name.pwm); \
         } \
     }
+#define IO_PWM_INVERTED(name, pwmname)
 
 #elif IO_TARGET == 4 // class
 
@@ -169,6 +175,25 @@
     }; \
     extern name##Class name;
 
+#define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow) \
+    class name##Class : public PWMHandler { \
+    public: \
+        fast8_t pwm; \
+        name##Class() \
+            : pwm(0) {} \
+        void set(fast8_t _pwm) final { \
+            if (_pwm > minValue) { \
+                pwmname.set(_pwm); \
+            } else if (offBelow) { \
+                pwmname.set(0); \
+            } else { \
+                pwmname.set(minValue); \
+            } \
+        } \
+        fast8_t get() final { return pwmname.get(); } \
+    }; \
+    extern name##Class name;
+
 #define IO_PWM_KICKSTART(name, pwmname, time100ms) \
     class name##Class : public PWMHandler { \
     public: \
@@ -192,6 +217,17 @@
     }; \
     extern name##Class name;
 
+#define IO_PWM_INVERTED(name, pwmname) \
+    class name##Class : public PWMHandler { \
+    public: \
+        name##Class() {} \
+        void set(fast8_t _pwm) final { \
+            pwmname.set(255 - _pwm); \
+        } \
+        fast8_t get() final { return 255 - pwmname.get(); } \
+    }; \
+    extern name##Class name;
+
 #elif IO_TARGET == 6 // variable
 
 #define IO_PWM_SOFTWARE(name, pinname, speed) \
@@ -209,7 +245,12 @@
 #define IO_PWM_HARDWARE(name, pinid, frequency) \
     name##Class name;
 
+#define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow) \
+    name##Class name;
+
 #define IO_PWM_KICKSTART(name, pwmname, timems) \
+    name##Class name;
+#define IO_PWM_INVERTED(name, pwmname) \
     name##Class name;
 
 #else
@@ -219,6 +260,8 @@
 #define IO_PWM_FAKE(name)
 #define IO_PWM_SWITCH(name, pinname, onLevel)
 #define IO_PWM_HARDWARE(name, pinid, frequency)
+#define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow)
 #define IO_PWM_KICKSTART(name, pwmname, timems)
+#define IO_PWM_INVERTED(name, pwmname)
 
 #endif

@@ -579,6 +579,8 @@ extern void microstepInit();
 #include "src/PrinterTypes/PrinterTypeCoreXYZ.h"
 #elif PRINTER_TYPE == 2
 #include "src/PrinterTypes/PrinterTypeDelta.h"
+#elif PRINTER_TYPE == 3
+#include "src/PrinterTypes/PrinterTypeDualXAxis.h"
 #endif
 #include "src/motion/VelocityProfile.h"
 
@@ -601,7 +603,11 @@ enum LsAction { LS_SerialPrint,
                 LS_GetFilename };
 class SDCard {
 public:
+#if ENABLE_SOFTWARE_SPI_CLASS
+    SdFatSoftSpi<SD_SOFT_MISO_PIN, SD_SOFT_MOSI_PIN, SD_SOFT_SCK_PIN> fat;
+#else
     SdFat fat;
+#endif
     //Sd2Card card; // ~14 Byte
     //SdVolume volume;
     //SdFile root;
@@ -615,7 +621,7 @@ public:
     //char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
     // char* shortname; // Pointer to start of filename itself
     // char* pathend;   // File to char where pathname in fullname ends
-    uint8_t sdmode;  // 1 if we are printing from sd card, 2 = stop accepting new commands
+    uint8_t sdmode; // 1 if we are printing from sd card, 2 = stop accepting new commands
     bool sdactive;
     //int16_t n;
     bool savetosd;

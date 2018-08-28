@@ -38,7 +38,17 @@ public:
     static void deactivatedTool(fast8_t id);
     static void activatedTool(fast8_t id);
     static void eepromHandle();
+    static void restoreFromConfiguration();
     static void init();
     static void updateDerived();
+    static void enableMotors(fast8_t axes);
+    static inline void queueMove(float feedrate) {
+        Motion1::queueMove(feedrate);
+    }
+    static inline bool supportsDittoMirror() { return false; }
+    static void setDittoMode(fast8_t count, bool mirror);
+    static inline bool ignoreAxisForLength(fast8_t axis) { return false; }
+    static void transformedToOfficial(float trans[NUM_AXES], float official[NUM_AXES]);
+    static void officialToTransformed(float official[NUM_AXES], float trans[NUM_AXES]);
 };
 #endif

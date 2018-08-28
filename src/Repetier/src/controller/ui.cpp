@@ -1793,11 +1793,6 @@ void UIDisplay::parse(const char *txt, bool ram) {
                     addStringP(Com::translatedF(UI_TEXT_STRING_HM_BANGBANG_ID));
             }
 #if USE_ADVANCE
-#if ENABLE_QUADRATIC_ADVANCE
-            else if(c2 == 'a') {
-                addFloat(Extruder::current->advanceK, 3, 0);
-            }
-#endif
             else if(c2 == 'l') {
                 addFloat(Extruder::current->advanceL, 3, 0);
             }
@@ -3773,9 +3768,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
             int32_t factors[4];
             PrintLine::calculatePlane(factors, Printer::levelingP1, Printer::levelingP2, Printer::levelingP3);
             Com::printFLN(Com::tLevelingCalc);
-            Com::printFLN(Com::tTower1, PrintLine::calcZOffset(factors, Printer::deltaAPosXSteps, Printer::deltaAPosYSteps) * Printer::invAxisStepsPerMM[Z_AXIS]);
-            Com::printFLN(Com::tTower2, PrintLine::calcZOffset(factors, Printer::deltaBPosXSteps, Printer::deltaBPosYSteps) * Printer::invAxisStepsPerMM[Z_AXIS]);
-            Com::printFLN(Com::tTower3, PrintLine::calcZOffset(factors, Printer::deltaCPosXSteps, Printer::deltaCPosYSteps) * Printer::invAxisStepsPerMM[Z_AXIS]);
+  //          Com::printFLN(Com::tTower1, PrintLine::calcZOffset(factors, Printer::deltaAPosXSteps, Printer::deltaAPosYSteps) * Printer::invAxisStepsPerMM[Z_AXIS]);
+  //          Com::printFLN(Com::tTower2, PrintLine::calcZOffset(factors, Printer::deltaBPosXSteps, Printer::deltaBPosYSteps) * Printer::invAxisStepsPerMM[Z_AXIS]);
+  //          Com::printFLN(Com::tTower3, PrintLine::calcZOffset(factors, Printer::deltaCPosXSteps, Printer::deltaCPosYSteps) * Printer::invAxisStepsPerMM[Z_AXIS]);
 #endif
             break;
 #if FEATURE_Z_PROBE

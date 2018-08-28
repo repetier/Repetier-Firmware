@@ -50,12 +50,73 @@ public:
     to ensure best accuracy in motion.
     */
     static void timer();
-    /** Return pointe rto next available buffer or nullptr. */
-    static Motion3Buffer* tryReserve();
+    /** Return pointer to next available buffer or nullptr. */
+    static inline Motion3Buffer* tryReserve() {
+        if (length < NUM_MOTION3_BUFFER) {
+            return &buffers[last];
+        }
+        return nullptr;
+    }
     /** Increment head position an dincrement length */
-    static void pushReserved();
+    static inline void pushReserved() {
+        last++;
+        if (last == NUM_MOTION3_BUFFER) {
+            last = 0;
+        }
+        InterruptProtectedBlock noInts;
+        length++;
+    }
     static void activateNext();
-    static void unstepMotors();
+    static inline void unstepMotors() {
+#ifdef XMOTOR_SWITCHABLE
+        Motion1::motors[X_AXIS]->unstep();
+#else
+        XMotor.unstep();
+#endif
+        Motion1::motors[Y_AXIS]->unstep();
+        Motion1::motors[Z_AXIS]->unstep();
+#if NUM_TOOLS > 6
+        for (fast8_t i = 0; i <= NUM_TOOLS; i++) {
+            Tool::getTool(i)->unstepMotor();
+        }
+#else
+#if NUM_TOOLS > 0
+        Tool::tools[0]->unstepMotor();
+#endif
+#if NUM_TOOLS > 1
+        Tool::tools[1]->unstepMotor();
+#endif
+#if NUM_TOOLS > 2
+        Tool::tools[2]->unstepMotor();
+#endif
+#if NUM_TOOLS > 3
+        Tool::tools[3]->unstepMotor();
+#endif
+#if NUM_TOOLS > 4
+        Tool::tools[4]->unstepMotor();
+#endif
+#if NUM_TOOLS > 5
+        Tool::tools[5]->unstepMotor();
+#endif
+#endif
+        /* if (Motion1::dittoMode) {
+            for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
+                Tool* t = Tool::getTool(i);
+                if (t != nullptr) {
+                    t->unstepMotor();
+                }
+            }
+        } else {
+            if (Motion1::motors[E_AXIS]) {
+                Motion1::motors[E_AXIS]->unstep();
+            }
+        } */
+        for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
+            if (Motion1::motors[i] != nullptr) {
+                Motion1::motors[i]->unstep();
+            }
+        }
+    }
     // static void removeParentId(uint8_t pid);
     static void reportBuffers();
 };

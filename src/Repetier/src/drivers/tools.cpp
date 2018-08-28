@@ -12,21 +12,40 @@ HeatManager* heatedBeds[] = HEATED_BED_LIST;
 
 fast8_t Tool::activeToolId = 255;
 Tool* Tool::activeTool = nullptr;
-Tool* Tool::tools[] = TOOLS;
+Tool* const Tool::tools[NUM_TOOLS] = TOOLS;
 
-void Tool::selectTool(fast8_t id) {
+void Tool::unselectTool() {
+    if (activeTool == nullptr) {
+        return;
+    }
+    Motion1::setToolOffset(0, 0, 0);
+    activeTool->deactivate();
+    DEBUG_MSG("UT3");
+    PrinterType::deactivatedTool(activeToolId);
+    DEBUG_MSG("UT4");
+    activeTool = nullptr;
+    activeToolId = 255;
+}
+
+void Tool::selectTool(fast8_t id, bool force) {
+    if (Motion1::dittoMode) { // in ditto mode 0 is always active!
+        id = 0;
+    }
     if (id < 0 || id >= NUM_TOOLS) {
         Com::printErrorF(PSTR("Illegal tool number selected:"));
         Com::print((int)id);
         Com::println();
+        if (activeTool != nullptr) {
+            Com::printFLN(PSTR("SelectTool:"), static_cast<int>(activeToolId));
+        }
         return;
     }
-    if (activeTool != nullptr && activeToolId == id) {
+    if (!force && activeTool != nullptr && activeToolId == id) {
         activeTool->updateDerived(); // reset values
         return;                      // already selected
     }
-    Com::printFLN(PSTR("SelectExtruder:"), static_cast<int>(id));
-    float zOffset = -Printer::offsetZ; // opposite sign to extruder offset!
+    Com::printFLN(PSTR("SelectTool:"), static_cast<int>(id));
+    float zOffset = -Motion1::toolOffset[Z_AXIS]; // opposite sign to extruder offset!
 #if RAISE_Z_ON_TOOLCHANGE > 0
     float lastZ = Motion1::currentPosition[X_AXIS];
     Motion1::setTmpPositionXYZ(lastZ + RAISE_Z_ON_TOOLCHANGE, IGNORE_COORDINATE, IGNORE_COORDINATE);
@@ -43,7 +62,7 @@ void Tool::selectTool(fast8_t id) {
     }
     Tool::activeToolId = id;
     Tool::activeTool = tools[id];
-    Motion1::advanceK = 0;
+    Motion1::advanceK = 0; // Gets activated by tool activation if supported!
     Motion2::advanceSteps = 0;
     activeTool->activate();
     PrinterType::activatedTool(activeToolId);
@@ -56,12 +75,18 @@ void Tool::selectTool(fast8_t id) {
 #endif
 }
 
-Tool* Tool::getTool(fast8_t id) {
+void Tool::resetBase(float offX, float offY, float offZ) {
+    offsetX = offX;
+    offsetY = offY;
+    offsetZ = offZ;
+}
+
+/* Tool* Tool::getTool(fast8_t id) {
     if (id < 0 || id >= NUM_TOOLS) {
         return nullptr;
     }
     return tools[id];
-}
+} */
 
 void Tool::initTools() {
     for (fast8_t i = 0; i < NUM_TOOLS; i++) {
@@ -94,6 +119,17 @@ void Tool::updateDerivedTools() {
         activeTool->updateDerived();
     }
 }
+
+void ToolExtruder::reset(float offx, float offy, float offz, float diameter, float resolution, float yank, float maxSpeed, float acceleration, float advance) {
+    resetBase(offx, offy, offz);
+    this->diameter = diameter;
+    stepsPerMM = resolution;
+    this->yank = yank;
+    this->acceleration = acceleration;
+    this->maxSpeed = maxSpeed;
+    this->advance = advance;
+}
+
 /// Called when the tool gets activated.
 void ToolExtruder::activate() {
     Motion1::setMotorForAxis(stepper, E_AXIS);
@@ -148,4 +184,17 @@ void ToolExtruder::updateDerived() {
 
 void ToolExtruder::disableMotor() {
     stepper->disable();
+}
+
+void ToolExtruder::enableMotor() {
+    stepper->enable();
+}
+void ToolExtruder::stepMotor() {
+    stepper->step();
+}
+void ToolExtruder::unstepMotor() {
+    stepper->unstep();
+}
+bool ToolExtruder::stepCondMotor() {
+    return stepper->stepCond();
 }

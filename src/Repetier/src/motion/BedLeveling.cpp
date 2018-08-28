@@ -527,14 +527,14 @@ bool Printer::startProbing(bool runScript, bool enforceStartHeight) {
         }
 
         // Update position
-        Printer::offsetX = -ZPOffsetX;
-        Printer::offsetY = -ZPOffsetY;
-        Printer::offsetZ = 0;
+        Motion1::toolOffset[X_AXIS] = -ZPOffsetX;
+        Motion1::toolOffset[Y_AXIS] = -ZPOffsetY;
+        Motion1::toolOffset[Z_AXIS] = 0;
 #if FEATURE_AUTOLEVEL
         // we must not change z for the probe offset even if we are rotated, so add a correction for z
         float dx, dy;
-        transformToPrinter(EEPROM::zProbeXOffset(), EEPROM::zProbeYOffset(), 0, dx, dy, offsetZ2);
-        //Com::printFLN(PSTR("ZPOffset2:"),offsetZ2,3);
+        transformToPrinter(EEPROM::zProbeXOffset(), EEPROM::zProbeYOffset(), 0, dx, dy, Motion1::zprobeZOffset);
+        //Com::printFLN(PSTR("ZPOffset2:"),Motion1::zprobeZOffset,3);
 #endif
     }
 #else
@@ -562,7 +562,7 @@ void Printer::finishProbing() {
     } else {
         offsetX = offsetY = offsetZ = 0;
     }
-    offsetZ2 = 0;
+    Motion1::zprobeZOffset = 0;
     Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
 }
 
@@ -591,9 +591,9 @@ Then we return the measured and corrected z distance.
 \return ILLEGAL_Z_PROBE on errors or measured distance.
 */
 float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScript, bool enforceStartHeight) {
-    float oldOffX = Printer::offsetX;
-    float oldOffY = Printer::offsetY;
-    float oldOffZ = Printer::offsetZ;
+    float oldOffX = Motion1::toolOffset[X_AXIS];
+    float oldOffY = Motion1::toolOffset[Y_AXIS];
+    float oldOffZ = Motion1::toolOffset[Z_AXIS];
     if (first) {
         if (!startProbing(runStartScript, enforceStartHeight))
             return ILLEGAL_Z_PROBE;

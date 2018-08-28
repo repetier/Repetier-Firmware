@@ -6,8 +6,10 @@ enum ToolTypes {
 };
 
 extern HeatManager* heatedBeds[];
+class Motion3;
 
 class Tool {
+    friend class Motion3;
     float offsetX;
     float offsetY;
     float offsetZ;
@@ -15,13 +17,14 @@ class Tool {
 
     static fast8_t activeToolId;
     static Tool* activeTool;
-    static Tool* tools[];
+    static Tool* const tools[NUM_TOOLS];
 
 public:
     Tool(float offX, float offY, float offZ)
         : offsetX(offX)
         , offsetY(offY)
         , offsetZ(offZ) {}
+    void resetBase(float offX, float offY, float offZ);
     /// Called when the tool gets activated.
     virtual void activate() = 0;
     /// Gets called when the tool gets disabled.
@@ -34,9 +37,9 @@ public:
     virtual void setIntensity(int32_t intensite) {}
     virtual bool supportsTemperatures() { return false; }
     virtual bool supportsIntensity() { return false; }
-    virtual float getOffsetX() { return offsetX; }
-    virtual float getOffsetY() { return offsetY; }
-    virtual float getOffsetZ() { return offsetZ; }
+    float getOffsetX() { return offsetX; }
+    float getOffsetY() { return offsetY; }
+    float getOffsetZ() { return offsetZ; }
     virtual float getMaxSpeed() { return 0; }
     virtual float getAcceleration() { return 0; }
     virtual float getMaxStartSpeed() { return 0; }
@@ -63,14 +66,25 @@ public:
         Com::printWarningFLN(PSTR("Autocalibration for this tool not supported!"));
     }
     virtual void disableMotor() {}
+    virtual void enableMotor() {}
+    virtual void stepMotor() {}
+    virtual void unstepMotor() {}
+    virtual bool stepCondMotor() { return false; }
+
     inline static Tool* getActiveTool() { return activeTool; }
     inline static fast8_t getActiveToolId() { return activeToolId; }
-    static void selectTool(fast8_t id);
-    static Tool* getTool(fast8_t id);
+    static void selectTool(fast8_t id, bool force = false);
+    static void unselectTool();
+    static inline Tool* getTool(fast8_t id) {
+        if (id < 0 || id >= NUM_TOOLS) {
+            return nullptr;
+        }
+        return tools[id];
+    }
     static void initTools();
     static void eepromHandleTools();
     static void updateDerivedTools();
-    static void disableMotors();    
+    static void disableMotors();
 };
 
 /** Defines a simple extruder with one motor.
@@ -87,6 +101,7 @@ class ToolExtruder : public Tool {
     float acceleration;
     float advance;
     float diameter;
+
 public:
     ToolExtruder(float offX, float offY, float offZ,
                  HeatManager* heat,
@@ -110,13 +125,14 @@ public:
         , acceleration(_acceleration)
         , advance(_advance)
         , diameter(dia) {}
+    void reset(float offx, float offy, float offz, float diameter, float resolution, float yank, float maxSpeed, float acceleration, float advance);
     bool supportsTemperatures() final { return true; }
     /// Called when the tool gets activated.
-    void activate();
+    void activate() final;
     /// Gets called when the tool gets disabled.
-    void deactivate();
+    void deactivate() final;
     /// Called on kill/emergency to disable the tool
-    void shutdown();
+    void shutdown() final;
     /// Set temperature in case tool supports temperatures.
     HeatManager* getHeater() final { return heater; }
     float getMaxSpeed() { return maxSpeed; }
@@ -129,7 +145,11 @@ public:
     void init();
     void setAdvance(float adv);
     void updateDerived();
-    void disableMotor();
+    void disableMotor() final;
+    void enableMotor() final;
+    void stepMotor() final;
+    void unstepMotor() final;
+    bool stepCondMotor() final;
     void setResolution(float stepspermm) { stepsPerMM = stepspermm; }
     void retract(bool backwards, bool longRetract) {
         // TODO: Add retract handling

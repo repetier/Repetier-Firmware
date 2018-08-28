@@ -158,12 +158,7 @@ extern bool analogEnabled[MAX_ANALOG_INPUTS];
 // INTERVAL / (32Khz/128)  = seconds
 #define WATCHDOG_INTERVAL 1024u // 8sec  (~16 seconds max)
 
-#if defined(ARDUINO) && ARDUINO >= 100
 #include "Arduino.h"
-#else
-#include "WProgram.h"
-#define COMPAT_PRE1
-#endif
 
 //#define	READ(pin)  PIO_Get(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin)
 #define READ_VAR(pin) (g_APinDescription[pin].pPort->PIO_PDSR & g_APinDescription[pin].ulPin ? 1 : 0) // does return 0 or pin value

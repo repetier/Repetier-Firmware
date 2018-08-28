@@ -29,6 +29,54 @@ extern uint8_t allAxes;
 #define POSITION_EPSILON 0.001
 class Motion2Buffer;
 #define FOR_ALL_AXES(i) for (fast8_t i = 0; i < NUM_AXES; i++)
+#if NUM_AXES < 4
+#error You need at least 4 axes!
+#endif
+#if NUM_AXES == 4
+#define MACRO_FOR_ALL_AXES(code, ...) \
+    { \
+        code(0, ##__VA_ARGS__); \
+        code(1, ##__VA_ARGS__); \
+        code(2, ##__VA_ARGS__); \
+        code(3, ##__VA_ARGS__); \
+    }
+#endif
+#if NUM_AXES == 5
+#define MACRO_FOR_ALL_AXES(code, ...) \
+    { \
+        code(0, ##__VA_ARGS__); \
+        code(1, ##__VA_ARGS__); \
+        code(2, ##__VA_ARGS__); \
+        code(3, ##__VA_ARGS__); \
+        code(4, ##__VA_ARGS__); \
+    }
+#endif
+#if NUM_AXES == 6
+#define MACRO_FOR_ALL_AXES(code, ...) \
+    { \
+        code(0, ##__VA_ARGS__); \
+        code(1, ##__VA_ARGS__); \
+        code(2, ##__VA_ARGS__); \
+        code(3, ##__VA_ARGS__); \
+        code(4, ##__VA_ARGS__); \
+        code(5, ##__VA_ARGS__); \
+    }
+#endif
+#if NUM_AXES == 7
+#define MACRO_FOR_ALL_AXES(code, ...) \
+    { \
+        code(0, ##__VA_ARGS__); \
+        code(1, ##__VA_ARGS__); \
+        code(2, ##__VA_ARGS__); \
+        code(3, ##__VA_ARGS__); \
+        code(4, ##__VA_ARGS__); \
+        code(5, ##__VA_ARGS__); \
+        code(6, ##__VA_ARGS__); \
+    }
+#endif
+#define _COPY_ALL_AXES(idx, dest, source) dest[idx] = source[idx];
+#define COPY_ALL_AXES(dest, source) MACRO_FOR_ALL_AXES(_COPY_ALL_AXES, dest, source)
+
 #define MEMORY_POS_SIZE 2
 
 #define FLAG_CHECK_ENDSTOPS 1
@@ -132,8 +180,13 @@ public:
 #define EPR_M1_PARK_Z EPR_M1_AXIS_COMP_END + 8
 #define EPR_M1_TOTAL EPR_M1_AXIS_COMP_END + 12
 
+class Motion2;
+
 class Motion1 {
 public:
+    friend class Motion2;
+    friend class PrinterType;
+
     static uint eprStart;
     static float autolevelTransformation[9]; ///< Transformation matrix
     static float currentPosition[NUM_AXES];  // Current printer position
@@ -148,6 +201,8 @@ public:
     static float maxPos[NUM_AXES];
     static float g92Offsets[NUM_AXES];
     static float maxYank[NUM_AXES];
+    static float toolOffset[3];
+    static float zprobeZOffset;
     static float homeRetestDistance[NUM_AXES];
     static float homeRetestReduction[NUM_AXES];
     static float homeEndstopDistance[NUM_AXES];
@@ -169,7 +224,9 @@ public:
     static fast8_t alwaysCheckEndstops;
     static fast8_t axesTriggered;
     static fast8_t motorTriggered;
-    static fast8_t stopMask; // stop move if these axes are triggered
+    static fast8_t stopMask;    // stop move if these axes are triggered
+    static fast8_t dittoMode;   // copy extrusion signals
+    static fast8_t dittoMirror; // mirror for dual x printer
     /* Buffer is a bit special in the sense that end keeps
     stored until all low level functions are finished while
     mid motion level can already be on an other segment in
@@ -198,7 +255,9 @@ public:
     static void moveRelativeByStepsRelative(int32_t coords[NUM_AXES]);
     /// Update position to new offsets
     static void setToolOffset(float ox, float oy, float oz);
+    // Updates currentPositionTransformed based on currentposition
     static void updatePositionsFromCurrent();
+    // Updates currentPosition based on currentPositionTransformed
     static void updatePositionsFromCurrentTransformed();
     // Sets A,B,C coordinates to ignore for easy use.
     static void setIgnoreABC(float coords[NUM_AXES]);
@@ -209,13 +268,7 @@ public:
     static void setMotorForAxis(StepperDriverBase* motor, fast8_t axis);
     static void waitForEndOfMoves();
     static void waitForXFreeMoves(fast8_t, bool allowMoves = false);
-    static void pop(); // Only called by Motion2::pop !
     static fast8_t buffersUsed();
-    /* If possible does a forward step and returns
-    the forwarded buffer. If none is available nullptr
-    is returned. Will update process and lengthUnprocessed */
-    static Motion1Buffer* forward(Motion2Buffer* m2);
-    static void insertWaitIfNeeded();
     static void LaserWarmUp(uint32_t wait);
     static void reportBuffers();
     static void moveToParkPosition();
@@ -223,19 +276,12 @@ public:
     static bool pushToMemory();
     /// Pop memorized position to tmpPosition
     static bool popFromMemory();
-    static void enableMotors(fast8_t axes);
     static bool isAxisHomed(fast8_t axis);
     static void setAxisHomed(fast8_t axis, bool state);
     static void homeAxes(fast8_t axes);
     static void simpleHome(fast8_t axis);
-    static void callBeforeHomingOnSteppers();
-    static void callAfterHomingOnSteppers();
     static PGM_P getAxisString(fast8_t axis);
     static EndstopDriver& endstopFoxAxisDir(fast8_t axis, bool maxDir);
-    // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on
-    // system without Z-probe
-    static void transformToPrinter(float x, float y, float z, float& transX, float& transY, float& transZ);
-    static void transformFromPrinter(float x, float y, float z, float& transX, float& transY, float& transZ);
 #if FEATURE_AUTOLEVEL || defined(DOXYGEN)
     static void resetTransformationMatrix(bool silent);
     //static void buildTransformationMatrix(float h1,float h2,float h3);
@@ -246,8 +292,20 @@ public:
     static void eepromReset();
 
 private:
+    // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on
+    // system without Z-probe
+    static void transformToPrinter(float x, float y, float z, float& transX, float& transY, float& transZ);
+    static void transformFromPrinter(float x, float y, float z, float& transX, float& transY, float& transZ);
+    static void callBeforeHomingOnSteppers();
+    static void callAfterHomingOnSteppers();
+    static void insertWaitIfNeeded();
     static void backplan(fast8_t actId);
     static Motion1Buffer& reserve();
+    /* If possible does a forward step and returns
+    the forwarded buffer. If none is available nullptr
+    is returned. Will update process and lengthUnprocessed */
+    static Motion1Buffer* forward(Motion2Buffer* m2);
     static void queueMove(float feedrate);
+    static void pop(); // Only called by Motion2::pop !
 };
 #endif

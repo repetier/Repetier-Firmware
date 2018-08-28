@@ -23,16 +23,6 @@
 
 #include "../../Repetier.h"
 
-// ================ Sanity checks ================
-#ifdef EXTRUDER_SPEED
-#error EXTRUDER_SPEED is not used any more. Values are now taken from extruder definition.
-#endif
-#ifdef ENDSTOPPULLUPS
-#error ENDSTOPPULLUPS is now replaced by individual pullup configuration!
-#endif
-#ifdef EXT0_PID_PGAIN
-#error The PID system has changed. Please use the new float number options!
-#endif
 // ####################################################################################
 // #          No configuration below this line - just some error checking             #
 // ####################################################################################
@@ -43,12 +33,6 @@
 #endif
 #if X_STEP_PIN < 0 || Y_STEP_PIN < 0 || Z_STEP_PIN < 0
 #error One of the following pins is not assigned: X_STEP_PIN,Y_STEP_PIN,Z_STEP_PIN
-#endif
-#if EXT0_STEP_PIN < 0 && NUM_EXTRUDER > 0
-#error EXT0_STEP_PIN not set to a pin number.
-#endif
-#if EXT0_DIR_PIN < 0 && NUM_EXTRUDER > 0
-#error EXT0_DIR_PIN not set to a pin number.
 #endif
 #if PRINTLINE_CACHE_SIZE < 4
 #error PRINTLINE_CACHE_SIZE must be at least 5

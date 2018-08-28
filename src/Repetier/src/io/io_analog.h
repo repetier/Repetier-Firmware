@@ -42,14 +42,19 @@ public:
 };
 
 #define IO_ANALOG_INPUT(name, channel, oversample) \
-    class name##Class: public AnalogInput { \
+    class name##Class : public AnalogInput { \
     public: \
         int32_t count; \
         int32_t sum; \
-        int32_t minVal,maxVal; \
+        int32_t minVal, maxVal; \
         int value; \
-        name##Class():count((1<<oversample)+2),sum(0),minVal(100000),maxVal(0),value(2048) {} \
-        int get() final {return value;} \
+        name##Class() \
+            : count((1 << oversample) + 2) \
+            , sum(0) \
+            , minVal(100000) \
+            , maxVal(0) \
+            , value(2048) {} \
+        int get() final { return value; } \
     }; \
     extern name##Class name;
 
@@ -75,7 +80,7 @@ public:
             name.minVal = 100000; \
             name.maxVal = 0; \
             name.sum = 0; \
-            name.count = (1<<oversample)+2;\
+            name.count = (1 << oversample) + 2; \
         } \
     }
 

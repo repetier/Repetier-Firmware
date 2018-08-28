@@ -47,7 +47,7 @@ void EEPROM::timerHandler() {
         return;
     }
     changedTimer--;
-    if (changedTimer == 0) {        
+    if (changedTimer == 0) {
         storeDataIntoEEPROM();
     }
 #endif
@@ -101,7 +101,7 @@ void EEPROM::callHandle() {
     handleLong(EPR_PRINTING_TIME, Com::tEPRPrinterActive, Printer::printingTime);
     handleLong(EPR_MAX_INACTIVE_TIME, Com::tEPRMaxInactiveTime, maxInactiveTime);
     handleLong(EPR_STEPPER_INACTIVE_TIME, Com::tEPRStopAfterInactivty, stepperInactiveTime);
-#if NUM_EXTRUDER > 0
+#if NUM_TOOLS > 0
     handleFloat(EPR_PRINTING_DISTANCE, Com::tEPRFilamentPrinted, 3, Printer::filamentPrintedTotal);
 #endif
     Motion1::eepromHandle();
@@ -123,8 +123,8 @@ void EEPROM::callHandle() {
 #include "../io/redefine.h"
     }
     int eCnt = 1, bCnt = 1, cCnt = 1, oCnt = 1;
-    for(int i = 0; i < NUM_HEATERS; i++) {
-        HeatManager *h = heaters[i];
+    for (int i = 0; i < NUM_HEATERS; i++) {
+        HeatManager* h = heaters[i];
         if (h->isExtruderHeater()) {
             EEPROM::handlePrefix(PSTR("Extr."), eCnt++);
         }
@@ -146,6 +146,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration() {
 #undef IO_TARGET
 #define IO_TARGET 10
 #include "../io/redefine.h"
+    PrinterType::restoreFromConfiguration();
     markChanged();
 }
 

@@ -29,7 +29,7 @@ enum Motion2State {
     NOT_INITIALIZED = 0,
     ACCELERATE_INIT = 1,
     ACCELERATING = 2,
-    PLATEU_INIT = 3,
+    PLATEAU_INIT = 3,
     PLATEU = 4,
     DECCELERATE_INIT = 5,
     DECELERATING = 6,

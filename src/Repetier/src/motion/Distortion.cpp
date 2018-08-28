@@ -274,7 +274,7 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const {
     if (!enabled || Printer::isZProbingActive()) {
         return 0;
     }
-    z += Printer::offsetZ * Printer::axisStepsPerMM[Z_AXIS] - Printer::zMinSteps;
+    z += Motion1::toolOffset[Z_AXIS] * Printer::axisStepsPerMM[Z_AXIS] - Printer::zMinSteps;
     if (z > zEnd) {
         /* Com::printF(PSTR("NoCor z:"),z);
          Com::printF(PSTR(" zEnd:"),zEnd);
@@ -282,8 +282,8 @@ int32_t Distortion::correct(int32_t x, int32_t y, int32_t z) const {
          Com::printFLN(PSTR(" zp:"),(int)Printer::isZProbingActive());*/
         return 0;
     }
-    x -= Printer::offsetX * Printer::axisStepsPerMM[X_AXIS]; // correct active tool offset
-    y -= Printer::offsetY * Printer::axisStepsPerMM[Y_AXIS];
+    x -= Motion1::toolOffset[X_AXIS] * Printer::axisStepsPerMM[X_AXIS]; // correct active tool offset
+    y -= Motion1::toolOffset[Y_AXIS] * Printer::axisStepsPerMM[Y_AXIS];
     if (false) {
         Com::printF(PSTR("correcting ("), x);
         Com::printF(PSTR(","), y);

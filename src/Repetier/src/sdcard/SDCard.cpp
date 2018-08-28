@@ -74,23 +74,27 @@ void SDCard::initsd() {
         return;
 #endif
     HAL::pingWatchdog();
-    HAL::delayMilliseconds(50);      // wait for stabilization of contacts, bootup ...
-    fat.begin(SDSS, SD_SCK_MHZ(50)); // dummy init of SD_CARD
-    HAL::delayMilliseconds(50);      // wait for init end
+    HAL::delayMilliseconds(50); // wait for stabilization of contacts, bootup ...
+#if ENABLE_SOFTWARE_SPI_CLASS
+    fat.begin(SDSS)
+#else
+    fat.begin(SDSS, SD_SCK_MHZ(8)); // dummy init of SD_CARD
+#endif
+        HAL::delayMilliseconds(50); // wait for init end
     HAL::pingWatchdog();
     /*if(dir[0].isOpen())
         dir[0].close();*/
-    if (!fat.begin(SDSS, SD_SCK_MHZ(50))) {
+    if (!fat.begin(SDSS, SD_SCK_MHZ(8))) {
         Com::printFLN(Com::tSDInitFail);
         sdmode = 100; // prevent automount loop!
         if (fat.card()->errorCode()) {
             Com::printFLN(PSTR(
-             "\nSD initialization failed.\n"
-             "Do not reformat the card!\n"
-             "Is the card correctly inserted?\n"
-             "Is chipSelect set to the correct value?\n"
-             "Does another SPI device need to be disabled?\n"
-             "Is there a wiring/soldering problem?"));
+                "\nSD initialization failed.\n"
+                "Do not reformat the card!\n"
+                "Is the card correctly inserted?\n"
+                "Is chipSelect set to the correct value?\n"
+                "Does another SPI device need to be disabled?\n"
+                "Is there a wiring/soldering problem?"));
             Com::printFLN(PSTR("errorCode: "), int(fat.card()->errorCode()));
             return;
         }
@@ -469,7 +473,7 @@ void SDCard::ls() {
     fat.chdir();
 
     file.openRoot(fat.vol());
-    file.ls(LS_R | LS_SIZE,0);
+    file.ls(LS_R | LS_SIZE, 0);
     Com::printFLN(Com::tEndFileList);
 }
 

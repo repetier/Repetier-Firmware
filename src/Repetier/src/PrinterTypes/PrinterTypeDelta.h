@@ -19,25 +19,37 @@
 #if PRINTER_TYPE == 2
 
 class PrinterType {
+    enum MotionMode {
+        MOTION_DELTA = 0,
+        MOTION_PER_AXIS = 1
+    };
     static float diagonal;
     static float horizontalRadius;
     static float printRadius;
     static float printRadiusSquared;
     static float angleA, angleB, angleC;
     static float correctionA, correctionB, correctionC;
+    static float radiusCorrectionA, radiusCorrectionB, radiusCorrectionC;
     static float diagonalSquaredA;
     static float diagonalSquaredB;
     static float diagonalSquaredC;
     static float APosX, APosY;
     static float BPosX, BPosY;
     static float CPosX, CPosY;
+    static float homeOffsetA, homeOffsetB, homeOffsetC;
     static uint16_t eeprom; // start position eeprom
+    static MotionMode mode; // 0 = delta, 1 = cartesian
+
+    static void homeZ();
+    static bool untriggerEndstops();
+
 public:
     // Are subdivisions required due to nonlinear kinematics
     static bool subdivisionsRequired() {
         return true;
     }
-
+    static bool isAnyEndstopTriggered(bool& moveX, bool& moveY, bool& moveZ);
+    static void setMotionMode(MotionMode newMode);
     static void transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]);
 
     static void homeAxis(fast8_t axis);
@@ -51,7 +63,17 @@ public:
     static void deactivatedTool(fast8_t id);
     static void activatedTool(fast8_t id);
     static void eepromHandle();
+    static void restoreFromConfiguration();
     static void init();
     static void updateDerived();
+    static void enableMotors(fast8_t axes);
+    static inline void queueMove(float feedrate) {
+        Motion1::queueMove(feedrate);
+    }
+    static inline bool supportsDittoMirror() { return false; }
+    static void setDittoMode(fast8_t count, bool mirror);
+    static inline bool ignoreAxisForLength(fast8_t axis) { return false; }
+    static void transformedToOfficial(float trans[NUM_AXES], float official[NUM_AXES]);
+    static void officialToTransformed(float official[NUM_AXES], float trans[NUM_AXES]);
 };
 #endif

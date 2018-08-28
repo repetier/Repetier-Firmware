@@ -34,21 +34,21 @@ void Motion3::init() {
     }
 }
 
-Motion3Buffer* Motion3::tryReserve() {
+/* Motion3Buffer* Motion3::tryReserve() {
     if (length < NUM_MOTION3_BUFFER) {
         return &buffers[last];
     }
     return nullptr;
-}
+} */
 
-void Motion3::pushReserved() {
+/* void Motion3::pushReserved() {
     last++;
     if (last == NUM_MOTION3_BUFFER) {
         last = 0;
     }
     InterruptProtectedBlock noInts;
     length++;
-}
+} */
 
 /*
  Select next prepared element, update next pointer
@@ -65,7 +65,7 @@ void Motion3::activateNext() {
     Motion1::motors[X_AXIS]->dir(act->directions & 1);
 #else
     XMotor.dir(act->directions & 1);
-#endif    
+#endif
     YMotor.dir(act->directions & 2);
     ZMotor.dir(act->directions & 4);
     for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
@@ -96,31 +96,21 @@ void Motion3::activateNext() {
 #endif
 }
 
-void Motion3::unstepMotors() {
+/* void Motion3::unstepMotors() {
     Motion1::motors[X_AXIS]->unstep();
     Motion1::motors[Y_AXIS]->unstep();
     Motion1::motors[Z_AXIS]->unstep();
-    for (fast8_t i = 3; i < NUM_AXES; i++) {
-        if (Motion1::motors[i] != nullptr) {
-            Motion1::motors[i]->unstep();
-        }
-    }
-}
-
-void Motion3::timer() {
-    static bool stepDone = false;
-
-#ifdef XMOTOR_SWITCHABLE
-    Motion1::motors[X_AXIS]->unstep();
-#else    
-    XMotor.unstep();
-#endif    
-    YMotor.unstep();
-    ZMotor.unstep();
     for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
         if (Motion1::motors[i] != nullptr) {
             Motion1::motors[i]->unstep();
         }
+    }
+} */
+
+void Motion3::timer() {
+    static bool stepDone = false;
+    if (stepDone) {
+        unstepMotors();
     }
     if (act == nullptr) {  // need new segment
         if (length == 0) { // nothing prepared
@@ -130,14 +120,13 @@ void Motion3::timer() {
 #ifdef SLOW_DIRECTION_CHANGE
         // Give timer one stepper count to settle direction
         return;
-#endif                
+#endif
     }
     // Run bresenham algorithm for stepping forward
 
     if (act->checkEndstops) {
         // Endstop handling - skip all following segments
         if (act->parentId == skipParentId) {
-            // Com::printFLN("sk", skipParentId);
             if (act->last) {
                 Motion2::pop();
             }
@@ -210,19 +199,25 @@ void Motion3::timer() {
             }
 #endif
 #if NUM_AXES > A_AXIS
+#if !defined(NO_AMIN_ENDSTOP_TEST) || !defined(NO_AMAX_ENDSTOP_TEST)
             if (m1.axisUsed & 16) {
                 if (m1.axisDir & 16) {
+#ifndef NO_AMAX_ENDSTOP_TEST
                     if (endstopAMax.update()) {
                         Motion2::endstopTriggered(act, A_AXIS);
                         return;
                     }
+#endif
                 } else {
+#ifndef NO_AMIN_ENDSTOP_TEST
                     if (endstopAMin.update()) {
                         Motion2::endstopTriggered(act, A_AXIS);
                         return;
                     }
+#endif
                 }
             }
+#endif
 #endif
 #if NUM_AXES > B_AXIS
             if (m1.axisUsed & 32) {
@@ -287,13 +282,14 @@ void Motion3::timer() {
             if ((act->error[Z_AXIS] += act->delta[Z_AXIS]) > 0) {
                 stepDone = true;
                 if (Motion1::endstopMode == PROBING) { // ignore z endstop here
-                    ZProbe->update();
-                    if (ZProbe->triggered()) {
+                    // Com::printFLN(PSTR("A"));
+                    if (ZProbe->update()) {
                         Motion2::motorEndstopTriggered(Z_AXIS);
                     } else {
                         Motion1::motors[Z_AXIS]->step();
                     }
                 } else {
+                    // Com::printF(PSTR("Z "));
                     if (ZMotor.stepCond()) {
                         Motion2::motorEndstopTriggered(Z_AXIS);
                     }
@@ -302,17 +298,30 @@ void Motion3::timer() {
                 act->error[Z_AXIS] -= act->errorUpdate;
             }
         }
+        if (stepDone)
+        // Com::println();
 #if NUM_AXES > E_AXIS
-        if ((act->usedAxes & 8) && (Motion1::motorTriggered & 8) == 0) {
-            if ((act->error[E_AXIS] += act->delta[E_AXIS]) > 0) {
-                stepDone = true;
-                if (Motion1::motors[E_AXIS]->stepCond()) {
-                    Motion2::motorEndstopTriggered(E_AXIS);
+            if ((act->usedAxes & 8) && (Motion1::motorTriggered & 8) == 0) {
+                if ((act->error[E_AXIS] += act->delta[E_AXIS]) > 0) {
+                    stepDone = true;
+                    if (Motion1::dittoMode) {
+                        for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
+                            Tool* t = Tool::getTool(i);
+                            if (t != nullptr && Tool::getTool(i)->stepCondMotor()) {
+                                Motion2::motorEndstopTriggered(E_AXIS);
+                            }
+                        }
+                    } else {
+                        if (Motion1::motors[E_AXIS]) {
+                            if (Motion1::motors[E_AXIS]->stepCond()) {
+                                Motion2::motorEndstopTriggered(E_AXIS);
+                            }
+                        }
+                    }
+                    m2.stepsRemaining[E_AXIS]--;
+                    act->error[E_AXIS] -= act->errorUpdate;
                 }
-                m2.stepsRemaining[E_AXIS]--;
-                act->error[E_AXIS] -= act->errorUpdate;
             }
-        }
 #endif
 #if NUM_AXES > A_AXIS
         if ((act->usedAxes & 16) && (Motion1::motorTriggered & 16) == 0) {
@@ -351,6 +360,7 @@ void Motion3::timer() {
         }
 #endif
     } else {
+        stepDone = false;
         if (act->usedAxes & 1) {
             if ((act->error[X_AXIS] += act->delta[X_AXIS]) > 0) {
 #ifdef XMOTOR_SWITCHABLE
@@ -358,25 +368,37 @@ void Motion3::timer() {
 #else
                 XMotor.step();
 #endif
+                stepDone = true;
                 act->error[X_AXIS] -= act->errorUpdate;
             }
         }
         if (act->usedAxes & 2) {
             if ((act->error[Y_AXIS] += act->delta[Y_AXIS]) > 0) {
                 YMotor.step();
+                stepDone = true;
                 act->error[Y_AXIS] -= act->errorUpdate;
             }
         }
         if (act->usedAxes & 4) {
             if ((act->error[Z_AXIS] += act->delta[Z_AXIS]) > 0) {
                 ZMotor.step();
+                stepDone = true;
                 act->error[Z_AXIS] -= act->errorUpdate;
             }
         }
 #if NUM_AXES > E_AXIS
         if (act->usedAxes & 8) {
             if ((act->error[E_AXIS] += act->delta[E_AXIS]) > 0) {
-                Motion1::motors[E_AXIS]->step();
+                if (Motion1::dittoMode) {
+                    for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
+                        Tool::getTool(i)->stepMotor();
+                    }
+                } else {
+                    if (Motion1::motors[E_AXIS]) {
+                        Motion1::motors[E_AXIS]->step();
+                    }
+                }
+                stepDone = true;
                 act->error[E_AXIS] -= act->errorUpdate;
             }
         }
@@ -385,6 +407,7 @@ void Motion3::timer() {
         if (act->usedAxes & 16) {
             if ((act->error[A_AXIS] += act->delta[A_AXIS]) > 0) {
                 Motion1::motors[A_AXIS]->step();
+                stepDone = true;
                 act->error[A_AXIS] -= act->errorUpdate;
             }
         }
@@ -393,6 +416,7 @@ void Motion3::timer() {
         if (act->usedAxes & 32) {
             if ((act->error[B_AXIS] += act->delta[B_AXIS]) > 0) {
                 Motion1::motors[B_AXIS]->step();
+                stepDone = true;
                 act->error[B_AXIS] -= act->errorUpdate;
             }
         }
@@ -400,6 +424,7 @@ void Motion3::timer() {
 #if NUM_AXES > C_AXIS
         if (act->usedAxes & 64) {
             if ((act->error[C_AXIS] += act->delta[C_AXIS]) > 0) {
+                stepDone = true;
                 Motion1::motors[C_AXIS]->step();
                 act->error[C_AXIS] -= act->errorUpdate;
             }
@@ -407,7 +432,7 @@ void Motion3::timer() {
 #endif
     }
     // Test if we are finished
-    if (--act->stepsRemaining == 0) {        
+    if (--act->stepsRemaining == 0) {
         if (act->last) {
             Motion2::pop();
         }

@@ -85,7 +85,59 @@ float PrinterType::feedrateForMoveSteps(fast8_t axes) {
 void PrinterType::deactivatedTool(fast8_t id) {}
 void PrinterType::activatedTool(fast8_t id) {}
 void PrinterType::eepromHandle() {}
+void PrinterType::restoreFromConfiguration() {}
 void PrinterType::init() {}
 void PrinterType::updateDerived() {}
+void PrinterType::enableMotors(fast8_t axes) {
+    if (axes & 7) { // enable x,y,z as a group!
+        Motion1::motors[X_AXIS]->enable();
+        Motion1::motors[Y_AXIS]->enable();
+        Motion1::motors[Z_AXIS]->enable();
+    }
+    for (fast8_t i = 3; i < NUM_AXES; i++) {
+        if ((axes & axisBits[i]) != 0 && Motion1::motors[i]) {
+            Motion1::motors[i]->enable();
+        }
+    }
+    if ((axes & axisBits[E_AXIS]) != 0 && Motion1::dittoMode) {
+        for (fast8_t i = 1; i <= Motion1::dittoMode; i++) {
+            Tool::getTool(i)->enableMotor();
+        }
+    }
+    Printer::unsetAllSteppersDisabled();
+}
+void PrinterType::setDittoMode(fast8_t count, bool mirror) {
+    Motion1::dittoMode = count;
+    Motion1::dittoMirror = mirror;
+}
+
+void PrinterType::transformedToOfficial(float trans[NUM_AXES], float official[NUM_AXES]) {
+    Motion1::transformFromPrinter(
+        trans[X_AXIS],
+        trans[Y_AXIS],
+        trans[Z_AXIS] - Motion1::zprobeZOffset,
+        official[X_AXIS],
+        official[Y_AXIS],
+        official[Z_AXIS]);
+    official[X_AXIS] -= Motion1::toolOffset[X_AXIS]; // Offset from active extruder or z probe
+    official[Y_AXIS] -= Motion1::toolOffset[Y_AXIS];
+    official[Z_AXIS] -= Motion1::toolOffset[Z_AXIS];
+    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
+        official[i] = trans[i];
+    }
+}
+
+void PrinterType::officialToTransformed(float official[NUM_AXES], float trans[NUM_AXES]) {
+    Motion1::transformToPrinter(official[X_AXIS] + Motion1::toolOffset[X_AXIS],
+                                official[Y_AXIS] + Motion1::toolOffset[Y_AXIS],
+                                official[Z_AXIS] + Motion1::toolOffset[Z_AXIS],
+                                trans[X_AXIS],
+                                trans[Y_AXIS],
+                                trans[Z_AXIS]);
+    trans[Z_AXIS] += Motion1::zprobeZOffset;
+    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
+        trans[i] = official[i];
+    }
+}
 
 #endif

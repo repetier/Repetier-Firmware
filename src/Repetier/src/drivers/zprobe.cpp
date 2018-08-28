@@ -40,14 +40,14 @@ void ZProbeHandler::activate() {
         }
 
         // Update position
-        Printer::offsetX = -ZPOffsetX;
-        Printer::offsetY = -ZPOffsetY;
-        Printer::offsetZ = 0;
+        Motion1::toolOffset[X_AXIS] = -ZPOffsetX;
+        Motion1::toolOffset[Y_AXIS] = -ZPOffsetY;
+        Motion1::toolOffsetZ_AXIS] = 0;
 #if FEATURE_AUTOLEVEL
         // we must not change z for the probe offset even if we are rotated, so add a correction for z
         float dx, dy;
-        transformToPrinter(EEPROM::zProbeXOffset(), EEPROM::zProbeYOffset(), 0, dx, dy, offsetZ2);
-        //Com::printFLN(PSTR("ZPOffset2:"),offsetZ2,3);
+        transformToPrinter(EEPROM::zProbeXOffset(), EEPROM::zProbeYOffset(), 0, dx, dy, Motion1::zprobeZOffset);
+        //Com::printFLN(PSTR("ZPOffset2:"),Motion1::zprobeZOffset,3);
 #endif
     }
 #else

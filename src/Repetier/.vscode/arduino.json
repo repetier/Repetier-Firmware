@@ -1,5 +1,5 @@
 {
-    "board": "arduino:sam:arduino_due_x",
+    "board": "arduino:sam:arduino_due_x_dbg",
     "sketch": "Repetier.ino",
     "output": "../build",
     "port": "COM3"

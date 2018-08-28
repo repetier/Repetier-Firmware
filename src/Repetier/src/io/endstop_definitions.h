@@ -34,9 +34,9 @@
     extern void name##_cb();
 #define ENDSTOP_SWITCH_DEBOUNCE(name, pin, level) extern EndstopSwitchDebounceDriver<pin, level> name;
 #define ENDSTOP_STEPPER(name) extern EndstopStepperControlledDriver name;
-#define ENDSTOP_MERGE2(name, e1, e2) extern EndstopMerge2 name;
-#define ENDSTOP_MERGE3(name, e1, e2, e3) extern EndstopMerge3 name;
-#define ENDSTOP_MERGE4(name, e1, e2, e3, e4) extern EndstopMerge4 name;
+#define ENDSTOP_MERGE2(name, e1, e2, axis) extern EndstopMerge2 name;
+#define ENDSTOP_MERGE3(name, e1, e2, e3, axis) extern EndstopMerge3 name;
+#define ENDSTOP_MERGE4(name, e1, e2, e3, e4, axis) extern EndstopMerge4 name;
 
 #elif IO_TARGET == 1 // Init
 
@@ -48,9 +48,9 @@
 
 #define ENDSTOP_SWITCH_DEBOUNCE(name, pin, level)
 #define ENDSTOP_STEPPER(name)
-#define ENDSTOP_MERGE2(name, e1, e2)
-#define ENDSTOP_MERGE3(name, e1, e2, e3)
-#define ENDSTOP_MERGE4(name, e1, e2, e3, e4)
+#define ENDSTOP_MERGE2(name, e1, e2, axis)
+#define ENDSTOP_MERGE3(name, e1, e2, e3, axis)
+#define ENDSTOP_MERGE4(name, e1, e2, e3, e4, axis)
 
 #elif IO_TARGET == 6
 
@@ -63,9 +63,9 @@
     }
 #define ENDSTOP_SWITCH_DEBOUNCE(name, pin, level) EndstopSwitchDebounceDriver<pin, level> name;
 #define ENDSTOP_STEPPER(name) EndstopStepperControlledDriver name;
-#define ENDSTOP_MERGE2(name, e1, e2) EndstopMerge2 name(&e1, &e2);
-#define ENDSTOP_MERGE3(name, e1, e2, e3) EndstopMerge3 name(&e1, &e2, &e3);
-#define ENDSTOP_MERGE4(name, e1, e2, e3, e4) EndstopMerge4 name(&e1, &e2, &e3, &e4);
+#define ENDSTOP_MERGE2(name, e1, e2, axis) EndstopMerge2 name(&e1, &e2, axis);
+#define ENDSTOP_MERGE3(name, e1, e2, e3, axis) EndstopMerge3 name(&e1, &e2, &e3, axis);
+#define ENDSTOP_MERGE4(name, e1, e2, e3, e4, axis) EndstopMerge4 name(&e1, &e2, &e3, &e4, axis);
 
 #elif IO_TARGET == 5
 
@@ -74,9 +74,9 @@
 #define ENDSTOP_SWITCH_HW(name, pin, axis)
 #define ENDSTOP_SWITCH_DEBOUNCE(name, pin, level) name.update();
 #define ENDSTOP_STEPPER(name) name.update();
-#define ENDSTOP_MERGE2(name, e1, e2) name.update();
-#define ENDSTOP_MERGE3(name, e1, e2, e3) name.update();
-#define ENDSTOP_MERGE4(name, e1, e2, e3, e4) name.update();
+#define ENDSTOP_MERGE2(name, e1, e2, axis) name.update();
+#define ENDSTOP_MERGE3(name, e1, e2, e3, axis) name.update();
+#define ENDSTOP_MERGE4(name, e1, e2, e3, e4, axis) name.update();
 
 #else
 
@@ -85,8 +85,8 @@
 #define ENDSTOP_SWITCH_HW(name, pin, axis)
 #define ENDSTOP_SWITCH_DEBOUNCE(name, pin, level)
 #define ENDSTOP_STEPPER(name)
-#define ENDSTOP_MERGE2(name, e1, e2)
-#define ENDSTOP_MERGE3(name, e1, e2, e3)
-#define ENDSTOP_MERGE4(name, e1, e2, e3, e4)
+#define ENDSTOP_MERGE2(name, e1, e2, axis)
+#define ENDSTOP_MERGE3(name, e1, e2, e3, axis)
+#define ENDSTOP_MERGE4(name, e1, e2, e3, e4, axis)
 
 #endif

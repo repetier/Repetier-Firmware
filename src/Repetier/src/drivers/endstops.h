@@ -26,11 +26,19 @@ public:
     virtual bool implemented() = 0;
     // Special case for drivers that sense endstop to set state instead of using update
     virtual void set(bool triggered) {}
+    virtual void report() {
+        Com::printF(triggered() ? Com::tHSpace : Com::tLSpace);
+    }
+    virtual void setParent(EndstopDriver* p) {}
+    // Called from dependent end stops
+    virtual void updateMaster() {}
 };
 
 class EndstopNoneDriver : public EndstopDriver {
 public:
-    inline virtual bool update() final { return false; }
+    inline virtual bool update() final {
+        return false;
+    }
     inline virtual bool implemented() final {
         return false;
     }
@@ -46,10 +54,12 @@ public:
 template <class inp>
 class EndstopSwitchDriver : public EndstopDriver {
     fast8_t state;
+    EndstopDriver* parent;
 
 public:
     EndstopSwitchDriver()
-        : state(false) {}
+        : state(false)
+        , parent(nullptr) {}
     inline virtual bool update() final {
         return (state = inp::get());
     }
@@ -59,22 +69,31 @@ public:
     inline virtual bool implemented() final {
         return true;
     }
+    virtual void setParent(EndstopDriver* p) {
+        parent = p;
+    }
 };
 
 template <class inp, int axis>
 class EndstopSwitchHardwareDriver : public EndstopDriver {
     fast8_t state;
+    EndstopDriver* parent;
 
 public:
     EndstopSwitchHardwareDriver()
-        : state(false) {}
+        : state(false)
+        , parent(nullptr) {}
     inline void updateReal() {
         fast8_t newState = inp::get();
         if (state != newState) {
+            state = newState;
             if (axis >= 0 && newState) { // tell motion planner
                 endstopTriggered(axis);
             }
-            state = newState;
+            if (parent != nullptr) {
+                parent->updateMaster();
+            }
+            // Com::printFLN(PSTR("HWState:"), (int)state); // TEST
         }
     }
 
@@ -87,6 +106,9 @@ public:
     inline virtual bool implemented() final {
         return true;
     }
+    virtual void setParent(EndstopDriver* p) final {
+        parent = p;
+    }
 };
 
 template <class inp, int level>
@@ -94,6 +116,8 @@ class EndstopSwitchDebounceDriver : public EndstopDriver {
     fast8_t state;
 
 public:
+    EndstopSwitchDebounceDriver()
+        : state(0) {}
     inline virtual bool update() final {
         if (inp::get()) {
             if (state < level) {
@@ -138,14 +162,19 @@ public:
 
 /** Merge 2 endstops into 1. Returns only true if both endstops are triggered. */
 class EndstopMerge2 : public EndstopDriver {
-    fast8_t state;
     EndstopDriver *e1, *e2;
+    fast8_t state;
+    fast8_t axis;
 
 public:
-    EndstopMerge2(EndstopDriver* _e1, EndstopDriver* _e2)
-        : state(false)
-        , e1(_e1)
-        , e2(_e2) {}
+    EndstopMerge2(EndstopDriver* _e1, EndstopDriver* _e2, fast8_t _axis)
+        : e1(_e1)
+        , e2(_e2)
+        , state(0)
+        , axis(_axis) {
+        e1->setParent(this);
+        e2->setParent(this);
+    }
     inline virtual bool update() final {
         return (state = (e1->triggered() && e2->triggered()));
     }
@@ -155,21 +184,43 @@ public:
     inline virtual bool implemented() final {
         return true;
     }
+    virtual void report() final {
+        Com::printF(triggered() ? Com::tHSpace : Com::tLSpace);
+        Com::print('(');
+        e1->report();
+        e2->report();
+        Com::print(')');
+    }
+    virtual void updateMaster() final {
+        fast8_t oldState = state;
+        update();
+        if (state != oldState) {
+            if (axis >= 0 && state) { // tell motion planner
+                endstopTriggered(axis);
+            }
+        }
+    }
 };
 
 /** Merge 3 endstops into 1. Returns only true if both endstops are triggered. 
  * This is required for z max endstop of deltas that merge the 3 motor max endstops.
 */
 class EndstopMerge3 : public EndstopDriver {
-    fast8_t state;
     EndstopDriver *e1, *e2, *e3;
+    fast8_t state;
+    fast8_t axis;
 
 public:
-    EndstopMerge3(EndstopDriver* _e1, EndstopDriver* _e2, EndstopDriver* _e3)
-        : state(false)
-        , e1(_e1)
+    EndstopMerge3(EndstopDriver* _e1, EndstopDriver* _e2, EndstopDriver* _e3, fast8_t _axis)
+        : e1(_e1)
         , e2(_e2)
-        , e3(_e3) {}
+        , e3(_e3)
+        , state(0)
+        , axis(_axis) {
+        e1->setParent(this);
+        e2->setParent(this);
+        e3->setParent(this);
+    }
     inline virtual bool update() final {
         return (state = (e1->triggered() && e2->triggered() && e3->triggered()));
     }
@@ -179,22 +230,47 @@ public:
     inline virtual bool implemented() final {
         return true;
     }
+    virtual void report() final {
+        Com::printF(triggered() ? Com::tHSpace : Com::tLSpace);
+        Com::print('(');
+        e1->report();
+        e2->report();
+        e3->report();
+        Com::print(')');
+    }
+    virtual void updateMaster() final {
+        fast8_t oldState = state;
+        update();
+        if (state != oldState) {
+            if (axis >= 0 && state) { // tell motion planner
+                endstopTriggered(axis);
+            }
+            // Com::printFLN(PSTR("MState:"), (int)state); // TEST
+        }
+    }
 };
 
 /** Merge 4 endstops into 1. Returns only true if both endstops are triggered. 
 */
 class EndstopMerge4 : public EndstopDriver {
-    fast8_t state;
     EndstopDriver *e1, *e2, *e3, *e4;
+    fast8_t state;
+    fast8_t axis;
 
 public:
     EndstopMerge4(EndstopDriver* _e1, EndstopDriver* _e2,
-                  EndstopDriver* _e3, EndstopDriver* _e4)
-        : state(false)
-        , e1(_e1)
+                  EndstopDriver* _e3, EndstopDriver* _e4, fast8_t _axis)
+        : e1(_e1)
         , e2(_e2)
         , e3(_e3)
-        , e4(_e4) {}
+        , e4(_e4)
+        , state(0)
+        , axis(_axis) {
+        e1->setParent(this);
+        e2->setParent(this);
+        e3->setParent(this);
+        e4->setParent(this);
+    }
     inline virtual bool update() final {
         return (state = (e1->triggered() && e2->triggered() && e3->triggered() && e4->triggered()));
     }
@@ -203,5 +279,23 @@ public:
     }
     inline virtual bool implemented() final {
         return true;
+    }
+    virtual void report() final {
+        Com::printF(triggered() ? Com::tHSpace : Com::tLSpace);
+        Com::print('(');
+        e1->report();
+        e2->report();
+        e3->report();
+        e4->report();
+        Com::print(')');
+    }
+    virtual void updateMaster() final {
+        fast8_t oldState = state;
+        update();
+        if (state != oldState) {
+            if (axis >= 0 && state) { // tell motion planner
+                endstopTriggered(axis);
+            }
+        }
     }
 };

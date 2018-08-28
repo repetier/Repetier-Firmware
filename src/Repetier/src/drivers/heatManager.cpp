@@ -3,18 +3,18 @@
 HeatManager* heaters[] = HEATERS;
 
 HeatManager::HeatManager(char htType, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod)
-        : error(HeaterError::NO_ERROR)
-        , targetTemperature(0)
-        , currentTemperature(0)
-        , maxTemperature(maxTemp)
-        , input(i)
-        , output(o)
-        , maxPWM(maxPwm)
-        , decoupleVariance(decVariance)
-        , decouplePeriod(decPeriod)
-        , decoupleMode(DecoupleMode::NO_HEATING)
-        , errorCount(0)
-        , heaterType(htType) {
+    : error(HeaterError::NO_ERROR)
+    , targetTemperature(0)
+    , currentTemperature(0)
+    , maxTemperature(maxTemp)
+    , input(i)
+    , output(o)
+    , maxPWM(maxPwm)
+    , decoupleVariance(decVariance)
+    , decouplePeriod(decPeriod)
+    , decoupleMode(DecoupleMode::NO_HEATING)
+    , errorCount(0)
+    , heaterType(htType) {
 }
 void HeatManager::init() {
     eepromPos = EEPROM::reserve(5, 1, eepromSizeLocal() + 13);
@@ -87,7 +87,7 @@ void HeatManager::update() {
 
     // Control heater
 
-    if (tempError > TEMPERATURE_CONTROL_RANGE) {
+    if (tempError > TEMPERATURE_CONTROL_RANGE) { // too cold
         output->set(maxPWM);
         wasOutsideRange = 2;
         if (decoupleMode == DecoupleMode::FAST_RISING) {
@@ -99,13 +99,13 @@ void HeatManager::update() {
         }
         return;
     }
-    if (tempError < -TEMPERATURE_CONTROL_RANGE) {
+    if (tempError < -TEMPERATURE_CONTROL_RANGE) { // too hot
         output->set(0);
         decoupleMode = DecoupleMode::COOLING;
         wasOutsideRange = 1;
         return;
     }
-    updateLocal(tempError);
+    updateLocal(tempError); // In control range
 }
 
 void HeatManager::eepromHandle() {
@@ -162,33 +162,34 @@ void HeatManager::reportTemperature(char c, int idx) {
 }
 
 void HeatManager::resetAllErrorStates() {
-    for(uint8_t i = 0; i < NUM_HEATERS; i++) {
+    for (uint8_t i = 0; i < NUM_HEATERS; i++) {
         heaters[i]->resetError();
     }
 }
 
 bool HeatManager::reportTempsensorError() {
 #if NUM_HEATERS > 0
-    if(!Printer::isAnyTempsensorDefect()) return false;
-    for(uint8_t i = 0; i < NUM_HEATERS; i++) {
-        HeatManager *h = heaters[i];
-        if(h->isBedHeater()) {
+    if (!Printer::isAnyTempsensorDefect())
+        return false;
+    for (uint8_t i = 0; i < NUM_HEATERS; i++) {
+        HeatManager* h = heaters[i];
+        if (h->isBedHeater()) {
             Com::printF(Com::tHeatedBed);
-        } else if(h->isExtruderHeater()) {
-             Com::printF(Com::tExtruderSpace, i);
-        } else if(h->isChamberHeater()) {
-             Com::printF(PSTR("Heated Chamber "), i);
+        } else if (h->isExtruderHeater()) {
+            Com::printF(Com::tExtruderSpace, i);
+        } else if (h->isChamberHeater()) {
+            Com::printF(PSTR("Heated Chamber "), i);
         } else {
             Com::printF(PSTR("Other:"));
         }
         HeaterError err = h->getError();
-        if(err == HeaterError::SENSOR_DEFECT)
+        if (err == HeaterError::SENSOR_DEFECT)
             Com::printF(Com::tTempSensorDefect);
         else
             Com::printF(Com::tTempSensorWorking);
-        if(err == HeaterError::NO_HEATUP)
+        if (err == HeaterError::NO_HEATUP)
             Com::printF(PSTR(" temperature does not rise"));
-        if(err == HeaterError::LEAVING_RANGE)
+        if (err == HeaterError::LEAVING_RANGE)
             Com::printF(PSTR(" temperature left control range"));
         Com::println();
     }
@@ -251,10 +252,10 @@ void HeatManagerPID::resetFromConfig(fast8_t _maxPwm, float decVariance, millis_
 
 void HeatManagerPID::eepromHandleLocal(int pos) {
     EEPROM::handleFloat(pos, PSTR("P [-]"), 2, P);
-    EEPROM::handleFloat(pos, PSTR("I [-]"), 2, I);
-    EEPROM::handleFloat(pos, PSTR("D [-]"), 2, D);
-    EEPROM::handleFloat(pos, PSTR("Min. I Part [-]"), 2, driveMin);
-    EEPROM::handleFloat(pos, PSTR("Max. I Part [-]"), 2, driveMax);
+    EEPROM::handleFloat(pos + 4, PSTR("I [-]"), 2, I);
+    EEPROM::handleFloat(pos + 8, PSTR("D [-]"), 2, D);
+    EEPROM::handleFloat(pos + 12, PSTR("Min. I Part [-]"), 2, driveMin);
+    EEPROM::handleFloat(pos + 16, PSTR("Max. I Part [-]"), 2, driveMax);
 }
 
 int HeatManagerPID::eepromSizeLocal() {
@@ -269,6 +270,7 @@ void HeatManagerPID::setPID(float p, float i, float d) {
 }
 
 void HeatManagerPID::autocalibrate(GCode* g) {
+    ENSURE_POWER
     float temp = g->hasS() ? g->S : 150;
     int maxCycles = g->hasR() ? static_cast<int>(g->R) : 5;
     bool storeValues = g->hasX();
