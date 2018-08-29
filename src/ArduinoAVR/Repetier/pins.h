@@ -1006,7 +1006,7 @@ STEPPER_CURRENT_CONTROL
 //29 on Melzi1284p A2
 #define PROBE_PIN          -1    
 
-#define LED_PIN            27
+#define LED_PIN            -1
 
 #define ORIG_FAN_PIN            4
 
