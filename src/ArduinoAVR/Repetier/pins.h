@@ -1006,6 +1006,7 @@ STEPPER_CURRENT_CONTROL
 //29 on Melzi1284p A2
 #define PROBE_PIN          -1    
 
+// Set LED_PIN to 27 if it is not used as beeper pin for display
 #define LED_PIN            -1
 
 #define ORIG_FAN_PIN            4

@@ -220,6 +220,78 @@ void halfautomaticLevel1() {
   uid.popMenu(false);
   halfautomaticLevel2();  
 }
+
+// Measure fixed point height and P1
+void halfautomaticLevel2GC() {
+  Com::printFLN(PSTR("ZLeveling:measuring"));
+  PlaneBuilder planeBuilder;
+  Printer::moveToReal(HALF_FIX_X, HALF_FIX_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
+  Commands::waitUntilEndOfAllMoves();
+  float halfRefHeight = Printer::runZProbe(false, false); 
+  planeBuilder.addPoint(HALF_FIX_X, HALF_FIX_Y, halfRefHeight);
+  Printer::moveToReal(HALF_P1_X, HALF_P1_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
+  Commands::waitUntilEndOfAllMoves();
+  float p1 = Printer::runZProbe(false, false);
+  planeBuilder.addPoint(HALF_P1_X, HALF_P1_Y, p1); 
+  Printer::moveToReal(HALF_P2_X, HALF_P2_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
+  Commands::waitUntilEndOfAllMoves();
+  float p2 = Printer::runZProbe(false, false);
+  planeBuilder.addPoint(HALF_P2_X, HALF_P2_Y, p2);
+  Plane plane;
+  planeBuilder.createPlane(plane);
+  // float z1 = p1 + (p2 - p1) / (HALF_P2_Y - HALF_P1_Y) * (HALF_WHEEL_P1 - HALF_P1_Y) - halfRefHeight; 
+  // float z2 = p1 + (p2 - p1) / (HALF_P2_Y - HALF_P1_Y) * (HALF_WHEEL_P2 - HALF_P1_Y) - halfRefHeight;
+#ifdef TEC4  
+  float z1 =(plane.z(HALF_P1_X, HALF_WHEEL_P1) - halfRefHeight - .15) * 360 / HALF_PITCH;  //added by FELIX extra offset of 0.1
+  float z2 = (plane.z(HALF_P1_X, HALF_WHEEL_P2) - halfRefHeight - .15) * 360 / HALF_PITCH; //added by FELIX extra offset of 0.1
+#else
+  float z1 =(plane.z(HALF_P1_X, HALF_WHEEL_P1) - halfRefHeight) * 360 / HALF_PITCH;
+  float z2 = (plane.z(HALF_P1_X, HALF_WHEEL_P2) - halfRefHeight) * 360 / HALF_PITCH;
+#endif
+  // z1 = back, z2 = front
+  Com::printF(PSTR("ZLeveling:result back:"), z1, 2);
+  Com::printFLN(PSTR(" front:"), z2, 2);    
+}
+// Finish leveling
+void halfautomaticLevel3GC() {
+  Printer::finishProbing();
+  Com::printFLN(PSTR("ZLeveling:finished"));
+}
+/* Start autoleveling */
+void halfautomaticLevel1GC() {
+  Com::printFLN(PSTR("ZLeveling:warmup"));
+  Printer::distortion.resetCorrection();
+  Printer::distortion.disable(false);
+#ifndef TEC4
+  Extruder::setTemperatureForExtruder(170,0,false);
+  if(NUM_EXTRUDER > 1){
+    Extruder::setTemperatureForExtruder(170,1,false);
+  }
+#else
+  Extruder::setTemperatureForExtruder(120,0,false);
+  if(NUM_EXTRUDER > 1){
+    Extruder::setTemperatureForExtruder(120,1,false);
+  }
+#endif
+  Extruder::setHeatedBedTemperature(55,true);
+  EVENT_WAITING_HEATER(-1);
+  tempController[HEATED_BED_INDEX]->waitForTargetTemperature();
+  EVENT_HEATING_FINISHED(-1);
+  Extruder::setTemperatureForExtruder(0,0,false);
+  if(NUM_EXTRUDER > 1){
+    Extruder::setTemperatureForExtruder(0,1,false);
+  }
+  Printer::homeAxis(true, true, true);
+  Extruder::setTemperatureForExtruder(0,0,false);
+  if(NUM_EXTRUDER > 1){
+    Extruder::setTemperatureForExtruder(0,1,false);
+  }
+  Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, HALF_Z, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
+  Printer::moveToReal(HALF_FIX_X, HALF_FIX_Y, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
+  Printer::startProbing(true);
+  halfautomaticLevel2GC();  
+}
+
 #endif
 
 #ifdef ZPROBE_HEIGHT_ROUTINE
@@ -242,8 +314,9 @@ press the button
 float refZ;
 bool distEnabled;
 
-void cZPHeight1() {
-  uid.pushMenu(&cui_msg_preparing,true);
+void cZPHeight1(bool menu = true) {
+  if(menu)
+    uid.pushMenu(&cui_msg_preparing,true);
 #if DISTORTION_CORRECTION
     distEnabled = Printer::distortion.isEnabled();
     Printer::distortion.disable(false); // if level has changed, distortion is also invalid
@@ -280,11 +353,14 @@ void cZPHeight1() {
   Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZPROBE_REF_HEIGHT - refZ, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
   Printer::updateCurrentPosition(true);
   Extruder::disableAllHeater(); //added by FELIX, ensure all heaters are off for correct reading of induction sensor
-  uid.popMenu(false);
-  uid.pushMenu(&cui_calib_zprobe_info, true);
+  Com::printFLN(PSTR("Z-Probe calibration started"));
+  if(menu) {
+    uid.popMenu(false);
+    uid.pushMenu(&cui_calib_zprobe_info, true);
+  }
 }
 
-void cZPHeight2() {
+void cZPHeight2(bool menu = true) {
 #if FEATURE_Z_PROBE
   // float diff = refZ + Printer::currentPosition[Z_AXIS] - ZPROBE_REF_HEIGHT;
   Commands::printCurrentPosition();
@@ -300,8 +376,11 @@ void cZPHeight2() {
 #else
 	Com::printFLN(PSTR("Z-probe height [mm]:"), zProbeHeight);
 #endif
-  uid.popMenu(false);
-  uid.menuLevel = 0;
+  Com::printFLN(PSTR("Probe calibrated"));
+  if(menu) {
+    uid.popMenu(false);
+    uid.menuLevel = 0;
+  }
   UI_STATUS_UPD("Probe calibrated");
 #endif
 #if DISTORTION_CORRECTION
@@ -912,6 +991,7 @@ void cOkWizard(int action) {
   case UI_ACTION_CZREFH_SUCC:
     uid.menuLevel = 0;
     break;
+#ifndef TEC4    
   case UI_ACTION_CALEX_Z2:  {
       uid.popMenu(false);
       uid.pushMenu(&ui_msg_extzcalib,true);
@@ -924,6 +1004,7 @@ void cOkWizard(int action) {
       }
      }
      break;
+#endif     
   case UI_ACTION_FC_CUSTOM_SET:
     setPreheatTemps(Printer::wizardStack[0].l, 55, false, false);
     preheatFCActive();
@@ -3460,6 +3541,25 @@ bool customMCode(GCode *com) {
         EEPROM::storeDataIntoEEPROM(false);    
     }
     break;   
+#ifdef HALFAUTOMATIC_LEVELING
+  case 4204:
+    halfautomaticLevel1GC();
+    break;
+  case 4205:
+    halfautomaticLevel2GC();
+    break;
+  case 4206:
+    halfautomaticLevel3GC();
+    break;
+#endif
+#ifdef ZPROBE_HEIGHT_ROUTINE
+  case 4207:   
+    cZPHeight1(false);
+    break; 
+  case 4208:   
+    cZPHeight2(false);
+    break; 
+#endif
   default:
      return false;
   }
