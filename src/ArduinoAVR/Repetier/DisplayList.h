@@ -872,6 +872,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_CLICK       31
 #define UI_DELAYPERCHAR 50
 #define UI_INVERT_MENU_DIRECTION 0
+
 #ifdef UI_MAIN
 void uiInitKeys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A, UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.

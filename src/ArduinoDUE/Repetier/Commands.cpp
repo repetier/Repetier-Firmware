@@ -2154,6 +2154,18 @@ void Commands::processMCode(GCode *com) {
         break;
 #endif
     case 203: // M203 Temperature monitor
+		if(com->hasX()) {
+			Printer::maxFeedrate[X_AXIS] = com->X / 60.0f;
+		}
+		if(com->hasY()) {
+			Printer::maxFeedrate[Y_AXIS] = com->Y / 60.0f;
+		}
+		if(com->hasZ()) {
+			Printer::maxFeedrate[Z_AXIS] = com->Z / 60.0f;
+		}
+		if(com->hasE()) {
+			Printer::maxFeedrate[E_AXIS] = com->E / 60.0f;
+		}
         if(com->hasS())
             manageMonitor = com->S != 255;
         else

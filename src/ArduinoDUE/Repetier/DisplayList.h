@@ -340,6 +340,27 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_RESET_PIN           41
 #endif
 #endif // smartcontroller
+
+#if (FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD) && (MOTHERBOARD == 63) //Melzi V2 + ReprapDiscount GLCD (such as Wanhao Duplicator i3)
+#define BEEPER_PIN             27
+#define UI_DISPLAY_RS_PIN      17
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  16
+#define UI_DISPLAY_D0_PIN      -1
+#define UI_DISPLAY_D1_PIN      -1
+#define UI_DISPLAY_D2_PIN      -1
+#define UI_DISPLAY_D3_PIN      -1
+#define UI_DISPLAY_D4_PIN      11
+#define UI_DISPLAY_D5_PIN      -1
+#define UI_DISPLAY_D6_PIN      -1
+#define UI_DISPLAY_D7_PIN      -1
+#define UI_ENCODER_A           29
+#define UI_ENCODER_B           30
+#define UI_ENCODER_CLICK       28
+#define UI_RESET_PIN           10
+#define SDCARDDETECT          -1
+#endif
+
 #define UI_DELAYPERCHAR 50
 #if FEATURE_CONTROLLER == CONTROLLER_BAM_DICE_DUE
 #define UI_ENCODER_SPEED 2
@@ -851,6 +872,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_CLICK       31
 #define UI_DELAYPERCHAR 50
 #define UI_INVERT_MENU_DIRECTION 0
+
 #ifdef UI_MAIN
 void uiInitKeys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A, UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.

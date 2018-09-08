@@ -32,7 +32,13 @@
 #include <stdint.h>
 #ifdef __AVR__
 #include <avr/io.h>
-#endif  // __AVR__
+#endif // __AVR__
+//------------------------------------------------------------------------------
+/**
+ * Set INCLUDE_SDIOS nonzero to include sdios.h in SdFat.h.
+ * sdios.h provides C++ style IO Streams.
+ */
+#define INCLUDE_SDIOS 1
 //------------------------------------------------------------------------------
 /**
  * Set USE_LONG_FILE_NAMES nonzero to use long file names (LFN).
@@ -76,7 +82,9 @@
  * will be defined. If ENABLE_EXTENDED_TRANSFER_CLASS is also nonzero,
  * the class SdFatSoftSpiEX will be defined.
  */
+#ifndef ENABLE_SOFTWARE_SPI_CLASS
 #define ENABLE_SOFTWARE_SPI_CLASS 0
+#endif
 //------------------------------------------------------------------------------
 /**
  * If CHECK_FLASH_PROGRAMMING is zero, overlap of single sector flash 
@@ -158,9 +166,9 @@
  */
 #ifdef __arm__
 #define USE_SEPARATE_FAT_CACHE 1
-#else  // __arm__
+#else // __arm__
 #define USE_SEPARATE_FAT_CACHE 0
-#endif  // __arm__
+#endif // __arm__
 //------------------------------------------------------------------------------
 /**
  * Set USE_MULTI_BLOCK_IO nonzero to use multi-block SD read/write.
@@ -169,17 +177,17 @@
  */
 #if defined(RAMEND) && RAMEND < 3000
 #define USE_MULTI_BLOCK_IO 0
-#else  // RAMEND
+#else // RAMEND
 #define USE_MULTI_BLOCK_IO 1
-#endif  // RAMEND
+#endif // RAMEND
 //-----------------------------------------------------------------------------
 /** Enable SDIO driver if available. */
 #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
 #define ENABLE_SDIO_CLASS 1
 #define ENABLE_SDIOEX_CLASS 1
-#else  // ENABLE_SDIO_CLASS
+#else // ENABLE_SDIO_CLASS
 #define ENABLE_SDIO_CLASS 0
-#endif  // ENABLE_SDIO_CLASS
+#endif // ENABLE_SDIO_CLASS
 //------------------------------------------------------------------------------
 /**
  * Determine the default SPI configuration.
@@ -187,22 +195,22 @@
 #if defined(__STM32F1__) || defined(__STM32F4__)
 // has multiple SPI ports
 #define SD_HAS_CUSTOM_SPI 2
-#elif defined(__AVR__)\
-  || defined(__SAM3X8E__) || defined(__SAM3X8H__)\
-  || (defined(__arm__) && defined(CORE_TEENSY))\
-  || defined(ESP8266)
+#elif defined(__AVR__) \
+    || defined(__SAM3X8E__) || defined(__SAM3X8H__) \
+    || (defined(__arm__) && defined(CORE_TEENSY)) \
+    || defined(ESP8266)
 #define SD_HAS_CUSTOM_SPI 1
-#else  // SD_HAS_CUSTOM_SPI
+#else // SD_HAS_CUSTOM_SPI
 // Use standard SPI library.
 #define SD_HAS_CUSTOM_SPI 0
-#endif  // SD_HAS_CUSTOM_SPI
+#endif // SD_HAS_CUSTOM_SPI
 //------------------------------------------------------------------------------
 /**
  * Check if API to select HW SPI port is needed.
  */
 #if (USE_STANDARD_SPI_LIBRARY || SD_HAS_CUSTOM_SPI < 2)
 #define IMPLEMENT_SPI_PORT_SELECTION 0
-#else  // USE_STANDARD_SPI_LIBRARY
+#else // USE_STANDARD_SPI_LIBRARY
 #define IMPLEMENT_SPI_PORT_SELECTION 1
-#endif  // USE_STANDARD_SPI_LIBRARY
-#endif  // SdFatConfig_h
+#endif // USE_STANDARD_SPI_LIBRARY
+#endif // SdFatConfig_h
