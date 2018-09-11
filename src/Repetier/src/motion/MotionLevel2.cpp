@@ -227,7 +227,13 @@ void Motion2::timer() {
         lastMotorIdx = nextMotorIdx;
         m3->parentId = act->id;
         m3->checkEndstops = actM1->isCheckEndstops();
-        m3->secondSpeed = actM1->secondSpeed;
+        Tool* tool = Tool::getActiveTool();
+        if (tool) {
+            Motion1Buffer* motion1 = act->motion1;
+            m3->secondSpeed = tool->computeIntensity(VelocityProfile::f, motion1->isActiveSecondary(), motion1->secondSpeed, motion1->secondSpeedPerMMPS);
+        } else {
+            m3->secondSpeed = 0;
+        }
         PrinterType::enableMotors(m3->usedAxes);
         if (m3->last) {
             actM1 = nullptr; // select next on next interrupt
@@ -328,12 +334,18 @@ void Motion2::timer() {
         lastMotorIdx = nextMotorIdx;
         m3->parentId = act->id;
         m3->checkEndstops = actM1->isCheckEndstops();
-        m3->secondSpeed = actM1->secondSpeed;
+        Tool* tool = Tool::getActiveTool();
+        if (tool) {
+            Motion1Buffer* motion1 = act->motion1;
+            m3->secondSpeed = tool->computeIntensity(VelocityProfile::f, motion1->isActiveSecondary(), motion1->secondSpeed, motion1->secondSpeedPerMMPS);
+        } else {
+            m3->secondSpeed = 0;
+        }
         PrinterType::enableMotors(m3->usedAxes);
         if (m3->last) {
             actM1 = nullptr; // select next on next interrupt
         }
-    } else if (actM1->action == Motion1Action::WAIT || actM1->action == Motion1Action::LASER_WARMUP) { // just wait a bit
+    } else if (actM1->action == Motion1Action::WAIT || actM1->action == Motion1Action::WARMUP) { // just wait a bit
         m3->parentId = act->id;
         m3->usedAxes = 0;
         m3->checkEndstops = 0;
@@ -358,11 +370,21 @@ void Motion2::timer() {
 // Will stop all motions stored. For z probing and homing We
 // Also note the remainig z steps.
 
-void motorEndstopTriggered(fast8_t axis) {
+void motorEndstopTriggered(fast8_t axis, bool dir) {
     Motion1::motorTriggered |= axisBits[axis];
+    if (dir) {
+        Motion1::motorDirTriggered |= axisBits[axis];
+    } else {
+        Motion1::motorDirTriggered &= ~axisBits[axis];
+    }
 }
-void Motion2::motorEndstopTriggered(fast8_t axis) {
+void Motion2::motorEndstopTriggered(fast8_t axis, bool dir) {
     Motion1::motorTriggered |= axisBits[axis];
+    if (dir) {
+        Motion1::motorDirTriggered |= axisBits[axis];
+    } else {
+        Motion1::motorDirTriggered &= ~axisBits[axis];
+    }
     Com::printFLN(PSTR("MotorTrigger:"), (int)Motion1::motorTriggered); // TEST
     /*Motion1::setAxisHomed(axis, false);
     Motion2Buffer& m2 = Motion2::buffers[act->parentId];
@@ -382,20 +404,33 @@ void Motion2::motorEndstopTriggered(fast8_t axis) {
     }*/
 }
 
-void endstopTriggered(fast8_t axis) {
+void endstopTriggered(fast8_t axis, bool dir) {
     InterruptProtectedBlock noInt;
-    Motion2::endstopTriggered(Motion3::act, axis);
+    Motion2::endstopTriggered(Motion3::act, axis, dir);
 }
 
-void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis) {
+void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis, bool dir) {
     // DEBUG_MSG2_FAST("EH:", (int)axis);
     if (act == nullptr || act->checkEndstops == false) {
         // DEBUG_MSG_FAST("EHX");
         return;
     }
-    Motion1::axesTriggered = axisBits[axis];
-    Motion1::setAxisHomed(axis, false);
+    fast8_t bit = axisBits[axis];
+    Motion1::axesTriggered = bit;
+    if (dir) {
+        Motion1::axesDirTriggered |= bit;
+    } else {
+        Motion1::axesDirTriggered &= ~bit;
+    }
     Motion2Buffer& m2 = Motion2::buffers[act->parentId];
+    Motion1Buffer* m1 = m2.motion1;
+    if ((m1->axisUsed & bit) == 0) { // not motion directory
+        return;
+    }
+    if ((m1->axisDir & bit) != (Motion1::axesDirTriggered & bit)) {
+        return; // we move away so it is a stale signal from other direction
+    }
+    Motion1::setAxisHomed(axis, false);
     if (Motion1::endstopMode == EndstopMode::STOP_AT_ANY_HIT || Motion1::endstopMode == EndstopMode::PROBING) {
         FOR_ALL_AXES(i) {
             Motion1::stepsRemaining[i] = m2.stepsRemaining[i];

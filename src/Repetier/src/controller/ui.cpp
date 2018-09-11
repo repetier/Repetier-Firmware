@@ -1547,7 +1547,7 @@ void UIDisplay::parse(const char *txt, bool ram) {
             }
             if(c2 == 'p') {
                 // pwm position
-#if SUPPORT_LASER
+/*#if SUPPORT_LASER
                 if(Printer::mode == PRINTER_MODE_LASER) {
                     if(LaserDriver::intens < LASER_PWM_MAX) {
                         float power = LaserDriver::intens * LASER_WATT / LASER_PWM_MAX; // Output Power = DIODEPower / Resolution * Value)
@@ -1564,7 +1564,7 @@ void UIDisplay::parse(const char *txt, bool ram) {
                     else
                         addStringP(PSTR("Max."));
                 }
-#endif
+#endif */
                 break;
             }
 //#########
@@ -2065,8 +2065,8 @@ void UIDisplay::refreshPage() {
             }
         }
 //###RAyWB  Change Mainpage for CNC and Laser Mode
-        else if
-        (menuPos[0] == 0 && (Printer::mode != PRINTER_MODE_FFF)) {
+        else if (false)
+        // (menuPos[0] == 0 && (Printer::mode != PRINTER_MODE_FFF)) {
 
             col = 0;
             r = 0;
@@ -2086,11 +2086,11 @@ void UIDisplay::refreshPage() {
 
             if(UI_ROWS > 4) {
                 col = 0;
-                if(Printer::mode == PRINTER_MODE_LASER)
+/* if(Printer::mode == PRINTER_MODE_LASER)
                     text = (char*)Com::translatedF(UI_TEXT_MAINPAGE6_4_L_ID);
                 if(Printer::mode == PRINTER_MODE_CNC)
                     text = (char*)Com::translatedF(UI_TEXT_MAINPAGE6_4_C_ID);
-
+*/
                 parse(text, false);
                 strcpy(cache[r++], uid.printCols);
             }
@@ -2778,10 +2778,10 @@ bool UIDisplay::nextPreviousAction(int16_t next, bool allowMoves) {
     EVENT_START_NEXTPREVIOUS(action, increment);
     switch(action) {
     case UI_ACTION_FANSPEED:
-        Commands::setFanSpeed(Printer::getFanSpeed() + increment * 3, true);
+        Printer::setFanSpeed(Printer::getFanSpeed() + increment * 3, true);
         break;
     case UI_ACTION_FAN2SPEED:
-        Commands::setFan2Speed(Printer::getFan2Speed() + increment * 3);
+        Printer::setFan2Speed(Printer::getFan2Speed() + increment * 3);
         break;
     case UI_ACTION_XPOSITION:
         if(!allowMoves) return false;
@@ -3527,18 +3527,18 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
         case UI_ACTION_FAN_25:
         case UI_ACTION_FAN_50:
         case UI_ACTION_FAN_75:
-            Commands::setFanSpeed((action - UI_ACTION_FAN_OFF) * 64, true);
+            Printer::setFanSpeed((action - UI_ACTION_FAN_OFF) * 64, true);
             break;
         case UI_ACTION_FAN_FULL:
-            Commands::setFanSpeed(255, true);
+            Printer::setFanSpeed(255, true);
             break;
         case UI_ACTION_FAN_SUSPEND: {
             static uint8_t lastFanSpeed = 255;
             if(Printer::getFanSpeed() == 0)
-                Commands::setFanSpeed(lastFanSpeed, true);
+                Printer::setFanSpeed(lastFanSpeed, true);
             else {
                 lastFanSpeed = Printer::getFanSpeed();
-                Commands::setFanSpeed(0, true);
+                Printer::setFanSpeed(0, true);
             }
         }
         break;
@@ -3794,10 +3794,10 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
 #endif
         break;
         case UI_ACTION_FAN_UP:
-            Commands::setFanSpeed(Printer::getFanSpeed() + 32, true);
+            Printer::setFanSpeed(Printer::getFanSpeed() + 32, true);
             break;
         case UI_ACTION_FAN_DOWN:
-            Commands::setFanSpeed(Printer::getFanSpeed() - 32, true);
+            Printer::setFanSpeed(Printer::getFanSpeed() - 32, true);
             break;
         case UI_ACTION_KILL:
             Commands::emergencyStop();

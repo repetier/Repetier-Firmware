@@ -66,7 +66,7 @@ bool PrinterType::untriggerEndstops() {
         moveX ? -10.0f : 0,
         moveY ? -10.0f : 0,
         moveZ ? -10.0f : 0);
-    Motion1::moveRelativeByOfficial(Motion1::tmpPosition, Motion1::homingFeedrate[Z_AXIS]);
+    Motion1::moveRelativeByOfficial(Motion1::tmpPosition, Motion1::homingFeedrate[Z_AXIS], false);
     Motion1::waitForEndOfMoves();
     moveX = Motion1::motors[X_AXIS]->getMaxEndstop()->triggered();
     moveY = Motion1::motors[Y_AXIS]->getMaxEndstop()->triggered();
@@ -104,7 +104,7 @@ void PrinterType::homeZ() {
         -homeOffsetA,
         -homeOffsetB,
         -homeOffsetC);
-    Motion1::moveRelativeByOfficial(Motion1::tmpPosition, Motion1::homingFeedrate[Z_AXIS]);
+    Motion1::moveRelativeByOfficial(Motion1::tmpPosition, Motion1::homingFeedrate[Z_AXIS], false);
     Motion1::waitForEndOfMoves();
     setMotionMode(MotionMode::MOTION_DELTA);
     FOR_ALL_AXES(i) {
@@ -175,7 +175,7 @@ void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]) {
     if ((temp = opt - temp2 * temp2) < 0) {
         return;
     }
-    motor[Z_AXIS] = lroundf((sqrt(temp) + z) * Motion1::resolution[Z_AXIS]);
+    motor[Z_AXIS] = lroundl((sqrt(temp) + z) * Motion1::resolution[Z_AXIS]);
 }
 
 void PrinterType::disableAllowedStepper() {

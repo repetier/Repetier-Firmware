@@ -39,6 +39,7 @@ IO_TARGET with following meanings:
 #include "io_input.h"
 #include "io_output.h"
 #include "io_pwm.h"
+#include "io_servos.h"
 #include "io_analog.h"
 #include "io_temperature.h"
 #include "endstop_definitions.h"

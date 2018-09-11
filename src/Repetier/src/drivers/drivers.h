@@ -32,8 +32,8 @@ public:
     virtual bool isDefect() = 0; /// Return true if sensor is defect
 };
 
-extern void motorEndstopTriggered(fast8_t axis);
-extern void endstopTriggered(fast8_t axis);
+extern void motorEndstopTriggered(fast8_t axis, bool dir);
+extern void endstopTriggered(fast8_t axis, bool dir);
 
 /*
 #include "../../Printer.h"

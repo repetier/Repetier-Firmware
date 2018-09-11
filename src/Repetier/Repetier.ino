@@ -123,7 +123,7 @@ Custom M Codes
 - M200 T<extruder> D<diameter> - Use volumetric extrusion. Set D0 or omit D to disable volumetric extr. Omit T for current extruder.
 - M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 - M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
-- M203 - Set temperature monitor to Sx
+- M203 X Y Z E A B C - Set maximum feedrate
 - M204 - Set PID parameter X => Kp Y => Ki Z => Kd S<extruder> Default is current extruder. NUM_EXTRUDER=Heated bed
 - M205 - Output EEPROM settings
 - M206 - Set EEPROM value
@@ -155,10 +155,6 @@ Custom M Codes
 - M401 - Store x, y and z position.
 - M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate for that move.
 - M408 S<0-5> - Return status as json string (requires matching feature) for PanelDue
-- M450 - Reports printer mode
-- M451 - Set printer mode to FFF
-- M452 - Set printer mode to laser
-- M453 - Set printer mode to CNC
 - M460 X<minTemp> Y<maxTemp> : Set temperature range for thermistor controlled fan
 - M500 Store settings to EEPROM
 - M501 Load settings from EEPROM

@@ -68,9 +68,9 @@ IO_INPUT_PULLUP(IOEndstopZMin, ORIG_Z_MIN_PIN)
 // You need to define all min and max endstops for all
 // axes except E even if you have none!
 
-ENDSTOP_SWITCH_HW(endstopXMin, IOEndstopXMin, X_AXIS)
-ENDSTOP_SWITCH_HW(endstopYMin, IOEndstopYMin, Y_AXIS)
-ENDSTOP_SWITCH_HW(endstopZMin, IOEndstopZMin, Z_AXIS)
+ENDSTOP_SWITCH_HW(endstopXMin, IOEndstopXMin, X_AXIS, false)
+ENDSTOP_SWITCH_HW(endstopYMin, IOEndstopYMin, Y_AXIS, false)
+ENDSTOP_SWITCH_HW(endstopZMin, IOEndstopZMin, Z_AXIS, false)
 ENDSTOP_NONE(endstopAMin)
 ENDSTOP_NONE(endstopXMax)
 ENDSTOP_NONE(endstopYMax)
@@ -157,5 +157,5 @@ COOLER_MANAGER_SENSOR(ExtruderCooler, TempHottestExtruder, CoolerFan, 40, 100, 2
 // Typical tools are:
 // TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript)
 
-TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 2230, 5, 30, 5000, 40, "M117 Extruder 1", "")
-TOOL_EXTRUDER(ToolExtruder2, 0, 0, 0, HeaterExtruder2, E2Motor, 1.75, 2230, 5, 30, 5000, 40, "M117 Extruder 2", "")
+TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 2230, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder2, 0, 0, 0, HeaterExtruder2, E2Motor, 1.75, 2230, 5, 30, 5000, 40, "M117 Extruder 2", "", &Fan2PWM)

@@ -45,18 +45,7 @@ public:
         , maxPWM(_maxPWM) {
         diff = static_cast<float>(maxPWM - minPWM) / (maxTemp - startTemp);
     }
-    void update() {
-        float temp = heater->getTargetTemperature();
-        if (temp < startTemp) {
-            pwm->set(0);
-            return;
-        }
-        if (temp > maxPWM) {
-            pwm->set(maxPWM);
-            return;
-        }
-        pwm->set(RMath::min(static_cast<fast8_t>(255), minPWM + static_cast<fast8_t>((temp - startTemp) * diff)));
-    }
+    void update();
 };
 
 /** This manager works on any temperature sensor and controls a fan.
@@ -86,16 +75,27 @@ public:
         , maxPWM(_maxPWM) {
         diff = static_cast<float>(maxPWM - minPWM) / (maxTemp - startTemp);
     }
-    void update() {
-        float temp = heater->get();
-        if (temp < startTemp) {
-            pwm->set(0);
-            return;
-        }
-        if (temp > maxPWM) {
-            pwm->set(maxPWM);
-            return;
-        }
-        pwm->set(RMath::min(static_cast<fast8_t>(255), minPWM + static_cast<fast8_t>((temp - startTemp) * diff)));
+    void update();
+};
+
+class CoolerManagerMotors {
+    PWMHandler* pwm;
+    fast8_t offPWM;
+    fast8_t onPWM;
+    int postCooling;
+    int onCount;
+
+public:
+    CoolerManagerMotors(PWMHandler* _pwm,
+                        fast8_t _offPWM,
+                        fast8_t _onPWM,
+                        int postCoolingSeconds)
+        : pwm(_pwm)
+        , offPWM(_offPWM)
+        , onPWM(_onPWM) {
+        postCooling = 2 * postCoolingSeconds;
+        onCount = -1;
+        pwm->set(offPWM);
     }
+    void update();
 };

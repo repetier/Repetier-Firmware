@@ -238,23 +238,7 @@ void HAL::setupTimer() {
     TCCR1B =  (_BV(WGM12) | _BV(CS10)); // no prescaler == 0.0625 usec tick | 001 = clk/1
     OCR1A = 65500; //start off with a slow frequency.
     TIMSK1 |= (1 << OCIE1A); // Enable interrupt
-#if FEATURE_SERVO
-#if SERVO0_PIN>-1
-    SET_OUTPUT(SERVO0_PIN);
-    WRITE(SERVO0_PIN, LOW);
-#endif
-#if SERVO1_PIN>-1
-    SET_OUTPUT(SERVO1_PIN);
-    WRITE(SERVO1_PIN, LOW);
-#endif
-#if SERVO2_PIN>-1
-    SET_OUTPUT(SERVO2_PIN);
-    WRITE(SERVO2_PIN, LOW);
-#endif
-#if SERVO3_PIN>-1
-    SET_OUTPUT(SERVO3_PIN);
-    WRITE(SERVO3_PIN, LOW);
-#endif
+#if NUM_SERVOS > 0
     TCCR3A = 0;             // normal counting mode
     TCCR3B = _BV(CS31);     // set prescaler of 8
     TCNT3 = 0;              // clear the timer count
@@ -487,7 +471,7 @@ unsigned char HAL::i2cReadNak(void) {
     return TWDR;
 }
 
-#if FEATURE_SERVO
+#if NUM_SERVOS > 0
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__) || defined(__AVR_ATmega128__) || defined(__AVR_ATmega1281__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega2561__)
 #define SERVO2500US F_CPU/3200
 #define SERVO5000US F_CPU/1600
@@ -495,84 +479,37 @@ unsigned int HAL::servoTimings[4] = {0, 0, 0, 0};
 unsigned int servoAutoOff[4] = {0, 0, 0, 0};
 static uint8_t servoIndex = 0;
 void HAL::servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff) {
-    if(ms < 500) ms = 0;
-    if(ms > 2500) ms = 2500;
     servoTimings[servo] = (unsigned int)(((F_CPU / 1000000) * (long)ms) >> 3);
     servoAutoOff[servo] = (ms) ? (autoOff / 20) : 0;
 }
 SIGNAL (TIMER3_COMPA_vect) {
-    switch(servoIndex) {
-    case 0:
-        TCNT3 = 0;
-        if(HAL::servoTimings[0]) {
-#if SERVO0_PIN > -1
-            WRITE(SERVO0_PIN, HIGH);
-#endif
-            OCR3A = HAL::servoTimings[0];
-        } else OCR3A = SERVO2500US;
-        break;
-    case 1:
-#if SERVO0_PIN > -1
-        WRITE(SERVO0_PIN, LOW);
-#endif
-        OCR3A = SERVO5000US;
-        break;
-    case 2:
-        TCNT3 = 0;
-        if(HAL::servoTimings[1]) {
-#if SERVO1_PIN > -1
-            WRITE(SERVO1_PIN, HIGH);
-#endif
-            OCR3A = HAL::servoTimings[1];
-        } else OCR3A = SERVO2500US;
-        break;
-    case 3:
-#if SERVO1_PIN > -1
-        WRITE(SERVO1_PIN, LOW);
-#endif
-        OCR3A = SERVO5000US;
-        break;
-    case 4:
-        TCNT3 = 0;
-        if(HAL::servoTimings[2]) {
-#if SERVO2_PIN > -1
-            WRITE(SERVO2_PIN, HIGH);
-#endif
-            OCR3A = HAL::servoTimings[2];
-        } else OCR3A = SERVO2500US;
-        break;
-    case 5:
-#if SERVO2_PIN > -1
-        WRITE(SERVO2_PIN, LOW);
-#endif
-        OCR3A = SERVO5000US;
-        break;
-    case 6:
-        TCNT3 = 0;
-        if(HAL::servoTimings[3]) {
-#if SERVO3_PIN > -1
-            WRITE(SERVO3_PIN, HIGH);
-#endif
-            OCR3A = HAL::servoTimings[3];
-        } else OCR3A = SERVO2500US;
-        break;
-    case 7:
-#if SERVO3_PIN > -1
-        WRITE(SERVO3_PIN, LOW);
-#endif
-        OCR3A = SERVO5000US;
-        break;
-    }
-    if(servoIndex & 1) {
-        uint8_t nr = servoIndex >> 1;
-        if(servoAutoOff[nr]) {
-            servoAutoOff[nr]--;
-            if(servoAutoOff[nr] == 0) HAL::servoTimings[nr] = 0;
+    fast8_t servoId = servoIndex >> 1;
+    ServoInterface* act = analogServoSlots[servoId];
+    if (act == nullptr) {
+        OCR3A = SERVO2500US;
+    } else {
+        if (servoIndex & 1) { // disable
+            act->disable();
+            OCR3A = SERVO5000US;
+            if (servoAutoOff[servoId]) {
+                servoAutoOff[servoId]--;
+                if (servoAutoOff[servoId] == 0)
+                    HAL::servoTimings[servoId] = 0;
+            }
+        } else { // enable
+            TCNT3 = 0;
+            if (HAL::servoTimings[servoId]) {
+                act->enable();
+                OCR3A = HAL::servoTimings[servoId];
+            } else {
+                OCR3A = SERVO2500US;
+            }
         }
     }
     servoIndex++;
-    if(servoIndex > 7)
+    if (servoIndex > 7) {
         servoIndex = 0;
+    }
 }
 #else
 #error No servo support for your board, please diable FEATURE_SERVO

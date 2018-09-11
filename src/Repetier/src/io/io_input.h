@@ -92,7 +92,7 @@ IO_INPUT_INVERTED_PULLUP(name, pin)
     class name { \
     public: \
         inline static fast8_t get() { \
-            return READ(_pin); \
+            return !READ(_pin); \
         } \
         inline static uint8_t pin() { return _pin; } \
     };

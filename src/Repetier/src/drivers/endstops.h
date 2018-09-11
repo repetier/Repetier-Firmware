@@ -74,7 +74,7 @@ public:
     }
 };
 
-template <class inp, int axis>
+template <class inp, int axis, bool dir>
 class EndstopSwitchHardwareDriver : public EndstopDriver {
     fast8_t state;
     EndstopDriver* parent;
@@ -88,7 +88,7 @@ public:
         if (state != newState) {
             state = newState;
             if (axis >= 0 && newState) { // tell motion planner
-                endstopTriggered(axis);
+                endstopTriggered(axis, dir);
             }
             if (parent != nullptr) {
                 parent->updateMaster();
@@ -165,13 +165,15 @@ class EndstopMerge2 : public EndstopDriver {
     EndstopDriver *e1, *e2;
     fast8_t state;
     fast8_t axis;
+    bool dir;
 
 public:
-    EndstopMerge2(EndstopDriver* _e1, EndstopDriver* _e2, fast8_t _axis)
+    EndstopMerge2(EndstopDriver* _e1, EndstopDriver* _e2, fast8_t _axis, bool _dir)
         : e1(_e1)
         , e2(_e2)
         , state(0)
-        , axis(_axis) {
+        , axis(_axis)
+        , dir(_dir) {
         e1->setParent(this);
         e2->setParent(this);
     }
@@ -196,7 +198,7 @@ public:
         update();
         if (state != oldState) {
             if (axis >= 0 && state) { // tell motion planner
-                endstopTriggered(axis);
+                endstopTriggered(axis, dir);
             }
         }
     }
@@ -209,14 +211,16 @@ class EndstopMerge3 : public EndstopDriver {
     EndstopDriver *e1, *e2, *e3;
     fast8_t state;
     fast8_t axis;
+    bool dir;
 
 public:
-    EndstopMerge3(EndstopDriver* _e1, EndstopDriver* _e2, EndstopDriver* _e3, fast8_t _axis)
+    EndstopMerge3(EndstopDriver* _e1, EndstopDriver* _e2, EndstopDriver* _e3, fast8_t _axis, bool _dir)
         : e1(_e1)
         , e2(_e2)
         , e3(_e3)
         , state(0)
-        , axis(_axis) {
+        , axis(_axis)
+        , dir(_dir) {
         e1->setParent(this);
         e2->setParent(this);
         e3->setParent(this);
@@ -243,7 +247,7 @@ public:
         update();
         if (state != oldState) {
             if (axis >= 0 && state) { // tell motion planner
-                endstopTriggered(axis);
+                endstopTriggered(axis, dir);
             }
             // Com::printFLN(PSTR("MState:"), (int)state); // TEST
         }
@@ -256,16 +260,18 @@ class EndstopMerge4 : public EndstopDriver {
     EndstopDriver *e1, *e2, *e3, *e4;
     fast8_t state;
     fast8_t axis;
+    bool dir;
 
 public:
     EndstopMerge4(EndstopDriver* _e1, EndstopDriver* _e2,
-                  EndstopDriver* _e3, EndstopDriver* _e4, fast8_t _axis)
+                  EndstopDriver* _e3, EndstopDriver* _e4, fast8_t _axis, bool _dir)
         : e1(_e1)
         , e2(_e2)
         , e3(_e3)
         , e4(_e4)
         , state(0)
-        , axis(_axis) {
+        , axis(_axis)
+        , dir(_dir) {
         e1->setParent(this);
         e2->setParent(this);
         e3->setParent(this);
@@ -294,7 +300,7 @@ public:
         update();
         if (state != oldState) {
             if (axis >= 0 && state) { // tell motion planner
-                endstopTriggered(axis);
+                endstopTriggered(axis, dir);
             }
         }
     }

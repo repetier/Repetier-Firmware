@@ -71,13 +71,17 @@ public:
     // Gets called when an end stop is triggered during motion.
     // Will stop all motions stored. For z probing and homing We
     // Also note the remainig z steps.
-    static void endstopTriggered(Motion3Buffer* act, fast8_t axis);
-    static void motorEndstopTriggered(fast8_t axis);
+    static void endstopTriggered(Motion3Buffer* act, fast8_t axis, bool dir);
+    static void motorEndstopTriggered(fast8_t axis, bool dir);
 
     /// Called from m3 timer when line is finished as planned
     static void pop() {
         InterruptProtectedBlock ip;
         length--;
+        Tool* a = Tool::getActiveTool();
+        if (a != nullptr) {
+            a->moveFinished();
+        }
         Motion1::pop();
     }
     static void reportBuffers();

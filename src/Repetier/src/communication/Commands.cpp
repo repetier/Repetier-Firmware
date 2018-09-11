@@ -65,11 +65,10 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     EVENT_PERIODICAL;
 #if defined(DOOR_PIN) && DOOR_PIN > -1
     if (Printer::updateDoorOpen()) {
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-        if (Printer::mode == PRINTER_MODE_LASER) {
-            LaserDriver::changeIntensity(0);
+        Tool* tool = Tool::getActiveTool();
+        if (tool) {
+            tool->shutdown();
         }
-#endif
     }
 #endif
     if (!executePeriodical)
@@ -241,27 +240,6 @@ void Commands::changeFlowrateMultiply(int factor) {
     //else
     //    Printer::extrusionFactor = 0.01f * static_cast<float>(factor) * 4.0f / (Extruder::current->diameter * Extruder::current->diameter * 3.141592654f);
     Com::printFLN(Com::tFlowMultiply, factor);
-}
-
-void Commands::setFanSpeed(int speed, bool immediately, int fanId) {
-    if (fanId < 0 || fanId >= NUM_FANS) {
-        return;
-    }
-    speed = constrain(speed, 0, 255);
-    if (Printer::getFanSpeed(fanId) == speed)
-        return;
-    if (fanId == 0) {
-        Printer::setMenuMode(MENU_MODE_FAN_RUNNING, speed != 0);
-        if (Motion1::length == 0 || immediately) {
-            if (Printer::mode == PRINTER_MODE_FFF) {
-                for (fast8_t i = 0; i < PRINTLINE_CACHE_SIZE; i++)
-                    Motion1::buffers[i].secondSpeed = speed; // fill all printline buffers with new fan speed value
-            }
-        }
-    }
-    Printer::setFanSpeedDirectly(speed, fanId);
-    Com::printF(PSTR("Fanspeed"), fanId);
-    Com::printFLN(Com::tColon, speed);
 }
 
 void Commands::reportPrinterUsage() {
@@ -1140,6 +1118,9 @@ void Commands::processMCode(GCode* com) {
     case 202: // M202 travel acceleration, but no difference atm
         MCode_202(com);
         break;
+    case 203: // M203
+        MCode_203(com);
+        break;
     case 204: // M204
         MCode_204(com);
         break;
@@ -1230,18 +1211,6 @@ void Commands::processMCode(GCode* com) {
         break;
     case 408:
         MCode_408(com);
-        break;
-    case 450:
-        MCode_450(com);
-        break;
-    case 451:
-        MCode_451(com);
-        break;
-    case 452:
-        MCode_452(com);
-        break;
-    case 453:
-        MCode_453(com);
         break;
     case 460: // M460 X<minTemp> Y<maxTemp> : Set temperature range for thermo controlled fan
         MCode_460(com);

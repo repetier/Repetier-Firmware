@@ -239,14 +239,18 @@ extern void updateEndstops();
 #define CONFIG_VARIABLE_EQ(tp, name, values) extern tp name;
 #endif
 
+class ServoInterface {
+public:
+    virtual int getPosition();
+    virtual void setPosition(int pos, int32_t timeout);
+    virtual void enable();
+    virtual void disable();
+};
+
 #include "src/io/temperature_tables.h"
 #include "Configuration.h"
 
-#if (LASER_PWM_MAX > 255 && SUPPORT_LASER) || (CNC_PWM_MAX > 255 && SUPPORT_CNC)
-typedef uint16_t secondspeed_t;
-#else
-typedef uint8_t secondspeed_t;
-#endif
+extern ServoInterface* servos[NUM_SERVOS];
 
 #ifndef SHARED_EXTRUDER_HEATER
 #define SHARED_EXTRUDER_HEATER 0
@@ -535,6 +539,7 @@ typedef uint8_t secondspeed_t;
 #define TRIM_FAN_PWM(x) static_cast<uint8_t>(static_cast<unsigned int>(x) * MAX_FAN_PWM / 255)
 #endif
 
+extern PWMHandler* fans[];
 // extern const uint8 osAnalogInputChannels[] PROGMEM;
 //extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
 //extern uint osAnalogInputBuildup[ANALOG_INPUTS];

@@ -18,6 +18,7 @@
 
 #include "Repetier.h"
 
+ServoInterface* servos[NUM_SERVOS] = SERVO_LIST;
 PWMHandler* fans[] = FAN_LIST;
 #if USE_ADVANCE
 ufast8_t Printer::maxExtruderSpeed;        ///< Timer delay for end extruder speed
@@ -42,7 +43,6 @@ uint8_t Printer::flag2 = 0;
 uint8_t Printer::flag3 = 0;
 uint8_t Printer::debugLevel = 6; ///< Bitfield defining debug output. 1 = echo, 2 = info, 4 = error, 8 = dry run., 16 = Only communication, 32 = No moves
 uint16_t Printer::menuMode = 0;
-uint8_t Printer::mode = DEFAULT_PRINTER_MODE;
 float Printer::extrudeMultiplyError = 0;
 float Printer::extrusionFactor = 1.0;
 uint8_t Printer::interruptEvent = 0;
@@ -154,6 +154,36 @@ void Printer::setFanSpeedDirectly(uint8_t speed, int fanId) {
     fans[fanId]->set(trimmedSpeed);
 }
 
+void Printer::setFanSpeed(int speed, bool immediately, int fanId) {
+    if (fanId < 0 || fanId >= NUM_FANS) {
+        return;
+    }
+    speed = constrain(speed, 0, 255);
+    Tool* tool = nullptr;
+    Tool* activeTool = Tool::getActiveTool();
+    Com::printF(PSTR("Fanspeed"), fanId);
+    Com::printFLN(Com::tColon, speed);
+    if (activeTool != nullptr && activeTool->usesSecondary(fans[fanId])) {
+        tool = activeTool;
+        tool->setSecondaryFixed(speed);
+        if (!immediately && Motion1::buffersUsed()) {
+            return;
+        }
+    }
+    if (Printer::getFanSpeed(fanId) == speed)
+        return;
+    if (tool && immediately) {
+        Printer::setMenuMode(MENU_MODE_FAN_RUNNING, speed != 0);
+        if (Motion1::length == 0 || immediately) {
+            if (Tool::getActiveTool() && Tool::getActiveTool()->secondaryIsFan()) {
+                for (fast8_t i = 0; i < PRINTLINE_CACHE_SIZE; i++)
+                    Motion1::buffers[i].secondSpeed = speed; // fill all printline buffers with new fan speed value
+            }
+        }
+    }
+    Printer::setFanSpeedDirectly(speed, fanId);
+}
+
 bool Printer::updateDoorOpen() {
 #if defined(DOOR_PIN) && DOOR_PIN > -1 //  && SUPPORT_LASER should always be respected
     bool isOpen = isDoorOpen();
@@ -171,23 +201,6 @@ bool Printer::updateDoorOpen() {
 #endif
 }
 
-void Printer::reportPrinterMode() {
-    Printer::setMenuMode(MENU_MODE_CNC + MENU_MODE_LASER + MENU_MODE_FDM, false);
-    switch (Printer::mode) {
-    case PRINTER_MODE_FFF:
-        Printer::setMenuMode(MENU_MODE_FDM, true);
-        Com::printFLN(Com::tPrinterModeFFF);
-        break;
-    case PRINTER_MODE_LASER:
-        Printer::setMenuMode(MENU_MODE_LASER, true);
-        Com::printFLN(Com::tPrinterModeLaser);
-        break;
-    case PRINTER_MODE_CNC:
-        Printer::setMenuMode(MENU_MODE_CNC, true);
-        Com::printFLN(Com::tPrinterModeCNC);
-        break;
-    }
-}
 void Printer::updateDerivedParameter() {
 #if DRIVE_SYSTEM == DELTA
 #else
@@ -284,7 +297,7 @@ uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
     if (f != IGNORE_COORDINATE)
         feedrate = f;
     Motion1::setTmpPositionXYZE(x, y, z, e);
-    Motion1::moveByPrinter(Motion1::tmpPosition, feedrate);
+    Motion1::moveByPrinter(Motion1::tmpPosition, feedrate, false);
     return 1;
 }
 
@@ -292,7 +305,7 @@ uint8_t Printer::moveToReal(float x, float y, float z, float e, float f, bool pa
     if (f != IGNORE_COORDINATE)
         feedrate = f;
     Motion1::setTmpPositionXYZE(x, y, z, e);
-    Motion1::moveByOfficial(Motion1::tmpPosition, feedrate);
+    Motion1::moveByOfficial(Motion1::tmpPosition, feedrate, false);
     return 1;
 }
 
@@ -316,7 +329,7 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
     bool posAllowed = true;
     float coords[NUM_AXES];
     Motion1::copyCurrentOfficial(coords);
-
+    bool secondaryMove = !(com->hasG() && com->G == 0);
 #if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
     if (!isNoDestinationCheck()) {
 #if MOVE_X_WHEN_HOMED
@@ -385,6 +398,7 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
 #endif
     }
     if (com->hasE() && !Printer::debugDryrun()) {
+        secondaryMove = true;
         p = convertToMM(com->E);
         HeatManager* heater = Tool::getActiveTool()->getHeater();
         if (relativeCoordinateMode || relativeExtruderCoordinateMode) {
@@ -408,7 +422,7 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
         else
             feedrate = com->F * (float)feedrateMultiply * 0.00016666666f;
     }
-    Motion1::moveByOfficial(coords, Printer::feedrate);
+    Motion1::moveByOfficial(coords, Printer::feedrate, secondaryMove);
 }
 
 void Printer::setup() {
@@ -569,20 +583,6 @@ void Printer::setup() {
     // Extruder::selectExtruderById(0);
     HAL::delayMilliseconds(20);
 
-#if FEATURE_SERVO // set servos to neutral positions at power_up
-#if defined(SERVO0_NEUTRAL_POS) && SERVO0_NEUTRAL_POS >= 500
-    HAL::servoMicroseconds(0, SERVO0_NEUTRAL_POS, 1000);
-#endif
-#if defined(SERVO1_NEUTRAL_POS) && SERVO1_NEUTRAL_POS >= 500
-    HAL::servoMicroseconds(1, SERVO1_NEUTRAL_POS, 1000);
-#endif
-#if defined(SERVO2_NEUTRAL_POS) && SERVO2_NEUTRAL_POS >= 500
-    HAL::servoMicroseconds(2, SERVO2_NEUTRAL_POS, 1000);
-#endif
-#if defined(SERVO3_NEUTRAL_POS) && SERVO3_NEUTRAL_POS >= 500
-    HAL::servoMicroseconds(3, SERVO3_NEUTRAL_POS, 1000);
-#endif
-#endif
     EVENT_INITIALIZE;
 #ifdef STARTUP_GCODE
     GCode::executeFString(Com::tStartupGCode);

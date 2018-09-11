@@ -18,12 +18,15 @@
 
 #undef COOLER_MANAGER_HEATER
 #undef COOLER_MANAGER_SENSOR
+#undef COOLER_MANAGER_MOTORS
 
 #if IO_TARGET == 12 // 500ms timer
 
 #define COOLER_MANAGER_HEATER(name, heater, pwm, minTemp, maxTemp, minPWM, maxPWM) \
     name.update();
 #define COOLER_MANAGER_SENSOR(name, heater, pwm, minTemp, maxTemp, minPWM, maxPWM) \
+    name.update();
+#define COOLER_MANAGER_MOTORS(name, pwm, offPWM, onPWM, offDelaySeconds) \
     name.update();
 
 #elif IO_TARGET == 4
@@ -32,6 +35,8 @@
     extern CoolerManagerHeater name;
 #define COOLER_MANAGER_SENSOR(name, heater, pwm, minTemp, maxTemp, minPWM, maxPWM) \
     extern CoolerManagerSensor name;
+#define COOLER_MANAGER_MOTORS(name, pwm, offPWM, onPWM, offDelaySeconds) \
+    extern CoolerManagerMotors name;
 
 #elif IO_TARGET == 6
 
@@ -39,10 +44,13 @@
     CoolerManagerHeater name(&heater, &pwm, minTemp, maxTemp, minPWM, maxPWM);
 #define COOLER_MANAGER_SENSOR(name, heater, pwm, minTemp, maxTemp, minPWM, maxPWM) \
     CoolerManagerSensor name(&heater, &pwm, minTemp, maxTemp, minPWM, maxPWM);
+#define COOLER_MANAGER_MOTORS(name, pwm, offPWM, onPWM, offDelaySeconds) \
+    CoolerManagerMotors name(&pwm, offPWM, onPWM, offDelaySeconds);
 
 #else
 
 #define COOLER_MANAGER_HEATER(name, heater, pwm, minTemp, maxTemp, minPWM, maxPWM)
 #define COOLER_MANAGER_SENSOR(name, heater, pwm, minTemp, maxTemp, minPWM, maxPWM)
+#define COOLER_MANAGER_MOTORS(name, pwm, offPWM, onPWM, offDelaySeconds)
 
 #endif

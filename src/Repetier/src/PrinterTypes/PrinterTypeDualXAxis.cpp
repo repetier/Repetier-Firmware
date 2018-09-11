@@ -157,7 +157,7 @@ void PrinterType::deactivatedTool(fast8_t id) {
         Motion1::tmpPosition[X_AXIS] = posReal[0];
         leftParked = true;
     }
-    Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED);
+    Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED, false);
     dontChangeCoords = false;
 }
 
@@ -184,7 +184,7 @@ void PrinterType::activatedTool(fast8_t id) {
         Motion1::tmpPosition[X_AXIS] = targetReal;
         leftParked = false;
     }
-    Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED);
+    Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED, false);
     dontChangeCoords = false;
 }
 
@@ -227,9 +227,9 @@ void PrinterType::enableMotors(fast8_t axes) {
     }
     Printer::unsetAllSteppersDisabled();
 }
-void PrinterType::queueMove(float feedrate) {
+void PrinterType::queueMove(float feedrate, bool secondaryMove) {
     if (dontChangeCoords) { // don't think about coordinates wanted!
-        Motion1::queueMove(feedrate);
+        Motion1::queueMove(feedrate, secondaryMove);
         return;
     }
     targetReal = Motion1::destinationPositionTransformed[X_AXIS];
@@ -272,7 +272,7 @@ void PrinterType::queueMove(float feedrate) {
                     leftParked = false;
                 }
             }
-            Motion1::queueMove(XY_SPEED);
+            Motion1::queueMove(XY_SPEED, secondaryMove);
             // Motion1::waitForEndOfMoves();
             dontChangeCoords = false;
             FOR_ALL_AXES(i) {
@@ -308,7 +308,7 @@ void PrinterType::queueMove(float feedrate) {
     }
     // Motion1::currentPosition[A_AXIS] = Motion1::destinationPositionTransformed[A_AXIS] - Motion1::toolOffset[X_AXIS];
     // DEBUG_MSG("Q6");
-    Motion1::queueMove(feedrate);
+    Motion1::queueMove(feedrate, secondaryMove);
 }
 
 void PrinterType::setDittoMode(fast8_t count, bool mirror) {

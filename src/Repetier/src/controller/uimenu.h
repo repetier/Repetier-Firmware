@@ -689,7 +689,7 @@ UI_MENU_ACTIONSELECTOR_T(ui_menu_go_zfast_notest, UI_TEXT_Z_POS_FAST_ID, ui_menu
 #define UI_SPEED_Z , &ui_menu_go_zpos
 #define UI_SPEED_Z_NOTEST , &ui_menu_go_zpos_notest
 #endif
-#if FEATURE_SERVO > 0 && UI_SERVO_CONTROL > 0
+#if NUM_SERVOS > 0 && UI_SERVO_CONTROL > 0
 UI_MENU_CHANGEACTION_T(ui_menu_servopos, UI_TEXT_SERVOPOS_ID, UI_ACTION_SERVOPOS)
 #define SERVOPOS_COUNT 1
 #define SERVOPOS_ENTRY , &ui_menu_servopos

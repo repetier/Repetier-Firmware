@@ -1246,7 +1246,7 @@ void GCode::fatalError(FSTRINGPARAM(message)) {
     Printer::stopPrint();
     if (Motion1::currentPosition[Z_AXIS] < Motion1::maxPos[Z_AXIS] - 15) {
         Motion1::setTmpPositionXYZ(0, 0, 10);
-        Motion1::moveRelativeByOfficial(Motion1::tmpPosition, Motion1::homingFeedrate[Z_AXIS]);
+        Motion1::moveRelativeByOfficial(Motion1::tmpPosition, Motion1::homingFeedrate[Z_AXIS], false);
     }
     EVENT_FATAL_ERROR_OCCURED
     Commands::waitUntilEndOfAllMoves();

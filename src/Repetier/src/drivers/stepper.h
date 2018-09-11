@@ -29,7 +29,7 @@ public:
     /// Disable motor driver
     virtual void disable() = 0;
     // Return true if setting microsteps is supported
-    virtual bool implementSetMicrosteps() { return false; }
+    virtual bool implementsSetMicrosteps() { return false; }
     // Return true if setting current in software is supported
     virtual bool implementSetMaxCurrent() { return false; }
     /// Set microsteps. Must be a power of 2.

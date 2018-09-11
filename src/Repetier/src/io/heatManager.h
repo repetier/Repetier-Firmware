@@ -30,7 +30,7 @@
 
 #define HEAT_MANAGER_BANG_BANG(tp, name, input, output, maxTemp, maxPwm, decVariance, decPeriod) \
     name.init();
-    
+
 #define HEAT_MANAGER_PID(tp, name, input, output, maxTemp, maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax) \
     name.init();
 

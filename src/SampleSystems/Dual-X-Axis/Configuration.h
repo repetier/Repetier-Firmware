@@ -38,6 +38,7 @@
 
 // The follwing variables are required early to decide on the right modules.
 #define NUM_EXTRUDER 2
+#define NUM_SERVOS 0
 #define NUM_TOOLS 2
 #define MOTHERBOARD 402 // RADDS
 #define EEPROM_MODE 1
@@ -177,6 +178,9 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define HEATERS \
     { &HeaterExtruder1, &HeaterExtruder2, &HeatedBed1 }
 
+#define SERVO_LIST \
+    {}
+
 // Array to call motor related commands like microstepping/current if supported.
 // Id's start at 0 and depend on position in this array.
 #define NUM_MOTORS 6
@@ -282,38 +286,6 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define SKIP_M190_IF_WITHIN 5
 #define MIN_EXTRUDER_TEMP 150
 #define MILLISECONDS_PREHEAT_TIME 30000
-
-// ##########################################################################################
-// ##                             Laser configuration                                      ##
-// ##########################################################################################
-
-/*
-If the firmware is in laser mode, it can control a laser output to cut or engrave materials.
-Please use this feature only if you know about safety and required protection. Lasers are
-dangerous and can hurt or make you blind!!!
-
-The default laser driver only supports laser on and off. Here you control the intensity with
-your feedrate. For exchangeable diode lasers this is normally enough. If you need more control
-you can set the intensity in a range 0-255 with a custom extension to the driver. See driver.h
-and comments on how to extend the functions non invasive with our event system.
-
-If you have a laser - powder system you will like your E override. If moves contain a
-increasing extruder position it will laser that move. With this trick you can
-use existing fdm slicers to laser the output. Laser width is extrusion width.
-
-Other tools may use M3 and M5 to enable/disable laser. Here G1/G2/G3 moves have laser enabled
-and G0 moves have it disables.
-
-In any case, laser only enables while moving. At the end of a move it gets
-automatically disabled.
-*/
-
-#define SUPPORT_LASER 0
-#define LASER_PIN -1
-#define LASER_ON_HIGH 1
-#define LASER_WARMUP_TIME 0
-#define LASER_PWM_MAX 255
-#define LASER_WATT 2
 
 // ##                              CNC configuration                                       ##
 
@@ -437,24 +409,6 @@ It also can add a delay to wait for spindle to run on full speed.
 #define ECHO_ON_EXECUTE 1
 #undef PS_ON_PIN
 #define PS_ON_PIN -1
-
-/* ======== Servos =======
-Control the servos with
-M340 P<servoId> S<pulseInUS>   / ServoID = 0..3  pulseInUs = 500..2500
-Servos are controlled by a pulse width normally between 500 and 2500 with 1500ms in center position. 0 turns servo off.
-WARNING: Servos can draw a considerable amount of current. Make sure your system can handle this or you may risk your hardware!
-*/
-#define SERVO0_PIN 5
-#define SERVO1_PIN -1
-#define SERVO2_PIN -1
-#define SERVO3_PIN -1
-#define SERVO0_NEUTRAL_POS 1050
-#define SERVO1_NEUTRAL_POS -1
-#define SERVO2_NEUTRAL_POS -1
-#define SERVO3_NEUTRAL_POS -1
-#define UI_SERVO_CONTROL 1
-
-#define FEATURE_SERVO 1
 
 // #################### Z-Probing #####################
 

@@ -51,6 +51,10 @@ IO_OUTPUT(IOE2Step, ORIG_E1_STEP_PIN)
 IO_OUTPUT(IOE2Dir, ORIG_E1_DIR_PIN)
 IO_OUTPUT_INVERTED(IOE2Enable, ORIG_E1_ENABLE_PIN)
 
+// Servo output
+
+IO_OUTPUT(Servo1Pin, 5)
+
 // Define your endstops inputs
 
 IO_INPUT(IOEndstopXMin, ORIG_X_MIN_PIN)
@@ -62,11 +66,11 @@ IO_INPUT_PULLUP(IOEndstopZMin, ORIG_Z_MIN_PIN)
 // You need to define all min and max endstops for all
 // axes except E even if you have none!
 
-ENDSTOP_SWITCH_HW(endstopXMin, IOEndstopXMin, X_AXIS)
+ENDSTOP_SWITCH_HW(endstopXMin, IOEndstopXMin, X_AXIS, false)
 ENDSTOP_NONE(endstopXMax)
 ENDSTOP_NONE(endstopYMin)
-ENDSTOP_SWITCH_HW(endstopYMax, IOEndstopYMax, Y_AXIS)
-ENDSTOP_SWITCH_HW(endstopZMin, IOEndstopZMin, Z_AXIS)
+ENDSTOP_SWITCH_HW(endstopYMax, IOEndstopYMax, Y_AXIS, true)
+ENDSTOP_SWITCH_HW(endstopZMin, IOEndstopZMin, Z_AXIS, false)
 ENDSTOP_NONE(endstopZMax)
 
 // Define fans
@@ -121,6 +125,9 @@ STEPPER_SIMPLE(ZMotor, IOZ1Step, IOZ1Dir, IOZ1Enable, endstopNone, endstopNone)
 STEPPER_SIMPLE(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, endstopNone, endstopNone)
 STEPPER_SIMPLE(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, endstopNone, endstopNone)
 
+// Servos
+SERVO_ANALOG(Servo1, 0, Servo1Pin, 500, 2500, 1050)
+
 // Heat manages are used for every component that needs to
 // control temperature. Higher level classes take these as input
 // and simple heater like a heated bed use it directly.
@@ -140,5 +147,6 @@ HEAT_MANAGER_PID('E', HeaterExtruder2, TempExt2, PWMExtruder2, 260, 255, 10, 200
 // Typical tools are:
 // TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript)
 
-TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "")
-TOOL_EXTRUDER(ToolExtruder2, 16.775, 0.615, -0.97, HeaterExtruder2, E2Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1950 R600\nG4 P300", "M340 P0 S1050 R600\nG4 P300")
+TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder2, 16.775, 0.615, -0.97, HeaterExtruder2, E2Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1950 R600\nG4 P300", "M340 P0 S1050 R600\nG4 P300", &Fan1PWM)
+TOOL_LASER(Laser3, 0, 0, 0, Fan1PWM, 3000, 1, 100, "", "")

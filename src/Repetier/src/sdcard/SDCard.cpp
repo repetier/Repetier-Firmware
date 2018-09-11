@@ -78,13 +78,13 @@ void SDCard::initsd() {
 #if ENABLE_SOFTWARE_SPI_CLASS
     fat.begin(SDSS)
 #else
-    fat.begin(SDSS, SD_SCK_MHZ(8)); // dummy init of SD_CARD
+    fat.begin(SDSS, SD_SCK_MHZ(4)); // dummy init of SD_CARD
 #endif
         HAL::delayMilliseconds(50); // wait for init end
     HAL::pingWatchdog();
     /*if(dir[0].isOpen())
         dir[0].close();*/
-    if (!fat.begin(SDSS, SD_SCK_MHZ(8))) {
+    if (!fat.begin(SDSS, SD_SCK_MHZ(4))) {
         Com::printFLN(Com::tSDInitFail);
         sdmode = 100; // prevent automount loop!
         if (fat.card()->errorCode()) {
@@ -177,16 +177,11 @@ void SDCard::pausePrint(bool intern) {
             Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE,
                                 Motion1::currentPosition[E_AXIS] - RETRACT_ON_PAUSE,
                                 Motion1::maxFeedrate[E_AXIS] / 2);
-#ifdef CNC_SAFE_Z
-            if (Printer::mode == PRINTER_MODE_CNC) {
-                Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, CNC_SAFE_Z - Motion1::g92Offsets[Z_AXIS], IGNORE_COORDINATE, Motion1::maxFeedrate[Z_AXIS]);
+            Tool* tool = Tool::getActiveTool();
+            if (tool) {
+                tool->afterPause();
             }
-#endif
-#if DRIVE_SYSTEM == DELTA
-            Printer::moveToReal(0, 0.9 * EEPROM::deltaMaxRadius(), IGNORE_COORDINATE, IGNORE_COORDINATE, Motion1::maxFeedrate[X_AXIS]);
-#else
-            Printer::moveToReal(Motion1::minPos[X_AXIS], Motion1::maxPos[Y_AXIS], IGNORE_COORDINATE, IGNORE_COORDINATE, Motion1::maxFeedrate[X_AXIS]);
-#endif
+            Motion1::moveToParkPosition();
             GCode::executeFString(PSTR(PAUSE_START_COMMANDS));
         }
     }
@@ -198,23 +193,27 @@ void SDCard::continuePrint(bool intern) {
         return;
     if (EVENT_SD_CONTINUE_START(intern)) {
         if (intern) {
+            Tool* tool = Tool::getActiveTool();
+            if (tool) {
+                tool->beforeContinue();
+            }
             GCode::executeFString(PSTR(PAUSE_END_COMMANDS));
             Motion1::popFromMemory();
             Motion1::pushToMemory();
             Motion1::tmpPosition[Z_AXIS] = IGNORE_COORDINATE;
             Motion1::tmpPosition[E_AXIS] = IGNORE_COORDINATE;
-            Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::maxFeedrate[X_AXIS]);
+            Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::maxFeedrate[X_AXIS], false);
             Motion1::popFromMemory();
             Motion1::pushToMemory();
             Motion1::tmpPosition[X_AXIS] = IGNORE_COORDINATE;
             Motion1::tmpPosition[Y_AXIS] = IGNORE_COORDINATE;
             Motion1::tmpPosition[E_AXIS] = IGNORE_COORDINATE;
-            Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::maxFeedrate[Z_AXIS]);
+            Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::maxFeedrate[Z_AXIS], false);
             Motion1::popFromMemory();
             Motion1::tmpPosition[X_AXIS] = IGNORE_COORDINATE;
             Motion1::tmpPosition[Y_AXIS] = IGNORE_COORDINATE;
             Motion1::tmpPosition[Z_AXIS] = IGNORE_COORDINATE;
-            Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::maxFeedrate[E_AXIS]);
+            Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::maxFeedrate[E_AXIS], false);
         }
     }
     EVENT_SD_CONTINUE_END(intern);

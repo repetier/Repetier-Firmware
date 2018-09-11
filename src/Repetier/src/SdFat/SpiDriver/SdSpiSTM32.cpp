@@ -23,22 +23,23 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #if defined(__STM32F1__) || defined(__STM32F4__)
+#include "../../../Repetier.h"
 #include "SdSpiDriver.h"
 #if defined(__STM32F1__)
 #define USE_STM32_DMA 1
 #elif defined(__STM32F4__)
 #define USE_STM32_DMA 1
-#else  // defined(__STM32F1__)
+#else // defined(__STM32F1__)
 #error Unknown STM32 type
-#endif  // defined(__STM32F1__)
+#endif // defined(__STM32F1__)
 //------------------------------------------------------------------------------
 static SPIClass m_SPI1(1);
 #if BOARD_NR_SPI >= 2
 static SPIClass m_SPI2(2);
-#endif  // BOARD_NR_SPI >= 2
+#endif // BOARD_NR_SPI >= 2
 #if BOARD_NR_SPI >= 3
 static SPIClass m_SPI3(3);
-#endif  // BOARD_NR_SPI >= 3
+#endif // BOARD_NR_SPI >= 3
 #if BOARD_NR_SPI > 3
 #error BOARD_NR_SPI too large
 #endif
@@ -48,7 +49,7 @@ static SPIClass m_SPI3(3);
  * \param[in] divisor SCK clock divider relative to the APB1 or APB2 clock.
  */
 void SdSpiAltDriver::activate() {
-  m_spi->beginTransaction(m_spiSettings);
+    m_spi->beginTransaction(m_spiSettings);
 }
 //------------------------------------------------------------------------------
 /** Initialize the SPI bus.
@@ -56,17 +57,17 @@ void SdSpiAltDriver::activate() {
  * \param[in] chipSelectPin SD card chip select pin.
  */
 void SdSpiAltDriver::begin(uint8_t csPin) {
-  m_csPin = csPin;
-  pinMode(m_csPin, OUTPUT);
-  digitalWrite(m_csPin, HIGH);
-  m_spi->begin();
+    m_csPin = csPin;
+    pinMode(m_csPin, OUTPUT);
+    digitalWrite(m_csPin, HIGH);
+    m_spi->begin();
 }
 //------------------------------------------------------------------------------
 /**
  * End SPI transaction.
  */
 void SdSpiAltDriver::deactivate() {
-  m_spi->endTransaction();
+    m_spi->endTransaction();
 }
 //------------------------------------------------------------------------------
 /** Receive a byte.
@@ -74,7 +75,7 @@ void SdSpiAltDriver::deactivate() {
  * \return The byte.
  */
 uint8_t SdSpiAltDriver::receive() {
-  return m_spi->transfer(0XFF);
+    return m_spi->transfer(0XFF);
 }
 //------------------------------------------------------------------------------
 /** Receive multiple bytes.
@@ -86,11 +87,11 @@ uint8_t SdSpiAltDriver::receive() {
  */
 uint8_t SdSpiAltDriver::receive(uint8_t* buf, size_t n) {
 #if USE_STM32_DMA
-  return m_spi->dmaTransfer(0, buf, n);
+    return m_spi->dmaTransfer(0, buf, n);
 #else  // USE_STM32_DMA
-  m_spi->read(buf, n);
-  return 0;
-#endif  // USE_STM32_DMA
+    m_spi->read(buf, n);
+    return 0;
+#endif // USE_STM32_DMA
 }
 //------------------------------------------------------------------------------
 /** Send a byte.
@@ -98,7 +99,7 @@ uint8_t SdSpiAltDriver::receive(uint8_t* buf, size_t n) {
  * \param[in] b Byte to send
  */
 void SdSpiAltDriver::send(uint8_t b) {
-  m_spi->transfer(b);
+    m_spi->transfer(b);
 }
 //------------------------------------------------------------------------------
 /** Send multiple bytes.
@@ -106,25 +107,25 @@ void SdSpiAltDriver::send(uint8_t b) {
  * \param[in] buf Buffer for data to be sent.
  * \param[in] n Number of bytes to send.
  */
-void SdSpiAltDriver::send(const uint8_t* buf , size_t n) {
+void SdSpiAltDriver::send(const uint8_t* buf, size_t n) {
 #if USE_STM32_DMA
-  m_spi->dmaTransfer(const_cast<uint8*>(buf), 0, n);
+    m_spi->dmaTransfer(const_cast<uint8*>(buf), 0, n);
 #else  // USE_STM32_DMA
-  m_spi->write(const_cast<uint8*>(buf), n);
-#endif  // USE_STM32_DMA
+    m_spi->write(const_cast<uint8*>(buf), n);
+#endif // USE_STM32_DMA
 }
 //------------------------------------------------------------------------------
 void SdSpiAltDriver::setPort(uint8_t portNumber) {
-  m_spi = &m_SPI1;
+    m_spi = &m_SPI1;
 #if BOARD_NR_SPI >= 2
-  if (portNumber == 2) {
-    m_spi = &m_SPI2;
-  }
-#endif  // BOARD_NR_SPI >= 2
+    if (portNumber == 2) {
+        m_spi = &m_SPI2;
+    }
+#endif // BOARD_NR_SPI >= 2
 #if BOARD_NR_SPI >= 3
-  if (portNumber == 3) {
-    m_spi = &m_SPI3;
-  }
-#endif  // BOARD_NR_SPI >= 2
+    if (portNumber == 3) {
+        m_spi = &m_SPI3;
+    }
+#endif // BOARD_NR_SPI >= 2
 }
-#endif  // defined(__STM32F1__) || defined(__STM32F4__)
+#endif // defined(__STM32F1__) || defined(__STM32F4__)

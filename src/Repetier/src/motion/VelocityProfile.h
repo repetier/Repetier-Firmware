@@ -24,6 +24,8 @@ extern const float invStepperFrequency;
 This class uses a linear velcity profile.
 Acceleration is constant and real jerk is infinite and
 only limited by flexibility of printer.
+f is the speed at current position
+s is the interval between start and end position (0..1)
 */
 class VelocityProfile {
 public:

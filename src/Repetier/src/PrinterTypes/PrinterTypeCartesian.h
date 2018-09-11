@@ -42,8 +42,8 @@ public:
     static void init();
     static void updateDerived();
     static void enableMotors(fast8_t axes);
-    static inline void queueMove(float feedrate) {
-        Motion1::queueMove(feedrate);
+    static inline void queueMove(float feedrate, bool secondaryMove) {
+        Motion1::queueMove(feedrate, secondaryMove);
     }
     static inline bool supportsDittoMirror() { return false; }
     static void setDittoMode(fast8_t count, bool mirror);

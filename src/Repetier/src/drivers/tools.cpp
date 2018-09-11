@@ -20,9 +20,7 @@ void Tool::unselectTool() {
     }
     Motion1::setToolOffset(0, 0, 0);
     activeTool->deactivate();
-    DEBUG_MSG("UT3");
     PrinterType::deactivatedTool(activeToolId);
-    DEBUG_MSG("UT4");
     activeTool = nullptr;
     activeToolId = 255;
 }
@@ -49,7 +47,7 @@ void Tool::selectTool(fast8_t id, bool force) {
 #if RAISE_Z_ON_TOOLCHANGE > 0
     float lastZ = Motion1::currentPosition[X_AXIS];
     Motion1::setTmpPositionXYZ(lastZ + RAISE_Z_ON_TOOLCHANGE, IGNORE_COORDINATE, IGNORE_COORDINATE);
-    Motion1::moveByOfficial(Motion1::tmpPosition, Z_SPEED);
+    Motion1::moveByOfficial(Motion1::tmpPosition, Z_SPEED, false);
     Motion1::waitForEndOfMoves();
 #endif
     float zOffsetNew = tools[id]->getOffsetZ();
@@ -70,7 +68,7 @@ void Tool::selectTool(fast8_t id, bool force) {
 #if RAISE_Z_ON_TOOLCHANGE > 0
     float lastZ = Motion1::currentPosition[X_AXIS];
     Motion1::setTmpPositionXYZ(lastZ, IGNORE_COORDINATE, IGNORE_COORDINATE);
-    Motion1::moveByOfficial(Motion1::tmpPosition, Z_SPEED);
+    Motion1::moveByOfficial(Motion1::tmpPosition, Z_SPEED, false);
     Motion1::waitForEndOfMoves();
 #endif
 }
@@ -197,4 +195,101 @@ void ToolExtruder::unstepMotor() {
 }
 bool ToolExtruder::stepCondMotor() {
     return stepper->stepCond();
+}
+
+// Laser
+
+void ToolLaser::init() {
+    setEepromStart(EEPROM::reserve(8, 1, Tool::eepromSize() + 2 * 4 + 2));
+}
+
+void ToolLaser::eepromHandle() {
+    Tool::eepromHandle();
+    uint pos = getEepromStart() + Tool::eepromSize();
+    EEPROM::handleFloat(pos, PSTR("Power [mW]"), 2, milliWatt);
+    EEPROM::handleLong(pos + 4, PSTR("Warmup [us]"), warmup);
+    EEPROM::handleInt(pos + 8, PSTR("Warmup Power [PWM]"), warmupPower);
+}
+
+void ToolLaser::reset(float offx, float offy, float offz, float _milliwatt, int32_t _warmup, int16_t _warmupPower) {
+    resetBase(offx, offy, offz);
+    milliWatt = _milliwatt;
+    warmup = _warmup;
+    warmupPower = _warmupPower;
+}
+
+/// Called when the tool gets activated.
+void ToolLaser::activate() {
+    GCode::executeFString(startScript);
+    Motion1::setMotorForAxis(nullptr, E_AXIS);
+}
+/// Gets called when the tool gets disabled.
+void ToolLaser::deactivate() {
+    GCode::executeFString(endScript);
+    Motion1::setMotorForAxis(nullptr, E_AXIS);
+}
+/// Called on kill/emergency to disable the tool
+void ToolLaser::shutdown() {
+    secondary->set(0);
+}
+
+void ToolLaser::updateDerived() {
+}
+
+int ToolLaser::computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) {
+    if (intensity) {
+        return intensity;
+    }
+    if (!activeSecondary) {
+        return 0;
+    }
+    float target = v * intensityPerMM;
+    if (target < 0) {
+        return 0;
+    }
+    if (target > 255) {
+        return 255;
+    }
+    return static_cast<int>(target);
+}
+
+void ToolLaser::M3(GCode* com) {
+    if (com->hasS()) {
+        activeSecondaryValue = com->S;
+        activeSecondaryPerMMPS = 0;
+    } else if (com->hasI()) {
+        activeSecondaryValue = 0;
+        activeSecondaryPerMMPS = com->I;
+    } else {
+        activeSecondaryValue = 255;
+        activeSecondaryPerMMPS = 0;
+    }
+}
+
+void ToolLaser::M4(GCode* com) {
+    if (com->hasS()) {
+        activeSecondaryValue = com->S;
+        activeSecondaryPerMMPS = 0;
+    } else if (com->hasI()) {
+        activeSecondaryValue = 0;
+        activeSecondaryPerMMPS = com->I;
+    } else {
+        activeSecondaryValue = 255;
+        activeSecondaryPerMMPS = 0;
+    }
+}
+
+void ToolLaser::M5(GCode* com) {
+    activeSecondaryValue = 0;
+    activeSecondaryPerMMPS = 0;
+}
+
+void ToolLaser::secondarySwitched(bool nowSecondary) {
+    if (nowSecondary && warmup > 0) {
+        Motion1::WarmUp(warmup, warmupPower);
+    }
+}
+
+void ToolLaser::moveFinished() {
+    secondary->set(0); // Disable laser after each move for safety!
 }

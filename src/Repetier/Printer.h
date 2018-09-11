@@ -261,7 +261,6 @@ public:
     static uint8_t relativeExtruderCoordinateMode; ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
     static uint8_t unitIsInches;
-    static uint8_t mode;
     static uint8_t flag0, flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t flag2, flag3;
     static uint32_t interval;   ///< Last step duration in ticks.
@@ -324,7 +323,6 @@ public:
         if (highPriority || interruptEvent == 0)
             interruptEvent = evt;
     }
-    static void reportPrinterMode();
     static INLINE void setMenuMode(uint16_t mode, bool on) {
         if (on)
             menuMode |= mode;
@@ -658,6 +656,7 @@ public:
     static void homeAxis(bool xaxis, bool yaxis, bool zaxis); /// Home axis
     static void setOrigin(float xOff, float yOff, float zOff);
     static int getFanSpeed(int fanId);
+    static void setFanSpeed(int speed, bool immediately, int fanId);
 
 #if MAX_HARDWARE_ENDSTOP_Z || defined(DOXYGEN)
     static float runZMaxProbe();

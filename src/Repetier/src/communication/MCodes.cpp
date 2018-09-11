@@ -25,43 +25,27 @@
 
 const int8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 
-void MCode_3(GCode* com) {
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-    if (Printer::mode == PRINTER_MODE_LASER) {
-        if (com->hasS())
-            LaserDriver::intensity = constrain(com->S, 0, LASER_PWM_MAX);
-        LaserDriver::laserOn = true;
-        Com::printFLN(PSTR("LaserOn:"), (int)LaserDriver::intensity);
+void MCode_3(GCode* com) { // Spindle CW on, laser intensity
+    Tool* t = Tool::getActiveTool();
+    if (t) {
+        t->M3(com);
     }
-#endif // defined
-#if defined(SUPPORT_CNC) && SUPPORT_CNC
-    if (Printer::mode == PRINTER_MODE_CNC) {
-        Motion1::waitForEndOfMoves();
-        CNCDriver::spindleOnCW(com->hasS() ? com->S : CNC_RPM_MAX);
-    }
-#endif // defined
 }
-void MCode_4(GCode* com) {
-#if defined(SUPPORT_CNC) && SUPPORT_CNC
-    if (Printer::mode == PRINTER_MODE_CNC) {
-        Motion1::waitForEndOfMoves();
-        CNCDriver::spindleOnCCW(com->hasS() ? com->S : CNC_RPM_MAX);
+
+void MCode_4(GCode* com) { // Spindle CCW, laser intensity
+    Tool* t = Tool::getActiveTool();
+    if (t) {
+        t->M4(com);
     }
-#endif // defined
 }
-void MCode_5(GCode* com) {
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-    if (Printer::mode == PRINTER_MODE_LASER) {
-        LaserDriver::laserOn = false;
+
+void MCode_5(GCode* com) { // Spindle, laser off
+    Tool* t = Tool::getActiveTool();
+    if (t) {
+        t->M5(com);
     }
-#endif // defined
-#if defined(SUPPORT_CNC) && SUPPORT_CNC
-    if (Printer::mode == PRINTER_MODE_CNC) {
-        Motion1::waitForEndOfMoves();
-        CNCDriver::spindleOff();
-    }
-#endif // defined
 }
+
 void MCode_18(GCode* com) {
     Motion1::waitForEndOfMoves();
     bool named = false;
@@ -95,6 +79,7 @@ void MCode_18(GCode* com) {
         Tool::disableMotors();
     }
 }
+
 void MCode_20(GCode* com) {
 #if SDSUPPORT
 #if JSON_OUTPUT
@@ -109,16 +94,19 @@ void MCode_20(GCode* com) {
 #endif
 #endif
 }
+
 void MCode_21(GCode* com) {
 #if SDSUPPORT
     sd.mount();
 #endif
 }
+
 void MCode_22(GCode* com) {
 #if SDSUPPORT
     sd.unmount();
 #endif
 }
+
 void MCode_23(GCode* com) {
 #if SDSUPPORT
     if (com->hasString()) {
@@ -127,39 +115,46 @@ void MCode_23(GCode* com) {
     }
 #endif
 }
+
 void MCode_24(GCode* com) {
 #if SDSUPPORT
     sd.startPrint();
 #endif
 }
+
 void MCode_25(GCode* com) {
 #if SDSUPPORT
     sd.pausePrint();
 #endif
 }
+
 void MCode_26(GCode* com) {
 #if SDSUPPORT
     if (com->hasS())
         sd.setIndex(com->S);
 #endif
 }
+
 void MCode_27(GCode* com) {
 #if SDSUPPORT
     sd.printStatus();
 #endif
 }
+
 void MCode_28(GCode* com) {
 #if SDSUPPORT
     if (com->hasString())
         sd.startWrite(com->text);
 #endif
 }
+
 void MCode_29(GCode* com) {
 #if SDSUPPORT
 //processed in write to file routine above
 //savetosd = false;
 #endif
 }
+
 void MCode_30(GCode* com) {
 #if SDSUPPORT
     if (com->hasString()) {
@@ -168,6 +163,7 @@ void MCode_30(GCode* com) {
     }
 #endif
 }
+
 void MCode_32(GCode* com) {
 #if SDSUPPORT
     if (com->hasString()) {
@@ -176,6 +172,7 @@ void MCode_32(GCode* com) {
     }
 #endif
 }
+
 void MCode_36(GCode* com) {
 #if JSON_OUTPUT && SDSUPPORT
     if (com->hasString()) {
@@ -183,6 +180,7 @@ void MCode_36(GCode* com) {
     }
 #endif
 }
+
 void MCode_42(GCode* com) {
     // Tool::getTool(com->T)->unstepMotor();
     // return;
@@ -214,6 +212,7 @@ void MCode_42(GCode* com) {
         }
     }
 }
+
 void MCode_80(GCode* com) {
 #if PS_ON_PIN > -1
     Motion1::waitForEndOfMoves();
@@ -223,6 +222,7 @@ void MCode_80(GCode* com) {
     WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
 #endif
 }
+
 void MCode_81(GCode* com) {
 #if PS_ON_PIN > -1
     Motion1::waitForEndOfMoves();
@@ -231,12 +231,15 @@ void MCode_81(GCode* com) {
     WRITE(PS_ON_PIN, (POWER_INVERTING ? LOW : HIGH));
 #endif
 }
+
 void MCode_82(GCode* com) {
     Printer::relativeExtruderCoordinateMode = false;
 }
+
 void MCode_83(GCode* com) {
     Printer::relativeExtruderCoordinateMode = true;
 }
+
 void MCode_84(GCode* com) {
     if (com->hasS()) {
         stepperInactiveTime = com->S * 1000;
@@ -245,12 +248,14 @@ void MCode_84(GCode* com) {
         Printer::kill(true);
     }
 }
+
 void MCode_85(GCode* com) {
     if (com->hasS())
         maxInactiveTime = (int32_t)com->S * 1000;
     else
         maxInactiveTime = 0;
 }
+
 void MCode_92(GCode* com) {
     Motion1::fillPosFromGCode(*com, Motion1::resolution, Motion1::resolution);
     Printer::updateDerivedParameter();
@@ -258,6 +263,7 @@ void MCode_92(GCode* com) {
         Tool::getActiveTool()->setResolution(com->E);
     }
 }
+
 void MCode_99(GCode* com) {
     millis_t wait = 10000;
     if (com->hasS())
@@ -282,6 +288,7 @@ void MCode_99(GCode* com) {
     if (com->hasZ())
         Motion1::motors[Z_AXIS]->enable();
 }
+
 void MCode_104(GCode* com) {
 #if NUM_TOOLS > 0
     previousMillisCmd = HAL::timeInMilliseconds();
@@ -319,34 +326,53 @@ void MCode_104(GCode* com) {
     }
 #endif // NUM_TOOLS > 0
 }
+
 void MCode_105(GCode* com) {
     Com::writeToAll = false;
     Commands::printTemperatures(com->hasX());
 }
+
 void MCode_106(GCode* com) {
     if (com->hasI()) {
-        if (com->I != 0)
+        if (com->I != 0) {
             Printer::flag2 |= PRINTER_FLAG2_IGNORE_M106_COMMAND;
-        else
+        } else {
             Printer::flag2 &= ~PRINTER_FLAG2_IGNORE_M106_COMMAND;
+        }
     }
     if (!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND)) {
         int p = 0;
         if (com->hasP()) {
             p = static_cast<int>(com->P);
+        } else if (Tool::getActiveTool()) {
+            for (fast8_t i = 0; i < NUM_FANS; i++) {
+                if (Tool::getActiveTool()->usesSecondary(fans[i])) {
+                    p = i;
+                    break;
+                }
+            }
         }
-        Commands::setFanSpeed(com->hasS() ? com->S : 255, false, p);
+        Printer::setFanSpeed(com->hasS() ? com->S : 255, false, p);
     }
 }
+
 void MCode_107(GCode* com) {
     if (!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND)) {
         int p = 0;
         if (com->hasP()) {
             p = static_cast<int>(com->P);
+        } else if (Tool::getActiveTool()) {
+            for (fast8_t i = 0; i < NUM_FANS; i++) {
+                if (Tool::getActiveTool()->usesSecondary(fans[i])) {
+                    p = i;
+                    break;
+                }
+            }
         }
-        Commands::setFanSpeed(0, false, p);
+        Printer::setFanSpeed(0, false, p);
     }
 }
+
 void MCode_109(GCode* com) {
 #if NUM_TOOLS > 0
     if (HeatManager::reportTempsensorError())
@@ -464,7 +490,6 @@ void MCode_115(GCode* com) {
     Com::cap(PSTR("PAUSESTOP:1"));
     Com::cap(PSTR("PREHEAT:1"));
     Commands::reportPrinterUsage();
-    Printer::reportPrinterMode();
 }
 void MCode_116(GCode* com) {
     for (fast8_t h = 0; h <= NUM_HEATERS; h++) {
@@ -711,6 +736,36 @@ void MCode_202(GCode* com) {
     Printer::updateDerivedParameter();
 }
 
+void MCode_203(GCode* com) {
+    if (com->hasX()) {
+        Motion1::maxFeedrate[X_AXIS] = com->X / 60.0f;
+    }
+    if (com->hasY()) {
+        Motion1::maxFeedrate[Y_AXIS] = com->Y / 60.0f;
+    }
+    if (com->hasZ()) {
+        Motion1::maxFeedrate[Z_AXIS] = com->Z / 60.0f;
+    }
+    if (com->hasE()) {
+        Motion1::maxFeedrate[E_AXIS] = com->E / 60.0f;
+    }
+#if NUM_AXES > A_AXIS
+    if (com->hasA()) {
+        Motion1::maxFeedrate[A_AXIS] = com->E / 60.0f;
+    }
+#endif
+#if NUM_AXES > B_AXIS
+    if (com->hasB()) {
+        Motion1::maxFeedrate[B_AXIS] = com->E / 60.0f;
+    }
+#endif
+#if NUM_AXES > C_AXIS
+    if (com->hasC()) {
+        Motion1::maxFeedrate[C_AXIS] = com->E / 60.0f;
+    }
+#endif
+}
+
 void MCode_204(GCode* com) {
     // Convert to new system
     HeatManager* pid = Tool::getActiveTool()->getHeater();
@@ -916,8 +971,8 @@ void MCode_323(GCode* com) {
 }
 
 void MCode_340(GCode* com) {
-#if FEATURE_SERVO
-    if (com->hasP() && com->P < 4 && com->P >= 0) {
+#if NUM_SERVOS > 0
+    if (com->hasP() && com->P < NUM_SERVOS && com->P >= 0) {
         ENSURE_POWER
         int s = 0;
         if (com->hasS())
@@ -925,14 +980,14 @@ void MCode_340(GCode* com) {
         uint16_t r = 0;
         if (com->hasR()) // auto off time in ms
             r = com->R;
-        HAL::servoMicroseconds(com->P, s, r);
+        servos[com->P]->setPosition(s, r);
     }
 #endif
 }
 
 void MCode_350(GCode* com) {
     if (com->hasP() && com->hasS() && com->P >= 0 && com->P < NUM_MOTORS) {
-        if (Motion1::drivers[com->P]->implementSetMicrosteps()) {
+        if (Motion1::drivers[com->P]->implementsSetMicrosteps()) {
             Motion1::drivers[com->P]->setMicrosteps((int)com->S);
         } else {
             Com::printWarningFLN(PSTR("This driver does not support setting microsteps by software!"));
@@ -962,7 +1017,7 @@ void MCode_401(GCode* com) {
 
 void MCode_402(GCode* com) {
     Motion1::popFromMemory();
-    Motion1::moveByOfficial(Motion1::tmpPosition, Printer::feedrate);
+    Motion1::moveByOfficial(Motion1::tmpPosition, Printer::feedrate, false);
     // Printer::GoToMemoryPosition(com->hasX(), com->hasY(), com->hasZ(), com->hasE(), (com->hasF() ? com->F : Printer::feedrate));
 }
 
@@ -970,32 +1025,6 @@ void MCode_408(GCode* com) {
 #if JSON_OUTPUT
     Printer::showJSONStatus(com->hasS() ? static_cast<int>(com->S) : 0);
 #endif
-}
-
-void MCode_450(GCode* com) {
-    Printer::reportPrinterMode();
-}
-
-void MCode_451(GCode* com) {
-    Motion1::waitForEndOfMoves();
-    Printer::mode = PRINTER_MODE_FFF;
-    Printer::reportPrinterMode();
-}
-
-void MCode_452(GCode* com) {
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-    Motion1::waitForEndOfMoves();
-    Printer::mode = PRINTER_MODE_LASER;
-#endif
-    Printer::reportPrinterMode();
-}
-
-void MCode_453(GCode* com) {
-#if defined(SUPPORT_CNC) && SUPPORT_CNC
-    Motion1::waitForEndOfMoves();
-    Printer::mode = PRINTER_MODE_CNC;
-#endif
-    Printer::reportPrinterMode();
 }
 
 void MCode_460(GCode* com) {

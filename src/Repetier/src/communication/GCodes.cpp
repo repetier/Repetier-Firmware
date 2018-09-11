@@ -24,76 +24,35 @@
 #include "../../Repetier.h"
 
 void GCode_0_1(GCode* com) {
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-    {
-        // disable laser for G0 moves
-        bool laserOn = LaserDriver::laserOn;
-        if (Printer::mode == PRINTER_MODE_LASER) {
-            if (com->G == 0) {
-                LaserDriver::laserOn = false;
-                LaserDriver::firstMove = true; //set G1 flag for Laser
-            } else {
-#if LASER_WARMUP_TIME > 0
-                uint8_t power = (com->hasX() || com->hasY()) && (LaserDriver::laserOn || com->hasE()) ? LaserDriver::intensity : 0;
-                if (power > 0 && LaserDriver::firstMove) {
-                    PrintLine::waitForXFreeLines(1, true);
-                    PrintLine::LaserWarmUp(LASER_WARMUP_TIME);
-                    LaserDriver::firstMove = false;
-                }
-#endif
-            }
-        }
-#endif // defined
-        if (com->hasS())
-            Printer::setNoDestinationCheck(com->S != 0);
-        Printer::setDestinationStepsFromGCode(com); // For X Y Z E F
+    if (com->hasS())
+        Printer::setNoDestinationCheck(com->S != 0);
+    Printer::setDestinationStepsFromGCode(com); // For X Y Z E F
 #if UI_HAS_KEYS
-        // ui can only execute motion commands if we are not waiting inside a move for an
-        // old move to finish. For normal response times, we always leave one free after
-        // sending a line. Drawback: 1 buffer line less for limited time. Since input cache
-        // gets filled while waiting, the lost is neglectable.
+    // ui can only execute motion commands if we are not waiting inside a move for an
+    // old move to finish. For normal response times, we always leave one free after
+    // sending a line. Drawback: 1 buffer line less for limited time. Since input cache
+    // gets filled while waiting, the lost is neglectable.
 //        PrintLine::waitForXFreeLines(1, true);
 #endif // UI_HAS_KEYS
 #ifdef DEBUG_QUEUE_MOVE
-        {
+    {
 
-            InterruptProtectedBlock noInts;
-            int lc = (int)PrintLine::linesCount;
-            int lp = (int)PrintLine::linesPos;
-            int wp = (int)PrintLine::linesWritePos;
-            int n = (wp - lp);
-            if (n < 0)
-                n += PRINTLINE_CACHE_SIZE;
-            noInts.unprotect();
-            if (n != lc)
-                Com::printFLN(PSTR("Buffer corrupted"));
-        }
-#endif
-
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-        LaserDriver::laserOn = laserOn;
+        InterruptProtectedBlock noInts;
+        int lc = (int)PrintLine::linesCount;
+        int lp = (int)PrintLine::linesPos;
+        int wp = (int)PrintLine::linesWritePos;
+        int n = (wp - lp);
+        if (n < 0)
+            n += PRINTLINE_CACHE_SIZE;
+        noInts.unprotect();
+        if (n != lc)
+            Com::printFLN(PSTR("Buffer corrupted"));
     }
-#endif // defined
+#endif
 }
 
 void GCode_2_3(GCode* com) {
 #if ARC_SUPPORT
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-    {
-        bool laserOn = LaserDriver::laserOn;
-#if LASER_WARMUP_TIME > 0
-        if (Printer::mode == PRINTER_MODE_LASER && LaserDriver::firstMove && (LaserDriver::laserOn || com->hasE())) {
-            PrintLine::waitForXFreeLines(1, true);
-            PrintLine::LaserWarmUp(LASER_WARMUP_TIME);
-            LaserDriver::firstMove = false;
-        }
-#endif
-#endif // defined
-        processArc(com);
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-        LaserDriver::laserOn = laserOn;
-    }
-#endif // defined
 #endif
 }
 

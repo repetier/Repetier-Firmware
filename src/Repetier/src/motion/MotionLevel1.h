@@ -82,6 +82,7 @@ class Motion2Buffer;
 #define FLAG_CHECK_ENDSTOPS 1
 #define FLAG_BLOCKED 2
 #define FLAG_ADVANCE 4
+#define FLAG_ACTIVE_SECONDARY 8 ///< Secondary tool should be active
 
 enum Motion1State {
     FREE = 0,              // Not used currenty
@@ -95,10 +96,10 @@ enum Motion1State {
 };
 
 enum Motion1Action {
-    WAIT = 0,         // Add a wait - in the hope a next move follows for bette roptimization
-    LASER_WARMUP = 1, // Preheat laser
-    MOVE = 2,         // A plain move
-    MOVE_STEPS = 3    // Distance in motor steps given
+    WAIT = 0,      // Add a wait - in the hope a next move follows for bette roptimization
+    WARMUP = 1,    // Preheat laser
+    MOVE = 2,      // A plain move
+    MOVE_STEPS = 3 // Distance in motor steps given
 };
 
 enum EndstopMode {
@@ -111,25 +112,26 @@ enum EndstopMode {
 // 158 byte for 7 axes
 class Motion1Buffer {
 public:
-    fast8_t id;                ///< Id of move for backreference
-    fast8_t flags;             ///< Flags for blocks and end stop handling
-    Motion1State state;        ///< State of preperation for buffer entry.
-    Motion1Action action;      ///< Type of action (wait, move float, move steps)
-    fast8_t axisUsed;          ///< Bitset of used axes
-    fast8_t axisDir;           ///< Axes directions: bit set = positive direction
-    float start[NUM_AXES];     ///< Start position in mm
-    float speed[NUM_AXES];     ///< Speed per axis in mm/s
-    float unitDir[NUM_AXES];   ///< Movement direction as vector
-    float feedrate;            ///< Target feedrate in mm/s
-    float acceleration;        ///< Acceleration in mm/s^2
-    float sa2;                 ///< s * a * 2 = endSpeed^2 - startSpeed^2
-    secondspeed_t secondSpeed; ///< Speed for fan or laser
-    float maxJoinSpeed;        ///< Max. join speed between this and next move
-    float startSpeed;          ///< Starting speed in mm/s
-    float endSpeed;            ///< End speed in mm/s
-    float length;              ///< Length of move in mm
-    float invLength;           ///< 1/length for faster computations
-    float eAdv;                ///< eAdv = veclocity * eAdv used for advance
+    fast8_t id;               ///< Id of move for backreference
+    fast8_t flags;            ///< Flags for blocks and end stop handling
+    Motion1State state;       ///< State of preperation for buffer entry.
+    Motion1Action action;     ///< Type of action (wait, move float, move steps)
+    fast8_t axisUsed;         ///< Bitset of used axes
+    fast8_t axisDir;          ///< Axes directions: bit set = positive direction
+    float start[NUM_AXES];    ///< Start position in mm
+    float speed[NUM_AXES];    ///< Speed per axis in mm/s
+    float unitDir[NUM_AXES];  ///< Movement direction as vector
+    float feedrate;           ///< Target feedrate in mm/s
+    float acceleration;       ///< Acceleration in mm/s^2
+    float sa2;                ///< s * a * 2 = endSpeed^2 - startSpeed^2
+    int secondSpeed;          ///< Speed for fan or laser
+    float secondSpeedPerMMPS; ///< Speed dependent intensity for laser etc.
+    float maxJoinSpeed;       ///< Max. join speed between this and next move
+    float startSpeed;         ///< Starting speed in mm/s
+    float endSpeed;           ///< End speed in mm/s
+    float length;             ///< Length of move in mm
+    float invLength;          ///< 1/length for faster computations
+    float eAdv;               ///< eAdv = veclocity * eAdv used for advance
 
     void computeMaxJunctionSpeed();
     inline bool isAxisMoving(fast8_t axis) {
@@ -149,11 +151,17 @@ public:
     inline bool isCheckEndstops() {
         return flags & FLAG_CHECK_ENDSTOPS;
     }
+    inline bool isActiveSecondary() {
+        return flags & FLAG_ACTIVE_SECONDARY;
+    }
     inline bool isAdvance() {
         return flags & FLAG_ADVANCE;
     }
     inline void setAdvance() {
         flags |= FLAG_ADVANCE;
+    }
+    inline void setActiveSecondary() {
+        flags |= FLAG_ACTIVE_SECONDARY;
     }
 };
 
@@ -213,6 +221,7 @@ public:
 #ifdef FEATURE_AXISCOMP
     static float axisCompTanXY, axisCompTanXZ, axisCompTanYZ;
 #endif
+    static bool wasLastSecondary; ///< true if last move had secondary flag
     static fast8_t homeDir[NUM_AXES];
     static fast8_t homePriority[NUM_AXES]; // determines homing order, lower number first
     static StepperDriverBase* motors[NUM_AXES];
@@ -224,6 +233,8 @@ public:
     static fast8_t alwaysCheckEndstops;
     static fast8_t axesTriggered;
     static fast8_t motorTriggered;
+    static fast8_t axesDirTriggered;
+    static fast8_t motorDirTriggered;
     static fast8_t stopMask;    // stop move if these axes are triggered
     static fast8_t dittoMode;   // copy extrusion signals
     static fast8_t dittoMirror; // mirror for dual x printer
@@ -245,13 +256,13 @@ public:
     static void fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback);
     static void fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback[NUM_AXES]);
     // Move with coordinates in official coordinates (before offset, transform, ...)
-    static void moveByOfficial(float coords[NUM_AXES], float feedrate);
+    static void moveByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove);
     // Move to the printer coordinates (after offset, transform, ...)
-    static void moveByPrinter(float coords[NUM_AXES], float feedrate);
+    static void moveByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove);
     // Move with coordinates in official coordinates (before offset, transform, ...)
-    static void moveRelativeByOfficial(float coords[NUM_AXES], float feedrate);
+    static void moveRelativeByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove);
     // Move to the printer coordinates (after offset, transform, ...)
-    static void moveRelativeByPrinter(float coords[NUM_AXES], float feedrate);
+    static void moveRelativeByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove);
     static void moveRelativeByStepsRelative(int32_t coords[NUM_AXES]);
     /// Update position to new offsets
     static void setToolOffset(float ox, float oy, float oz);
@@ -269,7 +280,7 @@ public:
     static void waitForEndOfMoves();
     static void waitForXFreeMoves(fast8_t, bool allowMoves = false);
     static fast8_t buffersUsed();
-    static void LaserWarmUp(uint32_t wait);
+    static void WarmUp(uint32_t, int second);
     static void reportBuffers();
     static void moveToParkPosition();
     /// Pushes current position to memory stack. Return true on success.
@@ -305,7 +316,7 @@ private:
     the forwarded buffer. If none is available nullptr
     is returned. Will update process and lengthUnprocessed */
     static Motion1Buffer* forward(Motion2Buffer* m2);
-    static void queueMove(float feedrate);
+    static void queueMove(float feedrate, bool secondaryMove);
     static void pop(); // Only called by Motion2::pop !
 };
 #endif

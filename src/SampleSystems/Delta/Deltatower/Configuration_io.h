@@ -62,15 +62,15 @@ IO_INPUT_INVERTED(IOEndstopZMax, ORIG_Z_MAX_PIN)
 // You need to define all min and max endstops for all
 // axes except E even if you have none!
 
-ENDSTOP_SWITCH_HW(endstopMotorXMax, IOEndstopXMax, -1)
-ENDSTOP_SWITCH_HW(endstopMotorYMax, IOEndstopYMax, -1)
-ENDSTOP_SWITCH_HW(endstopMotorZMax, IOEndstopZMax, -1)
+ENDSTOP_SWITCH_HW(endstopMotorXMax, IOEndstopXMax, -1, true)
+ENDSTOP_SWITCH_HW(endstopMotorYMax, IOEndstopYMax, -1, true)
+ENDSTOP_SWITCH_HW(endstopMotorZMax, IOEndstopZMax, -1, true)
 ENDSTOP_NONE(endstopXMin)
 ENDSTOP_NONE(endstopYMin)
 ENDSTOP_NONE(endstopZMin)
 ENDSTOP_NONE(endstopXMax)
 ENDSTOP_NONE(endstopYMax)
-ENDSTOP_MERGE3(endstopZMax, endstopMotorXMax, endstopMotorYMax, endstopMotorZMax, Z_AXIS)
+ENDSTOP_MERGE3(endstopZMax, endstopMotorXMax, endstopMotorYMax, endstopMotorZMax, Z_AXIS, true)
 // Set to nullptr for no zprobe or &endstopName for a switch
 #undef ZPROBE_ADDRESS
 #define ZPROBE_ADDRESS nullptr
@@ -149,5 +149,5 @@ HEAT_MANAGER_PID('E', HeaterExtruder2, TempExt2, PWMExtruder2, 260, 255, 20, 200
 // Typical tools are:
 // TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript)
 
-TOOL_EXTRUDER(ToolExtruder1, 0, -13, 0, HeaterExtruder1, E1Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "")
-TOOL_EXTRUDER(ToolExtruder2, 0, 13, 0, HeaterExtruder2, E2Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1950 R600\nG4 P300", "M340 P0 S1050 R600\nG4 P300")
+TOOL_EXTRUDER(ToolExtruder1, 0, -13, 0, HeaterExtruder1, E1Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder2, 0, 13, 0, HeaterExtruder2, E2Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1950 R600\nG4 P300", "M340 P0 S1050 R600\nG4 P300", &Fan1PWM)
