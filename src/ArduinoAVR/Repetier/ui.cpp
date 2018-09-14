@@ -1362,7 +1362,12 @@ void UIDisplay::parse(const char *txt, bool ram) {
 #endif
             if (c2 == 'z')
 #if MIN_HARDWARE_ENDSTOP_Z
+#if Z_PROBE_PIN == Z_MIN_PIN
+				// In this case z min is always false, return z probe signal instead
+                addStringP(Endstops::zProbe() ? ui_selected : ui_unselected);
+#else
                 addStringP(Endstops::zMin() ? ui_selected : ui_unselected);
+#endif
 #else
                 addStringP(Com::tSpace);
 #endif

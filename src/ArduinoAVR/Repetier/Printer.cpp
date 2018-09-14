@@ -2644,12 +2644,13 @@ void Printer::stopPrint() {
     void Printer::configTMC2130(TMC2130Stepper* tmc_driver, bool tmc_stealthchop, int8_t tmc_sgt,
       uint8_t tmc_pwm_ampl, uint8_t tmc_pwm_grad, bool tmc_pwm_autoscale, uint8_t tmc_pwm_freq) {
         while(!tmc_driver->stst());                     // Wait for motor stand-still
-        tmc_driver->begin();                            // Initiate pins and registeries
-        tmc_driver->I_scale_analog(true);               // Set current reference source
-        tmc_driver->interpolate(true);                  // Set internal microstep interpolation
+        tmc_driver->begin();                            // Initiate pins and registries
+		// Using internal reference should be good enough and work on more drivers
+        // tmc_driver->I_scale_analog(true);               // Set current reference source
+        tmc_driver->interpolate(true);                  // Set internal micro step interpolation
         tmc_driver->pwm_ampl(tmc_pwm_ampl);             // Chopper PWM amplitude
         tmc_driver->pwm_grad(tmc_pwm_grad);             // Velocity gradient for chopper PWM amplitude
-        tmc_driver->pwm_autoscale(tmc_pwm_autoscale);   // Chopper PWM autoscaling
+        tmc_driver->pwm_autoscale(tmc_pwm_autoscale);   // Chopper PWM autos scaling
         tmc_driver->pwm_freq(tmc_pwm_freq);             // Chopper PWM frequency selection
         tmc_driver->stealthChop(tmc_stealthchop);       // Enable extremely quiet stepping
         tmc_driver->sg_stall_value(tmc_sgt);            // StallGuard sensitivity
@@ -2658,12 +2659,14 @@ void Printer::stopPrint() {
 #if defined(SENSORLESS_HOMING)
     void Printer::tmcPrepareHoming(TMC2130Stepper* tmc_driver, uint32_t coolstep_sp_min) {
         while(!tmc_driver->stst());                     // Wait for motor stand-still
-        tmc_driver->stealth_max_speed(0);               // Upper speedlimit for stealthChop
+        tmc_driver->stealth_max_speed(0);               // Upper speed limit for stealthChop
         tmc_driver->stealthChop(false);                 // Turn off stealthChop
-        tmc_driver->coolstep_min_speed(coolstep_sp_min);// Minimum speed for StallGuard trigerring
+        tmc_driver->coolstep_min_speed(coolstep_sp_min);// Minimum speed for StallGuard triggering
         tmc_driver->sg_filter(false);                   // Turn off StallGuard filtering
         tmc_driver->diag1_stall(true);                  // Signal StallGuard on DIAG1 pin
+#if MOTHERBOARD != 310 // Rambo Einsy has diag0 and diag1 bound together so this could cause a defect
         tmc_driver->diag1_active_high(true);            // StallGuard pulses active high
+#endif
     }
 #endif
 

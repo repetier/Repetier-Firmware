@@ -532,7 +532,11 @@ TMC2130Stepper* tmcDriverByIndex(uint8_t index) {
 void setMotorCurrent( uint8_t driver, uint16_t level ) {
     TMC2130Stepper* tmc_driver = tmcDriverByIndex(driver);
     if(tmc_driver) {
+#if MOTHERBOARD == 310
+		tmc_driver->rms_current(level, 0.5, 0.22);
+#else
         tmc_driver->rms_current(level);
+#endif
     }
 }
 
