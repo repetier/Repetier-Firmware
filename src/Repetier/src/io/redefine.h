@@ -47,6 +47,7 @@ IO_TARGET with following meanings:
 #include "heatManager.h"
 #include "coolerManager.h"
 #include "tools.h"
+#include "../custom/customMacros.h"
 
 // Add user configuration
 

@@ -31,7 +31,7 @@ public:
     // Return true if setting microsteps is supported
     virtual bool implementsSetMicrosteps() { return false; }
     // Return true if setting current in software is supported
-    virtual bool implementSetMaxCurrent() { return false; }
+    virtual bool implementsSetMaxCurrent() { return false; }
     /// Set microsteps. Must be a power of 2.
     virtual void setMicrosteps(int microsteps) {}
     /// Set max current as range 0..255
@@ -41,6 +41,73 @@ public:
     virtual void beforeHoming() {}
     virtual void afterHoming() {}
     // uint32_t position;
+};
+
+/** Holds a position counter that can be observed, otherwise sends
+ * all commands through to the original stepper driver.
+ * You need this to detect a jam in extruder or maybe for other
+ * future task requiring a position counter.
+ */
+template <class driver>
+class ObservableStepperDriver : public StepperDriverBase {
+    driver* stepper;
+
+public:
+    uint32_t position;
+    ObservableStepperDriver(driver* _stepper)
+        : StepperDriverBase(_stepper->getMinEndstop(), _stepper->getMaxEndstop())
+        , stepper(_stepper) { position = 0; }
+    virtual ~ObservableStepperDriver() {}
+    inline EndstopDriver* getMinEndstop() { return minEndstop; }
+    inline EndstopDriver* getMaxEndstop() { return maxEndstop; }
+    /// Allows initialization of driver e.g. current, microsteps
+    virtual void init() final {}
+    /// Executes the step if endstop is not triggered. Return tru eif endstop is triggered
+    virtual bool stepCond() final {
+        if (stepper->stepCond()) {
+            return true;
+        }
+        if (direction) {
+            position++;
+        } else {
+            position--;
+        }
+        return false;
+    }
+    /// Always executes the step
+    virtual void step() final {
+        if (direction) {
+            position++;
+        } else {
+            position--;
+        }
+        step();
+    }
+    /// Set step signal low
+    virtual void unstep() final {
+        stepper->unstep();
+    }
+    /// Set direction, true = max direction
+    virtual void dir(bool d) final {
+        direction = d;
+        stepper->dir(d);
+    }
+    /// Enable motor driver
+    virtual void enable() final { stepper->enable(); }
+    /// Disable motor driver
+    virtual void disable() final { stepper->disable(); }
+    // Return true if setting microsteps is supported
+    virtual bool implementsSetMicrosteps() final { return stepper->implementsSetMicrosteps(); }
+    // Return true if setting current in software is supported
+    virtual bool implementsSetMaxCurrent() final { return stepper->implementsSetMaxCurrent(); }
+    /// Set microsteps. Must be a power of 2.
+    virtual void setMicrosteps(int microsteps) final { stepper->setMicrosteps(microsteps); }
+    /// Set max current as range 0..255
+    virtual void setMaxCurrent(int max) final { stepper->setMaxCurrent(max); }
+    // Called before homing starts. Can be used e.g. to disable silent mode
+    // or otherwise prepare for endstop detection.
+    virtual void beforeHoming() final { stepper->beforeHoming(); }
+    virtual void afterHoming() final { stepper->afterHoming(); }
 };
 
 /// Plain stepper driver with optional endstops attached.

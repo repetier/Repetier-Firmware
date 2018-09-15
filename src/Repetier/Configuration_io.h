@@ -122,8 +122,10 @@ IO_PWM_SOFTWARE(PWMBed1, IOBed1, 1)
 STEPPER_SIMPLE(XMotor, IOX1Step, IOX1Dir, IOX1Enable, endstopNone, endstopNone)
 STEPPER_SIMPLE(YMotor, IOY1Step, IOY1Dir, IOY1Enable, endstopNone, endstopNone)
 STEPPER_SIMPLE(ZMotor, IOZ1Step, IOZ1Dir, IOZ1Enable, endstopNone, endstopNone)
-STEPPER_SIMPLE(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, endstopNone, endstopNone)
-STEPPER_SIMPLE(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, endstopNone, endstopNone)
+STEPPER_SIMPLE(E1MotorBase, IOE1Step, IOE1Dir, IOE1Enable, endstopNone, endstopNone)
+STEPPER_OBSERVEABLE(E1Motor, E1MotorBase)
+STEPPER_SIMPLE(E2MotorBase, IOE2Step, IOE2Dir, IOE2Enable, endstopNone, endstopNone)
+STEPPER_OBSERVEABLE(E2Motor, E2MotorBase)
 
 // Servos
 SERVO_ANALOG(Servo1, 0, Servo1Pin, 500, 2500, 1050)

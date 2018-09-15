@@ -237,11 +237,11 @@ void ToolLaser::updateDerived() {
 }
 
 int ToolLaser::computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) {
-    if (intensity) {
-        return intensity;
-    }
     if (!activeSecondary) {
         return 0;
+    }
+    if (intensity) {
+        return intensity;
     }
     float target = v * intensityPerMM;
     if (target < 0) {

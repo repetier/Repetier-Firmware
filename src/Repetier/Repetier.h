@@ -24,7 +24,7 @@
 
 #include <math.h>
 #include <stdint.h>
-//#define REPETIER_VERSION "0.92.10"
+
 #define REPETIER_VERSION "2.0.0dev"
 
 // Use new communication model for multiple channels - only until stable, then old version gets deleted
@@ -718,9 +718,7 @@ extern int debugWaitLoop;
 #include "src/utilities/PlaneBuilder.h"
 
 #include "Events.h"
-#if defined(CUSTOM_EVENTS)
-#include "CustomEvents.h"
-#endif
+#include "src/custom/customEvents.h"
 
 // must be after CustomEvents as it might include definitions from there
 #include "src/controller/DisplayList.h"
