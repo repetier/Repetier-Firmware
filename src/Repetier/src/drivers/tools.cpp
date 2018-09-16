@@ -236,12 +236,45 @@ void ToolLaser::shutdown() {
 void ToolLaser::updateDerived() {
 }
 
+void ToolLaser::updateGammaMap() {
+    gammaMap[0] = 0;
+    int offset = bias * 255.0f / milliWatt;
+    for (fast8_t i = 1; i < 255; i++) {
+        float intensity = powf((float)i / 255.0f, gamma) * 255.0;
+        gammaMap[i] = static_cast<uint8_t>(map(static_cast<int>(intensity), 0, 255, offset, 255)); // scale gamma function and offset to max
+    }
+}
+void ToolLaser::extractNewGammaCorrection(GCode* com) {
+    float b = bias;
+    float c = gamma;
+    if (com->hasB()) {
+        b = com->B;
+        if (b < 0) {
+            b = 0.0f;
+        } else if (b > milliWatt) {
+            b = milliWatt;
+        }
+    }
+    if (com->hasC()) {
+        c = com->C;
+        if (c <= 0) {
+            c = 1.0;
+        }
+    }
+    if (c != gamma || b != bias) {
+        gamma = c;
+        bias = b;
+        Motion1::waitForEndOfMoves();
+        updateGammaMap();
+    }
+}
+
 int ToolLaser::computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) {
     if (!activeSecondary) {
         return 0;
     }
     if (intensity) {
-        return intensity;
+        return gammaMap[intensity];
     }
     float target = v * intensityPerMM;
     if (target < 0) {
@@ -250,33 +283,45 @@ int ToolLaser::computeIntensity(float v, bool activeSecondary, int intensity, fl
     if (target > 255) {
         return 255;
     }
-    return static_cast<int>(target);
+    return gammaMap[static_cast<int>(target)];
 }
 
 void ToolLaser::M3(GCode* com) {
     if (com->hasS()) {
         activeSecondaryValue = com->S;
+        if (activeSecondaryValue < 0) {
+            activeSecondaryValue = 0;
+        } else if (activeSecondaryValue > 255) {
+            activeSecondaryValue = 255;
+        }
         activeSecondaryPerMMPS = 0;
     } else if (com->hasI()) {
         activeSecondaryValue = 0;
-        activeSecondaryPerMMPS = com->I;
+        activeSecondaryPerMMPS = 255.0 * com->I / milliWatt;
     } else {
         activeSecondaryValue = 255;
         activeSecondaryPerMMPS = 0;
     }
+    extractNewGammaCorrection(com);
 }
 
 void ToolLaser::M4(GCode* com) {
     if (com->hasS()) {
         activeSecondaryValue = com->S;
+        if (activeSecondaryValue < 0) {
+            activeSecondaryValue = 0;
+        } else if (activeSecondaryValue > 255) {
+            activeSecondaryValue = 255;
+        }
         activeSecondaryPerMMPS = 0;
     } else if (com->hasI()) {
         activeSecondaryValue = 0;
-        activeSecondaryPerMMPS = com->I;
+        activeSecondaryPerMMPS = 255.0 * com->I / milliWatt;
     } else {
         activeSecondaryValue = 255;
         activeSecondaryPerMMPS = 0;
     }
+    extractNewGammaCorrection(com);
 }
 
 void ToolLaser::M5(GCode* com) {

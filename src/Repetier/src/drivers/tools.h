@@ -213,6 +213,9 @@ class ToolLaser : public Tool {
     float milliWatt;
     int32_t warmup;
     int16_t warmupPower;
+    float bias;
+    float gamma;
+    uint8_t gammaMap[256];
 
 public:
     ToolLaser(float offX, float offY, float offZ,
@@ -220,6 +223,8 @@ public:
               float milliWatt,
               int32_t warmupTime,
               int16_t _warmupPower,
+              float _bias,
+              float _gamma,
               PGM_P _startScript,
               PGM_P _endScript)
         : Tool(offX, offY, offZ, pwm)
@@ -227,8 +232,14 @@ public:
         , endScript(_endScript)
         , milliWatt(milliWatt)
         , warmup(warmupTime)
-        , warmupPower(_warmupPower) {}
+        , warmupPower(_warmupPower)
+        , bias(_bias)
+        , gamma(_gamma) {
+        updateGammaMap();
+    }
     void reset(float offx, float offy, float offz, float _milliwatt, int32_t _warmup, int16_t _warmupPower);
+    void updateGammaMap();
+    void extractNewGammaCorrection(GCode* com);
     bool supportsTemperatures() final { return false; }
     /// Called when the tool gets activated.
     void activate() final;

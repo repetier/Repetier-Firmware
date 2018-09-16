@@ -151,4 +151,4 @@ HEAT_MANAGER_PID('E', HeaterExtruder2, TempExt2, PWMExtruder2, 260, 255, 10, 200
 
 TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
 TOOL_EXTRUDER(ToolExtruder2, 16.775, 0.615, -0.97, HeaterExtruder2, E2Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1950 R600\nG4 P300", "M340 P0 S1050 R600\nG4 P300", &Fan1PWM)
-TOOL_LASER(Laser3, 0, 0, 0, Fan1PWM, 3000, 1, 100, "", "")
+TOOL_LASER(Laser3, 0, 0, 0, Fan1PWM, 3000, 1, 100, 150.0, 1.5, "", "")

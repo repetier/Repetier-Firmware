@@ -23,26 +23,26 @@
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
     extern ToolExtruder name;
-#define TOOL_LASER(name, offx, offy, offz, output, milliWatt, warmupUS, warmupPWM, startScript, endScript) \
+#define TOOL_LASER(name, offx, offy, offz, output, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
     extern ToolLaser name;
 
 #elif IO_TARGET == 6
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
     ToolExtruder name(offx, offy, offz, &heater, &stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, PSTR(startScript), PSTR(endScript), fan);
-#define TOOL_LASER(name, offx, offy, offz, output, milliWatt, warmupUS, warmupPWM, startScript, endScript) \
-    ToolLaser name(offx, offy, offz, &output, milliWatt, warmupUS, warmupPWM, PSTR(startScript), PSTR(endScript));
+#define TOOL_LASER(name, offx, offy, offz, output, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
+    ToolLaser name(offx, offy, offz, &output, milliWatt, warmupUS, warmupPWM, bias, gamma, PSTR(startScript), PSTR(endScript));
 
 #elif IO_TARGET == 10 // reset configs
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScrip, fan) \
     name.reset(offx, offy, offz, diameter, resolution, yank, maxSpeed, acceleration, advance);
-#define TOOL_LASER(name, offx, offy, offz, output, milliWatt, warmupUS, warmupPWM, startScript, endScript) \
+#define TOOL_LASER(name, offx, offy, offz, output, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
     extern ToolLaser name;
 
 #else
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan)
-#define TOOL_LASER(name, offx, offy, offz, output, milliWatt, warmupUS, warmupPWM, startScript, endScript)
+#define TOOL_LASER(name, offx, offy, offz, output, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript)
 
 #endif
