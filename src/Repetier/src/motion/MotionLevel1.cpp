@@ -754,6 +754,12 @@ void Motion1::insertWaitIfNeeded() {
             buf.feedrate = ceilf((20.0 * 1000000.0) * invStepperFrequency);
         }
         buf.flags = 0;
+        Tool* tool = Tool::getActiveTool();
+        if (tool) {
+            buf.secondSpeed = tool->computeIntensity(0, false, tool->activeSecondaryValue, tool->activeSecondaryPerMMPS);
+        } else {
+            buf.secondSpeed = 0;
+        }
         buf.state = Motion1State::FORWARD_PLANNED;
     }
 }
