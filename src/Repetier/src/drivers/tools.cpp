@@ -330,7 +330,7 @@ void ToolLaser::M5(GCode* com) {
 }
 
 void ToolLaser::secondarySwitched(bool nowSecondary) {
-    if (nowSecondary && warmup > 0) {
+    if (nowSecondary && warmup > 0 && (activeSecondaryValue > 0 || activeSecondaryPerMMPS > 0)) {
         Motion1::WarmUp(warmup, warmupPower);
     }
 }
