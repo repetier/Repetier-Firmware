@@ -420,6 +420,7 @@ void GCode_131(GCode* com) {
 
 void GCode_132(GCode* com) {
 #if false && PRINTER_TYPE == 2
+// TODO: G132 not working
     // G132 Calibrate endstop offsets
     // This has the probably unintended side effect of turning off leveling.
     Printer::setAutolevelActive(false); // don't let transformations change result!

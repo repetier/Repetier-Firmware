@@ -135,7 +135,6 @@ void MCode_209(GCode* com);
 void MCode_220(GCode* com);
 void MCode_221(GCode* com);
 void MCode_226(GCode* com);
-void MCode_223(GCode* com);
 void MCode_232(GCode* com);
 void MCode_251(GCode* com);
 void MCode_280(GCode* com);

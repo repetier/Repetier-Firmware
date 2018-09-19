@@ -830,13 +830,6 @@ void MCode_226(GCode* com) {
     }
 }
 
-void MCode_223(GCode* com) { // M223 Extruder interrupt test
-    if (com->hasS()) {
-        InterruptProtectedBlock noInts;
-        Printer::extruderStepsNeeded += com->S;
-    }
-}
-
 void MCode_232(GCode* com) {
     // Report max advance has been removed
 }

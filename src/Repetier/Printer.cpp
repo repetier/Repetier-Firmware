@@ -20,11 +20,6 @@
 
 ServoInterface* servos[NUM_SERVOS] = SERVO_LIST;
 PWMHandler* fans[] = FAN_LIST;
-#if USE_ADVANCE
-ufast8_t Printer::maxExtruderSpeed;        ///< Timer delay for end extruder speed
-volatile int Printer::extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
-//uint8_t Printer::extruderAccelerateDelay;     ///< delay between 2 speec increases
-#endif
 uint8_t Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
 //Stepper Movement Variables
 #if DRIVE_SYSTEM != DELTA
@@ -56,20 +51,8 @@ int32_t Printer::printingTime = 0;
 uint32_t Printer::interval = 30000; ///< Last step duration in ticks.
 uint32_t Printer::timer;            ///< used for acceleration/deceleration timing
 uint32_t Printer::stepNumber;       ///< Step number in current move.
-#if USE_ADVANCE
-int Printer::advanceStepsSet;
-#endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
 int32_t Printer::stepsRemainingAtZHit;
-#endif
-#if DRIVE_SYSTEM == DELTA
-int32_t Printer::stepsRemainingAtXHit;
-int32_t Printer::stepsRemainingAtYHit;
-#endif
-#if SOFTWARE_LEVELING
-int32_t Printer::levelingP1[3];
-int32_t Printer::levelingP2[3];
-int32_t Printer::levelingP3[3];
 #endif
 float Printer::feedrate;                 ///< Last requested feedrate.
 int Printer::feedrateMultiply;           ///< Multiplier for feedrate in percent (factor 1 = 100)
@@ -88,17 +71,47 @@ uint8_t Printer::backlashDir;
 float Printer::thermoMinTemp = FAN_THERMO_MIN_TEMP;
 float Printer::thermoMaxTemp = FAN_THERMO_MAX_TEMP;
 #endif
-#ifdef DEBUG_SEGMENT_LENGTH
-float Printer::maxRealSegmentLength = 0;
-#endif
-#ifdef DEBUG_REAL_JERK
-float Printer::maxRealJerk = 0;
-#endif
 #ifdef DEBUG_PRINT
 int debugWaitLoop = 0;
 #endif
 fast8_t Printer::wizardStackPos;
 wizardVar Printer::wizardStack[WIZARD_STACK_SIZE];
+
+FirmwareEvent FirmwareEvent::eventList[4];
+volatile fast8_t FirmwareEvent::start = 0;
+volatile fast8_t FirmwareEvent::length = 0;
+
+// Add event to queue if possible
+bool FirmwareEvent::queueEvent(int id, wizardVar p1, wizardVar p2) {
+    InterruptProtectedBlock lock;
+    if (length == 4) {
+        return false;
+    }
+    FirmwareEvent& act = eventList[(start + length) % 4];
+    act.eventId = id;
+    act.param1 = p1;
+    act.param2 = p2;
+    length++;
+    return true;
+}
+
+// Resolve all event tasks
+void FirmwareEvent::handleEvents() {
+    while (length > 0) {
+        FirmwareEvent& act = eventList[start];
+#undef IO_TARGET
+#define IO_TARGET 14
+#include "src/io/redefine.h"
+        {
+            InterruptProtectedBlock lock;
+            start++;
+            if (start == 4) {
+                start = 0;
+            }
+            length--;
+        }
+    }
+}
 
 void Printer::setDebugLevel(uint8_t newLevel) {
     if (newLevel != debugLevel) {
@@ -529,9 +542,6 @@ void Printer::setup() {
     feedrate = 50; ///< Current feedrate in mm/s.
     feedrateMultiply = 100;
     extrudeMultiply = 100;
-#if USE_ADVANCE
-    advanceStepsSet = 0;
-#endif
     interval = 5000;
     msecondsPrinting = 0;
     filamentPrinted = 0;
@@ -544,9 +554,6 @@ void Printer::setup() {
     backlashY = Y_BACKLASH;
     backlashZ = Z_BACKLASH;
     backlashDir = 0;
-#endif
-#if USE_ADVANCE
-    extruderStepsNeeded = 0;
 #endif
 #if (MOTHERBOARD == 502)
     SET_INPUT(FTDI_COM_RESET_PIN);

@@ -62,6 +62,7 @@ void Commands::commandLoop() {
 
 void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     Printer::handleInterruptEvent();
+    FirmwareEvent::handleEvents();
     EVENT_PERIODICAL;
 #if defined(DOOR_PIN) && DOOR_PIN > -1
     if (Printer::updateDoorOpen()) {
@@ -1144,10 +1145,6 @@ void Commands::processMCode(GCode* com) {
         break;
     case 226: // M226 P<pin> S<state 0/1> - Wait for pin getting state S
         MCode_226(com);
-        break;
-    case 223:
-        // TODO: replace/remove
-        MCode_223(com);
         break;
     case 232: // M232
         MCode_232(com);

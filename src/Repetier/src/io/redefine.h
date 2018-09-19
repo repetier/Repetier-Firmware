@@ -33,6 +33,7 @@ IO_TARGET with following meanings:
 11: analog input loop
 12: 500ms timer
 13: tools.cpp template definitions
+14: Solve firmware events
 */
 
 // #pragma message(VAR_NAME_VALUE(IO_TARGET))

@@ -974,6 +974,7 @@ is executed. This will keep the extruder moving, until the total
 wanted movement is achieved. This will be done with the maximum
 allowable speed for the extruder.
 */
+/*
 ISR(EXTRUDER_TIMER_VECTOR) {
     uint8_t timer = EXTRUDER_OCR;
     if(!Printer::isAdvanceActivated()) return; // currently no need
@@ -997,6 +998,7 @@ ISR(EXTRUDER_TIMER_VECTOR) {
     }
     EXTRUDER_OCR = timer + Printer::maxExtruderSpeed;
 }
+*/
 #endif
 
 #ifndef EXTERNALSERIAL

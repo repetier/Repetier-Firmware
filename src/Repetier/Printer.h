@@ -87,6 +87,19 @@ union wizardVar {
         : uc(_f) {}
 };
 
+class FirmwareEvent {
+public:
+    int eventId;
+    wizardVar param1, param2;
+    static FirmwareEvent eventList[4];
+    static volatile fast8_t start, length;
+
+    // Add event to queue if possible
+    static bool queueEvent(int id, wizardVar p1, wizardVar p2);
+    // Resolve all event tasks
+    static void handleEvents();
+};
+
 #define PRINTER_FLAG0_STEPPER_DISABLED 1
 #define PRINTER_FLAG0_SEPERATE_EXTRUDER_INT 2
 #define PRINTER_FLAG0_TEMPSENSOR_DEFECT 4
@@ -248,12 +261,6 @@ class Printer {
     static uint8_t debugLevel;
 
 public:
-#if USE_ADVANCE || defined(DOXYGEN)
-    static volatile int extruderStepsNeeded; ///< This many extruder steps are still needed, <0 = reverse steps needed.
-    static ufast8_t maxExtruderSpeed;        ///< Timer delay for end extruder speed
-    //static uint8_t extruderAccelerateDelay;     ///< delay between 2 speec increases
-    static int advanceStepsSet;
-#endif
     static uint16_t menuMode;
     static float homingFeedrate[]; // Feedrate in mm/s for homing.
     // static uint32_t maxInterval; // slowest allowed interval
@@ -275,11 +282,6 @@ public:
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM || defined(DOXYGEN)
     static int32_t stepsRemainingAtZHit;
-#endif
-#if SOFTWARE_LEVELING || defined(DOXYGEN)
-    static int32_t levelingP1[3];
-    static int32_t levelingP2[3];
-    static int32_t levelingP3[3];
 #endif
 #if FEATURE_AUTOLEVEL || defined(DOXYGEN)
     static float autolevelTransformation[9]; ///< Transformation matrix
@@ -305,9 +307,6 @@ public:
     static float backlashY;
     static float backlashZ;
     static uint8_t backlashDir;
-#endif
-#ifdef DEBUG_REAL_JERK
-    static float maxRealJerk;
 #endif
     // Print status related
     static int currentLayer;
@@ -653,7 +652,6 @@ public:
     static void kill(uint8_t only_steppers);
     static void setup();
     static void defaultLoopActions();
-    static void homeAxis(bool xaxis, bool yaxis, bool zaxis); /// Home axis
     static void setOrigin(float xOff, float yOff, float zOff);
     static int getFanSpeed(int fanId);
     static void setFanSpeed(int speed, bool immediately, int fanId);
