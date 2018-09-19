@@ -48,6 +48,7 @@
 #undef IO_PWM_HARDWARE
 #undef IO_PWM_MIN_SPEED
 #undef IO_PWM_INVERTED
+#undef IO_PWM_REPORT
 
 #if IO_TARGET == 1 // init
 
@@ -60,6 +61,7 @@
 #define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow)
 #define IO_PWM_KICKSTART(name, pwmname, timems)
 #define IO_PWM_INVERTED(name, pwmname)
+#define IO_PWM_REPORT(name, pwmname)
 
 #elif IO_TARGET == 2 // PWM interrupt
 
@@ -87,6 +89,7 @@
 #define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow)
 #define IO_PWM_KICKSTART(name, pwmname, timems)
 #define IO_PWM_INVERTED(name, pwmname)
+#define IO_PWM_REPORT(name, pwmname)
 
 #elif IO_TARGET == 3 // 100ms
 
@@ -103,6 +106,7 @@
         } \
     }
 #define IO_PWM_INVERTED(name, pwmname)
+#define IO_PWM_REPORT(name, pwmname)
 
 #elif IO_TARGET == 4 // class
 
@@ -227,6 +231,21 @@
         fast8_t get() final { return 255 - pwmname.get(); } \
     }; \
     extern name##Class name;
+#define IO_PWM_REPORT(name, pwmname) \
+    class name##Class : public PWMHandler { \
+        fast8_t lastPwm; \
+    public: \
+        name##Class() {lastPwm = 0;} \
+        void set(fast8_t _pwm) final { \
+            pwmname.set(_pwm); \
+            if(lastPwm != _pwm) { \
+              Com::printFLN(PSTR(#name) "=", (int)_pwm); \
+              lastPwm = _pwm; \
+            } \
+        } \
+        fast8_t get() final { return lastPwm; } \
+    }; \
+    extern name##Class name;
 
 #elif IO_TARGET == 6 // variable
 
@@ -253,6 +272,9 @@
 #define IO_PWM_INVERTED(name, pwmname) \
     name##Class name;
 
+#define IO_PWM_REPORT(name, pwmname) \
+    name##Class name;
+
 #else
 
 #define IO_PWM_SOFTWARE(name, pinname, speed)
@@ -263,5 +285,6 @@
 #define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow)
 #define IO_PWM_KICKSTART(name, pwmname, timems)
 #define IO_PWM_INVERTED(name, pwmname)
+#define IO_PWM_REPORT(name, pwmname)
 
 #endif

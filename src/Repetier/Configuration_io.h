@@ -20,6 +20,8 @@ and will add the semicolon if required.
 /* Define motor pins here. Each motor needs a setp, dir and enable pin. */
 
 ENDSTOP_NONE(endstopNone)
+// For use when no output is wanted, but possible
+IO_OUTPUT_FAKE(fakeOut)
 
 // X Motor
 
@@ -80,7 +82,8 @@ IO_PWM_SOFTWARE(Fan1NoKSPWM, IOFan1, 0)
 // IO_PWM_HARDWARE(Fan1PWM, 37,5000)
 // IO_PDM_SOFTWARE(Fan1NoKSPWM, IOFan1) // alternative to PWM signals
 IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20)
-
+// For debugging - reports new values and then calls real pwm
+IO_PWM_REPORT(Fan1Report, Fan1PWM)
 // Define temperature sensors
 
 // Typically they require an analog input (12 bit) so define
@@ -151,4 +154,4 @@ HEAT_MANAGER_PID('E', HeaterExtruder2, TempExt2, PWMExtruder2, 260, 255, 10, 200
 
 TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
 TOOL_EXTRUDER(ToolExtruder2, 16.775, 0.615, -0.97, HeaterExtruder2, E2Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1950 R600\nG4 P300", "M340 P0 S1050 R600\nG4 P300", &Fan1PWM)
-TOOL_LASER(Laser3, 0, 0, 0, Fan1PWM, 3000, 1, 100, 150.0, 1.5, "", "")
+TOOL_LASER(Laser3, 0, 0, 0, Fan1NoKSPWM, fakeOut, fakeOut, 3000, 1, 100, 150.0, 1.5, "", "")

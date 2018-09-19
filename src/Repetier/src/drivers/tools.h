@@ -207,6 +207,7 @@ public:
  * Power required is then Preq = I * v
  * Scaled to available power it is Ppercent = 100 * Preq/P
  */
+template <class enabledPin, class activePin>
 class ToolLaser : public Tool {
     PGM_P startScript;
     PGM_P endScript;
@@ -235,10 +236,10 @@ public:
         , warmupPower(_warmupPower)
         , bias(_bias)
         , gamma(_gamma) {
-        updateGammaMap();
+        updateGammaMap(false);
     }
     void reset(float offx, float offy, float offz, float _milliwatt, int32_t _warmup, int16_t _warmupPower);
-    void updateGammaMap();
+    void updateGammaMap(bool report);
     void extractNewGammaCorrection(GCode* com);
     bool supportsTemperatures() final { return false; }
     /// Called when the tool gets activated.

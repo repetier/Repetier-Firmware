@@ -32,6 +32,7 @@ IO_TARGET with following meanings:
 10: restore from config
 11: analog input loop
 12: 500ms timer
+13: tools.cpp template definitions
 */
 
 // #pragma message(VAR_NAME_VALUE(IO_TARGET))

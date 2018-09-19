@@ -199,11 +199,13 @@ bool ToolExtruder::stepCondMotor() {
 
 // Laser
 
-void ToolLaser::init() {
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::init() {
     setEepromStart(EEPROM::reserve(8, 1, Tool::eepromSize() + 2 * 4 + 2));
 }
 
-void ToolLaser::eepromHandle() {
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::eepromHandle() {
     Tool::eepromHandle();
     uint pos = getEepromStart() + Tool::eepromSize();
     EEPROM::handleFloat(pos, PSTR("Power [mW]"), 2, milliWatt);
@@ -211,7 +213,8 @@ void ToolLaser::eepromHandle() {
     EEPROM::handleInt(pos + 8, PSTR("Warmup Power [PWM]"), warmupPower);
 }
 
-void ToolLaser::reset(float offx, float offy, float offz, float _milliwatt, int32_t _warmup, int16_t _warmupPower) {
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::reset(float offx, float offy, float offz, float _milliwatt, int32_t _warmup, int16_t _warmupPower) {
     resetBase(offx, offy, offz);
     milliWatt = _milliwatt;
     warmup = _warmup;
@@ -219,32 +222,49 @@ void ToolLaser::reset(float offx, float offy, float offz, float _milliwatt, int3
 }
 
 /// Called when the tool gets activated.
-void ToolLaser::activate() {
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::activate() {
+    enabledPin::on();
     GCode::executeFString(startScript);
     Motion1::setMotorForAxis(nullptr, E_AXIS);
 }
 /// Gets called when the tool gets disabled.
-void ToolLaser::deactivate() {
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::deactivate() {
+    enabledPin::off();
     GCode::executeFString(endScript);
     Motion1::setMotorForAxis(nullptr, E_AXIS);
 }
 /// Called on kill/emergency to disable the tool
-void ToolLaser::shutdown() {
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::shutdown() {
+    enabledPin::off();
     secondary->set(0);
 }
 
-void ToolLaser::updateDerived() {
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::updateDerived() {
 }
 
-void ToolLaser::updateGammaMap() {
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::updateGammaMap(bool report) {
     gammaMap[0] = 0;
     int offset = bias * 255.0f / milliWatt;
-    for (fast8_t i = 1; i < 255; i++) {
-        float intensity = powf((float)i / 255.0f, gamma) * 255.0;
-        gammaMap[i] = static_cast<uint8_t>(map(static_cast<int>(intensity), 0, 255, offset, 255)); // scale gamma function and offset to max
+    if (report) {
+        Com::printFLN(PSTR("Gamma Offset:"), (int)offset);
+    }
+    for (fast8_t i = 1; i <= 255; i++) {
+        int intensity = static_cast<int>(lroundf(powf((float)i / 255.0f, gamma) * 255.0));
+        gammaMap[i] = static_cast<uint8_t>(map(intensity, 0, 255, offset, 255)); // scale gamma function and offset to max
+        if (report) {
+            Com::printF(PSTR("gamma"), (int)i);
+            Com::printFLN(PSTR("="), (int)gammaMap[i]);
+        }
     }
 }
-void ToolLaser::extractNewGammaCorrection(GCode* com) {
+
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::extractNewGammaCorrection(GCode* com) {
     float b = bias;
     float c = gamma;
     if (com->hasB()) {
@@ -265,11 +285,12 @@ void ToolLaser::extractNewGammaCorrection(GCode* com) {
         gamma = c;
         bias = b;
         Motion1::waitForEndOfMoves();
-        updateGammaMap();
+        updateGammaMap(com->hasR());
     }
 }
 
-int ToolLaser::computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) {
+template <class enabledPin, class activePin>
+int ToolLaser<enabledPin, activePin>::computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) {
     if (!activeSecondary) {
         return 0;
     }
@@ -278,15 +299,16 @@ int ToolLaser::computeIntensity(float v, bool activeSecondary, int intensity, fl
     }
     float target = v * intensityPerMM;
     if (target < 0) {
-        return 0;
+        target = 0;
     }
     if (target > 255) {
-        return 255;
+        target = 255;
     }
     return gammaMap[static_cast<int>(target)];
 }
 
-void ToolLaser::M3(GCode* com) {
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::M3(GCode* com) {
     if (com->hasS()) {
         activeSecondaryValue = com->S;
         if (activeSecondaryValue < 0) {
@@ -303,9 +325,15 @@ void ToolLaser::M3(GCode* com) {
         activeSecondaryPerMMPS = 0;
     }
     extractNewGammaCorrection(com);
+    if (com->hasR()) {
+        Com::printF(PSTR("Fixed PWM:"), activeSecondaryValue);
+        Com::printFLN(PSTR(" variable PWM/v:"), activeSecondaryPerMMPS);
+    }
+    activePin::on();
 }
 
-void ToolLaser::M4(GCode* com) {
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::M4(GCode* com) {
     if (com->hasS()) {
         activeSecondaryValue = com->S;
         if (activeSecondaryValue < 0) {
@@ -322,19 +350,32 @@ void ToolLaser::M4(GCode* com) {
         activeSecondaryPerMMPS = 0;
     }
     extractNewGammaCorrection(com);
+    if (com->hasR()) {
+        Com::printF(PSTR("Fixed PWM:"), activeSecondaryValue);
+        Com::printFLN(PSTR(" variable PWM/v:"), activeSecondaryPerMMPS);
+    }
+    activePin::on();
 }
 
-void ToolLaser::M5(GCode* com) {
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::M5(GCode* com) {
     activeSecondaryValue = 0;
     activeSecondaryPerMMPS = 0;
+    activePin::off();
 }
 
-void ToolLaser::secondarySwitched(bool nowSecondary) {
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::secondarySwitched(bool nowSecondary) {
     if (nowSecondary && warmup > 0 && (activeSecondaryValue > 0 || activeSecondaryPerMMPS > 0)) {
         Motion1::WarmUp(warmup, warmupPower);
     }
 }
 
-void ToolLaser::moveFinished() {
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::moveFinished() {
     secondary->set(0); // Disable laser after each move for safety!
 }
+
+#undef IO_TARGET
+#define IO_TARGET 13
+#include "../io/redefine.h"
