@@ -447,6 +447,43 @@ void JamDetectorHW<inputPin, ObserverType>::interruptSignaled() {
     lastSignal = observer->position;
 }
 
+// ----------------- FilamentDetector -------------
+
+template <class inputPin>
+FilamentDetector<inputPin>::FilamentDetector(Tool* _tool) {
+    tool = _tool;
+}
+
+template <class inputPin>
+void FilamentDetector<inputPin>::setup() {
+    if (!inputPin::get()) { // prevent error messages at startup
+        tool->setError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT);
+    }
+}
+
+template <class inputPin>
+void FilamentDetector<inputPin>::testFilament() {
+    if (inputPin::get()) {
+        lastFound = HAL::timeInMilliseconds();
+        tool->resetError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT);
+    } else if (!Printer::isDebugJamOrDisabled()) {
+        if (!inputPin::get() && !tool->hasError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT) && (HAL::timeInMilliseconds() - lastFound) > 2000) { // handle error
+            tool->setError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT);
+            EVENT_JAM_DETECTED;
+            Com::printFLN(PSTR("important:No Filament detected"));
+#if SDSUPPORT
+            if (sd.sdmode == 2) {
+                sd.pausePrint(true);
+                EVENT_JAM_DETECTED_END;
+                return;
+            }
+#endif // SDSUPPORT
+            GCodeSource::printAllFLN(PSTR("RequestPause:No filament detected!"));
+            EVENT_JAM_DETECTED_END;
+        }
+    }
+}
+
 #undef IO_TARGET
 #define IO_TARGET 13
 #include "../io/redefine.h"

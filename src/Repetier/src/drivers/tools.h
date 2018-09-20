@@ -303,3 +303,14 @@ public:
     void interruptSignaled();
     void testForJam();
 };
+
+template <class inputPin>
+class FilamentDetector {
+    Tool* tool;
+    millis_t lastFound;
+
+public:
+    FilamentDetector(Tool* tool);
+    void testFilament();
+    void setup();
+};
