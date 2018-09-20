@@ -34,6 +34,7 @@ IO_TARGET with following meanings:
 12: 500ms timer
 13: tools.cpp template definitions
 14: Solve firmware events
+15: Periodical actions
 */
 
 // #pragma message(VAR_NAME_VALUE(IO_TARGET))

@@ -72,6 +72,10 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
         }
     }
 #endif
+#undef IO_TARGET
+#define IO_TARGET 15
+#include "../io/redefine.h"
+
     if (!executePeriodical)
         return; // gets true every 100ms
     executePeriodical = 0;
@@ -1248,11 +1252,8 @@ void Commands::processMCode(GCode* com) {
     case 601:
         MCode_601(com);
         break;
-    case 602:
+    case 602: // set jam control
         MCode_602(com);
-        break;
-    case 603:
-        MCode_603(com);
         break;
     case 604:
         MCode_604(com);

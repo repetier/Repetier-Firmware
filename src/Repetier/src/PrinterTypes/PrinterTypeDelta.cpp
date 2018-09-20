@@ -248,7 +248,7 @@ void PrinterType::restoreFromConfiguration() {
 
 void PrinterType::init() {
     PrinterType::restoreFromConfiguration();
-    eeprom = EEPROM::reserve(5, 1, 15 * 4);
+    eeprom = EEPROM::reserve(EEPROM_SIGNATURE_DELTA, 1, 15 * 4);
 }
 
 void PrinterType::updateDerived() {

@@ -204,7 +204,7 @@ void PrinterType::restoreFromConfiguration() {
 
 void PrinterType::init() {
     PrinterType::restoreFromConfiguration();
-    eeprom = EEPROM::reserve(5, 1, 9);
+    eeprom = EEPROM::reserve(EEPROM_SIGNATURE_DUAL_X, 1, 9);
 }
 
 void PrinterType::updateDerived() {}

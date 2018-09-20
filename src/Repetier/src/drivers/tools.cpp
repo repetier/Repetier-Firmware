@@ -88,6 +88,7 @@ void Tool::resetBase(float offX, float offY, float offZ) {
 
 void Tool::initTools() {
     for (fast8_t i = 0; i < NUM_TOOLS; i++) {
+        tools[i]->setToolId(i);
         tools[i]->init();
     }
 }
@@ -152,7 +153,7 @@ void ToolExtruder::shutdown() {
 }
 
 void ToolExtruder::init() {
-    setEepromStart(EEPROM::reserve(2, 1, Tool::eepromSize() + 6 * 4));
+    setEepromStart(EEPROM::reserve(EEPROM_SIGNATURE_EXTRUDER, 1, Tool::eepromSize() + 6 * 4));
 }
 
 void ToolExtruder::eepromHandle() {
@@ -201,7 +202,7 @@ bool ToolExtruder::stepCondMotor() {
 
 template <class enabledPin, class activePin>
 void ToolLaser<enabledPin, activePin>::init() {
-    setEepromStart(EEPROM::reserve(8, 1, Tool::eepromSize() + 2 * 4 + 2));
+    setEepromStart(EEPROM::reserve(EEPROM_SIGNATURE_LASER, 1, Tool::eepromSize() + 2 * 4 + 2));
 }
 
 template <class enabledPin, class activePin>
@@ -374,6 +375,76 @@ void ToolLaser<enabledPin, activePin>::secondarySwitched(bool nowSecondary) {
 template <class enabledPin, class activePin>
 void ToolLaser<enabledPin, activePin>::moveFinished() {
     secondary->set(0); // Disable laser after each move for safety!
+}
+
+// ------------ JamDetectorHW ------------
+
+template <class inputPin, class ObserverType>
+JamDetectorHW<inputPin, ObserverType>::JamDetectorHW(ObserverType* _observer, Tool* _tool, int32_t _distanceSteps, int32_t _jitterSteps, int32_t _jamPercentage) {
+    observer = _observer;
+    tool = _tool;
+    distanceSteps = _distanceSteps;
+    jitterSteps = _jitterSteps;
+    jamPercentage = _jamPercentage;
+    errorSteps = (distanceSteps * jamPercentage) / 100;
+    lastSignal = 0;
+    eepromStart = EEPROM::reserve(EEPROM_SIGNATURE_JAM, 1, 3 * 4);
+}
+
+template <class inputPin, class ObserverType>
+void JamDetectorHW<inputPin, ObserverType>::reset(int32_t _distanceSteps, int32_t _jitterSteps, int32_t _jamPercentage) {
+    distanceSteps = _distanceSteps;
+    jitterSteps = _jitterSteps;
+    jamPercentage = _jamPercentage;
+    errorSteps = (distanceSteps * jamPercentage) / 100;
+}
+
+template <class inputPin, class ObserverType>
+void JamDetectorHW<inputPin, ObserverType>::eepromHandle() {
+    EEPROM::handlePrefix(PSTR("Jam Detector"), tool->getToolId() + 1);
+    EEPROM::handleLong(eepromStart + 0, PSTR("Steps between signal changes [steps]"), distanceSteps);
+    EEPROM::handleLong(eepromStart + 4, PSTR("Jitter signal range [steps]"), jitterSteps);
+    EEPROM::handleLong(eepromStart + 8, PSTR("Jam signal at [%]"), jamPercentage);
+    EEPROM::removePrefix();
+    errorSteps = (distanceSteps * jamPercentage) / 100;
+}
+
+template <class inputPin, class ObserverType>
+void JamDetectorHW<inputPin, ObserverType>::testForJam() {
+    if (!Printer::isDebugJamOrDisabled()) {
+        int32_t diff = labs(static_cast<int32_t>(observer->position - lastSignal));
+        if (diff > errorSteps && !tool->hasError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT)) { // handle error
+            tool->setError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT);
+            EVENT_JAM_DETECTED;
+            Com::printFLN(PSTR("important:Extruder jam detected"));
+#if SDSUPPORT
+            if (sd.sdmode == 2) {
+                sd.pausePrint(true);
+                EVENT_JAM_DETECTED_END;
+                return;
+            }
+#endif // SDSUPPORT
+            GCodeSource::printAllFLN(PSTR("RequestPause:Extruder Jam Detected!"));
+            EVENT_JAM_DETECTED_END;
+        }
+    }
+}
+
+template <class inputPin, class ObserverType>
+void JamDetectorHW<inputPin, ObserverType>::interruptSignaled() {
+    if (!Printer::isJamcontrolDisabled()) {
+        int32_t diff = labs(static_cast<int32_t>(observer->position - lastSignal));
+        if (diff < jitterSteps) { // ignore swinging state at edge
+            return;
+        }
+        if (diff < errorSteps) {
+            tool->resetError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT);
+        }
+        if (Printer::isDebugJam()) { // report signal
+            FirmwareEvent::queueEvent(FIRMWARE_EVENT_JAM_DEBUG, wizardVar(static_cast<int32_t>(tool->getToolId())), wizardVar(diff));
+        }
+    }
+    lastSignal = observer->position;
 }
 
 #undef IO_TARGET

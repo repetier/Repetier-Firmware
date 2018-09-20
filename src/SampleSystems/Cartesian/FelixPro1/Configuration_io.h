@@ -20,6 +20,8 @@ and will add the semicolon if required.
 /* Define motor pins here. Each motor needs a setp, dir and enable pin. */
 
 ENDSTOP_NONE(endstopNone)
+// For use when no output is wanted, but possible
+IO_OUTPUT_FAKE(fakeOut)
 
 // X Motor
 
@@ -62,6 +64,9 @@ IO_INPUT(IOEndstopXMin, ORIG_X_MIN_PIN)
 IO_INPUT(IOEndstopYMax, ORIG_Y_MAX_PIN)
 IO_INPUT_PULLUP(IOEndstopZMin, ORIG_Z_MIN_PIN)
 
+IO_INPUT(IOJam1, 35)
+IO_INPUT(IOJam2, 33)
+
 // Define our endstops solutions
 // You need to define all min and max endstops for all
 // axes except E even if you have none!
@@ -80,7 +85,8 @@ IO_PWM_SOFTWARE(Fan1NoKSPWM, IOFan1, 0)
 // IO_PWM_HARDWARE(Fan1PWM, 37,5000)
 // IO_PDM_SOFTWARE(Fan1NoKSPWM, IOFan1) // alternative to PWM signals
 IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20)
-
+// For debugging - reports new values and then calls real pwm
+IO_PWM_REPORT(Fan1Report, Fan1PWM)
 // Define temperature sensors
 
 // Typically they require an analog input (12 bit) so define
@@ -122,8 +128,10 @@ IO_PWM_SOFTWARE(PWMBed1, IOBed1, 1)
 STEPPER_SIMPLE(XMotor, IOX1Step, IOX1Dir, IOX1Enable, endstopNone, endstopNone)
 STEPPER_SIMPLE(YMotor, IOY1Step, IOY1Dir, IOY1Enable, endstopNone, endstopNone)
 STEPPER_SIMPLE(ZMotor, IOZ1Step, IOZ1Dir, IOZ1Enable, endstopNone, endstopNone)
-STEPPER_SIMPLE(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, endstopNone, endstopNone)
-STEPPER_SIMPLE(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, endstopNone, endstopNone)
+STEPPER_SIMPLE(E1MotorBase, IOE1Step, IOE1Dir, IOE1Enable, endstopNone, endstopNone)
+STEPPER_OBSERVEABLE(E1Motor, E1MotorBase)
+STEPPER_SIMPLE(E2MotorBase, IOE2Step, IOE2Dir, IOE2Enable, endstopNone, endstopNone)
+STEPPER_OBSERVEABLE(E2Motor, E2MotorBase)
 
 // Servos
 SERVO_ANALOG(Servo1, 0, Servo1Pin, 500, 2500, 1050)
@@ -149,4 +157,7 @@ HEAT_MANAGER_PID('E', HeaterExtruder2, TempExt2, PWMExtruder2, 260, 255, 10, 200
 
 TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
 TOOL_EXTRUDER(ToolExtruder2, 16.775, 0.615, -0.97, HeaterExtruder2, E2Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1950 R600\nG4 P300", "M340 P0 S1050 R600\nG4 P300", &Fan1PWM)
-TOOL_LASER(Laser3, 0, 0, 0, Fan1PWM, 3000, 1, 100, "", "")
+TOOL_LASER(Laser3, 0, 0, 0, Fan1NoKSPWM, fakeOut, fakeOut, 3000, 1, 100, 150.0, 1.5, "", "")
+
+JAM_DETECTOR_HW(JamExtruder1, E1Motor, IOJam1, ToolExtruder1, 220, 10, 500)
+JAM_DETECTOR_HW(JamExtruder2, E2Motor, IOJam2, ToolExtruder2, 220, 10, 500)

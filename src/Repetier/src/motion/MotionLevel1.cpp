@@ -75,7 +75,7 @@ volatile fast8_t Motion1::lengthUnprocessed;
 void Motion1::init() {
 
     int i;
-    eprStart = EEPROM::reserve(1, 1, EPR_M1_TOTAL);
+    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_MOTION, 1, EPR_M1_TOTAL);
     for (i = 0; i < PRINTLINE_CACHE_SIZE; i++) {
         buffers[i].id = i;
         buffers[i].flags = 0;

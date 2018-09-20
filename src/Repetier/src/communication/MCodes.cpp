@@ -1145,19 +1145,13 @@ void MCode_601(GCode* com) {
 }
 
 void MCode_602(GCode* com) {
-#if EXTRUDER_JAM_CONTROL && NUM_EXTRUDER > 0
     Motion1::waitForEndOfMoves();
     if (com->hasS())
         Printer::setDebugJam(com->S > 0);
     if (com->hasP())
         Printer::setJamcontrolDisabled(com->P > 0);
-#endif
-}
-
-void MCode_603(GCode* com) {
-#if EXTRUDER_JAM_CONTROL && NUM_EXTRUDER > 0
-    Printer::setInterruptEvent(PRINTER_INTERRUPT_EVENT_JAM_DETECTED, true);
-#endif
+    Com::printF(PSTR("Debug Jam:"), (int)Printer::isDebugJam());
+    Com::printFLN(PSTR(" Enabled:"), (int)!Printer::isJamcontrolDisabled());
 }
 
 void MCode_604(GCode* com) {

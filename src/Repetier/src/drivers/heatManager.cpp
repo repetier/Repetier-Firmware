@@ -17,7 +17,7 @@ HeatManager::HeatManager(char htType, IOTemperature* i, PWMHandler* o, float max
     , heaterType(htType) {
 }
 void HeatManager::init() {
-    eepromPos = EEPROM::reserve(5, 1, eepromSizeLocal() + 13);
+    eepromPos = EEPROM::reserve(EEPROM_SIGNATURE_HEAT_MANAGER, 1, eepromSizeLocal() + 13);
 }
 void HeatManager::update() {
     if (error != HeaterError::NO_ERROR) {

@@ -10,6 +10,10 @@ class Motion3;
 class Motion1;
 class GCode;
 
+#define TOOL_ERROR_HEATER_DEFECT 1
+#define TOOL_ERROR_HEATER_DECOUPLED 2
+#define TOOL_ERROR_JAMMED_OR_NO_FILAMENT 4
+
 class Tool {
     friend class Motion3;
     friend class Motion1;
@@ -19,9 +23,11 @@ protected:
     float offsetY;
     float offsetZ;
     int eepromStart;
+    int toolId;
     PWMHandler* secondary;        ///< Second controlled pwm device, e.g. fan
     int activeSecondaryValue;     ///< Fixed speed
     float activeSecondaryPerMMPS; ///< Speed per mm/s move speed
+    fast8_t errorFlags;
     static fast8_t activeToolId;
     static Tool* activeTool;
     static Tool* const tools[NUM_TOOLS];
@@ -34,7 +40,16 @@ public:
         , secondary(_secondary) {
         activeSecondaryValue = 0;
         activeSecondaryPerMMPS = 0;
+        toolId = -1;
+        errorFlags = 0;
     }
+    inline void setToolId(int t) { toolId = t; }
+    inline int getToolId() { return toolId; }
+    inline bool hasError() { return errorFlags != 0; }
+    inline void setError(fast8_t flag) { errorFlags |= flag; }
+    inline bool hasError(fast8_t flag) { return (errorFlags & flag) == flag; }
+    inline void resetErrors() { errorFlags = 0; }
+    inline void resetError(fast8_t flag) { errorFlags &= ~flag; }
     inline bool usesSecondary(void* sec) { return secondary == sec; }
     inline void setSecondaryFixed(int sec) {
         activeSecondaryValue = sec;
@@ -268,4 +283,23 @@ public:
     virtual void M3(GCode* com);
     virtual void M4(GCode* com);
     virtual void M5(GCode* com);
+};
+
+template <class inputPin, class ObserverType>
+class JamDetectorHW {
+    int eepromStart;
+    uint32_t lastSignal;
+    int32_t distanceSteps;
+    int32_t errorSteps;
+    int32_t jitterSteps;
+    int32_t jamPercentage;
+    Tool* tool;
+    ObserverType* observer;
+
+public:
+    JamDetectorHW(ObserverType* _observer, Tool* _tool, int32_t distanceSteps, int32_t jitterSteps, int32_t jamPercentage);
+    void reset(int32_t distanceSteps, int32_t jitterSteps, int32_t jamPercentage);
+    void eepromHandle();
+    void interruptSignaled();
+    void testForJam();
 };

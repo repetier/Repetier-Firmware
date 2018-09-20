@@ -19,6 +19,15 @@
 #ifndef _EEPROM_H
 #define _EEPROM_H
 
+#define EEPROM_SIGNATURE_MOTION 1
+#define EEPROM_SIGNATURE_EXTRUDER 2
+#define EEPROM_SIGNATURE_DELTA 3
+#define EEPROM_SIGNATURE_Z_PROBE 4
+#define EEPROM_SIGNATURE_HEAT_MANAGER 5
+#define EEPROM_SIGNATURE_DUAL_X 6
+#define EEPROM_SIGNATURE_JAM 7
+#define EEPROM_SIGNATURE_LASER 8
+
 #define EPR_MAGIC_BYTE 0
 #define EPR_INTEGRITY_BYTE 1         // Here the xored sum over eeprom is stored
 #define EPR_VARIATION1 2             // Used to detect eeprom layout changes

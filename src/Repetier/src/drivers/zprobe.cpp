@@ -81,7 +81,7 @@ float ZProbeHandler::yOffset() {
 }
 
 void ZProbeHandler::init() {
-    eprStart = EEPROM::reserve(2, 1, EPR_Z_PROBE_MEMORY);
+    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_Z_PROBE, 1, EPR_Z_PROBE_MEMORY);
     activated = false;
 }
 

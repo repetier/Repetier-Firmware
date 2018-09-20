@@ -87,6 +87,8 @@ union wizardVar {
         : uc(_f) {}
 };
 
+#define FIRMWARE_EVENT_JAM_DEBUG 1
+
 class FirmwareEvent {
 public:
     int eventId;
