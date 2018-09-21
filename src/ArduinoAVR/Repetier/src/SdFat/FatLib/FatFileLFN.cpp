@@ -128,7 +128,7 @@ bool FatFile::getName(char* name, size_t size) {
     DBG_FAIL_MACRO;
     goto fail;
   }
-  if (!isLFN()) {
+  if (!isLFN() || m_lfnOrd > MAX_VFAT_ENTRIES) {
     return getSFN(name);
   }
   if (!dirFile.openCluster(this)) {

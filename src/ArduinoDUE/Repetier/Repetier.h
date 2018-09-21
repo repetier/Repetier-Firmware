@@ -24,8 +24,8 @@
 
 #include <math.h>
 #include <stdint.h>
-//#define REPETIER_VERSION "0.92.10"
-#define REPETIER_VERSION "1.0.2"
+
+#define REPETIER_VERSION "1.0.3"
 
 // Use new communication model for multiple channels - only until stable, then old version gets deleted
 #define NEW_COMMUNICATION 1
@@ -211,7 +211,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 
 #include "Configuration.h"
 
-#if (LASER_PWM_MAX > 255 && SUPPORT_LASER) || (CNC_PWM_MAX > 255 && SUPPORT_CNC)
+#if (LASvfaER_PWM_MAX > 255 && SUPPORT_LASER) || (CNC_PWM_MAX > 255 && SUPPORT_CNC)
 typedef uint16_t secondspeed_t;
 #else
 typedef uint8_t secondspeed_t;
@@ -595,7 +595,13 @@ inline void memcopy4(void *dest,void *source) {
 #endif
 
 #include "HAL.h"
+#ifndef MAX_VFAT_ENTRIES
+#ifdef AVR_BOARD
 #define MAX_VFAT_ENTRIES (2)
+#else
+#define MAX_VFAT_ENTRIES (3)
+#endif
+#endif
 /** Total size of the buffer used to store the long filenames */
 #define LONG_FILENAME_LENGTH (13*MAX_VFAT_ENTRIES+1)
 #define SD_MAX_FOLDER_DEPTH 2

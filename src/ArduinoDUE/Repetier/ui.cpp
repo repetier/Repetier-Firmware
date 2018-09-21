@@ -2503,14 +2503,25 @@ int UIDisplay::okAction(bool allowMoves) {
     unsigned int action;
 #if SDSUPPORT
     if(mtype == UI_MENU_TYPE_FILE_SELECTOR) {
+        uint8_t filePos = menuPos[menuLevel] - 1;
+        char filename[LONG_FILENAME_LENGTH + 1];
         if(menuPos[menuLevel] == 0) { // Selected back instead of file
-            return executeAction(UI_ACTION_BACK, allowMoves);
+			if(folderLevel > 0) {
+				filename[0] = filename[1] = '.';
+				filename[2] = 0;
+				goDir(filename);
+				menuTop[menuLevel] = 0;
+				menuPos[menuLevel] = 1;
+			    refreshPage();
+		        oldMenuLevel = -1;
+	            return 0;
+			} else {
+				return executeAction(UI_ACTION_BACK, allowMoves);
+			}
         }
 
         if(!sd.sdactive)
             return 0;
-        uint8_t filePos = menuPos[menuLevel] - 1;
-        char filename[LONG_FILENAME_LENGTH + 1];
 
         getSDFilenameAt(filePos, filename);
         if(isDirname(filename)) { // Directory change selected
