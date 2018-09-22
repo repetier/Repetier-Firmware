@@ -24,15 +24,26 @@
 #include "../../Repetier.h"
 
 void GCode_0_1(GCode* com) {
+#if defined(G0_FEEDRATE) && G0_FEEDRATE > 0
+    float backupFeedrate = Printer::feedrate;
+    if (com->G == 0 && G0_FEEDRATE > 0) {
+        Printer::feedrate = G0_FEEDRATE;
+    }
+#endif
     if (com->hasP())
         Printer::setNoDestinationCheck(com->P == 0);
     Tool::getActiveTool()->extractG1(com);
     Printer::setDestinationStepsFromGCode(com); // For X Y Z E F
+#if defined(G0_FEEDRATE) && G0_FEEDRATE > 0
+    if (!(com->hasF() && com->F > 0.1)) {
+        Printer::feedrate = backupFeedrate;
+    }
+#endif
 #if UI_HAS_KEYS
-    // ui can only execute motion commands if we are not waiting inside a move for an
-    // old move to finish. For normal response times, we always leave one free after
-    // sending a line. Drawback: 1 buffer line less for limited time. Since input cache
-    // gets filled while waiting, the lost is neglectable.
+        // ui can only execute motion commands if we are not waiting inside a move for an
+        // old move to finish. For normal response times, we always leave one free after
+        // sending a line. Drawback: 1 buffer line less for limited time. Since input cache
+        // gets filled while waiting, the lost is neglectable.
 //        PrintLine::waitForXFreeLines(1, true);
 #endif // UI_HAS_KEYS
 #ifdef DEBUG_QUEUE_MOVE

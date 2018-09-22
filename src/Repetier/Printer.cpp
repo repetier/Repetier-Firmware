@@ -430,10 +430,11 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
         coords[E_AXIS] = Motion1::currentPosition[E_AXIS];
     }
     if (com->hasF() && com->F > 0.1) {
-        if (unitIsInches)
+        if (unitIsInches) {
             feedrate = com->F * 0.0042333f * (float)feedrateMultiply; // Factor is 25.5/60/100
-        else
+        } else {
             feedrate = com->F * (float)feedrateMultiply * 0.00016666666f;
+        }
     }
     Motion1::moveByOfficial(coords, Printer::feedrate, secondaryMove);
 }

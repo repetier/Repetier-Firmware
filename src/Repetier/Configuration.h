@@ -58,6 +58,7 @@
 #define VELOCITY_PROFILE 5           // 1 = linear, 3 = cubic, 5 = quintic velocity shape
 #define Z_SPEED 10                   // Z positioning speed
 #define XY_SPEED 100                 // XY positioning speed for normal operations
+#define G0_FEEDRATE 200              // Speed for G0 moves. Independent from set F value!
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
 #define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
 
