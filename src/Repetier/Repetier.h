@@ -490,7 +490,9 @@ extern ServoInterface* servos[NUM_SERVOS];
 #include "src/due/HAL.h"
 #endif
 
+#ifndef MAX_VFAT_ENTRIES
 #define MAX_VFAT_ENTRIES (2)
+#endif
 /** Total size of the buffer used to store the long filenames */
 #define LONG_FILENAME_LENGTH (13 * MAX_VFAT_ENTRIES + 1)
 #define SD_MAX_FOLDER_DEPTH 2

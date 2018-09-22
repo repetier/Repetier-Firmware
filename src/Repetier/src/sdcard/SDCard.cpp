@@ -416,11 +416,6 @@ void SDCard::writeCommand(GCode* code) {
     }
     buf[p++] = sum1;
     buf[p++] = sum2;
-    // Debug
-    /*Com::printF(PSTR("Buf: "));
-	for(int i=0;i<p;i++)
-	Com::printF(PSTR(" "),(int)buf[i]);
-	Com::println();*/
     if (params == 128) {
         Com::printErrorFLN(Com::tAPIDFinished);
     } else

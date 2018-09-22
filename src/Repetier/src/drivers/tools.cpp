@@ -212,6 +212,7 @@ void ToolLaser<enabledPin, activePin>::eepromHandle() {
     EEPROM::handleFloat(pos, PSTR("Power [mW]"), 2, milliWatt);
     EEPROM::handleLong(pos + 4, PSTR("Warmup [us]"), warmup);
     EEPROM::handleInt(pos + 8, PSTR("Warmup Power [PWM]"), warmupPower);
+    scalePower = 255.0 / milliWatt;
 }
 
 template <class enabledPin, class activePin>
@@ -225,6 +226,11 @@ void ToolLaser<enabledPin, activePin>::reset(float offx, float offy, float offz,
 /// Called when the tool gets activated.
 template <class enabledPin, class activePin>
 void ToolLaser<enabledPin, activePin>::activate() {
+    active = false;
+    activeSecondaryValue = 0;
+    activeSecondaryPerMMPS = 0;
+    activePin::off();
+
     enabledPin::on();
     GCode::executeFString(startScript);
     Motion1::setMotorForAxis(nullptr, E_AXIS);
@@ -232,6 +238,11 @@ void ToolLaser<enabledPin, activePin>::activate() {
 /// Gets called when the tool gets disabled.
 template <class enabledPin, class activePin>
 void ToolLaser<enabledPin, activePin>::deactivate() {
+    active = false;
+    activeSecondaryValue = 0;
+    activeSecondaryPerMMPS = 0;
+    activePin::off();
+
     enabledPin::off();
     GCode::executeFString(endScript);
     Motion1::setMotorForAxis(nullptr, E_AXIS);
@@ -309,7 +320,10 @@ int ToolLaser<enabledPin, activePin>::computeIntensity(float v, bool activeSecon
 }
 
 template <class enabledPin, class activePin>
-void ToolLaser<enabledPin, activePin>::M3(GCode* com) {
+void ToolLaser<enabledPin, activePin>::extractG1(GCode* com) {
+    if (!active) {
+        return;
+    }
     if (com->hasS()) {
         activeSecondaryValue = com->S;
         if (activeSecondaryValue < 0) {
@@ -320,7 +334,24 @@ void ToolLaser<enabledPin, activePin>::M3(GCode* com) {
         activeSecondaryPerMMPS = 0;
     } else if (com->hasI()) {
         activeSecondaryValue = 0;
-        activeSecondaryPerMMPS = 255.0 * com->I / milliWatt;
+        activeSecondaryPerMMPS = scalePower * com->I;
+    }
+}
+
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::M3(GCode* com) {
+    active = true;
+    if (com->hasS()) {
+        activeSecondaryValue = com->S;
+        if (activeSecondaryValue < 0) {
+            activeSecondaryValue = 0;
+        } else if (activeSecondaryValue > 255) {
+            activeSecondaryValue = 255;
+        }
+        activeSecondaryPerMMPS = 0;
+    } else if (com->hasI()) {
+        activeSecondaryValue = 0;
+        activeSecondaryPerMMPS = scalePower * com->I;
     } else {
         activeSecondaryValue = 255;
         activeSecondaryPerMMPS = 0;
@@ -335,6 +366,7 @@ void ToolLaser<enabledPin, activePin>::M3(GCode* com) {
 
 template <class enabledPin, class activePin>
 void ToolLaser<enabledPin, activePin>::M4(GCode* com) {
+    active = true;
     if (com->hasS()) {
         activeSecondaryValue = com->S;
         if (activeSecondaryValue < 0) {
@@ -345,7 +377,7 @@ void ToolLaser<enabledPin, activePin>::M4(GCode* com) {
         activeSecondaryPerMMPS = 0;
     } else if (com->hasI()) {
         activeSecondaryValue = 0;
-        activeSecondaryPerMMPS = 255.0 * com->I / milliWatt;
+        activeSecondaryPerMMPS = scalePower * com->I;
     } else {
         activeSecondaryValue = 255;
         activeSecondaryPerMMPS = 0;
@@ -360,6 +392,7 @@ void ToolLaser<enabledPin, activePin>::M4(GCode* com) {
 
 template <class enabledPin, class activePin>
 void ToolLaser<enabledPin, activePin>::M5(GCode* com) {
+    active = false;
     activeSecondaryValue = 0;
     activeSecondaryPerMMPS = 0;
     activePin::off();

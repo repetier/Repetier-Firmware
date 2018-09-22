@@ -127,6 +127,7 @@ public:
     virtual void afterPause() {}
     virtual void beforeContinue() {}
     virtual bool secondaryIsFan() { return false; }
+    virtual void extractG1(GCode* com) {}
     inline static Tool* getActiveTool() { return activeTool; }
     inline static fast8_t getActiveToolId() { return activeToolId; }
     static void selectTool(fast8_t id, bool force = false);
@@ -227,11 +228,13 @@ class ToolLaser : public Tool {
     PGM_P startScript;
     PGM_P endScript;
     float milliWatt;
+    float scalePower;
     int32_t warmup;
     int16_t warmupPower;
     float bias;
     float gamma;
     uint8_t gammaMap[256];
+    bool active;
 
 public:
     ToolLaser(float offX, float offY, float offZ,
@@ -252,6 +255,8 @@ public:
         , bias(_bias)
         , gamma(_gamma) {
         updateGammaMap(false);
+        scalePower = 255.0 / milliWatt;
+        active = false;
     }
     void reset(float offx, float offy, float offz, float _milliwatt, int32_t _warmup, int16_t _warmupPower);
     void updateGammaMap(bool report);
@@ -280,6 +285,7 @@ public:
     virtual void moveFinished();
     /// Switch between different seconcdary states will occur. Can add a pause or warmup
     virtual void secondarySwitched(bool nowSecondary);
+    virtual void extractG1(GCode* com);
     virtual void M3(GCode* com);
     virtual void M4(GCode* com);
     virtual void M5(GCode* com);

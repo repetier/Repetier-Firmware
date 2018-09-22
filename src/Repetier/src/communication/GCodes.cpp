@@ -24,8 +24,9 @@
 #include "../../Repetier.h"
 
 void GCode_0_1(GCode* com) {
-    if (com->hasS())
-        Printer::setNoDestinationCheck(com->S != 0);
+    if (com->hasP())
+        Printer::setNoDestinationCheck(com->P == 0);
+    Tool::getActiveTool()->extractG1(com);
     Printer::setDestinationStepsFromGCode(com); // For X Y Z E F
 #if UI_HAS_KEYS
     // ui can only execute motion commands if we are not waiting inside a move for an
