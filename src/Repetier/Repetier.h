@@ -491,8 +491,13 @@ extern ServoInterface* servos[NUM_SERVOS];
 #endif
 
 #ifndef MAX_VFAT_ENTRIES
+#ifdef AVR_BOARD
 #define MAX_VFAT_ENTRIES (2)
+#else
+#define MAX_VFAT_ENTRIES (3)
 #endif
+#endif
+
 /** Total size of the buffer used to store the long filenames */
 #define LONG_FILENAME_LENGTH (13 * MAX_VFAT_ENTRIES + 1)
 #define SD_MAX_FOLDER_DEPTH 2
@@ -577,6 +582,7 @@ extern void motorCurrentControlInit();
 extern void microstepInit();
 
 #include "Printer.h"
+#include "src/motion/LevelingMethod.h"
 #include "src/motion/MotionLevel1.h"
 #include "src/motion/MotionLevel2.h"
 #include "src/motion/MotionLevel3.h"

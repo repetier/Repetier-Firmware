@@ -342,7 +342,7 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
     bool posAllowed = true;
     float coords[NUM_AXES];
     Motion1::copyCurrentOfficial(coords);
-    bool secondaryMove = !(com->hasG() && com->G == 0);
+    bool secondaryMove = false;
 #if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
     if (!isNoDestinationCheck()) {
 #if MOVE_X_WHEN_HOMED
@@ -411,7 +411,6 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
 #endif
     }
     if (com->hasE() && !Printer::debugDryrun()) {
-        secondaryMove = true;
         p = convertToMM(com->E);
         HeatManager* heater = Tool::getActiveTool()->getHeater();
         if (relativeCoordinateMode || relativeExtruderCoordinateMode) {
@@ -426,8 +425,10 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
             }
             coords[E_AXIS] = p;
         }
+        secondaryMove = Tool::getActiveTool()->isSecondaryMove(com->hasG() && com->G == 0, true);
     } else {
         coords[E_AXIS] = Motion1::currentPosition[E_AXIS];
+        secondaryMove = Tool::getActiveTool()->isSecondaryMove(com->hasG() && com->G == 0, false);
     }
     if (com->hasF() && com->F > 0.1) {
         if (unitIsInches) {

@@ -356,6 +356,9 @@ void ToolLaser<enabledPin, activePin>::M3(GCode* com) {
         activeSecondaryValue = 255;
         activeSecondaryPerMMPS = 0;
     }
+    if (com->hasE()) {
+        powderMode = com->E != 0;
+    }
     extractNewGammaCorrection(com);
     if (com->hasR()) {
         Com::printF(PSTR("Fixed PWM:"), activeSecondaryValue);
@@ -381,6 +384,9 @@ void ToolLaser<enabledPin, activePin>::M4(GCode* com) {
     } else {
         activeSecondaryValue = 255;
         activeSecondaryPerMMPS = 0;
+    }
+    if (com->hasE()) {
+        powderMode = com->E != 0;
     }
     extractNewGammaCorrection(com);
     if (com->hasR()) {
