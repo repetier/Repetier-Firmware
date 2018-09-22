@@ -303,6 +303,54 @@ public:
     virtual void M5(GCode* com);
 };
 
+template <class dirPin, class enabledPin, class activePin>
+class ToolCNC : public Tool {
+    PGM_P startScript;
+    PGM_P endScript;
+    float rpm;
+    int32_t startStopDelay;
+    bool active;
+
+public:
+    ToolCNC(float offX, float offY, float offZ,
+            PWMHandler* pwm,
+            float _rpm,
+            int32_t _startStopDelay,
+            PGM_P _startScript,
+            PGM_P _endScript)
+        : Tool(offX, offY, offZ, pwm)
+        , startScript(_startScript)
+        , endScript(_endScript)
+        , rpm(_rpm)
+        , startStopDelay(_startStopDelay) {
+    }
+    void reset(float offx, float offy, float offz, float _rpm, int32_t _startStopDelay);
+    bool supportsTemperatures() final { return false; }
+    /// Called when the tool gets activated.
+    void activate() final;
+    /// Gets called when the tool gets disabled.
+    void deactivate() final;
+    /// Called on kill/emergency to disable the tool
+    void shutdown() final;
+    float getMaxSpeed() { return 200; }
+    float getAcceleration() { return 10000.0f; }
+    float getMaxStartSpeed() { return 200.0f; }
+    float getMaxYank() { return 200.0f; }
+    float getDiameter() { return 1.0f; }
+    float getMaxTemp() { return 0; }
+    void eepromHandle();
+    void init();
+    void setAdvance(float adv) {}
+    void updateDerived();
+    void retract(bool backwards, bool longRetract) {}
+    int computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) { return intensity; }
+    /// Gets called after each move is completed
+    /// Switch between different seconcdary states will occur. Can add a pause or warmup
+    virtual void M3(GCode* com);
+    virtual void M4(GCode* com);
+    virtual void M5(GCode* com);
+};
+
 template <class inputPin, class ObserverType>
 class JamDetectorHW {
     int eepromStart;

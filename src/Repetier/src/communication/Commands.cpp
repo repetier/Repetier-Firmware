@@ -131,6 +131,16 @@ void Commands::waitUntilEndOfAllMoves() {
     }
 }
 
+void Commands::waitMS(uint32_t wait) {
+    millis_t end = HAL::timeInMilliseconds() + wait;
+    while (static_cast<int32_t>(end - HAL::timeInMilliseconds()) > 0) {
+        //GCode::readFromSerial();
+        checkForPeriodicalActions(false);
+        GCode::keepAlive(Processing, 3);
+        UI_MEDIUM;
+    }
+}
+
 void Commands::waitUntilEndOfAllBuffers() {
     GCode* code = NULL;
 #ifdef DEBUG_PRINT

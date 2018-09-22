@@ -27,6 +27,7 @@
 #define EEPROM_SIGNATURE_DUAL_X 6
 #define EEPROM_SIGNATURE_JAM 7
 #define EEPROM_SIGNATURE_LASER 8
+#define EEPROM_SIGNATURE_CNC 9
 
 #define EPR_MAGIC_BYTE 0
 #define EPR_INTEGRITY_BYTE 1         // Here the xored sum over eeprom is stored

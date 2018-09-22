@@ -35,6 +35,7 @@ public:
     static void waitUntilEndOfAllMoves();
     static void waitUntilEndOfAllBuffers();
     static void printCurrentPosition();
+    static void waitMS(uint32_t wait);
     static void printTemperatures(bool showRaw = false);
     static void setFanSpeed(int speed, bool immediately, int fanId); /// Set fan speed 0..255
     static void changeFeedrateMultiply(int factorInPercent);

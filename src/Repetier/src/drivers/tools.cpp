@@ -198,7 +198,7 @@ bool ToolExtruder::stepCondMotor() {
     return stepper->stepCond();
 }
 
-// Laser
+// ------------- Laser ------------------
 
 template <class enabledPin, class activePin>
 void ToolLaser<enabledPin, activePin>::init() {
@@ -251,6 +251,9 @@ void ToolLaser<enabledPin, activePin>::deactivate() {
 template <class enabledPin, class activePin>
 void ToolLaser<enabledPin, activePin>::shutdown() {
     enabledPin::off();
+    activeSecondaryValue = 0;
+    activeSecondaryPerMMPS = 0;
+    activePin::off();
     secondary->set(0);
 }
 
@@ -414,6 +417,157 @@ void ToolLaser<enabledPin, activePin>::secondarySwitched(bool nowSecondary) {
 template <class enabledPin, class activePin>
 void ToolLaser<enabledPin, activePin>::moveFinished() {
     secondary->set(0); // Disable laser after each move for safety!
+}
+
+// ------------- CNC ------------------
+
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::init() {
+    setEepromStart(EEPROM::reserve(EEPROM_SIGNATURE_CNC, 1, Tool::eepromSize() + 2 * 4));
+}
+
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::eepromHandle() {
+    Tool::eepromHandle();
+    uint pos = getEepromStart() + Tool::eepromSize();
+    EEPROM::handleFloat(pos, PSTR("RPM [-]"), 2, rpm);
+    EEPROM::handleLong(pos + 4, PSTR("Start/Stop Delay [ms]"), startStopDelay);
+}
+
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::reset(float offx, float offy, float offz, float _rpm, int32_t _startStopDelay) {
+    resetBase(offx, offy, offz);
+    rpm = _rpm;
+    startStopDelay = _startStopDelay;
+}
+
+/// Called when the tool gets activated.
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::activate() {
+    active = false;
+    activeSecondaryValue = 0;
+    activeSecondaryPerMMPS = 0;
+    activePin::off();
+    enabledPin::on();
+    GCode::executeFString(startScript);
+    Motion1::setMotorForAxis(nullptr, E_AXIS);
+}
+/// Gets called when the tool gets disabled.
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::deactivate() {
+    active = false;
+    activeSecondaryValue = 0;
+    activeSecondaryPerMMPS = 0;
+    activePin::off();
+
+    enabledPin::off();
+    GCode::executeFString(endScript);
+    Motion1::setMotorForAxis(nullptr, E_AXIS);
+}
+/// Called on kill/emergency to disable the tool
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::shutdown() {
+    enabledPin::off();
+    activeSecondaryValue = 0;
+    activeSecondaryPerMMPS = 0;
+    activePin::off();
+    secondary->set(0);
+}
+
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::updateDerived() {
+}
+
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::M3(GCode* com) {
+    Motion1::waitForEndOfMoves();
+    if (active) {
+        secondary->set(0);
+        activePin::off();
+        Commands::waitMS(startStopDelay);
+    }
+    active = true;
+    if (com->hasS()) {
+        activeSecondaryValue = com->S;
+        if (activeSecondaryValue < 0) {
+            activeSecondaryValue = 0;
+        } else if (activeSecondaryValue > 255) {
+            activeSecondaryValue = 255;
+        }
+        activeSecondaryPerMMPS = 0;
+    } else if (com->hasI()) {
+        activeSecondaryValue = 0;
+        if (com->I < 0) {
+            com->I = 0;
+        }
+        if (com->I > rpm) {
+            com->I = rpm;
+        }
+        activeSecondaryPerMMPS = 255.0 * com->I / rpm;
+    } else {
+        activeSecondaryValue = 255;
+        activeSecondaryPerMMPS = 0;
+    }
+    if (com->hasR()) {
+        Com::printF(PSTR("Fixed PWM:"), activeSecondaryValue);
+        Com::printFLN(PSTR(" RPM:"), activeSecondaryValue * rpm / 255.0, 0);
+    }
+    activePin::on();
+    dirPin::on();
+    secondary->set(activeSecondaryValue);
+    Commands::waitMS(startStopDelay);
+}
+
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::M4(GCode* com) {
+    Motion1::waitForEndOfMoves();
+    if (active) {
+        secondary->set(0);
+        activePin::off();
+        Commands::waitMS(startStopDelay);
+    }
+    active = true;
+    if (com->hasS()) {
+        activeSecondaryValue = com->S;
+        if (activeSecondaryValue < 0) {
+            activeSecondaryValue = 0;
+        } else if (activeSecondaryValue > 255) {
+            activeSecondaryValue = 255;
+        }
+        activeSecondaryPerMMPS = 0;
+    } else if (com->hasI()) {
+        activeSecondaryValue = 0;
+        if (com->I < 0) {
+            com->I = 0;
+        }
+        if (com->I > rpm) {
+            com->I = rpm;
+        }
+        activeSecondaryPerMMPS = 255.0 * com->I / rpm;
+    } else {
+        activeSecondaryValue = 255;
+        activeSecondaryPerMMPS = 0;
+    }
+    if (com->hasR()) {
+        Com::printF(PSTR("Fixed PWM:"), activeSecondaryValue);
+        Com::printFLN(PSTR(" RPM:"), activeSecondaryValue * rpm / 255.0, 0);
+    }
+    activePin::on();
+    dirPin::off();
+    secondary->set(activeSecondaryValue);
+    Commands::waitMS(startStopDelay);
+}
+
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::M5(GCode* com) {
+    if (!active) {
+        return;
+    }
+    active = false;
+    Motion1::waitForEndOfMoves();
+    secondary->set(0);
+    activePin::off();
+    Commands::waitMS(startStopDelay);
 }
 
 // ------------ JamDetectorHW ------------
