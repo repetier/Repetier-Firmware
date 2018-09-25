@@ -539,7 +539,7 @@ void PrintLine::calculateMove(float axisDistanceMM[], uint8_t pathOptimize, fast
         axisInterval[E_AXIS] = timeForMove / delta[E_AXIS];
         speedE = axisDistanceMM[E_AXIS] * inverseTimeS;
         if(isENegativeMove()) speedE = -speedE;
-    }
+    } else speedE = 0;
 #if NONLINEAR_SYSTEM
     axisInterval[VIRTUAL_AXIS] = limitInterval; //timeForMove/stepsRemaining;
 #endif
@@ -879,9 +879,9 @@ inline void PrintLine::computeMaxJunctionSpeed(PrintLine *previous, PrintLine *c
     }
 #endif
     float eJerk = fabs(current->speedE - previous->speedE);
-    if(eJerk > Extruder::current->maxStartFeedrate)
+    if(eJerk > Extruder::current->maxStartFeedrate) {
         factor = RMath::min(factor, Extruder::current->maxStartFeedrate / eJerk);
-
+	}
     previous->maxJunctionSpeed = maxJoinSpeed * factor; // set speed limit
 #ifdef DEBUG_QUEUE_MOVE
     if(Printer::debugEcho()) {
