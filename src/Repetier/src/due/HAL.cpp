@@ -973,13 +973,11 @@ void PWM_TIMER_VECTOR() {
     // apparently have to read status register
     TC_GetStatus(PWM_TIMER, PWM_TIMER_CHANNEL);
 
-    static uint8_t pwm_count0 = 0;
+    static uint8_t pwm_count0 = 0; // Used my IO_PWM_SOFTWARE!
     static uint8_t pwm_count1 = 0;
     static uint8_t pwm_count2 = 0;
     static uint8_t pwm_count3 = 0;
     static uint8_t pwm_count4 = 0;
-    static uint8_t pwm_count_cooler = 0;
-    static uint8_t pwm_count_heater = 0;
 
 // Add all generated pwm handlers
 #undef IO_TARGET

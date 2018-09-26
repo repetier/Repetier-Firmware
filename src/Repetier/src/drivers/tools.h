@@ -87,6 +87,7 @@ public:
     float getOffsetX() { return offsetX; }
     float getOffsetY() { return offsetY; }
     float getOffsetZ() { return offsetZ; }
+    float getOffsetForAxis(fast8_t axis);
     virtual float getMaxSpeed() { return 0; }
     virtual float getAcceleration() { return 0; }
     virtual float getMaxStartSpeed() { return 0; }
@@ -116,7 +117,7 @@ public:
     virtual void enableMotor() {}
     virtual void stepMotor() {}
     virtual void unstepMotor() {}
-    virtual bool stepCondMotor() { return false; }
+    virtual bool updateMotor() { return false; }
     /// Computes intensity based on speed
     virtual int computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) { return 0; }
     /// Gets called after each move is completed
@@ -143,6 +144,7 @@ public:
     static void eepromHandleTools();
     static void updateDerivedTools();
     static void disableMotors();
+    static void minMaxOffsetForAxis(fast8_t axis, float& min, float& max);
 };
 
 /** Defines a simple extruder with one motor.
@@ -208,7 +210,7 @@ public:
     void enableMotor() final;
     void stepMotor() final;
     void unstepMotor() final;
-    bool stepCondMotor() final;
+    bool updateMotor() final;
     void setResolution(float stepspermm) { stepsPerMM = stepspermm; }
     void retract(bool backwards, bool longRetract) {
         // TODO: Add retract handling

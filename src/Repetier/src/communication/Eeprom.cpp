@@ -147,6 +147,8 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration() {
 #define IO_TARGET 10
 #include "../io/redefine.h"
     PrinterType::restoreFromConfiguration();
+    Motion1::setFromConfig();
+    ZProbeHandler::eepromReset();
     markChanged();
 }
 

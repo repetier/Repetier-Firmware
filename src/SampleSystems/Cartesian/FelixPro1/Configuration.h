@@ -37,11 +37,11 @@
 */
 
 // The follwing variables are required early to decide on the right modules.
-#define NUM_TOOLS 3
+#define NUM_TOOLS 4
 #define NUM_EXTRUDER 2
 #define NUM_SERVOS 1    // Number of serves available
 #define MOTHERBOARD 405 // 405
-#define EEPROM_MODE 1
+#define EEPROM_MODE 2
 #define RFSERIAL Serial
 #define WAITING_IDENTIFIER "wait"
 #define JSON_OUTPUT 1
@@ -52,17 +52,22 @@
 #define DISTORTION_CORRECTION 0
 #define USE_ADVANCE 1
 #define NUM_AXES 4                   // X,Y,Z and E for extruder A,B,C would be 5,6,7
-#define STEPPER_FREQUENCY 200000     // Maximum stepper frequency.
-#define PREPARE_FREQUENCY 2000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
-#define BLOCK_FREQUENCY 1000         // Number of blocks with constant stepper rate per second.
+#define STEPPER_FREQUENCY 153000     // Maximum stepper frequency.
+#define PREPARE_FREQUENCY 1000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
+#define BLOCK_FREQUENCY 500          // Number of blocks with constant stepper rate per second.
 #define VELOCITY_PROFILE 5           // 1 = linear, 3 = cubic, 5 = quintic velocity shape
 #define Z_SPEED 10                   // Z positioning speed
-#define XY_SPEED 100                 // XY positioning speed for normal operations
+#define XY_SPEED 150                 // XY positioning speed for normal operations
+#define G0_FEEDRATE 170              // Speed for G0 moves. Independent from set F value!
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
 #define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
-
+#define ZPROBE_TYPE 0                // 0 = no z probe, 1 = default z probe
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta
 #define PRINTER_TYPE 0
+// If all axis end stops are hardware based we can skip the time consuming tests each step
+#define NO_SOFTWARE_AXIS_ENDSTOPS
+// Normally only a delta has motor end stops required. Normally you trigger using axis endstops.
+#define NO_MOTOR_ENDSTOPS
 /* Ratios for core xyz. First index denotes motor and second axis.
 For each motor you can set the ratio of x,y,z position that adds
 to the position. 0 = no contribution. */
@@ -112,16 +117,6 @@ to the position. 0 = no contribution. */
 #define DELTA_HOME_OFFSET_B 0.0f
 #define DELTA_HOME_OFFSET_C 0.0f
 
-// Set all directions where no explicit test is required.
-// This is for dummy endstops and for hardware endstops.
-// NOt disabling them is just a speed penalty
-#define NO_XMIN_ENDSTOP_TEST
-#define NO_XMAX_ENDSTOP_TEST
-#define NO_YMIN_ENDSTOP_TEST
-#define NO_YMAX_ENDSTOP_TEST
-#define NO_ZMIN_ENDSTOP_TEST
-#define NO_ZMAX_ENDSTOP_TEST
-
 #define DISABLE_X 0
 #define DISABLE_Y 0
 #define DISABLE_Z 0
@@ -160,7 +155,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define SERVO_LIST \
     { &Servo1 }
 #define TOOLS \
-    { &ToolExtruder1, &ToolExtruder2, &Laser3 }
+    { &ToolExtruder1, &ToolExtruder2, &Laser3, &CNC4 }
 
 // Heaters enumerate all heaters, so we can loop over them
 // or call commands on a specific heater number.
@@ -310,8 +305,8 @@ It also can add a delay to wait for spindle to run on full speed.
 #define DOOR_PIN -1
 #define DOOR_PULLUP 1
 #define DOOR_INVERTING 1
-#define ENDSTOP_X_BACK_MOVE 30
-#define ENDSTOP_Y_BACK_MOVE 30
+#define ENDSTOP_X_BACK_MOVE 3
+#define ENDSTOP_Y_BACK_MOVE 3
 #define ENDSTOP_Z_BACK_MOVE 1
 #define ENDSTOP_X_RETEST_REDUCTION_FACTOR 2
 #define ENDSTOP_Y_RETEST_REDUCTION_FACTOR 2
@@ -358,12 +353,12 @@ It also can add a delay to wait for spindle to run on full speed.
 #define DELTASEGMENTS_PER_PRINTLINE 24
 #define STEPPER_INACTIVE_TIME 360L
 #define MAX_INACTIVE_TIME 1200L
-#define MAX_FEEDRATE_X 300
-#define MAX_FEEDRATE_Y 300
+#define MAX_FEEDRATE_X 250
+#define MAX_FEEDRATE_Y 250
 #define MAX_FEEDRATE_Z 20
-#define HOMING_FEEDRATE_X 50
-#define HOMING_FEEDRATE_Y 50
-#define HOMING_FEEDRATE_Z 5
+#define HOMING_FEEDRATE_X 80
+#define HOMING_FEEDRATE_Y 80
+#define HOMING_FEEDRATE_Z 10
 #define ZHOME_PRE_RAISE 0
 #define ZHOME_PRE_RAISE_DISTANCE 10
 #define ZHOME_MIN_TEMPERATURE 0
@@ -372,7 +367,7 @@ It also can add a delay to wait for spindle to run on full speed.
 #define FIXED_Z_HOME_POSITION 1
 #define ZHOME_X_POS 140
 #define ZHOME_Y_POS 45
-#define RAISE_Z_ON_TOOLCHANGE 0
+#define RAISE_Z_ON_TOOLCHANGE 2
 #define ENABLE_BACKLASH_COMPENSATION 0
 #define X_BACKLASH 0
 #define Y_BACKLASH 0

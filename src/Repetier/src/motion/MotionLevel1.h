@@ -189,6 +189,7 @@ public:
 #define EPR_M1_TOTAL EPR_M1_AXIS_COMP_END + 12
 
 class Motion2;
+class EndstopDriver;
 
 class Motion1 {
 public:
@@ -225,6 +226,8 @@ public:
     static fast8_t homeDir[NUM_AXES];
     static fast8_t homePriority[NUM_AXES]; // determines homing order, lower number first
     static StepperDriverBase* motors[NUM_AXES];
+    static EndstopDriver* minAxisEndstops[NUM_AXES];
+    static EndstopDriver* maxAxisEndstops[NUM_AXES];
     static fast8_t axesHomed;
     static float memory[MEMORY_POS_SIZE][NUM_AXES + 1];
     static fast8_t memoryPos;
@@ -317,6 +320,15 @@ private:
     is returned. Will update process and lengthUnprocessed */
     static Motion1Buffer* forward(Motion2Buffer* m2);
     static void queueMove(float feedrate, bool secondaryMove);
-    static void pop(); // Only called by Motion2::pop !
+    static INLINE void pop() {
+        Motion1Buffer& b = buffers[last];
+        b.state = Motion1State::FREE;
+        b.flags = 0; // unblock
+        last++;
+        if (last >= PRINTLINE_CACHE_SIZE) {
+            last = 0;
+        }
+        length--;
+    }; // Only called by Motion2::pop !
 };
 #endif

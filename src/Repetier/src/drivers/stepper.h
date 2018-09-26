@@ -5,6 +5,8 @@ protected:
     EndstopDriver* minEndstop;
     EndstopDriver* maxEndstop;
     bool direction;
+    fast8_t axisBit;
+    fast8_t axis;
 
 public:
     StepperDriverBase(EndstopDriver* minES, EndstopDriver* maxES)
@@ -14,10 +16,21 @@ public:
     virtual ~StepperDriverBase() {}
     inline EndstopDriver* getMinEndstop() { return minEndstop; }
     inline EndstopDriver* getMaxEndstop() { return maxEndstop; }
+    inline bool updateEndstop() {
+        if (direction) {
+            return maxEndstop->update();
+        } else {
+            return minEndstop->update();
+        }
+    }
+    inline void setAxis(fast8_t ax) {
+        axisBit = 1 << ax;
+        axis = ax;
+    }
+    inline fast8_t getAxisBit() { return axisBit; }
+    inline fast8_t getAxis() { return axis; }
     /// Allows initialization of driver e.g. current, microsteps
     virtual void init() {}
-    /// Executes the step if endstop is not triggered. Return tru eif endstop is triggered
-    virtual bool stepCond() = 0;
     /// Always executes the step
     virtual void step() = 0;
     /// Set step signal low
@@ -62,18 +75,6 @@ public:
     inline EndstopDriver* getMaxEndstop() { return maxEndstop; }
     /// Allows initialization of driver e.g. current, microsteps
     virtual void init() final {}
-    /// Executes the step if endstop is not triggered. Return tru eif endstop is triggered
-    virtual bool stepCond() final {
-        if (stepper->stepCond()) {
-            return true;
-        }
-        if (direction) {
-            position++;
-        } else {
-            position--;
-        }
-        return false;
-    }
     /// Always executes the step
     virtual void step() final {
         if (direction) {
@@ -117,20 +118,6 @@ public:
     SimpleStepperDriver(EndstopDriver* minES, EndstopDriver* maxES)
         : StepperDriverBase(minES, maxES) {}
     virtual void init() { disable(); }
-    inline bool stepCond() final {
-        if (direction) {
-            if (!maxEndstop->update()) {
-                stepCls::on();
-                return false;
-            }
-        } else {
-            if (!minEndstop->update()) {
-                stepCls::on();
-                return false;
-            }
-        }
-        return true;
-    }
     inline void step() final {
         stepCls::on();
     }
@@ -158,22 +145,6 @@ public:
         : StepperDriverBase(minES, maxES)
         , motor1(m1)
         , motor2(m2) {}
-    inline bool stepCond() final {
-        if (direction) {
-            if (!maxEndstop->update()) {
-                motor1->stepCond();
-                motor2->stepCond();
-                return false;
-            }
-        } else {
-            if (!minEndstop->update()) {
-                motor1->stepCond();
-                motor2->stepCond();
-                return false;
-            }
-        }
-        return true;
-    }
     inline void step() final {
         motor1->step();
         motor2->step();

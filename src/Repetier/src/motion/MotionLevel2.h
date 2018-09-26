@@ -75,7 +75,7 @@ public:
     static void motorEndstopTriggered(fast8_t axis, bool dir);
 
     /// Called from m3 timer when line is finished as planned
-    static void pop() {
+    static INLINE void pop() {
         InterruptProtectedBlock ip;
         length--;
         Tool* a = Tool::getActiveTool();

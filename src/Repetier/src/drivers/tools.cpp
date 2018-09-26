@@ -29,6 +29,7 @@ void Tool::selectTool(fast8_t id, bool force) {
     if (Motion1::dittoMode) { // in ditto mode 0 is always active!
         id = 0;
     }
+    // Test for valid tool id
     if (id < 0 || id >= NUM_TOOLS) {
         Com::printErrorF(PSTR("Illegal tool number selected:"));
         Com::print((int)id);
@@ -42,34 +43,39 @@ void Tool::selectTool(fast8_t id, bool force) {
         activeTool->updateDerived(); // reset values
         return;                      // already selected
     }
+    // Report new tool
     Com::printFLN(PSTR("SelectTool:"), static_cast<int>(id));
     float zOffset = -Motion1::toolOffset[Z_AXIS]; // opposite sign to extruder offset!
 #if RAISE_Z_ON_TOOLCHANGE > 0
-    float lastZ = Motion1::currentPosition[X_AXIS];
-    Motion1::setTmpPositionXYZ(lastZ + RAISE_Z_ON_TOOLCHANGE, IGNORE_COORDINATE, IGNORE_COORDINATE);
-    Motion1::moveByOfficial(Motion1::tmpPosition, Z_SPEED, false);
-    Motion1::waitForEndOfMoves();
+    float lastZ = Motion1::currentPosition[Z_AXIS];
+    if (Motion1::isAxisHomed(Z_AXIS)) {
+        Motion1::setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, lastZ + RAISE_Z_ON_TOOLCHANGE);
+        Motion1::moveByOfficial(Motion1::tmpPosition, Z_SPEED, false);
+        Motion1::waitForEndOfMoves();
+    }
 #endif
     float zOffsetNew = tools[id]->getOffsetZ();
     if (activeTool != nullptr) {
         if (zOffsetNew < zOffset) { // will hit bed, activate early
-            Motion1::setToolOffset(-activeTool->getOffsetX(), -activeTool->getOffsetY(), -zOffsetNew);
+            Motion1::setToolOffset(-activeTool->offsetX, -activeTool->offsetY, -zOffsetNew);
         }
         activeTool->deactivate();
         PrinterType::deactivatedTool(activeToolId);
     }
+    // From here on new tool is active
     Tool::activeToolId = id;
     Tool::activeTool = tools[id];
     Motion1::advanceK = 0; // Gets activated by tool activation if supported!
     Motion2::advanceSteps = 0;
     activeTool->activate();
     PrinterType::activatedTool(activeToolId);
-    Motion1::setToolOffset(-activeTool->getOffsetX(), -activeTool->getOffsetY(), -activeTool->getOffsetZ());
+    Motion1::setToolOffset(-activeTool->offsetX, -activeTool->offsetY, -activeTool->offsetZ);
 #if RAISE_Z_ON_TOOLCHANGE > 0
-    float lastZ = Motion1::currentPosition[X_AXIS];
-    Motion1::setTmpPositionXYZ(lastZ, IGNORE_COORDINATE, IGNORE_COORDINATE);
-    Motion1::moveByOfficial(Motion1::tmpPosition, Z_SPEED, false);
-    Motion1::waitForEndOfMoves();
+    if (Motion1::isAxisHomed(Z_AXIS)) {
+        Motion1::setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, lastZ);
+        Motion1::moveByOfficial(Motion1::tmpPosition, Z_SPEED, false);
+        Motion1::waitForEndOfMoves();
+    }
 #endif
 }
 
@@ -116,6 +122,38 @@ void Tool::eepromHandle() {
 void Tool::updateDerivedTools() {
     if (activeTool != nullptr) {
         activeTool->updateDerived();
+    }
+}
+
+float Tool::getOffsetForAxis(fast8_t axis) {
+    switch (axis) {
+    case X_AXIS:
+        return offsetX;
+    case Y_AXIS:
+        return offsetY;
+    case Z_AXIS:
+        return offsetZ;
+    }
+    return 0;
+}
+
+void Tool::minMaxOffsetForAxis(fast8_t axis, float& min, float& max) {
+    min = max = 0;
+    for (fast8_t i = 0; i < NUM_TOOLS; i++) {
+        float val = 0;
+        switch (axis) {
+        case X_AXIS:
+            val = tools[i]->offsetX;
+            break;
+        case Y_AXIS:
+            val = tools[i]->offsetY;
+            break;
+        case Z_AXIS:
+            val = tools[i]->offsetZ;
+            break;
+        }
+        min = RMath::min(min, val);
+        max = RMath::max(max, val);
     }
 }
 
@@ -194,8 +232,8 @@ void ToolExtruder::stepMotor() {
 void ToolExtruder::unstepMotor() {
     stepper->unstep();
 }
-bool ToolExtruder::stepCondMotor() {
-    return stepper->stepCond();
+bool ToolExtruder::updateMotor() {
+    return stepper->updateEndstop();
 }
 
 // ------------- Laser ------------------

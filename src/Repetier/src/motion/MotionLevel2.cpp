@@ -350,6 +350,10 @@ void Motion2::timer() {
         m3->usedAxes = 0;
         m3->checkEndstops = 0;
         m3->secondSpeed = actM1->secondSpeed;
+        FOR_ALL_AXES(i) {
+            m3->delta[i] = 0;
+            m3->error[i] = 0;
+        }
         if (actM1->feedrate > 32000) {
             m3->stepsRemaining = 32000;
             m3->last = 0;

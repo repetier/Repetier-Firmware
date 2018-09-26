@@ -49,6 +49,8 @@ bool Motion1::wasLastSecondary = false;
 StepperDriverBase* Motion1::drivers[NUM_MOTORS] = MOTORS;
 fast8_t Motion1::memoryPos;
 StepperDriverBase* Motion1::motors[NUM_AXES];
+EndstopDriver* Motion1::minAxisEndstops[NUM_AXES];
+EndstopDriver* Motion1::maxAxisEndstops[NUM_AXES];
 fast8_t Motion1::homeDir[NUM_AXES];
 fast8_t Motion1::homePriority[NUM_AXES];
 fast8_t Motion1::axesHomed;
@@ -175,6 +177,16 @@ void Motion1::setFromConfig() {
     parkPosition[Y_AXIS] = PARK_POSITION_Y;
     parkPosition[Z_AXIS] = PARK_POSITION_Z_RAISE;
 
+    minAxisEndstops[X_AXIS] = &endstopXMin;
+    minAxisEndstops[Y_AXIS] = &endstopYMin;
+    minAxisEndstops[Z_AXIS] = &endstopZMin;
+    minAxisEndstops[E_AXIS] = nullptr;
+
+    maxAxisEndstops[X_AXIS] = &endstopXMax;
+    maxAxisEndstops[Y_AXIS] = &endstopYMax;
+    maxAxisEndstops[Z_AXIS] = &endstopZMax;
+    maxAxisEndstops[E_AXIS] = nullptr;
+
 #if NUM_AXES > A_AXIS
     resolution[A_AXIS] = AAXIS_STEPS_PER_MM;
     maxYank[A_AXIS] = MAX_AJERK;
@@ -189,6 +201,8 @@ void Motion1::setFromConfig() {
     homeDir[A_AXIS] = A_HOME_DIR;
     homePriority[A_AXIS] = A_HOME_PRIORITY;
     motors[A_AXIS] = &AMotor;
+    minAxisEndstops[A_AXIS] = &endstopAMin;
+    maxAxisEndstops[A_AXIS] = &endstopAMax;
 #endif
 #if NUM_AXES > B_AXIS
     resolution[B_AXIS] = BAXIS_STEPS_PER_MM;
@@ -204,6 +218,8 @@ void Motion1::setFromConfig() {
     homeDir[B_AXIS] = B_HOME_DIR;
     homePriority[B_AXIS] = B_HOME_PRIORITY;
     motors[B_AXIS] = &BMotor;
+    minAxisEndstops[B_AXIS] = &endstopBMin;
+    maxAxisEndstops[B_AXIS] = &endstopBMax;
 #endif
 #if NUM_AXES > C_AXIS
     resolution[C_AXIS] = CAXIS_STEPS_PER_MM;
@@ -219,11 +235,25 @@ void Motion1::setFromConfig() {
     homeDir[C_AXIS] = C_HOME_DIR;
     homePriority[C_AXIS] = C_HOME_PRIORITY;
     motors[C_AXIS] = &CMotor;
+    minAxisEndstops[C_AXIS] = &endstopCMin;
+    maxAxisEndstops[C_AXIS] = &endstopCMax;
 #endif
 
     axisCompTanXY = AXISCOMP_TANXY;
     axisCompTanXZ = AXISCOMP_TANXZ;
     axisCompTanYZ = AXISCOMP_TANYZ;
+
+    FOR_ALL_AXES(i) {
+        if (motors[i]) {
+            motors[i]->setAxis(i);
+        }
+        if (maxAxisEndstops[i] && maxAxisEndstops[i]->implemented() == false) {
+            maxAxisEndstops[i] = nullptr;
+        }
+        if (minAxisEndstops[i] && minAxisEndstops[i]->implemented() == false) {
+            minAxisEndstops[i] = nullptr;
+        }
+    }
 }
 
 void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback) {
@@ -321,6 +351,7 @@ void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback[
 void Motion1::setMotorForAxis(StepperDriverBase* motor, fast8_t axis) {
     waitForEndOfMoves();
     motors[axis] = motor;
+    motor->setAxis(axis);
 }
 
 fast8_t Motion1::buffersUsed() {
@@ -363,20 +394,16 @@ Motion1Buffer& Motion1::reserve() {
 }
 
 // Gets called by Motion2::pop only inside interrupt protected block
-void Motion1::pop() {
+/* void Motion1::pop() {
     Motion1Buffer& b = buffers[last];
-    /*if (b.action == MOVE) {
-        DEBUG_MSG_FAST("FREE");
-    }*/
     b.state = Motion1State::FREE;
     b.flags = 0; // unblock
-                 //DEBUG_MSG2_FAST("pop1:",(int)b.id)
     last++;
     if (last >= PRINTLINE_CACHE_SIZE) {
         last = 0;
     }
     length--;
-}
+} */
 
 void Motion1::setIgnoreABC(float coords[NUM_AXES]) {
     for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
@@ -638,19 +665,19 @@ void Motion1::queueMove(float feedrate, bool secondaryMove) {
 
     buf.length = sqrtf(length2);
     buf.invLength = 1.0 / buf.length;
-
-    /* Com::printF("Move CX:", currentPositionTransformed[X_AXIS]);
-    // Com::printF(" AX:", currentPositionTransformed[A_AXIS]);
-    Com::printF(" CY:", currentPositionTransformed[Y_AXIS]);
-    Com::printF(" CZ:", currentPositionTransformed[Z_AXIS]);
-    Com::printF(" l:", buf.length);
-    Com::printFLN(" f:", feedrate);
-    Com::printF("Move DX:", delta[X_AXIS]);
-    // Com::printF(" DA:", delta[A_AXIS]);
-    Com::printF(" DE:", delta[E_AXIS]);
-    Com::printF(" DY:", delta[Y_AXIS]);
-    Com::printFLN(" DZ:", delta[Z_AXIS]); */
-
+    /* if (Printer::debugEcho()) {
+        Com::printF("Move CX:", currentPositionTransformed[X_AXIS]);
+        // Com::printF(" AX:", currentPositionTransformed[A_AXIS]);
+        Com::printF(" CY:", currentPositionTransformed[Y_AXIS]);
+        Com::printF(" CZ:", currentPositionTransformed[Z_AXIS]);
+        Com::printF(" l:", buf.length);
+        Com::printFLN(" f:", feedrate);
+        Com::printF("Move DX:", delta[X_AXIS]);
+        // Com::printF(" DA:", delta[A_AXIS]);
+        Com::printF(" DE:", delta[E_AXIS]);
+        Com::printF(" DY:", delta[Y_AXIS]);
+        Com::printFLN(" DZ:", delta[Z_AXIS]);
+    } */
     buf.action = Motion1Action::MOVE;
     if (endstopMode != EndstopMode::DISABLED) {
         buf.flags = FLAG_CHECK_ENDSTOPS;
@@ -1159,9 +1186,9 @@ bool Motion1::isAxisHomed(fast8_t axis) {
 
 void Motion1::setAxisHomed(fast8_t axis, bool state) {
     if (state) {
-        axis |= axisBits[axis];
+        axesHomed |= axisBits[axis];
     } else {
-        axis &= ~axisBits[axis];
+        axesHomed &= ~axisBits[axis];
     }
 }
 
@@ -1341,7 +1368,9 @@ void Motion1::simpleHome(fast8_t axis) {
     updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
     HAL::delayMilliseconds(30);
-    dest[axis] = -homeDir[axis] * homeEndstopDistance[axis];
+    float minOff, maxOff;
+    Tool::getActiveTool()->minMaxOffsetForAxis(axis, minOff, maxOff);
+    dest[axis] = -homeDir[axis] * (homeEndstopDistance[axis] + maxOff - minOff - Tool::getActiveTool()->getOffsetForAxis(axis));
     if (axis == Z_AXIS && ZProbe != nullptr && homeDir[Z_AXIS] < 0) {
         dest[axis] -= ZProbeHandler::getZProbeHeight();
     }
@@ -1354,7 +1383,6 @@ void Motion1::simpleHome(fast8_t axis) {
     endstopMode = oldMode;
     setAxisHomed(axis, true);
     Motion1::axesTriggered = 0;
-    Commands::printCurrentPosition();
 }
 
 void Motion1::callBeforeHomingOnSteppers() {

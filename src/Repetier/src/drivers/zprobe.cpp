@@ -1,6 +1,16 @@
 #include "../../Repetier.h"
 
 #if ZPROBE_TYPE == 1
+
+uint16_t ZProbeHandler::eprStart;
+float ZProbeHandler::height;
+float ZProbeHandler::bedDistance;
+float ZProbeHandler::coating;
+float ZProbeHandler::offsetX;
+float ZProbeHandler::offsetY;
+float ZProbeHandler::speed;
+bool ZProbeHandler::activated;
+
 float ZProbeHandler::getZProbeHeight() {
     return height;
 }
@@ -64,6 +74,13 @@ void ZProbeHandler::deactivate() {
     if (!activated) {
         return;
     }
+    float cx, cy, cz;
+    realPosition(cx, cy, cz);
+    GCode::executeFString(Com::tZProbeEndScript);
+    Tool* tool = Tool::getActiveTool();
+    Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
+    Motion1::zprobeZOffset = 0;
+    Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
 }
 
 float ZProbeHandler::runProbe() { return 0; }
@@ -92,10 +109,10 @@ void ZProbeHandler::eepromHandle() {
     EEPROM::handlePrefix(pre);
     EEPROM::handleFloat(PSTR("min. nozzle distance [mm]"), eprStart + EPR_Z_PROBE_BED_DISTANCE, 3, bedDistance);
     EEPROM::handlePrefix(pre);
-    EEPROM::handleFloat(PSTR("trigger height [mm]"), eprStart + EPR_Z_PROBE_SPEED, 3, speed);
+    EEPROM::handleFloat(PSTR("Probing Speed [mm]"), eprStart + EPR_Z_PROBE_SPEED, 3, speed);
     EEPROM::handlePrefix(pre);
-    EEPROM::handleFloat(PSTR("trigger height [mm]"), eprStart + EPR_Z_PROBE_X_OFFSET, 3, offsetX);
+    EEPROM::handleFloat(PSTR("X offset [mm]"), eprStart + EPR_Z_PROBE_X_OFFSET, 3, offsetX);
     EEPROM::handlePrefix(pre);
-    EEPROM::handleFloat(PSTR("trigger height [mm]"), eprStart + EPR_Z_PROBE_Y_OFFSET, 3, offsetY);
+    EEPROM::handleFloat(PSTR("Y offset [mm]"), eprStart + EPR_Z_PROBE_Y_OFFSET, 3, offsetY);
 }
 #endif

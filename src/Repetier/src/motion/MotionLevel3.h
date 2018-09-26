@@ -44,6 +44,8 @@ public:
     static fast8_t skipParentId;    // Skip blocks from this id - endstop was triggered
     static fast8_t lastParentId;
     static Motion3Buffer* act;
+    static Motion2Buffer* actM2;
+    static Motion1Buffer* actM1;
     static void init();
     /* Stepper timer called at STEPPER_FREQUENCY
     This is a very small code that is run at the highest interrupt level
@@ -67,7 +69,7 @@ public:
         length++;
     }
     static void activateNext();
-    static inline void unstepMotors() {
+    static INLINE void unstepMotors() {
 #ifdef XMOTOR_SWITCHABLE
         Motion1::motors[X_AXIS]->unstep();
 #else
