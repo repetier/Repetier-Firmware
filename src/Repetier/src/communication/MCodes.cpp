@@ -445,7 +445,7 @@ void MCode_111(GCode* com) {
 
 void MCode_114(GCode* com) {
     Com::writeToAll = false;
-    Commands::printCurrentPosition();
+    Motion1::printCurrentPosition();
     if (com->hasS() && com->S) {
         Com::printF(PSTR("XS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][X_AXIS]);
         Com::printF(PSTR(" YS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Y_AXIS]);
@@ -928,25 +928,25 @@ void MCode_303(GCode* com) {
 }
 
 void MCode_320(GCode* com) {
-    Printer::setAutolevelActive(true);
+    Motion1::setAutolevelActive(true);
     if (com->hasS() && com->S) {
         EEPROM::storeDataIntoEEPROM();
     }
 }
 
 void MCode_321(GCode* com) {
-    Printer::setAutolevelActive(false);
+    Motion1::setAutolevelActive(false);
     if (com->hasS() && com->S) {
         if (com->S == 3)
             Motion1::resetTransformationMatrix(false);
-        EEPROM::storeDataIntoEEPROM();
+        EEPROM::markChanged();
     }
 }
 
 void MCode_322(GCode* com) {
     Motion1::resetTransformationMatrix(false);
     if (com->hasS() && com->S) {
-        EEPROM::storeDataIntoEEPROM();
+        EEPROM::markChanged();
     }
 }
 

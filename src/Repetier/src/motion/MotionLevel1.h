@@ -192,6 +192,8 @@ class Motion2;
 class EndstopDriver;
 
 class Motion1 {
+    static bool autolevelActive;
+
 public:
     friend class Motion2;
     friend class PrinterType;
@@ -254,6 +256,9 @@ public:
     static volatile fast8_t lengthUnprocessed;          /// Number of unprocessed entries
     // Initializes data structures
     static void init();
+    static INLINE bool isAutolevelActive() { return autolevelActive; }
+    // Set autoleveling, changes current position according to printer position
+    static void setAutolevelActive(bool state);
     // Copy values from Configuration.h
     static void setFromConfig();
     static void fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback);
@@ -266,7 +271,7 @@ public:
     static void moveRelativeByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove);
     // Move to the printer coordinates (after offset, transform, ...)
     static void moveRelativeByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove);
-    static void moveRelativeByStepsRelative(int32_t coords[NUM_AXES]);
+    static void moveRelativeBySteps(int32_t coords[NUM_AXES]);
     /// Update position to new offsets
     static void setToolOffset(float ox, float oy, float oz);
     // Updates currentPositionTransformed based on currentposition
@@ -275,7 +280,9 @@ public:
     static void updatePositionsFromCurrentTransformed();
     // Sets A,B,C coordinates to ignore for easy use.
     static void setIgnoreABC(float coords[NUM_AXES]);
+    static void printCurrentPosition();
     static void copyCurrentOfficial(float coords[NUM_AXES]);
+    static void copyCurrentPrinter(float coords[NUM_AXES]);
     static void setTmpPositionXYZ(float x, float y, float z);
     static void setTmpPositionXYZE(float x, float y, float z, float e);
     // Reserve new buffer. Waits if required until a buffer is free.
@@ -283,7 +290,7 @@ public:
     static void waitForEndOfMoves();
     static void waitForXFreeMoves(fast8_t, bool allowMoves = false);
     static fast8_t buffersUsed();
-    static void WarmUp(uint32_t, int second);
+    static void WarmUp(uint32_t wait, int second);
     static void reportBuffers();
     static void moveToParkPosition();
     /// Pushes current position to memory stack. Return true on success.

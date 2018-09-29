@@ -64,6 +64,7 @@ fast8_t Motion1::stopMask;
 fast8_t Motion1::dittoMode = 0;   // copy extrusion signals
 fast8_t Motion1::dittoMirror = 0; // mirror for dual x printer
 fast8_t Motion1::alwaysCheckEndstops;
+bool Motion1::autolevelActive = false;
 #ifdef FEATURE_AXISCOMP
 float Motion1::axisCompTanXY, Motion1::axisCompTanXZ, Motion1::axisCompTanYZ;
 #endif
@@ -256,6 +257,19 @@ void Motion1::setFromConfig() {
     }
 }
 
+void Motion1::setAutolevelActive(bool state) {
+    if (state != autolevelActive) {
+        autolevelActive = state;
+        updatePositionsFromCurrentTransformed();
+    }
+    if (autolevelActive) {
+        Com::printInfoFLN(Com::tAutolevelEnabled);
+    } else {
+        Com::printInfoFLN(Com::tAutolevelDisabled);
+    }
+    printCurrentPosition();
+}
+
 void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback) {
     if (code.hasX()) {
         pos[X_AXIS] = code.X;
@@ -411,12 +425,51 @@ void Motion1::setIgnoreABC(float coords[NUM_AXES]) {
     }
 }
 
+void Motion1::printCurrentPosition() {
+    float x, y, z;
+    Printer::realPosition(x, y, z);
+    x += Motion1::g92Offsets[X_AXIS];
+    y += Motion1::g92Offsets[Y_AXIS];
+    z += Motion1::g92Offsets[Z_AXIS];
+    Com::printF(Com::tXColon, x * (Printer::unitIsInches ? 0.03937 : 1), 2);
+    Com::printF(Com::tSpaceYColon, y * (Printer::unitIsInches ? 0.03937 : 1), 2);
+    Com::printF(Com::tSpaceZColon, z * (Printer::unitIsInches ? 0.03937 : 1), 3);
+    if (Motion1::motors[E_AXIS]) {
+        Com::printF(Com::tSpaceEColon, Motion1::currentPosition[E_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 4);
+    }
+#if NUM_AXES > A_AXIS
+    Com::printF(Com::tSpaceAColon, Motion1::currentPosition[A_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 2);
+#endif
+#if NUM_AXES > B_AXIS
+    Com::printF(Com::tSpaceBColon, Motion1::currentPosition[B_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 2);
+#endif
+#if NUM_AXES > C_AXIS
+    Com::printF(Com::tSpaceCColon, Motion1::currentPosition[C_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 2);
+#endif
+    Com::println();
+#ifdef DEBUG_POS
+    Com::printF(PSTR("OffX:"), Motion1::toolOffset[X_AXIS]); // to debug offset handling
+    Com::printF(PSTR(" OffY:"), Motion1::toolOffset[Y_AXIS]);
+    Com::printF(PSTR(" OffZ:"), Motion1::toolOffset[Z_AXIS]);
+    Com::printF(PSTR(" OffZ2:"), Motion1::zprobeZOffset);
+    Com::printF(PSTR(" XS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][X_AXIS]);
+    Com::printF(PSTR(" YS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Y_AXIS]);
+    Com::printFLN(PSTR(" ZS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Z_AXIS]);
+
+#endif
+}
+
 void Motion1::copyCurrentOfficial(float coords[NUM_AXES]) {
     FOR_ALL_AXES(i) {
         coords[i] = currentPosition[i];
     }
 }
 
+void Motion1::copyCurrentPrinter(float coords[NUM_AXES]) {
+    FOR_ALL_AXES(i) {
+        coords[i] = currentPositionTransformed[i];
+    }
+}
 void Motion1::setTmpPositionXYZ(float x, float y, float z) {
     setIgnoreABC(tmpPosition);
     tmpPosition[X_AXIS] = x;
@@ -440,23 +493,7 @@ void Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate, bool second
         }
     }
     PrinterType::officialToTransformed(currentPosition, destinationPositionTransformed);
-    /* transformToPrinter(currentPosition[X_AXIS] + toolOffset[X_AXIS],
-                       currentPosition[Y_AXIS] + toolOffset[Y_AXIS],
-                       currentPosition[Z_AXIS] + toolOffset[Z_AXIS],
-                       destinationPositionTransformed[X_AXIS],
-                       destinationPositionTransformed[Y_AXIS],
-                       destinationPositionTransformed[Z_AXIS]);
-    destinationPositionTransformed[Z_AXIS] += zprobeZOffset;
-#if NUM_AXES > A_AXIS
-    for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
-        if (coords[i] != IGNORE_COORDINATE) {
-            destinationPositionTransformed[i] = coords[i];
-        } else {
-            destinationPositionTransformed[i] = currentPositionTransformed[i];
-        }
-    }
-#endif
-*/
+
     Tool* tool = Tool::getActiveTool();
     if (coords[E_AXIS] == IGNORE_COORDINATE || Printer::debugDryrun()
 #if MIN_EXTRUDER_TEMP > MAX_ROOM_TEMPERATURE
@@ -533,39 +570,10 @@ void Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate, bool seconda
 
 void Motion1::updatePositionsFromCurrent() {
     PrinterType::officialToTransformed(currentPosition, currentPositionTransformed);
-    /* transformToPrinter(currentPosition[X_AXIS] + toolOffset[X_AXIS],
-                       currentPosition[Y_AXIS] + toolOffset[Y_AXIS],
-                       currentPosition[Z_AXIS] + toolOffset[Z_AXIS],
-                       currentPositionTransformed[X_AXIS],
-                       currentPositionTransformed[Y_AXIS],
-                       currentPositionTransformed[Z_AXIS]);
-    currentPositionTransformed[Z_AXIS] += zprobeZOffset;
-#if NUM_AXES > E_AXIS
-    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
-        currentPositionTransformed[i] = currentPosition[i];
-    }
-#endif
-*/
 }
 
 void Motion1::updatePositionsFromCurrentTransformed() {
     PrinterType::transformedToOfficial(currentPositionTransformed, currentPosition);
-    /*transformFromPrinter(
-        currentPositionTransformed[X_AXIS],
-        currentPositionTransformed[Y_AXIS],
-        currentPositionTransformed[Z_AXIS] - zprobeZOffset,
-        currentPosition[X_AXIS],
-        currentPosition[Y_AXIS],
-        currentPosition[Z_AXIS]);
-    currentPosition[X_AXIS] -= toolOffset[X_AXIS]; // Offset from active extruder or z probe
-    currentPosition[Y_AXIS] -= toolOffset[Y_AXIS];
-    currentPosition[Z_AXIS] -= toolOffset[Z_AXIS];
-#if NUM_AXES > E_AXIS
-    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
-        currentPosition[i] = currentPositionTransformed[i];
-    }
-#endif
-*/
 }
 
 // Move with coordinates in official coordinates (before offset, transform, ...)
@@ -591,7 +599,7 @@ void Motion1::moveRelativeByPrinter(float coords[NUM_AXES], float feedrate, bool
 /** This function is required to fix some errors left over after homing/z-probing.
  * It assumes that we can move all axes in parallel.
  */
-void Motion1::moveRelativeByStepsRelative(int32_t coords[NUM_AXES]) {
+void Motion1::moveRelativeBySteps(int32_t coords[NUM_AXES]) {
     fast8_t axesUsed = 0;
     FOR_ALL_AXES(i) {
         if (coords[i]) {
@@ -607,17 +615,18 @@ void Motion1::moveRelativeByStepsRelative(int32_t coords[NUM_AXES]) {
     Motion1Buffer& buf = reserve();
     buf.flags = 0;
     buf.action = Motion1Action::MOVE_STEPS;
-    buf.feedrate = PrinterType::feedrateForMoveSteps(axesUsed);
-    buf.acceleration = PrinterType::accelerationForMoveSteps(axesUsed);
-    buf.length = 0;
+    buf.feedrate = 0.5 * PrinterType::feedrateForMoveSteps(axesUsed);
+    buf.acceleration = 0.5 * PrinterType::accelerationForMoveSteps(axesUsed);
     buf.startSpeed = buf.endSpeed = 0;
     FOR_ALL_AXES(i) {
         buf.start[i] = lpos[i];
-        buf.unitDir[i] = coords[i];
-        buf.length += RMath::sqr(buf.unitDir[i] / resolution[i]);
+        buf.length += RMath::sqr(static_cast<float>(coords[i]) / resolution[i]);
     }
     buf.length = sqrtf(buf.length);
     buf.invLength = 1.0f / buf.length;
+    FOR_ALL_AXES(i) {
+        buf.unitDir[i] = coords[i] * buf.invLength;
+    }
     buf.sa2 = 2.0f * buf.length * buf.acceleration;
     buf.state = Motion1State::BACKWARD_PLANNED;
 }
@@ -1194,6 +1203,8 @@ void Motion1::setAxisHomed(fast8_t axis, bool state) {
 
 void Motion1::homeAxes(fast8_t axes) {
     waitForEndOfMoves();
+    // bool isAL = isAutolevelActive();
+    // setAutolevelActive(false);
     updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
     Printer::setHoming(true);
@@ -1202,7 +1213,7 @@ void Motion1::homeAxes(fast8_t axes) {
 #if ZHOME_PRE_RAISE
     if (!isAxisHomed(Z_AXIS) || currentPosition[Z_AXIS] + ZHOME_PRE_RAISE_DISTANCE < maxPos[Z_AXIS]) {
         setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_PRE_RAISE_DISTANCE);
-        moveRelativeByOfficial(tmpPosition, homingFeedrate[Z_AXIS]);
+        moveRelativeByOfficial(tmpPosition, homingFeedrate[Z_AXIS], false);
     }
 #endif
     for (int priority = 0; priority <= 10; priority++) {
@@ -1251,7 +1262,7 @@ void Motion1::homeAxes(fast8_t axes) {
     if (Tool::getActiveTool() != nullptr) {
         Tool::selectTool(activeToolId, true);
     }
-    Commands::printCurrentPosition();
+    Motion1::printCurrentPosition();
 }
 
 EndstopDriver& Motion1::endstopFoxAxisDir(fast8_t axis, bool maxDir) {
@@ -1370,9 +1381,21 @@ void Motion1::simpleHome(fast8_t axis) {
     HAL::delayMilliseconds(30);
     float minOff, maxOff;
     Tool::getActiveTool()->minMaxOffsetForAxis(axis, minOff, maxOff);
-    dest[axis] = -homeDir[axis] * (homeEndstopDistance[axis] + maxOff - minOff - Tool::getActiveTool()->getOffsetForAxis(axis));
+    if (axis == Z_AXIS && homeDir[axis] < 0) {
+        dest[axis] = -homeDir[axis] * (homeEndstopDistance[axis]);
+#if EXTRUDER_IS_Z_PROBE
+        toolOffset[axis] = -Tool::getActiveTool()->getOffsetForAxis(axis);
+#endif
+    } else {
+        dest[axis] = -homeDir[axis] * (homeEndstopDistance[axis] + maxOff - minOff - Tool::getActiveTool()->getOffsetForAxis(axis));
+        if (axis <= Z_AXIS) {
+            toolOffset[axis] = -Tool::getActiveTool()->getOffsetForAxis(axis);
+        }
+    }
     if (axis == Z_AXIS && ZProbe != nullptr && homeDir[Z_AXIS] < 0) {
+        // Add z probe correctons
         dest[axis] -= ZProbeHandler::getZProbeHeight();
+        dest[axis] += ZProbeHandler::getCoating();
     }
     endstopMode = EndstopMode::DISABLED;
     moveRelativeByOfficial(dest, homingFeedrate[axis], false);
@@ -1480,7 +1503,7 @@ void Motion1::transformToPrinter(float x, float y, float z, float& transX, float
     y = y + z * axisCompTanYZ;
 #endif
 #if BED_CORRECTION_METHOD != 1
-    if (Printer::isAutolevelActive()) {
+    if (autolevelActive) {
         transX = x * autolevelTransformation[0] + y * autolevelTransformation[3] + z * autolevelTransformation[6];
         transY = x * autolevelTransformation[1] + y * autolevelTransformation[4] + z * autolevelTransformation[7];
         transZ = x * autolevelTransformation[2] + y * autolevelTransformation[5] + z * autolevelTransformation[8];
@@ -1499,7 +1522,7 @@ void Motion1::transformToPrinter(float x, float y, float z, float& transX, float
 /* Transform back to real printer coordinates. */
 void Motion1::transformFromPrinter(float x, float y, float z, float& transX, float& transY, float& transZ) {
 #if BED_CORRECTION_METHOD != 1
-    if (Printer::isAutolevelActive()) {
+    if (autolevelActive) {
         transX = x * autolevelTransformation[0] + y * autolevelTransformation[1] + z * autolevelTransformation[2];
         transY = x * autolevelTransformation[3] + y * autolevelTransformation[4] + z * autolevelTransformation[5];
         transZ = x * autolevelTransformation[6] + y * autolevelTransformation[7] + z * autolevelTransformation[8];

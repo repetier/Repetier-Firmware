@@ -69,6 +69,19 @@ void Motion2::timer() {
         }
         act->motion1 = actM1;
         act->state = Motion2State::NOT_INITIALIZED;
+        if (actM1->action == Motion1Action::MOVE && actM1->isCheckEndstops()) {
+            // Compute number of steps required
+            float pos[NUM_AXES];
+            FOR_ALL_AXES(i) {
+                pos[i] = actM1->start[i] + actM1->unitDir[i] * actM1->length;
+            }
+            PrinterType::transform(pos, act->stepsRemaining);
+            int32_t* lp = lastMotorPos[lastMotorIdx];
+            FOR_ALL_AXES(i) {
+                act->stepsRemaining[i] = labs(act->stepsRemaining[i] - *lp);
+                lp++;
+            }
+        }
         lastL = 0;
         // DEBUG_MSG2_FAST("new ", (int)actM1->action);
         InterruptProtectedBlock ip;

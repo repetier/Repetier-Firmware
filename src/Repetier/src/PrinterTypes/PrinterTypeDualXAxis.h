@@ -28,6 +28,7 @@ class PrinterType {
     static int activeMotor;
     static float posReal[2], targetReal;
     static bool dontChangeCoords;
+    static float bedRectangle[2][2];
     static uint16_t eeprom; // start position eeprom
 public:
     // Are subdivisions required due to nonlinear kinematics
@@ -38,6 +39,9 @@ public:
     static void transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]);
 
     static void homeAxis(fast8_t axis);
+    static void closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety);
+    static bool positionOnBed(float pos[2]);
+    static void getBedRectangle(float& xmin, float& xmax, float& ymin, float& ymax);
 
     static bool positionAllowed(float pos[NUM_AXES]);
     static void disableAllowedStepper();

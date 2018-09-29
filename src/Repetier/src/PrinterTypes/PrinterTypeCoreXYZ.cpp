@@ -20,6 +20,9 @@
 
 #if PRINTER_TYPE == 1
 
+float PrinterType::bedRectangle[2][2];
+uint16_t PrinterType::eprStart;
+
 void PrinterType::homeAxis(fast8_t axis) {
     Motion1::simpleHome(axis);
 }
@@ -39,6 +42,34 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
         }
     }
     return true;
+}
+
+void PrinterType::closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety) {
+    float offsets[3] = { offX, offY, 0 };
+    float tOffMin, tOffMax;
+    for (fast8_t i = 0; i < 3; i++) {
+        Tool::minMaxOffsetForAxis(i, tOffMin, tOffMax);
+
+        float p = pos[i] - offsets[i];
+        float minP = Motion1::minPos[i] + safety + tOffMax - tOffMin;
+        float maxP = Motion1::maxPos[i] - safety + tOffMax - tOffMin;
+        if (p < minP) {
+            pos[i] += minP - p;
+        } else if (p > maxP) {
+            pos[i] -= p - maxP;
+        }
+    }
+}
+
+bool PrinterType::positionOnBed(float pos[2]) {
+    return pos[X_AXIS] >= bedRectangle[X_AXIS][0] && pos[X_AXIS] <= bedRectangle[X_AXIS][1] && pos[Y_AXIS] >= bedRectangle[Y_AXIS][0] && pos[Y_AXIS] <= bedRectangle[Y_AXIS][1];
+}
+
+void PrinterType::getBedRectangle(float& xmin, float& xmax, float& ymin, float& ymax) {
+    xmin = bedRectangle[X_AXIS][0];
+    xmax = bedRectangle[X_AXIS][1];
+    ymin = bedRectangle[Y_AXIS][0];
+    ymax = bedRectangle[Y_AXIS][1];
 }
 
 void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]) {
@@ -81,10 +112,27 @@ float PrinterType::feedrateForMoveSteps(fast8_t axes) {
 
 void PrinterType::deactivatedTool(fast8_t id) {}
 void PrinterType::activatedTool(fast8_t id) {}
-void PrinterType::eepromHandle() {}
-void PrinterType::restoreFromConfiguration() {}
-void PrinterType::init() {}
+void PrinterType::eepromHandle() {
+    EEPROM::handlePrefix(PSTR("Printer"));
+    EEPROM::handleFloat(eprStart + 0, PSTR("Bed X Min [mm]"), 2, bedRectangle[X_AXIS][0]);
+    EEPROM::handleFloat(eprStart + 4, PSTR("Bed X Max [mm]"), 2, bedRectangle[X_AXIS][1]);
+    EEPROM::handleFloat(eprStart + 8, PSTR("Bed Y Min [mm]"), 2, bedRectangle[Y_AXIS][0]);
+    EEPROM::handleFloat(eprStart + 12, PSTR("Bed Y Max [mm]"), 2, bedRectangle[Y_AXIS][1]);
+    EEPROM::removePrefix();
+}
+void PrinterType::restoreFromConfiguration() {
+    bedRectangle[X_AXIS][0] = BED_X_MIN;
+    bedRectangle[X_AXIS][1] = BED_X_MAX;
+    bedRectangle[Y_AXIS][0] = BED_Y_MIN;
+    bedRectangle[Y_AXIS][1] = BED_Y_MAX;
+}
+void PrinterType::init() {
+    restoreFromConfiguration();
+    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_CARTESIAN, 1, 4 * 4);
+}
+
 void PrinterType::updateDerived() {}
+
 void PrinterType::enableMotors(fast8_t axes) {
     if (axes & 7) { // enable x,y,z as a group!
         Motion1::motors[X_AXIS]->enable();

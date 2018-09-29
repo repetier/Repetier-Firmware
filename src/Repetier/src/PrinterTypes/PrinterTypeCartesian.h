@@ -19,6 +19,9 @@
 #if PRINTER_TYPE == 0
 
 class PrinterType {
+    static float bedRectangle[2][2];
+    static uint16_t eprStart;
+
 public:
     // Are subdivisions required due to nonlinear kinematics
     static bool subdivisionsRequired() {
@@ -30,6 +33,9 @@ public:
     static void homeAxis(fast8_t axis);
 
     static bool positionAllowed(float pos[NUM_AXES]);
+    static void closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety);
+    static bool positionOnBed(float pos[2]);
+    static void getBedRectangle(float& xmin, float& xmax, float& ymin, float& ymax);
     static void disableAllowedStepper();
     /** During probing or homing a move in steps might be needed.
      * This returns the acceleration to use. */

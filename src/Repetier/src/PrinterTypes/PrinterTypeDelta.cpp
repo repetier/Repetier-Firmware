@@ -22,6 +22,7 @@
 
 float PrinterType::diagonal;
 float PrinterType::horizontalRadius;
+float PrinterType::bedRadius;
 float PrinterType::printRadius;
 float PrinterType::printRadiusSquared;
 float PrinterType::angleA, PrinterType::angleB, PrinterType::angleC;
@@ -140,6 +141,39 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
     return pos[X_AXIS] * pos[X_AXIS] + pos[Y_AXIS] * pos[Y_AXIS] <= printRadiusSquared;
 }
 
+void PrinterType::closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety) {
+    float offsets[2] = { offX, offY };
+    float tOffMin, tOffMax;
+    float tPos[2];
+    float dist = 0;
+    for (fast8_t i = 0; i < 2; i++) {
+        tPos[i] = pos[i] - offsets[i];
+        dist += tPos[i] * tPos[i];
+    }
+    dist = sqrtf(dist);
+    if (dist == 0) { // best position has no offset
+        return;
+    }
+    float fac = bedRadius / (dist + safety);
+    if (fac < 0) {
+        tPos[X_AXIS] *= fac;
+        tPos[Y_AXIS] *= fac;
+    }
+    pos[X_AXIS] = tPos[X_AXIS] + offX;
+    pos[Y_AXIS] = tPos[Y_AXIS] + offX;
+}
+
+bool PrinterType::positionOnBed(float pos[2]) {
+    return pos[X_AXIS] * pos[X_AXIS] + pos[Y_AXIS] * pos[Y_AXIS] <= bedRadius * bedRadius;
+}
+
+void PrinterType::getBedRectangle(float& xmin, float& xmax, float& ymin, float& ymax) {
+    xmin = -bedRadius;
+    xmax = bedRadius;
+    ymin = -bedRadius;
+    ymax = bedRadius;
+}
+
 void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]) {
     if (mode == MotionMode::MOTION_PER_AXIS) {
         motor[X_AXIS] = lroundf(pos[Z_AXIS] * Motion1::resolution[X_AXIS]);
@@ -212,6 +246,7 @@ void PrinterType::eepromHandle() {
     EEPROM::handleFloat(eeprom + 0, PSTR("Diagonal [mm]"), 2, diagonal);
     EEPROM::handleFloat(eeprom + 4, PSTR("Horizontal Radius [mm]"), 2, horizontalRadius);
     EEPROM::handleFloat(eeprom + 8, PSTR("Printable Radius [mm]"), 2, printRadius);
+    EEPROM::handleFloat(eeprom + 60, PSTR("Bed Radius [mm]"), 2, bedRadius);
     EEPROM::handleFloat(eeprom + 12, PSTR("Angle A [mm]"), 2, angleA);
     EEPROM::handleFloat(eeprom + 16, PSTR("Angle B [mm]"), 2, angleB);
     EEPROM::handleFloat(eeprom + 20, PSTR("Angle C [mm]"), 2, angleC);
@@ -243,12 +278,13 @@ void PrinterType::restoreFromConfiguration() {
     homeOffsetA = DELTA_HOME_OFFSET_A;
     homeOffsetB = DELTA_HOME_OFFSET_B;
     homeOffsetC = DELTA_HOME_OFFSET_C;
+    bedRadius = BED_RADIUS;
     PrinterType::updateDerived();
 }
 
 void PrinterType::init() {
     PrinterType::restoreFromConfiguration();
-    eeprom = EEPROM::reserve(EEPROM_SIGNATURE_DELTA, 1, 15 * 4);
+    eeprom = EEPROM::reserve(EEPROM_SIGNATURE_DELTA, 1, 16 * 4);
 }
 
 void PrinterType::updateDerived() {

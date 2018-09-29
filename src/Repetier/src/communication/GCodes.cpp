@@ -147,8 +147,8 @@ void GCode_29(GCode* com) {
 #endif
     bool ok = true;
     Printer::startProbing(true);
-    bool oldAutolevel = Printer::isAutolevelActive();
-    Printer::setAutolevelActive(false);
+    bool oldAutolevel = Motion1::isAutolevelActive();
+    Motion1::setAutolevelActive(false);
     float sum = 0, last, oldFeedrate = Printer::feedrate;
     Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
     sum = Printer::runZProbe(true, false, Z_PROBE_REPETITIONS, false);
@@ -193,11 +193,11 @@ void GCode_29(GCode* com) {
 #endif // max z endstop
         }
         Printer::feedrate = oldFeedrate;
-        Printer::setAutolevelActive(oldAutolevel);
+        Motion1::setAutolevelActive(oldAutolevel);
         if (ok && com->hasS() && com->S == 2)
             EEPROM::storeDataIntoEEPROM();
     }
-    printCurrentPosition();
+    Motion1::printCurrentPosition();
     Printer::finishProbing();
     Printer::feedrate = oldFeedrate;
     if (!ok) {
@@ -222,21 +222,35 @@ void GCode_29(GCode* com) {
 }
 
 void GCode_30(GCode* com) {
-#if FEATURE_Z_PROBE
+#if ZPROBE_TYPE
     // G30 [Pn] [S]
     // G30 (the same as G30 P3) single probe set Z0
     // G30 S1 Z<real_z_pos> - measures probe height (P is ignored) assuming we are at real height Z
     // G30 H<height> R<offset> Make probe define new Z and z offset (R) at trigger point assuming z-probe measured an object of H height.
     if (com->hasS()) {
-        Printer::measureZProbeHeight(com->hasZ() ? com->Z : Printer::currentPosition[Z_AXIS]);
+        float curHeight = (com->hasZ() ? com->Z : Motion1::currentPosition[Z_AXIS]);
+
+        float startHeight = ZProbeHandler::getBedDistance() + (ZProbeHandler::getZProbeHeight() > 0 ? ZProbeHandler::getZProbeHeight() : 0);
+        Motion1::setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, startHeight);
+        Motion1::moveByOfficial(Motion1::tmpPosition, Z_SPEED, false);
+        float zheight = ZProbeHandler::runProbe();
+        if (zheight == ILLEGAL_Z_PROBE) {
+            return;
+        }
+        float zProbeHeight = ZProbeHandler::getZProbeHeight() + startHeight - zheight;
+
+        ZProbeHandler::setZProbeHeight(zProbeHeight); // will also report on output
+        Com::printFLN(PSTR("Z-probe height [mm]:"), zProbeHeight);
+
     } else {
         uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
-        float z = Printer::runZProbe(p & 1, p & 2, Z_PROBE_REPETITIONS, true, false);
+        if (p & 1) {
+            ZProbeHandler::activate();
+        }
+        float z = ZProbeHandler::runProbe();
         if (z == ILLEGAL_Z_PROBE) {
             GCode::fatalError(PSTR("G30 probing failed!"));
-            break;
-        }
-        if (com->hasR() || com->hasH()) {
+        } else if (com->hasR() || com->hasH()) {
             float h = Printer::convertToMM(com->hasH() ? com->H : 0);
             float o = Printer::convertToMM(com->hasR() ? com->R : h);
 #if DISTORTION_CORRECTION
@@ -250,7 +264,10 @@ void GCode_30(GCode* com) {
             Motion1::g92Offsets[Z_AXIS] = o - h;
             Motion1::currentPosition[Z_AXIS] = z + h + Motion1::minPos[Z_AXIS];
             Motion1::updatePositionsFromCurrent();
-            Printer::setZHomed(true);
+            Motion1::setAxisHomed(Z_AXIS, true);
+        }
+        if (p & 2) {
+            ZProbeHandler::deactivate();
         }
     }
 #endif
@@ -435,7 +452,7 @@ void GCode_132(GCode* com) {
 // TODO: G132 not working
     // G132 Calibrate endstop offsets
     // This has the probably unintended side effect of turning off leveling.
-    Printer::setAutolevelActive(false); // don't let transformations change result!
+    Motion1::setAutolevelActive(false); // don't let transformations change result!
     Printer::coordinateOffset[X_AXIS] = 0;
     Printer::coordinateOffset[Y_AXIS] = 0;
     Printer::coordinateOffset[Z_AXIS] = 0;
@@ -468,8 +485,8 @@ void GCode_132(GCode* com) {
 void GCode_133(GCode* com) {
 #if false && PRINTER_TYPE == 2
     // G133 Measure steps to top
-    bool oldAuto = Printer::isAutolevelActive();
-    Printer::setAutolevelActive(false); // don't let transformations change result!
+    bool oldAuto = Motion1::isAutolevelActive();
+    Motion1::setAutolevelActive(false); // don't let transformations change result!
     Printer::currentPositionSteps[X_AXIS] = 0;
     Printer::currentPositionSteps[Y_AXIS] = 0;
     Printer::currentPositionSteps[Z_AXIS] = 0;
@@ -488,7 +505,7 @@ void GCode_133(GCode* com) {
     Com::printFLN(Com::tTower1, offx);
     Com::printFLN(Com::tTower2, offy);
     Com::printFLN(Com::tTower3, offz);
-    Printer::setAutolevelActive(oldAuto);
+    Motion1::setAutolevelActive(oldAuto);
     PrintLine::moveRelativeD®istanceInSteps(0, 0, Printer::axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
     Printer::homeAxis(true, true, true);
 #endif
@@ -607,7 +624,7 @@ void GCode_135(GCode* com) {
     Com::printFLN(Com::tComma, Printer::realDeltaPositionSteps[C_TOWER]);
 #endif
     Com::printF(PSTR("PosFromSteps:"));
-    printCurrentPosition();
+    Motion1::printCurrentPosition();
     break;
 #endif // DRIVE_SYSTEM
 }

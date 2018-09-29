@@ -170,40 +170,6 @@ void Commands::waitUntilEndOfAllBuffers() {
     }
 }
 
-void Commands::printCurrentPosition() {
-    float x, y, z;
-    Printer::realPosition(x, y, z);
-    x += Motion1::g92Offsets[X_AXIS];
-    y += Motion1::g92Offsets[Y_AXIS];
-    z += Motion1::g92Offsets[Z_AXIS];
-    Com::printF(Com::tXColon, x * (Printer::unitIsInches ? 0.03937 : 1), 2);
-    Com::printF(Com::tSpaceYColon, y * (Printer::unitIsInches ? 0.03937 : 1), 2);
-    Com::printF(Com::tSpaceZColon, z * (Printer::unitIsInches ? 0.03937 : 1), 3);
-    if (Motion1::motors[E_AXIS]) {
-        Com::printF(Com::tSpaceEColon, Motion1::currentPosition[E_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 4);
-    }
-#if NUM_AXES > A_AXIS
-    Com::printF(Com::tSpaceAColon, Motion1::currentPosition[A_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 2);
-#endif
-#if NUM_AXES > B_AXIS
-    Com::printF(Com::tSpaceBColon, Motion1::currentPosition[B_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 2);
-#endif
-#if NUM_AXES > C_AXIS
-    Com::printF(Com::tSpaceCColon, Motion1::currentPosition[C_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 2);
-#endif
-    Com::println();
-#ifdef DEBUG_POS
-    Com::printF(PSTR("OffX:"), Motion1::toolOffset[X_AXIS]); // to debug offset handling
-    Com::printF(PSTR(" OffY:"), Motion1::toolOffset[Y_AXIS]);
-    Com::printF(PSTR(" OffZ:"), Motion1::toolOffset[Z_AXIS]);
-    Com::printF(PSTR(" OffZ2:"), Motion1::zprobeZOffset);
-    Com::printF(PSTR(" XS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][X_AXIS]);
-    Com::printF(PSTR(" YS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Y_AXIS]);
-    Com::printFLN(PSTR(" ZS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Z_AXIS]);
-
-#endif
-}
-
 void Commands::printTemperatures(bool showRaw) {
     int error;
 #if NUM_TOOLS > 0

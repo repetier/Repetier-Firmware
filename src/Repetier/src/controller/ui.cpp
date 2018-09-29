@@ -1500,7 +1500,7 @@ void UIDisplay::parse(const char *txt, bool ram) {
             else if(c2 == 'o') addStringOnOff(READ(CASE_LIGHTS_PIN));        // Lights on/off
 #endif
 #if FEATURE_AUTOLEVEL
-            else if(c2 == 'l') addStringOnOff((Printer::isAutolevelActive()));        // Autolevel on/off
+            else if(c2 == 'l') addStringOnOff((Motion1::isAutolevelActive()));        // Autolevel on/off
 #endif
             break;
         case 'o':
@@ -1634,7 +1634,7 @@ void UIDisplay::parse(const char *txt, bool ram) {
                 addStringP(Com::translatedF(UI_TEXT_NA_ID));
 #endif
             if(c2 == 'P')
-#if (Z_PROBE_PIN > -1)
+#if (zProbe != nullptr)
                 addStringOnOff(Endstops::zProbe());
 #else
                 addStringP(Com::translatedF(UI_TEXT_NA_ID));
@@ -3831,7 +3831,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
 #endif
 #if FEATURE_AUTOLEVEL
         case UI_ACTION_AUTOLEVEL_ONOFF:
-            Printer::setAutolevelActive(!Printer::isAutolevelActive());
+            Motion1::setAutolevelActive(!Motion1::isAutolevelActive());
             break;
 #endif
 #ifdef DEBUG_PRINT

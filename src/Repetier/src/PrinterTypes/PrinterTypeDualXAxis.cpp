@@ -26,6 +26,7 @@ uint8_t PrinterType::lazyMode = false;
 float PrinterType::posReal[2];
 float PrinterType::targetReal;
 bool PrinterType::dontChangeCoords = false;
+float PrinterType::bedRectangle[2][2];
 uint16_t PrinterType::eeprom; // start position eeprom
 
 void PrinterType::homeAxis(fast8_t axis) {
@@ -103,6 +104,34 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
         }
     }
     return true;
+}
+
+void PrinterType::closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety) {
+    float offsets[3] = { offX, offY, 0 };
+    float tOffMin, tOffMax;
+    for (fast8_t i = 0; i < 3; i++) {
+        Tool::minMaxOffsetForAxis(i, tOffMin, tOffMax);
+
+        float p = pos[i] - offsets[i];
+        float minP = Motion1::minPos[i] + safety + tOffMax - tOffMin;
+        float maxP = Motion1::maxPos[i] - safety + tOffMax - tOffMin;
+        if (p < minP) {
+            pos[i] += minP - p;
+        } else if (p > maxP) {
+            pos[i] -= p - maxP;
+        }
+    }
+}
+
+bool PrinterType::positionOnBed(float pos[2]) {
+    return pos[X_AXIS] >= bedRectangle[X_AXIS][0] && pos[X_AXIS] <= bedRectangle[X_AXIS][1] && pos[Y_AXIS] >= bedRectangle[Y_AXIS][0] && pos[Y_AXIS] <= bedRectangle[Y_AXIS][1];
+}
+
+void PrinterType::getBedRectangle(float& xmin, float& xmax, float& ymin, float& ymax) {
+    xmin = bedRectangle[X_AXIS][0];
+    xmax = bedRectangle[X_AXIS][1];
+    ymin = bedRectangle[Y_AXIS][0];
+    ymax = bedRectangle[Y_AXIS][1];
 }
 
 void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]) {
@@ -190,6 +219,10 @@ void PrinterType::activatedTool(fast8_t id) {
 
 void PrinterType::eepromHandle() {
     EEPROM::handlePrefix(PSTR("Dual X"));
+    EEPROM::handleFloat(eprStart + 9, PSTR("Bed X Min [mm]"), 2, bedRectangle[X_AXIS][0]);
+    EEPROM::handleFloat(eprStart + 13, PSTR("Bed X Max [mm]"), 2, bedRectangle[X_AXIS][1]);
+    EEPROM::handleFloat(eprStart + 17, PSTR("Bed Y Min [mm]"), 2, bedRectangle[Y_AXIS][0]);
+    EEPROM::handleFloat(eprStart + 21, PSTR("Bed Y Max [mm]"), 2, bedRectangle[Y_AXIS][1]);
     EEPROM::handleFloat(eeprom + 0, PSTR("Offset Left [mm]"), 2, posReal[0]);
     EEPROM::handleFloat(eeprom + 4, PSTR("Offset Right [mm]"), 2, posReal[1]);
     EEPROM::handleByte(eeprom + 8, PSTR("Lazy Homing [0/1]"), lazyMode);
@@ -199,12 +232,17 @@ void PrinterType::restoreFromConfiguration() {
     lazyMode = LAZY_DUAL_X_AXIS;
     posReal[0] = DUAL_X_LEFT_OFFSET;
     posReal[1] = DUAL_X_RIGHT_OFFSET;
+    bedRectangle[X_AXIS][0] = BED_X_MIN;
+    bedRectangle[X_AXIS][1] = BED_X_MAX;
+    bedRectangle[Y_AXIS][0] = BED_Y_MIN;
+    bedRectangle[Y_AXIS][1] = BED_Y_MAX;
+
     PrinterType::updateDerived();
 }
 
 void PrinterType::init() {
     PrinterType::restoreFromConfiguration();
-    eeprom = EEPROM::reserve(EEPROM_SIGNATURE_DUAL_X, 1, 9);
+    eeprom = EEPROM::reserve(EEPROM_SIGNATURE_DUAL_X, 1, 25);
 }
 
 void PrinterType::updateDerived() {}

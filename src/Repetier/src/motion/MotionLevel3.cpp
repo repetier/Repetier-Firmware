@@ -156,16 +156,17 @@ void Motion3::timer() {
                 }
             }
         }
+        if (testMotorId == Z_AXIS && Motion1::endstopMode == PROBING) {
+            if (ZProbe->update()) { // ignore z endstop here
+                Motion2::endstopTriggered(Z_AXIS, act->directions & axisBit, false);
+            }
+        }
 #endif
 
 #if !defined(NO_MOTOR_ENDSTOPS)
         StepperDriverBase* m = Motion1::motors[testMotorId];
         if (m != nullptr && (act->usedAxes & axisBit)) {
-            if (testMotorId == Z_AXIS && Motion1::endstopMode == PROBING) {
-                if (ZProbe->update()) { // ignore z endstop here
-                    Motion2::motorEndstopTriggered(Z_AXIS, act->directions & axisBit);
-                }
-            } else if (testMotorId == E_AXIS && Motion1::dittoMode) {
+            if (testMotorId == E_AXIS && Motion1::dittoMode) {
                 for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
                     Tool* t = Tool::getTool(i);
                     if (t != nullptr && Tool::getTool(i)->updateMotor()) {

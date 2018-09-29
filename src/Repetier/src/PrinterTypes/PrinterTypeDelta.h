@@ -25,6 +25,7 @@ class PrinterType {
     };
     static float diagonal;
     static float horizontalRadius;
+    static float bedRadius;
     static float printRadius;
     static float printRadiusSquared;
     static float angleA, angleB, angleC;
@@ -55,6 +56,9 @@ public:
     static void homeAxis(fast8_t axis);
 
     static bool positionAllowed(float pos[NUM_AXES]);
+    static void closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety);
+    static bool positionOnBed(float pos[2]);
+    static void getBedRectangle(float& xmin, float& xmax, float& ymin, float& ymax);
     static void disableAllowedStepper();
     /** During probing or homing a move in steps might be needed.
      * This returns the acceleration to use. */

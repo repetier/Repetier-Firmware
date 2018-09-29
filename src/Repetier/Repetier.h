@@ -317,10 +317,6 @@ extern ServoInterface* servos[NUM_SERVOS];
 #define ZPROBE_MIN_TEMPERATURE ZHOME_MIN_TEMPERATURE
 #endif
 
-#if FEATURE_Z_PROBE && Z_PROBE_PIN < 0
-#error You need to define Z_PROBE_PIN to use z probe!
-#endif
-
 #if DISTORTION_CORRECTION
 #if !FEATURE_Z_PROBE
 #error Distortion correction requires the z probe feature to be enabled and configured!

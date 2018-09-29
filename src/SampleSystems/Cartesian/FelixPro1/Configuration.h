@@ -47,6 +47,7 @@
 #define JSON_OUTPUT 1
 #define FEATURE_SERVO 1
 #define FEATURE_WATCHDOG 0
+#define FEATURE_AUTOLEVEL 1
 #define FEATURE_Z_PROBE 0
 #define FEATURE_RETRACTION 1
 #define DISTORTION_CORRECTION 0
@@ -61,7 +62,8 @@
 #define G0_FEEDRATE 170              // Speed for G0 moves. Independent from set F value!
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
 #define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
-#define ZPROBE_TYPE 0                // 0 = no z probe, 1 = default z probe
+#define ZPROBE_TYPE 1                // 0 = no z probe, 1 = default z probe
+#define ZPROBE_BORDER 2              // Safety border to ensure position is allowed
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta
 #define PRINTER_TYPE 0
 // If all axis end stops are hardware based we can skip the time consuming tests each step
@@ -174,11 +176,16 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define Y_HOME_DIR 1
 #define Z_HOME_DIR -1
 #define X_MAX_LENGTH 240
-#define Y_MAX_LENGTH 245
+#define Y_MAX_LENGTH 240
 #define Z_MAX_LENGTH 225
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
+#define BED_X_MIN X_MIN_POS
+#define BED_X_MAX (X_MIN_POS + X_MAX_LENGTH)
+#define BED_Y_MIN Y_MIN_POS
+#define BED_Y_MAX (Y_MIN_POS + Y_MAX_LENGTH)
+
 // Park position used when pausing from firmware side
 #if PRINTER_TYPE == 2
 #define PARK_POSITION_X (0)
@@ -359,21 +366,25 @@ It also can add a delay to wait for spindle to run on full speed.
 #define HOMING_FEEDRATE_X 80
 #define HOMING_FEEDRATE_Y 80
 #define HOMING_FEEDRATE_Z 10
-#define ZHOME_PRE_RAISE 0
-#define ZHOME_PRE_RAISE_DISTANCE 10
+// Raise z before homing (1)
+#define ZHOME_PRE_RAISE 1
+// How much mm should z raise before homing
+#define ZHOME_PRE_RAISE_DISTANCE 2
 #define ZHOME_MIN_TEMPERATURE 0
 #define ZHOME_HEAT_ALL 0
+// Height in mm after homing.
 #define ZHOME_HEIGHT 10
+// Home Z at a fixed xy position (1)
 #define FIXED_Z_HOME_POSITION 1
 #define ZHOME_X_POS 140
 #define ZHOME_Y_POS 45
+// Raise extruders before switching tools. Used to prevent touching objects while switching.
 #define RAISE_Z_ON_TOOLCHANGE 2
+
 #define ENABLE_BACKLASH_COMPENSATION 0
 #define X_BACKLASH 0
 #define Y_BACKLASH 0
 #define Z_BACKLASH 0
-#define RAMP_ACCELERATION 1
-#define STEPPER_HIGH_DELAY 0
 #define DIRECTION_DELAY 0
 #define INTERPOLATE_ACCELERATION_WITH_Z 1
 #define ACCELERATION_FACTOR_TOP 75
@@ -399,30 +410,28 @@ It also can add a delay to wait for spindle to run on full speed.
 
 // #################### Z-Probing #####################
 
-#define Z_PROBE_Z_OFFSET 0.05
+#define Z_PROBE_COATING 0
 #define Z_PROBE_Z_OFFSET_MODE 1
 #define UI_BED_COATING 1
 #define EXTRUDER_IS_Z_PROBE 1
 #define Z_PROBE_DISABLE_HEATERS 1
 #define Z_PROBE_BED_DISTANCE 3
-#define Z_PROBE_PIN ORIG_Z_MIN_PIN
-#define Z_PROBE_PULLUP 0
-#define Z_PROBE_ON_HIGH 1
 #define Z_PROBE_X_OFFSET 0
 #define Z_PROBE_Y_OFFSET 0
-#define Z_PROBE_WAIT_BEFORE_TEST 0
 #define Z_PROBE_SPEED 2
-#define Z_PROBE_XY_SPEED 150
 #define Z_PROBE_SWITCHING_DISTANCE 1
-#define Z_PROBE_REPETITIONS 1
-#define Z_PROBE_HEIGHT 0
+// How often should we test a position 1 .. x. Averages result over all tests.
+#define Z_PROBE_REPETITIONS 3
+// Nozzle distance to bed when z probe triggers
+#define Z_PROBE_HEIGHT -0.15
+// Delay in ms before we go down again. For BLTouch so signal can disable
 #define Z_PROBE_DELAY 0
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
 #define Z_PROBE_RUN_AFTER_EVERY_PROBE ""
 #define Z_PROBE_REQUIRES_HEATING 1
 #define Z_PROBE_MIN_TEMPERATURE 150
-#define FEATURE_AUTOLEVEL 1
+
 #define FEATURE_SOFTWARE_LEVELING 0
 #define Z_PROBE_X1 60
 #define Z_PROBE_Y1 130

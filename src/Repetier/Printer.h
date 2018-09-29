@@ -107,7 +107,6 @@ public:
 #define PRINTER_FLAG0_TEMPSENSOR_DEFECT 4
 #define PRINTER_FLAG0_FORCE_CHECKSUM 8
 #define PRINTER_FLAG0_MANUAL_MOVE_MODE 16
-#define PRINTER_FLAG0_AUTOLEVEL_ACTIVE 32
 #define PRINTER_FLAG0_ZPROBEING 64
 // #define PRINTER_FLAG0_LARGE_MACHINE 128
 #define PRINTER_FLAG1_HOMED_ALL 1
@@ -594,10 +593,6 @@ public:
     static INLINE void setManualMoveMode(bool on) {
         flag0 = (on ? flag0 | PRINTER_FLAG0_MANUAL_MOVE_MODE : flag0 & ~PRINTER_FLAG0_MANUAL_MOVE_MODE);
     }
-    static INLINE bool isAutolevelActive() {
-        return (flag0 & PRINTER_FLAG0_AUTOLEVEL_ACTIVE) != 0;
-    }
-    static void setAutolevelActive(bool on);
     static INLINE void setZProbingActive(bool on) {
         flag0 = (on ? flag0 | PRINTER_FLAG0_ZPROBEING : flag0 & ~PRINTER_FLAG0_ZPROBEING);
     }

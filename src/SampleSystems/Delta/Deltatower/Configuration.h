@@ -100,6 +100,7 @@ to the position. 0 = no contribution. */
 #define DELTA_DIAGONAL 444.800f
 #define DELTA_HORIZONTAL_RADIUS 209.900f
 #define DELTA_PRINT_RADIUS 209.0f
+#define BED_RADIUS 200.0f
 #define DELTA_ANGLE_A 210.0f
 #define DELTA_ANGLE_B 330.0f
 #define DELTA_ANGLE_C 90.123f

@@ -318,7 +318,7 @@ bool runBedLeveling(int s) {
     bool distEnabled = Printer::distortion.isEnabled();
     Printer::distortion.disable(false); // if level has changed, distortion is also invalid
 #endif
-    Printer::setAutolevelActive(false);       // iterate
+    Motion1::setAutolevelActive(false);       // iterate
     Printer::resetTransformationMatrix(true); // in case we switch from matrix to motorized!
 #if DRIVE_SYSTEM == DELTA
     // It is not possible to go to the edges at the top, also users try
@@ -402,12 +402,12 @@ bool runBedLeveling(int s) {
     Printer::updateDerivedParameter();
     Printer::finishProbing();
 #if BED_CORRECTION_METHOD != 1
-    Printer::setAutolevelActive(true); // only for software correction or we can spare the comp. time
+    Motion1::setAutolevelActive(true); // only for software correction or we can spare the comp. time
 #endif
     if (s >= 2) {
         EEPROM::storeDataIntoEEPROM();
     }
-    Commands::printCurrentPosition();
+    Motion1::printCurrentPosition();
 #if DISTORTION_CORRECTION
     if (distEnabled)
         Printer::distortion.enable(false); // if level has changed, distortion is also invalid
@@ -437,21 +437,6 @@ bool runBedLeveling(int s) {
 
 #endif
 
-/** \brief Activate or deactivate rotation correction.
-
-\param on True if Rotation correction should be enabled.
-*/
-void Printer::setAutolevelActive(bool on) {
-#if FEATURE_AUTOLEVEL
-    if (on == isAutolevelActive())
-        return;
-    flag0 = (on ? flag0 | PRINTER_FLAG0_AUTOLEVEL_ACTIVE : flag0 & ~PRINTER_FLAG0_AUTOLEVEL_ACTIVE);
-    if (on)
-        Com::printInfoFLN(Com::tAutolevelEnabled);
-    else
-        Com::printInfoFLN(Com::tAutolevelDisabled);
-#endif // FEATURE_AUTOLEVEL
-}
 #if MAX_HARDWARE_ENDSTOP_Z
 /** \brief Measure distance from current position until triggering z max endstop.
 
@@ -671,7 +656,7 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
         return ILLEGAL_Z_PROBE;
     }
     //Com::printFLN(PSTR("after probe"));
-    //Commands::printCurrentPosition();
+    //Motion1::printCurrentPosition();
     float distance = static_cast<float>(sum) * invAxisStepsPerMM[Z_AXIS] / static_cast<float>(repeat) + EEPROM::zProbeHeight();
 #if FEATURE_AUTOLEVEL
     // we must change z for the z change from moving in rotated coordinates away from real position

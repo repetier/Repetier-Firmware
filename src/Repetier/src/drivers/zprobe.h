@@ -3,6 +3,7 @@
 class ZProbeHandler {
 public:
     static float getZProbeHeight() { return 0; }
+    static void setZProbeHeight(float height) {}
     static void activate() {}
     static void deactivate() {}
     static float runProbe() { return 0; }
@@ -14,17 +15,11 @@ public:
     static void eepromReset() {}
     static float getCoating() { return 0; }
     static void setCoating(float val) {}
+    static float getBedDistance() { return 0; }
 };
 
 #elif ZPROBE_TYPE == 1
 
-#define EPR_Z_PROBE_HEIGHT 0
-#define EPR_Z_PROBE_BED_DISTANCE 4
-#define EPR_Z_PROBE_SPEED 8
-#define EPR_Z_PROBE_X_OFFSET 12
-#define EPR_Z_PROBE_Y_OFFSET 16
-#define EPR_Z_PROBE_MEMORY 20
-// TODO: Real z probe ZProbeHandler
 class ZProbeHandler {
     static uint16_t eprStart;
     static float height;
@@ -37,6 +32,7 @@ class ZProbeHandler {
 
 public:
     static float getZProbeHeight();
+    static void setZProbeHeight(float height);
     static void activate();
     static void deactivate();
     static float runProbe();
@@ -45,9 +41,10 @@ public:
     static float yOffset();
     static void init();
     static void eepromHandle();
-    static void eepromReset() {}
+    static void eepromReset();
     static float getCoating() { return coating; }
     static void setCoating(float val) { coating = val; }
+    static float getBedDistance() { return bedDistance; }
 };
 
 #else
