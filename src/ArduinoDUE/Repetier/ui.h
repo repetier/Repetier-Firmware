@@ -252,6 +252,7 @@
 #define UI_ACTION_MEASURE_ZP_REALZ      1240
 #define UI_ACTION_Z_OFFSET              1241
 #define UI_ACTION_TOGGLE_JAMCONTROL     1242
+#define UI_ACTION_RESET_EEPROM          1243
 
 // 1500-1699 reserved for custom actions
 

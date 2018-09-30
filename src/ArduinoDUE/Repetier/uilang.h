@@ -98,7 +98,7 @@
 #define LANGUAGE_FI_ID 11
 
 #define NUM_LANGUAGES_KNOWN 12
-#define NUM_TRANSLATED_WORDS 311
+#define NUM_TRANSLATED_WORDS 314
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -418,6 +418,10 @@
 #define UI_TEXT_MAINPAGE6_4_C_ID 308 //""Mul: %om%%% Laser %op W"
 #define UI_TEXT_MAINPAGE6_4_L_ID 309 //""Mul: %om%%% Spindle %opRPM"
 #define UI_TEXT_JAMCONTROL_ID 310 // "%ej Jam Control
+#define UI_TEXT_RESET_EEPROM_ID 311
+#define UI_TEXT_EEPROM_RESETEDA_ID 312
+#define UI_TEXT_EEPROM_RESETEDB_ID 313
+
 // Universal definitions
 
 #define UI_TEXT_SEL              cSEL
@@ -598,6 +602,9 @@
 #define UI_TEXT_EEPROM_STOREDB_EN     "stored in EEPROM"
 #define UI_TEXT_EEPROM_LOADEDA_EN     "Configuration"
 #define UI_TEXT_EEPROM_LOADEDB_EN     "loaded f. EEPROM"
+#define UI_TEXT_RESET_EEPROM_EN       "Reset EEPROM"
+#define UI_TEXT_EEPROM_RESETEDA_EN    "Configuration"
+#define UI_TEXT_EEPROM_RESETEDB_EN    "Reset from Config"
 #define UI_TEXT_UPLOADING_EN         "Uploading..."
 #define UI_TEXT_PAGE_BUFFER_EN       "Buffer:%oB"
 #define UI_TEXT_PAGE_EXTRUDER_EN     " E:%ec/%Ec" cDEG "C" cARROW "%oC"
@@ -933,6 +940,9 @@
 #define UI_TEXT_EEPROM_STOREDB_DE     "gespeichert."
 #define UI_TEXT_EEPROM_LOADEDA_DE     "Konfiguration"
 #define UI_TEXT_EEPROM_LOADEDB_DE     "geladen."
+#define UI_TEXT_RESET_EEPROM_DE       "Reset EEPROM"
+#define UI_TEXT_EEPROM_RESETEDA_DE    "Konfiguration"
+#define UI_TEXT_EEPROM_RESETEDB_DE    "wieder hergestellt"
 #define UI_TEXT_UPLOADING_DE         "Hochladen..."
 #define UI_TEXT_PAGE_BUFFER_DE       "Puffer:%oB"
 #define UI_TEXT_PAGE_EXTRUDER_DE     " E:%ec/%Ec" cDEG "C" cARROW "%oC"
@@ -1273,6 +1283,9 @@
 #define UI_TEXT_EEPROM_STOREDB_NL     "Opgeslagen in EEPROM"
 #define UI_TEXT_EEPROM_LOADEDA_NL     "Configuratie"
 #define UI_TEXT_EEPROM_LOADEDB_NL     "EEPROM ingeladen"
+#define UI_TEXT_RESET_EEPROM_NL       "Reset EEPROM"
+#define UI_TEXT_EEPROM_RESETEDA_NL    "Configuration"
+#define UI_TEXT_EEPROM_RESETEDB_NL    "Reset from Config"
 #define UI_TEXT_UPLOADING_NL         "Uploaden..."
 #define UI_TEXT_PAGE_BUFFER_NL       "Buffer:%oB"
 #define UI_TEXT_PAGE_EXTRUDER_NL     " E:%ec/%Ec" cDEG "C" cARROW "%oC"
@@ -1608,6 +1621,9 @@
 #define UI_TEXT_EEPROM_STOREDB_PT     "armazenada na EEPROM"
 #define UI_TEXT_EEPROM_LOADEDA_PT     "Configuracao"
 #define UI_TEXT_EEPROM_LOADEDB_PT     "carregada da EEPROM"
+#define UI_TEXT_RESET_EEPROM_PT       "Reset EEPROM"
+#define UI_TEXT_EEPROM_RESETEDA_PT    "Configuration"
+#define UI_TEXT_EEPROM_RESETEDB_PT    "Reset from Config"
 #define UI_TEXT_UPLOADING_PT         "Enviando..."
 #define UI_TEXT_PAGE_BUFFER_PT       "Buffer:%oB"
 #define UI_TEXT_PAGE_EXTRUDER_PT     " E:%ec/%Ec" cDEG "C" cARROW "%oC"
@@ -1943,6 +1959,9 @@
 #define UI_TEXT_EEPROM_STOREDB_IT     "Salvata in EEPROM"
 #define UI_TEXT_EEPROM_LOADEDA_IT     "Configurazione"
 #define UI_TEXT_EEPROM_LOADEDB_IT     "Caricata da EEPROM"
+#define UI_TEXT_RESET_EEPROM_IT       "Reset EEPROM"
+#define UI_TEXT_EEPROM_RESETEDA_IT    "Configuration"
+#define UI_TEXT_EEPROM_RESETEDB_IT    "Reset from Config"
 #define UI_TEXT_UPLOADING_IT         "Caricamento..."
 #define UI_TEXT_PAGE_BUFFER_IT       "Tampone:%oB"
 #define UI_TEXT_PAGE_EXTRUDER_IT     " E:%ec/%Ec" cDEG "C" cARROW "%oC"
@@ -2278,6 +2297,9 @@
 #define UI_TEXT_EEPROM_STOREDB_ES     "almacenada en EEPROM"
 #define UI_TEXT_EEPROM_LOADEDA_ES     "Config."
 #define UI_TEXT_EEPROM_LOADEDB_ES     "cargada de EEPROM"
+#define UI_TEXT_RESET_EEPROM_ES       "Reset EEPROM"
+#define UI_TEXT_EEPROM_RESETEDA_ES    "Configuration"
+#define UI_TEXT_EEPROM_RESETEDB_ES    "Reset from Config"
 #define UI_TEXT_UPLOADING_ES         "Actualizando..."
 #define UI_TEXT_PAGE_BUFFER_ES       "Buffer:%oB"
 #define UI_TEXT_PAGE_EXTRUDER_ES     " E:%ec/%Ec" cDEG "C" cARROW "%oC"
@@ -2615,6 +2637,9 @@
 #define UI_TEXT_EEPROM_STOREDB_SE     "sparad i EEPROM"
 #define UI_TEXT_EEPROM_LOADEDA_SE     "Konfiguration"
 #define UI_TEXT_EEPROM_LOADEDB_SE     "laddat fr. EEPROM"
+#define UI_TEXT_RESET_EEPROM_SE       "Reset EEPROM"
+#define UI_TEXT_EEPROM_RESETEDA_SE    "Configuration"
+#define UI_TEXT_EEPROM_RESETEDB_SE    "Reset from Config"
 #define UI_TEXT_UPLOADING_SE         "Uppladdning..."
 #define UI_TEXT_PAGE_BUFFER_SE       "Buffer:%oB"
 #define UI_TEXT_PAGE_EXTRUDER_SE     " E:%ec/%Ec" cDEG "C" cARROW "%oC"
@@ -2954,6 +2979,9 @@
 #define UI_TEXT_EEPROM_STOREDB_FR     "Stock. => EEPROM"
 #define UI_TEXT_EEPROM_LOADEDA_FR     "Configuration"
 #define UI_TEXT_EEPROM_LOADEDB_FR     "Charg. <= EEPROM"
+#define UI_TEXT_RESET_EEPROM_FR       "Reset EEPROM"
+#define UI_TEXT_EEPROM_RESETEDA_FR    "Configuration"
+#define UI_TEXT_EEPROM_RESETEDB_FR    "Reset from Config"
 #define UI_TEXT_UPLOADING_FR         "Telechargement.."
 #define UI_TEXT_PAGE_BUFFER_FR       "Tampon:%oB"
 #define UI_TEXT_PAGE_EXTRUDER_FR     " E:%ec/%Ec\002C\176%oC"
@@ -3292,6 +3320,9 @@
 #define UI_TEXT_EEPROM_STOREDB_CZ     "Ulozena v EEPROM"
 #define UI_TEXT_EEPROM_LOADEDA_CZ     "Konfigurace"
 #define UI_TEXT_EEPROM_LOADEDB_CZ     "Nactena z EEPROM"
+#define UI_TEXT_RESET_EEPROM_CZ       "Reset EEPROM"
+#define UI_TEXT_EEPROM_RESETEDA_CZ    "Configuration"
+#define UI_TEXT_EEPROM_RESETEDB_CZ    "Reset from Config"
 #define UI_TEXT_UPLOADING_CZ         "Nahravam..."
 #define UI_TEXT_PAGE_BUFFER_CZ       "Buffer:%oB"
 #define UI_TEXT_PAGE_EXTRUDER_CZ     " E:%ec/%Ec\002C\176%oC"
@@ -3629,6 +3660,9 @@
 #define UI_TEXT_EEPROM_STOREDB_PL     "zapisana do EEPROM"
 #define UI_TEXT_EEPROM_LOADEDA_PL     "Konfiguracja"
 #define UI_TEXT_EEPROM_LOADEDB_PL     "odczytana z EEPROM"
+#define UI_TEXT_RESET_EEPROM_PL       "Reset EEPROM"
+#define UI_TEXT_EEPROM_RESETEDA_PL    "Configuration"
+#define UI_TEXT_EEPROM_RESETEDB_PL    "Reset from Config"
 #define UI_TEXT_UPLOADING_PL         "Ladowanie..."
 #define UI_TEXT_PAGE_BUFFER_PL       "Bufor:%oB"
 #define UI_TEXT_PAGE_EXTRUDER_PL     " E:%ec/%Ec" cDEG "C" cARROW "%oC"
@@ -3963,6 +3997,9 @@
 #define UI_TEXT_EEPROM_STOREDB_TR     "EEPROM'a kaydedildi"
 #define UI_TEXT_EEPROM_LOADEDA_TR     "Konfigurasyon"
 #define UI_TEXT_EEPROM_LOADEDB_TR     "EEPROM'dan cagrildi"
+#define UI_TEXT_RESET_EEPROM_TR       "Reset EEPROM"
+#define UI_TEXT_EEPROM_RESETEDA_TR    "Configuration"
+#define UI_TEXT_EEPROM_RESETEDB_TR    "Reset from Config"
 #define UI_TEXT_UPLOADING_TR         "Yukluyor..."
 #define UI_TEXT_PAGE_BUFFER_TR       "Onbellek:%oB"
 #define UI_TEXT_PAGE_EXTRUDER_TR     " E:%ec/%Ec" cDEG "C" cARROW "%oC"
@@ -4297,6 +4334,9 @@
 #define UI_TEXT_EEPROM_STOREDB_FI     "Tallennettu EEPROM"
 #define UI_TEXT_EEPROM_LOADEDA_FI     "Kokoonpano"
 #define UI_TEXT_EEPROM_LOADEDB_FI     "Ladattu EEPROM"
+#define UI_TEXT_RESET_EEPROM_FI       "Reset EEPROM"
+#define UI_TEXT_EEPROM_RESETEDA_FI    "Configuration"
+#define UI_TEXT_EEPROM_RESETEDB_FI    "Reset from Config"
 #define UI_TEXT_UPLOADING_FI         "Ladataan..."
 #define UI_TEXT_PAGE_BUFFER_FI       "Puskuri:%oB"
 #define UI_TEXT_PAGE_EXTRUDER_FI     " E:%ec/%Ec" cDEG "C" cARROW "%oC"

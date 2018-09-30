@@ -757,12 +757,6 @@ void cExecute(int action,bool allowMoves) {
     cZPHeight1();
     break;
 #endif
-  case UI_ACTION_RESET_EEPROM:
-#if EEPROM_MODE != 0  
-    EEPROM::restoreEEPROMSettingsFromConfiguration();
-    EEPROM::storeDataIntoEEPROM(false);
-#endif    
-    break;   
   case UI_ACTION_EXTRXY_V2:
     uid.pushMenu(&cui_msg_preparing,true);
     if (!Printer::isHomedAll()) {

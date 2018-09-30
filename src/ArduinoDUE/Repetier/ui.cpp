@@ -3522,6 +3522,12 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
             pushMenu(&ui_menu_eeprom_loaded, false);
             BEEP_LONG;
             break;
+		case UI_ACTION_RESET_EEPROM:
+		    EEPROM::restoreEEPROMSettingsFromConfiguration();
+		    EEPROM::storeDataIntoEEPROM(false);
+            pushMenu(&ui_menu_eeprom_reset, false);
+            BEEP_LONG;
+			break;
 #endif
 #if SDSUPPORT
         case UI_ACTION_SD_DELETE:

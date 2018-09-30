@@ -87,7 +87,7 @@ extern bool cCustomParser(char c1, char c2);
 #define UI_ACTION_START_CZREFH  1548
 #define UI_ACTION_CZREFH_INFO   1549
 #define UI_ACTION_CZREFH_SUCC   1550
-#define UI_ACTION_RESET_EEPROM  1551
+// #define UI_ACTION_RESET_EEPROM  1551
 #define UI_ACTION_EXTRXY_V2     1552
 #define UI_ACTION_EXTRXY_V2_1   1553
 

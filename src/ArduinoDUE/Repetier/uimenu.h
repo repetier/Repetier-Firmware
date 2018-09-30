@@ -1298,10 +1298,12 @@ UI_MENU_SUBMENU_T(ui_menu_conf_bed,    UI_TEXT_HEATING_BED_ID,  ui_menu_bedconf)
 #if EEPROM_MODE!=0
 UI_MENU_ACTIONCOMMAND_T(ui_menu_conf_to_eeprom, UI_TEXT_STORE_TO_EEPROM_ID, UI_ACTION_STORE_EEPROM)
 UI_MENU_ACTIONCOMMAND_T(ui_menu_conf_from_eeprom, UI_TEXT_LOAD_EEPROM_ID, UI_ACTION_LOAD_EEPROM)
-#define UI_MENU_EEPROM_COND ,&ui_menu_conf_to_eeprom,&ui_menu_conf_from_eeprom
-#define UI_MENU_EEPROM_CNT 2
+UI_MENU_ACTIONCOMMAND_T(ui_menu_conf_reset_eeprom, UI_TEXT_RESET_EEPROM_ID, UI_ACTION_RESET_EEPROM)
+#define UI_MENU_EEPROM_COND ,&ui_menu_conf_to_eeprom,&ui_menu_conf_from_eeprom,&ui_menu_conf_reset_eeprom
+#define UI_MENU_EEPROM_CNT 3
 UI_MENU_ACTION2_T(ui_menu_eeprom_saved,  UI_ACTION_DUMMY, UI_TEXT_EEPROM_STOREDA_ID, UI_TEXT_EEPROM_STOREDB_ID)
 UI_MENU_ACTION2_T(ui_menu_eeprom_loaded, UI_ACTION_DUMMY, UI_TEXT_EEPROM_LOADEDA_ID, UI_TEXT_EEPROM_LOADEDB_ID)
+UI_MENU_ACTION2_T(ui_menu_eeprom_reset, UI_ACTION_DUMMY, UI_TEXT_EEPROM_RESETEDA_ID, UI_TEXT_EEPROM_RESETEDB_ID)
 #else
 #define UI_MENU_EEPROM_COND
 #define UI_MENU_EEPROM_CNT 0
