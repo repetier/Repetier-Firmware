@@ -1262,6 +1262,14 @@ public:
     static void prepareForProbing();
 #endif
 #if defined(DRV_TMC2130)
+#define TRINAMIC_WAIT_RESOLUTION_uS 100
+/// Wait for boolean 'condition' to become true until 'timeout' (in miliseconds)
+#define WAIT_UNTIL(condition, timeout) \
+for(uint16_t count = 0; !condition || count < ((uint16_t)timeout * (uint16_t)1000 / (uint16_t)TRINAMIC_WAIT_RESOLUTION_uS); count++) { \
+	HAL::delayMicroseconds(TRINAMIC_WAIT_RESOLUTION_uS); \
+}
+/// Wait for driver standstill condition until timeout (in miliseconds)
+#define TRINAMIC_WAIT_FOR_STANDSTILL(driver, timeout) WAIT_UNTIL(driver->stst(), timeout)
     static void configTMC2130(TMC2130Stepper* tmc_driver, bool tmc_stealthchop, int8_t tmc_sgt,
       uint8_t tmc_pwm_ampl, uint8_t tmc_pwm_grad, bool tmc_pwm_autoscale, uint8_t tmc_pwm_freq);
     static void tmcPrepareHoming(TMC2130Stepper* tmc_driver, uint32_t coolstep_sp_min);
