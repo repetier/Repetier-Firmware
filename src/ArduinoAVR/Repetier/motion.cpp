@@ -2725,23 +2725,17 @@ int32_t PrintLine::bresenhamStep() { // version for Cartesian printer
                 Extruder::step();
             cur->error[E_AXIS] += cur_errupd;
         }
-#if CPU_ARCH == ARCH_AVR
         if(cur->isXMove())
-#endif
             if((cur->error[X_AXIS] -= cur->delta[X_AXIS]) < 0) {
                 cur->startXStep();
                 cur->error[X_AXIS] += cur_errupd;
             }
-#if CPU_ARCH == ARCH_AVR
         if(cur->isYMove())
-#endif
             if((cur->error[Y_AXIS] -= cur->delta[Y_AXIS]) < 0) {
                 cur->startYStep();
                 cur->error[Y_AXIS] += cur_errupd;
             }
-#if CPU_ARCH == ARCH_AVR
         if(cur->isZMove())
-#endif
             if((cur->error[Z_AXIS] -= cur->delta[Z_AXIS]) < 0) {
                 cur->startZStep();
                 cur->error[Z_AXIS] += cur_errupd;
