@@ -398,12 +398,17 @@ Since temp. is negative no heating will occur. */
 void Extruder::pauseExtruders(bool bed) {
 #if NUM_EXTRUDER > 0
     disableAllExtruderMotors();
+#if SHARED_EXTRUDER_HEATER
+     extruder[0].tempControl.targetTemperatureC = -fabs(extruder[0].tempControl.targetTemperatureC);
+     pwm_pos[extruder[0].tempControl.pwmIndex] = 0;
+#else
     for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
         if(extruder[i].tempControl.targetTemperatureC > 0) {
             extruder[i].tempControl.targetTemperatureC = -fabs(extruder[i].tempControl.targetTemperatureC);
             pwm_pos[extruder[i].tempControl.pwmIndex] = 0;
         }
     }
+#endif
 #endif
 #if HAVE_HEATED_BED
     if(bed) {
@@ -416,10 +421,15 @@ void Extruder::pauseExtruders(bool bed) {
 void Extruder::unpauseExtruders(bool wait) {
 #if NUM_EXTRUDER > 0
     // activate temperatures
+#if SHARED_EXTRUDER_HEATER
+   if(extruder[0].tempControl.targetTemperatureC < 0)
+        extruder[0].tempControl.targetTemperatureC = -extruder[0].tempControl.targetTemperatureC;
+#else
     for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
         if(extruder[i].tempControl.targetTemperatureC < 0)
             extruder[i].tempControl.targetTemperatureC = -extruder[i].tempControl.targetTemperatureC;
     }
+#endif
 #endif
 #if HAVE_HEATED_BED
     bool waitBed = false;
@@ -469,6 +479,7 @@ void Extruder::markAllUnjammed() {
     Printer::unsetAnyTempsensorDefect(); // stop alarm
     Com::printInfoFLN(PSTR("Marked all extruders as unjammed."));
     Printer::setUIErrorMessage(false);
+	UI_ERROR("");
 }
 
 void Extruder::resetJamSteps() {
