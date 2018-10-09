@@ -1502,7 +1502,7 @@ void UIDisplay::parse(const char *txt, bool ram) {
         case 'l':
             if(c2 == 'a') addInt(lastAction, 4);
 #if defined(CASE_LIGHTS_PIN) && CASE_LIGHTS_PIN >= 0
-            else if(c2 == 'o') addStringOnOff(READ(CASE_LIGHTS_PIN));        // Lights on/off
+            else if(c2 == 'o') addStringOnOff(Printer::lightOn);        // Lights on/off
 #endif
 #if FEATURE_AUTOLEVEL
             else if(c2 == 'l') addStringOnOff((Printer::isAutolevelActive()));        // Autolevel on/off
@@ -3393,7 +3393,8 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
         break;
 #if CASE_LIGHTS_PIN >= 0
         case UI_ACTION_LIGHTS_ONOFF:
-            TOGGLE(CASE_LIGHTS_PIN);
+			Printer::lightOn = !Printer::lightOn;
+            WRITE(CASE_LIGHTS_PIN, Printer::lightOn);
 #ifdef CASE_LIGHTS2_PIN
             TOGGLE(CASE_LIGHTS2_PIN);
 #endif

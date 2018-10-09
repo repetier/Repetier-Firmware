@@ -193,6 +193,9 @@ fast8_t Printer::multiYHomeFlags;  // 1 = move Y0, 2 = move Y1
 #if MULTI_ZENDSTOP_HOMING
 fast8_t Printer::multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
 #endif
+#if CASE_LIGHTS_PIN > -1
+fast8_t Printer::lightOn;
+#endif
 #ifdef DEBUG_PRINT
 int debugWaitLoop = 0;
 #endif
@@ -1114,6 +1117,7 @@ void Printer::setup() {
 #if CASE_LIGHTS_PIN >= 0
     SET_OUTPUT(CASE_LIGHTS_PIN);
     WRITE(CASE_LIGHTS_PIN, CASE_LIGHT_DEFAULT_ON);
+	lightOn = CASE_LIGHT_DEFAULT_ON;
 #endif // CASE_LIGHTS_PIN
 #if defined(UI_VOLTAGE_LEVEL) && defined(EXP_VOLTAGE_LEVEL_PIN) && EXP_VOLTAGE_LEVEL_PIN >-1
     SET_OUTPUT(EXP_VOLTAGE_LEVEL_PIN);
@@ -2114,13 +2118,14 @@ void Printer::zBabystep() {
 void Printer::setCaseLight(bool on) {
 #if CASE_LIGHTS_PIN > -1
     WRITE(CASE_LIGHTS_PIN, on);
+	lightOn = on;
     reportCaseLightStatus();
 #endif
 }
 
 void Printer::reportCaseLightStatus() {
 #if CASE_LIGHTS_PIN > -1
-    if(READ(CASE_LIGHTS_PIN))
+    if(lightOn)
         Com::printInfoFLN(PSTR("Case lights on"));
     else
         Com::printInfoFLN(PSTR("Case lights off"));

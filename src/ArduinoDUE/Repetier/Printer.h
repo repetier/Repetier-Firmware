@@ -387,6 +387,9 @@ public:
 #if MULTI_ZENDSTOP_HOMING || defined(DOXYGEN)
 	static fast8_t multiZHomeFlags;  // 1 = move Z0, 2 = move Z1
 #endif
+#if CASE_LIGHTS_PIN > -1
+	static fast8_t lightOn;
+#endif
     static float memoryX;
     static float memoryY;
     static float memoryZ;
