@@ -211,7 +211,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 
 #include "Configuration.h"
 
-#if (LASvfaER_PWM_MAX > 255 && SUPPORT_LASER) || (CNC_PWM_MAX > 255 && SUPPORT_CNC)
+#if (LASER_PWM_MAX > 255 && SUPPORT_LASER) || (CNC_PWM_MAX > 255 && SUPPORT_CNC)
 typedef uint16_t secondspeed_t;
 #else
 typedef uint8_t secondspeed_t;
