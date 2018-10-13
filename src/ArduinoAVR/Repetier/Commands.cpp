@@ -1020,7 +1020,7 @@ void Commands::processGCode(GCode *com) {
         // disable laser for G0 moves
         bool laserOn = LaserDriver::laserOn;
         if(Printer::mode == PRINTER_MODE_LASER) {
-            if(com->G == 0) {
+            if(com->G == 0 || (!LaserDriver::laserOn && !com->hasE())) {
                 LaserDriver::laserOn = false;
                 LaserDriver::firstMove = true; //set G1 flag for Laser
             } else {
