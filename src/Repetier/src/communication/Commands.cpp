@@ -19,7 +19,7 @@ by kliment (https://github.com/kliment/Sprinter)
 which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 int Commands::lowestRAMValue = MAX_RAM;
 int Commands::lowestRAMValueSend = MAX_RAM;

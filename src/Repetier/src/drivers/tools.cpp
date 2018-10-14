@@ -1,4 +1,4 @@
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 #ifndef NUM_TOOLS
 #error "Number of tools NUM_TOOLS not defined."

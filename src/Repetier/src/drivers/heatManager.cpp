@@ -1,4 +1,4 @@
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 HeatManager* heaters[] = HEATERS;
 

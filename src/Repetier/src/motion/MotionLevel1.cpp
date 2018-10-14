@@ -16,7 +16,7 @@
 
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 uint8_t axisBits[NUM_AXES];
 uint8_t allAxes;

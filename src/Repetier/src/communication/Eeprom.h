@@ -29,6 +29,7 @@
 #define EEPROM_SIGNATURE_LASER 8
 #define EEPROM_SIGNATURE_CNC 9
 #define EEPROM_SIGNATURE_CARTESIAN 10
+#define EEPROM_SIGNATURE_GRID_LEVELING 11
 
 #define EPR_MAGIC_BYTE 0
 #define EPR_INTEGRITY_BYTE 1         // Here the xored sum over eeprom is stored
@@ -63,6 +64,7 @@ enum EEPROMType {
 class EEPROM {
     static fast8_t mode;  // 0 = output, 1 = set var, 2 = store to eeprom, 3 = read from eeprom
     static uint storePos; // where does M206 want to store
+    static bool silent;
     static EEPROMType storeType;
     static EEPROMVar storeVar;
     static void callHandle();
@@ -78,6 +80,7 @@ public:
     /// Start a timer to store everything to eeprom
 
 public:
+    static void setSilent(bool s) { silent = s; }
     static void init();
     static void markChanged();
     static void initBaudrate();

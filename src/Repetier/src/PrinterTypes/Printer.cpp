@@ -101,7 +101,7 @@ void FirmwareEvent::handleEvents() {
         FirmwareEvent& act = eventList[start];
 #undef IO_TARGET
 #define IO_TARGET 14
-#include "src/io/redefine.h"
+#include "io/redefine.h"
         {
             InterruptProtectedBlock lock;
             start++;
@@ -481,12 +481,14 @@ void Printer::setup() {
     // Define io functions
 #undef IO_TARGET
 #define IO_TARGET 1
-#include "src/io/redefine.h"
+#include "io/redefine.h"
 
     Motion1::init();
     Motion2::init();
     Motion3::init();
     ZProbeHandler::init();
+    LevelingCorrector::init();
+    Leveling::init();
     PrinterType::init();
     Tool::initTools();
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI

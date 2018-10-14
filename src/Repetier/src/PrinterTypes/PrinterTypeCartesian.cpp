@@ -16,7 +16,7 @@
 
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 #if PRINTER_TYPE == 0
 

@@ -77,6 +77,7 @@ public:
     FSTRINGVAR(tBAxis)
     FSTRINGVAR(tCAxis)
 
+    FSTRINGVAR(tEmpty)
     FSTRINGVAR(tDebug)
     FSTRINGVAR(tFirmware)
     FSTRINGVAR(tOk)

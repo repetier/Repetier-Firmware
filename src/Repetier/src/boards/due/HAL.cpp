@@ -25,7 +25,7 @@
     Initial port of hardware abstraction layer to Arduino Due: John Silvia
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 #ifdef DUE_BOARD
 #include <malloc.h>
 
@@ -982,7 +982,7 @@ void PWM_TIMER_VECTOR() {
 // Add all generated pwm handlers
 #undef IO_TARGET
 #define IO_TARGET 2
-#include "../io/redefine.h"
+#include "io/redefine.h"
 
     counterPeriodical++;                          // Approximate a 100ms timer
     if (counterPeriodical >= PWM_COUNTER_100MS) { //  (int)(F_CPU/40960))
@@ -995,7 +995,7 @@ void PWM_TIMER_VECTOR() {
     if ((ADC->ADC_ISR & adcEnable) == adcEnable) {
 #undef IO_TARGET
 #define IO_TARGET 11
-#include "../io/redefine.h"
+#include "io/redefine.h"
         /*if (executePeriodical) {
             Com::printFLN("bed:",IOAnalogBed0.value);
         }*/

@@ -1,4 +1,4 @@
-#include "../../Repetier.h"
+#include "Repetier.h"
 #ifdef AVR_BOARD
 #include <compat/twi.h>
 

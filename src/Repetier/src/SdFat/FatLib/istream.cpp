@@ -23,7 +23,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 //  #include <ctype.h>
-#include "../../../Repetier.h"
+#include "Repetier.h"
 #include <float.h>
 #include <ctype.h>
 #include "istream.h"

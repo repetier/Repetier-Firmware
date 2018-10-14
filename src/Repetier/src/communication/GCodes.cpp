@@ -21,7 +21,7 @@
   Functions in this file are used to communicate using ascii or repetier protocol.
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 void GCode_0_1(GCode* com) {
 #if defined(G0_FEEDRATE) && G0_FEEDRATE > 0
@@ -274,24 +274,16 @@ void GCode_30(GCode* com) {
 }
 
 void GCode_31(GCode* com) {
-#if FEATURE_Z_PROBE
     // G31 display hall sensor output
-    Endstops::update();
-    Endstops::update();
-    Com::printF(Com::tZProbeState);
-    Com::printF(Endstops::zProbe() ? Com::tHSpace : Com::tLSpace);
-    Com::println();
-#endif
+    if (ZProbe != nullptr) {
+        ZProbe->update();
+        Com::printF(Com::tZProbeState);
+        Com::printFLN(ZProbe->triggered() ? Com::tHSpace : Com::tLSpace);
+    }
 }
 
 void GCode_32(GCode* com) {
-#if FEATURE_Z_PROBE
-#if FEATURE_AUTOLEVEL
-    if (!runBedLeveling(com->hasS() ? com->S : -1)) {
-        GCode::fatalError(PSTR("G32 leveling failed!"));
-    }
-#endif
-#endif
+    Leveling::execute_G32(com);
 }
 
 void GCode_33(GCode* com) {

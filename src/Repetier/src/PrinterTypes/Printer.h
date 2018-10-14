@@ -158,7 +158,7 @@ public:
     }
 };
 
-#include "src/motion/Distortion.h"
+#include "motion/Distortion.h"
 
 #ifndef DEFAULT_PRINTER_MODE
 #if NUM_TOOLS > 0

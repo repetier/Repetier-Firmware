@@ -19,7 +19,7 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 #if FEATURE_CONTROLLER != NO_CONTROLLER
 uint8_t Com::selectedLanguage;
@@ -39,6 +39,7 @@ uint8_t Com::selectedLanguage;
 #endif // FIRMWARE_URL
 
 FSTRINGVALUE(Com::tFirmware, "FIRMWARE_NAME:Repetier_" REPETIER_VERSION " COMPILED:" __DATE__ " FIRMWARE_URL:" FIRMWARE_URL " PROTOCOL_VERSION:1.0 MACHINE_TYPE:" MACHINE_TYPE " EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:4")
+FSTRINGVALUE(Com::tEmpty, "")
 FSTRINGVALUE(Com::tDebug, "Debug:")
 FSTRINGVALUE(Com::tOk, "ok")
 FSTRINGVALUE(Com::tNewline, "\r\n")

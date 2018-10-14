@@ -23,7 +23,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #if defined(__STM32F1__) || defined(__STM32F4__)
-#include "../../../Repetier.h"
+#include "Repetier.h"
 #include "SdSpiDriver.h"
 #if defined(__STM32F1__)
 #define USE_STM32_DMA 1

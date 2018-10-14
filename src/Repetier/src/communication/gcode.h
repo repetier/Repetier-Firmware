@@ -89,7 +89,7 @@ extern SDCardGCodeSource sdSource;
 #endif
 #endif
 
-class GCode // 52 uint8_ts per command needed
+class GCode // 97-99 uint8_ts per command needed
 {
     uint16_t params;
     uint16_t params2;

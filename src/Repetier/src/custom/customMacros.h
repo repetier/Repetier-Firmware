@@ -12,7 +12,7 @@ stategic places we add
 
 #undef IO_TARGET
 #define IO_TARGET <number 1-12>
-#include "/src/io/redefine.h"
+#include "io/redefine.h"
 
 redefine.h includes now all .h files in src/io which define all the 
 standard modules and then this file gets included and then

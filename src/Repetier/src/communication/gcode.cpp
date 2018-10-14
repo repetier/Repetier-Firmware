@@ -21,7 +21,7 @@
   Functions in this file are used to communicate using ascii or repetier protocol.
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 #ifndef FEATURE_CHECKSUM_FORCED
 #define FEATURE_CHECKSUM_FORCED false

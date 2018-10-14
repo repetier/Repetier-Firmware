@@ -21,7 +21,7 @@
 
 #define UILANG_CPP
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 #if UI_DISPLAY_TYPE != NO_DISPLAY
 

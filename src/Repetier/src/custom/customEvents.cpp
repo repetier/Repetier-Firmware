@@ -5,6 +5,6 @@ to copy your files as replacement of these dummies and are done.
 
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 // Add your functions/class implementations here

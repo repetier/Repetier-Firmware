@@ -26,7 +26,7 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include "../../../Repetier.h"
+#include "Repetier.h"
 #include "SdSpiDriver.h"
 #if defined(__SAM3X8E__) || defined(__SAM3X8H__)
 /** Use SAM3X DMAC if nonzero */

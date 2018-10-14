@@ -1,10 +1,10 @@
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 #define CELSIUS_EXTRA_BITS 3
-#define TEMP_INT_TO_FLOAT(temp) ((float)(temp)/(float)(1<<CELSIUS_EXTRA_BITS))
-#define TEMP_FLOAT_TO_INT(temp) ((int)((temp)*(1<<CELSIUS_EXTRA_BITS)))
+#define TEMP_INT_TO_FLOAT(temp) ((float)(temp) / (float)(1 << CELSIUS_EXTRA_BITS))
+#define TEMP_FLOAT_TO_INT(temp) ((int)((temp) * (1 << CELSIUS_EXTRA_BITS)))
 
-float IOTemperatureTable::interpolateNTC(int value, fast8_t num, const short *temptable) {
+float IOTemperatureTable::interpolateNTC(int value, fast8_t num, const short* temptable) {
     num <<= 1;
     fast8_t i = 2;
     int oldraw = pgm_read_word(&temptable[0]);
@@ -26,7 +26,7 @@ float IOTemperatureTable::interpolateNTC(int value, fast8_t num, const short *te
     return TEMP_INT_TO_FLOAT(newtemp);
 }
 
-float IOTemperatureTable::interpolatePTC(int value, fast8_t num, const short *temptable) {
+float IOTemperatureTable::interpolatePTC(int value, fast8_t num, const short* temptable) {
     num <<= 1;
     fast8_t i = 2;
     int oldraw = pgm_read_word(&temptable[0]);

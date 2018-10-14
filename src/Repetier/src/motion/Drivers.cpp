@@ -1,4 +1,4 @@
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 #if defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS > 0
 MOTOR_DRIVER_1(motorDriver1);

@@ -16,7 +16,7 @@
 
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 void CoolerManagerHeater::update() {
     float temp = RMath::max(heater->getTargetTemperature(), heater->getCurrentTemperature());

@@ -180,8 +180,8 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define ANALOG_REF_INT_2_56 _BV(REFS0) | _BV(REFS1)
 #define ANALOG_REF ANALOG_REF_AVCC
 
-#include "src/utilities/RMath.h"
-#include "src/utilities/RVector3.h"
+#include "utilities/RMath.h"
+#include "utilities/RVector3.h"
 extern void updateEndstops();
 
 #define HOME_ORDER_XYZ 1
@@ -247,7 +247,7 @@ public:
     virtual void disable();
 };
 
-#include "src/io/temperature_tables.h"
+#include "io/temperature_tables.h"
 #include "Configuration.h"
 
 extern ServoInterface* servos[NUM_SERVOS];
@@ -480,10 +480,10 @@ extern ServoInterface* servos[NUM_SERVOS];
 #endif
 
 #ifdef AVR_BOARD
-#include "src/avr/HAL.h"
+#include "boards/avr/HAL.h"
 #endif
 #ifdef DUE_BOARD
-#include "src/due/HAL.h"
+#include "boards/due/HAL.h"
 #endif
 
 #ifndef MAX_VFAT_ENTRIES
@@ -498,7 +498,7 @@ extern ServoInterface* servos[NUM_SERVOS];
 #define LONG_FILENAME_LENGTH (13 * MAX_VFAT_ENTRIES + 1)
 #define SD_MAX_FOLDER_DEPTH 2
 
-#include "src/controller/ui.h"
+#include "controller/ui.h"
 
 #if UI_DISPLAY_TYPE != DISPLAY_U8G
 #if (defined(USER_KEY1_PIN) && (USER_KEY1_PIN == UI_DISPLAY_D5_PIN || USER_KEY1_PIN == UI_DISPLAY_D6_PIN || USER_KEY1_PIN == UI_DISPLAY_D7_PIN)) || (defined(USER_KEY2_PIN) && (USER_KEY2_PIN == UI_DISPLAY_D5_PIN || USER_KEY2_PIN == UI_DISPLAY_D6_PIN || USER_KEY2_PIN == UI_DISPLAY_D7_PIN)) || (defined(USER_KEY3_PIN) && (USER_KEY3_PIN == UI_DISPLAY_D5_PIN || USER_KEY3_PIN == UI_DISPLAY_D6_PIN || USER_KEY3_PIN == UI_DISPLAY_D7_PIN)) || (defined(USER_KEY4_PIN) && (USER_KEY4_PIN == UI_DISPLAY_D5_PIN || USER_KEY4_PIN == UI_DISPLAY_D6_PIN || USER_KEY4_PIN == UI_DISPLAY_D7_PIN))
@@ -515,10 +515,10 @@ extern ServoInterface* servos[NUM_SERVOS];
 #endif
 
 #if SDSUPPORT
-#include "src/SdFat/SdFat.h"
+#include "SdFat/SdFat.h"
 #endif
 
-#include "src/communication/gcode.h"
+#include "communication/gcode.h"
 
 #if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM != CARTESIAN && !defined(ENFORCE_BACKLASH)
 #undef ENABLE_BACKLASH_COMPENSATION
@@ -577,21 +577,21 @@ extern void setupTimerInterrupt();
 extern void motorCurrentControlInit();
 extern void microstepInit();
 
-#include "Printer.h"
-#include "src/motion/LevelingMethod.h"
-#include "src/motion/MotionLevel1.h"
-#include "src/motion/MotionLevel2.h"
-#include "src/motion/MotionLevel3.h"
+#include "PrinterTypes/Printer.h"
+#include "motion/LevelingMethod.h"
+#include "motion/MotionLevel1.h"
+#include "motion/MotionLevel2.h"
+#include "motion/MotionLevel3.h"
 #if PRINTER_TYPE == 0
-#include "src/PrinterTypes/PrinterTypeCartesian.h"
+#include "PrinterTypes/PrinterTypeCartesian.h"
 #elif PRINTER_TYPE == 1
-#include "src/PrinterTypes/PrinterTypeCoreXYZ.h"
+#include "PrinterTypes/PrinterTypeCoreXYZ.h"
 #elif PRINTER_TYPE == 2
-#include "src/PrinterTypes/PrinterTypeDelta.h"
+#include "PrinterTypes/PrinterTypeDelta.h"
 #elif PRINTER_TYPE == 3
-#include "src/PrinterTypes/PrinterTypeDualXAxis.h"
+#include "PrinterTypes/PrinterTypeDualXAxis.h"
 #endif
-#include "src/motion/VelocityProfile.h"
+#include "motion/VelocityProfile.h"
 
 // #include "src/motion/motion.h"
 
@@ -686,8 +686,8 @@ extern int debugWaitLoop;
 
 #define STR(s) #s
 #define XSTR(s) STR(s)
-#include "src/communication/Commands.h"
-#include "src/communication/Eeprom.h"
+#include "communication/Commands.h"
+#include "communication/Eeprom.h"
 
 #if CPU_ARCH == ARCH_AVR
 #define DELAY1MICROSECOND __asm__("nop\n\t" \
@@ -718,13 +718,13 @@ extern int debugWaitLoop;
 #define SQRT(x) sqrt(x)
 #endif
 
-#include "src/motion/Drivers.h"
-#include "src/utilities/PlaneBuilder.h"
+#include "motion/Drivers.h"
+#include "utilities/PlaneBuilder.h"
 
 #include "Events.h"
-#include "src/custom/customEvents.h"
+#include "custom/customEvents.h"
 
 // must be after CustomEvents as it might include definitions from there
-#include "src/controller/DisplayList.h"
+#include "controller/DisplayList.h"
 
 #endif

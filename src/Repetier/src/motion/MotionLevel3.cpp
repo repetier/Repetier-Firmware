@@ -16,7 +16,7 @@
 
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 Motion3Buffer Motion3::buffers[NUM_MOTION3_BUFFER];
 fast8_t volatile Motion3::length;

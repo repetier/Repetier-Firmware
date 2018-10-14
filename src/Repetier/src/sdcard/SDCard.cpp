@@ -19,7 +19,7 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 #if SDSUPPORT
 

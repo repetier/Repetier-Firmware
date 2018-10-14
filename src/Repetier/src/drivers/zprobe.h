@@ -16,6 +16,7 @@ public:
     static float getCoating() { return 0; }
     static void setCoating(float val) {}
     static float getBedDistance() { return 0; }
+    static float optimumProbingHeight() { return 0; }
 };
 
 #elif ZPROBE_TYPE == 1
@@ -45,6 +46,7 @@ public:
     static float getCoating() { return coating; }
     static void setCoating(float val) { coating = val; }
     static float getBedDistance() { return bedDistance; }
+    static float optimumProbingHeight();
 };
 
 #else

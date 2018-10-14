@@ -11,10 +11,10 @@
 
 #undef IO_TARGET
 #define IO_TARGET 6
-#include "src/io/redefine.h"
+#include "io/redefine.h"
 
 void updateEndstops() {
 #undef IO_TARGET
 #define IO_TARGET 5
-#include "src/io/redefine.h"
+#include "io/redefine.h"
 }

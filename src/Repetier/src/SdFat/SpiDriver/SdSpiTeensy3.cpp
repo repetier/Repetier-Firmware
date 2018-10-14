@@ -22,7 +22,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#include "../../../Repetier.h"
+#include "Repetier.h"
 #include "SdSpiDriver.h"
 #if defined(__arm__) && defined(CORE_TEENSY)
 // SPI definitions

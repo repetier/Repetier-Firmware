@@ -104,7 +104,7 @@ In homing to z min we assume z endstop is bed level so we move up Z_PROBE_Z_OFFS
 requires the extruder to bend the coating thickness without harm!
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 #ifndef BED_LEVELING_METHOD
 #define BED_LEVELING_METHOD 0

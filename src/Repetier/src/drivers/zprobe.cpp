@@ -1,4 +1,4 @@
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 #if ZPROBE_TYPE == 1
 
@@ -228,4 +228,9 @@ void ZProbeHandler::eepromHandle() {
     EEPROM::handleFloat(eprStart + 16, PSTR("Y offset [mm]"), 3, offsetY);
     EEPROM::removePrefix();
 }
+
+float ZProbeHandler::optimumProbingHeight() {
+    return bedDistance + (height > 0 ? 0 : -height);
+}
+
 #endif

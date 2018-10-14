@@ -129,13 +129,13 @@ to the position. 0 = no contribution. */
 #define DISABLE_Z 0
 
 // Next 7 lines are required to make the following work, do not change!
-#include "pins.h"
+#include "boards/pins.h"
 #undef IO_TARGET
 #define IO_TARGET 4
 #undef CONFIG_EXTERN
 #define CONFIG_EXTERN extern
-#include "src/drivers/drivers.h"
-#include "src/io/redefine.h"
+#include "drivers/drivers.h"
+#include "io/redefine.h"
 
 // Define ZProbe by referencing a endstop defined
 CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)

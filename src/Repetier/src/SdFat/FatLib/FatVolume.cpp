@@ -23,7 +23,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
  
-#include "../../../Repetier.h"
+#include "Repetier.h"
 #include <string.h>
 #include "FatVolume.h"
 //------------------------------------------------------------------------------

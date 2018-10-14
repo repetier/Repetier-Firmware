@@ -17,7 +17,7 @@
 */
 
 #define UI_MAIN 1
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 #define UI_ROWS_EXTRA 0
 #if UI_DISPLAY_TYPE == DISPLAY_U8G

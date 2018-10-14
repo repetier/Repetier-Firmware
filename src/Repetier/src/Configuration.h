@@ -124,13 +124,13 @@ to the position. 0 = no contribution. */
 #define DISABLE_Z 0
 
 // Next 7 lines are required to make the following work, do not change!
-#include "pins.h"
+#include "boards/pins.h"
 #undef IO_TARGET
 #define IO_TARGET 4
 #undef CONFIG_EXTERN
 #define CONFIG_EXTERN extern
-#include "src/drivers/drivers.h"
-#include "src/io/redefine.h"
+#include "drivers/drivers.h"
+#include "io/redefine.h"
 
 // Define ZProbe by referencing a endstop defined
 CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
@@ -433,14 +433,25 @@ It also can add a delay to wait for spindle to run on full speed.
 #define Z_PROBE_MIN_TEMPERATURE 150
 
 #define FEATURE_SOFTWARE_LEVELING 0
-#define Z_PROBE_X1 60
-#define Z_PROBE_Y1 130
-#define Z_PROBE_X2 137
-#define Z_PROBE_Y2 45
-#define Z_PROBE_X3 137
-#define Z_PROBE_Y3 210
-#define BED_LEVELING_METHOD 2
-#define BED_CORRECTION_METHOD 0
+
+// How to correct rotated beds
+// 0 = Software side by rotating coordinates
+// 1 = Move bed physically using 2 motors
+#define LEVELING_CORRECTOR 0
+#define LC_P1_X 60
+#define LC_P1_Y 130
+#define LC_P2_X 137
+#define LC_P2_Y 45
+#define LC_P3_X 137
+#define LC_P3_Y 210
+
+#define L_P1_X 60
+#define L_P1_Y 130
+#define L_P2_X 137
+#define L_P2_Y 45
+#define L_P3_X 137
+#define L_P3_Y 210
+#define LEVELING_METHOD 2
 #define BED_LEVELING_GRID_SIZE 5
 #define BED_LEVELING_REPETITIONS 5
 #define BED_MOTOR_1_X 55

@@ -21,7 +21,7 @@
   Functions in this file are used to communicate using ascii or repetier protocol.
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 const int8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 

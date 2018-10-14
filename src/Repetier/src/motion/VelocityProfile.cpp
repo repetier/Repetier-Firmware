@@ -16,7 +16,7 @@
 
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 const float invBlockFrequency = 1.0 / static_cast<float>(BLOCK_FREQUENCY);
 const float invStepperFrequency = 1.0 / static_cast<float>(STEPPER_FREQUENCY);

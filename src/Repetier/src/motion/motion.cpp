@@ -21,7 +21,7 @@
   Functions in this file are used to communicate using ascii or repetier protocol.
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 // ####################################################################################
 // #          No configuration below this line - just some error checking             #

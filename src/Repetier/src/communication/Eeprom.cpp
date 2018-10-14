@@ -21,7 +21,7 @@
   Functions in this file are used to communicate using ascii or repetier protocol.
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 fast8_t EEPROM::mode;  // 0 = output, 1 = set var, 2 = store to eeprom
 uint EEPROM::storePos; // where does M206 want to store
@@ -31,6 +31,7 @@ char EEPROM::prefix[20];
 uint EEPROM::reservedEnd = EPR_START_RESERVE; // Last position for reserved data
 unsigned int EEPROM::variation1 = 0, EEPROM::variation2 = 0;
 fast8_t EEPROM::changedTimer = 0;
+bool EEPROM::silent;
 
 uint EEPROM::reserve(uint8_t sig, uint8_t version, uint length) {
     uint r = reservedEnd;
@@ -106,6 +107,8 @@ void EEPROM::callHandle() {
 #endif
     Motion1::eepromHandle();
     ZProbeHandler::eepromHandle();
+    LevelingCorrector::handleEeprom();
+    Leveling::handleEeprom();
     PrinterType::eepromHandle();
     Tool::eepromHandleTools();
     // Add generic eepromHandle calls
@@ -149,6 +152,8 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration() {
     PrinterType::restoreFromConfiguration();
     Motion1::setFromConfig();
     ZProbeHandler::eepromReset();
+    LevelingCorrector::resetEeprom();
+    Leveling::resetEeprom();
     markChanged();
 }
 
@@ -200,6 +205,7 @@ void EEPROM::updateVariation(fast8_t data) {
 #define USE_CONFIGURATION_BAUD_RATE 0
 #endif // USE_CONFIGURATION_BAUD_RATE
 void EEPROM::init() {
+    silent = false;
 #if EEPROM_MODE != 0
     uint8_t check = computeChecksum();
     uint8_t storedcheck = HAL::eprGetByte(EPR_INTEGRITY_BYTE);
@@ -317,7 +323,7 @@ void EEPROM::removePrefix() {
 }
 
 void EEPROM::handleFloat(uint pos, PGM_P text, uint8_t digits, float& var) {
-    if (mode == 0) {
+    if (mode == 0 && !silent) {
         Com::printF(Com::tEPR3, static_cast<int>(pos));
         Com::print(' ');
         Com::printFloat(var, digits);
@@ -347,7 +353,7 @@ void EEPROM::handleFloat(uint pos, PGM_P text, uint8_t digits, float& var) {
 }
 
 void EEPROM::handleLong(uint pos, PGM_P text, int32_t& var) {
-    if (mode == 0) {
+    if (mode == 0 && !silent) {
         Com::printF(Com::tEPR2, static_cast<int>(pos));
         Com::print(' ');
         Com::print(var);
@@ -377,7 +383,7 @@ void EEPROM::handleLong(uint pos, PGM_P text, int32_t& var) {
 }
 
 void EEPROM::handleLong(uint pos, PGM_P text, uint32_t& var) {
-    if (mode == 0) {
+    if (mode == 0 && !silent) {
         Com::printF(Com::tEPR2, static_cast<int>(pos));
         Com::print(' ');
         Com::print(static_cast<int32_t>(var));
@@ -407,7 +413,7 @@ void EEPROM::handleLong(uint pos, PGM_P text, uint32_t& var) {
 }
 
 void EEPROM::handleInt(uint pos, PGM_P text, int16_t& var) {
-    if (mode == 0) {
+    if (mode == 0 && !silent) {
         Com::printF(Com::tEPR1, static_cast<int>(pos));
         Com::print(' ');
         Com::print(var);
@@ -437,7 +443,7 @@ void EEPROM::handleInt(uint pos, PGM_P text, int16_t& var) {
 }
 
 void EEPROM::handleByte(uint pos, PGM_P text, uint8_t& var) {
-    if (mode == 0) {
+    if (mode == 0 && !silent) {
         Com::printF(Com::tEPR0, static_cast<int>(pos));
         Com::print(' ');
         Com::print((int)var);
@@ -467,7 +473,7 @@ void EEPROM::handleByte(uint pos, PGM_P text, uint8_t& var) {
 }
 
 void EEPROM::handleByte(uint pos, PGM_P text, int32_t& var) {
-    if (mode == 0) {
+    if (mode == 0 && !silent) {
         Com::printF(Com::tEPR0, static_cast<int>(pos));
         Com::print(' ');
         Com::print((int)var);

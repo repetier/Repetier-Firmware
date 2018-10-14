@@ -16,7 +16,7 @@
 
 */
 
-#include "../../Repetier.h"
+#include "Repetier.h"
 
 Motion2Buffer Motion2::buffers[NUM_MOTION2_BUFFER];
 volatile fast8_t Motion2::length;

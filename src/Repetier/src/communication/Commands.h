@@ -49,7 +49,7 @@ private:
     static int lowestRAMValueSend;
 };
 
-// #include "../../Repetier.h"
+// #include "Repetier.h"
 
 void GCode_0_1(GCode* com);
 void GCode_2_3(GCode* com);
