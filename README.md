@@ -1,4 +1,10 @@
 # Repetier-Firmware - the fast and user friendly firmware
+
+## Configuration and Installation
+
+Please read [our documentation](https://docfirmwarev2.repetier.com/config/introduction/)
+for detailed help.
+
 ## The new Dimension of 3d printing. The ultimate upgrade for your printer!
 
 With Repetier-Firmware 2.0 you will get these benefits you'll never want to miss again:
