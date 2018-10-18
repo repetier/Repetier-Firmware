@@ -261,6 +261,11 @@ public:
     static float axisX1StepsPerMM;
     static float axisX2StepsPerMM;
 #endif
+#if DUAL_X_AXIS_MODE > 0 && LAZY_DUAL_X_AXIS == 0
+    static float x1Length;
+    static float x1Min;
+#endif
+    	
     static float axisStepsPerMM[]; ///< Resolution of each axis in steps per mm.
     static float invAxisStepsPerMM[]; ///< 1/axisStepsPerMM for faster computation.
     static float maxFeedrate[]; ///< Maximum feedrate in mm/s per axis.

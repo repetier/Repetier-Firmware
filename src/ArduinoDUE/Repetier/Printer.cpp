@@ -33,6 +33,10 @@ float Printer::homingFeedrate[Z_AXIS_ARRAY] = {HOMING_FEEDRATE_X, HOMING_FEEDRAT
 float Printer::axisX1StepsPerMM = XAXIS_STEPS_PER_MM;
 float Printer::axisX2StepsPerMM = X2AXIS_STEPS_PER_MM;
 #endif
+#if DUAL_X_AXIS_MODE > 0 && LAZY_DUAL_X_AXIS == 0
+float Printer::x1Length;
+float Printer::x1Min;
+#endif	
 #if RAMP_ACCELERATION
 //  float max_start_speed_units_per_second[E_AXIS_ARRAY] = MAX_START_SPEED_UNITS_PER_SECOND; ///< Speed we can use, without acceleration.
 float Printer::maxAccelerationMMPerSquareSecond[E_AXIS_ARRAY] = {MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X, MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y, MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z}; ///< X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts
@@ -1209,6 +1213,10 @@ void Printer::setup() {
     xMin = X_MIN_POS;
     yMin = Y_MIN_POS;
     zMin = Z_MIN_POS;
+#if DUAL_X_AXIS_MODE > 0 && LAZY_DUAL_X_AXIS == 0
+    x1Min = xMin;
+    x1Length = xLength;
+#endif
 #if DRIVE_SYSTEM == DELTA
     radius0 = ROD_RADIUS;
 #endif
@@ -1581,9 +1589,16 @@ void Printer::homeXAxis() {
     sledParked = true;
     currentPosition[X_AXIS] = lastCmdPos[X_AXIS] = xMin;
 #else
-    // Now position current extrude on x = 0
-    PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
-    currentPositionSteps[X_AXIS] = xMinSteps;
+    #if DUAL_X_AXIS_MODE > 0 && LAZY_DUAL_X_AXIS == 0
+        if (Extruder::current->isLeftCarriage()) //left carriage
+            currentPositionSteps[X_AXIS] = xMinSteps;
+        else
+            currentPositionSteps[X_AXIS] = Extruder::current->xOffset;
+    #else
+        // Now position current extrude on x = 0
+        PrintLine::moveRelativeDistanceInSteps(-Extruder::current->xOffset, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
+        currentPositionSteps[X_AXIS] = xMinSteps;
+    #endif
 #endif  // LAZY_DUAL_X_AXIS
     updateCurrentPosition(false);
     offsetX = 0;

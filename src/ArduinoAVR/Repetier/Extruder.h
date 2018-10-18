@@ -318,6 +318,9 @@ public:
     void retract(bool isRetract,bool isLong);
     void retractDistance(float dist,bool extraLength = false);
 #endif
+#if DUAL_X_AXIS_MODE > 0 && LAZY_DUAL_X_AXIS == 0
+    inline bool isLeftCarriage() {return ((id == 0 && X_HOME_DIR == -1) || (id == 1 && X_HOME_DIR == 1)) ? true:false;}
+#endif
     static void manageTemperatures();
     static void disableCurrentExtruderMotor();
     static void disableAllExtruderMotors();

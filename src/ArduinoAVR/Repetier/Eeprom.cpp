@@ -110,6 +110,10 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration()
     Printer::xMin = X_MIN_POS;
     Printer::yMin = Y_MIN_POS;
     Printer::zMin = Z_MIN_POS;
+#if DUAL_X_AXIS_MODE > 0 && LAZY_DUAL_X_AXIS == 0
+    Printer::x1Min = Printer::xMin;
+    Printer::x1Length = Printer::xLength;
+#endif
 #if NONLINEAR_SYSTEM
 #ifdef ROD_RADIUS
 	Printer::radius0 = ROD_RADIUS;
@@ -573,6 +577,10 @@ void EEPROM::readDataFromEEPROM(bool includeExtruder)
     Printer::xLength = HAL::eprGetFloat(EPR_X_LENGTH);
     Printer::yLength = HAL::eprGetFloat(EPR_Y_LENGTH);
     Printer::zLength = HAL::eprGetFloat(EPR_Z_LENGTH);
+#if DUAL_X_AXIS_MODE > 0 && LAZY_DUAL_X_AXIS == 0
+    Printer::x1Min = Printer::xMin;
+    Printer::x1Length = Printer::xLength;
+#endif
 #if NONLINEAR_SYSTEM
     Printer::radius0 = HAL::eprGetFloat(EPR_DELTA_HORIZONTAL_RADIUS);
 #endif
