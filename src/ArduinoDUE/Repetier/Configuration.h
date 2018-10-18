@@ -1397,10 +1397,30 @@ instead of driving both with a single stepper. The same works for the other axis
 
 /* Dual x axis mean having a printer with x motors and each controls one
 extruder position. In that case you can also have different resolutions for the
-2 motors. */
+2 motors. 
+DUAL_X_AXIS has 2 working modes, selectable with DUAL_X_AXIS_MODE:
+- 0 is legacy mode. This is the way DUAL_X has always been working in Repetier. With this mode
+  you need to configure both extruders XOffset relative to X0 on the bed. When toolchange command
+  is issued, the current tool will be parked and the new one will be unparked and positioned at the
+  last X coordinate before the switch, unless LAZY_DUAL_X_AXIS is set to 1, which will make the new
+  extruder stay parked until the next X,Y or Z move.
+ 
+- 1 is the new mode. In this mode you need to adjust X_MIN_POS, X_MAX_LENGTH and right extruder Xoffset
+  to fit your particular setup. Usually, X_MIN_POS will be a negative number which will be exactly the
+  distance from left extruder home position to bed X0.
+  X_MAX_LENGTH will have to be the distance between left carriage home position and the right carriage 
+  home position, while XOffset of the right carriage will have to be the distance (in steps)
+  from right home position to bed X0. XOffset of left carriage must be 0.
+  In this mode, when tool switch command is issued, the current extruder will be parked and the new one will
+  be unparked and positioned at the last X coordinate, unless that coordinate is outside its reach (that would 
+  be the opposite carriage parking spot).
+  M606 command will be available to move the current carriage to a position relative to its home position.
+*/
 #define DUAL_X_AXIS 0
 #define DUAL_X_RESOLUTION 0
 #define X2AXIS_STEPS_PER_MM 100
+#define LAZY_DUAL_X_AXIS 0
+#define DUAL_X_AXIS_MODE 0
 
 #define FEATURE_TWO_YSTEPPER 0
 #define Y2_STEP_PIN   E1_STEP_PIN

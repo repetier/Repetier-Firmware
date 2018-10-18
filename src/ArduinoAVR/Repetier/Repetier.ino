@@ -173,6 +173,7 @@ Custom M Codes
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
 - M603 - Simulate a jam
 - M604 X<slowdownSteps> Y<errorSteps> Z<slowdownTo> T<extruderId> - Set jam detection values on a per extruder basis. If not set it uses defaults from Configuration.h
+- M606 X<distance> F<speed> - In DUAL_X_AXIS_MODE = 1 moves the current extruder to the specified distance relative to the carriage's home position. Default X is 0 (home position).
 - M666 - force communication error, required DEBUG_COM_ERRORS
 - M668 - set line number 0 without notice to simulate error
 - M670 S<version> - Set eeprom version to a value for testing eeprom upgrade path.
