@@ -211,6 +211,15 @@ usage or for searching for memory induced errors. Switch it off for production, 
 
 #include "Configuration.h"
 
+#ifndef DUAL_X_AXIS_MODE
+#define DUAL_X_AXIS_MODE 0
+#endif
+
+#if DUAL_X_AXIS_MODE > 0
+#undef LAZY_DUAL_X_AXIS
+#define LAZY_DUAL_X_AXIS 0
+#endif
+
 #if (LASER_PWM_MAX > 255 && SUPPORT_LASER) || (CNC_PWM_MAX > 255 && SUPPORT_CNC)
 typedef uint16_t secondspeed_t;
 #else

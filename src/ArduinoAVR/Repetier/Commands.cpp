@@ -2689,22 +2689,24 @@ void Commands::processMCode(GCode *com) {
     break;
 #endif
 #if DUAL_X_AXIS_MODE > 0 && LAZY_DUAL_X_AXIS == 0
-    case 606:
-        float newXpos;
-        if (com->hasX())
-            newXpos = abs(com->X);
-        if (Extruder::current->isLeftCarriage()) //left carriage
-            newXpos = Printer::xMin + newXpos;
-        else //right carriage
-            newXpos = Printer::xLength - Printer::xMin - newXpos;
-
-        if (Printer::isPositionAllowed(newXpos,Printer::currentPosition[Y_AXIS],Printer::currentPosition[Z_AXIS])) {        	        	  	
-            Printer::moveToReal(newXpos, IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE,(com->hasF() ? com->F : EXTRUDER_SWITCH_XY_SPEED));
-            Printer::lastCmdPos[X_AXIS] = newXpos;
-            Printer::updateCurrentPosition(false);
-            Com::writeToAll = false;
-            printCurrentPosition();
-        }
+    case 606: 
+		{
+			float newXpos = 0;
+			if (com->hasX())
+		        newXpos = abs(com->X);
+	        if (Extruder::current->isLeftCarriage()) { //left carriage
+				newXpos = Printer::xMin + newXpos;
+			} else { //right carriage
+		        newXpos = Printer::xLength - Printer::xMin - newXpos;
+			}
+	        if (Printer::isPositionAllowed(newXpos,Printer::currentPosition[Y_AXIS],Printer::currentPosition[Z_AXIS])) {        	        	  	
+				Printer::moveToReal(newXpos, IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE,(com->hasF() ? com->F : EXTRUDER_SWITCH_XY_SPEED));
+			    Printer::lastCmdPos[X_AXIS] = newXpos;
+		        Printer::updateCurrentPosition(false);
+	            Com::writeToAll = false;
+				printCurrentPosition();
+			}
+		}
         break;
 #endif
     case 670:
