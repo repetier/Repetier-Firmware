@@ -1430,8 +1430,8 @@ DUAL_X_AXIS has 2 working modes, selectable with DUAL_X_AXIS_MODE:
 - 1 is the new mode. In this mode you need to adjust X_MIN_POS, X_MAX_LENGTH and right extruder Xoffset
   to fit your particular setup. Usually, X_MIN_POS will be a negative number which will be exactly the
   distance from left extruder home position to bed X0.
-  X_MAX_LENGTH will have to be the distance between left carriage home position and the right carriage 
-  home position, while XOffset of the right carriage will have to be the distance (in steps)
+  X_MAX_LENGTH will have to be the distance between left carriage home position and just before hitting
+   the right carriage in park position, while XOffset of the right carriage will have to be the distance (in steps)
   from right home position to bed X0. XOffset of left carriage must be 0.
   In this mode, when tool switch command is issued, the current extruder will be parked and the new one will
   be unparked and positioned at the last X coordinate, unless that coordinate is outside its reach (that would 
