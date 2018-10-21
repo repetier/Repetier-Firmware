@@ -78,7 +78,6 @@ public:
     void executeCommands(FSTRINGPARAM(data), bool waitFinish, int action);
 };
 
-#if NEW_COMMUNICATION
 extern FlashGCodeSource flashSource;
 extern SerialGCodeSource serial0Source;
 #if BLUETOOTH_SERIAL > 0
@@ -86,7 +85,6 @@ extern SerialGCodeSource serial1Source;
 #endif
 #if SDSUPPORT
 extern SDCardGCodeSource sdSource;
-#endif
 #endif
 
 class GCode // 97-99 uint8_ts per command needed
@@ -294,15 +292,8 @@ protected:
     static volatile uint8_t bufferLength;             ///< Number of commands stored in gcode_buffer
     static uint8_t formatErrors;                      ///< Number of sequential format errors
     static millis_t lastBusySignal;                   ///< When was the last busy signal
-#if NEW_COMMUNICATION == 0
-    static int8_t waitingForResend;                ///< Waiting for line to be resend. -1 = no wait.
-    static uint32_t lastLineNumber;                ///< Last line number received.
-    static millis_t timeOfLastDataPacket;          ///< Time, when we got the last data packet. Used to detect missing uint8_ts.
-    static uint8_t wasLastCommandReceivedAsBinary; ///< Was the last successful command in binary mode?
-#else
 public:
     GCodeSource* source;
-#endif
 };
 
 #if JSON_OUTPUT

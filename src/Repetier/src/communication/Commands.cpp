@@ -1289,19 +1289,15 @@ void Commands::processMCode(GCode* com) {
 \brief Execute the command stored in com.
 */
 void Commands::executeGCode(GCode* com) {
-#if NEW_COMMUNICATION
     // Set return channel for private commands. By default all commands send to all receivers.
     GCodeSource* actSource = GCodeSource::activeSource;
     GCodeSource::activeSource = com->source;
     Com::writeToAll = true;
-#endif
     if (INCLUDE_DEBUG_COMMUNICATION) {
         if (Printer::debugCommunication()) {
             if (com->hasG() || (com->hasM() && com->M != 111)) {
                 previousMillisCmd = HAL::timeInMilliseconds();
-#if NEW_COMMUNICATION
                 GCodeSource::activeSource = actSource;
-#endif
                 return;
             }
         }
@@ -1328,9 +1324,7 @@ void Commands::executeGCode(GCode* com) {
         Printer::debugReset(8);
     }
 #endif
-#if NEW_COMMUNICATION
     GCodeSource::activeSource = actSource;
-#endif
 }
 
 void Commands::emergencyStop() {

@@ -25,9 +25,7 @@
 
 char tempLongFilename[LONG_FILENAME_LENGTH + 1];
 char fullName[LONG_FILENAME_LENGTH * SD_MAX_FOLDER_DEPTH + SD_MAX_FOLDER_DEPTH + 1];
-#if NEW_COMMUNICATION
 SDCardGCodeSource sdSource;
-#endif
 SDCard sd;
 
 SDCard::SDCard() {
@@ -153,9 +151,7 @@ void SDCard::startPrint() {
     Printer::maxLayer = 0;
     Printer::currentLayer = 0;
     UI_STATUS_F(PSTR(""));
-#if NEW_COMMUNICATION
     GCodeSource::registerSource(&sdSource);
-#endif
 }
 
 void SDCard::pausePrint(bool intern) {
@@ -166,9 +162,7 @@ void SDCard::pausePrint(bool intern) {
 #if !defined(DISABLE_PRINTMODE_ON_PAUSE) || DISABLE_PRINTMODE_ON_PAUSE == 1
     Printer::setPrinting(false);
 #endif
-#if NEW_COMMUNICATION
     GCodeSource::removeSource(&sdSource);
-#endif
     if (EVENT_SD_PAUSE_START(intern)) {
         if (intern) {
             Commands::waitUntilEndOfAllBuffers();
@@ -217,9 +211,7 @@ void SDCard::continuePrint(bool intern) {
         }
     }
     EVENT_SD_CONTINUE_END(intern);
-#if NEW_COMMUNICATION
     GCodeSource::registerSource(&sdSource);
-#endif
     Printer::setPrinting(true);
     Printer::setMenuMode(MENU_MODE_PAUSED, false);
     sdmode = 1;
@@ -234,9 +226,7 @@ void SDCard::stopPrint() {
     Printer::setMenuMode(MENU_MODE_SD_PRINTING, false);
     Printer::setMenuMode(MENU_MODE_PAUSED, false);
     Printer::setPrinting(0);
-#if NEW_COMMUNICATION
     GCodeSource::removeSource(&sdSource);
-#endif
     if (EVENT_SD_STOP_START) {
         GCode::executeFString(PSTR(SD_RUN_ON_STOP));
         if (SD_STOP_HEATER_AND_MOTORS_ON_STOP) {

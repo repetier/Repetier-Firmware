@@ -28,7 +28,7 @@
 #define REPETIER_VERSION "2.0.0dev"
 
 // Use new communication model for multiple channels - only until stable, then old version gets deleted
-#define NEW_COMMUNICATION 1
+
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################

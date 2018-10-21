@@ -63,7 +63,7 @@ All known Arduino boards use 64. This value is needed for the extruder timing. *
 #if MOTHERBOARD == 8 || MOTHERBOARD == 88 || MOTHERBOARD == 9 || MOTHERBOARD == 92 || CPU_ARCH != ARCH_AVR
 #define EXTERNALSERIAL
 #endif
-#if NEW_COMMUNICATION && defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
+#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
 #undef EXTERNALSERIAL
 #define EXTERNALSERIAL
 #endif
