@@ -1174,6 +1174,10 @@ void MCode_604(GCode* com) {
 */
 }
 
+void MCode_606(GCode* com) {
+    PrinterType::park(com);
+}
+
 void MCode_890(GCode* com) {
 #if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
     if (com->hasX() && com->hasY()) {

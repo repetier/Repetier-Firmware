@@ -248,7 +248,7 @@ void Commands::reportPrinterUsage() {
 #endif
 }
 #if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_DIGIPOT
-    // Digipot methods for controling current and microstepping
+// Digipot methods for controling current and microstepping
 
 #if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
 int digitalPotWrite(int address, uint16_t value) { // From Arduino DigitalPotControl example
@@ -1233,6 +1233,9 @@ void Commands::processMCode(GCode* com) {
         break;
     case 604:
         MCode_604(com);
+        break;
+    case 606: // Park extruder
+        MCode_606(com);
         break;
     case 900: // M233 now use M900 like Marlin
         MCode_900(com);

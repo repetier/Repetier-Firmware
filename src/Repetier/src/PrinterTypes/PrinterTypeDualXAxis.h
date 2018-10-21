@@ -30,6 +30,8 @@ class PrinterType {
     static bool dontChangeCoords;
     static float bedRectangle[2][2];
     static uint16_t eeprom; // start position eeprom
+    static fast8_t activeAxis;
+
 public:
     // Are subdivisions required due to nonlinear kinematics
     static bool subdivisionsRequired() {
@@ -62,5 +64,6 @@ public:
     static bool ignoreAxisForLength(fast8_t axis);
     static void transformedToOfficial(float trans[NUM_AXES], float official[NUM_AXES]);
     static void officialToTransformed(float official[NUM_AXES], float trans[NUM_AXES]);
+    static void park();
 };
 #endif

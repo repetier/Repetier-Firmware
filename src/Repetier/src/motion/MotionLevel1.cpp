@@ -630,8 +630,11 @@ void Motion1::moveRelativeBySteps(int32_t coords[NUM_AXES]) {
     buf.sa2 = 2.0f * buf.length * buf.acceleration;
     buf.state = Motion1State::BACKWARD_PLANNED;
 }
-
-void Motion1::queueMove(float feedrate, bool secondaryMove) {
+π void Motion1::queueMove(float feedrate, bool secondaryMove) {
+    if (!PrinterType::positionAllowed(destinationPositionTransformed)) {
+        Com::printWarningFLN(PSTR("Move to illegal position prevented!"));
+        return;
+    }
     float delta[NUM_AXES];
     float e2 = 0, length2 = 0;
     fast8_t axisUsed = 0;

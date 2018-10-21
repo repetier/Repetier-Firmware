@@ -28,6 +28,7 @@ float PrinterType::targetReal;
 bool PrinterType::dontChangeCoords = false;
 float PrinterType::bedRectangle[2][2];
 uint16_t PrinterType::eeprom; // start position eeprom
+fast8_t PrinterType::activeAxis = 0;
 
 void PrinterType::homeAxis(fast8_t axis) {
     // Tool::unselectTool();
@@ -76,6 +77,28 @@ void PrinterType::homeAxis(fast8_t axis) {
     }
 }
 
+void PrinterType::park(GCode* com) {
+    if (!Motion1::isAxisHomed(X_AXIS)) {
+        Motion1::homeAxis(X_AXIS);
+    }
+    Motion1::copyCurrentPrinter(Motion1::tmpPosition);
+    if (Motion1::dittoMode == 0) {
+        if (activeAxis == 0) {
+            Motion1::tmpPosition[X_AXIS] = posReal[0] + (com->hasX() ? com->X : 0);
+            leftParked = Motion1::tmpPosition[X_AXIS] == posReal[0];
+        } else if (activeAxis == 1) {
+            Motion1::tmpPosition[A_AXIS] = posReal[1] - (com->hasX() ? com->X : 0);
+            rightParked = Motion1::tmpPosition[X_AXIS] == posReal[1];
+        }
+    } else {
+        Motion1::tmpPosition[X_AXIS] = posReal[0] + (com->hasX() ? com->X : 0);
+        leftParked = Motion1::tmpPosition[X_AXIS] == posReal[0];
+        Motion1::tmpPosition[A_AXIS] = posReal[1] - (com->hasX() ? com->X : 0);
+        rightParked = Motion1::tmpPosition[X_AXIS] == posReal[1];
+    }
+    Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED, false);
+}
+
 bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
     if (Printer::isNoDestinationCheck()) {
         return true;
@@ -83,7 +106,7 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
     if (Printer::isHoming()) {
         return true;
     }
-    for (fast8_t i = 0; i < 3; i++) {
+    for (fast8_t i = 1; i < 3; i++) {
         if (Motion1::axesHomed & axisBits[i]) {
             if (pos[i] < Motion1::minPos[i] || pos[i] > Motion1::maxPos[i]) {
                 return false;
@@ -98,9 +121,19 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
                 return false;
             }
         } else {
-            if (pos[X_AXIS] > 0.5f * (Motion1::minPos[X_AXIS] + Motion1::maxPos[X_AXIS])) {
+            if (pos[X_AXIS] > 0.5f * (Motion1::minPos[X_AXIS] + Motion1::maxPos[X_AXIS]) + posReal[1] - Motion1::maxPos[X_AXIS]) {
                 return false;
             }
+            if (pos[X_AXIS] < realPos[0]) {
+                return false;
+            }
+        }
+    } else {
+        // Test X or A range depending on which is active
+        if (activeAxis == 0) {
+            return pos[X_AXIS] > posReal[0] && pos[X_AXIS] <= Motion1::maxPos[X_AXIS];
+        } else {
+            return pos[X_AXIS] >= 0 && pos[X_AXIS] <= posReal[1];
         }
     }
     return true;
@@ -206,12 +239,15 @@ void PrinterType::activatedTool(fast8_t id) {
         }
         rightParked = false;
         leftParked = false;
+        activeAxis = 0;
     } else if (id) { // right extruder
         Motion1::tmpPosition[A_AXIS] = targetReal;
         rightParked = false;
+        activeAxis = 1;
     } else {
         Motion1::tmpPosition[X_AXIS] = targetReal;
         leftParked = false;
+        activeAxis = 0;
     }
     Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED, false);
     dontChangeCoords = false;

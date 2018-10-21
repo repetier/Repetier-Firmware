@@ -79,5 +79,6 @@ public:
     static inline bool ignoreAxisForLength(fast8_t axis) { return false; }
     static void transformedToOfficial(float trans[NUM_AXES], float official[NUM_AXES]);
     static void officialToTransformed(float official[NUM_AXES], float trans[NUM_AXES]);
+    static void park(GCode* com) {}
 };
 #endif
