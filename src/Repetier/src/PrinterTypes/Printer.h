@@ -314,6 +314,7 @@ public:
     static int maxLayer;       // -1 = unknown
     static char printName[21]; // max. 20 chars + 0
     static float progress;
+    static fast8_t breakLongCommand; // Set by M108 to stop long tasks
     static fast8_t wizardStackPos;
     static wizardVar wizardStack[WIZARD_STACK_SIZE];
 
@@ -553,10 +554,10 @@ public:
     }
 
     static INLINE void setJamcontrolDisabled(uint8_t b) {
-    // TODO: add jam control
+        // TODO: add jam control
 #if EXTRUDER_JAM_CONTROL
-    //if (b)
-    //    Extruder::markAllUnjammed();
+        //if (b)
+        //    Extruder::markAllUnjammed();
 #endif
         flag2 = (b ? flag2 | PRINTER_FLAG2_JAMCONTROL_DISABLED : flag2 & ~PRINTER_FLAG2_JAMCONTROL_DISABLED);
         Com::printFLN(PSTR("Jam control disabled:"), b);

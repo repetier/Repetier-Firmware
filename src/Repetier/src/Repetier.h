@@ -27,6 +27,10 @@
 
 #define REPETIER_VERSION "2.0.0dev"
 
+#ifndef EMERGENCY_PARSER
+#define EMERGENCY_PARSER 1
+#endif
+
 // Use new communication model for multiple channels - only until stable, then old version gets deleted
 
 // ##########################################################################################

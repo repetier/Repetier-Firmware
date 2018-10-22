@@ -41,7 +41,7 @@
 #define NUM_EXTRUDER 2
 #define NUM_SERVOS 1    // Number of serves available
 #define MOTHERBOARD 405 // 405
-#define EEPROM_MODE 2
+#define EEPROM_MODE 0
 #define RFSERIAL Serial
 #define WAITING_IDENTIFIER "wait"
 #define JSON_OUTPUT 1
@@ -234,7 +234,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 // If it is incompatible you will get compiler errors about write functions not being compatible!
 //#define COMPAT_PRE1
 #define BLUETOOTH_SERIAL -1
-#define BLUETOOTH_BAUD 250000
+#define BLUETOOTH_BAUD 115200
 #define MIXING_EXTRUDER 0
 
 #define DRIVE_SYSTEM 0

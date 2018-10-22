@@ -132,7 +132,7 @@ void HeatManager::waitForTargetTemperature() {
     while (true) {
         Commands::checkForPeriodicalActions(true);
         GCode::keepAlive(WaitHeater);
-        if (fabs(targetTemperature - currentTemperature) <= 1) {
+        if (fabs(targetTemperature - currentTemperature) <= 1 || Printer::breakLongCommand) {
             Printer::setAutoreportTemp(oldReport);
             return;
         }
@@ -299,7 +299,7 @@ void HeatManagerPID::autocalibrate(GCode* g) {
     Com::printInfoFLN(Com::tPIDAutotuneStart);
     targetTemperature = temp;
     output->set(maxPWM);
-    for (;;) {
+    while (!Printer::breakLongCommand) {
 #if FEATURE_WATCHDOG
         HAL::pingWatchdog();
 #endif                                             // FEATURE_WATCHDOG

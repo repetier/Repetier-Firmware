@@ -41,6 +41,7 @@ uint16_t Printer::menuMode = 0;
 float Printer::extrudeMultiplyError = 0;
 float Printer::extrusionFactor = 1.0;
 uint8_t Printer::interruptEvent = 0;
+fast8_t Printer::breakLongCommand = false;
 int Printer::currentLayer = 0;
 int Printer::maxLayer = -1;       // -1 = unknown
 char Printer::printName[21] = ""; // max. 20 chars + 0
@@ -936,7 +937,7 @@ void Printer::showJSONStatus(int type) {
     Com::print(Motion1::isAxisHomed(Z_AXIS));
     Com::printF(PSTR("]"));
     if (type == 1) {
-    //  "geometry": "cartesian",
+        //  "geometry": "cartesian",
 #if DRIVE_SYSTEM == DELTA
         Com::printF(PSTR(",\"geometry\":\"Delta\""));
 #else

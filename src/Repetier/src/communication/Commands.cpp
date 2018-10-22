@@ -63,6 +63,9 @@ void Commands::commandLoop() {
 void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     Printer::handleInterruptEvent();
     FirmwareEvent::handleEvents();
+#if EMERGENCY_PARSER
+    GCodeSource::prefetchAll();
+#endif
     EVENT_PERIODICAL;
 #if defined(DOOR_PIN) && DOOR_PIN > -1
     if (Printer::updateDoorOpen()) {
@@ -1045,6 +1048,9 @@ void Commands::processMCode(GCode* com) {
     case 105: // M105  get temperature. Always returns the current temperature, doesn't wait until move stopped
         MCode_105(com);
         break;
+    case 108: // Break long commands
+        MCode_108(com);
+        break;
     case 109: // M109 - Wait for extruder heater to reach target.
         MCode_109(com);
         break;
@@ -1142,7 +1148,9 @@ void Commands::processMCode(GCode* com) {
         MCode_281(com);
         break;
     case 290: // M290 Z<babysteps> - Correct by adding baby steps for Z mm
+#if EMERGENCY_PARSER == 0
         MCode_290(com);
+#endif
         break;
     case 300: // M300
         MCode_300(com);

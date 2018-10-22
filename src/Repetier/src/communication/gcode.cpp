@@ -393,6 +393,9 @@ void GCode::readFromSerial() {
         return; // do nothing while door is open
     }
 #endif
+#if EMERGENCY_PARSER
+    GCodeSource::prefetchAll();
+#endif
     if (bufferLength >= GCODE_BUFFER_SIZE || (waitUntilAllCommandsAreParsed && bufferLength)) {
         keepAlive(Processing, 1);
         return; // all buffers full
@@ -458,8 +461,8 @@ void GCode::readFromSerial() {
                 binaryCommandSize = computeBinarySize((char*)commandReceiving);
             if (commandsReceivingWritePosition == binaryCommandSize) {
                 GCode* act = &commandsBuffered[bufferWriteIndex];
-                act->source = GCodeSource::activeSource;        // we need to know where to write answers to
-                if (act->parseBinary(commandReceiving, true)) { // Success
+                act->source = GCodeSource::activeSource;                           // we need to know where to write answers to
+                if (act->parseBinary(commandReceiving, binaryCommandSize, true)) { // Success
                     act->checkAndPushCommand();
                 } else {
                     if (GCodeSource::activeSource->closeOnError()) { // this device does not support resends so all errors are final!
@@ -527,13 +530,13 @@ void GCode::readFromSerial() {
   Converts a binary uint8_tfield containing one GCode line into a GCode structure.
   Returns true if checksum was correct.
 */
-bool GCode::parseBinary(uint8_t* buffer, bool fromSerial) {
+bool GCode::parseBinary(uint8_t* buffer, fast8_t length, bool fromSerial) {
     internalCommand = !fromSerial;
     unsigned int sum1 = 0, sum2 = 0; // for fletcher-16 checksum
     // first do fletcher-16 checksum tests see
     // http://en.wikipedia.org/wiki/Fletcher's_checksum
     uint8_t* p = buffer;
-    uint8_t len = binaryCommandSize - 2;
+    uint8_t len = length - 2;
     while (len) {
         sum1 += *p++;
         if (sum1 >= 255) {
@@ -1124,6 +1127,12 @@ void GCodeSource::writeToAll(uint8_t byte) { ///< Write to all listening sources
     }
 }
 
+void GCodeSource::prefetchAll() {
+    for (fast8_t i = 0; i < numSources; i++) {
+        sources[i]->prefetchContent();
+    }
+}
+
 void GCodeSource::printAllFLN(FSTRINGPARAM(text)) {
     bool old = Com::writeToAll;
     Com::writeToAll = true;
@@ -1147,6 +1156,11 @@ GCodeSource::GCodeSource() {
 
 SerialGCodeSource::SerialGCodeSource(Stream* p) {
     stream = p;
+#if EMERGENCY_PARSER
+    bufReadPos = bufLength = bufWritePos = 0;
+    commandsReceivingWritePosition = 0;
+    commentDetected = false;
+#endif
 }
 bool SerialGCodeSource::isOpen() {
     return true;
@@ -1158,16 +1172,99 @@ bool SerialGCodeSource::closeOnError() { // return true if the channel can not i
     return false;
 }
 bool SerialGCodeSource::dataAvailable() { // would read return a new byte?
+#if EMERGENCY_PARSER
+    return bufLength > 0;
+#else
     return stream->available();
+#endif
 }
+
 int SerialGCodeSource::readByte() {
+#if EMERGENCY_PARSER
+    if (bufLength == 0) {
+        return -1;
+    }
+    uint8_t c = buffer[bufReadPos++];
+    if (bufReadPos >= SERIAL_IN_BUFFER) {
+        bufReadPos = 0;
+    }
+    bufLength--;
+    return c;
+#else
     return stream->read();
+#endif
 }
 void SerialGCodeSource::writeByte(uint8_t byte) {
     stream->write(byte);
 }
 void SerialGCodeSource::close() {
 }
+void SerialGCodeSource::prefetchContent() {
+#if EMERGENCY_PARSER
+    while (stream->available() && bufLength < SERIAL_IN_BUFFER) {
+        commandReceiving[commandsReceivingWritePosition++] = buffer[bufWritePos] = stream->read();
+        bufWritePos++;
+        if (bufWritePos == SERIAL_IN_BUFFER) {
+            bufWritePos = 0;
+        }
+
+        if (commandsReceivingWritePosition == 1) {
+            sendAsBinary = (commandReceiving[0] & 128) != 0;
+        } // first byte detection
+        if (sendAsBinary) {
+            if (commandsReceivingWritePosition >= 2) {
+
+                if (commandsReceivingWritePosition == 5 || commandsReceivingWritePosition == 4)
+                    binaryCommandSize = GCode::computeBinarySize((char*)commandReceiving);
+                if (commandsReceivingWritePosition == binaryCommandSize) {
+                    GCode act;
+                    if (act.parseBinary(commandReceiving, binaryCommandSize, false)) { // Success
+                        testEmergency(act);
+                    }
+                    commandsReceivingWritePosition = 0;
+                }
+            }
+        } else // ASCII command
+        {
+            char ch = commandReceiving[commandsReceivingWritePosition - 1];
+            if (ch == 0 || ch == '\n' || ch == '\r' || !GCodeSource::activeSource->isOpen() /*|| (!commentDetected && ch == ':')*/) // complete line read
+            {
+                commandReceiving[commandsReceivingWritePosition - 1] = 0;
+                commentDetected = false;
+                if (commandsReceivingWritePosition > 1) { // empty line ignore
+                    GCode act;
+                    if (act.parseAscii((char*)commandReceiving, false)) { // Success
+                        testEmergency(act);
+                    }
+                }
+                commandsReceivingWritePosition = 0;
+            } else {
+                if (ch == ';')
+                    commentDetected = true; // ignore new data until line end
+                if (commentDetected)
+                    commandsReceivingWritePosition--;
+            }
+        }
+        if (commandsReceivingWritePosition >= MAX_CMD_SIZE - 1) {
+            commandsReceivingWritePosition = 0;
+        }
+        bufLength++;
+    }
+#endif
+}
+
+void SerialGCodeSource::testEmergency(GCode& gcode) {
+    if (gcode.hasM()) {
+        if (gcode.M == 108) {
+            Printer::breakLongCommand = true;
+        } else if (gcode.M == 112) {
+            Commands::emergencyStop();
+        } else if (gcode.M == 290) { // speed up babystepping
+            MCode_290(&gcode);
+        }
+    }
+}
+
 // ----- SD card source -----
 
 #if SDSUPPORT

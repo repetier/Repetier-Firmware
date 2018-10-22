@@ -373,6 +373,10 @@ void MCode_107(GCode* com) {
     }
 }
 
+void MCode_108(GCode* com) {
+    Printer::breakLongCommand = false;
+}
+
 void MCode_109(GCode* com) {
 #if NUM_TOOLS > 0
     if (HeatManager::reportTempsensorError())
@@ -489,6 +493,11 @@ void MCode_115(GCode* com) {
 #endif
     Com::cap(PSTR("PAUSESTOP:1"));
     Com::cap(PSTR("PREHEAT:1"));
+#if EMERGENCY_PARSER
+    Com::cap(PSTR("EMERGENCY_PARSER:1"));
+#else
+    Com::cap(PSTR("EMERGENCY_PARSER:0"));
+#endif
     Commands::reportPrinterUsage();
 }
 void MCode_116(GCode* com) {
