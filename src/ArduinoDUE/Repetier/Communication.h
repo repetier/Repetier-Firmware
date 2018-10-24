@@ -48,6 +48,7 @@ class GCodeSource {
     static void removeSource(GCodeSource *delSource);
     static void rotateSource(); ///< Move active to next source
     static void writeToAll(uint8_t byte); ///< Write to all listening sources
+    static void prefetchAll();
     static void printAllFLN(FSTRINGPARAM(text) );
     static void printAllFLN(FSTRINGPARAM(text), int32_t v);
     uint32_t lastLineNumber;
@@ -64,6 +65,7 @@ class GCodeSource {
     virtual int readByte() = 0;
     virtual void close() = 0;
     virtual void writeByte(uint8_t byte) = 0;
+    virtual void prefetchContent() {} // Used for emergency parsing to read ahaed
 };
 
 class Com

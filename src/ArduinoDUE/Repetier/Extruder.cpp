@@ -366,7 +366,7 @@ void TemperatureController::waitForTargetTemperature() {
         }*/
         Commands::checkForPeriodicalActions(true);
         GCode::keepAlive(WaitHeater);
-        if(fabs(targetTemperatureC - currentTemperatureC) <= 1) {
+        if(fabs(targetTemperatureC - currentTemperatureC) <= 1 || Printer::breakLongCommand) {
             Printer::setAutoreportTemp(oldReport);
             return;
         }
@@ -2447,7 +2447,7 @@ void TemperatureController::autotunePID(float temp, uint8_t controllerId, int ma
         extruder[controllerId].coolerPWM = extruder[controllerId].coolerSpeed;
         extruder[0].coolerPWM = extruder[0].coolerSpeed;
     }
-    for(;;) {
+    while(!Printer::breakLongCommand) {
 #if FEATURE_WATCHDOG
         HAL::pingWatchdog();
 #endif // FEATURE_WATCHDOG

@@ -60,6 +60,9 @@ void Commands::commandLoop() {
 
 void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     Printer::handleInterruptEvent();
+#if EMERGENCY_PARSER
+	GCodeSource::prefetchAll();
+#endif
     EVENT_PERIODICAL;
 #if defined(DOOR_PIN) && DOOR_PIN > -1
     if(Printer::updateDoorOpen()) {
@@ -1964,6 +1967,9 @@ void Commands::processMCode(GCode *com) {
         }
         break;
 #endif
+	case 108:
+		Printer::breakLongCommand = false;
+		break;
     case 111: // M111 enable/disable run time debug flags
         if(com->hasS()) Printer::setDebugLevel(static_cast<uint8_t>(com->S));
         if(com->hasP()) {
@@ -2018,6 +2024,11 @@ void Commands::processMCode(GCode *com) {
 #endif
         Com::cap(PSTR("PAUSESTOP:1"));
         Com::cap(PSTR("PREHEAT:1"));
+#if EMERGENCY_PARSER
+		Com::cap(PSTR("EMERGENCY_PARSER:1"));
+#else
+		Com::cap(PSTR("EMERGENCY_PARSER:0"));
+#endif
         reportPrinterUsage();
         Printer::reportPrinterMode();
         break;
@@ -2363,10 +2374,12 @@ void Commands::processMCode(GCode *com) {
     break;
 #if FEATURE_BABYSTEPPING
     case 290: // M290 Z<babysteps> - Correct by adding baby steps for Z mm
+#if EMERGENCY_PARSER == 0
         if(com->hasZ()) {
             if(abs(com->Z) < (32700 - labs(Printer::zBabystepsMissing)) * Printer::axisStepsPerMM[Z_AXIS])
                 Printer::zBabystepsMissing += com->Z * Printer::axisStepsPerMM[Z_AXIS];
         }
+#endif
         break;
 #endif
 #if defined(BEEPER_PIN) && BEEPER_PIN>=0

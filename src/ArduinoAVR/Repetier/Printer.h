@@ -415,7 +415,8 @@ public:
     static int maxLayer; // -1 = unknown
     static char printName[21]; // max. 20 chars + 0
     static float progress;
-    static fast8_t wizardStackPos;
+    static fast8_t breakLongCommand; // Set by M108 to stop long tasks
+	static fast8_t wizardStackPos;
     static wizardVar wizardStack[WIZARD_STACK_SIZE];
 
 #if defined(DRV_TMC2130)

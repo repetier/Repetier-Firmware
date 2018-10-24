@@ -211,6 +211,14 @@ usage or for searching for memory induced errors. Switch it off for production, 
 
 #include "Configuration.h"
 
+#ifndef EMERGENCY_PARSER
+#if DRIVE_SYSTEM != 3 || CPU_ARCH != ARCH_AVR
+#define EMERGENCY_PARSER 1
+#else
+#define EMERGENCY_PARSER 0
+#endif
+#endif
+
 #ifndef DUAL_X_AXIS_MODE
 #define DUAL_X_AXIS_MODE 0
 #endif
