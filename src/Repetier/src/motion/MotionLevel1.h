@@ -264,13 +264,13 @@ public:
     static void fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback);
     static void fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback[NUM_AXES]);
     // Move with coordinates in official coordinates (before offset, transform, ...)
-    static void moveByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove);
+    static bool moveByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove);
     // Move to the printer coordinates (after offset, transform, ...)
-    static void moveByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove);
+    static bool moveByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove);
     // Move with coordinates in official coordinates (before offset, transform, ...)
-    static void moveRelativeByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove);
+    static bool moveRelativeByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove);
     // Move to the printer coordinates (after offset, transform, ...)
-    static void moveRelativeByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove);
+    static bool moveRelativeByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove);
     static void moveRelativeBySteps(int32_t coords[NUM_AXES]);
     /// Update position to new offsets
     static void setToolOffset(float ox, float oy, float oz);
@@ -326,7 +326,7 @@ private:
     the forwarded buffer. If none is available nullptr
     is returned. Will update process and lengthUnprocessed */
     static Motion1Buffer* forward(Motion2Buffer* m2);
-    static void queueMove(float feedrate, bool secondaryMove);
+    static bool queueMove(float feedrate, bool secondaryMove);
     static INLINE void pop() {
         Motion1Buffer& b = buffers[last];
         b.state = Motion1State::FREE;

@@ -104,6 +104,7 @@ In homing to z min we assume z endstop is bed level so we move up Z_PROBE_Z_OFFS
 requires the extruder to bend the coating thickness without harm!
 */
 
+#if 0
 #include "Repetier.h"
 
 #ifndef BED_LEVELING_METHOD
@@ -164,7 +165,7 @@ void Printer::prepareForProbing() {
 bool measureAutolevelPlane(Plane& plane) {
     PlaneBuilder builder;
     builder.reset();
-#if BED_LEVELING_METHOD == 0 // 3 point
+#if BED_LEVELING_METHOD == 0   // 3 point
     float h;
     Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
     h = Printer::runZProbe(false, false);
@@ -243,7 +244,7 @@ bool measureAutolevelPlane(Plane& plane) {
 }
 
 void correctAutolevel(Plane& plane) {
-#if BED_CORRECTION_METHOD == 0 // rotation matrix
+#if BED_CORRECTION_METHOD == 0   // rotation matrix
     //Printer::buildTransformationMatrix(plane.z(EEPROM::zProbeX1(),EEPROM::zProbeY1()),plane.z(EEPROM::zProbeX2(),EEPROM::zProbeY2()),plane.z(EEPROM::zProbeX3(),EEPROM::zProbeY3()));
     Printer::buildTransformationMatrix(plane);
 #elif BED_CORRECTION_METHOD == 1 // motorized correction
@@ -726,7 +727,7 @@ void Printer::measureZProbeHeight(float curHeight) {
     }
     float zProbeHeight = EEPROM::zProbeHeight() + startHeight - zheight;
 
-#if EEPROM_MODE != 0                       // Com::tZProbeHeight is not declared when EEPROM_MODE is 0
+#if EEPROM_MODE != 0 // Com::tZProbeHeight is not declared when EEPROM_MODE is 0
     EEPROM::setZProbeHeight(zProbeHeight); // will also report on output
 #else
     Com::printFLN(PSTR("Z-probe height [mm]:"), zProbeHeight);
@@ -811,3 +812,5 @@ void Printer::buildTransformationMatrix(float h1,float h2,float h3) {
     Com::printArrayFLN(Com::tTransformationMatrix,autolevelTransformation, 9, 6);
 }
 */
+
+#endif

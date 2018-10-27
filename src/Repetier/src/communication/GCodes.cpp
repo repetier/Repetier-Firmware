@@ -40,10 +40,10 @@ void GCode_0_1(GCode* com) {
     }
 #endif
 #if UI_HAS_KEYS
-        // ui can only execute motion commands if we are not waiting inside a move for an
-        // old move to finish. For normal response times, we always leave one free after
-        // sending a line. Drawback: 1 buffer line less for limited time. Since input cache
-        // gets filled while waiting, the lost is neglectable.
+    // ui can only execute motion commands if we are not waiting inside a move for an
+    // old move to finish. For normal response times, we always leave one free after
+    // sending a line. Drawback: 1 buffer line less for limited time. Since input cache
+    // gets filled while waiting, the lost is neglectable.
 //        PrintLine::waitForXFreeLines(1, true);
 #endif // UI_HAS_KEYS
 #ifdef DEBUG_QUEUE_MOVE
@@ -222,7 +222,7 @@ void GCode_29(GCode* com) {
 }
 
 void GCode_30(GCode* com) {
-#if ZPROBE_TYPE
+#if Z_PROBE_TYPE
     // G30 [Pn] [S]
     // G30 (the same as G30 P3) single probe set Z0
     // G30 S1 Z<real_z_pos> - measures probe height (P is ignored) assuming we are at real height Z
@@ -287,6 +287,7 @@ void GCode_32(GCode* com) {
 }
 
 void GCode_33(GCode* com) {
+    Leveling::execute_G33(com);
 #if FEATURE_Z_PROBE
 #if DISTORTION_CORRECTION
     if (com->hasL()) { // G33 L0 - List distortion matrix

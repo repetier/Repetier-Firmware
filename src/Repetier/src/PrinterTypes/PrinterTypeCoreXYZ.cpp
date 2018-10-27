@@ -31,7 +31,7 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
     if (Printer::isNoDestinationCheck()) {
         return true;
     }
-    if (Printer::isHoming()) {
+    if (Printer::isHoming() || Motion1::endstopMode == EndstopMode::PROBING) {
         return true;
     }
     for (fast8_t i = 0; i < 3; i++) {
@@ -139,7 +139,7 @@ void PrinterType::enableMotors(fast8_t axes) {
         Motion1::motors[Y_AXIS]->enable();
         Motion1::motors[Z_AXIS]->enable();
     }
-    for (fast8_t i = 3; i < NUM_AXES; i++) {
+    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
         if ((axes & axisBits[i]) != 0 && Motion1::motors[i]) {
             Motion1::motors[i]->enable();
         }

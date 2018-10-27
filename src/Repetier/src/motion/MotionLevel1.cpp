@@ -486,7 +486,7 @@ void Motion1::setTmpPositionXYZE(float x, float y, float z, float e) {
     tmpPosition[E_AXIS] = e;
 }
 // Move with coordinates in official coordinates (before offset, transform, ...)
-void Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
+bool Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
     FOR_ALL_AXES(i) {
         if (coords[i] != IGNORE_COORDINATE) {
             currentPosition[i] = coords[i];
@@ -505,7 +505,7 @@ void Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate, bool second
     if (feedrate == IGNORE_COORDINATE) {
         feedrate = Printer::feedrate;
     }
-    PrinterType::queueMove(feedrate, secondaryMove);
+    return PrinterType::queueMove(feedrate, secondaryMove);
 }
 
 void Motion1::setToolOffset(float ox, float oy, float oz) {
@@ -532,7 +532,7 @@ void Motion1::setToolOffset(float ox, float oy, float oz) {
 }
 
 // Move to the printer coordinates (after offset, transform, ...)
-void Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
+bool Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
     FOR_ALL_AXES(i) {
         if (coords[i] == IGNORE_COORDINATE) {
             destinationPositionTransformed[i] = currentPositionTransformed[i];
@@ -565,7 +565,7 @@ void Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate, bool seconda
     }
 #endif
 */
-    PrinterType::queueMove(feedrate, secondaryMove);
+    return PrinterType::queueMove(feedrate, secondaryMove);
 }
 
 void Motion1::updatePositionsFromCurrent() {
@@ -577,23 +577,23 @@ void Motion1::updatePositionsFromCurrentTransformed() {
 }
 
 // Move with coordinates in official coordinates (before offset, transform, ...)
-void Motion1::moveRelativeByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
+bool Motion1::moveRelativeByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
     FOR_ALL_AXES(i) {
         if (coords[i] != IGNORE_COORDINATE) {
             coords[i] += currentPosition[i];
         }
     }
-    moveByOfficial(coords, feedrate, secondaryMove);
+    return moveByOfficial(coords, feedrate, secondaryMove);
 }
 
 // Move to the printer coordinates (after offset, transform, ...)
-void Motion1::moveRelativeByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
+bool Motion1::moveRelativeByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
     FOR_ALL_AXES(i) {
         if (coords[i] != IGNORE_COORDINATE) {
             coords[i] += currentPositionTransformed[i];
         }
     }
-    moveByPrinter(coords, feedrate, secondaryMove);
+    return moveByPrinter(coords, feedrate, secondaryMove);
 }
 
 /** This function is required to fix some errors left over after homing/z-probing.
@@ -631,10 +631,15 @@ void Motion1::moveRelativeBySteps(int32_t coords[NUM_AXES]) {
     buf.state = Motion1State::BACKWARD_PLANNED;
 }
 
-void Motion1::queueMove(float feedrate, bool secondaryMove) {
+bool Motion1::queueMove(float feedrate, bool secondaryMove) {
     if (!PrinterType::positionAllowed(destinationPositionTransformed)) {
         Com::printWarningFLN(PSTR("Move to illegal position prevented!"));
-        return;
+        if (Printer::debugEcho()) {
+            Com::printF(PSTR("XT:"), destinationPositionTransformed[X_AXIS], 2);
+            Com::printF(PSTR(" YT:"), destinationPositionTransformed[Y_AXIS], 2);
+            Com::printFLN(PSTR(" ZT:"), destinationPositionTransformed[Z_AXIS], 2);
+        }
+        return false;
     }
     float delta[NUM_AXES];
     float e2 = 0, length2 = 0;
@@ -662,7 +667,7 @@ void Motion1::queueMove(float feedrate, bool secondaryMove) {
         }
     }
     if (length2 == 0) { // no move, ignore it
-        return;
+        return true;
     }
 
     insertWaitIfNeeded(); // for buffer fillup on first move
@@ -779,6 +784,7 @@ void Motion1::queueMove(float feedrate, bool secondaryMove) {
     buf.state = Motion1State::RESERVED; // make it accessible
 
     backplan(buf.id);
+    return true;
 }
 
 void Motion1::insertWaitIfNeeded() {

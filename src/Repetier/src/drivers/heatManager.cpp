@@ -2,7 +2,7 @@
 
 HeatManager* heaters[] = HEATERS;
 
-HeatManager::HeatManager(char htType, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod)
+HeatManager::HeatManager(char htType, fast8_t _index, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod, bool _hotPluggable)
     : error(HeaterError::NO_ERROR)
     , targetTemperature(0)
     , currentTemperature(0)
@@ -14,7 +14,9 @@ HeatManager::HeatManager(char htType, IOTemperature* i, PWMHandler* o, float max
     , decouplePeriod(decPeriod)
     , decoupleMode(DecoupleMode::NO_HEATING)
     , errorCount(0)
-    , heaterType(htType) {
+    , heaterType(htType)
+    , index(_index)
+    , hotPluggable(_hotPluggable) {
 }
 void HeatManager::init() {
     eepromPos = EEPROM::reserve(EEPROM_SIGNATURE_HEAT_MANAGER, 1, eepromSizeLocal() + 13);
@@ -32,12 +34,35 @@ void HeatManager::update() {
     if (decoupleMode == PAUSED) {
         return; // do nothing in pause mode
     }
+    if (decoupleMode == UNPLUGGED) {
+        if (input->isDefect()) {
+            return;
+        }
+        decoupleMode = NO_HEATING;
+        Com::printF(PSTR("Heater "));
+        printName();
+        Com::printFLN(PSTR(" plugged."));
+    }
     if (input->isDefect()) {
-        errorCount += 2;
-        if (errorCount > 10) {
-            Com::printErrorFLN(PSTR("Heater seems to be defect. Sensor reported unusual values."));
-            Com::printErrorFLN(PSTR("This can be a broken wire or a shorted contact of the sensor."));
-            setError(HeaterError::SENSOR_DEFECT);
+        if (hotPluggable) {
+            setCurrentTemperature(0);
+            // setTargetTemperature(0); // unplugged mode will prevent errors
+            output->set(0);
+            decoupleMode = UNPLUGGED;
+            Com::printF(PSTR("Heater "));
+            printName();
+            Com::printFLN(PSTR(" unplugged."));
+
+            return;
+        } else {
+            errorCount += 2;
+            if (errorCount > 10) {
+                Com::printErrorF(PSTR("Heater "));
+                printName();
+                Com::printF(PSTR(" seems to be defect. Sensor reported unusual values."));
+                Com::printErrorFLN(PSTR("This can be a broken wire or a shorted contact of the sensor."));
+                setError(HeaterError::SENSOR_DEFECT);
+            }
         }
         return;
     } else {
@@ -198,6 +223,11 @@ bool HeatManager::reportTempsensorError() {
 #else
     return false;
 #endif
+}
+
+void HeatManager::printName() {
+    Com::print(heaterType);
+    Com::print(static_cast<int32_t>(index));
 }
 
 void HeatManagerBangBang::eepromHandleLocal(int adr) {

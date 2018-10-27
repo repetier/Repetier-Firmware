@@ -30,4 +30,5 @@ public:
             Com::printFLN(PSTR(" c = "), plane.c, 4);
         }
     }
+    inline int numPoints() { return n; }
 };

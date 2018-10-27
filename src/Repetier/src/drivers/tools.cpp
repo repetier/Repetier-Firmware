@@ -235,7 +235,9 @@ void ToolExtruder::unstepMotor() {
 bool ToolExtruder::updateMotor() {
     return stepper->updateEndstop();
 }
-
+void ToolExtruder::directionMotor(bool dir) {
+    stepper->dir(dir);
+}
 // ------------- Laser ------------------
 
 template <class enabledPin, class activePin>

@@ -132,7 +132,7 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
     if (Printer::isNoDestinationCheck()) {
         return true;
     }
-    if (Printer::isHoming()) {
+    if (Printer::isHoming() || Motion1::endstopMode == EndstopMode::PROBING) {
         return true;
     }
     if (pos[Z_AXIS] < Motion1::minPos[Z_AXIS] || pos[Z_AXIS] > Motion1::maxPos[Z_AXIS]) {
@@ -175,6 +175,9 @@ void PrinterType::getBedRectangle(float& xmin, float& xmax, float& ymin, float& 
 }
 
 void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]) {
+    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
+        motor[i] = lroundf(pos[i] * Motion1::resolution[i]);
+    }
     if (mode == MotionMode::MOTION_PER_AXIS) {
         motor[X_AXIS] = lroundf(pos[Z_AXIS] * Motion1::resolution[X_AXIS]);
         motor[Y_AXIS] = lroundf(pos[Y_AXIS] * Motion1::resolution[Y_AXIS]);
@@ -183,9 +186,6 @@ void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]) {
     }
     // Move them in delta mode
     float z = pos[Z_AXIS];
-    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
-        motor[i] = lroundf(pos[i] * Motion1::resolution[i]);
-    }
     float temp = APosY - pos[Y_AXIS];
     float opt = diagonalSquaredA - temp * temp;
     float temp2 = APosX - pos[X_AXIS];
@@ -308,7 +308,7 @@ void PrinterType::enableMotors(fast8_t axes) {
         Motion1::motors[Y_AXIS]->enable();
         Motion1::motors[Z_AXIS]->enable();
     }
-    for (fast8_t i = 3; i < NUM_AXES; i++) {
+    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
         if ((axes & axisBits[i]) != 0 && Motion1::motors[i]) {
             Motion1::motors[i]->enable();
         }

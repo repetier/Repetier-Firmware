@@ -117,6 +117,7 @@ public:
     virtual void enableMotor() {}
     virtual void stepMotor() {}
     virtual void unstepMotor() {}
+    virtual void directionMotor(bool dir) {}
     virtual bool updateMotor() { return false; }
     /// Computes intensity based on speed
     virtual int computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) { return 0; }
@@ -211,6 +212,7 @@ public:
     void stepMotor() final;
     void unstepMotor() final;
     bool updateMotor() final;
+    void directionMotor(bool dir) final;
     void setResolution(float stepspermm) { stepsPerMM = stepspermm; }
     void retract(bool backwards, bool longRetract) {
         // TODO: Add retract handling

@@ -24,8 +24,6 @@ public:
 #elif LEVELING_CORRECTOR == 1 // Motorized correction
 
 class LevelingCorrector {
-    static float points[3][2];
-
 public:
     static void init();
     static void handleEeprom();
@@ -46,6 +44,7 @@ public:
     inline static void handleEeprom() {}
     inline static void resetEeprom() {}
     inline static void execute_G32(GCode* com) {}
+    inline static void execute_G33(GCode* com) {}
 };
 
 #elif LEVELING_METHOD == 1 // Grid leveling
@@ -60,16 +59,30 @@ class Leveling {
     static float dx, dy;
     static uint16_t eprStart;
     static uint8_t distortionEnabled;
+    inline static float xPosFor(fast8_t index) {
+        return xMin + dx * index;
+    }
+    inline static float yPosFor(fast8_t index) {
+        return yMin + dy * index;
+    }
+    static void extrapolateGrid();
+    static bool extrapolateableNeighbours(int x, int y);
+    static float extrapolateNeighbours(int x, int y);
+    inline static bool validGridIndex(int x, int y) {
+        return x >= 0 && y >= 0 && x < GRID_SIZE && y < GRID_SIZE;
+    }
+    static bool gridIndexForDir(int dir, int dist, int& x, int& y);
 
 public:
     inline static void addDistortion(float* pos) {}
     inline static void subDistortion(float* pos) {}
-    inline static void measure();
-    inline static void init();
-    inline static void handleEeprom();
-    inline static void resetEeprom();
-    inline static void execute_G32(GCode* com);
-    inline static void updateDerived();
+    static void measure();
+    static void init();
+    static void handleEeprom();
+    static void resetEeprom();
+    static void updateDerived();
+    static void execute_G32(GCode* com);
+    static void execute_G33(GCode* com);
 };
 
 #elif LEVELING_METHOD == 2 // 4 point symmetric
@@ -83,6 +96,21 @@ public:
     inline static void handleEeprom() {}
     inline static void resetEeprom() {}
     static void execute_G32(GCode* com);
+    inline static void execute_G33(GCode* com) {}
+};
+
+#elif LEVELING_METHOD == 3 // 3 points
+
+class Leveling {
+public:
+    inline static void addDistortion(float* pos) {}
+    inline static void subDistortion(float* pos) {}
+    static void measure();
+    inline static void init() {}
+    inline static void handleEeprom() {}
+    inline static void resetEeprom() {}
+    static void execute_G32(GCode* com);
+    inline static void execute_G33(GCode* com) {}
 };
 
 #else

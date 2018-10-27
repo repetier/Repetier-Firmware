@@ -41,7 +41,7 @@
 #define NUM_EXTRUDER 2
 #define NUM_SERVOS 1    // Number of serves available
 #define MOTHERBOARD 405 // 405
-#define EEPROM_MODE 0
+#define EEPROM_MODE 1
 #define RFSERIAL Serial
 #define WAITING_IDENTIFIER "wait"
 #define JSON_OUTPUT 1
@@ -62,8 +62,10 @@
 #define G0_FEEDRATE 170              // Speed for G0 moves. Independent from set F value!
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
 #define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
-#define ZPROBE_TYPE 1                // 0 = no z probe, 1 = default z probe
-#define ZPROBE_BORDER 2              // Safety border to ensure position is allowed
+#define Z_PROBE_TYPE 2               // 0 = no z probe, 1 = default z probe, 2 = Nozzle as probe
+#define Z_PROBE_BORDER 2             // Safety border to ensure position is allowed
+#define Z_PROBE_TEMPERATURE 170      // Temperature for type 2
+
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta
 #define PRINTER_TYPE 0
 // If all axis end stops are hardware based we can skip the time consuming tests each step
@@ -168,9 +170,9 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 
 // Array to call motor related commands like microstepping/current if supported.
 // Id's start at 0 and depend on position in this array.
-#define NUM_MOTORS 3
+#define NUM_MOTORS 5
 #define MOTORS \
-    { &XMotor, &YMotor, &ZMotor }
+    { &XMotor, &YMotor, &ZMotor, &AL1Motor, &AL2Motor }
 
 #define X_HOME_DIR -1
 #define Y_HOME_DIR 1
@@ -422,6 +424,8 @@ It also can add a delay to wait for spindle to run on full speed.
 #define Z_PROBE_SWITCHING_DISTANCE 1
 // How often should we test a position 1 .. x. Averages result over all tests.
 #define Z_PROBE_REPETITIONS 3
+// 0 = use average, 1 = use middle value after ordering z
+#define Z_PROBE_USE_MEDIAN 1
 // Nozzle distance to bed when z probe triggers
 #define Z_PROBE_HEIGHT -0.15
 // Delay in ms before we go down again. For BLTouch so signal can disable
@@ -437,21 +441,32 @@ It also can add a delay to wait for spindle to run on full speed.
 // How to correct rotated beds
 // 0 = Software side by rotating coordinates
 // 1 = Move bed physically using 2 motors
-#define LEVELING_CORRECTOR 0
-#define LC_P1_X 60
+#define LEVELING_CORRECTOR 1
+// Bed fixture coordinates for motor leveling
+#define LC_P1_X 55
 #define LC_P1_Y 130
 #define LC_P2_X 137
 #define LC_P2_Y 45
 #define LC_P3_X 137
 #define LC_P3_Y 210
+#define LC_P2_MOTOR AL1Motor
+#define LC_P3_MOTOR AL2Motor
+#define LC_STEPS_PER_MM 3382
+#define LC_Z_SPEED 0.2
+// > 0 will move bed down and wait for removal (heater removed) and will pause another LC_WAIT_BED_REMOVE seconds
+#define LC_WAIT_BED_REMOVE 2
+// Uncomment to limit correction per autoleveling iteration. Value is the max. correction in mm
+// #define LIMIT_MOTORIZED_CORRECTION 0.5
 
+// Leveling method
+// 0 = none, 3 = 3 points, 1 = grid, 2 = 4 point symmetric
+#define LEVELING_METHOD 1
 #define L_P1_X 60
 #define L_P1_Y 130
 #define L_P2_X 137
 #define L_P2_Y 45
 #define L_P3_X 137
 #define L_P3_Y 210
-#define LEVELING_METHOD 2
 #define BED_LEVELING_GRID_SIZE 5
 #define BED_LEVELING_REPETITIONS 5
 #define BED_MOTOR_1_X 55
@@ -530,16 +545,9 @@ Values must be in range 1..255
 #define UI_SET_EXTRUDER_FEEDRATE 5
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3
 
-#define NUM_MOTOR_DRIVERS 2
-#define MOTOR_DRIVER_1(var) StepperDriver<51, 53, 49, 0, 0> var(3382, 0.2)
-#define MOTOR_DRIVER_2(var) StepperDriver<39, 13, 40, 0, 0> var(3382, 0.2)
-
-#define ALTERNATIVE_JERK
-#define REDUCE_ON_SMALL_SEGMENTS
 //#define CUSTOM_EVENTS
 //#define CUSTOM_MENU
 //#define CUSTOM_TRANSLATIONS
-#define LIMIT_MOTORIZED_CORRECTION 0.5
 #define HALFAUTOMATIC_LEVELING 1
 // add z probe height routine
 #define ZPROBE_HEIGHT_ROUTINE

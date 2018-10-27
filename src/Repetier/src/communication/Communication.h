@@ -303,7 +303,7 @@ public:
 #ifdef DEBUG_STEPCOUNT
     FSTRINGVAR(tDBGMissedSteps)
 #endif
-#if ZPROBE_TYPE
+#if Z_PROBE_TYPE
     FSTRINGVAR(tZProbe)
     FSTRINGVAR(tZProbeStartScript)
     FSTRINGVAR(tZProbeEndScript)

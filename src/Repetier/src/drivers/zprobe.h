@@ -1,4 +1,4 @@
-#if ZPROBE_TYPE == 0
+#if Z_PROBE_TYPE == 0
 
 class ZProbeHandler {
 public:
@@ -19,8 +19,9 @@ public:
     static float optimumProbingHeight() { return 0; }
 };
 
-#elif ZPROBE_TYPE == 1
+#elif Z_PROBE_TYPE == 1
 
+// Default handler for switches, induction
 class ZProbeHandler {
     static uint16_t eprStart;
     static float height;
@@ -49,8 +50,40 @@ public:
     static float optimumProbingHeight();
 };
 
+#elif Z_PROBE_TYPE == 2
+
+// Nozzle based limit switch. Ensures a minimum temperature. Offset is
+// not required since nozzle is the probe we use nozzle offset.
+
+class ZProbeHandler {
+    static uint16_t eprStart;
+    static float height;
+    static float bedDistance;
+    static float speed;
+    static int16_t probeTemperature;
+    static bool activated;
+    static int16_t activateTemperature;
+
+public:
+    static float getZProbeHeight();
+    static void setZProbeHeight(float height);
+    static void activate();
+    static void deactivate();
+    static float runProbe();
+    static bool probingPossible();
+    static float xOffset();
+    static float yOffset();
+    static void init();
+    static void eepromHandle();
+    static void eepromReset();
+    static float getCoating() { return 0; }
+    static void setCoating(float val) {}
+    static float getBedDistance() { return bedDistance; }
+    static float optimumProbingHeight();
+};
+
 #else
 
-#error Unknown ZPROBE_TYPE value
+#error Unknown Z_PROBE_TYPE value
 
 #endif

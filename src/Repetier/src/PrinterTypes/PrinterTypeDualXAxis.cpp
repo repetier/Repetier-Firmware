@@ -103,7 +103,7 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
     if (Printer::isNoDestinationCheck()) {
         return true;
     }
-    if (Printer::isHoming()) {
+    if (Printer::isHoming() || Motion1::endstopMode == EndstopMode::PROBING) {
         return true;
     }
     for (fast8_t i = 1; i < 3; i++) {
@@ -303,8 +303,7 @@ void PrinterType::enableMotors(fast8_t axes) {
 }
 void PrinterType::queueMove(float feedrate, bool secondaryMove) {
     if (dontChangeCoords) { // don't think about coordinates wanted!
-        Motion1::queueMove(feedrate, secondaryMove);
-        return;
+        return Motion1::queueMove(feedrate, secondaryMove);
     }
     targetReal = Motion1::destinationPositionTransformed[X_AXIS];
     // DEBUG_MSG2_FAST("Q1 X:", targetReal);
@@ -382,7 +381,7 @@ void PrinterType::queueMove(float feedrate, bool secondaryMove) {
     }
     // Motion1::currentPosition[A_AXIS] = Motion1::destinationPositionTransformed[A_AXIS] - Motion1::toolOffset[X_AXIS];
     // DEBUG_MSG("Q6");
-    Motion1::queueMove(feedrate, secondaryMove);
+    return Motion1::queueMove(feedrate, secondaryMove);
 }
 
 void PrinterType::setDittoMode(fast8_t count, bool mirror) {

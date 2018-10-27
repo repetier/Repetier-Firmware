@@ -69,8 +69,13 @@ void Motion3::activateNext() {
     YMotor.dir(act->directions & 2);
     ZMotor.dir(act->directions & 4);
     for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
-        if (act->usedAxes & axisBits[i]) {
+        if (act->usedAxes & axisBits[i] && Motion1::motors[i]) {
             Motion1::motors[i]->dir(act->directions & axisBits[i]);
+        }
+    }
+    if (Motion1::dittoMode) {
+        for (fast8_t i = 1; i < Motion1::dittoMode; i++) {
+            Tool::tools[i]->directionMotor(act->directions & 8);
         }
     }
     // on new line reset triggered axes
@@ -136,7 +141,7 @@ void Motion3::timer() {
             return;
         }
 
-            // Test one motor endstop to simplify stepper logic
+        // Test one motor endstop to simplify stepper logic
 #if !defined(NO_SOFTWARE_AXIS_ENDSTOPS) || !defined(NO_MOTOR_ENDSTOPS)
         static fast8_t testMotorId = 0;
         fast8_t axisBit = axisBits[testMotorId];
@@ -271,7 +276,7 @@ void Motion3::timer() {
             ZMotor.step();
             act->error[Z_AXIS] -= act->errorUpdate;
         }
-            //}
+        //}
 #if NUM_AXES > E_AXIS
         //if (act->usedAxes & 8) {
         if ((act->error[E_AXIS] += act->delta[E_AXIS]) > 0) {
@@ -286,7 +291,7 @@ void Motion3::timer() {
             }
             act->error[E_AXIS] -= act->errorUpdate;
         }
-            //}
+        //}
 #endif
 #if NUM_AXES > A_AXIS
         //if (act->usedAxes & 16) {
@@ -294,7 +299,7 @@ void Motion3::timer() {
             Motion1::motors[A_AXIS]->step();
             act->error[A_AXIS] -= act->errorUpdate;
         }
-            //}
+        //}
 #endif
 #if NUM_AXES > B_AXIS
         //if (act->usedAxes & 32) {
@@ -302,7 +307,7 @@ void Motion3::timer() {
             Motion1::motors[B_AXIS]->step();
             act->error[B_AXIS] -= act->errorUpdate;
         }
-            //}
+        //}
 #endif
 #if NUM_AXES > C_AXIS
         //if (act->usedAxes & 64) {
@@ -310,7 +315,7 @@ void Motion3::timer() {
             Motion1::motors[C_AXIS]->step();
             act->error[C_AXIS] -= act->errorUpdate;
         }
-            //}
+        //}
 #endif
     }
     // Test if we are finished

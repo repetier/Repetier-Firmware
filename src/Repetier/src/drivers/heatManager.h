@@ -29,7 +29,8 @@ enum DecoupleMode {
     HOLDING = 3,     // Holding temperature
     COOLING = 4,     // Target was dropped but not off
     CALIBRATING = 5, // Signal that no updates should happen
-    PAUSED = 6
+    PAUSED = 6,
+    UNPLUGGED = 7
 };
 
 class GCode;
@@ -53,9 +54,11 @@ protected:
     fast8_t errorCount;
     fast8_t wasOutsideRange; // 1 = if was above range, 2 = was below range
     char heaterType;         // E = Extruder, B = bed, C = Chamber, O = Other
-    uint16_t eepromPos; // Start position in eeprom
+    fast8_t index;           // Type index for name reporting
+    bool hotPluggable;       // If true will not panic when sensor is defect, will only disable this heater
+    uint16_t eepromPos;      // Start position in eeprom
 public:
-    HeatManager(char htType, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod);
+    HeatManager(char htType, fast8_t _index, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod, bool _hotPluggable);
     void init();
     virtual void setTargetTemperature(float temp) {
         if (temp > maxTemperature) {
@@ -85,6 +88,7 @@ public:
     inline void unpause() {
         setTargetTemperature(targetTemperature);
     }
+    inline bool isUnplugged() { return decoupleMode == UNPLUGGED; }
     inline float getTargetTemperature() { return targetTemperature; }
     inline void setCurrentTemperature(float temp) {
         currentTemperature = temp;
@@ -109,12 +113,12 @@ public:
     virtual void updateLocal(float tempError) = 0;
     void eepromHandle();
     virtual void eepromHandleLocal(int pos) = 0;
-    virtual int eepromSizeLocal() {return 0;};
+    virtual int eepromSizeLocal() { return 0; };
     void update();
     virtual void updateDerived() {}
     /** Waits until the set target temperature is reached */
     void waitForTargetTemperature();
-    inline float getMaxTemperature() { return maxTemperature;}
+    inline float getMaxTemperature() { return maxTemperature; }
     void reportTemperature(char c, int idx);
     virtual void autocalibrate(GCode* g) {
         Com::printWarningFLN(PSTR("Autocalibration for this tool not supported!"));
@@ -123,7 +127,7 @@ public:
     bool isBedHeater() { return heaterType == 'B'; }
     bool isChamberHeater() { return heaterType == 'C'; }
     bool isOtherHeater() { return heaterType == 'O'; }
-
+    void printName();
     static bool reportTempsensorError();
     static void disableAllHeaters();
     static void resetAllErrorStates();
@@ -157,10 +161,10 @@ class HeatManagerPID : public HeatManager {
     fast8_t counter;
 
 public:
-    HeatManagerPID(char htType, IOTemperature* input, PWMHandler* output, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod,
-                   float p, float i, float d, float _driveMin, float _driveMax)
-        : HeatManager(htType, input,
-                      output, maxTemp, maxPwm, decVariance, decPeriod)
+    HeatManagerPID(char htType, fast8_t _index, IOTemperature* input, PWMHandler* output, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod,
+                   float p, float i, float d, float _driveMin, float _driveMax, bool _hotPluggable)
+        : HeatManager(htType, _index, input,
+                      output, maxTemp, maxPwm, decVariance, decPeriod, _hotPluggable)
         , P(p)
         , I(i)
         , D(d)

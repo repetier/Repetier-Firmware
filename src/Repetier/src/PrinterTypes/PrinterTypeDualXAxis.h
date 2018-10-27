@@ -58,7 +58,7 @@ public:
     static void init();
     static void updateDerived();
     static void enableMotors(fast8_t axes);
-    static void queueMove(float feedrate, bool secondaryMove);
+    static bool queueMove(float feedrate, bool secondaryMove);
     static inline bool supportsDittoMirror() { return true; }
     static void setDittoMode(fast8_t count, bool mirror);
     static bool ignoreAxisForLength(fast8_t axis);
