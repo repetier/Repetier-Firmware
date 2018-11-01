@@ -75,6 +75,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // Printrboard (at90usb)      = 9 // requires Teensyduino
 // Printrboard Ref. F or newer= 92 // requires Teensyduino
 // Foltyn 3D Master           = 12
+// Fysetc F6                  = 190
 // MegaTronics 1.0            = 70
 // Megatronics 2.0            = 701
 // Megatronics 3.0            = 703 // Thermistors predefined not thermocouples
@@ -113,7 +114,7 @@ We can connect BlueTooth to serial converter module directly to boards based on 
   c) pin 17 and 18 of AUX4 connector, then set BLUETOOTH_SERIAL to 2 (RX from BT to AUX4 p18, TX from BT to AUX4 p17)
   Comment out or set the BLUETOOTH_SERIAL to 0 or -1 to disable this feature.
 */
-#define BLUETOOTH_SERIAL   1                      // Port number (1..3) - For RUMBA use 3
+#define BLUETOOTH_SERIAL   -1                      // Port number (1..3) - For RUMBA use 3
 #define BLUETOOTH_BAUD     115200                 // communication speed
 
 // Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0

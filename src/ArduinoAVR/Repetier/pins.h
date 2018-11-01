@@ -3011,7 +3011,7 @@ S3(ext)=9
 #if MOTHERBOARD == 310
 #define KNOWN_BOARD
 /*****************************************************************
-* RAMBo Pin Assignments
+* RAMBo EInsy Pin Assignments
 ******************************************************************/
 
 #ifndef __AVR_ATmega2560__
@@ -3135,13 +3135,157 @@ S3(ext)=9
 
 #endif
 
+// ================================
+// Fysetc F6
+//
+// https://wiki.fysetc.com/F6_V1.3/
+// If using TMC2130 drives note this:
+// https://discuss.toms3d.org/hardware-f6/be-aware-with-chinese-fysetc-tmc2130-t384.html
+// ================================
+#if MOTHERBOARD == 190
+
+#ifndef __AVR_ATmega1280__
+#ifndef __AVR_ATmega2560__
+
+#error Oops!  Make sure you have 'Arduino Mega' selected from the 'Tools -> Boards' menu.
+#endif
+#endif
+
+#define ORIG_X_STEP_PIN         54
+#define ORIG_X_DIR_PIN          55
+#define ORIG_X_ENABLE_PIN       38
+#ifndef ORIG_X_CS_PIN
+#define ORIG_X_CS_PIN         70
+#endif
+
+#define ORIG_X_MIN_PIN          63
+#define ORIG_X_MAX_PIN          64
+
+#define ORIG_Y_STEP_PIN         60
+#define ORIG_Y_DIR_PIN          61
+#define ORIG_Y_ENABLE_PIN       56
+#ifndef ORIG_Y_CS_PIN
+#define ORIG_Y_CS_PIN         39
+#endif
+
+#define ORIG_Y_MIN_PIN          14
+#define ORIG_Y_MAX_PIN          15
+
+#define ORIG_Z_STEP_PIN         43
+#define ORIG_Z_DIR_PIN          48
+#define ORIG_Z_ENABLE_PIN       58
+#ifndef ORIG_Z_CS_PIN
+#define ORIG_Z_CS_PIN         74
+#endif
+
+#define ORIG_Z_MIN_PIN          12
+#define ORIG_Z_MAX_PIN          9
+
+#define ORIG_E0_STEP_PIN         26
+#define ORIG_E0_DIR_PIN          28
+#define ORIG_E0_ENABLE_PIN       24
+#ifndef ORIG_E0_CS_PIN
+#define ORIG_E0_CS_PIN        47
+#endif
+
+#define ORIG_E1_STEP_PIN         36
+#define ORIG_E1_DIR_PIN          34
+#define ORIG_E1_ENABLE_PIN       30
+#ifndef ORIG_E1_CS_PIN
+#define ORIG_E1_CS_PIN        32
+#endif
+
+#define ORIG_E2_STEP_PIN         59
+#define ORIG_E2_DIR_PIN          57
+#define ORIG_E2_ENABLE_PIN       40
+#ifndef ORIG_E2_CS_PIN
+#define ORIG_E2_CS_PIN        42
+#endif
+
+//
+// LCDs and Controllers
+//
+#define BEEPER_PIN         37
+#define SD_DETECT_PIN      49
+
+#define LCD_PINS_RS        16
+#define LCD_PINS_ENABLE    17
+#define LCD_PINS_D4        23
+#define LCD_PINS_D5        25
+#define LCD_PINS_D6        27
+#define LCD_PINS_D7        29
+
+#if ENABLED(NEWPANEL)
+#define BTN_EN1          31
+#define BTN_EN2          33
+#define BTN_ENC          35
+#endif
+
+
+#define SDPOWER            -1
+
+#define SDSS               53
+
+#define LED_PIN            13
+
+#define ORIG_PS_ON_PIN          11
+
+#define KILL_PIN           41
+
+#define HEATER_0_PIN      5
+// Bed heater
+#define HEATER_1_PIN      8
+#define HEATER_2_PIN      6
+#define HEATER_3_PIN      7
+
+#define ORIG_FAN_PIN       44
+
+#define TEMP_0_PIN        12
+#define TEMP_2_PIN        13
+#define TEMP_3_PIN        14
+// Bed sensor
+#define TEMP_1_PIN        15
+
+#define FAN_PIN            44
+#define FAN2_PIN           45
+#define FAN3_PIN           46
+
+#define FAN_TEMP_PIN       4
+#define POWER_TEMP_PIN     3
+
+#define E0_PINS ORIG_E0_STEP_PIN,ORIG_E0_DIR_PIN,ORIG_E0_ENABLE_PIN,
+#define E1_PINS ORIG_E1_STEP_PIN,ORIG_E1_DIR_PIN,ORIG_E1_ENABLE_PIN,
+#define E2_PINS ORIG_E2_STEP_PIN,ORIG_E2_DIR_PIN,ORIG_E2_ENABLE_PIN,
+
+#define SCK_PIN          52
+#define MISO_PIN         50
+#define MOSI_PIN         51
+#define MAX6675_SS       53
+#endif
 
 #if MOTHERBOARD == 999
 #define KNOWN_BOARD
 #include "userpins.h"
 #endif
 
-
+#if defined(ORIG_X_CS_PIN) && !defined(TMC2130_X_CS_PIN)
+#define TMC2130_X_CS_PIN ORIG_X_CS_PIN
+#endif
+#if defined(ORIG_Y_CS_PIN) && !defined(TMC2130_Y_CS_PIN)
+#define TMC2130_Y_CS_PIN ORIG_Y_CS_PIN
+#endif
+#if defined(ORIG_Z_CS_PIN) && !defined(TMC2130_Z_CS_PIN)
+#define TMC2130_Z_CS_PIN ORIG_Z_CS_PIN
+#endif
+#if defined(ORIG_E0_CS_PIN) && !defined(TMC2130_EXT0_CS_PIN)
+#define TMC2130_EXT0_CS_PIN ORIG_E0_CS_PIN
+#endif
+#if defined(ORIG_E1_CS_PIN) && !defined(TMC2130_EXT1_CS_PIN)
+#define TMC2130_EXT1_CS_PIN ORIG_E1_CS_PIN
+#endif
+#if defined(ORIG_E2_CS_PIN) && !defined(TMC2130_EXT2_CS_PIN)
+#define TMC2130_EXT2_CS_PIN ORIG_E2_CS_PIN
+#endif
 
 #ifndef CPU_ARCH  // Set default architecture
 #define CPU_ARCH ARCH_AVR

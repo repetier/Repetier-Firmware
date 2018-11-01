@@ -2647,7 +2647,9 @@ void Printer::continuePrint() {
 }
 
 void Printer::stopPrint() {
+#if NEW_COMMUNICATION
     flashSource.close(); // stop flash printing if busy
+#endif
 #if SDSUPPORT
     if(Printer::isMenuMode(MENU_MODE_SD_PRINTING)) {
         sd.stopPrint();

@@ -622,7 +622,7 @@ void GCode::readFromSerial()
             if(commandsReceivingWritePosition == binaryCommandSize)
             {
                 GCode *act = &commandsBuffered[bufferWriteIndex];
-                if(act->parseBinary(commandReceiving, true))   // Success
+                if(act->parseBinary(commandReceiving, binaryCommandSize, true))   // Success
                     act->checkAndPushCommand();
                 else
                     requestResend();
@@ -1330,15 +1330,21 @@ SerialGCodeSource serial1Source(&RFSERIAL2);
 #if BLUETOOTH_SERIAL > 0
 fast8_t GCodeSource::numSources = 2; ///< Number of data sources available
 fast8_t GCodeSource::numWriteSources = 2;
+#if NEW_COMMUNICATION
 GCodeSource *GCodeSource::sources[MAX_DATA_SOURCES] = {&serial0Source,&serial1Source};
 GCodeSource *GCodeSource::writeableSources[MAX_DATA_SOURCES] = {&serial0Source,&serial1Source};
+#endif
 #else
 fast8_t GCodeSource::numSources = 1; ///< Number of data sources available
 fast8_t GCodeSource::numWriteSources = 1;
+#if NEW_COMMUNICATION
 GCodeSource *GCodeSource::sources[MAX_DATA_SOURCES] = {&serial0Source};      
 GCodeSource *GCodeSource::writeableSources[MAX_DATA_SOURCES] = {&serial0Source};
+#endif
 #endif    
+#if NEW_COMMUNICATION
 GCodeSource *GCodeSource::activeSource = &serial0Source;
+#endif
 
 void GCodeSource::registerSource(GCodeSource *newSource) {
   for(fast8_t i = 0; i < numSources; i++) { // skip register if already contained
