@@ -179,8 +179,8 @@ Custom M Codes
 - M670 S<version> - Set eeprom version to a value for testing eeprom upgrade path.
 - M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
 - M999 - Continue from fatal error. M999 S1 will create a fatal error for testing.
-- M914 X<sg_value> Y<sg_value> Z<sg_value> Stall detection sensitivity for Trinamic stepper drivers.
-- M915 X<0/1> Y<0/1> Z<0/1> Turn StealthChop mode ON or OFF on Trinamic stepper drivers.
+- M914 X<sg_value> Y<sg_value> Z<sg_value> E<sg_value> A<sg_value> B<sg_value> Stall detection sensitivity for Trinamic stepper drivers. E = Ext0, A = Ext1, B = Ext2
+- M915 X<0/1> Y<0/1> Z<0/1> E<0/1> A<0/1> B<0/1> Turn StealthChop mode ON or OFF on Trinamic stepper drivers. E = Ext0, A = Ext1, B = Ext2
 */
 
 #include "Repetier.h"

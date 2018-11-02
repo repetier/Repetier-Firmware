@@ -2852,15 +2852,15 @@ void Commands::processMCode(GCode *com) {
         }
 #endif
 #if TMC2130_ON_EXT1
-        if(com->hasE()) {
-            Com::printF(PSTR(" E1:"), com->F);
-            Printer::tmc_driver_e1->sg_stall_value(com->F);
+        if(com->hasA()) {
+            Com::printF(PSTR(" E1:"), com->A);
+            Printer::tmc_driver_e1->sg_stall_value(com->A);
         }
 #endif
 #if TMC2130_ON_EXT2
-        if(com->hasE()) {
-            Com::printF(PSTR(" E2:"), com->G);
-            Printer::tmc_driver_e2->sg_stall_value(com->G);
+        if(com->hasB()) {
+            Com::printF(PSTR(" E2:"), com->B);
+            Printer::tmc_driver_e2->sg_stall_value(com->B);
         }
 #endif
         Com::println();
@@ -2912,15 +2912,15 @@ void Commands::processMCode(GCode *com) {
         }
 #endif
 #if TMC2130_ON_EXT1
-        if(com->hasE()) {
-            Com::printF(PSTR(" E1:"), com->F);
-            Printer::tmc_driver_e1->stealthChop((bool)(com->F));
+        if(com->hasA()) {
+            Com::printF(PSTR(" E1:"), com->A);
+            Printer::tmc_driver_e1->stealthChop((bool)(com->A));
         }
 #endif
 #if TMC2130_ON_EXT2
-        if(com->hasE()) {
-            Com::printF(PSTR(" E2:"), com->G);
-            Printer::tmc_driver_e2->stealthChop((bool)(com->G));
+        if(com->hasB()) {
+            Com::printF(PSTR(" E2:"), com->B);
+            Printer::tmc_driver_e2->stealthChop((bool)(com->B));
         }
 #endif
         Com::println();

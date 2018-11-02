@@ -3206,20 +3206,18 @@ S3(ext)=9
 // LCDs and Controllers
 //
 #define BEEPER_PIN         37
-#define SD_DETECT_PIN      49
+#define SDCARDDETECT       49
 
-#define LCD_PINS_RS        16
-#define LCD_PINS_ENABLE    17
-#define LCD_PINS_D4        23
-#define LCD_PINS_D5        25
-#define LCD_PINS_D6        27
-#define LCD_PINS_D7        29
+#define UI_DISPLAY_RS_PIN        16
+#define UI_DISPLAY_ENABLE_PIN    17
+#define UI_DISPLAY_D4_PIN        23
+#define UI_DISPLAY_D5_PIN        25
+#define UI_DISPLAY_D6_PIN        27
+#define UI_DISPLAY_D7_PIN        29
 
-#if ENABLED(NEWPANEL)
-#define BTN_EN1          31
-#define BTN_EN2          33
-#define BTN_ENC          35
-#endif
+#define UI_ENCODER_A             31
+#define UI_ENCODER_B             33
+#define UI_ENCODER_CLICK         35
 
 
 #define SDPOWER            -1
