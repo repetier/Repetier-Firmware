@@ -63,7 +63,8 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // DUE3DOM                      = 410
 // DUE3DOM MINI                 = 411
 // STACKER 3D Superboard        = 412
-// RURAMPS4D                    = 414
+// RURAMPS4D 1.0-1.1            = 414
+// RURAMPS4D 1.3                = 415
 // Alligator Board rev1         = 500
 // Alligator Board rev2         = 501
 // Alligator Board rev3         = 502
