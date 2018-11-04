@@ -1039,6 +1039,9 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
               ) {
                 waituntil = currentTime + 1000UL * (millis_t)actExtruder->watchPeriod; // now wait for temp. to stabilize
             }
+			if(Printer::breakLongCommand) {
+				break;
+			}
         } while(waituntil == 0 || (waituntil != 0 && (millis_t)(waituntil - currentTime) < 2000000000UL));
         Printer::setAutoreportTemp(oldAutoreport);
 #if RETRACT_DURING_HEATUP
