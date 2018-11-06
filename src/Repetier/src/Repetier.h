@@ -299,32 +299,12 @@ extern ServoInterface* servos[NUM_SERVOS];
 #define MAX_JERK_DISTANCE 0.6
 #endif
 
-#if defined(FAST_COREXYZ) && !(DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == YX_GANTRY || DRIVE_SYSTEM == XZ_GANTRY || DRIVE_SYSTEM == ZX_GANTRY || DRIVE_SYSTEM == GANTRY_FAKE)
-#undef FAST_COREXYZ
-#endif
-#ifdef FAST_COREXYZ
-#if DELTA_SEGMENTS_PER_SECOND_PRINT > 30
-#undef DELTA_SEGMENTS_PER_SECOND_PRINT
-#define DELTA_SEGMENTS_PER_SECOND_PRINT 30 // core is linear, no subsegments needed
-#endif
-#if DELTA_SEGMENTS_PER_SECOND_MOVE > 30
-#undef DELTA_SEGMENTS_PER_SECOND_MOVE
-#define DELTA_SEGMENTS_PER_SECOND_MOVE 30
-#endif
-#endif
-
 #ifndef JSON_OUTPUT
 #define JSON_OUTPUT 0
 #endif
 
 #if !defined(ZPROBE_MIN_TEMPERATURE) && defined(ZHOME_MIN_TEMPERATURE)
 #define ZPROBE_MIN_TEMPERATURE ZHOME_MIN_TEMPERATURE
-#endif
-
-#if DISTORTION_CORRECTION
-#if !FEATURE_Z_PROBE
-#error Distortion correction requires the z probe feature to be enabled and configured!
-#endif
 #endif
 
 #ifndef MAX_ROOM_TEMPERATURE
@@ -365,7 +345,6 @@ extern ServoInterface* servos[NUM_SERVOS];
 #define SPEED_MAX_MILLIS 60
 #define SPEED_MAGNIFICATION 100.0f
 
-#define SOFTWARE_LEVELING ((FEATURE_SOFTWARE_LEVELING) && (DRIVE_SYSTEM == DELTA))
 /**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
 */
 #if !defined(ROD_RADIUS) && DRIVE_SYSTEM == DELTA
@@ -473,10 +452,6 @@ extern ServoInterface* servos[NUM_SERVOS];
 
 #ifndef BENDING_CORRECTION_C
 #define BENDING_CORRECTION_C 0
-#endif
-
-#ifndef ACCELERATION_FACTOR_TOP
-#define ACCELERATION_FACTOR_TOP 100
 #endif
 
 #ifndef KEEP_ALIVE_INTERVAL

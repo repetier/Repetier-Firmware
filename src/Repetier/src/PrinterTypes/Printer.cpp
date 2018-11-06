@@ -230,7 +230,7 @@ void Printer::updateDerivedParameter() {
 #endif
 #endif
 
-/*
+    /*
     maxInterval = F_CPU / (minimumSpeed * axisStepsPerMM[X_AXIS]);
     uint32_t tmp = F_CPU / (minimumSpeed * axisStepsPerMM[Y_AXIS]);
     if(tmp < maxInterval)
@@ -241,11 +241,8 @@ void Printer::updateDerivedParameter() {
         maxInterval = tmp;
 #endif
 */
-//Com::printFLN(PSTR("Minimum Speed:"),minimumSpeed);
-//Com::printFLN(PSTR("Minimum Speed Z:"),minimumZSpeed);
-#if DISTORTION_CORRECTION
-    distortion.updateDerived();
-#endif // DISTORTION_CORRECTION
+    //Com::printFLN(PSTR("Minimum Speed:"),minimumSpeed);
+    //Com::printFLN(PSTR("Minimum Speed Z:"),minimumZSpeed);
     EVENT_UPDATE_DERIVED;
 }
 #if AUTOMATIC_POWERUP
@@ -565,9 +562,6 @@ void Printer::setup() {
     // sets auto leveling in eeprom init
     UI_INITIALIZE;
     //Commands::printCurrentPosition();
-#if DISTORTION_CORRECTION
-    distortion.init();
-#endif // DISTORTION_CORRECTION
 
     updateDerivedParameter();
     Commands::checkFreeMemory();
@@ -728,14 +722,23 @@ void Printer::showConfiguration() {
     Com::config(PSTR("XHomeDir:"), Motion1::homeDir[X_AXIS]);
     Com::config(PSTR("YHomeDir:"), Motion1::homeDir[Y_AXIS]);
     Com::config(PSTR("ZHomeDir:"), Motion1::homeDir[Z_AXIS]);
-#if DRIVE_SYSTEM == DELTA
+#if PRINTER_TYPE == 2
+#if FIXED_Z_HOME_POSITION
+    Com::config(PSTR("XHomePos:"), (float)ZHOME_X_POS, 2);
+    Com::config(PSTR("YHomePos:"), (float)ZHOME_Y_POS, 2);
+#else
     Com::config(PSTR("XHomePos:"), 0, 2);
     Com::config(PSTR("YHomePos:"), 0, 2);
+#endif
     Com::config(PSTR("ZHomePos:"), Motion1::maxPos[Z_AXIS], 3);
 #else
     Com::config(PSTR("XHomePos:"), (Motion1::homeDir[X_AXIS] > 0 ? Motion1::maxPos[X_AXIS] : Motion1::minPos[X_AXIS]), 2);
     Com::config(PSTR("YHomePos:"), (Motion1::homeDir[Y_AXIS] > 0 ? Motion1::maxPos[Y_AXIS] : Motion1::minPos[Y_AXIS]), 2);
+#if ZHOME_HEIGHT > 0
+    Com::config(PSTR("ZHomePos:"), (float)ZHOME_HEIGHT);
+#else
     Com::config(PSTR("ZHomePos:"), (Motion1::homeDir[Z_AXIS] > 0 ? Motion1::maxPos[Z_AXIS] : Motion1::minPos[Z_AXIS]), 3);
+#endif
 #endif
     Com::config(PSTR("SupportG10G11:"), FEATURE_RETRACTION);
     Com::config(PSTR("SupportLocalFilamentchange:"), FEATURE_RETRACTION);
@@ -746,7 +749,7 @@ void Printer::showConfiguration() {
     Com::config(PSTR("PrintlineCache:"), PRINTLINE_CACHE_SIZE);
     Com::config(PSTR("JerkXY:"), Motion1::maxYank[X_AXIS]);
     Com::config(PSTR("KeepAliveInterval:"), KEEP_ALIVE_INTERVAL);
-#if DRIVE_SYSTEM != DELTA
+#if PRINTER_TYPE != 2
     Com::config(PSTR("JerkZ:"), Motion1::maxYank[Z_AXIS]);
 #endif
 #if FEATURE_RETRACTION

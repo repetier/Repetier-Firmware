@@ -175,7 +175,7 @@ public:
 #define EPR_M1_ENDSTOP_DISTANCE EPR_M1_MAX_POS + 4 * (NUM_AXES - 1)
 #define EPR_M1_ALWAYS_CHECK_ENDSTOPS ((EPR_M1_ENDSTOP_DISTANCE + 4) * (NUM_AXES - 1))
 #define EPR_M1_AUTOLEVEL_MATRIX EPR_M1_ALWAYS_CHECK_ENDSTOPS + 1
-#ifdef FEATURE_AXISCOMP
+#if FEATURE_AXISCOMP
 #define EPR_M1_AXIS_COMP_XY EPR_M1_AUTOLEVEL_MATRIX + 36
 #define EPR_M1_AXIS_COMP_XZ EPR_M1_AXIS_COMP_XY + 4
 #define EPR_M1_AXIS_COMP_YZ EPR_M1_AXIS_COMP_XZ + 4
@@ -213,7 +213,7 @@ public:
     static float g92Offsets[NUM_AXES];
     static float maxYank[NUM_AXES];
     static float toolOffset[3];
-    static float zprobeZOffset;
+    static float zprobeZOffset; // bed coating to add to z
     static float homeRetestDistance[NUM_AXES];
     static float homeRetestReduction[NUM_AXES];
     static float homeEndstopDistance[NUM_AXES];
@@ -221,7 +221,7 @@ public:
     static StepperDriverBase* drivers[NUM_MOTORS];
     static float advanceK;       // advance spring constant
     static float advanceEDRatio; // Ratio of extrusion
-#ifdef FEATURE_AXISCOMP
+#if FEATURE_AXISCOMP
     static float axisCompTanXY, axisCompTanXZ, axisCompTanYZ;
 #endif
     static bool wasLastSecondary; ///< true if last move had secondary flag
@@ -301,6 +301,7 @@ public:
     static void setAxisHomed(fast8_t axis, bool state);
     static void homeAxes(fast8_t axes);
     static void simpleHome(fast8_t axis);
+    static void correctBumpOffset(); // Adjust position to offset
     static PGM_P getAxisString(fast8_t axis);
     static EndstopDriver& endstopFoxAxisDir(fast8_t axis, bool maxDir);
 #if FEATURE_AUTOLEVEL || defined(DOXYGEN)

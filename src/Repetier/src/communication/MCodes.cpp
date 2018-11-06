@@ -960,16 +960,7 @@ void MCode_322(GCode* com) {
 }
 
 void MCode_323(GCode* com) {
-#if DISTORTION_CORRECTION
-    if (com->hasS()) {
-        if (com->S > 0)
-            Printer::distortion.enable(com->hasP() && com->P == 1);
-        else
-            Printer::distortion.disable(com->hasP() && com->P == 1);
-    } else {
-        Printer::distortion.reportStatus();
-    }
-#endif
+    Leveling::execute_M323(com);
 }
 
 void MCode_340(GCode* com) {

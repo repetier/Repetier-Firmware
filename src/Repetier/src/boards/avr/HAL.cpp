@@ -224,10 +224,6 @@ int32_t HAL::CPUDivU2(unsigned int divisor) {
 }
 
 void HAL::setupTimer() {
-#if USE_ADVANCE
-    EXTRUDER_TCCR = 0; // need Normal not fastPWM set by arduino init
-    EXTRUDER_TIMSK |= (1 << EXTRUDER_OCIE); // Activate compa interrupt on timer 0
-#endif
     PWM_TCCR = 0;  // Setup PWM interrupt
     PWM_OCR = 64;
     PWM_TIMSK |= (1 << PWM_OCIE);
@@ -955,51 +951,6 @@ ISR(PWM_TIMER_VECTOR) {
     }
 #endif
 }
-#if USE_ADVANCE
-
-static int8_t extruderLastDirection = 0;
-#ifndef ADVANCE_DIR_FILTER_STEPS
-#define ADVANCE_DIR_FILTER_STEPS 2
-#endif
-
-void HAL::resetExtruderDirection() {
-    extruderLastDirection = 0;
-}
-/** \brief Timer routine for extruder stepper.
-
-Several methods need to move the extruder. To get a optima result,
-all methods update the printer_state.extruderStepsNeeded with the
-number of additional steps needed. During this interrupt, one step
-is executed. This will keep the extruder moving, until the total
-wanted movement is achieved. This will be done with the maximum
-allowable speed for the extruder.
-*/
-/*
-ISR(EXTRUDER_TIMER_VECTOR) {
-    uint8_t timer = EXTRUDER_OCR;
-    if(!Printer::isAdvanceActivated()) return; // currently no need
-    if(Printer::extruderStepsNeeded > 0 && extruderLastDirection != 1) {
-        if(Printer::extruderStepsNeeded >= ADVANCE_DIR_FILTER_STEPS) {
-            Extruder::setDirection(true);
-            extruderLastDirection = 1;
-            timer += 40; // Add some more wait time to prevent blocking
-        }
-    } else if(Printer::extruderStepsNeeded < 0 && extruderLastDirection != -1) {
-        if(-Printer::extruderStepsNeeded >= ADVANCE_DIR_FILTER_STEPS) {
-            Extruder::setDirection(false);
-            extruderLastDirection = -1;
-            timer += 40; // Add some more wait time to prevent blocking
-        }
-    } else if(Printer::extruderStepsNeeded != 0) {
-        Extruder::step();
-        Printer::extruderStepsNeeded -= extruderLastDirection;
-        Printer::insertStepperHighDelay();
-        Extruder::unstep();
-    }
-    EXTRUDER_OCR = timer + Printer::maxExtruderSpeed;
-}
-*/
-#endif
 
 #ifndef EXTERNALSERIAL
 // Implement serial communication for one stream only!

@@ -165,6 +165,7 @@ void Motion2::timer() {
                 pos[i] = actM1->start[i];
             }
         }
+        Leveling::addDistortion(pos);
         fast8_t nextMotorIdx = 1 - lastMotorIdx;
         int32_t* np = lastMotorPos[nextMotorIdx];
         int32_t* lp = lastMotorPos[lastMotorIdx];

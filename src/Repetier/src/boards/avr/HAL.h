@@ -710,9 +710,7 @@ public:
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);
 #endif
     static void analogStart();
-#if USE_ADVANCE
-    static void resetExtruderDirection();
-#endif
+
 protected:
 private:
 };

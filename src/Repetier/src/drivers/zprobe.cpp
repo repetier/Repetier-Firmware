@@ -60,6 +60,10 @@ float ZProbeHandler::runProbe() {
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
         return ILLEGAL_Z_PROBE;
     }
+    if (Leveling::isDistortionEnabled()) {
+        Com::printErrorFLN(PSTR("z-probe stopped because bump correction is active. This will influence the result."));
+        return ILLEGAL_Z_PROBE;
+    }
     bool wasActivated = activated;
     if (!activated) {
         activate();
@@ -170,6 +174,11 @@ float ZProbeHandler::runProbe() {
         corSteps[i] -= corSteps2[i];
     }
 #endif
+#if ENABLE_BUMP_CORRECTION
+    //if (Leveling::isDistortionEnabled()) {
+    zCorr = Leveling::distortionAt(Motion1::currentPosition[X_AXIS], Motion1::currentPosition[Y_AXIS]);
+    //}
+#endif
     z += height;
     z -= coating;
     z -= zCorr;
@@ -203,8 +212,8 @@ float ZProbeHandler::runProbe() {
     }
     Com::printF(Com::tZProbe, z, 3);
     Com::printF(Com::tSpaceXColon, Motion1::currentPosition[X_AXIS]);
-#if DISTORTION_CORRECTION
-    if (Printer::distortion.isEnabled()) {
+#if ENABLE_BUMP_CORRECTION
+    if (Leveling::isDistortionEnabled()) {
         Com::printF(Com::tSpaceYColon, Motion1::currentPosition[Y_AXIS]);
         Com::printFLN(PSTR(" zCorr:"), zCorr, 3);
     } else {
@@ -335,12 +344,17 @@ float ZProbeHandler::runProbe() {
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
         return ILLEGAL_Z_PROBE;
     }
+    if (Leveling::isDistortionEnabled()) {
+        Com::printErrorFLN(PSTR("z-probe stopped because bump correction is active. This will influence the result."));
+        return ILLEGAL_Z_PROBE;
+    }
     bool wasActivated = activated;
     if (!activated) {
         activate();
     }
     bool alActive = Motion1::isAutolevelActive();
     Motion1::setAutolevelActive(false);
+    // bool bcActive = Leveling::isDistortionEnabled();
     EndstopMode oldMode = Motion1::endstopMode;
     Motion1::endstopMode = EndstopMode::PROBING;
     Motion1::waitForEndOfMoves(); // defined starting condition
@@ -446,6 +460,11 @@ float ZProbeHandler::runProbe() {
         corSteps[i] -= corSteps2[i];
     }
 #endif
+#if ENABLE_BUMP_CORRECTION
+    // if (Leveling::isDistortionEnabled()) {
+    zCorr = Leveling::distortionAt(Motion1::currentPosition[X_AXIS], Motion1::currentPosition[Y_AXIS]);
+    // }
+#endif
     z += height;
     z -= zCorr;
     /* DEBUG_MSG2_FAST("StartSteps", cPosSteps[Z_AXIS]);
@@ -478,8 +497,8 @@ float ZProbeHandler::runProbe() {
     }
     Com::printF(Com::tZProbe, z, 3);
     Com::printF(Com::tSpaceXColon, Motion1::currentPosition[X_AXIS]);
-#if DISTORTION_CORRECTION
-    if (Printer::distortion.isEnabled()) {
+#if ENABLE_BUMP_CORRECTION
+    if (Leveling::isDistortionEnabled()) {
         Com::printF(Com::tSpaceYColon, Motion1::currentPosition[Y_AXIS]);
         Com::printFLN(PSTR(" zCorr:"), zCorr, 3);
     } else {

@@ -369,7 +369,7 @@ void HAL::analogStart(void) {
     ADC->ADC_CR = ADC_CR_START;
 }
 
-    //#endif
+//#endif
 
 #if EEPROM_AVAILABLE == EEPROM_SDCARD
 
@@ -1060,10 +1060,6 @@ TcChannel* motion2Channel = (MOTION2_TIMER->TC_CHANNEL + MOTION2_TIMER_CHANNEL);
 #define ADVANCE_DIR_FILTER_STEPS 2
 #endif
 
-static int extruderLastDirection = 0;
-void HAL::resetExtruderDirection() {
-    extruderLastDirection = 0;
-}
 // MOTION2_TIMER IRQ handler
 void MOTION2_TIMER_VECTOR() {
 #if DEBUG_TIMING

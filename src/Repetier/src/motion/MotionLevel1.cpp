@@ -65,7 +65,7 @@ fast8_t Motion1::dittoMode = 0;   // copy extrusion signals
 fast8_t Motion1::dittoMirror = 0; // mirror for dual x printer
 fast8_t Motion1::alwaysCheckEndstops;
 bool Motion1::autolevelActive = false;
-#ifdef FEATURE_AXISCOMP
+#if FEATURE_AXISCOMP
 float Motion1::axisCompTanXY, Motion1::axisCompTanXZ, Motion1::axisCompTanYZ;
 #endif
 
@@ -240,9 +240,11 @@ void Motion1::setFromConfig() {
     maxAxisEndstops[C_AXIS] = &endstopCMax;
 #endif
 
+#if FEATURE_AXISCOMP
     axisCompTanXY = AXISCOMP_TANXY;
     axisCompTanXZ = AXISCOMP_TANXZ;
     axisCompTanYZ = AXISCOMP_TANYZ;
+#endif
 
     FOR_ALL_AXES(i) {
         if (motors[i]) {
@@ -629,6 +631,21 @@ void Motion1::moveRelativeBySteps(int32_t coords[NUM_AXES]) {
     }
     buf.sa2 = 2.0f * buf.length * buf.acceleration;
     buf.state = Motion1State::BACKWARD_PLANNED;
+}
+
+// Adjust position to offset
+void Motion1::correctBumpOffset() {
+    int32_t correct[NUM_AXES];
+    float pos[NUM_AXES];
+    waitForEndOfMoves();
+    copyCurrentPrinter(pos);
+    Leveling::addDistortion(pos);
+    int32_t* lp = Motion2::lastMotorPos[Motion2::lastMotorIdx];
+    PrinterType::transform(pos, correct);
+    FOR_ALL_AXES(i) {
+        correct[i] -= lp[i];
+    }
+    moveRelativeBySteps(correct);
 }
 
 bool Motion1::queueMove(float feedrate, bool secondaryMove) {
@@ -1215,6 +1232,8 @@ void Motion1::homeAxes(fast8_t axes) {
     waitForEndOfMoves();
     // bool isAL = isAutolevelActive();
     // setAutolevelActive(false);
+    bool bcActive = Leveling::isDistortionEnabled();
+    Leveling::setDistortionEnabled(false);
     updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
     Printer::setHoming(true);
@@ -1257,7 +1276,7 @@ void Motion1::homeAxes(fast8_t axes) {
             }
         }
     }
-
+    Motion1::correctBumpOffset(); // activate bump offset
     callAfterHomingOnSteppers();
     Printer::setHoming(false);
 
@@ -1269,6 +1288,7 @@ void Motion1::homeAxes(fast8_t axes) {
         }
     }
     Printer::setHomedAll(ok);
+    Leveling::setDistortionEnabled(bcActive);
     if (Tool::getActiveTool() != nullptr) {
         Tool::selectTool(activeToolId, true);
     }

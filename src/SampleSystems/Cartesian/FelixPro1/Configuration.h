@@ -41,7 +41,7 @@
 #define NUM_EXTRUDER 2
 #define NUM_SERVOS 1    // Number of serves available
 #define MOTHERBOARD 405 // 405
-#define EEPROM_MODE 2
+#define EEPROM_MODE 1
 #define RFSERIAL Serial
 #define WAITING_IDENTIFIER "wait"
 #define JSON_OUTPUT 1
@@ -50,8 +50,6 @@
 #define FEATURE_AUTOLEVEL 1
 #define FEATURE_Z_PROBE 0
 #define FEATURE_RETRACTION 1
-#define DISTORTION_CORRECTION 0
-#define USE_ADVANCE 1
 #define NUM_AXES 4                   // X,Y,Z and E for extruder A,B,C would be 5,6,7
 #define STEPPER_FREQUENCY 153000     // Maximum stepper frequency.
 #define PREPARE_FREQUENCY 1000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
@@ -62,8 +60,10 @@
 #define G0_FEEDRATE 170              // Speed for G0 moves. Independent from set F value!
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
 #define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
-#define ZPROBE_TYPE 1                // 0 = no z probe, 1 = default z probe
-#define ZPROBE_BORDER 2              // Safety border to ensure position is allowed
+#define Z_PROBE_TYPE 2               // 0 = no z probe, 1 = default z probe, 2 = Nozzle as probe
+#define Z_PROBE_BORDER 2             // Safety border to ensure position is allowed
+#define Z_PROBE_TEMPERATURE 170      // Temperature for type 2
+
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta
 #define PRINTER_TYPE 0
 // If all axis end stops are hardware based we can skip the time consuming tests each step
@@ -168,14 +168,14 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 
 // Array to call motor related commands like microstepping/current if supported.
 // Id's start at 0 and depend on position in this array.
-#define NUM_MOTORS 3
+#define NUM_MOTORS 5
 #define MOTORS \
-    { &XMotor, &YMotor, &ZMotor }
+    { &XMotor, &YMotor, &ZMotor, &AL1Motor, &AL2Motor }
 
 #define X_HOME_DIR -1
 #define Y_HOME_DIR 1
 #define Z_HOME_DIR -1
-#define X_MAX_LENGTH 240
+#define X_MAX_LENGTH 235
 #define Y_MAX_LENGTH 240
 #define Z_MAX_LENGTH 225
 #define X_MIN_POS 0
@@ -234,7 +234,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 // If it is incompatible you will get compiler errors about write functions not being compatible!
 //#define COMPAT_PRE1
 #define BLUETOOTH_SERIAL -1
-#define BLUETOOTH_BAUD 250000
+#define BLUETOOTH_BAUD 115200
 #define MIXING_EXTRUDER 0
 
 #define DRIVE_SYSTEM 0
@@ -330,19 +330,6 @@ It also can add a delay to wait for spindle to run on full speed.
 
 #define PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT 1
 
-#define DISTORTION_CORRECTION_POINTS 5
-#define DISTORTION_LIMIT_TO 2
-#define DISTORTION_CORRECTION_R 100
-#define DISTORTION_PERMANENT 1
-#define DISTORTION_UPDATE_FREQUENCY 15
-#define DISTORTION_START_DEGRADE 5
-#define DISTORTION_END_HEIGHT 10
-#define DISTORTION_EXTRAPOLATE_CORNERS 0
-#define DISTORTION_XMIN 10
-#define DISTORTION_YMIN 10
-#define DISTORTION_XMAX 225
-#define DISTORTION_YMAX 230
-
 // ##########################################################################################
 // ##                           Movement settings                                          ##
 // ##########################################################################################
@@ -350,14 +337,9 @@ It also can add a delay to wait for spindle to run on full speed.
 #define FEATURE_BABYSTEPPING 1
 #define BABYSTEP_MULTIPLICATOR 64
 
-#define DELTA_SEGMENTS_PER_SECOND_PRINT 180 // Move accurate setting for print moves
-#define DELTA_SEGMENTS_PER_SECOND_MOVE 70   // Less accurate setting for other moves
-#define EXACT_DELTA_MOVES 1
-
 // Delta settings
 #define DELTA_HOME_ON_POWER 0
 
-#define DELTASEGMENTS_PER_PRINTLINE 24
 #define STEPPER_INACTIVE_TIME 360L
 #define MAX_INACTIVE_TIME 1200L
 #define MAX_FEEDRATE_X 250
@@ -386,8 +368,6 @@ It also can add a delay to wait for spindle to run on full speed.
 #define Y_BACKLASH 0
 #define Z_BACKLASH 0
 #define DIRECTION_DELAY 0
-#define INTERPOLATE_ACCELERATION_WITH_Z 1
-#define ACCELERATION_FACTOR_TOP 75
 #define MAX_JERK 5
 #define MAX_ZJERK 0.3
 #define PRINTLINE_CACHE_SIZE 32
@@ -421,7 +401,9 @@ It also can add a delay to wait for spindle to run on full speed.
 #define Z_PROBE_SPEED 2
 #define Z_PROBE_SWITCHING_DISTANCE 1
 // How often should we test a position 1 .. x. Averages result over all tests.
-#define Z_PROBE_REPETITIONS 3
+#define Z_PROBE_REPETITIONS 1
+// 0 = use average, 1 = use middle value after ordering z
+#define Z_PROBE_USE_MEDIAN 1
 // Nozzle distance to bed when z probe triggers
 #define Z_PROBE_HEIGHT -0.15
 // Delay in ms before we go down again. For BLTouch so signal can disable
@@ -432,23 +414,41 @@ It also can add a delay to wait for spindle to run on full speed.
 #define Z_PROBE_REQUIRES_HEATING 1
 #define Z_PROBE_MIN_TEMPERATURE 150
 
-#define FEATURE_SOFTWARE_LEVELING 0
-#define Z_PROBE_X1 60
-#define Z_PROBE_Y1 130
-#define Z_PROBE_X2 137
-#define Z_PROBE_Y2 45
-#define Z_PROBE_X3 137
-#define Z_PROBE_Y3 210
-#define BED_LEVELING_METHOD 2
-#define BED_CORRECTION_METHOD 0
-#define BED_LEVELING_GRID_SIZE 5
-#define BED_LEVELING_REPETITIONS 5
-#define BED_MOTOR_1_X 55
-#define BED_MOTOR_1_Y 130
-#define BED_MOTOR_2_X 137
-#define BED_MOTOR_2_Y 45
-#define BED_MOTOR_3_X 137
-#define BED_MOTOR_3_Y 210
+// How to correct rotated beds
+// 0 = Software side by rotating coordinates
+// 1 = Move bed physically using 2 motors
+#define LEVELING_CORRECTOR 0
+// Bed fixture coordinates for motor leveling
+#define LC_P1_X 55
+#define LC_P1_Y 130
+#define LC_P2_X 137
+#define LC_P2_Y 45
+#define LC_P3_X 137
+#define LC_P3_Y 210
+#define LC_P2_MOTOR AL1Motor
+#define LC_P3_MOTOR AL2Motor
+#define LC_STEPS_PER_MM 3382
+#define LC_Z_SPEED 0.2
+// > 0 will move bed down and wait for removal (heater removed) and will pause another LC_WAIT_BED_REMOVE seconds
+#define LC_WAIT_BED_REMOVE 2
+// Uncomment to limit correction per autoleveling iteration. Value is the max. correction in mm
+// #define LIMIT_MOTORIZED_CORRECTION 0.5
+
+// Leveling method
+// 0 = none, 3 = 3 points, 1 = grid, 2 = 4 point symmetric
+#define LEVELING_METHOD 2
+#define L_P1_X 60
+#define L_P1_Y 130
+#define L_P2_X 137
+#define L_P2_Y 45
+#define L_P3_X 137
+#define L_P3_Y 210
+#define GRID_SIZE 5
+#define ENABLE_BUMP_CORRECTION 1          // CPU intensive, so only activate if required
+#define BUMP_CORRECTION_START_DEGRADE 0.5 // Until this height we correct 100%
+#define BUMP_CORRECTION_END_HEIGHT 2      // From this height on we do no correction
+#define BUMP_LIMIT_TO 0                   // Maximum allowed correction up/down, <= 0 off.
+
 #define BENDING_CORRECTION_A 0
 #define BENDING_CORRECTION_B 0
 #define BENDING_CORRECTION_C 0
@@ -519,16 +519,9 @@ Values must be in range 1..255
 #define UI_SET_EXTRUDER_FEEDRATE 5
 #define UI_SET_EXTRUDER_RETRACT_DISTANCE 3
 
-#define NUM_MOTOR_DRIVERS 2
-#define MOTOR_DRIVER_1(var) StepperDriver<51, 53, 49, 0, 0> var(3382, 0.2)
-#define MOTOR_DRIVER_2(var) StepperDriver<39, 13, 40, 0, 0> var(3382, 0.2)
-
-#define ALTERNATIVE_JERK
-#define REDUCE_ON_SMALL_SEGMENTS
 //#define CUSTOM_EVENTS
 //#define CUSTOM_MENU
 //#define CUSTOM_TRANSLATIONS
-#define LIMIT_MOTORIZED_CORRECTION 0.5
 #define HALFAUTOMATIC_LEVELING 1
 // add z probe height routine
 #define ZPROBE_HEIGHT_ROUTINE

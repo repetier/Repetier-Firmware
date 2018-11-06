@@ -1792,11 +1792,9 @@ void UIDisplay::parse(const char *txt, bool ram) {
                 else
                     addStringP(Com::translatedF(UI_TEXT_STRING_HM_BANGBANG_ID));
             }
-#if USE_ADVANCE
             else if(c2 == 'l') {
                 addFloat(Extruder::current->advanceL, 3, 0);
             }
-#endif
             else if(c2 == 'x') {
                 addFloat(Extruder::current->xOffset * Printer::invAxisStepsPerMM[X_AXIS], 3, 2);
             } else if(c2 == 'y') {
@@ -3140,16 +3138,9 @@ ZPOS2:
         INCREMENT_MIN_MAX(Extruder::current->waitRetractUnits, 1, 0, 99);
         break;
 #endif
-#if USE_ADVANCE
-#if ENABLE_QUADRATIC_ADVANCE
-    case UI_ACTION_ADVANCE_K:
-        INCREMENT_MIN_MAX(Extruder::current->advanceK, 1, 0, 200);
-        break;
-#endif
     case UI_ACTION_ADVANCE_L:
         INCREMENT_MIN_MAX(Extruder::current->advanceL, 1, 0, 600);
         break;
-#endif
 #if FEATURE_AUTOLEVEL
     case UI_ACTION_AUTOLEVEL2:
         popMenu(true);

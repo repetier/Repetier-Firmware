@@ -253,12 +253,12 @@ void GCode_30(GCode* com) {
         } else if (com->hasR() || com->hasH()) {
             float h = Printer::convertToMM(com->hasH() ? com->H : 0);
             float o = Printer::convertToMM(com->hasR() ? com->R : h);
-#if DISTORTION_CORRECTION
+#if ENABLE_BUMP_CORRECTION
             // Undo z distortion correction contained in z
             float zCorr = 0;
-            if (Printer::distortion.isEnabled()) {
-                zCorr = Printer::distortion.correct(Printer::currentPositionSteps[X_AXIS], Printer::currentPositionSteps[Y_AXIS], Printer::zMinSteps) * Printer::invAxisStepsPerMM[Z_AXIS];
-                z -= zCorr;
+            if (Leveling::isDistortionEnabled()) {
+                zCorr = Leveling::distortionAt(Motion1::currentPosition[X_AXIS], Motion1::currentPosition[Y_AXIS]);
+                z += zCorr;
             }
 #endif
             Motion1::g92Offsets[Z_AXIS] = o - h;
@@ -288,23 +288,6 @@ void GCode_32(GCode* com) {
 
 void GCode_33(GCode* com) {
     Leveling::execute_G33(com);
-#if FEATURE_Z_PROBE
-#if DISTORTION_CORRECTION
-    if (com->hasL()) { // G33 L0 - List distortion matrix
-        Printer::distortion.showMatrix();
-    } else if (com->hasR()) { // G33 R0 - Reset distortion matrix
-        Printer::distortion.resetCorrection();
-    } else if (com->hasX() || com->hasY() || com->hasZ()) { // G33 X<xpos> Y<ypos> Z<zCorrection> - Set correction for nearest point
-        if (com->hasX() && com->hasY() && com->hasZ()) {
-            Printer::distortion.set(com->X, com->Y, com->Z);
-        } else {
-            Com::printErrorFLN(PSTR("You need to define X, Y and Z to set a point!"));
-        }
-    } else { // G33
-        Printer::measureDistortion();
-    }
-#endif
-#endif
 }
 
 void GCode_90(GCode* com) {

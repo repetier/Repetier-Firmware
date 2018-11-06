@@ -843,9 +843,6 @@ public:
 #endif
 
     static void analogStart(void);
-#if USE_ADVANCE
-    static void resetExtruderDirection();
-#endif
     static volatile uint8_t insideTimer1;
 };
 

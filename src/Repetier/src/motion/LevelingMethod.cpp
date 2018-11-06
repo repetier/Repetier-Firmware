@@ -145,22 +145,26 @@ float Leveling::grid[GRID_SIZE][GRID_SIZE];
 uint16_t Leveling::eprStart;
 float Leveling::xMin, Leveling::xMax, Leveling::yMin, Leveling::yMax;
 uint8_t Leveling::distortionEnabled;
+float Leveling::dx, Leveling::dy, Leveling::invDx, Leveling::invDy;
+float Leveling::startDegrade, Leveling::endDegrade, Leveling::diffDegrade;
 
 void Leveling::init() {
-    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_GRID_LEVELING, 1, 4 * GRID_SIZE * GRID_SIZE + 17);
+    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_GRID_LEVELING, 1, 4 * GRID_SIZE * GRID_SIZE + 25);
     resetEeprom();
 }
 
 void Leveling::handleEeprom() {
+    EEPROM::handleByte(eprStart + 16, PSTR("Bump correction enabled"), distortionEnabled);
+    EEPROM::handleFloat(eprStart + 17, PSTR("100% Bump Correction until [mm]"), 2, startDegrade);
+    EEPROM::handleFloat(eprStart + 21, PSTR("0% BumpCorrection from [mm]"), 2, endDegrade);
     EEPROM::setSilent(true);
     EEPROM::handleFloat(eprStart + 0, Com::tEmpty, 2, xMin);
     EEPROM::handleFloat(eprStart + 4, Com::tEmpty, 2, xMax);
     EEPROM::handleFloat(eprStart + 8, Com::tEmpty, 2, yMin);
     EEPROM::handleFloat(eprStart + 12, Com::tEmpty, 2, yMax);
-    EEPROM::handleByte(eprStart + 16, Com::tEmpty, distortionEnabled);
     for (int y = 0; y < GRID_SIZE; y++) {
         for (int x = 0; x < GRID_SIZE; x++) {
-            EEPROM::handleFloat(eprStart + 17 + 4 * x + y * GRID_SIZE, Com::tEmpty, 2, grid[x][y]);
+            EEPROM::handleFloat(eprStart + 25 + 4 * (x + y * GRID_SIZE), Com::tEmpty, 2, grid[x][y]);
         }
     }
     EEPROM::setSilent(false);
@@ -173,14 +177,42 @@ void Leveling::resetEeprom() {
             grid[x][y] = 0;
         }
     }
-    distortionEnabled = false;
+    setDistortionEnabled(false);
     xMin = yMin = xMax = yMax = 0;
+    startDegrade = BUMP_CORRECTION_START_DEGRADE;
+    endDegrade = BUMP_CORRECTION_END_HEIGHT;
     updateDerived();
 }
 
 void Leveling::updateDerived() {
     dx = (xMax - xMin) / (GRID_SIZE - 1);
     dy = (yMax - yMin) / (GRID_SIZE - 1);
+    invDx = 1.0 / dx;
+    invDy = 1.0 / dy;
+    diffDegrade = -1.0f / (endDegrade - startDegrade);
+}
+
+void Leveling::setDistortionEnabled(bool newState) {
+#if ENABLE_BUMP_CORRECTION == 0
+    newState = false;
+#endif
+    bool nonZero = false;
+    if (newState) {
+        for (int y = 0; y < GRID_SIZE; y++) {
+            for (int x = 0; x < GRID_SIZE; x++) {
+                nonZero |= grid[x][y] != 0;
+            }
+        }
+        if (!nonZero) {
+            newState = false;
+            Com::printFLN(PSTR("All corrections are 0, disabling bump correction!"));
+        }
+    }
+    if (newState == distortionEnabled) {
+        return;
+    }
+    distortionEnabled = newState;
+    Motion1::correctBumpOffset();
 }
 
 void Leveling::measure() {
@@ -195,6 +227,7 @@ void Leveling::measure() {
     yMax -= Z_PROBE_BORDER;
     updateDerived();
 
+    setDistortionEnabled(false);
     Motion1::setAutolevelActive(false);
     Motion1::homeAxes(7); // Home x, y and z
     float px = xMin, py = yMin;
@@ -238,12 +271,12 @@ void Leveling::measure() {
     }
     if (builder.numPoints() < 3) {
         ok = false;
+        Com::printFLN(PSTR("You need at least 3 valid points for correction!"));
     }
     if (ok) {
         builder.createPlane(plane, false);
         LevelingCorrector::correct(&plane);
         // Reduce to distortion after bed correction
-        Com::printFLN(PSTR("You need at least 3 valid points for correction!"));
         for (int y = 0; y < GRID_SIZE; y++) {
             for (int x = 0; x < GRID_SIZE; x++) {
                 if (grid[x][y] != ILLEGAL_Z_PROBE) {
@@ -252,6 +285,10 @@ void Leveling::measure() {
             }
         }
         extrapolateGrid();
+#if ENABLE_BUMP_CORRECTION
+        setDistortionEnabled(true);
+        reportDistortionStatus();
+#endif
     } else {
         GCode::fatalError(PSTR("Leveling failed!"));
         resetEeprom();
@@ -368,22 +405,156 @@ bool Leveling::gridIndexForDir(int dir, int dist, int& x, int& y) {
     return validGridIndex(x, y);
 }
 
+#if ENABLE_BUMP_CORRECTION
+
+void Leveling::addDistortion(float* pos) {
+    if (!distortionEnabled || pos[Z_AXIS] >= endDegrade) {
+        return; // no correction from here on
+    }
+    float factor;
+    if (pos[Z_AXIS] >= startDegrade) {
+        factor = 1.0f + (pos[Z_AXIS] - startDegrade) * diffDegrade;
+    } else {
+        factor = 1.0f;
+    }
+    pos[Z_AXIS] += factor * distortionAt(pos[X_AXIS], pos[Y_AXIS]);
+}
+
+void Leveling::subDistortion(float* pos) {
+    if (!distortionEnabled || pos[Z_AXIS] >= endDegrade) {
+        return; // no correction from here on
+    }
+    float factor;
+    if (pos[Z_AXIS] >= startDegrade) {
+        factor = 1.0 + (pos[Z_AXIS] - startDegrade) * diffDegrade;
+    } else {
+        factor = 1.0f;
+    }
+    pos[Z_AXIS] -= factor * distortionAt(pos[X_AXIS], pos[Y_AXIS]);
+}
+
+float Leveling::distortionAt(float xp, float yp) {
+    xp -= xMin;
+    yp -= yMin;
+    int fx = floorf(xp * invDx);
+    int fy = floorf(yp * invDy);
+    xp -= fx * dx; // Now between 0 and dx
+    xp *= invDx;   // Now between 0 and 1
+    yp -= fy * dy;
+    yp *= invDy;
+    int fx2 = fx + 1;
+    int fy2 = fy + 1;
+    if (fx < 0) {
+        fx = fx2 = 0;
+    } else if (fx >= GRID_SIZE) {
+        fx = fx2 = GRID_SIZE - 1;
+    } else if (fx == GRID_SIZE - 1) {
+        fx2 = fx;
+    }
+    if (fy < 0) {
+        fy = fy2 = 0;
+    } else if (fy >= GRID_SIZE) {
+        fy = fy2 = GRID_SIZE - 1;
+    } else if (fy == GRID_SIZE - 1) {
+        fy2 = fy;
+    }
+    float xp1 = 1.0f - xp;
+    float c1 = grid[fx][fy] * xp1 + grid[fx2][fy] * xp;
+    float c2 = grid[fx][fy2] * xp1 + grid[fx2][fy2] * xp;
+    return c1 * (1.0f - yp) + yp * c2;
+}
+
+void Leveling::reportDistortionStatus() {
+    Com::printFLN(distortionEnabled ? PSTR("Z bump correction enabled") : PSTR("Z bump correction disabled"));
+    Com::printF(PSTR("G33 X min:"), xMin);
+    Com::printF(PSTR(" X max:"), xMax);
+    Com::printF(PSTR(" Y min:"), yMin);
+    Com::printFLN(PSTR(" Y max:"), yMax);
+}
+
+void Leveling::showMatrix() {
+    for (int iy = 0; iy < GRID_SIZE; iy++) {
+        for (int ix = 0; ix < GRID_SIZE; ix++) {
+            Com::printF(PSTR("G33 X"), xPosFor(ix), 2);
+            Com::printF(PSTR(" Y"), yPosFor(iy), 2);
+            Com::printFLN(PSTR(" Z"), grid[ix][iy], 3);
+        }
+    }
+}
+
+void Leveling::set(float x, float y, float z) {
+    int32_t ix = lroundf((x - xMin) * invDx);
+    int32_t iy = lroundf((y - yMin) * invDy);
+    if (validGridIndex(ix, iy)) {
+        if (BUMP_LIMIT_TO <= 0 || fabsf(z) <= BUMP_LIMIT_TO) {
+            grid[ix][iy] = z;
+            Motion1::correctBumpOffset();
+        } else {
+            Com::printWarningFLN(PSTR("Max. distortion value exceeded - not setting this value."));
+        }
+    } else {
+        Com::printFLN(PSTR("Invalid position - no grid point in neighbourhood."));
+    }
+}
+
+void Leveling::execute_M323(GCode* com) {
+    if (com->hasS()) {
+        if (com->hasS() > 0) {
+            if (distortionEnabled != (com->S != 0)) {
+                setDistortionEnabled(!distortionEnabled);
+                if (com->hasP() && com->P != 0) {
+                    EEPROM::markChanged();
+                }
+            }
+        }
+    }
+    reportDistortionStatus();
+}
+#else
+void Leveling::reportDistortionStatus() {
+    Com::printFLN(PSTR("No bump correction support compiled!"));
+}
+#endif
+
 void Leveling::execute_G32(GCode* com) {
     measure();
+    if (com->hasS() && com->S > 0) {
+        EEPROM::markChanged();
+    }
 }
 void Leveling::execute_G33(GCode* com) {
-    /*   if (com->hasL()) { // G33 L0 - List distortion matrix
-        Printer::distortion.showMatrix();
+#if ENABLE_BUMP_CORRECTION
+    if (com->hasL()) { // G33 L0 - List distortion matrix
+        reportDistortionStatus();
+        showMatrix();
     } else if (com->hasR()) { // G33 R0 - Reset distortion matrix
-        Printer::distortion.resetCorrection();
+        Com::printInfoFLN(PSTR("Resetting Z bump correction"));
+        for (int y = 0; y < GRID_SIZE; y++) {
+            for (int x = 0; x < GRID_SIZE; x++) {
+                grid[x][y] = 0;
+            }
+        }
+        Motion1::correctBumpOffset();
     } else if (com->hasX() || com->hasY() || com->hasZ()) { // G33 X<xpos> Y<ypos> Z<zCorrection> - Set correction for nearest point
         if (com->hasX() && com->hasY() && com->hasZ()) {
-            Printer::distortion.set(com->X, com->Y, com->Z);
+            set(com->X, com->Y, com->Z);
         } else {
             Com::printErrorFLN(PSTR("You need to define X, Y and Z to set a point!"));
         }
+    } else if (com->hasI()) { // Inform contained correction
+        float pos[NUM_AXES];
+        Motion1::copyCurrentPrinter(pos);
+        float z0 = pos[Z_AXIS];
+        addDistortion(pos);
+        float diff = pos[Z_AXIS] - z0;
+        Com::printF(PSTR("G33 Info x:"), Motion1::currentPosition[X_AXIS]);
+        Com::printF(PSTR(" y:"), Motion1::currentPosition[Y_AXIS]);
+        Com::printF(PSTR(" z:"), Motion1::currentPosition[Z_AXIS]);
+        Com::printFLN(PSTR(" bump:"), diff);
     }
-    */
+#else
+    reportDistortionStatus();
+#endif
 }
 #endif
 

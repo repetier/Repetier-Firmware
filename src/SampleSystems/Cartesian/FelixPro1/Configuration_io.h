@@ -53,6 +53,18 @@ IO_OUTPUT(IOE2Step, ORIG_E1_STEP_PIN)
 IO_OUTPUT(IOE2Dir, ORIG_E1_DIR_PIN)
 IO_OUTPUT_INVERTED(IOE2Enable, ORIG_E1_ENABLE_PIN)
 
+// Autolevel Motor 1
+
+IO_OUTPUT(IOAL1Step, 51)
+IO_OUTPUT(IOAL1Dir, 53)
+IO_OUTPUT_INVERTED(IOAL1Enable, 49)
+
+// Autolevel Motor 1
+
+IO_OUTPUT(IOAL2Step, 39)
+IO_OUTPUT(IOAL2Dir, 13)
+IO_OUTPUT_INVERTED(IOAL2Enable, 40)
+
 // Servo output
 
 IO_OUTPUT(Servo1Pin, 5)
@@ -132,6 +144,8 @@ STEPPER_SIMPLE(E1MotorBase, IOE1Step, IOE1Dir, IOE1Enable, endstopNone, endstopN
 STEPPER_OBSERVEABLE(E1Motor, E1MotorBase)
 STEPPER_SIMPLE(E2MotorBase, IOE2Step, IOE2Dir, IOE2Enable, endstopNone, endstopNone)
 STEPPER_OBSERVEABLE(E2Motor, E2MotorBase)
+STEPPER_SIMPLE(AL1Motor, IOAL1Step, IOAL1Dir, IOAL1Enable, endstopNone, endstopNone)
+STEPPER_SIMPLE(AL2Motor, IOAL2Step, IOAL2Dir, IOAL2Enable, endstopNone, endstopNone)
 
 // Servos
 SERVO_ANALOG(Servo1, 0, Servo1Pin, 500, 2500, 1050)
@@ -140,9 +154,9 @@ SERVO_ANALOG(Servo1, 0, Servo1Pin, 500, 2500, 1050)
 // control temperature. Higher level classes take these as input
 // and simple heater like a heated bed use it directly.
 
-HEAT_MANAGER_PID('B', HeatedBed1, TempBed1, PWMBed1, 120, 255, 5, 30000, 12.0, 33.0, 290.0, 80, 255)
-HEAT_MANAGER_PID('E', HeaterExtruder1, TempExt1, PWMExtruder1, 260, 255, 10, 20000, 20.0, 0.6, 65.0, 40, 220)
-HEAT_MANAGER_PID('E', HeaterExtruder2, TempExt2, PWMExtruder2, 260, 255, 10, 20000, 20.0, 0.6, 65.0, 40, 220)
+HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 120, 255, 5, 30000, 12.0, 33.0, 290.0, 80, 255, true)
+HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
+HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
 
 // Coolers are stand alone functions that allow it to control
 // a fan with external sensors. Many extruders require a cooling
@@ -155,8 +169,8 @@ HEAT_MANAGER_PID('E', HeaterExtruder2, TempExt2, PWMExtruder2, 260, 255, 10, 200
 // Typical tools are:
 // TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript)
 
-TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
-TOOL_EXTRUDER(ToolExtruder2, 16.775, 0.615, -0.97, HeaterExtruder2, E2Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1500 R600\nG4 P300", "M340 P0 S800 R600\nG4 P300", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, /*AL1Motor */ E1Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder2, 16.775, 0.615, -0.97, HeaterExtruder2, /*AL2Motor */ E2Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1500 R600\nG4 P300", "M340 P0 S800 R600\nG4 P300", &Fan1PWM)
 TOOL_LASER(Laser3, 0, 0, 0, Fan1NoKSPWM, fakeOut, fakeOut, 3000, 1, 100, 150.0, 1.5, "", "")
 TOOL_CNC(CNC4, 0, 0, 0, Fan1NoKSPWM, fakeOut, fakeOut, fakeOut, 7000, 3000, "", "")
 

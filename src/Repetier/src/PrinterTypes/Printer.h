@@ -158,8 +158,6 @@ public:
     }
 };
 
-#include "motion/Distortion.h"
-
 #ifndef DEFAULT_PRINTER_MODE
 #if NUM_TOOLS > 0
 #define DEFAULT_PRINTER_MODE PRINTER_MODE_FFF
@@ -664,10 +662,6 @@ public:
     static void measureZProbeHeight(float curHeight);
     static void waitForZProbeStart();
     static float bendingCorrectionAt(float x, float y);
-#endif
-#if DISTORTION_CORRECTION || defined(DOXYGEN)
-    static void measureDistortion(void);
-    static Distortion distortion;
 #endif
     static void zBabystep();
 

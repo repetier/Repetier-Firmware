@@ -50,8 +50,6 @@
 #define FEATURE_AUTOLEVEL 1
 #define FEATURE_Z_PROBE 0
 #define FEATURE_RETRACTION 1
-#define DISTORTION_CORRECTION 0
-#define USE_ADVANCE 1
 #define NUM_AXES 4                   // X,Y,Z and E for extruder A,B,C would be 5,6,7
 #define STEPPER_FREQUENCY 153000     // Maximum stepper frequency.
 #define PREPARE_FREQUENCY 1000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
@@ -177,7 +175,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define X_HOME_DIR -1
 #define Y_HOME_DIR 1
 #define Z_HOME_DIR -1
-#define X_MAX_LENGTH 240
+#define X_MAX_LENGTH 235
 #define Y_MAX_LENGTH 240
 #define Z_MAX_LENGTH 225
 #define X_MIN_POS 0
@@ -332,19 +330,6 @@ It also can add a delay to wait for spindle to run on full speed.
 
 #define PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT 1
 
-#define DISTORTION_CORRECTION_POINTS 5
-#define DISTORTION_LIMIT_TO 2
-#define DISTORTION_CORRECTION_R 100
-#define DISTORTION_PERMANENT 1
-#define DISTORTION_UPDATE_FREQUENCY 15
-#define DISTORTION_START_DEGRADE 5
-#define DISTORTION_END_HEIGHT 10
-#define DISTORTION_EXTRAPOLATE_CORNERS 0
-#define DISTORTION_XMIN 10
-#define DISTORTION_YMIN 10
-#define DISTORTION_XMAX 225
-#define DISTORTION_YMAX 230
-
 // ##########################################################################################
 // ##                           Movement settings                                          ##
 // ##########################################################################################
@@ -352,14 +337,9 @@ It also can add a delay to wait for spindle to run on full speed.
 #define FEATURE_BABYSTEPPING 1
 #define BABYSTEP_MULTIPLICATOR 64
 
-#define DELTA_SEGMENTS_PER_SECOND_PRINT 180 // Move accurate setting for print moves
-#define DELTA_SEGMENTS_PER_SECOND_MOVE 70   // Less accurate setting for other moves
-#define EXACT_DELTA_MOVES 1
-
 // Delta settings
 #define DELTA_HOME_ON_POWER 0
 
-#define DELTASEGMENTS_PER_PRINTLINE 24
 #define STEPPER_INACTIVE_TIME 360L
 #define MAX_INACTIVE_TIME 1200L
 #define MAX_FEEDRATE_X 250
@@ -388,8 +368,6 @@ It also can add a delay to wait for spindle to run on full speed.
 #define Y_BACKLASH 0
 #define Z_BACKLASH 0
 #define DIRECTION_DELAY 0
-#define INTERPOLATE_ACCELERATION_WITH_Z 1
-#define ACCELERATION_FACTOR_TOP 75
 #define MAX_JERK 5
 #define MAX_ZJERK 0.3
 #define PRINTLINE_CACHE_SIZE 32
@@ -423,7 +401,7 @@ It also can add a delay to wait for spindle to run on full speed.
 #define Z_PROBE_SPEED 2
 #define Z_PROBE_SWITCHING_DISTANCE 1
 // How often should we test a position 1 .. x. Averages result over all tests.
-#define Z_PROBE_REPETITIONS 3
+#define Z_PROBE_REPETITIONS 1
 // 0 = use average, 1 = use middle value after ordering z
 #define Z_PROBE_USE_MEDIAN 1
 // Nozzle distance to bed when z probe triggers
@@ -436,12 +414,10 @@ It also can add a delay to wait for spindle to run on full speed.
 #define Z_PROBE_REQUIRES_HEATING 1
 #define Z_PROBE_MIN_TEMPERATURE 150
 
-#define FEATURE_SOFTWARE_LEVELING 0
-
 // How to correct rotated beds
 // 0 = Software side by rotating coordinates
 // 1 = Move bed physically using 2 motors
-#define LEVELING_CORRECTOR 1
+#define LEVELING_CORRECTOR 0
 // Bed fixture coordinates for motor leveling
 #define LC_P1_X 55
 #define LC_P1_Y 130
@@ -460,21 +436,19 @@ It also can add a delay to wait for spindle to run on full speed.
 
 // Leveling method
 // 0 = none, 3 = 3 points, 1 = grid, 2 = 4 point symmetric
-#define LEVELING_METHOD 1
+#define LEVELING_METHOD 2
 #define L_P1_X 60
 #define L_P1_Y 130
 #define L_P2_X 137
 #define L_P2_Y 45
 #define L_P3_X 137
 #define L_P3_Y 210
-#define BED_LEVELING_GRID_SIZE 5
-#define BED_LEVELING_REPETITIONS 5
-#define BED_MOTOR_1_X 55
-#define BED_MOTOR_1_Y 130
-#define BED_MOTOR_2_X 137
-#define BED_MOTOR_2_Y 45
-#define BED_MOTOR_3_X 137
-#define BED_MOTOR_3_Y 210
+#define GRID_SIZE 5
+#define ENABLE_BUMP_CORRECTION 1          // CPU intensive, so only activate if required
+#define BUMP_CORRECTION_START_DEGRADE 0.5 // Until this height we correct 100%
+#define BUMP_CORRECTION_END_HEIGHT 2      // From this height on we do no correction
+#define BUMP_LIMIT_TO 0                   // Maximum allowed correction up/down, <= 0 off.
+
 #define BENDING_CORRECTION_A 0
 #define BENDING_CORRECTION_B 0
 #define BENDING_CORRECTION_C 0
