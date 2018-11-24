@@ -376,16 +376,10 @@ fast8_t Motion1::buffersUsed() {
 }
 
 void Motion1::waitForEndOfMoves() {
-    //DEBUG_MSG("BS");
     while (buffersUsed() > 0) {
-        // DEBUG_MSG2("BU", (int)buffersUsed());
         Commands::checkForPeriodicalActions(false);
-        // DEBUG_MSG("B2");
         GCode::keepAlive(Processing, 3);
-        // DEBUG_MSG("B3");
-        UI_MEDIUM;
     }
-    //DEBUG_MSG("BE");
 }
 
 void Motion1::waitForXFreeMoves(fast8_t n, bool allowMoves) {
@@ -654,7 +648,11 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
         if (Printer::debugEcho()) {
             Com::printF(PSTR("XT:"), destinationPositionTransformed[X_AXIS], 2);
             Com::printF(PSTR(" YT:"), destinationPositionTransformed[Y_AXIS], 2);
-            Com::printFLN(PSTR(" ZT:"), destinationPositionTransformed[Z_AXIS], 2);
+            Com::printF(PSTR(" ZT:"), destinationPositionTransformed[Z_AXIS], 2);
+#if NUM_AXES > A_AXIS
+            Com::printF(PSTR(" AT:"), destinationPositionTransformed[A_AXIS], 2);
+#endif
+            Com::println();
         }
         return false;
     }
@@ -1185,10 +1183,15 @@ void Motion1Buffer::unblock() {
 }
 
 void Motion1::moveToParkPosition() {
-    setTmpPositionXYZ(parkPosition[X_AXIS], parkPosition[Y_AXIS], IGNORE_COORDINATE);
-    moveByOfficial(tmpPosition, XY_SPEED, false);
-    setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::min(maxPos[Z_AXIS], parkPosition[Z_AXIS] + currentPosition[Z_AXIS]));
-    moveByOfficial(tmpPosition, Z_SPEED, false);
+    if (isAxisHomed(X_AXIS) && isAxisHomed(Y_AXIS)) {
+        setTmpPositionXYZ(parkPosition[X_AXIS], parkPosition[Y_AXIS], IGNORE_COORDINATE);
+        moveByOfficial(tmpPosition, XY_SPEED, false);
+    }
+    if (Motion1::parkPosition[Z_AXIS] > 0 && isAxisHomed(Z_AXIS)) {
+        Motion1::moveByPrinter(Motion1::tmpPosition, Z_SPEED, false);
+        setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::min(maxPos[Z_AXIS], parkPosition[Z_AXIS] + currentPosition[Z_AXIS]));
+        moveByOfficial(tmpPosition, Z_SPEED, false);
+    }
 }
 
 /// Pushes current position to memory stack. Return true on success.
@@ -1229,6 +1232,7 @@ void Motion1::setAxisHomed(fast8_t axis, bool state) {
 }
 
 void Motion1::homeAxes(fast8_t axes) {
+    GUI::setStatusP(PSTR("Homing ..."), GUIStatusLevel::BUSY);
     waitForEndOfMoves();
     // bool isAL = isAutolevelActive();
     // setAutolevelActive(false);
@@ -1240,9 +1244,21 @@ void Motion1::homeAxes(fast8_t axes) {
     fast8_t activeToolId = Tool::getActiveToolId();
     callBeforeHomingOnSteppers();
 #if ZHOME_PRE_RAISE
-    if (!isAxisHomed(Z_AXIS) || currentPosition[Z_AXIS] + ZHOME_PRE_RAISE_DISTANCE < maxPos[Z_AXIS]) {
-        setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_PRE_RAISE_DISTANCE);
-        moveRelativeByOfficial(tmpPosition, homingFeedrate[Z_AXIS], false);
+    if (ZHOME_PRE_RAISE == 2 || Motion1::minAxisEndstops[Z_AXIS]->update()) {
+        if (!isAxisHomed(Z_AXIS) || currentPosition[Z_AXIS] + ZHOME_PRE_RAISE_DISTANCE < maxPos[Z_AXIS]) {
+            setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_PRE_RAISE_DISTANCE);
+            moveRelativeByOfficial(tmpPosition, homingFeedrate[Z_AXIS], false);
+        }
+    }
+#endif
+#if FIXED_Z_HOME_POSITION
+    if (axes && axisBits[Z_AXIS]) { // ensure x and y are homed
+        if (!isAxisHomed(X_AXIS)) {
+            axes |= axisBits[X_AXIS];
+        }
+        if (!isAxisHomed(Y_AXIS)) {
+            axes |= axisBits[Y_AXIS];
+        }
     }
 #endif
     for (int priority = 0; priority <= 10; priority++) {
@@ -1293,6 +1309,7 @@ void Motion1::homeAxes(fast8_t axes) {
         Tool::selectTool(activeToolId, true);
     }
     Motion1::printCurrentPosition();
+    GUI::popBusy();
 }
 
 EndstopDriver& Motion1::endstopFoxAxisDir(fast8_t axis, bool maxDir) {
@@ -1364,14 +1381,15 @@ EndstopDriver& Motion1::endstopFoxAxisDir(fast8_t axis, bool maxDir) {
     return endstopNone;
 }
 
-void Motion1::simpleHome(fast8_t axis) {
+bool Motion1::simpleHome(fast8_t axis) {
     if (homeDir[axis] == 0) { // nothing to do, just set to min
         setAxisHomed(axis, true);
         currentPosition[axis] = minPos[axis];
         updatePositionsFromCurrent();
         Motion2::setMotorPositionFromTransformed();
-        return;
+        return true;
     }
+    bool ok = true;
     EndstopDriver& eStop = endstopFoxAxisDir(axis, homeDir[axis] > 0);
     float secureDistance = (maxPos[axis] - minPos[axis]) * 1.5f;
     EndstopMode oldMode = endstopMode;
@@ -1386,9 +1404,11 @@ void Motion1::simpleHome(fast8_t axis) {
         dest[i] = IGNORE_COORDINATE;
     }
     waitForEndOfMoves(); // defined starting condition
+
+    // First test
     dest[axis] = homeDir[axis] * secureDistance;
     Motion1::axesTriggered = 0;
-    if (!eStop.triggered()) { // don't test if we are still there
+    if (!eStop.update()) { // don't test if we are still there
         moveRelativeByOfficial(dest, homingFeedrate[axis], false);
         waitForEndOfMoves();
         updatePositionsFromCurrent();
@@ -1396,16 +1416,26 @@ void Motion1::simpleHome(fast8_t axis) {
         HAL::delayMilliseconds(50);
     }
 
+    // Move back for retest
     endstopMode = EndstopMode::DISABLED;
     dest[axis] = -homeDir[axis] * homeRetestDistance[axis];
     Motion1::axesTriggered = 0;
     moveRelativeByOfficial(dest, homingFeedrate[axis], false);
     waitForEndOfMoves();
+
+    // retest
     endstopMode = newMode;
     dest[axis] = homeDir[axis] * homeRetestDistance[axis] * 1.5f;
     Motion1::axesTriggered = 0;
-    moveRelativeByOfficial(dest, homingFeedrate[axis] / homeRetestReduction[axis], false);
-    waitForEndOfMoves();
+    if (!eStop.update()) {
+        moveRelativeByOfficial(dest, homingFeedrate[axis] / homeRetestReduction[axis], false);
+        waitForEndOfMoves();
+    } else {
+        Com::printWarningF(PSTR("Endstop for axis "));
+        Com::print((int16_t)axis);
+        Com::printFLN(PSTR(" did not untrigger for retest!"));
+        ok = false;
+    }
     updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
     HAL::delayMilliseconds(30);
@@ -1436,6 +1466,7 @@ void Motion1::simpleHome(fast8_t axis) {
     endstopMode = oldMode;
     setAxisHomed(axis, true);
     Motion1::axesTriggered = 0;
+    return ok;
 }
 
 void Motion1::callBeforeHomingOnSteppers() {

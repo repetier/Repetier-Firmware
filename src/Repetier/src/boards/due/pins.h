@@ -125,7 +125,7 @@
 #endif
 
 #if MOTHERBOARD == 412
-#include "boards/stacker3d_superboard.h"
+#include "boards/stacker_3d_superboard.h"
 #endif
 
 #if MOTHERBOARD == 414

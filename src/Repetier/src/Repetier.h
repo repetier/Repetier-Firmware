@@ -31,6 +31,17 @@
 #define EMERGENCY_PARSER 1
 #endif
 
+// Some helper macros
+
+#define _CAT(a, ...) a##__VA_ARGS__
+#define SWITCH_ENABLED_false 0
+#define SWITCH_ENABLED_true 1
+#define SWITCH_ENABLED_0 0
+#define SWITCH_ENABLED_1 1
+#define SWITCH_ENABLED_ 1
+#define ENABLED(b) _CAT(SWITCH_ENABLED_, b)
+#define DISABLED(b) (!_CAT(SWITCH_ENABLED_, b))
+
 // Use new communication model for multiple channels - only until stable, then old version gets deleted
 
 // ##########################################################################################
@@ -230,6 +241,11 @@ extern void updateEndstops();
 #define PRINTER_MODE_FFF 0
 #define PRINTER_MODE_LASER 1
 #define PRINTER_MODE_CNC 2
+
+#define PRINTER_TYPE_CARESIAN 0
+#define PRINTER_TYPE_CORE_XYZ 1
+#define PRINTER_TYPE_DELTA 2
+#define PRINTER_TYPE_DUAL_X 3
 
 #define ILLEGAL_Z_PROBE -888
 
@@ -706,4 +722,5 @@ extern int debugWaitLoop;
 // must be after CustomEvents as it might include definitions from there
 #include "controller/DisplayList.h"
 
+#include "controller/gui.h"
 #endif

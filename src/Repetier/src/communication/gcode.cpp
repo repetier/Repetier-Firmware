@@ -1351,7 +1351,8 @@ void FlashGCodeSource::close() {
         finished = true;
         //printAllFLN(PSTR("FlashFinished"));
         GCodeSource::removeSource(this);
-        UI_ACTION(actionOnFinish);
+        // TODO: Replacement
+        // UI_ACTION(actionOnFinish);
     }
 }
 

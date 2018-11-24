@@ -36,7 +36,6 @@ void Commands::commandLoop() {
         GCode::readFromSerial();
         GCode* code = GCode::peekCurrentCommand();
         //UI_SLOW; // do longer timed user interface action
-        UI_MEDIUM; // do check encoder
         if (code) {
 #if SDSUPPORT
             if (sd.savetosd) {
@@ -54,10 +53,8 @@ void Commands::commandLoop() {
         }
     } else {
         GCode::keepAlive(Paused);
-        UI_MEDIUM;
     }
     Printer::defaultLoopActions();
-    //}
 }
 
 void Commands::checkForPeriodicalActions(bool allowNewMoves) {
@@ -109,11 +106,13 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
 #include "../io/redefine.h"
         EVENT_TIMER_500MS;
     }
+#if DISPLAY_DRIVER != DRIVER_NONE
+    GUI::update();
+#endif
     // If called from queueDelta etc. it is an error to start a new move since it
     // would invalidate old computation resulting in unpredicted behavior.
     // lcd controller can start new moves, so we disallow it if called from within
     // a move command.
-    UI_SLOW(allowNewMoves);
 }
 
 /** \brief Waits until movement cache is empty.
@@ -130,7 +129,6 @@ void Commands::waitUntilEndOfAllMoves() {
         //GCode::readFromSerial();
         checkForPeriodicalActions(false);
         GCode::keepAlive(Processing, 3);
-        UI_MEDIUM;
     }
 }
 
@@ -140,7 +138,6 @@ void Commands::waitMS(uint32_t wait) {
         //GCode::readFromSerial();
         checkForPeriodicalActions(false);
         GCode::keepAlive(Processing, 3);
-        UI_MEDIUM;
     }
 }
 
@@ -152,7 +149,6 @@ void Commands::waitUntilEndOfAllBuffers() {
     while (Motion1::length || (code != NULL)) {
         //GCode::readFromSerial();
         code = GCode::peekCurrentCommand();
-        UI_MEDIUM; // do check encoder
         if (code) {
 #if SDSUPPORT
             if (sd.savetosd) {
@@ -169,7 +165,6 @@ void Commands::waitUntilEndOfAllBuffers() {
             code->popCurrentCommand();
         }
         Commands::checkForPeriodicalActions(false); // only called from memory
-        UI_MEDIUM;
     }
 }
 
@@ -1244,6 +1239,9 @@ void Commands::processMCode(GCode* com) {
         break;
     case 606: // Park extruder
         MCode_606(com);
+        break;
+    case 669: // Measure lcd refresh time
+        MCode_669(com);
         break;
     case 900: // M233 now use M900 like Marlin
         MCode_900(com);

@@ -16,7 +16,7 @@
 
 */
 
-#if PRINTER_TYPE == 1
+#if PRINTER_TYPE == PRINTER_TYPE_CORE_XYZ
 
 class PrinterType {
     static float bedRectangle[2][2];
@@ -57,5 +57,6 @@ public:
     static void transformedToOfficial(float trans[NUM_AXES], float official[NUM_AXES]);
     static void officialToTransformed(float official[NUM_AXES], float trans[NUM_AXES]);
     static void park(GCode* com) {}
+    static bool canSelectTool(fast8_t toolId);
 };
 #endif

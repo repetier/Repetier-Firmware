@@ -289,7 +289,7 @@ void Printer::kill(uint8_t onlySteppers) {
         for (uint8_t i = 0; i < NUM_HEATED_BEDS; i++) {
             heatedBeds[i]->setTargetTemperature(0);
         }
-        UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_STANDBY_ID));
+        UI_STATUS_UPD("Standby");
 #if defined(PS_ON_PIN) && PS_ON_PIN > -1 && !defined(NO_POWER_TIMEOUT)
         //pinMode(PS_ON_PIN,INPUT);
         SET_OUTPUT(PS_ON_PIN); //GND
@@ -298,7 +298,7 @@ void Printer::kill(uint8_t onlySteppers) {
 #endif
         Printer::setAllKilled(true);
     } else {
-        UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_STEPPER_DISABLED_ID));
+        UI_STATUS_UPD("Motors disabled");
     }
     Commands::printTemperatures(false);
 }
@@ -560,7 +560,7 @@ void Printer::setup() {
     HAL::analogStart();
     // Extruder::initExtruder();
     // sets auto leveling in eeprom init
-    UI_INITIALIZE;
+    GUI::init();
     //Commands::printCurrentPosition();
 
     updateDerivedParameter();
@@ -597,7 +597,6 @@ void Printer::setup() {
 
 void Printer::defaultLoopActions() {
     Commands::checkForPeriodicalActions(true); //check heater every n milliseconds
-    UI_MEDIUM;                                 // do check encoder
     millis_t curtime = HAL::timeInMilliseconds();
     if (Motion1::length != 0 || isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED))
         previousMillisCmd = curtime;
@@ -1224,7 +1223,7 @@ void Printer::stopPrint() {
         GCodeSource::printAllFLN(PSTR("RequestStop:"));
     }
     if (!isUIErrorMessage()) {
-        UI_RESET_MENU
+        GUI::resetMenu();
     }
 }
 

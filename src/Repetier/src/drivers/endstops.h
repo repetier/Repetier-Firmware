@@ -27,7 +27,7 @@ public:
     // Special case for drivers that sense endstop to set state instead of using update
     virtual void set(bool triggered) {}
     virtual void report() {
-        Com::printF(triggered() ? Com::tHSpace : Com::tLSpace);
+        Com::printF(update() ? Com::tHSpace : Com::tLSpace);
     }
     virtual void setParent(EndstopDriver* p) {}
     // Called from dependent end stops
@@ -178,7 +178,7 @@ public:
         e2->setParent(this);
     }
     inline virtual bool update() final {
-        return (state = (e1->triggered() && e2->triggered()));
+        return (state = (e1->update() && e2->update()));
     }
     inline virtual bool triggered() final {
         return state;
@@ -187,7 +187,7 @@ public:
         return true;
     }
     virtual void report() final {
-        Com::printF(triggered() ? Com::tHSpace : Com::tLSpace);
+        Com::printF(update() ? Com::tHSpace : Com::tLSpace);
         Com::print('(');
         e1->report();
         e2->report();
@@ -226,7 +226,7 @@ public:
         e3->setParent(this);
     }
     inline virtual bool update() final {
-        return (state = (e1->triggered() && e2->triggered() && e3->triggered()));
+        return (state = (e1->update() && e2->update() && e3->update()));
     }
     inline virtual bool triggered() final {
         return state;
@@ -235,7 +235,7 @@ public:
         return true;
     }
     virtual void report() final {
-        Com::printF(triggered() ? Com::tHSpace : Com::tLSpace);
+        Com::printF(update() ? Com::tHSpace : Com::tLSpace);
         Com::print('(');
         e1->report();
         e2->report();
@@ -278,7 +278,7 @@ public:
         e4->setParent(this);
     }
     inline virtual bool update() final {
-        return (state = (e1->triggered() && e2->triggered() && e3->triggered() && e4->triggered()));
+        return (state = (e1->update() && e2->update() && e3->update() && e4->update()));
     }
     inline virtual bool triggered() final {
         return state;
@@ -287,7 +287,7 @@ public:
         return true;
     }
     virtual void report() final {
-        Com::printF(triggered() ? Com::tHSpace : Com::tLSpace);
+        Com::printF(update() ? Com::tHSpace : Com::tLSpace);
         Com::print('(');
         e1->report();
         e2->report();

@@ -79,6 +79,34 @@ IO_INPUT_PULLUP(IOEndstopZMin, ORIG_Z_MIN_PIN)
 IO_INPUT(IOJam1, 35)
 IO_INPUT(IOJam2, 33)
 
+// Controller input pins
+
+#if UI_ENCODER_CLICK >= 0
+IO_INPUT_INVERTED_PULLUP(ControllerClick, UI_ENCODER_CLICK)
+#else
+IO_INPUT_DUMMY(ControllerClick, false)
+#endif
+#if UI_ENCODER_A >= 0
+IO_INPUT_INVERTED_PULLUP(ControllerEncA, UI_ENCODER_A)
+#else
+IO_INPUT_DUMMY(ControllerEncA, false)
+#endif
+#if UI_ENCODER_B >= 0
+IO_INPUT_INVERTED_PULLUP(ControllerEncB, UI_ENCODER_B)
+#else
+IO_INPUT_DUMMY(ControllerEncB, false)
+#endif
+#if UI_BACK_PIN >= 0
+IO_INPUT_PULLUP(ControllerBack, UI_BACK_PIN)
+#else
+IO_INPUT_DUMMY(ControllerBack, false)
+#endif
+#if UI_RESET_PIN >= 0
+IO_INPUT_PULLUP(ControllerReset, UI_RESET_PIN)
+#else
+IO_INPUT_DUMMY(ControllerReset, false)
+#endif
+
 // Define our endstops solutions
 // You need to define all min and max endstops for all
 // axes except E even if you have none!

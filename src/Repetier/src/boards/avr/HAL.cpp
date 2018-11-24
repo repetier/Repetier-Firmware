@@ -941,7 +941,7 @@ ISR(PWM_TIMER_VECTOR) {
     }
 #endif
 
-    UI_FAST; // Short timed user interface action
+    GUI::handleKeypress();
     pwm_count_cooler += COOLER_PWM_STEP;
     pwm_count_heater += HEATER_PWM_STEP;
 #if FEATURE_WATCHDOG

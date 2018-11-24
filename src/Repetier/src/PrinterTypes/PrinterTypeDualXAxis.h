@@ -20,13 +20,13 @@
     Lazy homing means that the tools remain inside homing position until an extrusion in positive direction happens.
 */
 
-#if PRINTER_TYPE == 3
+#if PRINTER_TYPE == PRINTER_TYPE_DUAL_X
 
 class PrinterType {
     static bool leftParked, rightParked;
     static uint8_t lazyMode;
     static int activeMotor;
-    static float posReal[2], targetReal;
+    static float endPos[2], targetReal;
     static bool dontChangeCoords;
     static float bedRectangle[2][2];
     static uint16_t eeprom; // start position eeprom
@@ -64,6 +64,9 @@ public:
     static bool ignoreAxisForLength(fast8_t axis);
     static void transformedToOfficial(float trans[NUM_AXES], float official[NUM_AXES]);
     static void officialToTransformed(float official[NUM_AXES], float trans[NUM_AXES]);
-    static void park();
+    static void park(GCode* com);
+    static fast8_t axisForTool(fast8_t toolId);
+    static fast8_t getActiveAxis() { return activeAxis; }
+    static bool canSelectTool(fast8_t toolId);
 };
 #endif

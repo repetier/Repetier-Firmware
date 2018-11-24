@@ -26,12 +26,9 @@ void Tool::unselectTool() {
 }
 
 void Tool::selectTool(fast8_t id, bool force) {
-    if (Motion1::dittoMode) { // in ditto mode 0 is always active!
-        id = 0;
-    }
     // Test for valid tool id
-    if (id < 0 || id >= NUM_TOOLS) {
-        Com::printErrorF(PSTR("Illegal tool number selected:"));
+    if (id < 0 || id >= NUM_TOOLS || !PrinterType::canSelectTool(id)) {
+        Com::printWarningF(PSTR("Illegal tool number selected:"));
         Com::print((int)id);
         Com::println();
         if (activeTool != nullptr) {
@@ -55,7 +52,7 @@ void Tool::selectTool(fast8_t id, bool force) {
     }
 #endif
     float zOffsetNew = tools[id]->getOffsetZ();
-    if (activeTool != nullptr) {
+    if (activeTool != nullptr && Motion1::dittoMode == 0) {
         if (zOffsetNew < zOffset) { // will hit bed, activate early
             Motion1::setToolOffset(-activeTool->offsetX, -activeTool->offsetY, -zOffsetNew);
         }
@@ -67,9 +64,11 @@ void Tool::selectTool(fast8_t id, bool force) {
     Tool::activeTool = tools[id];
     Motion1::advanceK = 0; // Gets activated by tool activation if supported!
     Motion2::advanceSteps = 0;
-    activeTool->activate();
-    PrinterType::activatedTool(activeToolId);
-    Motion1::setToolOffset(-activeTool->offsetX, -activeTool->offsetY, -activeTool->offsetZ);
+    if (Motion1::dittoMode == 0) {
+        activeTool->activate();
+        PrinterType::activatedTool(activeToolId);
+        Motion1::setToolOffset(-activeTool->offsetX, -activeTool->offsetY, -activeTool->offsetZ);
+    }
 #if RAISE_Z_ON_TOOLCHANGE > 0
     if (Motion1::isAxisHomed(Z_AXIS)) {
         Motion1::setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, lastZ);
@@ -114,7 +113,9 @@ void Tool::eepromHandleTools() {
 }
 
 void Tool::eepromHandle() {
+#if PRINTER_TYPE != 3
     EEPROM::handleFloat(eepromStart, PSTR("X Offset [mm]"), 3, offsetX);
+#endif
     EEPROM::handleFloat(eepromStart + 4, PSTR("Y Offset [mm]"), 3, offsetY);
     EEPROM::handleFloat(eepromStart + 8, PSTR("Z Offset [mm]"), 3, offsetZ);
 }

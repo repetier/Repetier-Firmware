@@ -18,7 +18,7 @@
 
 #include "Repetier.h"
 
-#if PRINTER_TYPE == 2
+#if PRINTER_TYPE == PRINTER_TYPE_DELTA
 
 float PrinterType::diagonal;
 float PrinterType::horizontalRadius;
@@ -352,5 +352,9 @@ void PrinterType::officialToTransformed(float official[NUM_AXES], float trans[NU
     for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
         trans[i] = official[i];
     }
+}
+
+bool PrinterType::canSelectTool(fast8_t toolId) {
+    return true;
 }
 #endif

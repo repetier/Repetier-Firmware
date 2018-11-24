@@ -1,4 +1,4 @@
-enum ToolTypes {
+enum class ToolTypes {
     EXTRUDER = 0,
     SYRINGE = 1,
     LASER = 2,
@@ -51,6 +51,7 @@ public:
     inline void resetErrors() { errorFlags = 0; }
     inline void resetError(fast8_t flag) { errorFlags &= ~flag; }
     inline bool usesSecondary(void* sec) { return secondary == sec; }
+    bool hasSecondary() { return secondary != nullptr; }
     inline void setSecondaryFixed(int sec) {
         activeSecondaryValue = sec;
         activeSecondaryPerMMPS = 0;
@@ -129,8 +130,10 @@ public:
     virtual void afterPause() {}
     virtual void beforeContinue() {}
     virtual bool secondaryIsFan() { return false; }
+    int secondaryPercent() { return secondary ? (static_cast<int>(secondary->get()) * 100) / 255 : 0; }
     virtual void extractG1(GCode* com) {}
     virtual bool isSecondaryMove(bool isG0, bool isEMove) { return true; }
+    virtual ToolTypes getToolType() { return ToolTypes::EXTRUDER; }
     inline static Tool* getActiveTool() { return activeTool; }
     inline static fast8_t getActiveToolId() { return activeToolId; }
     static void selectTool(fast8_t id, bool force = false);
@@ -221,6 +224,7 @@ public:
     /// Computes intensity based on speed
     virtual int computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) { return activeSecondaryValue; }
     virtual bool secondaryIsFan() { return true; }
+    virtual ToolTypes getToolType() { return ToolTypes::EXTRUDER; }
 };
 
 /** Controls a laser by adjusting the PWM frequency to an output depending
@@ -305,6 +309,7 @@ public:
     virtual void M3(GCode* com);
     virtual void M4(GCode* com);
     virtual void M5(GCode* com);
+    virtual ToolTypes getToolType() { return ToolTypes::LASER; }
 };
 
 template <class dirPin, class enabledPin, class activePin>
@@ -353,6 +358,7 @@ public:
     virtual void M3(GCode* com);
     virtual void M4(GCode* com);
     virtual void M5(GCode* com);
+    virtual ToolTypes getToolType() { return ToolTypes::MILL; }
 };
 
 template <class inputPin, class ObserverType>

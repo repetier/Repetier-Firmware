@@ -510,7 +510,7 @@ void MCode_116(GCode* com) {
 
 void MCode_117(GCode* com) {
     if (com->hasString()) {
-        UI_STATUS_UPD_RAM(com->text);
+        GUI::setStatus(com->text, GUIStatusLevel::REGULAR);
 #if JSON_OUTPUT && defined(WRITE_MESSAGES_To_JSON)
         Com::printF(PSTR("{\"message\":\""), com->text);
         Com::printFLN(PSTR("\"}"));
@@ -682,7 +682,7 @@ void MCode_190(GCode* com) {
         if (Printer::debugDryrun() || HeatManager::reportTempsensorError()) {
             return;
         }
-        UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HEATING_BED_ID));
+        UI_STATUS_UPD("Heating Bed");
         Motion1::waitForEndOfMoves();
         EVENT_WAITING_HEATER(-1);
         if (com->hasH()) { // one bed
@@ -1066,7 +1066,7 @@ void MCode_530(GCode* com) {
         Printer::setPrinting(0);
     }
     Printer::setMenuMode(MENU_MODE_PAUSED, false);
-    UI_RESET_MENU
+    GUI::resetMenu();
 }
 
 void MCode_531(GCode* com) {
@@ -1094,7 +1094,7 @@ void MCode_539(GCode* com) {
             Printer::setMenuMode(MENU_MODE_PAUSED, true);
         } else {
             Printer::setMenuMode(MENU_MODE_PAUSED, false);
-            UI_RESET_MENU
+            GUI::resetMenu();
         }
     }
 }
@@ -1106,9 +1106,9 @@ void MCode_540(GCode* com) {
 }
 
 void MCode_600(GCode* com) {
-#if FEATURE_CONTROLLER != NO_CONTROLLER && FEATURE_RETRACTION
-    uid.executeAction(UI_ACTION_WIZARD_FILAMENTCHANGE, true);
-#endif
+    // #if FEATURE_CONTROLLER != NO_CONTROLLER && FEATURE_RETRACTION
+    // uid.executeAction(UI_ACTION_WIZARD_FILAMENTCHANGE, true);
+    // #endif
 }
 
 void MCode_601(GCode* com) {
@@ -1176,6 +1176,13 @@ void MCode_604(GCode* com) {
 
 void MCode_606(GCode* com) {
     PrinterType::park(com);
+}
+
+void MCode_669(GCode* com) {
+    millis_t t1 = HAL::timeInMilliseconds();
+    GUI::refresh();
+    millis_t diff = HAL::timeInMilliseconds() - t1;
+    Com::printFLN(PSTR("LCD Refresh time:"), static_cast<int32_t>(diff));
 }
 
 void MCode_890(GCode* com) {
@@ -1258,7 +1265,8 @@ void MCode_910(GCode* com) {
 }
 
 void MCode_998(GCode* com) {
-    UI_MESSAGE(com->S);
+    // TODO: debug messages
+    // UI_MESSAGE(com->S);
 }
 
 void MCode_999(GCode* com) {

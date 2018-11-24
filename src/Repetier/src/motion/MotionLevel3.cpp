@@ -114,6 +114,11 @@ void Motion3::activateNext() {
 } */
 
 void Motion3::timer() {
+    // Test one motor endstop to simplify stepper logic
+#if !defined(NO_SOFTWARE_AXIS_ENDSTOPS) || !defined(NO_MOTOR_ENDSTOPS)
+    static fast8_t testMotorId = 0;
+#endif
+
     unstepMotors();
     if (act == nullptr) {  // need new segment
         if (length == 0) { // nothing prepared
@@ -143,13 +148,12 @@ void Motion3::timer() {
 
         // Test one motor endstop to simplify stepper logic
 #if !defined(NO_SOFTWARE_AXIS_ENDSTOPS) || !defined(NO_MOTOR_ENDSTOPS)
-        static fast8_t testMotorId = 0;
         fast8_t axisBit = axisBits[testMotorId];
 #endif
 
 #if !defined(NO_SOFTWARE_AXIS_ENDSTOPS)
         if (actM1->axisUsed & axisBit) {
-            if (m1.axisDir & axisBit) {
+            if (actM1->axisDir & axisBit) {
                 if (Motion1::maxAxisEndstops[testMotorId] && Motion1::maxAxisEndstops[testMotorId]->update()) {
                     Motion2::endstopTriggered(act, testMotorId, true);
                     return;
@@ -163,7 +167,7 @@ void Motion3::timer() {
         }
         if (testMotorId == Z_AXIS && Motion1::endstopMode == PROBING) {
             if (ZProbe->update()) { // ignore z endstop here
-                Motion2::endstopTriggered(Z_AXIS, act->directions & axisBit, false);
+                Motion2::endstopTriggered(act, act->directions & axisBit, false);
             }
         }
 #endif

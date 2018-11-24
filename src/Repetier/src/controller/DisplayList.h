@@ -18,6 +18,7 @@ This firmware is a nearly complete rewrite of the sprinter firmware
 by kliment (https://github.com/kliment/Sprinter)
 which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
+#define RF_DISPLAY
 #ifndef RF_DISPLAY
 #define RF_DISPLAY
 
@@ -1777,9 +1778,6 @@ inline void uiCheckSlowKeys(uint16_t &action) {}
 #endif
 #endif
 
-#define UI_INITIALIZE uid.initialize();
-#define UI_FAST if((counterPeriodical & 3) == 3) {uid.fastAction();}
-#define UI_MEDIUM uid.mediumAction();
 #define UI_SLOW(allowMoves) uid.slowAction(allowMoves);
 #define UI_STATUS(status) uid.setStatusP(PSTR(status));
 #define UI_STATUS_F(status) uid.setStatusP(status);
@@ -1798,9 +1796,6 @@ inline void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_MESSAGE(menu) {uid.showMessage(menu);}
 #define UI_ACTION(ac) {uid.executeAction(ac,true);}
 #else
-#define UI_INITIALIZE {}
-#define UI_FAST {}
-#define UI_MEDIUM {}
 #define UI_SLOW(allowMoves) {}
 #define UI_STATUS(status) {}
 #define UI_STATUS_F(status) {}

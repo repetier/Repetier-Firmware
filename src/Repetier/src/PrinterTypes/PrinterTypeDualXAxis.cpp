@@ -18,89 +18,91 @@
 
 #include "Repetier.h"
 
-#if PRINTER_TYPE == 3
+#if PRINTER_TYPE == PRINTER_TYPE_DUAL_X
 
 bool PrinterType::leftParked = false;
 bool PrinterType::rightParked = false;
 uint8_t PrinterType::lazyMode = false;
-float PrinterType::posReal[2];
-float PrinterType::targetReal;
-bool PrinterType::dontChangeCoords = false;
+float PrinterType::endPos[2];
+float PrinterType::targetReal;              // Official position
+bool PrinterType::dontChangeCoords = false; // if true queueMove will not adjust positions!
 float PrinterType::bedRectangle[2][2];
 uint16_t PrinterType::eeprom; // start position eeprom
 fast8_t PrinterType::activeAxis = 0;
 
 void PrinterType::homeAxis(fast8_t axis) {
-    // Tool::unselectTool();
-    dontChangeCoords = true;
     if (axis == X_AXIS) {
+        dontChangeCoords = true;
         leftParked = rightParked = false;
         Motion1::simpleHome(X_AXIS);
         MCode_119(nullptr);
         Motion1::simpleHome(A_AXIS);
-        Tool* tool1 = Tool::getTool(0);
-        Tool* tool2 = Tool::getTool(1);
-        targetReal = Motion1::minPos[X_AXIS];
-        leftParked = true;
-        rightParked = true;
-        Motion1::currentPositionTransformed[X_AXIS] = posReal[0];
-        Motion1::currentPositionTransformed[A_AXIS] = posReal[1];
+        targetReal = /* lazyMode ? Motion1::minPos[X_AXIS] : */ endPos[activeAxis];
+        leftParked = rightParked = lazyMode;
+        Motion1::currentPositionTransformed[X_AXIS] = endPos[0];
+        Motion1::currentPositionTransformed[A_AXIS] = endPos[1];
         Motion1::updatePositionsFromCurrentTransformed();
-        /* if (!lazyMode) {
-            // Unpark active extruder
+        Motion2::setMotorPositionFromTransformed();
+        // Now both are in their park positions
+        if (!lazyMode && Motion1::dittoMode) {
             FOR_ALL_AXES(i) {
                 Motion1::tmpPosition[i] = Motion1::currentPositionTransformed[i];
             }
-            if (Motion1::dittoMode) {
-                Motion1::tmpPosition[X_AXIS] = Motion1::minPos[X_AXIS];
-                if (Motion1::dittoMirror) {
-                    Motion1::tmpPosition[A_AXIS] = Motion1::maxPos[X_AXIS] + Motion1::minPos[X_AXIS] - Motion1::tmpPosition[X_AXIS];
-                } else {
-                    Motion1::tmpPosition[A_AXIS] = Motion1::tmpPosition[X_AXIS] + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
-                }
-                leftParked = false;
-                rightParked = false;
-            } else if (Tool::getActiveToolId()) {
-                rightParked = false;
+            Motion1::tmpPosition[X_AXIS] = Motion1::minPos[X_AXIS];
+            if (Motion1::dittoMirror) {
                 Motion1::tmpPosition[A_AXIS] = Motion1::maxPos[X_AXIS];
             } else {
-                leftParked = false;
-                Motion1::tmpPosition[X_AXIS] = Motion1::minPos[X_AXIS];
+                Motion1::tmpPosition[A_AXIS] = Motion1::tmpPosition[X_AXIS] + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
             }
-            Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED);
-        } */
-        dontChangeCoords = false;
-        // Now both are in their park positions
+            targetReal = Motion1::tmpPosition[X_AXIS];
+            leftParked = rightParked = false;
+            Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED, false);
+            Motion1::updatePositionsFromCurrentTransformed();
+            Motion2::setMotorPositionFromTransformed();
+        }
     } else if (axis != A_AXIS) {
         Motion1::simpleHome(axis);
-        dontChangeCoords = false;
     }
+    dontChangeCoords = false;
 }
 
 void PrinterType::park(GCode* com) {
     if (!Motion1::isAxisHomed(X_AXIS)) {
-        Motion1::homeAxis(X_AXIS);
+        Motion1::homeAxes(X_AXIS);
     }
     Motion1::copyCurrentPrinter(Motion1::tmpPosition);
+    float f = com->hasF() ? com->F : XY_SPEED;
+    float x = com->hasX() ? com->X : 0;
     if (Motion1::dittoMode == 0) {
         if (activeAxis == 0) {
-            Motion1::tmpPosition[X_AXIS] = posReal[0] + (com->hasX() ? com->X : 0);
-            leftParked = Motion1::tmpPosition[X_AXIS] == posReal[0];
+            Motion1::tmpPosition[X_AXIS] = endPos[0] + x;
+            leftParked = Motion1::tmpPosition[X_AXIS] == endPos[0] && lazyMode;
         } else if (activeAxis == 1) {
-            Motion1::tmpPosition[A_AXIS] = posReal[1] - (com->hasX() ? com->X : 0);
-            rightParked = Motion1::tmpPosition[X_AXIS] == posReal[1];
+            Motion1::tmpPosition[A_AXIS] = endPos[1] - x;
+            rightParked = Motion1::tmpPosition[A_AXIS] == endPos[1] && lazyMode;
         }
     } else {
-        Motion1::tmpPosition[X_AXIS] = posReal[0] + (com->hasX() ? com->X : 0);
-        leftParked = Motion1::tmpPosition[X_AXIS] == posReal[0];
-        Motion1::tmpPosition[A_AXIS] = posReal[1] - (com->hasX() ? com->X : 0);
-        rightParked = Motion1::tmpPosition[X_AXIS] == posReal[1];
+        Motion1::tmpPosition[X_AXIS] = endPos[0] + x;
+        leftParked = Motion1::tmpPosition[X_AXIS] == endPos[0] && lazyMode;
+        Motion1::tmpPosition[A_AXIS] = endPos[1] - x;
+        rightParked = Motion1::tmpPosition[A_AXIS] == endPos[1] && lazyMode;
     }
+    dontChangeCoords = true;
     Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED, false);
+    dontChangeCoords = false;
 }
 
+// Is called after normalizing position coordinates!
 bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
-    if (Printer::isNoDestinationCheck()) {
+    /*    Com::printF(PSTR("Test PA XT:"), pos[X_AXIS], 2);
+    Com::printF(PSTR(" YT:"), pos[Y_AXIS], 2);
+    Com::printF(PSTR(" ZT:"), pos[Z_AXIS], 2);
+#if NUM_AXES > A_AXIS
+    Com::printF(PSTR(" AT:"), pos[A_AXIS], 2);
+#endif
+    Com::println();
+*/
+    if (Printer::isNoDestinationCheck() || dontChangeCoords) {
         return true;
     }
     if (Printer::isHoming() || Motion1::endstopMode == EndstopMode::PROBING) {
@@ -113,30 +115,21 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
             }
         }
     }
-    // In ditto mode prevent moves past half.
-    if (Motion1::dittoMode) {
+
+    // Test X or A range
+    /* if (Motion1::dittoMode) {
         if (Motion1::dittoMirror) {
-            // Extruders can collide in center, so subtract left parking distance as safety margin
-            if (pos[X_AXIS] > 0.5f * (Motion1::minPos[X_AXIS] + Motion1::maxPos[X_AXIS]) - (posReal[0] - Motion1::minPos[X_AXIS])) {
-                return false;
-            }
+            pos[A_AXIS] = Motion1::maxPos[X_AXIS] + Motion1::minPos[X_AXIS] - pos[X_AXIS];
         } else {
-            if (pos[X_AXIS] > 0.5f * (Motion1::minPos[X_AXIS] + Motion1::maxPos[X_AXIS]) + posReal[1] - Motion1::maxPos[X_AXIS]) {
-                return false;
-            }
-            if (pos[X_AXIS] < realPos[0]) {
-                return false;
-            }
+            pos[A_AXIS] = pos[X_AXIS] - Motion1::minPos[X_AXIS] + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
         }
-    } else {
-        // Test X or A range depending on which is active
-        if (activeAxis == 0) {
-            return pos[X_AXIS] > posReal[0] && pos[X_AXIS] <= Motion1::maxPos[X_AXIS];
-        } else {
-            return pos[X_AXIS] >= 0 && pos[X_AXIS] <= posReal[1];
-        }
-    }
-    return true;
+    } else if (activeAxis) {
+        pos[A_AXIS] = pos[X_AXIS];
+        pos[X_AXIS] = Motion1::currentPositionTransformed[X_AXIS]; // do not move x axis
+    } else {                                                       // left tool active
+        pos[A_AXIS] = Motion1::currentPositionTransformed[A_AXIS];
+    } */
+    return pos[X_AXIS] >= endPos[0] && pos[X_AXIS] <= Motion1::maxPos[X_AXIS] && pos[A_AXIS] >= 0 && pos[A_AXIS] <= endPos[1] && pos[A_AXIS] >= pos[X_AXIS] + DUAL_X_MIN_DISTANCE;
 }
 
 void PrinterType::closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety) {
@@ -204,27 +197,34 @@ float PrinterType::feedrateForMoveSteps(fast8_t axes) {
     return feedrate;
 }
 
+fast8_t PrinterType::axisForTool(fast8_t toolId) {
+    // TODO: Add map for tool->axis
+    return toolId;
+}
+
 void PrinterType::deactivatedTool(fast8_t id) {
-    if (Motion1::dittoMode || (id == 0 && leftParked) || (id == 1 && rightParked) || (leftParked == false && rightParked == false)) {
+    fast8_t axisId = axisForTool(id);
+    if (Motion1::dittoMode || (axisId == 0 && Motion1::currentPositionTransformed[X_AXIS] == endPos[0]) || (axisId == 1 && Motion1::currentPositionTransformed[A_AXIS] == endPos[1]) || (leftParked && rightParked)) {
         // already parked, nothing to do
         return;
     }
     // Move into park position
     COPY_ALL_AXES(Motion1::tmpPosition, Motion1::currentPositionTransformed);
     dontChangeCoords = true;
-    if (id) { // right extruder
-        Motion1::tmpPosition[A_AXIS] = posReal[1];
-        rightParked = true;
+    if (axisId) { // right extruder
+        Motion1::tmpPosition[A_AXIS] = endPos[1];
+        rightParked = lazyMode;
     } else {
-        Motion1::tmpPosition[X_AXIS] = posReal[0];
-        leftParked = true;
+        Motion1::tmpPosition[X_AXIS] = endPos[0];
+        leftParked = lazyMode;
     }
     Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED, false);
     dontChangeCoords = false;
 }
 
 void PrinterType::activatedTool(fast8_t id) {
-    if (Motion1::dittoMode || (id == 0 && !leftParked) || (id == 1 && !rightParked) || lazyMode) {
+    activeAxis = axisForTool(id);
+    if (Motion1::dittoMode || lazyMode /* || (activeAxis == 0 && Motion1::currentPositionTransformed[X_AXIS] == endPos[0]) || (activeAxis == 1 && Motion1::currentPositionTransformed[A_AXIS] == endPos[1]) */) {
         return;
     }
     // Move out of park position
@@ -235,19 +235,23 @@ void PrinterType::activatedTool(fast8_t id) {
         if (Motion1::dittoMirror) {
             Motion1::tmpPosition[A_AXIS] = Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS] - targetReal;
         } else {
-            Motion1::tmpPosition[A_AXIS] = targetReal + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
+            Motion1::tmpPosition[A_AXIS] = targetReal - Motion1::minPos[X_AXIS] + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
         }
         rightParked = false;
         leftParked = false;
         activeAxis = 0;
-    } else if (id) { // right extruder
+    } else if (activeAxis) {                        // right extruder
+        if (targetReal < Motion1::minPos[X_AXIS]) { // prevent crash
+            targetReal = endPos[1];
+        }
         Motion1::tmpPosition[A_AXIS] = targetReal;
         rightParked = false;
-        activeAxis = 1;
     } else {
+        if (targetReal > Motion1::maxPos[X_AXIS]) { // prevent crash
+            targetReal = endPos[0];
+        }
         Motion1::tmpPosition[X_AXIS] = targetReal;
         leftParked = false;
-        activeAxis = 0;
     }
     Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED, false);
     dontChangeCoords = false;
@@ -255,19 +259,19 @@ void PrinterType::activatedTool(fast8_t id) {
 
 void PrinterType::eepromHandle() {
     EEPROM::handlePrefix(PSTR("Dual X"));
-    EEPROM::handleFloat(eprStart + 9, PSTR("Bed X Min [mm]"), 2, bedRectangle[X_AXIS][0]);
-    EEPROM::handleFloat(eprStart + 13, PSTR("Bed X Max [mm]"), 2, bedRectangle[X_AXIS][1]);
-    EEPROM::handleFloat(eprStart + 17, PSTR("Bed Y Min [mm]"), 2, bedRectangle[Y_AXIS][0]);
-    EEPROM::handleFloat(eprStart + 21, PSTR("Bed Y Max [mm]"), 2, bedRectangle[Y_AXIS][1]);
-    EEPROM::handleFloat(eeprom + 0, PSTR("Offset Left [mm]"), 2, posReal[0]);
-    EEPROM::handleFloat(eeprom + 4, PSTR("Offset Right [mm]"), 2, posReal[1]);
+    EEPROM::handleFloat(eeprom + 9, PSTR("Bed X Min [mm]"), 2, bedRectangle[X_AXIS][0]);
+    EEPROM::handleFloat(eeprom + 13, PSTR("Bed X Max [mm]"), 2, bedRectangle[X_AXIS][1]);
+    EEPROM::handleFloat(eeprom + 17, PSTR("Bed Y Min [mm]"), 2, bedRectangle[Y_AXIS][0]);
+    EEPROM::handleFloat(eeprom + 21, PSTR("Bed Y Max [mm]"), 2, bedRectangle[Y_AXIS][1]);
+    EEPROM::handleFloat(eeprom + 0, PSTR("Offset Left [mm]"), 2, endPos[0]);
+    EEPROM::handleFloat(eeprom + 4, PSTR("Offset Right [mm]"), 2, endPos[1]);
     EEPROM::handleByte(eeprom + 8, PSTR("Lazy Homing [0/1]"), lazyMode);
 }
 
 void PrinterType::restoreFromConfiguration() {
     lazyMode = LAZY_DUAL_X_AXIS;
-    posReal[0] = DUAL_X_LEFT_OFFSET;
-    posReal[1] = DUAL_X_RIGHT_OFFSET;
+    endPos[0] = DUAL_X_LEFT_OFFSET;
+    endPos[1] = DUAL_X_RIGHT_OFFSET;
     bedRectangle[X_AXIS][0] = BED_X_MIN;
     bedRectangle[X_AXIS][1] = BED_X_MAX;
     bedRectangle[Y_AXIS][0] = BED_Y_MIN;
@@ -301,21 +305,20 @@ void PrinterType::enableMotors(fast8_t axes) {
     }
     Printer::unsetAllSteppersDisabled();
 }
-void PrinterType::queueMove(float feedrate, bool secondaryMove) {
+bool PrinterType::queueMove(float feedrate, bool secondaryMove) {
     if (dontChangeCoords) { // don't think about coordinates wanted!
         return Motion1::queueMove(feedrate, secondaryMove);
     }
     targetReal = Motion1::destinationPositionTransformed[X_AXIS];
-    // DEBUG_MSG2_FAST("Q1 X:", targetReal);
     // Set current to real position if parked
     if (leftParked) {
-        Motion1::currentPositionTransformed[X_AXIS] = posReal[0];
+        Motion1::currentPositionTransformed[X_AXIS] = endPos[0];
     }
     if (rightParked) {
-        Motion1::currentPositionTransformed[A_AXIS] = posReal[1];
+        Motion1::currentPositionTransformed[A_AXIS] = endPos[1];
     }
     // Check what we need to do
-    if (leftParked && rightParked) {
+    if (lazyMode && leftParked && rightParked) {
         // DEBUG_MSG_FAST("Q2");
         // Seems we are in lazy mode with both tools parked, so test if we need to move one
         if (Motion1::currentPositionTransformed[E_AXIS] < Motion1::destinationPositionTransformed[E_AXIS]) {
@@ -331,13 +334,13 @@ void PrinterType::queueMove(float feedrate, bool secondaryMove) {
                 if (Motion1::dittoMirror) {
                     Motion1::destinationPositionTransformed[A_AXIS] = Motion1::maxPos[X_AXIS] + Motion1::minPos[X_AXIS] - targetReal;
                 } else {
-                    Motion1::destinationPositionTransformed[A_AXIS] = targetReal + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
+                    Motion1::destinationPositionTransformed[A_AXIS] = targetReal - Motion1::minPos[X_AXIS] + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
                 }
                 Motion1::destinationPositionTransformed[X_AXIS] = targetReal;
                 rightParked = false;
                 leftParked = false;
             } else {
-                if (Tool::getActiveToolId()) {
+                if (activeAxis) {
                     Motion1::destinationPositionTransformed[A_AXIS] = targetReal;
                     rightParked = false;
                 } else {
@@ -368,15 +371,20 @@ void PrinterType::queueMove(float feedrate, bool secondaryMove) {
             if (Motion1::dittoMirror) {
                 Motion1::destinationPositionTransformed[A_AXIS] = Motion1::maxPos[X_AXIS] + Motion1::minPos[X_AXIS] - Motion1::destinationPositionTransformed[X_AXIS];
             } else {
-                Motion1::destinationPositionTransformed[A_AXIS] = Motion1::destinationPositionTransformed[X_AXIS] + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
+                Motion1::destinationPositionTransformed[A_AXIS] = Motion1::destinationPositionTransformed[X_AXIS] - Motion1::minPos[X_AXIS] + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
             }
         }
-    } else if (leftParked) {
-        if (!rightParked) { // right tool active
-            Motion1::destinationPositionTransformed[A_AXIS] = Motion1::destinationPositionTransformed[X_AXIS];
+    } else if (activeAxis) {
+        if (rightParked) { // right tool active
+            Motion1::destinationPositionTransformed[A_AXIS] = Motion1::currentPositionTransformed[A_AXIS];
+        } else {
+            Motion1::destinationPositionTransformed[A_AXIS] = targetReal;
         }
-        Motion1::destinationPositionTransformed[X_AXIS] = Motion1::currentPositionTransformed[X_AXIS];
-    } else if (rightParked) { // left tool active
+        Motion1::destinationPositionTransformed[X_AXIS] = endPos[0];                                   // do not move x axis
+    } else if (!leftParked) {                                                                          // left tool active
+        Motion1::destinationPositionTransformed[A_AXIS] = Motion1::currentPositionTransformed[A_AXIS]; // Don't move right side
+    } else {                                                                                           // left side is parked so do not move
+        Motion1::destinationPositionTransformed[X_AXIS] = Motion1::currentPositionTransformed[X_AXIS]; // do not move x axis
         Motion1::destinationPositionTransformed[A_AXIS] = Motion1::currentPositionTransformed[A_AXIS];
     }
     // Motion1::currentPosition[A_AXIS] = Motion1::destinationPositionTransformed[A_AXIS] - Motion1::toolOffset[X_AXIS];
@@ -385,9 +393,21 @@ void PrinterType::queueMove(float feedrate, bool secondaryMove) {
 }
 
 void PrinterType::setDittoMode(fast8_t count, bool mirror) {
+    // Test if all tools have z offset 0
+    for (int i = 0; i < NUM_TOOLS; i++) {
+        if (Tool::getTool(i)->getOffsetZ() != 0) {
+            Com::printWarningFLN(PSTR("Ditto mode requires all tool z offsets to be zero."));
+            GUI::setStatusP(PSTR("Tool Z-Offsets not 0"), GUIStatusLevel::ERROR);
+            return;
+        }
+    }
+    GUI::setStatusP(PSTR("Homing ..."), GUIStatusLevel::BUSY);
+    Printer::setHoming(true);
     Motion1::dittoMode = count;
     Motion1::dittoMirror = mirror;
     homeAxis(X_AXIS);
+    Printer::setHoming(false);
+    GUI::popBusy();
 }
 
 bool PrinterType::ignoreAxisForLength(fast8_t axis) {
@@ -433,4 +453,7 @@ void PrinterType::officialToTransformed(float official[NUM_AXES], float trans[NU
     }
 }
 
+bool PrinterType::canSelectTool(fast8_t toolId) {
+    return toolId == 0 || Motion1::dittoMode == 0;
+}
 #endif

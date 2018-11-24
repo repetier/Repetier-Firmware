@@ -89,6 +89,7 @@ public:
         setTargetTemperature(targetTemperature);
     }
     inline bool isUnplugged() { return decoupleMode == UNPLUGGED; }
+    inline bool isPaused() { return decoupleMode == PAUSED; }
     inline float getTargetTemperature() { return targetTemperature; }
     inline void setCurrentTemperature(float temp) {
         currentTemperature = temp;

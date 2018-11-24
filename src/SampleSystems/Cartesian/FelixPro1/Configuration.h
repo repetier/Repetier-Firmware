@@ -57,19 +57,29 @@
 #define VELOCITY_PROFILE 5           // 1 = linear, 3 = cubic, 5 = quintic velocity shape
 #define Z_SPEED 10                   // Z positioning speed
 #define XY_SPEED 150                 // XY positioning speed for normal operations
-#define G0_FEEDRATE 170              // Speed for G0 moves. Independent from set F value!
+#define G0_FEEDRATE 0              // Speed for G0 moves. Independent from set F value! Set 0 to use F value.
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
 #define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
 #define Z_PROBE_TYPE 2               // 0 = no z probe, 1 = default z probe, 2 = Nozzle as probe
 #define Z_PROBE_BORDER 2             // Safety border to ensure position is allowed
 #define Z_PROBE_TEMPERATURE 170      // Temperature for type 2
 
-// 0 = Cartesian, 1 = CoreXYZ, 2 = delta
+// 0 = Cartesian, 1 = CoreXYZ, 2 = delta, 3 = Dual X-Axis
 #define PRINTER_TYPE 0
 // If all axis end stops are hardware based we can skip the time consuming tests each step
 #define NO_SOFTWARE_AXIS_ENDSTOPS
 // Normally only a delta has motor end stops required. Normally you trigger using axis endstops.
 #define NO_MOTOR_ENDSTOPS
+
+#define FEATURE_CONTROLLER CONTROLLER_FELIX_DUE
+// Use more memory to speedup display updates
+#define DISPLAY_FULL_BUFFER 1
+// Direction 1 or -1
+#define ENCODER_DIRECTION -1
+// Encoder speed 0 = fastest, 1 or 2 = slowest - set so 1 click is one menu move
+// Default is 2 if not set by controller. Us eonly to fix wrong setting
+// #define ENCODER_SPEED 2
+
 /* Ratios for core xyz. First index denotes motor and second axis.
 For each motor you can set the ratio of x,y,z position that adds
 to the position. 0 = no contribution. */
@@ -471,7 +481,6 @@ It also can add a delay to wait for spindle to run on full speed.
 #define FEATURE_CHECKSUM_FORCED 0
 #define FEATURE_FAN_CONTROL 1
 #define FEATURE_FAN2_CONTROL 0
-#define FEATURE_CONTROLLER 0 // 11
 #define ADC_KEYPAD_PIN -1
 #define LANGUAGE_EN_ACTIVE 1
 #define LANGUAGE_DE_ACTIVE 1

@@ -436,8 +436,6 @@ void HeatManagerPID::autocalibrate(GCode* g) {
             setTargetTemperature(0);
             return;
         }
-        UI_MEDIUM;
-        UI_SLOW(true);
     } // loop
     setTargetTemperature(0);
 }

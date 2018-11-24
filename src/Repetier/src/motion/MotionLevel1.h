@@ -300,7 +300,7 @@ public:
     static bool isAxisHomed(fast8_t axis);
     static void setAxisHomed(fast8_t axis, bool state);
     static void homeAxes(fast8_t axes);
-    static void simpleHome(fast8_t axis);
+    static bool simpleHome(fast8_t axis);
     static void correctBumpOffset(); // Adjust position to offset
     static PGM_P getAxisString(fast8_t axis);
     static EndstopDriver& endstopFoxAxisDir(fast8_t axis, bool maxDir);

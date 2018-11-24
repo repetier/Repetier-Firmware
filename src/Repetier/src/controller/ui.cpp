@@ -16,6 +16,7 @@
 
 */
 
+#if 0
 #define UI_MAIN 1
 #include "Repetier.h"
 
@@ -23,7 +24,7 @@
 #if UI_DISPLAY_TYPE == DISPLAY_U8G
 #if defined(UI_HEAD)
 #undef UI_ROWS
-#define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)-1
+#define UI_ROWS (UI_LCD_HEIGHT / UI_FONT_HEIGHT) - 1
 #undef UI_ROWS_EXTRA
 #define UI_ROWS_EXTRA 1
 #endif
@@ -40,7 +41,7 @@ extern const int8_t encoder_table[16] PROGMEM ;
 #include <ctype.h>
 
 #if FEATURE_SERVO > 0 && UI_SERVO_CONTROL > 0
-#if   UI_SERVO_CONTROL == 1 && defined(SERVO0_NEUTRAL_POS)
+#if UI_SERVO_CONTROL == 1 && defined(SERVO0_NEUTRAL_POS)
 uint16_t servoPosition = SERVO0_NEUTRAL_POS;
 #elif UI_SERVO_CONTROL == 2 && defined(SERVO1_NEUTRAL_POS)
 uint16_t servoPosition = SERVO1_NEUTRAL_POS;
@@ -53,10 +54,10 @@ uint16_t servoPosition = 1500;
 #endif
 #endif
 
-#if BEEPER_TYPE==2 && defined(UI_HAS_I2C_KEYS) && UI_I2C_KEY_ADDRESS!=BEEPER_ADDRESS
+#if BEEPER_TYPE == 2 && defined(UI_HAS_I2C_KEYS) && UI_I2C_KEY_ADDRESS != BEEPER_ADDRESS
 #error Beeper address and i2c key address must be identical
 #else
-#if BEEPER_TYPE==2
+#if BEEPER_TYPE == 2
 #define UI_I2C_KEY_ADDRESS BEEPER_ADDRESS
 #endif
 #endif
@@ -69,45 +70,45 @@ millis_t ui_autoreturn_time = 0;
 
 void beep(uint8_t duration, uint8_t count) {
 #if FEATURE_BEEPER
-#if BEEPER_TYPE!=0
-#if BEEPER_TYPE==1 && defined(BEEPER_PIN) && BEEPER_PIN>=0
+#if BEEPER_TYPE != 0
+#if BEEPER_TYPE == 1 && defined(BEEPER_PIN) && BEEPER_PIN >= 0
     SET_OUTPUT(BEEPER_PIN);
 #endif
-#if BEEPER_TYPE==2
+#if BEEPER_TYPE == 2
     HAL::i2cStartWait(BEEPER_ADDRESS + I2C_WRITE);
-#if UI_DISPLAY_I2C_CHIPTYPE==1
+#if UI_DISPLAY_I2C_CHIPTYPE == 1
     HAL::i2cWrite( 0x14); // Start at port a
 #endif
 #endif
     for(uint8_t i = 0; i < count; i++) {
-#if BEEPER_TYPE==1 && defined(BEEPER_PIN) && BEEPER_PIN>=0
+#if BEEPER_TYPE == 1 && defined(BEEPER_PIN) && BEEPER_PIN >= 0
 #if defined(BEEPER_TYPE_INVERTING) && BEEPER_TYPE_INVERTING
         WRITE(BEEPER_PIN, LOW);
 #else
         WRITE(BEEPER_PIN, HIGH);
 #endif
 #else
-#if UI_DISPLAY_I2C_CHIPTYPE==0
+#if UI_DISPLAY_I2C_CHIPTYPE == 0
 #if BEEPER_ADDRESS == UI_DISPLAY_I2C_ADDRESS
         HAL::i2cWrite(uid.outputMask & ~BEEPER_PIN);
 #else
         HAL::i2cWrite(~BEEPER_PIN);
 #endif
 #endif
-#if UI_DISPLAY_I2C_CHIPTYPE==1
+#if UI_DISPLAY_I2C_CHIPTYPE == 1
         HAL::i2cWrite((BEEPER_PIN) | uid.outputMask);
         HAL::i2cWrite(((BEEPER_PIN) | uid.outputMask) >> 8);
 #endif
 #endif
         HAL::delayMilliseconds(duration);
-#if BEEPER_TYPE==1 && defined(BEEPER_PIN) && BEEPER_PIN>=0
+#if BEEPER_TYPE == 1 && defined(BEEPER_PIN) && BEEPER_PIN >= 0
 #if defined(BEEPER_TYPE_INVERTING) && BEEPER_TYPE_INVERTING
         WRITE(BEEPER_PIN, HIGH);
 #else
         WRITE(BEEPER_PIN, LOW);
 #endif
 #else
-#if UI_DISPLAY_I2C_CHIPTYPE==0
+#if UI_DISPLAY_I2C_CHIPTYPE == 0
 
 #if BEEPER_ADDRESS == UI_DISPLAY_I2C_ADDRESS
         HAL::i2cWrite((BEEPER_PIN) | uid.outputMask);
@@ -115,14 +116,14 @@ void beep(uint8_t duration, uint8_t count) {
         HAL::i2cWrite(255);
 #endif
 #endif
-#if UI_DISPLAY_I2C_CHIPTYPE==1
+#if UI_DISPLAY_I2C_CHIPTYPE == 1
         HAL::i2cWrite( uid.outputMask);
         HAL::i2cWrite(uid.outputMask >> 8);
 #endif
 #endif
         HAL::delayMilliseconds(duration);
     }
-#if BEEPER_TYPE==2
+#if BEEPER_TYPE == 2
     HAL::i2cStop();
 #endif
 #endif
@@ -222,61 +223,60 @@ const long baudrates[] PROGMEM = {9600, 14400, 19200, 28800, 38400, 56000, 57600
                                   460800, 500000, 921600, 1000000, 1500000, 0
                                  };
 
-#define LCD_ENTRYMODE           0x04            /**< Set entrymode */
+#define LCD_ENTRYMODE 0x04                       /**< Set entrymode */
 
 /** @name GENERAL COMMANDS */
 /*@{*/
-#define LCD_CLEAR           0x01    /**< Clear screen */
-#define LCD_HOME            0x02    /**< Cursor move to first digit */
+#define LCD_CLEAR 0x01                           /**< Clear screen */
+#define LCD_HOME 0x02                            /**< Cursor move to first digit */
 /*@}*/
 
 /** @name ENTRYMODES */
 /*@{*/
-#define LCD_ENTRYMODE           0x04            /**< Set entrymode */
-#define LCD_INCREASE        LCD_ENTRYMODE | 0x02    /**<    Set cursor move direction -- Increase */
-#define LCD_DECREASE        LCD_ENTRYMODE | 0x00    /**<    Set cursor move direction -- Decrease */
-#define LCD_DISPLAYSHIFTON  LCD_ENTRYMODE | 0x01    /**<    Display is shifted */
-#define LCD_DISPLAYSHIFTOFF LCD_ENTRYMODE | 0x00    /**<    Display is not shifted */
+#define LCD_ENTRYMODE 0x04                       /**< Set entrymode */
+#define LCD_INCREASE LCD_ENTRYMODE | 0x02        /**<    Set cursor move direction -- Increase */
+#define LCD_DECREASE LCD_ENTRYMODE | 0x00        /**<    Set cursor move direction -- Decrease */
+#define LCD_DISPLAYSHIFTON LCD_ENTRYMODE | 0x01  /**<    Display is shifted */
+#define LCD_DISPLAYSHIFTOFF LCD_ENTRYMODE | 0x00 /**<    Display is not shifted */
 /*@}*/
 
 /** @name DISPLAYMODES */
 /*@{*/
-#define LCD_DISPLAYMODE         0x08            /**< Set displaymode */
-#define LCD_DISPLAYON       LCD_DISPLAYMODE | 0x04  /**<    Display on */
-#define LCD_DISPLAYOFF      LCD_DISPLAYMODE | 0x00  /**<    Display off */
-#define LCD_CURSORON        LCD_DISPLAYMODE | 0x02  /**<    Cursor on */
-#define LCD_CURSOROFF       LCD_DISPLAYMODE | 0x00  /**<    Cursor off */
-#define LCD_BLINKINGON      LCD_DISPLAYMODE | 0x01  /**<    Blinking on */
-#define LCD_BLINKINGOFF     LCD_DISPLAYMODE | 0x00  /**<    Blinking off */
+#define LCD_DISPLAYMODE 0x08                     /**< Set displaymode */
+#define LCD_DISPLAYON LCD_DISPLAYMODE | 0x04     /**<    Display on */
+#define LCD_DISPLAYOFF LCD_DISPLAYMODE | 0x00    /**<    Display off */
+#define LCD_CURSORON LCD_DISPLAYMODE | 0x02      /**<    Cursor on */
+#define LCD_CURSOROFF LCD_DISPLAYMODE | 0x00     /**<    Cursor off */
+#define LCD_BLINKINGON LCD_DISPLAYMODE | 0x01    /**<    Blinking on */
+#define LCD_BLINKINGOFF LCD_DISPLAYMODE | 0x00   /**<    Blinking off */
 /*@}*/
 
 /** @name SHIFTMODES */
 /*@{*/
-#define LCD_SHIFTMODE           0x10            /**< Set shiftmode */
-#define LCD_DISPLAYSHIFT    LCD_SHIFTMODE | 0x08    /**<    Display shift */
-#define LCD_CURSORMOVE      LCD_SHIFTMODE | 0x00    /**<    Cursor move */
-#define LCD_RIGHT       LCD_SHIFTMODE | 0x04    /**<    Right shift */
-#define LCD_LEFT        LCD_SHIFTMODE | 0x00    /**<    Left shift */
+#define LCD_SHIFTMODE 0x10                       /**< Set shiftmode */
+#define LCD_DISPLAYSHIFT LCD_SHIFTMODE | 0x08    /**<    Display shift */
+#define LCD_CURSORMOVE LCD_SHIFTMODE | 0x00      /**<    Cursor move */
+#define LCD_RIGHT LCD_SHIFTMODE | 0x04           /**<    Right shift */
+#define LCD_LEFT LCD_SHIFTMODE | 0x00            /**<    Left shift */
 /*@}*/
 
 /** @name DISPLAY_CONFIGURATION */
 /*@{*/
-#define LCD_CONFIGURATION       0x20                /**< Set function */
-#define LCD_8BIT        LCD_CONFIGURATION | 0x10    /**<    8 bits interface */
-#define LCD_4BIT        LCD_CONFIGURATION | 0x00    /**<    4 bits interface */
-#define LCD_2LINE       LCD_CONFIGURATION | 0x08    /**<    2 line display */
-#define LCD_1LINE       LCD_CONFIGURATION | 0x00    /**<    1 line display */
-#define LCD_5X10        LCD_CONFIGURATION | 0x04    /**<    5 X 10 dots */
-#define LCD_5X7         LCD_CONFIGURATION | 0x00    /**<    5 X 7 dots */
+#define LCD_CONFIGURATION 0x20                   /**< Set function */
+#define LCD_8BIT LCD_CONFIGURATION | 0x10        /**<    8 bits interface */
+#define LCD_4BIT LCD_CONFIGURATION | 0x00        /**<    4 bits interface */
+#define LCD_2LINE LCD_CONFIGURATION | 0x08       /**<    2 line display */
+#define LCD_1LINE LCD_CONFIGURATION | 0x00       /**<    1 line display */
+#define LCD_5X10 LCD_CONFIGURATION | 0x04        /**<    5 X 10 dots */
+#define LCD_5X7 LCD_CONFIGURATION | 0x00         /**<    5 X 7 dots */
 
 #define LCD_SETCGRAMADDR 0x40
 
-#define lcdPutChar(value) lcdWriteByte(value,1)
-#define lcdCommand(value) lcdWriteByte(value,0)
+#define lcdPutChar(value) lcdWriteByte(value, 1)
+#define lcdCommand(value) lcdWriteByte(value, 0)
 
 static const uint8_t LCDLineOffsets[] PROGMEM = UI_LINE_OFFSETS;
 static const char versionString[] PROGMEM = UI_VERSION_STRING;
-
 
 #if UI_DISPLAY_TYPE == DISPLAY_I2C
 
@@ -291,9 +291,9 @@ inline void lcdStopWrite() {
     HAL::i2cStop();
 }
 void lcdWriteNibble(uint8_t value) {
-#if UI_DISPLAY_I2C_CHIPTYPE==0
+#if UI_DISPLAY_I2C_CHIPTYPE == 0
     value |= uid.outputMask;
-#if UI_DISPLAY_D4_PIN==1 && UI_DISPLAY_D5_PIN==2 && UI_DISPLAY_D6_PIN==4 && UI_DISPLAY_D7_PIN==8
+#if UI_DISPLAY_D4_PIN == 1 && UI_DISPLAY_D5_PIN == 2 && UI_DISPLAY_D6_PIN == 4 && UI_DISPLAY_D7_PIN == 8
     HAL::i2cWrite((value) | UI_DISPLAY_ENABLE_PIN);
     HAL::i2cWrite(value);
 #else
@@ -303,7 +303,7 @@ void lcdWriteNibble(uint8_t value) {
 #
 #endif
 #endif
-#if UI_DISPLAY_I2C_CHIPTYPE==1
+#if UI_DISPLAY_I2C_CHIPTYPE == 1
     unsigned int v = (value & 1 ? UI_DISPLAY_D4_PIN : 0) | (value & 2 ? UI_DISPLAY_D5_PIN : 0) | (value & 4 ? UI_DISPLAY_D6_PIN : 0) | (value & 8 ? UI_DISPLAY_D7_PIN : 0) | uid.outputMask;
     unsigned int v2 = v | UI_DISPLAY_ENABLE_PIN;
     HAL::i2cWrite(v2 & 255);
@@ -313,9 +313,9 @@ void lcdWriteNibble(uint8_t value) {
 #endif
 }
 void lcdWriteByte(uint8_t c, uint8_t rs) {
-#if UI_DISPLAY_I2C_CHIPTYPE==0
+#if UI_DISPLAY_I2C_CHIPTYPE == 0
     uint8_t mod = (rs ? UI_DISPLAY_RS_PIN : 0) | uid.outputMask; // | (UI_DISPLAY_RW_PIN);
-#if UI_DISPLAY_D4_PIN==1 && UI_DISPLAY_D5_PIN==2 && UI_DISPLAY_D6_PIN==4 && UI_DISPLAY_D7_PIN==8
+#if UI_DISPLAY_D4_PIN == 1 && UI_DISPLAY_D5_PIN == 2 && UI_DISPLAY_D6_PIN == 4 && UI_DISPLAY_D7_PIN == 8
     uint8_t value = (c >> 4) | mod;
     HAL::i2cWrite((value) | UI_DISPLAY_ENABLE_PIN);
     HAL::i2cWrite(value);
@@ -331,7 +331,7 @@ void lcdWriteByte(uint8_t c, uint8_t rs) {
     HAL::i2cWrite(value);
 #endif
 #endif
-#if UI_DISPLAY_I2C_CHIPTYPE==1
+#if UI_DISPLAY_I2C_CHIPTYPE == 1
     unsigned int mod = (rs ? UI_DISPLAY_RS_PIN : 0) | uid.outputMask; // | (UI_DISPLAY_RW_PIN);
     unsigned int value = (c & 16 ? UI_DISPLAY_D4_PIN : 0) | (c & 32 ? UI_DISPLAY_D5_PIN : 0) | (c & 64 ? UI_DISPLAY_D6_PIN : 0) | (c & 128 ? UI_DISPLAY_D7_PIN : 0) | mod;
     unsigned int value2 = (value) | UI_DISPLAY_ENABLE_PIN;
@@ -351,7 +351,7 @@ void initializeLCD() {
     HAL::delayMilliseconds(235);
     lcdStartWrite();
     HAL::i2cWrite(uid.outputMask & 255);
-#if UI_DISPLAY_I2C_CHIPTYPE==1
+#if UI_DISPLAY_I2C_CHIPTYPE == 1
     HAL::i2cWrite(uid.outputMask >> 8);
 #endif
     HAL::delayMicroseconds(20);
@@ -747,7 +747,7 @@ void UIDisplay::printRow(uint8_t r, char *txt, char *txt2, uint8_t changeAtCol) 
 #if UI_DISPLAY_TYPE == DISPLAY_I2C
     lcdStopWrite();
 #endif
-#if UI_HAS_KEYS==1 && UI_HAS_I2C_ENCODER>0
+#if UI_HAS_KEYS == 1 && UI_HAS_I2C_ENCODER > 0
     uiCheckSlowEncoder();
 #endif
 }
@@ -794,7 +794,7 @@ void UIDisplay::printRow(uint8_t r, char *txt, char *txt2, uint8_t changeAtCol) 
             col++;
         }
     }
-#if UI_HAS_KEYS==1 && UI_HAS_I2C_ENCODER>0
+#if UI_HAS_KEYS == 1 && UI_HAS_I2C_ENCODER > 0
     uiCheckSlowEncoder();
 #endif
 }
@@ -890,7 +890,7 @@ void UIDisplay::printRow(uint8_t r, char *txt, char *txt2, uint8_t changeAtCol) 
         u8g_SetColorIndex(&u8g, 1);
     }
 
-#if UI_HAS_KEYS==1 && UI_HAS_I2C_ENCODER>0
+#if UI_HAS_KEYS == 1 && UI_HAS_I2C_ENCODER > 0
     uiCheckSlowEncoder();
 #endif
 }
@@ -958,13 +958,13 @@ void UIDisplay::initialize() {
     oldMenuLevel = -2;
 #ifdef COMPILE_I2C_DRIVER
     uid.outputMask = UI_DISPLAY_I2C_OUTPUT_START_MASK;
-#if UI_DISPLAY_I2C_CHIPTYPE==0 && BEEPER_TYPE==2 && BEEPER_PIN>=0
+#if UI_DISPLAY_I2C_CHIPTYPE == 0 && BEEPER_TYPE == 2 && BEEPER_PIN >= 0
 #if BEEPER_ADDRESS == UI_DISPLAY_I2C_ADDRESS
     uid.outputMask |= BEEPER_PIN;
 #endif
 #endif
     HAL::i2cInit(UI_I2C_CLOCKSPEED);
-#if UI_DISPLAY_I2C_CHIPTYPE==1
+#if UI_DISPLAY_I2C_CHIPTYPE == 1
     // set direction of pins
     HAL::i2cStart(UI_DISPLAY_I2C_ADDRESS + I2C_WRITE);
     HAL::i2cWrite(0); // IODIRA
@@ -1008,7 +1008,7 @@ void UIDisplay::initialize() {
 #if defined(USER_KEY4_PIN) && USER_KEY4_PIN > -1
     UI_KEYS_INIT_BUTTON_LOW(USER_KEY4_PIN);
 #endif
-#if UI_DISPLAY_TYPE == DISPLAY_I2C && defined(UI_DISPLAY_I2C_CHIPTYPE) && UI_DISPLAY_I2C_CHIPTYPE==1
+#if UI_DISPLAY_TYPE == DISPLAY_I2C && defined(UI_DISPLAY_I2C_CHIPTYPE) && UI_DISPLAY_I2C_CHIPTYPE == 1
     // I don't know why but after power up the lcd does not come up
     // but if I reinitialize i2c and the lcd again here it works.
     HAL::delayMilliseconds(10);
@@ -1048,7 +1048,7 @@ void UIDisplay::initialize() {
         printRowP(5, PSTR(UI_PRINTER_COMPANY));
 #endif // CUSTOM_LOGO
     } while( u8g_NextPage(&u8g) ); //end picture loop
-#else // not DISPLAY_U8G
+#else  // not DISPLAY_U8G
     printRowP(0, versionString);
     printRowP(1, PSTR(UI_PRINTER_NAME));
 #if UI_ROWS > 2
@@ -1059,7 +1059,7 @@ void UIDisplay::initialize() {
 #endif // gameduino2
     HAL::delayMilliseconds(UI_START_SCREEN_DELAY);
 #endif
-#if defined(UI_DISPLAY_I2C_CHIPTYPE) && UI_DISPLAY_I2C_CHIPTYPE==0 && (BEEPER_TYPE==2 || defined(UI_HAS_I2C_KEYS))
+#if defined(UI_DISPLAY_I2C_CHIPTYPE) && UI_DISPLAY_I2C_CHIPTYPE == 0 && (BEEPER_TYPE == 2 || defined(UI_HAS_I2C_KEYS))
     // Make sure the beeper is off
     HAL::i2cStartWait(UI_I2C_KEY_ADDRESS + I2C_WRITE);
     HAL::i2cWrite(255); // Disable beeper, enable read for other pins.
@@ -1569,8 +1569,6 @@ void UIDisplay::parse(const char *txt, bool ram) {
             }
 //#########
 
-
-
 #if FEATURE_SERVO > 0 && UI_SERVO_CONTROL > 0
             if(c2 == 'S') {
                 addInt(servoPosition, 4);
@@ -1610,7 +1608,7 @@ void UIDisplay::parse(const char *txt, bool ram) {
                 addStringP(Com::translatedF(UI_TEXT_NA_ID));
 #endif
             if(c2 == 'y')
-#if (Y_MIN_PIN > -1)&& MIN_HARDWARE_ENDSTOP_Y
+#if (Y_MIN_PIN > -1) && MIN_HARDWARE_ENDSTOP_Y
                 addStringOnOff(Endstops::yMin());
 #else
                 addStringP(Com::translatedF(UI_TEXT_NA_ID));
@@ -1756,7 +1754,7 @@ void UIDisplay::parse(const char *txt, bool ram) {
             break;
 
         case 'X': // Extruder related
-#if NUM_EXTRUDER>0
+#if NUM_EXTRUDER > 0
             if(c2 >= '0' && c2 <= '9') {
                 addStringP(Extruder::current->id == c2 - '0' ? ui_selected : ui_unselected);
             } else if(c2 == 'i') {
@@ -1997,7 +1995,7 @@ void UIDisplay::refreshPage() {
     Endstops::update();
     if(EVENT_UI_REFRESH_PAGE)
         return;
-#if  UI_DISPLAY_TYPE == DISPLAY_GAMEDUINO2
+#if UI_DISPLAY_TYPE == DISPLAY_GAMEDUINO2
     GD2::refresh();
 #else
     uint16_t r;
@@ -2185,16 +2183,19 @@ void UIDisplay::refreshPage() {
         } else off[y] = 0;
     }
 #if UI_DISPLAY_TYPE == DISPLAY_U8G
-#define drawHProgressBar(x,y,width,height,progress) \
-     {u8g_DrawFrame(&u8g,x,y, width, height);  \
-     int p = ceil((width-2) * progress / 100); \
-     u8g_DrawBox(&u8g,x+1,y+1, p, height-2);}
+#define drawHProgressBar(x, y, width, height, progress) \
+    { \
+        u8g_DrawFrame(&u8g, x, y, width, height); \
+        int p = ceil((width - 2) * progress / 100); \
+        u8g_DrawBox(&u8g, x + 1, y + 1, p, height - 2); \
+    }
 
-
-#define drawVProgressBar(x,y,width,height,progress) \
-     {u8g_DrawFrame(&u8g,x,y, width, height);  \
-     int p = height-1 - ceil((height-2) * progress / 100); \
-     u8g_DrawBox(&u8g,x+1,y+p, width-2, (height-p));}
+#define drawVProgressBar(x, y, width, height, progress) \
+    { \
+        u8g_DrawFrame(&u8g, x, y, width, height); \
+        int p = height - 1 - ceil((height - 2) * progress / 100); \
+        u8g_DrawBox(&u8g, x + 1, y + p, width - 2, (height - p)); \
+    }
 #if UI_DISPLAY_TYPE == DISPLAY_U8G
 #if SDSUPPORT
     unsigned long sdPercent = 0;
@@ -2233,7 +2234,6 @@ void UIDisplay::refreshPage() {
 #endif // HAVE_HEATED_BED
 
             }//###Ray
-
 
 #if FAN_PIN > -1 && FEATURE_FAN_CONTROL
             //fan
@@ -2316,8 +2316,8 @@ void UIDisplay::refreshPage() {
                     printU8GRow(66, 52, const_cast<char *>("SD"));
                     drawHProgressBar(79, 46, 46, 6, sdPercent);
                 }
-#endif // SDSUPPORT
-                //Status
+#endif // SDSUPPORT \
+       //Status
                 py = u8g_GetHeight(&u8g) - 2;
                 if(u8g_IsBBXIntersection(&u8g, 70, py - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
                     printU8GRow(0, py, cache[5]);
@@ -2356,7 +2356,7 @@ void UIDisplay::refreshPage() {
 #endif
                 for(y = 0; y < UI_ROWS; y++)
                     printRow(y, &cache[y][off[y]], NULL, UI_COLS);
-#if  defined(UI_HEAD) && UI_DISPLAY_TYPE == DISPLAY_U8G
+#if defined(UI_HEAD) && UI_DISPLAY_TYPE == DISPLAY_U8G
             }
 #endif
 #if UI_DISPLAY_TYPE == DISPLAY_U8G
@@ -2623,7 +2623,7 @@ int UIDisplay::okAction(bool allowMoves) {
 //#define INCREMENT_MIN_MAX(a,steps,_min,_max) if ( (increment<0) && (_min>=0) && (a<_min-increment*steps) ) {a=_min;} else { a+=increment*steps; if(a<_min) a=_min; else if(a>_max) a=_max;};
 
 // this version not have single byte variable rollover bug
-#define INCREMENT_MIN_MAX(a,steps,_min,_max) a = constrain((a + increment * steps), _min, _max);
+#define INCREMENT_MIN_MAX(a, steps, _min, _max) a = constrain((a + increment * steps), _min, _max);
 
 void UIDisplay::adjustMenuPos() {
     if(menuLevel == 0) return;
@@ -3069,7 +3069,7 @@ ZPOS2:
 #endif
     break;
     case UI_ACTION_SERVOPOS:
-#if FEATURE_SERVO > 0  && UI_SERVO_CONTROL > 0
+#if FEATURE_SERVO > 0 && UI_SERVO_CONTROL > 0
         INCREMENT_MIN_MAX(servoPosition, 5, 500, 2500);
         HAL::servoMicroseconds(UI_SERVO_CONTROL - 1, servoPosition, 500);
 #endif
@@ -3155,7 +3155,7 @@ ZPOS2:
         EVENT_UI_NEXTPREVIOUS(action, allowMoves, increment);
         break;
     }
-#if UI_AUTORETURN_TO_MENU_AFTER!=0
+#if UI_AUTORETURN_TO_MENU_AFTER != 0
     ui_autoreturn_time = HAL::timeInMilliseconds() + UI_AUTORETURN_TO_MENU_AFTER;
 #endif
 #endif
@@ -3513,7 +3513,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
         case UI_ACTION_CONTINUE:
             Printer::continuePrint();
             break;
-#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
+#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
         case UI_ACTION_FAN_OFF:
         case UI_ACTION_FAN_25:
         case UI_ACTION_FAN_50:
@@ -3885,14 +3885,14 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
             break;
         }
     refreshPage();
-#if UI_AUTORETURN_TO_MENU_AFTER!=0
+#if UI_AUTORETURN_TO_MENU_AFTER != 0
     ui_autoreturn_time = HAL::timeInMilliseconds() + UI_AUTORETURN_TO_MENU_AFTER;
 #endif
 #endif
     return ret;
 }
 void UIDisplay::mediumAction() {
-#if UI_HAS_I2C_ENCODER>0
+#if UI_HAS_I2C_ENCODER > 0
     uiCheckSlowEncoder();
 #endif
 }
@@ -3917,13 +3917,13 @@ void UIDisplay::slowAction(bool allowMoves) {
         {
             // check temps and set appropriate leds
             int led = 0;
-#if NUM_EXTRUDER>0 && defined(UI_I2C_HOTEND_LED)
+#if NUM_EXTRUDER > 0 && defined(UI_I2C_HOTEND_LED)
             led |= (tempController[Extruder::current->id]->targetTemperatureC > 0 ? UI_I2C_HOTEND_LED : 0);
 #endif
 #if HAVE_HEATED_BED && defined(UI_I2C_HEATBED_LED)
             led |= (heatedBedController.targetTemperatureC > 0 ? UI_I2C_HEATBED_LED : 0);
 #endif
-#if FAN_PIN>=0 && defined(UI_I2C_FAN_LED)
+#if FAN_PIN >= 0 && defined(UI_I2C_FAN_LED)
             led |= (Printer::getFanSpeed() > 0 ? UI_I2C_FAN_LED : 0);
 #endif
             // update the leds
@@ -4065,17 +4065,17 @@ void UIDisplay::fastAction() {
 }
 
 #if defined(UI_REVERSE_ENCODER) && UI_REVERSE_ENCODER == 1
-#if UI_ENCODER_SPEED==0
+#if UI_ENCODER_SPEED == 0
 const int8_t encoder_table[16] PROGMEM = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; // Full speed
-#elif UI_ENCODER_SPEED==1
+#elif UI_ENCODER_SPEED == 1
 const int8_t encoder_table[16] PROGMEM = {0, 0, 1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 1, 0, 0}; // Half speed
 #else
 const int8_t encoder_table[16] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0}; // Quart speed
 #endif
 #else
-#if UI_ENCODER_SPEED==0
+#if UI_ENCODER_SPEED == 0
 const int8_t encoder_table[16] PROGMEM = {0, 1, -1, 0, -1, 0, 0, 1, 1, 0, 0, -1, 0, -1, 1, 0}; // Full speed
-#elif UI_ENCODER_SPEED==1
+#elif UI_ENCODER_SPEED == 1
 const int8_t encoder_table[16] PROGMEM = {0, 0, -1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, -1, 0, 0}; // Half speed
 #else
 //const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,1,0,0,0,0,-1,0,0}; // Quart speed
@@ -4087,4 +4087,6 @@ const int8_t encoder_table[16] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0
 
 #if defined(CUSTOM_EVENTS)
 #include "CustomEventsImpl.h"
+#endif
+
 #endif

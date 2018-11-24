@@ -1032,7 +1032,7 @@ void PWM_TIMER_VECTOR() {
     pwm_count2 += 4;
     pwm_count3 += 8;
     pwm_count4 += 16;
-    UI_FAST; // Short timed user interface action
+    GUI::handleKeypress();
 #if FEATURE_WATCHDOG
     if (HAL::wdPinged) {
         WDT->WDT_CR = 0xA5000001;

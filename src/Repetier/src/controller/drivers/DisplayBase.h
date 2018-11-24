@@ -1,0 +1,41 @@
+#ifndef _DISPLAY_BASE
+#define _DISPLAY_BASE
+
+#define DRIVER_NONE 0
+#define DRIVER_U8G2 1
+#define DRIVER_20x4 2
+
+#define DISPLAY_DRIVER DRIVER_NONE
+
+#ifndef UI_START_SCREEN_DELAY
+#define UI_START_SCREEN_DELAY 3000
+#endif
+
+// Map controller types to drivers and set meningfull defaults if not predefined
+#if FEATURE_CONTROLLER == CONTROLLER_SPARKLCD || FEATURE_CONTROLLER == CONTROLLER_SPARKLCD_ADAPTER \
+    || FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD || FEATURE_CONTROLLER == CONTROLLER_FELIX_DUE \
+    || FEATURE_CONTROLLER == CONTROLLER_ORCABOTXXLPRO2
+#define DISPLAY_ST7920_SW 1
+#endif
+
+#ifndef ENCODER_SPEED
+#if FEATURE_CONTROLLER == CONTROLLER_ORCABOTXXLPRO2
+#define ENCODER_SPEED 1
+#else
+#define ENCODER_SPEED 2
+#endif
+#endif
+
+// It is always safe to assume there is no back key for a display
+#ifndef UI_HAS_BACK_KEY
+#define UI_HAS_BACK_KEY 0
+#endif
+
+#if ENABLED(DISPLAY_ST7920_SW)
+#undef DISPLAY_DRIVER
+#define DISPLAY_DRIVER DRIVER_U8G2
+#define DISPLAY_WIDTH 128
+#define DISPLAY_HEIGHT 64
+#endif
+
+#endif
