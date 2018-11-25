@@ -132,6 +132,7 @@
 
 // Controller related default pins
 
+#ifndef CUSTOM_CONTROLLER_PINS
 #if FEATURE_CONTROLLER == CONTROLLER_SPARKLCD
 
 #define UI_DISPLAY_RS_PIN 25
@@ -180,6 +181,7 @@
 #define UI_RESET_PIN -1
 #define UI_BACK_PIN 71
 
+#endif
 #endif
 
 // Servo pins: 5,6 und 39

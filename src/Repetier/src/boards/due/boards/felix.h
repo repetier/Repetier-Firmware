@@ -98,6 +98,7 @@
 #define SDA_PIN 20 // 20 or 70
 #define SCL_PIN 21 // 21 or 71
 
+#ifndef CUSTOM_CONTROLLER_PINS
 // Controller related default pins
 #define BEEPER_PIN -1
 #define UI_DISPLAY_RS_PIN 42
@@ -109,6 +110,7 @@
 #define UI_ENCODER_CLICK 48
 #define UI_RESET_PIN -1
 #define UI_BACK_PIN -1
+#endif
 
 #define E0_PINS ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN,

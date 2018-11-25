@@ -1,7 +1,7 @@
 #include "Repetier.h"
 
 #if DISPLAY_DRIVER == DRIVER_U8G2
-#include <U8g2lib.h>
+#include "u8g2/U8g2lib.h"
 #define UI_SPI_SCK UI_DISPLAY_D4_PIN
 #define UI_SPI_MOSI UI_DISPLAY_ENABLE_PIN
 #define UI_SPI_CS UI_DISPLAY_RS_PIN
