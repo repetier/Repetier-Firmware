@@ -107,6 +107,9 @@ void Motion1::init() {
 }
 
 void Motion1::setFromConfig() {
+    Motion2::velocityProfileIndex = VELOCITY_PROFILE;
+    Motion2::velocityProfile = velocityProfiles[Motion2::velocityProfileIndex];
+
     alwaysCheckEndstops = ALWAYS_CHECK_ENDSTOPS;
 
     resolution[X_AXIS] = XAXIS_STEPS_PER_MM;
@@ -1536,6 +1539,7 @@ void Motion1::eepromHandle() {
     EEPROM::handleFloat(eprStart + EPR_M1_PARK_Y, PSTR("Park position Y [mm]"), 2, parkPosition[Y_AXIS]);
     EEPROM::handleFloat(eprStart + EPR_M1_PARK_Z, PSTR("Park position Z raise [mm]"), 2, parkPosition[Z_AXIS]);
     EEPROM::handleByte(eprStart + EPR_M1_ALWAYS_CHECK_ENDSTOPS, PSTR("Always check endstops"), alwaysCheckEndstops);
+    EEPROM::handleByte(eprStart + EPR_M1_VELOCITY_PROFILE, PSTR("Velocity Profile [0-2]"), Motion2::velocityProfileIndex);
 #if FEATURE_AXISCOMP
     EEPROM::handleFloat(eprStart + EPR_AXISCOMP_TANXY, Com::tAxisCompTanXY, 6, axisCompTanXY);
     EEPROM::handleFloat(eprStart + EPR_AXISCOMP_TANYZ, Com::tAxisCompTanYZ, 6, axisCompTanYZ);
@@ -1543,6 +1547,10 @@ void Motion1::eepromHandle() {
 #endif
 }
 void Motion1::updateDerived() {
+    if (Motion2::velocityProfileIndex > 2) {
+        Motion2::velocityProfileIndex = 2;
+    }
+    Motion2::velocityProfile = velocityProfiles[Motion2::velocityProfileIndex];
 }
 
 void Motion1::eepromReset() {

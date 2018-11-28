@@ -54,7 +54,7 @@
 #define STEPPER_FREQUENCY 153000     // Maximum stepper frequency.
 #define PREPARE_FREQUENCY 1000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
 #define BLOCK_FREQUENCY 500          // Number of blocks with constant stepper rate per second.
-#define VELOCITY_PROFILE 5           // 1 = linear, 3 = cubic, 5 = quintic velocity shape
+#define VELOCITY_PROFILE 2           // 0 = linear, 1 = cubic, 2 = quintic velocity shape
 #define Z_SPEED 10                   // Z positioning speed
 #define XY_SPEED 150                 // XY positioning speed for normal operations
 #define G0_FEEDRATE 0              // Speed for G0 moves. Independent from set F value! Set 0 to use F value.

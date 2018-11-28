@@ -24,6 +24,7 @@ from 0, where 0 position depends on printer type.
 
 #define NUM_MOTION2_BUFFER 4
 class Motion3Buffer;
+class VelocityProfile;
 
 enum Motion2State {
     NOT_INITIALIZED = 0,
@@ -55,6 +56,8 @@ class Motion2 {
     static fast8_t nextActId;
 
 public:
+    static VelocityProfile* velocityProfile;
+    static uint8_t velocityProfileIndex;
     static Motion2Buffer buffers[NUM_MOTION2_BUFFER];
     static volatile fast8_t length;
     static int32_t lastMotorPos[2][NUM_AXES];

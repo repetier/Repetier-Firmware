@@ -61,7 +61,7 @@ Early stage version for Stacke X2 printer - use with care
 #define STEPPER_FREQUENCY 150000     // Maximum stepper frequency.
 #define PREPARE_FREQUENCY 200        // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
 #define BLOCK_FREQUENCY 100          // Number of blocks with constant stepper rate per second.
-#define VELOCITY_PROFILE 5           // 1 = linear, 3 = cubic, 5 = quintic velocity shape
+#define VELOCITY_PROFILE 2           // 0 = linear, 1 = cubic, 2 = quintic velocity shape
 #define Z_SPEED 5                    // Z positioning speed
 #define XY_SPEED 100                 // XY positioning speed for normal operations
 #define G0_FEEDRATE 0                // Speed for G0 moves. Independent from set F value! Set 0 to use F value.
