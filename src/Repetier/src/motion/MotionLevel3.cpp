@@ -44,15 +44,6 @@ void Motion3::init() {
     return nullptr;
 } */
 
-/* void Motion3::pushReserved() {
-    last++;
-    if (last == NUM_MOTION3_BUFFER) {
-        last = 0;
-    }
-    InterruptProtectedBlock noInts;
-    length++;
-} */
-
 /*
  Select next prepared element, update next pointer
  and set fan/laser intensity. Also set directions.
@@ -68,11 +59,18 @@ void Motion3::activateNext() {
 #endif
     YMotor.dir(act->directions & 2);
     ZMotor.dir(act->directions & 4);
-    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
-        if (act->usedAxes & axisBits[i] && Motion1::motors[i]) {
-            Motion1::motors[i]->dir(act->directions & axisBits[i]);
-        }
+    if (Motion1::motors[E_AXIS]) {
+        Motion1::motors[E_AXIS]->dir(act->directions & 8);
     }
+#if NUM_AXES > A_AXIS
+    AMotor.dir(act->directions & 16);
+#endif
+#if NUM_AXES > B_AXIS
+    BMotor.dir(act->directions & 32);
+#endif
+#if NUM_AXES > C_AXIS
+    CMotor.dir(act->directions & 64);
+#endif
     if (Motion1::dittoMode) {
         for (fast8_t i = 1; i < Motion1::dittoMode; i++) {
             Tool::tools[i]->directionMotor(act->directions & 8);
@@ -94,24 +92,11 @@ void Motion3::activateNext() {
         nextActId = 0;
     }
     // Tool related activations/changes
-    // Motion2Buffer& m2 = Motion2::buffers[act->parentId];
-    // Motion1Buffer& m1 = *(m2.motion1);
     Tool* tool = Tool::getActiveTool();
     if (tool != nullptr) {
         tool->sendSecondary(act->secondSpeed);
     }
 }
-
-/* void Motion3::unstepMotors() {
-    Motion1::motors[X_AXIS]->unstep();
-    Motion1::motors[Y_AXIS]->unstep();
-    Motion1::motors[Z_AXIS]->unstep();
-    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
-        if (Motion1::motors[i] != nullptr) {
-            Motion1::motors[i]->unstep();
-        }
-    }
-} */
 
 void Motion3::timer() {
     // Test one motor endstop to simplify stepper logic
@@ -194,7 +179,6 @@ void Motion3::timer() {
             testMotorId = 0;
         }
 #endif
-
         if (/* (act->usedAxes & 1) && */ (Motion1::motorTriggered & 1) == 0) {
             if ((act->error[X_AXIS] += act->delta[X_AXIS]) > 0) {
 #ifdef XMOTOR_SWITCHABLE
@@ -259,7 +243,7 @@ void Motion3::timer() {
         }
 #endif
     } else { // untested steps
-             // if (act->usedAxes & 1) {
+        // if (act->usedAxes & 1) {
         if ((act->error[X_AXIS] += act->delta[X_AXIS]) > 0) {
 #ifdef XMOTOR_SWITCHABLE
             Motion1::motors[X_AXIS]->step();
@@ -327,11 +311,14 @@ void Motion3::timer() {
         if (act->last) {
             Motion2::pop();
         }
-        if (--length == 0) {
+        InterruptProtectedBlock noInts;
+        --length;
+        act = nullptr;
+        /* if (--length == 0) {
             act = nullptr;
         } else {
             activateNext();
-        }
+        } */
     }
 }
 

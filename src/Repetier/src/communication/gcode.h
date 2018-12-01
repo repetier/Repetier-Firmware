@@ -138,17 +138,35 @@ public:
     // True if origin did not come from serial console. That way we can send status messages to
     // a host only if he would normally not know about the mode switch.
     bool internalCommand;
+
+    GCode();
     inline bool hasM() {
         return ((params & 2) != 0);
+    }
+    inline void setM(uint16_t val) {
+        M = val;
+        params |= 2;
     }
     inline bool hasN() {
         return ((params & 1) != 0);
     }
+    inline void setN(uint16_t val) {
+        N = val;
+        params |= 1;
+    }
     inline bool hasG() {
         return ((params & 4) != 0);
     }
+    inline void setG(uint16_t val) {
+        G = val;
+        params |= 4;
+    }
     inline bool hasX() {
         return ((params & 8) != 0);
+    }
+    inline void setX(float val) {
+        X = val;
+        params |= 8;
     }
     inline void unsetX() {
         params &= ~8;
@@ -156,11 +174,19 @@ public:
     inline bool hasY() {
         return ((params & 16) != 0);
     }
+    inline void setY(float val) {
+        Y = val;
+        params |= 16;
+    }
     inline void unsetY() {
         params &= ~16;
     }
     inline bool hasZ() {
         return ((params & 32) != 0);
+    }
+    inline void setZ(float val) {
+        X = val;
+        params |= 32;
     }
     inline void unsetZ() {
         params &= ~32;
@@ -171,17 +197,37 @@ public:
     inline bool hasE() {
         return ((params & 64) != 0);
     }
+    inline void setE(float val) {
+        E = val;
+        params |= 64;
+    }
     inline bool hasF() {
         return ((params & 256) != 0);
+    }
+    inline void setF(float val) {
+        F = val;
+        params |= 256;
     }
     inline bool hasT() {
         return ((params & 512) != 0);
     }
+    inline void setT(uint8_t val) {
+        T = val;
+        params |= 512;
+    }
     inline bool hasS() {
         return ((params & 1024) != 0);
     }
+    inline void setS(int32_t val) {
+        S = val;
+        params |= 8;
+    }
     inline bool hasP() {
         return ((params & 2048) != 0);
+    }
+    inline void setP(int32_t val) {
+        P = val;
+        params |= 2048;
     }
     inline bool isV2() {
         return ((params & 4096) != 0);
@@ -192,44 +238,114 @@ public:
     inline bool hasI() {
         return ((params2 & 1) != 0);
     }
+    inline void setI(float val) {
+        I = val;
+        params |= 4096;
+        params2 |= 8;
+    }
     inline bool hasJ() {
         return ((params2 & 2) != 0);
+    }
+    inline void setJ(float val) {
+        J = val;
+        params |= 4096;
+        params2 |= 2;
     }
     inline bool hasR() {
         return ((params2 & 4) != 0);
     }
+    inline void setR(float val) {
+        R = val;
+        params |= 4096;
+        params2 |= 4;
+    }
     inline bool hasD() {
         return ((params2 & 8) != 0);
+    }
+    inline void setD(float val) {
+        D = val;
+        params |= 4096;
+        params2 |= 8;
     }
     inline bool hasC() {
         return ((params2 & 16) != 0);
     }
+    inline void setC(float val) {
+        C = val;
+        params |= 4096;
+        params2 |= 16;
+    }
     inline bool hasH() {
         return ((params2 & 32) != 0);
+    }
+    inline void setH(float val) {
+        H = val;
+        params |= 4096;
+        params2 |= 32;
     }
     inline bool hasA() {
         return ((params2 & 64) != 0);
     }
+    inline void setA(float val) {
+        A = val;
+        params |= 4096;
+        params2 |= 64;
+    }
     inline bool hasB() {
         return ((params2 & 128) != 0);
+    }
+    inline void setB(float val) {
+        B = val;
+        params |= 4096;
+        params2 |= 128;
     }
     inline bool hasK() {
         return ((params2 & 256) != 0);
     }
+    inline void setK(float val) {
+        K = val;
+        params |= 4096;
+        params2 |= 256;
+    }
     inline bool hasL() {
         return ((params2 & 512) != 0);
+    }
+    inline void setL(float val) {
+        L = val;
+        params |= 4096;
+        params2 |= 512;
     }
     inline bool hasO() {
         return ((params2 & 1024) != 0);
     }
+    inline void setO(float val) {
+        O = val;
+        params |= 4096;
+        params2 |= 1024;
+    }
     inline bool hasU() {
         return ((params2 & 2048) != 0);
+    }
+    inline void setU(float val) {
+        U = val;
+        params |= 4096;
+        params2 |= 2048;
     }
     inline bool hasV() {
         return ((params2 & 4096) != 0);
     }
+    inline void setV(float val) {
+        V = val;
+        params |= 4096;
+        params2 |= 4096;
+    }
     inline bool hasW() {
         return ((params2 & 8192) != 0);
+    }
+    inline void setW(float val) {
+        W = val;
+        params |= 4096;
+        params2 |= 8192;
     }
     inline long getS(long def) {
         return (hasS() ? S : def);
@@ -243,6 +359,7 @@ public:
     inline bool hasFormatError() {
         return ((params2 & 32768) != 0);
     }
+    inline void reset() { params = params2 = 0; }
     void printCommand();
     bool parseBinary(uint8_t* buffer, fast8_t length, bool fromSerial);
     bool parseAscii(char* line, bool fromSerial);

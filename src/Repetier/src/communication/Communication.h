@@ -71,6 +71,10 @@ public:
 
 class Com {
 public:
+    FSTRINGVAR(tFirmwareVersion)
+    FSTRINGVAR(tFirmwareCompiled)
+    FSTRINGVAR(tVendor)
+    FSTRINGVAR(tPrinterName)
     FSTRINGVAR(tXAxis)
     FSTRINGVAR(tYAxis)
     FSTRINGVAR(tZAxis)
@@ -136,6 +140,15 @@ public:
     FSTRINGVAR(tSpaceSlash)
     FSTRINGVAR(tFatal)
     FSTRINGVAR(tDoorOpen)
+    FSTRINGVAR(tBtnOK)
+    // Units
+    FSTRINGVAR(tUnitMM)
+    FSTRINGVAR(tUnitMMPS)
+    FSTRINGVAR(tUnitMMPS2)
+    FSTRINGVAR(tUnitMMPS3)
+    FSTRINGVAR(tUnitBaud)
+    FSTRINGVAR(tUnitPercent)
+    FSTRINGVAR(tUnitDegCelsius)
 #if JSON_OUTPUT
     FSTRINGVAR(tJSONDir)
     FSTRINGVAR(tJSONFiles)

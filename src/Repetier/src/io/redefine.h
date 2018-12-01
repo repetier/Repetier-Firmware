@@ -35,9 +35,13 @@ IO_TARGET with following meanings:
 13: tools.cpp template definitions
 14: Solve firmware events
 15: Periodical actions
+16: Tools menu
+
 */
 
 // #pragma message(VAR_NAME_VALUE(IO_TARGET))
+
+enum class GUIAction;
 
 #include "io_input.h"
 #include "io_output.h"

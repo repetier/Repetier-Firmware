@@ -48,10 +48,11 @@ void GUI::update() {
 
     handleKeypress(); // Test for new keys
 
-    if (nextAction != GUIAction::NONE && nextAction != GUIAction::CLICK_PROCESSED) {
+    if (nextAction != GUIAction::NONE && nextAction != GUIAction::CLICK_PROCESSED && nextAction != GUIAction::BACK_PROCESSED) {
         Com::printFLN(PSTR("Action:"), (int32_t)nextAction);
         callbacks[level](nextAction, data[level]);
-        nextAction = nextAction == GUIAction::CLICK ? GUIAction::CLICK_PROCESSED : GUIAction::NONE;
+        nextAction = nextAction == GUIAction::CLICK ? GUIAction::CLICK_PROCESSED : (nextAction == GUIAction::BACK ? GUIAction::BACK_PROCESSED : GUIAction::NONE);
+        nextActionRepeat = 0;
         contentChanged = true;
         lastAction = HAL::timeInMilliseconds();
     }
@@ -168,16 +169,21 @@ void GUI::okKey() {
 void GUI::handleKeypress() {
     setEncoderA(ControllerEncA::get());
     setEncoderB(ControllerEncB::get());
+    millis_t timeDiff = HAL::timeInMilliseconds() - lastRefresh;
     if (ControllerClick::get()) {
         if (nextAction != GUIAction::CLICK_PROCESSED) {
             okKey();
         }
-    } else if (nextAction == GUIAction::CLICK_PROCESSED) {
+    } else if (nextAction == GUIAction::CLICK_PROCESSED && timeDiff > 75) {
         nextAction = GUIAction::NONE;
     }
+#if ENABLED(UI_HAS_BACK_KEY)
     if (ControllerBack::get()) {
         backKey();
+    } else if (nextAction == GUIAction::BACK_PROCESSED && timeDiff > 75) {
+        nextAction = GUIAction::NONE;
     }
+#endif
 }
 
 #if ENCODER_SPEED == 0
@@ -401,6 +407,92 @@ void GUI::bufToStatus(GUIStatusLevel lvl) {
     setStatus(buf, lvl);
 }
 
+void GUI::flashToString(char* dest, FSTRINGPARAM(text)) {
+    fast8_t pos = 0;
+    while (pos < MAX_COLS) {
+        uint8_t c = HAL::readFlashByte(text++);
+        if (c == 0)
+            break;
+        dest[pos++] = c;
+    }
+    dest[pos] = 0;
+}
+void GUI::flashToStringLong(char* dest, FSTRINGPARAM(text), int32_t value) {
+    fast8_t pos = 0;
+    while (pos < MAX_COLS) {
+        uint8_t c = HAL::readFlashByte(text++);
+        if (c == 0)
+            break;
+        if (c == '@') {
+            uint8_t dig = 0;
+            if (value < 0) {
+                dest[pos++] = '-';
+                value = -value;
+            }
+            char buf2[13]; // Assumes 8-bit chars plus zero byte.
+            char* str = &buf2[12];
+            buf2[12] = 0;
+            do {
+                unsigned long m = value;
+                value /= 10;
+                char c = m - 10 * value;
+                *--str = c + '0';
+                dig++;
+            } while (value);
+            while (*str && pos < MAX_COLS) {
+                dest[pos++] = *str;
+                str++;
+            }
+        } else {
+            dest[pos++] = c;
+        }
+    }
+    dest[pos] = 0;
+}
+
+void GUI::flashToStringFlash(char* dest, FSTRINGPARAM(text), FSTRINGPARAM(val)) {
+    fast8_t pos = 0;
+    while (pos < MAX_COLS) {
+        uint8_t c = HAL::readFlashByte(text++);
+        if (c == 0) {
+            break;
+        }
+        if (c == '@') {
+            while (pos < MAX_COLS) {
+                uint8_t c = HAL::readFlashByte(val++);
+                if (c == 0)
+                    break;
+                dest[pos++] = c;
+            }
+        } else {
+            dest[pos++] = c;
+        }
+    }
+    dest[pos] = 0;
+}
+
+void GUI::flashToStringString(char* dest, FSTRINGPARAM(text), char* val) {
+    fast8_t pos = 0;
+    while (pos < MAX_COLS) {
+        uint8_t c = HAL::readFlashByte(text++);
+        if (c == 0) {
+            break;
+        }
+        if (c == '@') {
+            while (pos < MAX_COLS) {
+                uint8_t c = *val;
+                val++;
+                if (c == 0)
+                    break;
+                dest[pos++] = c;
+            }
+        } else {
+            dest[pos++] = c;
+        }
+    }
+    dest[pos] = 0;
+}
+
 void GUI::clearStatus() {
     if (statusLevel == GUIStatusLevel::REGULAR) {
         status[0] = 0;
@@ -457,5 +549,110 @@ void GUI::setStatus(char* text, GUIStatusLevel lvl) {
         if (lvl == GUIStatusLevel::ERROR) {
             push(errorScreen, status, GUIPageType::STATUS);
         }
+    }
+}
+
+bool GUI::handleFloatValueAction(GUIAction action, float& value, float min, float max, float increment) {
+    if (action == GUIAction::CLICK || action == GUIAction::BACK) {
+        GUI::pop();
+        return false;
+    }
+    float orig = value;
+    if (action == GUIAction::NEXT) {
+        value += nextActionRepeat * increment;
+        contentChanged = true;
+    }
+    if (action == GUIAction::PREVIOUS) {
+        value -= nextActionRepeat * increment;
+        contentChanged = true;
+    }
+    if (value < min) {
+        value = min;
+    }
+    if (value > max) {
+        value = max;
+    }
+    return orig != value;
+}
+
+bool GUI::handleLongValueAction(GUIAction action, int32_t& value, int32_t min, int32_t max, int32_t increment) {
+    if (action == GUIAction::CLICK || action == GUIAction::BACK) {
+        GUI::pop();
+        return false;
+    }
+    int32_t orig = value;
+    if (action == GUIAction::NEXT) {
+        value += nextActionRepeat * increment;
+        contentChanged = true;
+    }
+    if (action == GUIAction::PREVIOUS) {
+        value -= nextActionRepeat * increment;
+        contentChanged = true;
+    }
+    if (value < min) {
+        value = min;
+    }
+    if (value > max) {
+        value = max;
+    }
+    return orig != value;
+}
+
+void GUI::menuBack(GUIAction action) {
+#if DISABLED(UI_HAS_BACK_KEY)
+    GUI::menuSelectableP(action, PSTR("Back"), nullptr, nullptr, GUIPageType::POP);
+#endif
+}
+
+void directAction(GUIAction action, void* data) {
+    int opt = reinterpret_cast<int>(data);
+    switch (opt) {
+    case GUI_DIRECT_ACTION_HOME_ALL:
+        Motion1::homeAxes(0);
+        break;
+    case GUI_DIRECT_ACTION_HOME_X:
+    case GUI_DIRECT_ACTION_HOME_Y:
+    case GUI_DIRECT_ACTION_HOME_Z:
+    case GUI_DIRECT_ACTION_HOME_E:
+    case GUI_DIRECT_ACTION_HOME_A:
+    case GUI_DIRECT_ACTION_HOME_B:
+    case GUI_DIRECT_ACTION_HOME_C:
+        Motion1::homeAxes(axisBits[opt - GUI_DIRECT_ACTION_HOME_X]);
+        break;
+    case GUI_DIRECT_ACTION_FACTORY_RESET:
+        EEPROM::restoreEEPROMSettingsFromConfiguration();
+        GUI::setStatusP(PSTR("Factory Setting Act."), GUIStatusLevel::INFO);
+        break;
+    case GUI_DIRECT_ACTION_STORE_EEPROM:
+#if EEPROM_MODE > 0
+        EEPROM::markChanged();
+        GUI::setStatusP(PSTR("Settings Saved"), GUIStatusLevel::INFO);
+#endif
+        break;
+    case GUI_DIRECT_ACTION_TOGGLE_DEBUG_ECHO:
+        Printer::toggleEcho();
+        break;
+    case GUI_DIRECT_ACTION_TOGGLE_DEBUG_INFO:
+        Printer::toggleInfo();
+        break;
+    case GUI_DIRECT_ACTION_TOGGLE_DEBUG_ERRORS:
+        Printer::toggleErrors();
+        break;
+    case GUI_DIRECT_ACTION_TOGGLE_DEBUG_DRYRUN:
+        Printer::toggleDryRun();
+        break;
+    case GUI_DIRECT_ACTION_TOGGLE_DEBUG_NO_MOVES:
+        Printer::toggleNoMoves();
+        break;
+    case GUI_DIRECT_ACTION_TOGGLE_DEBUG_COMMUNICATION:
+        Printer::toggleCommunication();
+        break;
+    case GUI_DIRECT_ACTION_TOGGLE_LIGHT:
+        // TODO: Toggle light
+        break;
+    case GUI_DIRECT_ACTION_DISABLE_MOTORS:
+        Motion1::waitForEndOfMoves();
+        Printer::kill(true);
+        break;
     }
 }

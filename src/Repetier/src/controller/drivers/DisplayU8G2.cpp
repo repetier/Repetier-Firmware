@@ -107,8 +107,21 @@ void GUI::menuEnd(GUIAction action) {
         }
     }
 }
+#define TEST_MENU_CLICK \
+    if (guiLine == cursorRow[level]) { /* Actions for active line only!*/ \
+        if (action == GUIAction::CLICK) { \
+            if (tp == GUIPageType::POP) { /* Leave menu */ \
+                pop(); \
+            } else if (cb != nullptr && tp == GUIPageType::ACTION) { /* Execute a direct action */ \
+                cb(action, cData); \
+            } else if (cb) { /* Push new display function on stack */ \
+                push(cb, cData, tp); \
+            } \
+            action = GUIAction::CLICK_PROCESSED; \
+        } \
+    }
 
-void GUI::menuText(GUIAction action, PGM_P text, bool highlight) {
+void GUI::menuTextP(GUIAction action, PGM_P text, bool highlight) {
     if (action == GUIAction::ANALYSE) {
         length[level]++;
     } else if (action == GUIAction::DRAW) {
@@ -123,14 +136,145 @@ void GUI::menuText(GUIAction action, PGM_P text, bool highlight) {
                 lcd.setDrawColor(1);
             } else {
                 guiY += 10;
+                if (guiLine == cursorRow[level]) {
+                    lcd.drawBox(0, guiY - 8, 128, 10);
+                    lcd.setDrawColor(0);
+                }
                 lcd.drawStr(0, guiY, GUI::buf);
+                if (guiLine == cursorRow[level]) {
+                    lcd.setDrawColor(1);
+                }
             }
+        }
+    } else if (action == GUIAction::NEXT) {
+        if (!highlight && !npActionFound && guiLine > cursorRow[level]) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else if (action == GUIAction::PREVIOUS) {
+        if (!highlight && guiLine < guiSelIndex) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
         }
     }
     guiLine++;
 }
 
-void GUI::menuSelectable(GUIAction action, PGM_P text, GuiCallback cb, void* cData, GUIPageType tp) {
+void GUI::menuFloatP(GUIAction action, PGM_P text, float val, int precision, GuiCallback cb, void* cData, GUIPageType tp) {
+    if (action == GUIAction::ANALYSE) {
+        length[level]++;
+    } else if (action == GUIAction::DRAW) {
+        if (guiLine >= topRow[level] && guiLine < topRow[level] + 5) {
+            bufClear();
+            bufAddStringP(text);
+            bufAddFloat(val, 0, precision);
+            guiY += 10;
+            if (guiLine == cursorRow[level]) {
+                lcd.drawBox(0, guiY - 8, 128, 10);
+                lcd.setDrawColor(0);
+                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawGlyph(0, guiY, '>');
+                lcd.setDrawColor(1);
+            } else {
+                lcd.drawStr(10, guiY, GUI::buf);
+            }
+        }
+    } else if (action == GUIAction::NEXT) {
+        if (!npActionFound && guiLine > cursorRow[level]) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else if (action == GUIAction::PREVIOUS) {
+        if (guiLine < guiSelIndex) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else
+        TEST_MENU_CLICK
+    guiLine++;
+}
+
+void GUI::menuLongP(GUIAction action, PGM_P text, long val, GuiCallback cb, void* cData, GUIPageType tp) {
+    if (action == GUIAction::ANALYSE) {
+        length[level]++;
+    } else if (action == GUIAction::DRAW) {
+        if (guiLine >= topRow[level] && guiLine < topRow[level] + 5) {
+            bufClear();
+            bufAddStringP(text);
+            bufAddLong(val, 0);
+            guiY += 10;
+            if (guiLine == cursorRow[level]) {
+                lcd.drawBox(0, guiY - 8, 128, 10);
+                lcd.setDrawColor(0);
+                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawGlyph(0, guiY, '>');
+                lcd.setDrawColor(1);
+            } else {
+                lcd.drawStr(10, guiY, GUI::buf);
+            }
+        }
+    } else if (action == GUIAction::NEXT) {
+        if (!npActionFound && guiLine > cursorRow[level]) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else if (action == GUIAction::PREVIOUS) {
+        if (guiLine < guiSelIndex) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else
+        TEST_MENU_CLICK
+    guiLine++;
+}
+
+void GUI::menuOnOffP(GUIAction action, PGM_P text, bool val, GuiCallback cb, void* cData, GUIPageType tp) {
+    if (action == GUIAction::ANALYSE) {
+        length[level]++;
+    } else if (action == GUIAction::DRAW) {
+        if (guiLine >= topRow[level] && guiLine < topRow[level] + 5) {
+            bufClear();
+            bufAddStringP(text);
+            if (val) {
+                bufAddStringP(PSTR("On"));
+            } else {
+                bufAddStringP(PSTR("Off"));
+            }
+            guiY += 10;
+            if (guiLine == cursorRow[level]) {
+                lcd.drawBox(0, guiY - 8, 128, 10);
+                lcd.setDrawColor(0);
+                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawGlyph(0, guiY, '>');
+                lcd.setDrawColor(1);
+            } else {
+                lcd.drawStr(10, guiY, GUI::buf);
+            }
+        }
+    } else if (action == GUIAction::NEXT) {
+        if (!npActionFound && guiLine > cursorRow[level]) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else if (action == GUIAction::PREVIOUS) {
+        if (guiLine < guiSelIndex) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else
+        TEST_MENU_CLICK
+    guiLine++;
+}
+
+void GUI::menuSelectableP(GUIAction& action, PGM_P text, GuiCallback cb, void* cData, GUIPageType tp) {
     if (action == GUIAction::ANALYSE) {
         if (cursorRow[level] < 0) {
             cursorRow[level] = length[level];
@@ -164,21 +308,267 @@ void GUI::menuSelectable(GUIAction action, PGM_P text, GuiCallback cb, void* cDa
             npActionFound = true;
             contentChanged = true;
         }
-    } else if (guiLine == cursorRow[level]) {
-        if (action == GUIAction::CLICK) {
-            if (tp == GUIPageType::POP) {
-                pop();
+    } else
+        TEST_MENU_CLICK
+    guiLine++;
+}
+
+void GUI::menuText(GUIAction action, char* text, bool highlight) {
+    if (action == GUIAction::ANALYSE) {
+        length[level]++;
+    } else if (action == GUIAction::DRAW) {
+        if (guiLine >= topRow[level] && guiLine < topRow[level] + 5) {
+            bufClear();
+            bufAddString(text);
+            if (highlight) {
+                guiY += 12;
+                lcd.drawBox(0, guiY - 9, 128, 10);
+                lcd.setDrawColor(0);
+                lcd.drawStr(0, guiY - 1, GUI::buf);
+                lcd.setDrawColor(1);
             } else {
-                push(cb, cData, tp);
+                guiY += 10;
+                if (guiLine == cursorRow[level]) {
+                    lcd.drawBox(0, guiY - 8, 128, 10);
+                    lcd.setDrawColor(0);
+                }
+                lcd.drawStr(0, guiY, GUI::buf);
+                if (guiLine == cursorRow[level]) {
+                    lcd.setDrawColor(1);
+                }
             }
+        }
+    } else if (action == GUIAction::NEXT) {
+        if (!highlight && !npActionFound && guiLine > cursorRow[level]) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else if (action == GUIAction::PREVIOUS) {
+        if (!highlight && guiLine < guiSelIndex) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
         }
     }
     guiLine++;
 }
 
-// Value modifyer display
+void GUI::menuFloat(GUIAction action, char* text, float val, int precision, GuiCallback cb, void* cData, GUIPageType tp) {
+    if (action == GUIAction::ANALYSE) {
+        length[level]++;
+    } else if (action == GUIAction::DRAW) {
+        if (guiLine >= topRow[level] && guiLine < topRow[level] + 5) {
+            bufClear();
+            bufAddString(text);
+            bufAddFloat(val, 0, precision);
+            guiY += 10;
+            if (guiLine == cursorRow[level]) {
+                lcd.drawBox(0, guiY - 8, 128, 10);
+                lcd.setDrawColor(0);
+                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawGlyph(0, guiY, '>');
+                lcd.setDrawColor(1);
+            } else {
+                lcd.drawStr(10, guiY, GUI::buf);
+            }
+        }
+    } else if (action == GUIAction::NEXT) {
+        if (!npActionFound && guiLine > cursorRow[level]) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else if (action == GUIAction::PREVIOUS) {
+        if (guiLine < guiSelIndex) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else
+        TEST_MENU_CLICK
+    guiLine++;
+}
 
-void GUI::modInt(PGM_P text, int32_t& value, int32_t min, int32_t max, int32_t step) {
+void GUI::menuLong(GUIAction action, char* text, long val, GuiCallback cb, void* cData, GUIPageType tp) {
+    if (action == GUIAction::ANALYSE) {
+        length[level]++;
+    } else if (action == GUIAction::DRAW) {
+        if (guiLine >= topRow[level] && guiLine < topRow[level] + 5) {
+            bufClear();
+            bufAddString(text);
+            bufAddLong(val, 0);
+            guiY += 10;
+            if (guiLine == cursorRow[level]) {
+                lcd.drawBox(0, guiY - 8, 128, 10);
+                lcd.setDrawColor(0);
+                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawGlyph(0, guiY, '>');
+                lcd.setDrawColor(1);
+            } else {
+                lcd.drawStr(10, guiY, GUI::buf);
+            }
+        }
+    } else if (action == GUIAction::NEXT) {
+        if (!npActionFound && guiLine > cursorRow[level]) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else if (action == GUIAction::PREVIOUS) {
+        if (guiLine < guiSelIndex) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else
+        TEST_MENU_CLICK
+    guiLine++;
+}
+
+void GUI::menuOnOff(GUIAction action, char* text, bool val, GuiCallback cb, void* cData, GUIPageType tp) {
+    if (action == GUIAction::ANALYSE) {
+        length[level]++;
+    } else if (action == GUIAction::DRAW) {
+        if (guiLine >= topRow[level] && guiLine < topRow[level] + 5) {
+            bufClear();
+            bufAddString(text);
+            if (val) {
+                bufAddStringP(PSTR("On"));
+            } else {
+                bufAddStringP(PSTR("Off"));
+            }
+            guiY += 10;
+            if (guiLine == cursorRow[level]) {
+                lcd.drawBox(0, guiY - 8, 128, 10);
+                lcd.setDrawColor(0);
+                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawGlyph(0, guiY, '>');
+                lcd.setDrawColor(1);
+            } else {
+                lcd.drawStr(10, guiY, GUI::buf);
+            }
+        }
+    } else if (action == GUIAction::NEXT) {
+        if (!npActionFound && guiLine > cursorRow[level]) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else if (action == GUIAction::PREVIOUS) {
+        if (guiLine < guiSelIndex) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else
+        TEST_MENU_CLICK
+    guiLine++;
+}
+
+void GUI::menuSelectable(GUIAction& action, char* text, GuiCallback cb, void* cData, GUIPageType tp) {
+    if (action == GUIAction::ANALYSE) {
+        if (cursorRow[level] < 0) {
+            cursorRow[level] = length[level];
+        }
+        maxCursorRow[level] = length[level];
+        length[level]++;
+    } else if (action == GUIAction::DRAW) {
+        if (guiLine >= topRow[level] && guiLine < topRow[level] + 5) {
+            GUI::bufClear();
+            GUI::bufAddString(text);
+            guiY += 10;
+            if (guiLine == cursorRow[level]) {
+                lcd.drawBox(0, guiY - 8, 128, 10);
+                lcd.setDrawColor(0);
+                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawGlyph(0, guiY, '>');
+                lcd.setDrawColor(1);
+            } else {
+                lcd.drawStr(10, guiY, GUI::buf);
+            }
+        }
+    } else if (action == GUIAction::NEXT) {
+        if (!npActionFound && guiLine > cursorRow[level]) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else if (action == GUIAction::PREVIOUS) {
+        if (guiLine < guiSelIndex) {
+            cursorRow[level] = guiLine;
+            npActionFound = true;
+            contentChanged = true;
+        }
+    } else
+        TEST_MENU_CLICK
+    guiLine++;
+}
+
+void drawPStr(PGM_P flash, int x, int y, int dxLen = 0) {
+    char text[MAX_COLS + 1];
+    int pos = 0;
+    while (pos < MAX_COLS) {
+        uint8_t c = HAL::readFlashByte(flash++);
+        if (c == 0)
+            break;
+        text[pos++] = c;
+    }
+    x -= dxLen * pos;
+    text[pos] = 0;
+    lcd.drawUTF8(x, y, text);
+}
+
+// Value modifyer display
+void GUI::showValueP(PGM_P text, PGM_P unit, char* value) {
+    // Value y 24 - 48, x 0 - 127
+
+    lcd.setFont(u8g2_font_10x20_mf);
+    int len = strlen(value);
+    lcd.drawStr(125 - 10 * len, 39, value);
+    lcd.drawFrame(0, 22, 128, 21);
+
+    // changes buf so use after drawing value!
+    drawStatusLine();
+    // Head
+    lcd.setFont(u8g2_font_6x10_mf);
+    drawPStr(text, 0, 19);
+
+    // Unit
+    lcd.setFont(u8g2_font_5x7_mf);
+    drawPStr(unit, 125, 51, 5);
+    // Ok hint
+    lcd.setFont(u8g2_font_6x10_mf);
+    lcd.setDrawColor(0);
+    GUI::bufClear();
+    GUI::bufAddStringP(Com::tBtnOK);
+    lcd.drawStr(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+    lcd.setDrawColor(1);
+}
+void GUI::showValue(char* text, PGM_P unit, char* value) {
+    // Value y 24 - 48, x 0 - 127
+
+    lcd.setFont(u8g2_font_10x20_mf);
+    int len = strlen(value);
+    lcd.drawStr(125 - 10 * len, 39, value);
+    lcd.drawFrame(0, 22, 128, 21);
+
+    // changes buf so use after drawing value!
+    drawStatusLine();
+    // Head
+    lcd.setFont(u8g2_font_6x10_mf);
+    lcd.drawUTF8(0, 19, text);
+
+    // Unit
+    lcd.setFont(u8g2_font_5x7_mf);
+    drawPStr(unit, 125, 51, 5);
+    // Ok hint
+    lcd.setFont(u8g2_font_6x10_mf);
+    lcd.setDrawColor(0);
+    GUI::bufClear();
+    GUI::bufAddStringP(Com::tBtnOK);
+    lcd.drawStr(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+    lcd.setDrawColor(1);
 }
 
 extern void __attribute__((weak)) startScreen(GUIAction action, void* data);
@@ -297,29 +687,6 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
     GUI::pushOn(GUIAction::CLICK, mainMenu, nullptr, GUIPageType::MENU);
 }
 
-void __attribute__((weak)) mainMenu(GUIAction action, void* data) {
-    GUI::menuStart(action);
-    GUI::menuText(action, PSTR("Main Menu"), true);
-#if UI_HAS_BACK_KEY == 0
-    GUI::menuSelectable(action, PSTR("Back"), nullptr, nullptr, GUIPageType::POP);
-#endif
-    GUI::menuSelectable(action, PSTR("Warning 1"), warningScreen, (void*)"Test Warning", GUIPageType::WIZARD_FIXED);
-    GUI::menuSelectable(action, PSTR("Info 1"), infoScreen, (void*)"Test Info", GUIPageType::WIZARD_FIXED);
-    GUI::menuSelectable(action, PSTR("Error 1"), errorScreen, (void*)"Test Error", GUIPageType::WIZARD_FIXED);
-    GUI::menuSelectable(action, PSTR("Spin"), waitScreen, (void*)"Computing", GUIPageType::BUSY);
-    GUI::menuSelectable(action, PSTR("Spin 2"), waitScreen, (void*)"Computing slowly", GUIPageType::BUSY);
-    GUI::menuSelectable(action, PSTR("Item 2"), nullptr, nullptr, GUIPageType::POP);
-    GUI::menuSelectable(action, PSTR("Item 3"), nullptr, nullptr, GUIPageType::POP);
-    GUI::menuSelectable(action, PSTR("Item 4"), nullptr, nullptr, GUIPageType::POP);
-    GUI::menuSelectable(action, PSTR("Item 5"), nullptr, nullptr, GUIPageType::POP);
-    GUI::menuSelectable(action, PSTR("Item 6"), nullptr, nullptr, GUIPageType::POP);
-    GUI::menuSelectable(action, PSTR("Item 7"), nullptr, nullptr, GUIPageType::POP);
-    GUI::menuSelectable(action, PSTR("Item 8"), nullptr, nullptr, GUIPageType::POP);
-    GUI::menuSelectable(action, PSTR("Item 9"), nullptr, nullptr, GUIPageType::POP);
-    GUI::menuSelectable(action, PSTR("Item 10"), nullptr, nullptr, GUIPageType::POP);
-    GUI::menuEnd(action);
-}
-
 void __attribute__((weak)) warningScreen(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         drawStatusLine();
@@ -333,7 +700,7 @@ void __attribute__((weak)) warningScreen(GUIAction action, void* data) {
         lcd.drawStr(64 - 3 * len, 50, static_cast<char*>(data));
         lcd.setDrawColor(0);
         GUI::bufClear();
-        GUI::bufAddStringP(PSTR(" OK "));
+        GUI::bufAddStringP(Com::tBtnOK);
         lcd.drawStr(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
         lcd.setDrawColor(1);
     } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
@@ -353,7 +720,7 @@ void __attribute__((weak)) errorScreen(GUIAction action, void* data) {
         lcd.drawStr(64 - 3 * len, 50, static_cast<char*>(data));
         lcd.setDrawColor(0);
         GUI::bufClear();
-        GUI::bufAddStringP(PSTR(" OK "));
+        GUI::bufAddStringP(Com::tBtnOK);
         lcd.drawStr(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
         lcd.setDrawColor(1);
     } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
@@ -373,7 +740,7 @@ void __attribute__((weak)) infoScreen(GUIAction action, void* data) {
         lcd.drawStr(64 - 3 * len, 50, static_cast<char*>(data));
         lcd.setDrawColor(0);
         GUI::bufClear();
-        GUI::bufAddStringP(PSTR(" OK "));
+        GUI::bufAddStringP(Com::tBtnOK);
         lcd.drawStr(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
         lcd.setDrawColor(1);
     } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {

@@ -2,6 +2,16 @@
 
 HeatManager* heaters[] = HEATERS;
 
+// HeatManager instance pointer as data
+void menuSetTemperature(GUIAction action, void* data) {
+    HeatManager* hm = reinterpret_cast<HeatManager*>(data);
+    float value = hm->getTargetTemperature();
+    DRAW_FLOAT_P(PSTR("Target Temperature:"), Com::tUnitDegCelsius, value, 0);
+    if (GUI::handleFloatValueAction(action, value, 0, hm->getMaxTemperature(), 1)) {
+        hm->setTargetTemperature(value);
+    }
+}
+
 HeatManager::HeatManager(char htType, fast8_t _index, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod, bool _hotPluggable)
     : error(HeaterError::NO_ERROR)
     , targetTemperature(0)
@@ -298,6 +308,13 @@ void HeatManagerPID::setPID(float p, float i, float d) {
     D = d;
     updateDerived();
 }
+
+void HeatManagerPID::showControlMenu(GUIAction action) {
+    char help[MAX_COLS + 1];
+    GUI::flashToStringLong(help, PSTR("Set Temp: @°C"), static_cast<int32_t>(lroundf(targetTemperature)));
+    GUI::menuSelectable(action, help, menuSetTemperature, this, GUIPageType::FIXED_CONTENT);
+}
+void HeatManagerPID::showConfigMenu(GUIAction action) {}
 
 void HeatManagerPID::autocalibrate(GCode* g) {
     ENSURE_POWER

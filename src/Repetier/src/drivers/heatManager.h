@@ -32,6 +32,9 @@ enum DecoupleMode {
     PAUSED = 6,
     UNPLUGGED = 7
 };
+enum class GUIAction;
+// HeatManager instance pointer as data
+extern void menuSetTemperature(GUIAction action, void* data);
 
 class GCode;
 class HeatManager {
@@ -124,6 +127,8 @@ public:
     virtual void autocalibrate(GCode* g) {
         Com::printWarningFLN(PSTR("Autocalibration for this tool not supported!"));
     }
+    virtual void showControlMenu(GUIAction action) {}
+    virtual void showConfigMenu(GUIAction action) {}
     bool isExtruderHeater() { return heaterType == 'E'; }
     bool isBedHeater() { return heaterType == 'B'; }
     bool isChamberHeater() { return heaterType == 'C'; }
@@ -187,6 +192,8 @@ public:
     float getI() { return I; }
     float getD() { return D; }
     void setPID(float p, float i, float d);
+    void showControlMenu(GUIAction action);
+    void showConfigMenu(GUIAction action);
 };
 
 extern HeatManager* heaters[];

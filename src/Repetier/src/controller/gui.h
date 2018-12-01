@@ -4,6 +4,25 @@
 #define GUI_MAX_LEVEL 5
 #define MAX_COLS 40
 
+#define GUI_DIRECT_ACTION_HOME_ALL 1
+#define GUI_DIRECT_ACTION_HOME_X 2
+#define GUI_DIRECT_ACTION_HOME_Y 3
+#define GUI_DIRECT_ACTION_HOME_Z 4
+#define GUI_DIRECT_ACTION_HOME_E 5
+#define GUI_DIRECT_ACTION_HOME_A 6
+#define GUI_DIRECT_ACTION_HOME_B 7
+#define GUI_DIRECT_ACTION_HOME_C 8
+#define GUI_DIRECT_ACTION_FACTORY_RESET 9
+#define GUI_DIRECT_ACTION_STORE_EEPROM 10
+#define GUI_DIRECT_ACTION_TOGGLE_DEBUG_ECHO 11
+#define GUI_DIRECT_ACTION_TOGGLE_DEBUG_INFO 12
+#define GUI_DIRECT_ACTION_TOGGLE_DEBUG_ERRORS 13
+#define GUI_DIRECT_ACTION_TOGGLE_DEBUG_DRYRUN 14
+#define GUI_DIRECT_ACTION_TOGGLE_DEBUG_NO_MOVES 15
+#define GUI_DIRECT_ACTION_TOGGLE_DEBUG_COMMUNICATION 16
+#define GUI_DIRECT_ACTION_TOGGLE_LIGHT 17
+#define GUI_DIRECT_ACTION_DISABLE_MOTORS 18
+
 enum class GUIAction {
     NONE = 0,
     DRAW = 1,
@@ -12,7 +31,8 @@ enum class GUIAction {
     CLICK = 4,
     ANALYSE = 5,
     BACK = 6,
-    CLICK_PROCESSED = 7
+    CLICK_PROCESSED = 7,
+    BACK_PROCESSED = 8
 };
 
 enum class GUIPageType {
@@ -25,7 +45,8 @@ enum class GUIPageType {
     ACK_MESSAGE = 7,   // Sticky message until ok is clicked
     POP = 8,           // Pop if clicked
     STATUS = 9,        // Info, Warning or Error page
-    BUSY = 10          // Busy status
+    BUSY = 10,         // Busy status
+    ACTION = 11        // Action command that does not need a new entry
 };
 
 enum class GUIStatusLevel {
@@ -42,6 +63,7 @@ extern void warningScreen(GUIAction action, void* data);
 extern void errorScreen(GUIAction action, void* data);
 extern void infoScreen(GUIAction action, void* data);
 extern void waitScreen(GUIAction action, void* data);
+extern void directAction(GUIAction action, void* data);
 
 #include "drivers/DisplayBase.h"
 
@@ -113,6 +135,12 @@ public:
     static void bufAddHeaterTemp(HeatManager* hm, bool target);
 
     static void bufToStatus(GUIStatusLevel lvl);
+
+    static void flashToString(char* dest, FSTRINGPARAM(text));
+    static void flashToStringLong(char* dest, FSTRINGPARAM(text), int32_t val);
+    static void flashToStringFlash(char* dest, FSTRINGPARAM(text), FSTRINGPARAM(val));
+    static void flashToStringString(char* dest, FSTRINGPARAM(text), char* val);
+
     static void clearStatus();
     static void setStatusP(FSTRINGPARAM(text), GUIStatusLevel lvl);
     static void setStatus(char* text, GUIStatusLevel lvl);
@@ -142,12 +170,60 @@ public:
 
     static void menuStart(GUIAction action);
     static void menuEnd(GUIAction action);
-    static void menuText(GUIAction action, PGM_P text, bool highlight);
-    static void menuSelectable(GUIAction action, PGM_P text, GuiCallback cb, void* cData, GUIPageType tp);
+    static void menuTextP(GUIAction action, PGM_P text, bool highlight = false);
+    static void menuFloatP(GUIAction action, PGM_P text, float val, int precision, GuiCallback cb, void* cData, GUIPageType tp);
+    static void menuLongP(GUIAction action, PGM_P text, long val, GuiCallback cb, void* cData, GUIPageType tp);
+    static void menuOnOffP(GUIAction action, PGM_P text, bool val, GuiCallback cb, void* cData, GUIPageType tp);
+    static void menuSelectableP(GUIAction& action, PGM_P text, GuiCallback cb, void* cData, GUIPageType tp);
+
+    static void menuText(GUIAction action, char* text, bool highlight = false);
+    static void menuFloat(GUIAction action, char* text, float val, int precision, GuiCallback cb, void* cData, GUIPageType tp);
+    static void menuLong(GUIAction action, char* text, long val, GuiCallback cb, void* cData, GUIPageType tp);
+    static void menuOnOff(GUIAction action, char* text, bool val, GuiCallback cb, void* cData, GUIPageType tp);
+    static void menuSelectable(GUIAction& action, char* text, GuiCallback cb, void* cData, GUIPageType tp);
+    static void menuBack(GUIAction action);
 
     // Value modifyer display
 
-    static void modInt(PGM_P text, int32_t& value, int32_t min, int32_t max, int32_t step);
+    // Draw display with content for a value given as string
+    static void showValueP(PGM_P text, PGM_P unit, char* value);
+    static void showValue(char* text, PGM_P unit, char* value);
+    static bool handleFloatValueAction(GUIAction action, float& value, float min, float max, float increment);
+    static bool handleLongValueAction(GUIAction action, int32_t& value, int32_t min, int32_t max, int32_t increment);
 };
+
+#define DRAW_FLOAT_P(text, unit, val, prec) \
+    float v = val; \
+    if (action == GUIAction::DRAW) { \
+        GUI::bufClear(); \
+        GUI::bufAddFloat(v, 0, prec); \
+        GUI::showValueP(text, unit, GUI::buf); \
+    }
+
+#define DRAW_FLOAT(text, unit, val, prec) \
+    float v = val; \
+    if (action == GUIAction::DRAW) { \
+        GUI::bufClear(); \
+        GUI::bufAddFloat(v, 0, prec); \
+        GUI::showValue(text, unit, GUI::buf); \
+    }
+
+#define DRAW_LONG_P(text, unit, val) \
+    float v = val; \
+    if (action == GUIAction::DRAW) { \
+        GUI::bufClear(); \
+        GUI::bufAddLong(v, 0); \
+        GUI::showValueP(text, unit, GUI::buf); \
+    }
+
+#define DRAW_LONG(text, unit, val) \
+    float v = val; \
+    if (action == GUIAction::DRAW) { \
+        GUI::bufClear(); \
+        GUI::bufAddLong(v, 0); \
+        GUI::showValue(text, unit, GUI::buf); \
+    }
+
+#include "menu.h"
 
 #endif

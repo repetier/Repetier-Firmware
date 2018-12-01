@@ -177,6 +177,10 @@ uint8_t GCode::computeBinarySize(char* ptr) // unsigned int bitfield) {
     return s;
 }
 
+GCode::GCode() {
+    reset();
+}
+
 void GCode::keepAlive(enum FirmwareState state, int id) {
     millis_t now = HAL::timeInMilliseconds();
 

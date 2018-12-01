@@ -30,6 +30,7 @@ uint8_t Motion2::velocityProfileIndex;
 int Motion2::advanceSteps = 0; // already included advance steps
 
 void Motion2::init() {
+
     length = nextActId = 0;
     actM1 = nullptr;
     lastMotorIdx = 0;

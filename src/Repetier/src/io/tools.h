@@ -25,28 +25,46 @@
 #if IO_TARGET == 4 // declare variable
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
-    extern ToolExtruder name;
+    extern ToolExtruder name; \
+    extern void __attribute__((weak)) menuControl##name(GUIAction action, void* data);
+
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
     extern ToolLaser<toolPin, enablePin> name;
+
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript) \
     extern ToolCNC<dirPin, toolPin, enablePin> name;
+
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage) \
     extern JamDetectorHW<inputPin, observer##Type> name; \
     extern void name##Int();
+
 #define FILAMENT_DETECTOR(name, inputPin, tool) \
     extern FilamentDetector<inputPin> name;
 
 #elif IO_TARGET == 6 // define variables
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
-    ToolExtruder name(offx, offy, offz, &heater, &stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, PSTR(startScript), PSTR(endScript), fan);
+    ToolExtruder name(offx, offy, offz, &heater, &stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, PSTR(startScript), PSTR(endScript), fan); \
+    void __attribute__((weak)) menuControl##name(GUIAction action, void* data) { \
+        GUI::menuStart(action); \
+        char help[MAX_COLS]; \
+        GUI::flashToStringLong(help, PSTR("= Extruder @ ="), name.getToolId() + 1); \
+        GUI::menuText(action, help, true); \
+        GUI::menuBack(action); \
+        name.getHeater()->showControlMenu(action); \
+        GUI::menuEnd(action); \
+    }
+
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
     ToolLaser<toolPin, enablePin> name(offx, offy, offz, &output, milliWatt, warmupUS, warmupPWM, bias, gamma, PSTR(startScript), PSTR(endScript));
+
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript) \
     ToolCNC<dirPin, toolPin, enablePin> name(offx, offy, offz, &output, rpm, startStopDelay, PSTR(startScript), PSTR(endScript));
+
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage) \
     JamDetectorHW<inputPin, observer##Type> name(&observer, &tool, distanceSteps, jitterSteps, jamPercentage); \
     void name##Int() { name.interruptSignaled(); }
+
 #define FILAMENT_DETECTOR(name, inputPin, tool) \
     FilamentDetector<inputPin> name(&tool);
 
@@ -115,6 +133,16 @@
     name.testForJam();
 #define FILAMENT_DETECTOR(name, inputPin, tool) \
     name.testFilament();
+
+#elif IO_TARGET == 16 // Control tools manipulate menu
+
+#define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
+    GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuControl##name, nullptr, GUIPageType::MENU);
+
+#define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript)
+#define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript)
+#define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage)
+#define FILAMENT_DETECTOR(name, inputPin, tool)
 
 #else
 
