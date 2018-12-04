@@ -56,7 +56,7 @@ void PrinterType::homeAxis(fast8_t axis) {
             }
             targetReal = Motion1::tmpPosition[X_AXIS];
             leftParked = rightParked = false;
-            Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED, false);
+            Motion1::moveByPrinter(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
             Motion1::updatePositionsFromCurrentTransformed();
             Motion2::setMotorPositionFromTransformed();
         }
@@ -71,7 +71,7 @@ void PrinterType::park(GCode* com) {
         Motion1::homeAxes(X_AXIS);
     }
     Motion1::copyCurrentPrinter(Motion1::tmpPosition);
-    float f = com->hasF() ? com->F : XY_SPEED;
+    float f = com->hasF() ? com->F : Motion1::moveFeedrate[X_AXIS];
     float x = com->hasX() ? com->X : 0;
     if (Motion1::dittoMode == 0) {
         if (activeAxis == 0) {
@@ -88,7 +88,7 @@ void PrinterType::park(GCode* com) {
         rightParked = Motion1::tmpPosition[A_AXIS] == endPos[1] && lazyMode;
     }
     dontChangeCoords = true;
-    Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED, false);
+    Motion1::moveByPrinter(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
     dontChangeCoords = false;
 }
 
@@ -218,7 +218,7 @@ void PrinterType::deactivatedTool(fast8_t id) {
         Motion1::tmpPosition[X_AXIS] = endPos[0];
         leftParked = lazyMode;
     }
-    Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED, false);
+    Motion1::moveByPrinter(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
     dontChangeCoords = false;
 }
 
@@ -253,7 +253,7 @@ void PrinterType::activatedTool(fast8_t id) {
         Motion1::tmpPosition[X_AXIS] = targetReal;
         leftParked = false;
     }
-    Motion1::moveByPrinter(Motion1::tmpPosition, XY_SPEED, false);
+    Motion1::moveByPrinter(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
     dontChangeCoords = false;
 }
 
@@ -348,7 +348,7 @@ bool PrinterType::queueMove(float feedrate, bool secondaryMove) {
                     leftParked = false;
                 }
             }
-            Motion1::queueMove(XY_SPEED, secondaryMove);
+            Motion1::queueMove(Motion1::moveFeedrate[X_AXIS], secondaryMove);
             // Motion1::waitForEndOfMoves();
             dontChangeCoords = false;
             FOR_ALL_AXES(i) {

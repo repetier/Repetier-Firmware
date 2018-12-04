@@ -22,6 +22,10 @@
 #define GUI_DIRECT_ACTION_TOGGLE_DEBUG_COMMUNICATION 16
 #define GUI_DIRECT_ACTION_TOGGLE_LIGHT 17
 #define GUI_DIRECT_ACTION_DISABLE_MOTORS 18
+#define GUI_DIRECT_ACTION_MOUNT_SD_CARD 19
+#define GUI_DIRECT_ACTION_STOP_SD_PRINT 20
+#define GUI_DIRECT_ACTION_PAUSE_SD_PRINT 21
+#define GUI_DIRECT_ACTION_CONTINUE_SD_PRINT 22
 
 enum class GUIAction {
     NONE = 0,
@@ -58,12 +62,17 @@ enum class GUIStatusLevel {
 };
 
 typedef void (*GuiCallback)(GUIAction action, void* data);
+
+extern void startScreen(GUIAction action, void* data);
+extern void printProgress(GUIAction action, void* data);
+extern void mainMenu(GUIAction action, void* data);
 extern void startScreen(GUIAction action, void* data);
 extern void warningScreen(GUIAction action, void* data);
 extern void errorScreen(GUIAction action, void* data);
 extern void infoScreen(GUIAction action, void* data);
 extern void waitScreen(GUIAction action, void* data);
 extern void directAction(GUIAction action, void* data);
+extern void selectToolAction(GUIAction action, void* data);
 
 #include "drivers/DisplayBase.h"
 
@@ -121,10 +130,16 @@ public:
     static bool contentChanged;                  ///< set to true if forced refresh is wanted
     static char status[MAX_COLS + 1];            ///< Status Line
     static char buf[MAX_COLS + 1];               ///< Buffer to build strings
+    static char tmpString[MAX_COLS + 1];         ///< Buffer to build strings
     static fast8_t bufPos;                       ///< Pos for appending data
     static GUIAction nextAction;                 ///< Next action to execute on opdate
     static int nextActionRepeat;                 ///< Increment for next/previous
     static GUIStatusLevel statusLevel;
+#if SDSUPPORT
+    static char cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2];
+    static uint8_t folderLevel;
+#endif
+
     static void bufClear();
     static void bufAddInt(int value, uint8_t digits, char fillChar = ' ');
     static void bufAddLong(long value, int8_t digits);
@@ -170,26 +185,26 @@ public:
 
     static void menuStart(GUIAction action);
     static void menuEnd(GUIAction action);
-    static void menuTextP(GUIAction action, PGM_P text, bool highlight = false);
-    static void menuFloatP(GUIAction action, PGM_P text, float val, int precision, GuiCallback cb, void* cData, GUIPageType tp);
-    static void menuLongP(GUIAction action, PGM_P text, long val, GuiCallback cb, void* cData, GUIPageType tp);
-    static void menuOnOffP(GUIAction action, PGM_P text, bool val, GuiCallback cb, void* cData, GUIPageType tp);
+    static void menuTextP(GUIAction& action, PGM_P text, bool highlight = false);
+    static void menuFloatP(GUIAction& action, PGM_P text, float val, int precision, GuiCallback cb, void* cData, GUIPageType tp);
+    static void menuLongP(GUIAction& action, PGM_P text, long val, GuiCallback cb, void* cData, GUIPageType tp);
+    static void menuOnOffP(GUIAction& action, PGM_P text, bool val, GuiCallback cb, void* cData, GUIPageType tp);
     static void menuSelectableP(GUIAction& action, PGM_P text, GuiCallback cb, void* cData, GUIPageType tp);
 
-    static void menuText(GUIAction action, char* text, bool highlight = false);
-    static void menuFloat(GUIAction action, char* text, float val, int precision, GuiCallback cb, void* cData, GUIPageType tp);
-    static void menuLong(GUIAction action, char* text, long val, GuiCallback cb, void* cData, GUIPageType tp);
-    static void menuOnOff(GUIAction action, char* text, bool val, GuiCallback cb, void* cData, GUIPageType tp);
+    static void menuText(GUIAction& action, char* text, bool highlight = false);
+    static void menuFloat(GUIAction& action, char* text, float val, int precision, GuiCallback cb, void* cData, GUIPageType tp);
+    static void menuLong(GUIAction& action, char* text, long val, GuiCallback cb, void* cData, GUIPageType tp);
+    static void menuOnOff(GUIAction& action, char* text, bool val, GuiCallback cb, void* cData, GUIPageType tp);
     static void menuSelectable(GUIAction& action, char* text, GuiCallback cb, void* cData, GUIPageType tp);
-    static void menuBack(GUIAction action);
+    static void menuBack(GUIAction& action);
 
     // Value modifyer display
 
     // Draw display with content for a value given as string
     static void showValueP(PGM_P text, PGM_P unit, char* value);
     static void showValue(char* text, PGM_P unit, char* value);
-    static bool handleFloatValueAction(GUIAction action, float& value, float min, float max, float increment);
-    static bool handleLongValueAction(GUIAction action, int32_t& value, int32_t min, int32_t max, int32_t increment);
+    static bool handleFloatValueAction(GUIAction& action, float& value, float min, float max, float increment);
+    static bool handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, int32_t max, int32_t increment);
 };
 
 #define DRAW_FLOAT_P(text, unit, val, prec) \

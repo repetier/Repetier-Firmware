@@ -14,6 +14,12 @@ class GCode;
 #define TOOL_ERROR_HEATER_DECOUPLED 2
 #define TOOL_ERROR_JAMMED_OR_NO_FILAMENT 4
 
+extern void menuExtruderStepsPerMM(GUIAction action, void* data);
+extern void menuExtruderMaxSpeed(GUIAction action, void* data);
+extern void menuExtruderMaxAcceleration(GUIAction action, void* data);
+extern void menuExtruderMaxYank(GUIAction action, void* data);
+extern void menuExtruderFilamentDiameter(GUIAction action, void* data);
+
 class Tool {
     friend class Motion3;
     friend class Motion1;
@@ -201,10 +207,14 @@ public:
     /// Set temperature in case tool supports temperatures.
     HeatManager* getHeater() final { return heater; }
     float getMaxSpeed() { return maxSpeed; }
+    void setMaxSpeed(float speed) { maxSpeed = speed; }
     float getAcceleration() { return acceleration; }
+    void setAcceleration(float accel) { acceleration = accel; }
     float getMaxStartSpeed() { return 0.5 * yank; }
     float getMaxYank() { return yank; }
+    void setMaxYank(float y) { yank = y; }
     float getDiameter() { return diameter; }
+    void setDiameter(float dia) { diameter = dia; }
     float getMaxTemp() { return heater->getMaxTemperature(); }
     void eepromHandle();
     void init();
@@ -217,10 +227,10 @@ public:
     bool updateMotor() final;
     void directionMotor(bool dir) final;
     void setResolution(float stepspermm) { stepsPerMM = stepspermm; }
+    float getResolution() { return stepsPerMM; }
     void retract(bool backwards, bool longRetract) {
         // TODO: Add retract handling
     }
-    void setDiameter(float d) { diameter = d; }
     /// Computes intensity based on speed
     virtual int computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) { return activeSecondaryValue; }
     virtual bool secondaryIsFan() { return true; }

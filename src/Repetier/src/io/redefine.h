@@ -35,8 +35,11 @@ IO_TARGET with following meanings:
 13: tools.cpp template definitions
 14: Solve firmware events
 15: Periodical actions
-16: Tools menu
-
+16: Controls menu (prepare, printe ris idle)
+17: Configuration menu
+18: Tune menu (if printer is printing)
+19: Main menu
+20: Wizard menu
 */
 
 // #pragma message(VAR_NAME_VALUE(IO_TARGET))

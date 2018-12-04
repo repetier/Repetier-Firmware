@@ -226,6 +226,7 @@ void SDCard::stopPrint() {
     Printer::setMenuMode(MENU_MODE_SD_PRINTING, false);
     Printer::setMenuMode(MENU_MODE_PAUSED, false);
     Printer::setPrinting(0);
+    Motion1::moveToParkPosition();
     GCodeSource::removeSource(&sdSource);
     if (EVENT_SD_STOP_START) {
         GCode::executeFString(PSTR(SD_RUN_ON_STOP));
@@ -600,7 +601,7 @@ void SDCard::startWrite(char* filename) {
     if (!file.open(filename, O_CREAT | O_APPEND | O_WRITE | O_TRUNC)) {
         Com::printFLN(Com::tOpenFailedFile, filename);
     } else {
-        UI_STATUS("Uploading...");
+        GUI::setStatusP(PSTR("Uploading..."), GUIStatusLevel::INFO);
         savetosd = true;
         Com::printFLN(Com::tWritingToFile, filename);
     }
@@ -613,7 +614,7 @@ void SDCard::finishWrite() {
     file.close();
     savetosd = false;
     Com::printFLN(Com::tDoneSavingFile);
-    UI_CLEAR_STATUS;
+    GUI::pop();
 }
 
 void SDCard::deleteFile(char* filename) {

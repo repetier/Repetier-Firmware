@@ -35,7 +35,7 @@ void GUI::init() {
         lcd.drawXBM(0, 0, LOGO_width, LOGO_height, LOGO_bits);
         bufClear();
         bufAddStringP(PSTR(REPETIER_VERSION));
-        lcd.drawStr(20, 55, buf);
+        lcd.drawUTF8(20, 55, buf);
     } while (lcd.nextPage());
     lastRefresh = HAL::timeInMilliseconds() + UI_START_SCREEN_DELAY; // Show start screen 4s but will not delay start process
 }
@@ -121,7 +121,7 @@ void GUI::menuEnd(GUIAction action) {
         } \
     }
 
-void GUI::menuTextP(GUIAction action, PGM_P text, bool highlight) {
+void GUI::menuTextP(GUIAction& action, PGM_P text, bool highlight) {
     if (action == GUIAction::ANALYSE) {
         length[level]++;
     } else if (action == GUIAction::DRAW) {
@@ -132,7 +132,7 @@ void GUI::menuTextP(GUIAction action, PGM_P text, bool highlight) {
                 guiY += 12;
                 lcd.drawBox(0, guiY - 9, 128, 10);
                 lcd.setDrawColor(0);
-                lcd.drawStr(0, guiY - 1, GUI::buf);
+                lcd.drawUTF8(0, guiY - 1, GUI::buf);
                 lcd.setDrawColor(1);
             } else {
                 guiY += 10;
@@ -140,7 +140,7 @@ void GUI::menuTextP(GUIAction action, PGM_P text, bool highlight) {
                     lcd.drawBox(0, guiY - 8, 128, 10);
                     lcd.setDrawColor(0);
                 }
-                lcd.drawStr(0, guiY, GUI::buf);
+                lcd.drawUTF8(0, guiY, GUI::buf);
                 if (guiLine == cursorRow[level]) {
                     lcd.setDrawColor(1);
                 }
@@ -162,7 +162,7 @@ void GUI::menuTextP(GUIAction action, PGM_P text, bool highlight) {
     guiLine++;
 }
 
-void GUI::menuFloatP(GUIAction action, PGM_P text, float val, int precision, GuiCallback cb, void* cData, GUIPageType tp) {
+void GUI::menuFloatP(GUIAction& action, PGM_P text, float val, int precision, GuiCallback cb, void* cData, GUIPageType tp) {
     if (action == GUIAction::ANALYSE) {
         length[level]++;
     } else if (action == GUIAction::DRAW) {
@@ -174,11 +174,11 @@ void GUI::menuFloatP(GUIAction action, PGM_P text, float val, int precision, Gui
             if (guiLine == cursorRow[level]) {
                 lcd.drawBox(0, guiY - 8, 128, 10);
                 lcd.setDrawColor(0);
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
                 lcd.drawGlyph(0, guiY, '>');
                 lcd.setDrawColor(1);
             } else {
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
             }
         }
     } else if (action == GUIAction::NEXT) {
@@ -198,7 +198,7 @@ void GUI::menuFloatP(GUIAction action, PGM_P text, float val, int precision, Gui
     guiLine++;
 }
 
-void GUI::menuLongP(GUIAction action, PGM_P text, long val, GuiCallback cb, void* cData, GUIPageType tp) {
+void GUI::menuLongP(GUIAction& action, PGM_P text, long val, GuiCallback cb, void* cData, GUIPageType tp) {
     if (action == GUIAction::ANALYSE) {
         length[level]++;
     } else if (action == GUIAction::DRAW) {
@@ -210,11 +210,11 @@ void GUI::menuLongP(GUIAction action, PGM_P text, long val, GuiCallback cb, void
             if (guiLine == cursorRow[level]) {
                 lcd.drawBox(0, guiY - 8, 128, 10);
                 lcd.setDrawColor(0);
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
                 lcd.drawGlyph(0, guiY, '>');
                 lcd.setDrawColor(1);
             } else {
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
             }
         }
     } else if (action == GUIAction::NEXT) {
@@ -234,7 +234,7 @@ void GUI::menuLongP(GUIAction action, PGM_P text, long val, GuiCallback cb, void
     guiLine++;
 }
 
-void GUI::menuOnOffP(GUIAction action, PGM_P text, bool val, GuiCallback cb, void* cData, GUIPageType tp) {
+void GUI::menuOnOffP(GUIAction& action, PGM_P text, bool val, GuiCallback cb, void* cData, GUIPageType tp) {
     if (action == GUIAction::ANALYSE) {
         length[level]++;
     } else if (action == GUIAction::DRAW) {
@@ -250,11 +250,11 @@ void GUI::menuOnOffP(GUIAction action, PGM_P text, bool val, GuiCallback cb, voi
             if (guiLine == cursorRow[level]) {
                 lcd.drawBox(0, guiY - 8, 128, 10);
                 lcd.setDrawColor(0);
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
                 lcd.drawGlyph(0, guiY, '>');
                 lcd.setDrawColor(1);
             } else {
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
             }
         }
     } else if (action == GUIAction::NEXT) {
@@ -289,11 +289,11 @@ void GUI::menuSelectableP(GUIAction& action, PGM_P text, GuiCallback cb, void* c
             if (guiLine == cursorRow[level]) {
                 lcd.drawBox(0, guiY - 8, 128, 10);
                 lcd.setDrawColor(0);
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
                 lcd.drawGlyph(0, guiY, '>');
                 lcd.setDrawColor(1);
             } else {
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
             }
         }
     } else if (action == GUIAction::NEXT) {
@@ -313,7 +313,7 @@ void GUI::menuSelectableP(GUIAction& action, PGM_P text, GuiCallback cb, void* c
     guiLine++;
 }
 
-void GUI::menuText(GUIAction action, char* text, bool highlight) {
+void GUI::menuText(GUIAction& action, char* text, bool highlight) {
     if (action == GUIAction::ANALYSE) {
         length[level]++;
     } else if (action == GUIAction::DRAW) {
@@ -324,7 +324,7 @@ void GUI::menuText(GUIAction action, char* text, bool highlight) {
                 guiY += 12;
                 lcd.drawBox(0, guiY - 9, 128, 10);
                 lcd.setDrawColor(0);
-                lcd.drawStr(0, guiY - 1, GUI::buf);
+                lcd.drawUTF8(0, guiY - 1, GUI::buf);
                 lcd.setDrawColor(1);
             } else {
                 guiY += 10;
@@ -332,7 +332,7 @@ void GUI::menuText(GUIAction action, char* text, bool highlight) {
                     lcd.drawBox(0, guiY - 8, 128, 10);
                     lcd.setDrawColor(0);
                 }
-                lcd.drawStr(0, guiY, GUI::buf);
+                lcd.drawUTF8(0, guiY, GUI::buf);
                 if (guiLine == cursorRow[level]) {
                     lcd.setDrawColor(1);
                 }
@@ -354,7 +354,7 @@ void GUI::menuText(GUIAction action, char* text, bool highlight) {
     guiLine++;
 }
 
-void GUI::menuFloat(GUIAction action, char* text, float val, int precision, GuiCallback cb, void* cData, GUIPageType tp) {
+void GUI::menuFloat(GUIAction& action, char* text, float val, int precision, GuiCallback cb, void* cData, GUIPageType tp) {
     if (action == GUIAction::ANALYSE) {
         length[level]++;
     } else if (action == GUIAction::DRAW) {
@@ -366,11 +366,11 @@ void GUI::menuFloat(GUIAction action, char* text, float val, int precision, GuiC
             if (guiLine == cursorRow[level]) {
                 lcd.drawBox(0, guiY - 8, 128, 10);
                 lcd.setDrawColor(0);
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
                 lcd.drawGlyph(0, guiY, '>');
                 lcd.setDrawColor(1);
             } else {
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
             }
         }
     } else if (action == GUIAction::NEXT) {
@@ -390,7 +390,7 @@ void GUI::menuFloat(GUIAction action, char* text, float val, int precision, GuiC
     guiLine++;
 }
 
-void GUI::menuLong(GUIAction action, char* text, long val, GuiCallback cb, void* cData, GUIPageType tp) {
+void GUI::menuLong(GUIAction& action, char* text, long val, GuiCallback cb, void* cData, GUIPageType tp) {
     if (action == GUIAction::ANALYSE) {
         length[level]++;
     } else if (action == GUIAction::DRAW) {
@@ -402,11 +402,11 @@ void GUI::menuLong(GUIAction action, char* text, long val, GuiCallback cb, void*
             if (guiLine == cursorRow[level]) {
                 lcd.drawBox(0, guiY - 8, 128, 10);
                 lcd.setDrawColor(0);
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
                 lcd.drawGlyph(0, guiY, '>');
                 lcd.setDrawColor(1);
             } else {
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
             }
         }
     } else if (action == GUIAction::NEXT) {
@@ -426,7 +426,7 @@ void GUI::menuLong(GUIAction action, char* text, long val, GuiCallback cb, void*
     guiLine++;
 }
 
-void GUI::menuOnOff(GUIAction action, char* text, bool val, GuiCallback cb, void* cData, GUIPageType tp) {
+void GUI::menuOnOff(GUIAction& action, char* text, bool val, GuiCallback cb, void* cData, GUIPageType tp) {
     if (action == GUIAction::ANALYSE) {
         length[level]++;
     } else if (action == GUIAction::DRAW) {
@@ -442,11 +442,11 @@ void GUI::menuOnOff(GUIAction action, char* text, bool val, GuiCallback cb, void
             if (guiLine == cursorRow[level]) {
                 lcd.drawBox(0, guiY - 8, 128, 10);
                 lcd.setDrawColor(0);
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
                 lcd.drawGlyph(0, guiY, '>');
                 lcd.setDrawColor(1);
             } else {
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
             }
         }
     } else if (action == GUIAction::NEXT) {
@@ -481,11 +481,11 @@ void GUI::menuSelectable(GUIAction& action, char* text, GuiCallback cb, void* cD
             if (guiLine == cursorRow[level]) {
                 lcd.drawBox(0, guiY - 8, 128, 10);
                 lcd.setDrawColor(0);
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
                 lcd.drawGlyph(0, guiY, '>');
                 lcd.setDrawColor(1);
             } else {
-                lcd.drawStr(10, guiY, GUI::buf);
+                lcd.drawUTF8(10, guiY, GUI::buf);
             }
         }
     } else if (action == GUIAction::NEXT) {
@@ -525,7 +525,7 @@ void GUI::showValueP(PGM_P text, PGM_P unit, char* value) {
 
     lcd.setFont(u8g2_font_10x20_mf);
     int len = strlen(value);
-    lcd.drawStr(125 - 10 * len, 39, value);
+    lcd.drawUTF8(125 - 10 * len, 39, value);
     lcd.drawFrame(0, 22, 128, 21);
 
     // changes buf so use after drawing value!
@@ -542,7 +542,7 @@ void GUI::showValueP(PGM_P text, PGM_P unit, char* value) {
     lcd.setDrawColor(0);
     GUI::bufClear();
     GUI::bufAddStringP(Com::tBtnOK);
-    lcd.drawStr(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+    lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
     lcd.setDrawColor(1);
 }
 void GUI::showValue(char* text, PGM_P unit, char* value) {
@@ -550,7 +550,7 @@ void GUI::showValue(char* text, PGM_P unit, char* value) {
 
     lcd.setFont(u8g2_font_10x20_mf);
     int len = strlen(value);
-    lcd.drawStr(125 - 10 * len, 39, value);
+    lcd.drawUTF8(125 - 10 * len, 39, value);
     lcd.drawFrame(0, 22, 128, 21);
 
     // changes buf so use after drawing value!
@@ -567,13 +567,13 @@ void GUI::showValue(char* text, PGM_P unit, char* value) {
     lcd.setDrawColor(0);
     GUI::bufClear();
     GUI::bufAddStringP(Com::tBtnOK);
-    lcd.drawStr(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+    lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
     lcd.setDrawColor(1);
 }
 
-extern void __attribute__((weak)) startScreen(GUIAction action, void* data);
-extern void __attribute__((weak)) printProgress(GUIAction action, void* data);
-extern void __attribute__((weak)) mainMenu(GUIAction action, void* data);
+//extern void __attribute__((weak)) startScreen(GUIAction action, void* data);
+//extern void __attribute__((weak)) printProgress(GUIAction action, void* data);
+// extern void __attribute__((weak)) mainMenu(GUIAction action, void* data);
 //void mainMenu(GUIAction action, void* data) __attribute__((weak, alias("WmainMenu")));
 //void printProgress(GUIAction action, void* data) __attribute__((weak, alias("WprintProgress")));
 //void startScreen(GUIAction action, void* data) __attribute__((weak, alias("WstartScreen")));
@@ -594,23 +594,23 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
 #else
         GUI::bufAddFloat(Motion1::currentPosition[X_AXIS], 4, 2);
 #endif
-        lcd.drawStr(66, 16, GUI::buf);
+        lcd.drawUTF8(66, 16, GUI::buf);
         // Y position
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Y:"));
         GUI::bufAddFloat(Motion1::currentPosition[Y_AXIS], 4, 2);
-        lcd.drawStr(66, 23, GUI::buf);
+        lcd.drawUTF8(66, 23, GUI::buf);
         // Z position
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Z:"));
         GUI::bufAddFloat(Motion1::currentPosition[Z_AXIS], 4, 2);
-        lcd.drawStr(66, 30, GUI::buf);
+        lcd.drawUTF8(66, 30, GUI::buf);
         // FeedRate multiplier
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("FR:"));
         GUI::bufAddInt(Printer::feedrateMultiply, 3);
         GUI::bufAddChar('%');
-        lcd.drawStr(66, 37, GUI::buf);
+        lcd.drawUTF8(66, 37, GUI::buf);
 
         // Left take first 6 that make sense
 
@@ -654,20 +654,22 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
             GUI::bufAddStringP("Flow:");
             GUI::bufAddInt(Printer::extrudeMultiply, 3);
             GUI::bufAddChar('%');
-            lcd.drawStr(0, 16 + n * 7, GUI::buf);
+            lcd.drawUTF8(0, 16 + n * 7, GUI::buf);
             n++;
         }
         if (n < 6 && Printer::areAllSteppersDisabled()) {
             GUI::bufClear();
             GUI::bufAddStringP("Motors off");
-            lcd.drawStr(0, 16 + n * 7, GUI::buf);
+            lcd.drawUTF8(0, 16 + n * 7, GUI::buf);
             n++;
         }
         lcd.setFont(u8g2_font_6x10_mf);
-        lcd.drawStr(0, 61, GUI::status);
+        lcd.drawUTF8(0, 61, GUI::status);
     }
-    GUI::replaceOn(GUIAction::NEXT, printProgress, nullptr, GUIPageType::FIXED_CONTENT);
-    GUI::replaceOn(GUIAction::PREVIOUS, printProgress, nullptr, GUIPageType::FIXED_CONTENT);
+    if (Printer::isPrinting()) {
+        GUI::replaceOn(GUIAction::NEXT, printProgress, nullptr, GUIPageType::FIXED_CONTENT);
+        GUI::replaceOn(GUIAction::PREVIOUS, printProgress, nullptr, GUIPageType::FIXED_CONTENT);
+    }
     GUI::pushOn(GUIAction::CLICK, mainMenu, nullptr, GUIPageType::MENU);
 }
 
@@ -677,10 +679,10 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Progress:"));
         GUI::bufAddFloat(Motion1::currentPosition[Y_AXIS], 4, 2);
-        lcd.drawStr(0, 10, GUI::buf);
+        lcd.drawUTF8(0, 10, GUI::buf);
 
         lcd.setFont(u8g2_font_6x10_mf);
-        lcd.drawStr(0, 61, GUI::status);
+        lcd.drawUTF8(0, 61, GUI::status);
     }
     GUI::replaceOn(GUIAction::NEXT, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
     GUI::replaceOn(GUIAction::PREVIOUS, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
@@ -694,14 +696,14 @@ void __attribute__((weak)) warningScreen(GUIAction action, void* data) {
         lcd.drawXBM(2, 13, WARNING_width, WARNING_height, WARNING_bits); // 26x26 pixel
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Warning"));
-        lcd.drawStr(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
+        lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
         lcd.setFont(u8g2_font_6x10_mf);
         int len = strlen(static_cast<char*>(data));
-        lcd.drawStr(64 - 3 * len, 50, static_cast<char*>(data));
+        lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(data));
         lcd.setDrawColor(0);
         GUI::bufClear();
         GUI::bufAddStringP(Com::tBtnOK);
-        lcd.drawStr(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+        lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
         lcd.setDrawColor(1);
     } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
         GUI::pop();
@@ -714,14 +716,14 @@ void __attribute__((weak)) errorScreen(GUIAction action, void* data) {
         lcd.drawXBM(2, 13, ERROR_width, ERROR_height, ERROR_bits); // 26x26 pixel
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Error"));
-        lcd.drawStr(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
+        lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
         lcd.setFont(u8g2_font_6x10_mf);
         int len = strlen(static_cast<char*>(data));
-        lcd.drawStr(64 - 3 * len, 50, static_cast<char*>(data));
+        lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(data));
         lcd.setDrawColor(0);
         GUI::bufClear();
         GUI::bufAddStringP(Com::tBtnOK);
-        lcd.drawStr(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+        lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
         lcd.setDrawColor(1);
     } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
         GUI::pop();
@@ -734,14 +736,14 @@ void __attribute__((weak)) infoScreen(GUIAction action, void* data) {
         lcd.drawXBM(2, 13, INFO_width, INFO_height, INFO_bits); // 26x26 pixel
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Info"));
-        lcd.drawStr(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
+        lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
         lcd.setFont(u8g2_font_6x10_mf);
         int len = strlen(static_cast<char*>(data));
-        lcd.drawStr(64 - 3 * len, 50, static_cast<char*>(data));
+        lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(data));
         lcd.setDrawColor(0);
         GUI::bufClear();
         GUI::bufAddStringP(Com::tBtnOK);
-        lcd.drawStr(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+        lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
         lcd.setDrawColor(1);
     } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
         GUI::pop();

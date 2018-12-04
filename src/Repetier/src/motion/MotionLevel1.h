@@ -173,7 +173,8 @@ public:
 #define EPR_M1_MIN_POS EPR_M1_MAX_YANK + 4 * (NUM_AXES - 1)
 #define EPR_M1_MAX_POS EPR_M1_MIN_POS + 4 * (NUM_AXES - 1)
 #define EPR_M1_ENDSTOP_DISTANCE EPR_M1_MAX_POS + 4 * (NUM_AXES - 1)
-#define EPR_M1_ALWAYS_CHECK_ENDSTOPS ((EPR_M1_ENDSTOP_DISTANCE + 4) * (NUM_AXES - 1))
+#define EPR_M1_MOVE_FEEDRATE EPR_M1_ENDSTOP_DISTANCE + 4 * (NUM_AXES - 1)
+#define EPR_M1_ALWAYS_CHECK_ENDSTOPS ((EPR_M1_MOVE_FEEDRATE + 4) * (NUM_AXES - 1))
 #define EPR_M1_AUTOLEVEL_MATRIX EPR_M1_ALWAYS_CHECK_ENDSTOPS + 1
 #if FEATURE_AXISCOMP
 #define EPR_M1_AXIS_COMP_XY EPR_M1_AUTOLEVEL_MATRIX + 36
@@ -207,6 +208,7 @@ public:
     static float tmpPosition[NUM_AXES];
     static float maxFeedrate[NUM_AXES];
     static float homingFeedrate[NUM_AXES];
+    static float moveFeedrate[NUM_AXES]; // Used for genral moves like coordinate changes
     static float maxAcceleration[NUM_AXES];
     static float resolution[NUM_AXES];
     static float minPos[NUM_AXES];

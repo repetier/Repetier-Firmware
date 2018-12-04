@@ -270,6 +270,10 @@ public:
 #include "io/temperature_tables.h"
 #include "Configuration.h"
 
+#ifndef E_SPEED
+#define E_SPEED 2
+#endif
+
 extern ServoInterface* servos[NUM_SERVOS];
 
 #ifndef SHARED_EXTRUDER_HEATER

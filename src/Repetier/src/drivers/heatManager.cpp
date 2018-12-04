@@ -11,7 +11,14 @@ void menuSetTemperature(GUIAction action, void* data) {
         hm->setTargetTemperature(value);
     }
 }
-
+void menuHMMaxPWM(GUIAction action, void* data) {
+    HeatManager* hm = reinterpret_cast<HeatManager*>(data);
+    float value = hm->getMaxPWM();
+    DRAW_FLOAT_P(PSTR("Max. PWM:"), Com::tUnitDegCelsius, value, 0);
+    if (GUI::handleFloatValueAction(action, value, 1, 255, 1)) {
+        hm->setMaxPWM(static_cast<uint8_t>(value));
+    }
+}
 HeatManager::HeatManager(char htType, fast8_t _index, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod, bool _hotPluggable)
     : error(HeaterError::NO_ERROR)
     , targetTemperature(0)
@@ -310,11 +317,64 @@ void HeatManagerPID::setPID(float p, float i, float d) {
 }
 
 void HeatManagerPID::showControlMenu(GUIAction action) {
-    char help[MAX_COLS + 1];
-    GUI::flashToStringLong(help, PSTR("Set Temp: @°C"), static_cast<int32_t>(lroundf(targetTemperature)));
-    GUI::menuSelectable(action, help, menuSetTemperature, this, GUIPageType::FIXED_CONTENT);
+    GUI::flashToStringLong(GUI::tmpString, PSTR("Set Temp: @°C"), static_cast<int32_t>(lroundf(targetTemperature)));
+    GUI::menuSelectable(action, GUI::tmpString, menuSetTemperature, this, GUIPageType::FIXED_CONTENT);
 }
-void HeatManagerPID::showConfigMenu(GUIAction action) {}
+
+void menuSetPIDP(GUIAction action, void* data) {
+    HeatManagerPID* hm = reinterpret_cast<HeatManagerPID*>(data);
+    float value = hm->getP();
+    DRAW_FLOAT_P(PSTR("Proportial P:"), Com::tEmpty, value, 1);
+    if (GUI::handleFloatValueAction(action, value, 0, 500, 0.1)) {
+        hm->setPID(value, hm->getI(), hm->getD());
+    }
+}
+
+void menuSetPIDI(GUIAction action, void* data) {
+    HeatManagerPID* hm = reinterpret_cast<HeatManagerPID*>(data);
+    float value = hm->getP();
+    DRAW_FLOAT_P(PSTR("Integral I:"), Com::tEmpty, value, 2);
+    if (GUI::handleFloatValueAction(action, value, 0, 500, 0.02)) {
+        hm->setPID(hm->getP(), value, hm->getD());
+    }
+}
+
+void menuSetPIDD(GUIAction action, void* data) {
+    HeatManagerPID* hm = reinterpret_cast<HeatManagerPID*>(data);
+    float value = hm->getD();
+    DRAW_FLOAT_P(PSTR("Damping D:"), Com::tEmpty, value, 1);
+    if (GUI::handleFloatValueAction(action, value, 0, 500, 0.1)) {
+        hm->setPID(hm->getP(), hm->getI(), value);
+    }
+}
+
+void menuSetDriveMin(GUIAction action, void* data) {
+    HeatManagerPID* hm = reinterpret_cast<HeatManagerPID*>(data);
+    float value = hm->getDriveMin();
+    DRAW_FLOAT_P(PSTR("Min. I-Part:"), Com::tEmpty, value, 1);
+    if (GUI::handleFloatValueAction(action, value, -500, 500, 0.1)) {
+        hm->setDriveMin(value);
+    }
+}
+
+void menuSetDriveMax(GUIAction action, void* data) {
+    HeatManagerPID* hm = reinterpret_cast<HeatManagerPID*>(data);
+    float value = hm->getDriveMax();
+    DRAW_FLOAT_P(PSTR("Max. I-Part:"), Com::tEmpty, value, 1);
+    if (GUI::handleFloatValueAction(action, value, -500, 500, 0.1)) {
+        hm->setDriveMax(value);
+    }
+}
+
+void HeatManagerPID::showConfigMenu(GUIAction action) {
+
+    GUI::menuLongP(action, PSTR("Max. PWM:"), maxPWM, menuHMMaxPWM, this, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("P:"), P, 1, menuSetPIDP, this, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("I:"), I, 2, menuSetPIDI, this, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("D:"), D, 1, menuSetPIDD, this, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Min. I-Part:"), driveMin, 1, menuSetDriveMin, this, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Max. I-Part:"), driveMax, 1, menuSetDriveMax, this, GUIPageType::FIXED_CONTENT);
+}
 
 void HeatManagerPID::autocalibrate(GCode* g) {
     ENSURE_POWER

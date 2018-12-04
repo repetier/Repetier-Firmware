@@ -26,7 +26,8 @@
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
     extern ToolExtruder name; \
-    extern void __attribute__((weak)) menuControl##name(GUIAction action, void* data);
+    extern void __attribute__((weak)) menuControl##name(GUIAction action, void* data); \
+    extern void __attribute__((weak)) menuConfig##name(GUIAction action, void* data);
 
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
     extern ToolLaser<toolPin, enablePin> name;
@@ -51,7 +52,22 @@
         GUI::flashToStringLong(help, PSTR("= Extruder @ ="), name.getToolId() + 1); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
+        GUI::menuSelectableP(action, PSTR("Select Extruder"), selectToolAction, (void*)name.getToolId(), GUIPageType::ACTION); \
         name.getHeater()->showControlMenu(action); \
+        GUI::menuEnd(action); \
+    } \
+    void __attribute__((weak)) menuConfig##name(GUIAction action, void* data) { \
+        GUI::menuStart(action); \
+        char help[MAX_COLS]; \
+        GUI::flashToStringLong(help, PSTR("= Extruder @ ="), name.getToolId() + 1); \
+        GUI::menuText(action, help, true); \
+        GUI::menuBack(action); \
+        GUI::menuFloatP(action, PSTR("Resolution:"), name.getResolution(), 2, menuExtruderStepsPerMM, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuFloatP(action, PSTR("Max Speed  :"), name.getMaxSpeed(), 0, menuExtruderMaxSpeed, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuFloatP(action, PSTR("Max Accel. :"), name.getAcceleration(), 0, menuExtruderMaxAcceleration, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuFloatP(action, PSTR("Max Jerk   :"), name.getMaxYank(), 1, menuExtruderMaxYank, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuFloatP(action, PSTR("Diameter   :"), name.getDiameter(), 2, menuExtruderFilamentDiameter, &name, GUIPageType::FIXED_CONTENT); \
+        name.getHeater()->showConfigMenu(action); \
         GUI::menuEnd(action); \
     }
 
@@ -138,6 +154,16 @@
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
     GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuControl##name, nullptr, GUIPageType::MENU);
+
+#define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript)
+#define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript)
+#define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage)
+#define FILAMENT_DETECTOR(name, inputPin, tool)
+
+#elif IO_TARGET == 17 // config menu
+
+#define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
+    GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU);
 
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript)
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript)

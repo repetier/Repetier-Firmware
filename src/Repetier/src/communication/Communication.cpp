@@ -128,6 +128,7 @@ FSTRINGVALUE(Com::tUnitMMPS3, "mm/s^3")
 FSTRINGVALUE(Com::tUnitBaud, "baud")
 FSTRINGVALUE(Com::tUnitPercent, "%")
 FSTRINGVALUE(Com::tUnitDegCelsius, "°C")
+FSTRINGVALUE(Com::tUnitStepsPerMM, "steps/mm")
 #if JSON_OUTPUT
 FSTRINGVALUE(Com::tJSONDir, "{\"dir\":\"")
 FSTRINGVALUE(Com::tJSONFiles, "\",\"files\":[")

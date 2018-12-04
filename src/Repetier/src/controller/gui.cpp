@@ -16,7 +16,12 @@ GUIAction GUI::nextAction = GUIAction::NONE; ///< Next action to execute on opda
 int GUI::nextActionRepeat = 0;               ///< Increment for next/previous
 char GUI::status[MAX_COLS + 1];              ///< Status Line
 char GUI::buf[MAX_COLS + 1];                 ///< Buffer to build strings
+char GUI::tmpString[MAX_COLS + 1];           ///< Buffer to build strings
 fast8_t GUI::bufPos;                         ///< Pos for appending data
+#if SDSUPPORT
+char GUI::cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2] = { '/', 0 };
+uint8_t GUI::folderLevel = 0;
+#endif
 
 #if DISPLAY_DRIVER == DRIVER_NONE
 void GUI::init() { ///< Initialize display
@@ -169,18 +174,23 @@ void GUI::okKey() {
 void GUI::handleKeypress() {
     setEncoderA(ControllerEncA::get());
     setEncoderB(ControllerEncB::get());
-    millis_t timeDiff = HAL::timeInMilliseconds() - lastRefresh;
+    if (nextAction == GUIAction::CLICK_PROCESSED || nextAction == GUIAction::BACK_PROCESSED) {
+        millis_t timeDiff = HAL::timeInMilliseconds() - lastRefresh;
+        if (timeDiff < 75) {
+            return;
+        }
+    }
     if (ControllerClick::get()) {
         if (nextAction != GUIAction::CLICK_PROCESSED) {
             okKey();
         }
-    } else if (nextAction == GUIAction::CLICK_PROCESSED && timeDiff > 75) {
+    } else if (nextAction == GUIAction::CLICK_PROCESSED) {
         nextAction = GUIAction::NONE;
     }
 #if ENABLED(UI_HAS_BACK_KEY)
     if (ControllerBack::get()) {
         backKey();
-    } else if (nextAction == GUIAction::BACK_PROCESSED && timeDiff > 75) {
+    } else if (nextAction == GUIAction::BACK_PROCESSED) {
         nextAction = GUIAction::NONE;
     }
 #endif
@@ -552,7 +562,7 @@ void GUI::setStatus(char* text, GUIStatusLevel lvl) {
     }
 }
 
-bool GUI::handleFloatValueAction(GUIAction action, float& value, float min, float max, float increment) {
+bool GUI::handleFloatValueAction(GUIAction& action, float& value, float min, float max, float increment) {
     if (action == GUIAction::CLICK || action == GUIAction::BACK) {
         GUI::pop();
         return false;
@@ -575,7 +585,7 @@ bool GUI::handleFloatValueAction(GUIAction action, float& value, float min, floa
     return orig != value;
 }
 
-bool GUI::handleLongValueAction(GUIAction action, int32_t& value, int32_t min, int32_t max, int32_t increment) {
+bool GUI::handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, int32_t max, int32_t increment) {
     if (action == GUIAction::CLICK || action == GUIAction::BACK) {
         GUI::pop();
         return false;
@@ -598,7 +608,7 @@ bool GUI::handleLongValueAction(GUIAction action, int32_t& value, int32_t min, i
     return orig != value;
 }
 
-void GUI::menuBack(GUIAction action) {
+void GUI::menuBack(GUIAction& action) {
 #if DISABLED(UI_HAS_BACK_KEY)
     GUI::menuSelectableP(action, PSTR("Back"), nullptr, nullptr, GUIPageType::POP);
 #endif
@@ -654,5 +664,34 @@ void directAction(GUIAction action, void* data) {
         Motion1::waitForEndOfMoves();
         Printer::kill(true);
         break;
+    case GUI_DIRECT_ACTION_MOUNT_SD_CARD:
+#if SDSUPPORT
+        sd.mount();
+#endif
+        break;
+    case GUI_DIRECT_ACTION_STOP_SD_PRINT:
+#if SDSUPPORT
+        sd.stopPrint();
+#endif
+        break;
+    case GUI_DIRECT_ACTION_PAUSE_SD_PRINT:
+#if SDSUPPORT
+        sd.pausePrint(true);
+#endif
+        break;
+    case GUI_DIRECT_ACTION_CONTINUE_SD_PRINT:
+#if SDSUPPORT
+        sd.continuePrint(true);
+#endif
+        break;
     }
 }
+
+void selectToolAction(GUIAction action, void* data) {
+    int id = reinterpret_cast<int>(data);
+    Tool::selectTool(id);
+}
+
+#if defined(CUSTOM_EVENTS)
+#include "CustomEventsImpl.h"
+#endif

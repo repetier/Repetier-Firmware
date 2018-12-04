@@ -29,6 +29,7 @@ float Motion1::destinationPositionTransformed[NUM_AXES];
 float Motion1::tmpPosition[NUM_AXES];
 float Motion1::maxFeedrate[NUM_AXES];
 float Motion1::homingFeedrate[NUM_AXES];
+float Motion1::moveFeedrate[NUM_AXES];
 float Motion1::maxAcceleration[NUM_AXES];
 float Motion1::resolution[NUM_AXES];
 float Motion1::minPos[NUM_AXES];
@@ -132,6 +133,11 @@ void Motion1::setFromConfig() {
     homingFeedrate[Z_AXIS] = HOMING_FEEDRATE_Z;
     homingFeedrate[E_AXIS] = 10;
 
+    moveFeedrate[X_AXIS] = XY_SPEED;
+    moveFeedrate[Y_AXIS] = XY_SPEED;
+    moveFeedrate[Z_AXIS] = Z_SPEED;
+    moveFeedrate[E_AXIS] = E_SPEED;
+
     maxAcceleration[X_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X;
     maxAcceleration[Y_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
     maxAcceleration[Z_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
@@ -196,6 +202,7 @@ void Motion1::setFromConfig() {
     maxYank[A_AXIS] = MAX_AJERK;
     maxFeedrate[A_AXIS] = MAX_FEEDRATE_A;
     homingFeedrate[A_AXIS] = HOMING_FEEDRATE_A;
+    moveFeedrate[A_AXIS] = A_SPEED;
     maxAcceleration[A_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_A;
     homeRetestDistance[A_AXIS] = ENDSTOP_A_BACK_MOVE;
     homeRetestReduction[A_AXIS] = ENDSTOP_A_RETEST_REDUCTION_FACTOR;
@@ -213,6 +220,7 @@ void Motion1::setFromConfig() {
     maxYank[B_AXIS] = MAX_BJERK;
     maxFeedrate[B_AXIS] = MAX_FEEDRATE_B;
     homingFeedrate[B_AXIS] = HOMING_FEEDRATE_B;
+    moveFeedrate[A_AXIS] = B_SPEED;
     maxAcceleration[B_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_B;
     homeRetestDistance[B_AXIS] = ENDSTOP_B_BACK_MOVE;
     homeRetestReduction[B_AXIS] = ENDSTOP_B_RETEST_REDUCTION_FACTOR;
@@ -230,6 +238,7 @@ void Motion1::setFromConfig() {
     maxYank[C_AXIS] = MAX_CJERK;
     maxFeedrate[C_AXIS] = MAX_FEEDRATE_C;
     homingFeedrate[C_AXIS] = HOMING_FEEDRATE_C;
+    moveFeedrate[C_AXIS] = C_SPEED;
     maxAcceleration[C_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_C;
     homeRetestDistance[C_AXIS] = ENDSTOP_C_BACK_MOVE;
     homeRetestReduction[C_AXIS] = ENDSTOP_C_RETEST_REDUCTION_FACTOR;
@@ -512,11 +521,11 @@ void Motion1::setToolOffset(float ox, float oy, float oz) {
         setTmpPositionXYZ(currentPosition[X_AXIS] + ox - toolOffset[X_AXIS],
                           currentPosition[Y_AXIS] + oy - toolOffset[Y_AXIS],
                           currentPosition[Z_AXIS]);
-        moveByOfficial(tmpPosition, XY_SPEED, false);
+        moveByOfficial(tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
         setTmpPositionXYZ(currentPosition[X_AXIS],
                           currentPosition[Y_AXIS],
                           currentPosition[Z_AXIS] + oz - toolOffset[Z_AXIS]);
-        moveByOfficial(tmpPosition, Z_SPEED, false);
+        moveByOfficial(tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
         waitForEndOfMoves();
     } else {
         currentPosition[X_AXIS] += ox - toolOffset[X_AXIS];
@@ -1188,12 +1197,12 @@ void Motion1Buffer::unblock() {
 void Motion1::moveToParkPosition() {
     if (isAxisHomed(X_AXIS) && isAxisHomed(Y_AXIS)) {
         setTmpPositionXYZ(parkPosition[X_AXIS], parkPosition[Y_AXIS], IGNORE_COORDINATE);
-        moveByOfficial(tmpPosition, XY_SPEED, false);
+        moveByOfficial(tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
     }
     if (Motion1::parkPosition[Z_AXIS] > 0 && isAxisHomed(Z_AXIS)) {
-        Motion1::moveByPrinter(Motion1::tmpPosition, Z_SPEED, false);
+        Motion1::moveByPrinter(Motion1::tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
         setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::min(maxPos[Z_AXIS], parkPosition[Z_AXIS] + currentPosition[Z_AXIS]));
-        moveByOfficial(tmpPosition, Z_SPEED, false);
+        moveByOfficial(tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
     }
 }
 
@@ -1528,6 +1537,7 @@ void Motion1::eepromHandle() {
         EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_FEEDRATE, PSTR("max. feedrate [mm/s]"), 3, maxFeedrate[i]);
         EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_ACCELERATION, PSTR("max. acceleration [mm/s^2]"), 3, maxAcceleration[i]);
         EEPROM::handleFloat(eprStart + p + EPR_M1_HOMING_FEEDRATE, PSTR("homing feedrate [mm/s]"), 3, homingFeedrate[i]);
+        EEPROM::handleFloat(eprStart + p + EPR_M1_MOVE_FEEDRATE, PSTR("move feedrate [mm/s]"), 3, moveFeedrate[i]);
         EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_YANK, PSTR("max. yank(jerk) [mm/s]"), 3, maxYank[i]);
         EEPROM::handleFloat(eprStart + p + EPR_M1_MIN_POS, PSTR("min. position [mm]"), 3, minPos[i]);
         EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_POS, PSTR("max. position [mm]"), 3, maxPos[i]);

@@ -233,7 +233,7 @@ void Leveling::measure() {
     float px = xMin, py = yMin;
     Motion1::setTmpPositionXYZ(px, py, ZProbeHandler::optimumProbingHeight());
     PrinterType::closestAllowedPositionWithNewXYOffset(Motion1::tmpPosition, ZProbeHandler::xOffset(), ZProbeHandler::yOffset(), Z_PROBE_BORDER);
-    Motion1::moveByOfficial(Motion1::tmpPosition, XY_SPEED, false);
+    Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
     ZProbeHandler::activate();
     Motion1::copyCurrentPrinter(pos);
     bool ok = true;
@@ -256,7 +256,7 @@ void Leveling::measure() {
             pos[Z_AXIS] = ZProbeHandler::optimumProbingHeight();
             if (PrinterType::positionAllowed(pos)) {
                 if (ok) {
-                    Motion1::moveByPrinter(pos, XY_SPEED, false);
+                    Motion1::moveByPrinter(pos, Motion1::moveFeedrate[X_AXIS], false);
                     float h = ZProbeHandler::runProbe();
                     ok &= h != ILLEGAL_Z_PROBE;
                     grid[xx][y] = h;
@@ -580,25 +580,25 @@ void Leveling::measure() {
     Motion1::setAutolevelActive(false);
     Motion1::homeAxes(7); // Home x, y and z
     Motion1::setTmpPositionXYZ(L_P1_X, L_P1_Y, ZProbeHandler::optimumProbingHeight());
-    ok &= Motion1::moveByOfficial(Motion1::tmpPosition, XY_SPEED, false);
+    ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
     ZProbeHandler::activate();
     h1 = ZProbeHandler::runProbe();
     ok &= h1 != ILLEGAL_Z_PROBE;
     if (ok) {
         Motion1::setTmpPositionXYZ(L_P2_X, L_P2_Y, ZProbeHandler::optimumProbingHeight());
-        ok &= Motion1::moveByOfficial(Motion1::tmpPosition, XY_SPEED, false);
+        ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
         h2 = ZProbeHandler::runProbe();
         ok &= h2 != ILLEGAL_Z_PROBE;
     }
     if (ok) {
         Motion1::setTmpPositionXYZ(L_P3_X, L_P3_Y, ZProbeHandler::optimumProbingHeight());
-        ok &= Motion1::moveByOfficial(Motion1::tmpPosition, XY_SPEED, false);
+        ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
         h3 = ZProbeHandler::runProbe();
         ok &= h3 != ILLEGAL_Z_PROBE;
     }
     if (ok) {
         Motion1::setTmpPositionXYZ(x1Mirror, y1Mirror, ZProbeHandler::optimumProbingHeight());
-        ok &= Motion1::moveByOfficial(Motion1::tmpPosition, XY_SPEED, false);
+        ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
         h4 = ZProbeHandler::runProbe();
         ok &= h4 != ILLEGAL_Z_PROBE;
     }
@@ -633,19 +633,19 @@ void Leveling::measure() {
     Motion1::setAutolevelActive(false);
     Motion1::homeAxes(7); // Home x, y and z
     Motion1::setTmpPositionXYZ(L_P1_X, L_P1_Y, ZProbeHandler::optimumProbingHeight());
-    ok &= Motion1::moveByOfficial(Motion1::tmpPosition, XY_SPEED, false);
+    ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
     ZProbeHandler::activate();
     h1 = ZProbeHandler::runProbe();
     ok &= h1 != ILLEGAL_Z_PROBE;
     if (ok) {
         Motion1::setTmpPositionXYZ(L_P2_X, L_P2_Y, ZProbeHandler::optimumProbingHeight());
-        ok &= Motion1::moveByOfficial(Motion1::tmpPosition, XY_SPEED, false);
+        ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
         h2 = ZProbeHandler::runProbe();
         ok &= h2 != ILLEGAL_Z_PROBE;
     }
     if (ok) {
         Motion1::setTmpPositionXYZ(L_P3_X, L_P3_Y, ZProbeHandler::optimumProbingHeight());
-        ok &= Motion1::moveByOfficial(Motion1::tmpPosition, XY_SPEED, false);
+        ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
         h3 = ZProbeHandler::runProbe();
         ok &= h3 != ILLEGAL_Z_PROBE;
     }

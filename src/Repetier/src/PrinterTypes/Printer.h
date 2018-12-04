@@ -500,10 +500,7 @@ public:
         return flag3 & PRINTER_FLAG3_PRINTING;
     }
 
-    static INLINE void setPrinting(uint8_t b) {
-        flag3 = (b ? flag3 | PRINTER_FLAG3_PRINTING : flag3 & ~PRINTER_FLAG3_PRINTING);
-        Printer::setMenuMode(MENU_MODE_PRINTING, b);
-    }
+    static void setPrinting(uint8_t b);
 
     static INLINE uint8_t isStartStopSupported() {
         return flag3 & PRINTER_FLAG3_SUPPORTS_STARTSTOP;

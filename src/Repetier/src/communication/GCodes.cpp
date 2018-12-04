@@ -232,7 +232,7 @@ void GCode_30(GCode* com) {
 
         float startHeight = ZProbeHandler::getBedDistance() + (ZProbeHandler::getZProbeHeight() > 0 ? ZProbeHandler::getZProbeHeight() : 0);
         Motion1::setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, startHeight);
-        Motion1::moveByOfficial(Motion1::tmpPosition, Z_SPEED, false);
+        Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
         float zheight = ZProbeHandler::runProbe();
         if (zheight == ILLEGAL_Z_PROBE) {
             return;

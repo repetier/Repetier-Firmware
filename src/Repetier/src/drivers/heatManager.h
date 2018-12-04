@@ -35,6 +35,9 @@ enum DecoupleMode {
 enum class GUIAction;
 // HeatManager instance pointer as data
 extern void menuSetTemperature(GUIAction action, void* data);
+extern void menuPreheatHeatManager(GUIAction action, void* data);
+extern void menuSetPreheatTemperatureList(GUIAction action, void* data);
+extern void menuSetPreheatTemperatureList(GUIAction action, void* data);
 
 class GCode;
 class HeatManager {
@@ -109,6 +112,8 @@ public:
             decoupleMode = DecoupleMode::NO_HEATING;
         }
     }
+    inline uint8_t getMaxPWM() { return maxPWM; }
+    inline void setMaxPWM(uint8_t m) { maxPWM = m; }
     virtual float getP() { return 0; }
     virtual float getI() { return 0; }
     virtual float getD() { return 0; }
@@ -192,6 +197,16 @@ public:
     float getI() { return I; }
     float getD() { return D; }
     void setPID(float p, float i, float d);
+    float getDriveMin() { return driveMin; }
+    float getDriveMax() { return driveMax; }
+    void setDriveMin(float dm) {
+        driveMin = dm;
+        updateDerived();
+    }
+    void setDriveMax(float dm) {
+        driveMax = dm;
+        updateDerived();
+    }
     void showControlMenu(GUIAction action);
     void showConfigMenu(GUIAction action);
 };

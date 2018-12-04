@@ -14,6 +14,46 @@ fast8_t Tool::activeToolId = 255;
 Tool* Tool::activeTool = nullptr;
 Tool* const Tool::tools[NUM_TOOLS] = TOOLS;
 
+void __attribute__((weak)) menuExtruderStepsPerMM(GUIAction action, void* data) {
+    ToolExtruder* ext = reinterpret_cast<ToolExtruder*>(data);
+    DRAW_FLOAT_P(PSTR("Resolution:"), Com::tUnitStepsPerMM, ext->getResolution(), 2);
+    if (GUI::handleFloatValueAction(action, v, 0, 100000, 0.1)) {
+        ext->setResolution(v);
+    }
+}
+
+void __attribute__((weak)) menuExtruderMaxSpeed(GUIAction action, void* data) {
+    ToolExtruder* ext = reinterpret_cast<ToolExtruder*>(data);
+    DRAW_FLOAT_P(PSTR("Max. Speed:"), Com::tUnitMMPS, ext->getMaxSpeed(), 0);
+    if (GUI::handleFloatValueAction(action, v, 1, 1000, 1)) {
+        ext->setMaxSpeed(v);
+    }
+}
+
+void __attribute__((weak)) menuExtruderMaxAcceleration(GUIAction action, void* data) {
+    ToolExtruder* ext = reinterpret_cast<ToolExtruder*>(data);
+    DRAW_FLOAT_P(PSTR("Max. Acceleration:"), Com::tUnitMMPS2, ext->getAcceleration(), 0);
+    if (GUI::handleFloatValueAction(action, v, 50, 20000, 50)) {
+        ext->setAcceleration(v);
+    }
+}
+
+void __attribute__((weak)) menuExtruderMaxYank(GUIAction action, void* data) {
+    ToolExtruder* ext = reinterpret_cast<ToolExtruder*>(data);
+    DRAW_FLOAT_P(PSTR("Max. Jerk"), Com::tUnitMMPS, ext->getMaxYank(), 0);
+    if (GUI::handleFloatValueAction(action, v, 0.1, 100, 0.1)) {
+        ext->setMaxYank(v);
+    }
+}
+
+void __attribute__((weak)) menuExtruderFilamentDiameter(GUIAction action, void* data) {
+    ToolExtruder* ext = reinterpret_cast<ToolExtruder*>(data);
+    DRAW_FLOAT_P(PSTR("Fil. Diameter"), Com::tUnitMM, ext->getDiameter(), 2);
+    if (GUI::handleFloatValueAction(action, v, 0.1, 100, 0.01)) {
+        ext->setDiameter(v);
+    }
+}
+
 void Tool::unselectTool() {
     if (activeTool == nullptr) {
         return;
@@ -47,7 +87,7 @@ void Tool::selectTool(fast8_t id, bool force) {
     float lastZ = Motion1::currentPosition[Z_AXIS];
     if (Motion1::isAxisHomed(Z_AXIS)) {
         Motion1::setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, lastZ + RAISE_Z_ON_TOOLCHANGE);
-        Motion1::moveByOfficial(Motion1::tmpPosition, Z_SPEED, false);
+        Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
         Motion1::waitForEndOfMoves();
     }
 #endif
@@ -72,7 +112,7 @@ void Tool::selectTool(fast8_t id, bool force) {
 #if RAISE_Z_ON_TOOLCHANGE > 0
     if (Motion1::isAxisHomed(Z_AXIS)) {
         Motion1::setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, lastZ);
-        Motion1::moveByOfficial(Motion1::tmpPosition, Z_SPEED, false);
+        Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
         Motion1::waitForEndOfMoves();
     }
 #endif

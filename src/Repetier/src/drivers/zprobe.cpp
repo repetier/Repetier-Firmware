@@ -31,8 +31,9 @@ void ZProbeHandler::activate() {
     float cPos[NUM_AXES];
     Motion1::copyCurrentOfficial(cPos);
     PrinterType::closestAllowedPositionWithNewXYOffset(cPos, offsetX, offsetY, Z_PROBE_BORDER);
+    Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     GCode::executeFString(Com::tZProbeStartScript);
-    Motion1::moveByOfficial(cPos, XY_SPEED, false);
+    Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Motion1::setToolOffset(-offsetX, -offsetY, 0);
     activated = true;
 }
@@ -47,15 +48,15 @@ void ZProbeHandler::deactivate() {
     Tool* tool = Tool::getActiveTool();
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Motion1::zprobeZOffset = 0;
-    Motion1::moveByOfficial(cPos, XY_SPEED, false);
+    Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     activated = false;
 }
 
 float ZProbeHandler::runProbe() {
+    float zCorr = 0;
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
     float measurements[Z_PROBE_REPETITIONS];
 #endif
-    float zCorr = 0;
     if (ZProbe->update()) {
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
         return ILLEGAL_Z_PROBE;
@@ -83,12 +84,12 @@ float ZProbeHandler::runProbe() {
     tPos[Z_AXIS] -= secureDistance;
     PrinterType::transform(tPos, tPosSteps);
     int32_t secureSteps = lround(secureDistance * Motion1::resolution[Z_AXIS]);
-    Motion1::endstopMode = EndstopMode::DISABLED;
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
     HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
     Motion1::moveByPrinter(tPos, speed, false);
     Motion1::waitForEndOfMoves();
+    Motion1::endstopMode = EndstopMode::DISABLED;
     float z = secureDistance * ((fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]));
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
     measurements[0] = z;
@@ -120,7 +121,7 @@ float ZProbeHandler::runProbe() {
     PrinterType::transform(cPos2, cPosSteps2);
     PrinterType::transform(tPos2, tPosSteps2);
     PrinterType::transform(tPos3, tPosSteps3);
-    Motion1::moveByPrinter(tPos2, Z_SPEED, false);
+    Motion1::moveByPrinter(tPos2, Motion1::moveFeedrate[Z_AXIS], false);
     Motion1::waitForEndOfMoves();
 #ifdef Z_PROBE_RUN_AFTER_EVERY_PROBE
     GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));
@@ -134,6 +135,7 @@ float ZProbeHandler::runProbe() {
         Motion1::endstopMode = EndstopMode::PROBING;
         Motion1::moveByPrinter(tPos3, speed, false);
         Motion1::waitForEndOfMoves();
+        Motion1::endstopMode = EndstopMode::DISABLED;
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
         measurements[r] = z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
 #else
@@ -175,9 +177,9 @@ float ZProbeHandler::runProbe() {
     }
 #endif
 #if ENABLE_BUMP_CORRECTION
-    //if (Leveling::isDistortionEnabled()) {
+    // if (Leveling::isDistortionEnabled()) {
     zCorr = Leveling::distortionAt(Motion1::currentPosition[X_AXIS], Motion1::currentPosition[Y_AXIS]);
-    //}
+    // }
 #endif
     z += height;
     z -= coating;
@@ -300,9 +302,9 @@ void ZProbeHandler::activate() {
     Tool* tool = Tool::getActiveTool();
     Motion1::copyCurrentOfficial(cPos);
     PrinterType::closestAllowedPositionWithNewXYOffset(cPos, tool->getOffsetX(), tool->getOffsetY(), Z_PROBE_BORDER);
-    Motion1::moveByOfficial(cPos, XY_SPEED, false);
+    Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     GCode::executeFString(Com::tZProbeStartScript);
-    Motion1::moveByOfficial(cPos, XY_SPEED, false);
+    Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Tool* t = Tool::getActiveTool();
     HeatManager* hm = t->getHeater();
@@ -326,7 +328,7 @@ void ZProbeHandler::deactivate() {
     Tool* tool = Tool::getActiveTool();
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Motion1::zprobeZOffset = 0;
-    Motion1::moveByOfficial(cPos, XY_SPEED, false);
+    Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Tool* t = Tool::getActiveTool();
     HeatManager* hm = t->getHeater();
     if (hm != nullptr) {
@@ -405,7 +407,7 @@ float ZProbeHandler::runProbe() {
     PrinterType::transform(cPos2, cPosSteps2);
     PrinterType::transform(tPos2, tPosSteps2);
     PrinterType::transform(tPos3, tPosSteps3);
-    Motion1::moveByPrinter(tPos2, Z_SPEED, false);
+    Motion1::moveByPrinter(tPos2, Motion1::moveFeedrate[Z_AXIS], false);
     Motion1::waitForEndOfMoves();
 #ifdef Z_PROBE_RUN_AFTER_EVERY_PROBE
     GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));

@@ -326,6 +326,18 @@ void Printer::setOrigin(float xOff, float yOff, float zOff) {
     Motion1::g92Offsets[Z_AXIS] = zOff;
 }
 
+void Printer::setPrinting(uint8_t b) {
+    if (!!isPrinting != !!b) { // Start with progress on print start
+        if (b) {
+            GUI::callbacks[0] = printProgress;
+        } else {
+            GUI::callbacks[0] = startScreen;
+        }
+    }
+    flag3 = (b ? flag3 | PRINTER_FLAG3_PRINTING : flag3 & ~PRINTER_FLAG3_PRINTING);
+    Printer::setMenuMode(MENU_MODE_PRINTING, b);
+}
+
 /** \brief Sets the destination coordinates to values stored in com.
 
 Extracts x,y,z,e,f from g-code considering active units. Converted result is stored in currentPosition and lastCmdPos. Converts
