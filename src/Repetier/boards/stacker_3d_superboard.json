@@ -53,6 +53,6 @@
     "use_1200bps_touch": true,
     "wait_for_upload_port": false
   },
-  "url": "https://www.arduino.cc/en/Main/ArduinoBoardDue",
-  "vendor": "Arduino"
+  "url": "http://stacker3d.com",
+  "vendor": "STACKER 3D"
 }

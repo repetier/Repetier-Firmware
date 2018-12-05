@@ -176,7 +176,7 @@ void GUI::handleKeypress() {
     setEncoderB(ControllerEncB::get());
     if (nextAction == GUIAction::CLICK_PROCESSED || nextAction == GUIAction::BACK_PROCESSED) {
         millis_t timeDiff = HAL::timeInMilliseconds() - lastRefresh;
-        if (timeDiff < 75) {
+        if (timeDiff < 200) {
             return;
         }
     }

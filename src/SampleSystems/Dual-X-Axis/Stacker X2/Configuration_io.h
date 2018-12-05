@@ -25,37 +25,37 @@ ENDSTOP_NONE(endstopNone)
 
 IO_OUTPUT(IOX1Step, ORIG_X_STEP_PIN)
 IO_OUTPUT(IOX1Dir, ORIG_X_DIR_PIN)
-IO_OUTPUT(IOX1Enable, ORIG_X_ENABLE_PIN)
+IO_OUTPUT_INVERTED(IOX1Enable, ORIG_X_ENABLE_PIN)
 
 // X Motor right
 
-IO_OUTPUT(IOAStep, ORIG_E2_STEP_PIN)
-IO_OUTPUT(IOADir, ORIG_E2_DIR_PIN)
-IO_OUTPUT(IOAEnable, ORIG_E2_ENABLE_PIN)
+IO_OUTPUT(IOAStep, ORIG_E4_STEP_PIN)
+IO_OUTPUT(IOADir, ORIG_E4_DIR_PIN)
+IO_OUTPUT_INVERTED(IOAEnable, ORIG_E4_ENABLE_PIN)
 
 // Y Motor
 
 IO_OUTPUT(IOY1Step, ORIG_Y_STEP_PIN)
 IO_OUTPUT(IOY1Dir, ORIG_Y_DIR_PIN)
-IO_OUTPUT(IOY1Enable, ORIG_Y_ENABLE_PIN)
+IO_OUTPUT_INVERTED(IOY1Enable, ORIG_Y_ENABLE_PIN)
 
 // Z Motor
 
 IO_OUTPUT(IOZ1Step, ORIG_Z_STEP_PIN)
 IO_OUTPUT_INVERTED(IOZ1Dir, ORIG_Z_DIR_PIN)
-IO_OUTPUT(IOZ1Enable, ORIG_Z_ENABLE_PIN)
+IO_OUTPUT_INVERTED(IOZ1Enable, ORIG_Z_ENABLE_PIN)
 
 // E0 Motor
 
 IO_OUTPUT(IOE1Step, ORIG_E0_STEP_PIN)
-IO_OUTPUT(IOE1Dir, ORIG_E0_DIR_PIN)
-IO_OUTPUT(IOE1Enable, ORIG_E0_ENABLE_PIN)
+IO_OUTPUT_INVERTED(IOE1Dir, ORIG_E0_DIR_PIN)
+IO_OUTPUT_INVERTED(IOE1Enable, ORIG_E0_ENABLE_PIN)
 
 // E1 Motor
 
 IO_OUTPUT(IOE2Step, ORIG_E1_STEP_PIN)
-IO_OUTPUT(IOE2Dir, ORIG_E1_DIR_PIN)
-IO_OUTPUT(IOE2Enable, ORIG_E1_ENABLE_PIN)
+IO_OUTPUT_INVERTED(IOE2Dir, ORIG_E1_DIR_PIN)
+IO_OUTPUT_INVERTED(IOE2Enable, ORIG_E1_ENABLE_PIN)
 
 // Controller input pins
 
@@ -113,7 +113,7 @@ ENDSTOP_SWITCH_HW(endstopAMax, IOEndstopAMax, A_AXIS, true)
 
 IO_OUTPUT(IOFan1, ORIG_FAN_PIN)
 IO_OUTPUT(IOFan2, ORIG_FAN2_PIN)
-IO_OUTPUT(IOCoolerFan1, HEATER_3_PIN)
+IO_OUTPUT(IOCoolerFan1, ORIG_FAN2_PIN)
 
 IO_PWM_SOFTWARE(Fan1NoKSPWM, IOFan1, 0)
 IO_PWM_SOFTWARE(Fan2NoKSPWM, IOFan2, 0)
@@ -133,13 +133,13 @@ IO_ANALOG_INPUT(IOAnalogExt1, TEMP_0_PIN, 5)
 IO_ANALOG_INPUT(IOAnalogExt2, TEMP_2_PIN, 5)
 
 // Need a conversion table for epcos NTC
-IO_TEMP_TABLE_NTC(TempTablePT100, PT100_3_3V)
+IO_TEMP_TABLE_NTC(TempTableATC_104GT, ATC_104GT)
 
 // Now create the temperature inputs
 
-IO_TEMPERATURE_TABLE(TempBed1, IOAnalogBed1, TempTablePT100)
-IO_TEMPERATURE_TABLE(TempExt1, IOAnalogExt1, TempTablePT100)
-IO_TEMPERATURE_TABLE(TempExt2, IOAnalogExt2, TempTablePT100)
+IO_TEMPERATURE_TABLE(TempBed1, IOAnalogBed1, TempTableATC_104GT)
+IO_TEMPERATURE_TABLE(TempExt1, IOAnalogExt1, TempTableATC_104GT)
+IO_TEMPERATURE_TABLE(TempExt2, IOAnalogExt2, TempTableATC_104GT)
 IO_HOTTEST_OF_2(TempHottestExtruder, TempExt1, TempExt2)
 
 // Use PWM outputs to heat. If using hardware PWM make sure
@@ -184,7 +184,7 @@ COOLER_MANAGER_SENSOR(ExtruderCooler, TempHottestExtruder, CoolerFan, 40, 100, 2
 
 // Define tools. They get inserted into a tool array in configuration.h
 // Typical tools are:
-// TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript)
+// TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript)
 
-TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 2230, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
-TOOL_EXTRUDER(ToolExtruder2, 0, 0, 0, HeaterExtruder2, E2Motor, 1.75, 2230, 5, 30, 5000, 40, "M117 Extruder 2", "", &Fan2PWM)
+TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 367, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder2, 0, 0, 0, HeaterExtruder2, E2Motor, 1.75, 367, 5, 30, 5000, 40, "M117 Extruder 2", "", &Fan2PWM)
