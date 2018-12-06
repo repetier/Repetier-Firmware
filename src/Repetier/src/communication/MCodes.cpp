@@ -197,7 +197,7 @@ void MCode_42(GCode* com) {
                 if (com->S >= 0 && com->S <= 255) {
                     pinMode(pin_number, OUTPUT);
                     digitalWrite(pin_number, com->S);
-                    analogWrite(pin_number, com->S);
+                    // analogWrite(pin_number, com->S); // conflicts often with hardware pwm!
                     Com::printF(Com::tSetOutputSpace, pin_number);
                     Com::printFLN(Com::tSpaceToSpace, (int)com->S);
                 } else
