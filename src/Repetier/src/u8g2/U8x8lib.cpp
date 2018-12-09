@@ -338,6 +338,7 @@ uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uint8_t arg_in
 
 /* this function completly replaces u8x8_byte_4wire_sw_spi*/
 extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_ptr) {
+    uint8_t SREG_backup;
     uint8_t i, b;
     uint8_t* data;
     uint8_t takeover_edge = u8x8_GetSPIClockPhase(u8x8);
@@ -364,6 +365,8 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
                 b = *data;
                 data++;
                 arg_int--;
+                SREG_backup = SREG;
+                cli();
                 /* issue 156, check for speed */
 #if F_CPU <= 17000000
                 if (b == 0) {
@@ -386,12 +389,15 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
                         *arduino_clock_port &= arduino_clock_n_mask;
                     }
                 }
+                SREG = SREG_backup;
             }
         } else {
             while (arg_int > 0) {
                 b = *data;
                 data++;
                 arg_int--;
+                SREG_backup = SREG;
+                cli();
                 /* issue 156, check for speed */
 #if F_CPU <= 17000000
                 if (b == 0) {
@@ -414,6 +420,7 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
                         *arduino_clock_port |= arduino_clock_mask;
                     }
                 }
+                SREG = SREG_backup;
             }
         }
         break;
@@ -455,6 +462,7 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
     }
     return 1;
 }
+
 #elif defined(__SAM3X8E__)
 
 inline void u8g2_spi_wait_short() {

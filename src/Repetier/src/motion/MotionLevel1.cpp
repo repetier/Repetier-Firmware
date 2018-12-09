@@ -286,44 +286,44 @@ void Motion1::setAutolevelActive(bool state) {
 
 void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback) {
     if (code.hasX()) {
-        pos[X_AXIS] = code.X;
+        pos[X_AXIS] = Printer::convertToMM(code.X);
     } else {
         pos[X_AXIS] = fallback;
     }
     if (code.hasY()) {
-        pos[Y_AXIS] = code.Y;
+        pos[Y_AXIS] = Printer::convertToMM(code.Y);
     } else {
         pos[Y_AXIS] = fallback;
     }
     if (code.hasZ()) {
-        pos[Z_AXIS] = code.Z;
+        pos[Z_AXIS] = Printer::convertToMM(code.Z);
     } else {
         pos[Z_AXIS] = fallback;
     }
 #if NUM_AXES > E_AXIS
     if (code.hasE()) {
-        pos[E_AXIS] = code.E;
+        pos[E_AXIS] = Printer::convertToMM(code.E);
     } else {
         pos[E_AXIS] = fallback;
     }
 #endif
 #if NUM_AXES > A_AXIS
     if (code.hasA()) {
-        pos[A_AXIS] = code.A;
+        pos[A_AXIS] = Printer::convertToMM(code.A);
     } else {
         pos[A_AXIS] = fallback;
     }
 #endif
 #if NUM_AXES > B_AXIS
     if (code.hasB()) {
-        pos[B_AXIS] = code.B;
+        pos[B_AXIS] = Printer::convertToMM(code.B);
     } else {
         pos[B_AXIS] = fallback;
     }
 #endif
 #if NUM_AXES > C_AXIS
     if (code.hasC()) {
-        pos[C_AXIS] = code.C;
+        pos[C_AXIS] = Printer::convertToMM(code.C);
     } else {
         pos[C_AXIS] = fallback;
     }
@@ -332,44 +332,44 @@ void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback)
 
 void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback[NUM_AXES]) {
     if (code.hasX()) {
-        pos[X_AXIS] = code.X;
+        pos[X_AXIS] = Printer::convertToMM(code.X);
     } else {
         pos[X_AXIS] = fallback[X_AXIS];
     }
     if (code.hasY()) {
-        pos[Y_AXIS] = code.Y;
+        pos[Y_AXIS] = Printer::convertToMM(code.Y);
     } else {
         pos[Y_AXIS] = fallback[Y_AXIS];
     }
     if (code.hasZ()) {
-        pos[Z_AXIS] = code.Z;
+        pos[Z_AXIS] = Printer::convertToMM(code.Z);
     } else {
         pos[Z_AXIS] = fallback[Z_AXIS];
     }
 #if NUM_AXES > E_AXIS
     if (code.hasE()) {
-        pos[E_AXIS] = code.E;
+        pos[E_AXIS] = Printer::convertToMM(code.E);
     } else {
         pos[E_AXIS] = fallback[E_AXIS];
     }
 #endif
 #if NUM_AXES > A_AXIS
     if (code.hasA()) {
-        pos[A_AXIS] = code.A;
+        pos[A_AXIS] = Printer::convertToMM(code.A);
     } else {
         pos[A_AXIS] = fallback[A_AXIS];
     }
 #endif
 #if NUM_AXES > B_AXIS
     if (code.hasB()) {
-        pos[B_AXIS] = code.B;
+        pos[B_AXIS] = Printer::convertToMM(code.B);
     } else {
         pos[B_AXIS] = fallback[B_AXIS];
     }
 #endif
 #if NUM_AXES > C_AXIS
     if (code.hasC()) {
-        pos[C_AXIS] = code.C;
+        pos[C_AXIS] = Printer::convertToMM(code.C);
     } else {
         pos[C_AXIS] = fallback[C_AXIS];
     }

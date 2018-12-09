@@ -303,16 +303,7 @@ void GCode_91(GCode* com) {
 }
 
 void GCode_92(GCode* com) {
-    float xOff = Motion1::g92Offsets[X_AXIS];
-    float yOff = Motion1::g92Offsets[Y_AXIS];
-    float zOff = Motion1::g92Offsets[Z_AXIS];
-    if (com->hasX())
-        xOff = Printer::convertToMM(com->X) - Motion1::currentPosition[X_AXIS];
-    if (com->hasY())
-        yOff = Printer::convertToMM(com->Y) - Motion1::currentPosition[Y_AXIS];
-    if (com->hasZ())
-        zOff = Printer::convertToMM(com->Z) - Motion1::currentPosition[Z_AXIS];
-    Printer::setOrigin(xOff, yOff, zOff);
+    Motion1::fillPosFromGCode(*com, Motion1::g92Offsets, Motion1::g92Offsets);
     if (com->hasE()) {
         Motion1::destinationPositionTransformed[E_AXIS] = Motion1::currentPosition[E_AXIS] = Motion1::currentPositionTransformed[E_AXIS] = Printer::convertToMM(com->E);
     }
@@ -320,6 +311,16 @@ void GCode_92(GCode* com) {
         Com::printF(PSTR("X_OFFSET:"), Motion1::g92Offsets[X_AXIS], 3);
         Com::printF(PSTR(" Y_OFFSET:"), Motion1::g92Offsets[Y_AXIS], 3);
         Com::printFLN(PSTR(" Z_OFFSET:"), Motion1::g92Offsets[Z_AXIS], 3);
+#if NUM_AXES > A_AXIS
+        Com::printFLN(PSTR(" A_OFFSET:"), Motion1::g92Offsets[A_AXIS], 3);
+#endif
+#if NUM_AXES > B_AXIS
+        Com::printFLN(PSTR(" B_OFFSET:"), Motion1::g92Offsets[B_AXIS], 3);
+#endif
+#if NUM_AXES > C_AXIS
+        Com::printFLN(PSTR(" C_OFFSET:"), Motion1::g92Offsets[C_AXIS], 3);
+#endif
+        Com::println();
     }
 }
 
