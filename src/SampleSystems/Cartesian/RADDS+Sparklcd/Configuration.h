@@ -58,6 +58,7 @@
 #define VELOCITY_PROFILE 2           // 0 = linear, 1 = cubic, 2 = quintic velocity shape
 #define Z_SPEED 10                   // Z positioning speed
 #define XY_SPEED 150                 // XY positioning speed for normal operations
+#define E_SPEED 2                    // Extrusion speed
 #define G0_FEEDRATE 0                // Speed for G0 moves. Independent from set F value! Set 0 to use F value.
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
 #define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature

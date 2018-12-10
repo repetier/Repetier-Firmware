@@ -303,25 +303,30 @@ void GCode_91(GCode* com) {
 }
 
 void GCode_92(GCode* com) {
-    Motion1::fillPosFromGCode(*com, Motion1::g92Offsets, Motion1::g92Offsets);
+    Motion1::fillPosFromGCode(*com, Motion1::tmpPosition, IGNORE_COORDINATE);
+    FOR_ALL_AXES(i) {
+        if (Motion1::tmpPosition[i] != IGNORE_COORDINATE) {
+            Motion1::g92Offsets[i] = Motion1::tmpPosition[i] - Motion1::currentPosition[X_AXIS];
+        }
+    }
     if (com->hasE()) {
         Motion1::destinationPositionTransformed[E_AXIS] = Motion1::currentPosition[E_AXIS] = Motion1::currentPositionTransformed[E_AXIS] = Printer::convertToMM(com->E);
     }
-    if (com->hasX() || com->hasY() || com->hasZ()) {
-        Com::printF(PSTR("X_OFFSET:"), Motion1::g92Offsets[X_AXIS], 3);
-        Com::printF(PSTR(" Y_OFFSET:"), Motion1::g92Offsets[Y_AXIS], 3);
-        Com::printFLN(PSTR(" Z_OFFSET:"), Motion1::g92Offsets[Z_AXIS], 3);
+    // if (com->hasX() || com->hasY() || com->hasZ()) {
+    Com::printF(PSTR("X_OFFSET:"), Motion1::g92Offsets[X_AXIS], 3);
+    Com::printF(PSTR(" Y_OFFSET:"), Motion1::g92Offsets[Y_AXIS], 3);
+    Com::printF(PSTR(" Z_OFFSET:"), Motion1::g92Offsets[Z_AXIS], 3);
 #if NUM_AXES > A_AXIS
-        Com::printFLN(PSTR(" A_OFFSET:"), Motion1::g92Offsets[A_AXIS], 3);
+    Com::printF(PSTR(" A_OFFSET:"), Motion1::g92Offsets[A_AXIS], 3);
 #endif
 #if NUM_AXES > B_AXIS
-        Com::printFLN(PSTR(" B_OFFSET:"), Motion1::g92Offsets[B_AXIS], 3);
+    Com::printF(PSTR(" B_OFFSET:"), Motion1::g92Offsets[B_AXIS], 3);
 #endif
 #if NUM_AXES > C_AXIS
-        Com::printFLN(PSTR(" C_OFFSET:"), Motion1::g92Offsets[C_AXIS], 3);
+    Com::printF(PSTR(" C_OFFSET:"), Motion1::g92Offsets[C_AXIS], 3);
 #endif
-        Com::println();
-    }
+    Com::println();
+    // }
 }
 
 // G100 Calibrate floor or rod radius
