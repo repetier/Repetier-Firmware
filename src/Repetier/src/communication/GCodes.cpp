@@ -306,7 +306,7 @@ void GCode_92(GCode* com) {
     Motion1::fillPosFromGCode(*com, Motion1::tmpPosition, IGNORE_COORDINATE);
     FOR_ALL_AXES(i) {
         if (Motion1::tmpPosition[i] != IGNORE_COORDINATE) {
-            Motion1::g92Offsets[i] = Motion1::tmpPosition[i] - Motion1::currentPosition[X_AXIS];
+            Motion1::g92Offsets[i] = Motion1::tmpPosition[i] - Motion1::currentPosition[i];
         }
     }
     if (com->hasE()) {
