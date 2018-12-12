@@ -346,6 +346,30 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_INVERT_MENU_DIRECTION 0
 #define UI_BUTTON_BACK         71
 
+#elif MOTHERBOARD = 403 || MOTHERBOARD = 404
+
+ // ramps-fd lcd adaptor needs to rotate connectors 180° to work!
+#define UI_DISPLAY_RS_PIN         16
+#define UI_DISPLAY_ENABLE_PIN     17
+#define UI_DISPLAY_D4_PIN         23
+#define UI_DISPLAY_D5_PIN         25
+#define UI_DISPLAY_D6_PIN         27
+#define UI_DISPLAY_D7_PIN         29
+#define BEEPER_PIN                37
+#define UI_ENCODER_A              33
+#define UI_ENCODER_B              31
+#define UI_ENCODER_CLICK          35
+#define UI_RESET_PIN              -1
+#define UI_DELAYPERCHAR 50
+#define UI_INVERT_MENU_DIRECTION   0
+#define UI_BUTTON_BACK            -1
+#undef SDCARDDETECT
+#define SDCARDDETECT           49
+#undef SDCARDDETECTINVERTED
+#define SDCARDDETECTINVERTED   0
+#undef SDSUPPORT
+#define SDSUPPORT              1
+
 #else  // RAMPS
 
 #undef BEEPER_PIN

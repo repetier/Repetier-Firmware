@@ -3179,7 +3179,8 @@ S3(ext)=9
 #endif
 
 #define ORIG_Z_MIN_PIN          12
-#define ORIG_Z_MAX_PIN          9
+// some images show z max pin 9 but v1.3 pin description says 2!
+#define ORIG_Z_MAX_PIN          2
 
 #define ORIG_E0_STEP_PIN         26
 #define ORIG_E0_DIR_PIN          28

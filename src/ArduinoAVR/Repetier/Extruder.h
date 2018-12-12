@@ -324,6 +324,8 @@ public:
     static void manageTemperatures();
     static void disableCurrentExtruderMotor();
     static void disableAllExtruderMotors();
+    static void enableCurrentExtruderMotor();
+    static void enableAllExtruderMotors();
     static void selectExtruderById(uint8_t extruderId);
     static void disableAllHeater();
     static void initExtruder();

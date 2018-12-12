@@ -1977,6 +1977,109 @@ void Extruder::disableCurrentExtruderMotor() {
 #endif
 #endif // MIXING_EXTRUDER
 }
+void Extruder::enableCurrentExtruderMotor() {
+	#if MIXING_EXTRUDER
+	#if NUM_EXTRUDER > 0 && defined(EXT0_ENABLE_PIN) && EXT0_ENABLE_PIN > -1
+	WRITE(EXT0_ENABLE_PIN, EXT0_ENABLE_ON );
+	#if defined(EXT0_MIRROR_STEPPER) && EXT0_MIRROR_STEPPER
+	WRITE(EXT0_ENABLE2_PIN, EXT0_ENABLE_ON);
+	#endif
+	#endif
+	#if NUM_EXTRUDER > 1 && defined(EXT1_ENABLE_PIN) && EXT1_ENABLE_PIN > -1
+	WRITE(EXT1_ENABLE_PIN, EXT1_ENABLE_ON );
+	#if defined(EXT1_MIRROR_STEPPER) && EXT1_MIRROR_STEPPER
+	WRITE(EXT1_ENABLE2_PIN, EXT1_ENABLE_ON);
+	#endif
+	#endif
+	#if NUM_EXTRUDER > 2 && defined(EXT2_ENABLE_PIN) && EXT2_ENABLE_PIN > -1
+	WRITE(EXT2_ENABLE_PIN, EXT2_ENABLE_ON );
+	#if defined(EXT2_MIRROR_STEPPER) && EXT2_MIRROR_STEPPER
+	WRITE(EXT2_ENABLE2_PIN, EXT2_ENABLE_ON);
+	#endif
+	#endif
+	#if NUM_EXTRUDER > 3 && defined(EXT3_ENABLE_PIN) && EXT3_ENABLE_PIN > -1
+	WRITE(EXT3_ENABLE_PIN, EXT3_ENABLE_ON );
+	#if defined(EXT3_MIRROR_STEPPER) && EXT3_MIRROR_STEPPER
+	WRITE(EXT3_ENABLE2_PIN, EXT3_ENABLE_ON);
+	#endif
+	#endif
+	#if NUM_EXTRUDER > 4 && defined(EXT4_ENABLE_PIN) && EXT4_ENABLE_PIN > -1
+	WRITE(EXT4_ENABLE_PIN, EXT4_ENABLE_ON );
+	#if defined(EXT4_MIRROR_STEPPER) && EXT4_MIRROR_STEPPER
+	WRITE(EXT4_ENABLE2_PIN, EXT4_ENABLE_ON);
+	#endif
+	#endif
+	#if NUM_EXTRUDER > 5 && defined(EXT5_ENABLE_PIN) && EXT5_ENABLE_PIN > -1
+	WRITE(EXT5_ENABLE_PIN, EXT5_ENABLE_ON );
+	#if defined(EXT5_MIRROR_STEPPER) && EXT5_MIRROR_STEPPER
+	WRITE(EXT5_ENABLE2_PIN, EXT5_ENABLE_ON);
+	#endif
+	#endif
+	#else // MIXING_EXTRUDER
+	#if NUM_EXTRUDER > 0
+	switch(Extruder::current->id) {
+		#if defined(EXT0_MIRROR_STEPPER) && EXT0_MIRROR_STEPPER && NUM_EXTRUDER > 0
+		case 0:
+		WRITE(EXT0_ENABLE2_PIN, EXT0_ENABLE_ON);
+		break;
+		#endif
+		#if defined(EXT1_MIRROR_STEPPER) && EXT1_MIRROR_STEPPER && NUM_EXTRUDER > 1
+		case 1:
+		WRITE(EXT1_ENABLE2_PIN, EXT1_ENABLE_ON);
+		break;
+		#endif
+		#if defined(EXT2_MIRROR_STEPPER) && EXT2_MIRROR_STEPPER && NUM_EXTRUDER > 2
+		case 2:
+		WRITE(EXT2_ENABLE2_PIN, EXT2_ENABLE_ON);
+		break;
+		#endif
+		#if defined(EXT3_MIRROR_STEPPER) && EXT3_MIRROR_STEPPER && NUM_EXTRUDER > 3
+		case 3:
+		WRITE(EXT3_ENABLE2_PIN, EXT3_ENABLE_ON);
+		break;
+		#endif
+		#if defined(EXT4_MIRROR_STEPPER) && EXT4_MIRROR_STEPPER && NUM_EXTRUDER > 4
+		case 4:
+		WRITE(EXT4_ENABLE2_PIN, EXT4_ENABLE_ON);
+		break;
+		#endif
+		#if defined(EXT5_MIRROR_STEPPER) && EXT5_MIRROR_STEPPER && NUM_EXTRUDER > 5
+		case 5:
+		WRITE(EXT5_ENABLE2_PIN, EXT5_ENABLE_ON);
+		break;
+		#endif
+	}
+	if(Extruder::current->enablePin > -1)
+	HAL::digitalWrite(Extruder::current->enablePin, Extruder::current->enableOn);
+	#if FEATURE_DITTO_PRINTING
+	if(Extruder::dittoMode) {
+		if(extruder[1].enablePin > -1) {
+			HAL::digitalWrite(extruder[1].enablePin, extruder[1].enableOn);
+			#if defined(EXT1_MIRROR_STEPPER) && EXT1_MIRROR_STEPPER && NUM_EXTRUDER > 1
+			WRITE(EXT1_ENABLE2_PIN, EXT1_ENABLE_ON);
+			#endif
+		}
+		#if NUM_EXTRUDER > 2
+		if(Extruder::dittoMode > 1 && extruder[2].enablePin > -1) {
+			HAL::digitalWrite(extruder[2].enablePin, !extruder[2].enableOn);
+			#if defined(EXT2_MIRROR_STEPPER) && EXT2_MIRROR_STEPPER && NUM_EXTRUDER > 2
+			WRITE(EXT2_ENABLE2_PIN, EXT2_ENABLE_ON);
+			#endif
+		}
+		#endif
+		#if NUM_EXTRUDER > 3
+		if(Extruder::dittoMode > 2 && extruder[3].enablePin > -1) {
+			HAL::digitalWrite(extruder[3].enablePin, !extruder[3].enableOn);
+			#if defined(EXT3_MIRROR_STEPPER) && EXT3_MIRROR_STEPPER && NUM_EXTRUDER > 3
+			WRITE(EXT3_ENABLE2_PIN, EXT3_ENABLE_ON);
+			#endif
+		}
+		#endif
+	}
+	#endif
+	#endif
+	#endif // MIXING_EXTRUDER
+}
 void Extruder::disableAllExtruderMotors() {
     for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
         if(extruder[i].enablePin > -1)
@@ -2000,6 +2103,30 @@ void Extruder::disableAllExtruderMotors() {
 #if defined(EXT5_MIRROR_STEPPER) && EXT5_MIRROR_STEPPER && NUM_EXTRUDER > 5
     WRITE(EXT5_ENABLE2_PIN, !EXT5_ENABLE_ON);
 #endif
+}
+void Extruder::enableAllExtruderMotors() {
+	for(fast8_t i = 0; i < NUM_EXTRUDER; i++) {
+		if(extruder[i].enablePin > -1)
+		HAL::digitalWrite(extruder[i].enablePin, extruder[i].enableOn);
+	}
+	#if defined(EXT0_MIRROR_STEPPER) && EXT0_MIRROR_STEPPER && NUM_EXTRUDER > 0
+	WRITE(EXT0_ENABLE2_PIN, EXT0_ENABLE_ON);
+	#endif
+	#if defined(EXT1_MIRROR_STEPPER) && EXT1_MIRROR_STEPPER && NUM_EXTRUDER > 1
+	WRITE(EXT1_ENABLE2_PIN, EXT1_ENABLE_ON);
+	#endif
+	#if defined(EXT2_MIRROR_STEPPER) && EXT2_MIRROR_STEPPER && NUM_EXTRUDER > 2
+	WRITE(EXT2_ENABLE2_PIN, EXT2_ENABLE_ON);
+	#endif
+	#if defined(EXT3_MIRROR_STEPPER) && EXT3_MIRROR_STEPPER && NUM_EXTRUDER > 3
+	WRITE(EXT3_ENABLE2_PIN, EXT3_ENABLE_ON);
+	#endif
+	#if defined(EXT4_MIRROR_STEPPER) && EXT4_MIRROR_STEPPER && NUM_EXTRUDER > 4
+	WRITE(EXT4_ENABLE2_PIN, EXT4_ENABLE_ON);
+	#endif
+	#if defined(EXT5_MIRROR_STEPPER) && EXT5_MIRROR_STEPPER && NUM_EXTRUDER > 5
+	WRITE(EXT5_ENABLE2_PIN, EXT5_ENABLE_ON);
+	#endif
 }
 #define NUMTEMPS_1 28
 // Epcos B57560G0107F000

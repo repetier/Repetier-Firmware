@@ -1782,6 +1782,34 @@ void Commands::processMCode(GCode *com) {
     case 83: // M83
         Printer::relativeExtruderCoordinateMode = true;
         break;
+	case 17: // M17 is to enable named axis
+	{
+		Commands::waitUntilEndOfAllMoves();
+		bool named = false;
+		if(com->hasX()) {
+			named = true;
+			Printer::enableXStepper();
+		}
+		if(com->hasY()) {
+			named = true;
+			Printer::enableYStepper();
+		}
+		if(com->hasZ()) {
+			named = true;
+			Printer::enableZStepper();
+		}
+		if(com->hasE()) {
+			named = true;
+			Extruder::enableCurrentExtruderMotor();
+		}
+		if(!named) {
+			Printer::enableXStepper();
+			Printer::enableYStepper();
+			Printer::enableZStepper();
+			Extruder::enableAllExtruderMotors();
+		}
+	}
+	break;
 	case 18: // M18 is to disable named axis
         {
 			Commands::waitUntilEndOfAllMoves();
