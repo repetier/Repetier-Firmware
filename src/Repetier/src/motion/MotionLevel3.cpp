@@ -208,8 +208,14 @@ void Motion3::timer() {
 #if NUM_AXES > E_AXIS
         if (/* (act->usedAxes & 8) && */ (Motion1::motorTriggered & 8) == 0) {
             if ((act->error[E_AXIS] += act->delta[E_AXIS]) > 0) {
-                if (Motion1::motors[E_AXIS]) {
-                    Motion1::motors[E_AXIS]->step();
+                if (Motion1::dittoMode) {
+                    for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
+                        Tool::getTool(i)->stepMotor();
+                    }
+                } else {
+                    if (Motion1::motors[E_AXIS]) {
+                        Motion1::motors[E_AXIS]->step();
+                    }
                 }
                 actM2->stepsRemaining[E_AXIS]--;
                 act->error[E_AXIS] -= act->errorUpdate;
