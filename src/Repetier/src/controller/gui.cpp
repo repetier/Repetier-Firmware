@@ -399,7 +399,12 @@ void GUI::bufAddHeaterTemp(HeatManager* hm, bool target) {
         if (hm->isUnplugged()) {
             GUI::bufAddStringP(PSTR("---"));
         } else if (hm->isPaused()) {
-            GUI::bufAddStringP(PSTR("Off"));
+            GUI::bufAddFloat(hm->getCurrentTemperature(), 3, 0);
+            if (target) {
+                GUI::bufAddChar('/');
+                GUI::bufAddStringP(PSTR("Off"));
+            }
+            GUI::bufAddStringP(PSTR("°C"));
         } else {
             GUI::bufAddFloat(hm->getCurrentTemperature(), 3, 0);
             if (target) {
@@ -683,6 +688,9 @@ void directAction(GUIAction action, void* data) {
 #if SDSUPPORT
         sd.continuePrint(true);
 #endif
+        break;
+    case GUI_DIRECT_ACTION_POWERLOSS:
+        Printer::handlePowerLoss();
         break;
     }
 }

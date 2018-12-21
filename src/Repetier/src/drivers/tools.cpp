@@ -66,6 +66,7 @@ void Tool::unselectTool() {
 }
 
 void Tool::selectTool(fast8_t id, bool force) {
+    bool doMove = activeToolId != 255;
     // Test for valid tool id
     if (id < 0 || id >= NUM_TOOLS || !PrinterType::canSelectTool(id)) {
         Com::printWarningF(PSTR("Illegal tool number selected:"));
@@ -85,7 +86,7 @@ void Tool::selectTool(fast8_t id, bool force) {
     float zOffset = -Motion1::toolOffset[Z_AXIS]; // opposite sign to extruder offset!
 #if RAISE_Z_ON_TOOLCHANGE > 0
     float lastZ = Motion1::currentPosition[Z_AXIS];
-    if (Motion1::isAxisHomed(Z_AXIS)) {
+    if (doMove && Motion1::isAxisHomed(Z_AXIS)) {
         Motion1::setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, lastZ + RAISE_Z_ON_TOOLCHANGE);
         Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
         Motion1::waitForEndOfMoves();
@@ -107,10 +108,17 @@ void Tool::selectTool(fast8_t id, bool force) {
     if (Motion1::dittoMode == 0) {
         activeTool->activate();
         PrinterType::activatedTool(activeToolId);
-        Motion1::setToolOffset(-activeTool->offsetX, -activeTool->offsetY, -activeTool->offsetZ);
+        if (doMove) {
+            Motion1::setToolOffset(-activeTool->offsetX, -activeTool->offsetY, -activeTool->offsetZ);
+        } else {
+            Motion1::currentPosition[X_AXIS] += -activeTool->offsetX - Motion1::toolOffset[X_AXIS];
+            Motion1::currentPosition[Y_AXIS] += -activeTool->offsetY - Motion1::toolOffset[Y_AXIS];
+            Motion1::currentPosition[Z_AXIS] += -activeTool->offsetZ - Motion1::toolOffset[Z_AXIS];
+            Motion1::updatePositionsFromCurrent();
+        }
     }
 #if RAISE_Z_ON_TOOLCHANGE > 0
-    if (Motion1::isAxisHomed(Z_AXIS)) {
+    if (doMove && Motion1::isAxisHomed(Z_AXIS)) {
         Motion1::setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, lastZ);
         Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
         Motion1::waitForEndOfMoves();
@@ -142,6 +150,38 @@ void Tool::disableMotors() {
     for (fast8_t i = 0; i < NUM_TOOLS; i++) {
         tools[i]->disableMotor();
     }
+}
+
+void Tool::enableMotors() {
+    for (fast8_t i = 0; i < NUM_TOOLS; i++) {
+        tools[i]->enableMotor();
+    }
+}
+void Tool::pauseHeaters() {
+    for (fast8_t i = 0; i < NUM_TOOLS; i++) {
+        HeatManager* hm = tools[i]->getHeater();
+        if (hm) {
+            hm->pause();
+        }
+    }
+}
+void Tool::unpauseHeaters() {
+    for (fast8_t i = 0; i < NUM_TOOLS; i++) {
+        HeatManager* hm = tools[i]->getHeater();
+        if (hm) {
+            hm->unpause();
+        }
+    }
+}
+void Tool::waitForTemperatures() {
+    GUI::setStatusP(PSTR("Heating..."), GUIStatusLevel::BUSY); // inform user
+    for (fast8_t i = 0; i < NUM_TOOLS; i++) {
+        HeatManager* hm = tools[i]->getHeater();
+        if (hm) {
+            hm->waitForTargetTemperature();
+        }
+    }
+    GUI::popBusy();
 }
 
 void Tool::eepromHandleTools() {

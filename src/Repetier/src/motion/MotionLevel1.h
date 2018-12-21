@@ -229,7 +229,7 @@ public:
 #endif
     static bool wasLastSecondary; ///< true if last move had secondary flag
     static fast8_t homeDir[NUM_AXES];
-    static fast8_t homePriority[NUM_AXES]; // determines homing order, lower number first
+    static int8_t homePriority[NUM_AXES]; // determines homing order, lower number first
     static StepperDriverBase* motors[NUM_AXES];
     static EndstopDriver* minAxisEndstops[NUM_AXES];
     static EndstopDriver* maxAxisEndstops[NUM_AXES];
@@ -300,6 +300,7 @@ public:
     static bool pushToMemory();
     /// Pop memorized position to tmpPosition
     static bool popFromMemory();
+    static bool popFromMemory(float coords[NUM_AXES]);
     static bool isAxisHomed(fast8_t axis);
     static void setAxisHomed(fast8_t axis, bool state);
     static void homeAxes(fast8_t axes);

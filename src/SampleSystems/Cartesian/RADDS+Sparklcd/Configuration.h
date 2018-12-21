@@ -62,6 +62,10 @@
 #define G0_FEEDRATE 0                // Speed for G0 moves. Independent from set F value! Set 0 to use F value.
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
 #define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
+#define HOST_RESCUE 1                // Enable host rescue help system
+//#define DEBUG_RESCUE                 // Uncomment to add power loss entry in debug menu while printing
+#define POWERLOSS_LEVEL 2            // How much time do we have on powerloss, 0 = no move, 1 = short just raise Z, 2 = long full park move
+#define POWERLOSS_UP 5               // How much to move up if mode 1 is active
 #define Z_PROBE_TYPE 2               // 0 = no z probe, 1 = default z probe, 2 = Nozzle as probe
 #define Z_PROBE_BORDER 2             // Safety border to ensure position is allowed
 #define Z_PROBE_TEMPERATURE 170      // Temperature for type 2

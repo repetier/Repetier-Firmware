@@ -77,6 +77,10 @@ int debugWaitLoop = 0;
 #endif
 fast8_t Printer::wizardStackPos;
 wizardVar Printer::wizardStack[WIZARD_STACK_SIZE];
+uint16_t Printer::rescuePos;       // EEPROM address for rescue
+fast8_t Printer::safetyParked = 0; /// True if moved to a safety position to protect print
+uint8_t Printer::rescueOn = false;
+bool Printer::failedMode = false;
 
 FirmwareEvent FirmwareEvent::eventList[4];
 volatile fast8_t FirmwareEvent::start = 0;
@@ -442,9 +446,9 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
     }
     if (com->hasF() && com->F > 0.1) {
         if (unitIsInches) {
-            feedrate = com->F * 0.0042333f * (float)feedrateMultiply; // Factor is 25.5/60/100
+            feedrate = com->F * 0.0042333f * (float)feedrateMultiply; // Factor is 25.4/60/100
         } else {
-            feedrate = com->F * (float)feedrateMultiply * 0.00016666666f;
+            feedrate = com->F * (float)feedrateMultiply * 0.00016666666f; // Factor is 1/60/100
         }
     }
     Motion1::moveByOfficial(coords, Printer::feedrate, secondaryMove);
@@ -501,6 +505,8 @@ void Printer::setup() {
     Leveling::init();
     PrinterType::init();
     Tool::initTools();
+    rescuePos = EEPROM::reserveRecover(1, 1, EPR_RESCUE_SIZE);
+
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
 #endif // FEATURE_CONTROLLER
@@ -590,7 +596,7 @@ void Printer::setup() {
 #endif // FEATURE_WATCHDOG
     HAL::delayMilliseconds(20);
 
-    Tool::selectTool(0);
+    Tool::selectTool(rescueStartTool());
     // Extruder::selectExtruderById(0);
     HAL::delayMilliseconds(20);
 
@@ -598,19 +604,14 @@ void Printer::setup() {
 #ifdef STARTUP_GCODE
     GCode::executeFString(Com::tStartupGCode);
 #endif
-#if EEPROM_MODE != 0 && UI_DISPLAY_TYPE != NO_DISPLAY
-    if (EEPROM::getStoredLanguage() == 254) {
-        Com::printFLN(PSTR("Needs language selection"));
-        uid.showLanguageSelectionWizard();
-    }
-#endif // EEPROM_MODE
     HAL::delayMilliseconds(20);
+    rescueSetup();
 }
 
 void Printer::defaultLoopActions() {
     Commands::checkForPeriodicalActions(true); //check heater every n milliseconds
     millis_t curtime = HAL::timeInMilliseconds();
-    if (Motion1::length != 0 || isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED))
+    if (isRescueRequired() || Motion1::length != 0 || isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED))
         previousMillisCmd = curtime;
     else {
         curtime -= previousMillisCmd;
@@ -1244,4 +1245,212 @@ void Printer::realPosition(float& xp, float& yp, float& zp) {
     xp = Motion1::currentPosition[X_AXIS];
     yp = Motion1::currentPosition[Y_AXIS];
     zp = Motion1::currentPosition[Z_AXIS];
+}
+
+/*
+
+Rescue system uses the following layout in eeprom:
+1 : mode
+4 * NUM_AXES : Last received position
+4 * NUM_AXES : Last position
+4 * NUM_AXES : Last Offsets
+*/
+
+void Printer::enableRescue(bool on) {
+#if HOST_RESCUE
+    if (on && EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE)) {
+        EEPROM::setRecoverByte(rescuePos + EPR_RESCUE_MODE, 0);
+    }
+    rescueOn = on;
+    if (!on) {
+        unparkSafety();
+        GUI::popBusy();
+    }
+    rescueReset(); // enabling/disabling removes old values
+#endif
+}
+bool Printer::isRescue() {
+#if HOST_RESCUE
+    return rescueOn;
+#else
+    return false;
+#endif
+}
+void Printer::rescueReport() {
+#if HOST_RESCUE
+    uint8_t mode = EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE);
+    Com::printF(PSTR("RESCUE_STATE:"));
+    if (mode & 1) {
+        FOR_ALL_AXES(i) {
+            Com::print(' ');
+            Com::print('L');
+            Com::printF(axisNames[i]);
+            Com::printF(Com::tColon, EEPROM::getRecoverFloat(rescuePos + EPR_RESCUE_LAST_RECEIVED + sizeof(float) * i), 2);
+        }
+        Com::printF(PSTR(" LT:"), (int)EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_TOOL));
+    }
+    if (mode & 2) {
+        FOR_ALL_AXES(i) {
+            Com::print(' ');
+            Com::printF(axisNames[i]);
+            Com::printF(Com::tColon, EEPROM::getRecoverFloat(rescuePos + EPR_RESCUE_LAST_POS + sizeof(float) * i), 2);
+        }
+    }
+    if (mode == 0) {
+        Com::printFLN(PSTR(" OFF"));
+    }
+    Com::println();
+#endif
+}
+void Printer::rescueStoreReceivedPosition() {
+#if HOST_RESCUE
+    if (!rescueOn) {
+        return;
+    }
+    FOR_ALL_AXES(i) {
+        EEPROM::setRecoverFloat(rescuePos + EPR_RESCUE_LAST_RECEIVED + sizeof(float) * i, Motion1::currentPosition[i]);
+    }
+    EEPROM::setRecoverByte(rescuePos + EPR_RESCUE_TOOL, Tool::getActiveToolId());
+    EEPROM::setRecoverByte(rescuePos + EPR_RESCUE_MODE, EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE) | 1);
+#endif
+}
+void Printer::rescueStorePosition() {
+#if HOST_RESCUE
+    if (!rescueOn) {
+        return;
+    }
+    FOR_ALL_AXES(i) {
+        EEPROM::setRecoverFloat(rescuePos + EPR_RESCUE_LAST_POS + sizeof(float) * i, Motion1::currentPosition[i]);
+        EEPROM::setRecoverFloat(rescuePos + EPR_RESCUE_OFFSETS + sizeof(float) * i, Motion1::g92Offsets[i]);
+    }
+    EEPROM::setRecoverByte(rescuePos + EPR_RESCUE_MODE, EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE) | 2);
+#endif
+}
+void Printer::rescueRecover() {
+#if HOST_RESCUE
+    uint8_t mode = EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE);
+    if (mode == 0) {
+        return;
+    }
+    if (mode & 2) {
+        FOR_ALL_AXES(i) {
+            Motion1::currentPosition[i] = EEPROM::getRecoverFloat(rescuePos + EPR_RESCUE_LAST_POS + sizeof(float) * i);
+            Motion1::g92Offsets[i] = EEPROM::getRecoverFloat(rescuePos + EPR_RESCUE_OFFSETS + sizeof(float) * i);
+            Motion1::setAxisHomed(i, true);
+        }
+    } else if (mode & 1) {
+        FOR_ALL_AXES(i) {
+            Motion1::currentPosition[i] = EEPROM::getRecoverFloat(rescuePos + EPR_RESCUE_LAST_RECEIVED + sizeof(float) * i);
+            Motion1::setAxisHomed(i, true);
+        }
+    }
+#endif
+}
+int Printer::rescueStartTool() {
+#if HOST_RESCUE
+    if (EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE)) {
+        return static_cast<int>(EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_TOOL));
+    } else {
+        return 0;
+    }
+#else
+    return 0;
+#endif
+}
+void Printer::rescueSetup() {
+#if HOST_RESCUE
+    uint8_t mode = EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE);
+    if (mode) {
+        rescueReport();
+        FOR_ALL_AXES(i) { // prevent unwanted moves so we can continue
+            if (i != E_AXIS && Motion1::motors[i]) {
+                Motion1::motors[i]->enable();
+            }
+        }
+        rescueRecover();
+    }
+#endif
+}
+
+bool Printer::isRescueRequired() {
+#if HOST_RESCUE
+    return EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE) != 0;
+#else
+    return false;
+#endif
+}
+void Printer::rescueReset() {
+#if HOST_RESCUE
+    uint8_t mode = EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE);
+    if (mode) {
+        EEPROM::setRecoverByte(rescuePos + EPR_RESCUE_MODE, 0);
+    }
+#endif
+}
+void Printer::handlePowerLoss() {
+    HeatManager::disableAllHeaters();
+    if (rescueOn) {
+        Com::printErrorF(PSTR("POWERLOSS_DETECTED"));
+        rescueStoreReceivedPosition();
+#if POWERLOSS_LEVEL == 1 //z up only
+#endif
+#if POWERLOSS_LEVEL == 2 // full park - we are on a UPC :-)
+        parkSafety();
+#endif
+        Motion1::waitForEndOfMoves();
+        rescueStorePosition();
+        Tool::disableMotors();
+        kill(false);
+        enableFailedModeP(PSTR("Power Loss"));
+    }
+}
+void Printer::parkSafety() {
+    if (safetyParked || !rescueOn) {
+        return; // nothing to unpark
+    }
+    rescueStoreReceivedPosition();
+    safetyParked = 1;
+    if (Motion1::pushToMemory()) {
+        Motion1::moveToParkPosition();
+        Motion1::waitForEndOfMoves();
+        rescueStorePosition();
+        safetyParked = 2;
+    }
+    Tool::pauseHeaters();
+    GUI::setStatusP(PSTR("Waiting f. Data..."), GUIStatusLevel::BUSY); // inform user
+}
+void Printer::unparkSafety() {
+    if (!safetyParked) {
+        return; // nothing to unpark
+    }
+    Tool::unpauseHeaters();
+    Tool::waitForTemperatures();
+    bool needsPop = safetyParked > 1;
+    safetyParked = 0;
+    float pos[NUM_AXES];
+    if (needsPop && Motion1::popFromMemory(pos)) {
+        float z = pos[Z_AXIS];
+        pos[Z_AXIS] = IGNORE_COORDINATE;
+        Motion1::moveByOfficial(pos, Motion1::moveFeedrate[X_AXIS], false);
+        FOR_ALL_AXES(i) {
+            pos[i] = IGNORE_COORDINATE;
+        }
+        pos[Z_AXIS] = z;
+        Motion1::moveByOfficial(pos, Motion1::moveFeedrate[Z_AXIS], false);
+    }
+    GUI::popBusy();
+}
+void Printer::enableFailedModeP(PGM_P msg) {
+    failedMode = true;
+    GUI::setStatusP(msg, GUIStatusLevel::ERROR);
+    Com::printErrorFLN(msg);
+    Com::printErrorFLN(Com::tM999);
+}
+void Printer::enableFailedMode(char* msg) {
+    failedMode = true;
+    GUI::setStatus(msg, GUIStatusLevel::ERROR);
+    Com::printErrorF(Com::tEmpty);
+    Com::print(msg);
+    Com::println();
+    Com::printErrorFLN(Com::tM999);
 }

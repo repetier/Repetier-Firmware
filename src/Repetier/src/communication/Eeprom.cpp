@@ -30,6 +30,8 @@ EEPROMVar EEPROM::storeVar;
 char EEPROM::prefix[20];
 uint EEPROM::reservedEnd = EPR_START_RESERVE; // Last position for reserved data
 unsigned int EEPROM::variation1 = 0, EEPROM::variation2 = 0;
+uint EEPROM::reservedRecoverEnd = 2; // Last position for recover data
+unsigned int EEPROM::variationRecover1 = 0, EEPROM::variationRecover2 = 0;
 fast8_t EEPROM::changedTimer = 0;
 bool EEPROM::silent;
 
@@ -39,6 +41,15 @@ uint EEPROM::reserve(uint8_t sig, uint8_t version, uint length) {
     updateVariation(sig);
     updateVariation(version);
     updateVariation(static_cast<uint8_t>(length & 255));
+    return r;
+}
+
+uint EEPROM::reserveRecover(uint8_t sig, uint8_t version, uint length) {
+    uint r = reservedRecoverEnd;
+    reservedRecoverEnd += length;
+    updateVariationRecover(sig);
+    updateVariationRecover(version);
+    updateVariationRecover(static_cast<uint8_t>(length & 255));
     return r;
 }
 
@@ -201,6 +212,17 @@ void EEPROM::updateVariation(fast8_t data) {
     }
 }
 
+void EEPROM::updateVariationRecover(fast8_t data) {
+    variationRecover1 += data;
+    if (variationRecover1 >= 255) {
+        variationRecover1 -= 255;
+    }
+    variationRecover2 += variationRecover1;
+    if (variationRecover2 >= 255) {
+        variationRecover2 -= 255;
+    }
+}
+
 #ifndef USE_CONFIGURATION_BAUD_RATE
 #define USE_CONFIGURATION_BAUD_RATE 0
 #endif // USE_CONFIGURATION_BAUD_RATE
@@ -213,6 +235,7 @@ void EEPROM::init() {
     prefix[0] = 0;
     var1 = HAL::eprGetByte(EPR_VARIATION1);
     var2 = HAL::eprGetByte(EPR_VARIATION2);
+    bool resetRec = false;
     if (HAL::eprGetByte(EPR_MAGIC_BYTE) == EEPROM_MODE && storedcheck == check && var1 == variation1 && var2 == variation2 && HAL::eprGetByte(EPR_VERSION) == EEPROM_PROTOCOL_VERSION) {
         readDataFromEEPROM();
         if (USE_CONFIGURATION_BAUD_RATE) {
@@ -228,7 +251,13 @@ void EEPROM::init() {
             Com::printFLN(PSTR("RECOMPILE WITH USE_CONFIGURATION_BAUD_RATE == 0 to alter baud rate via EEPROM"));
         }
     } else {
+        resetRec = true;
         storeDataIntoEEPROM(storedcheck != check);
+    }
+    var1 = getRecoverByte(0);
+    var2 = getRecoverByte(1);
+    if (resetRec || var1 != variationRecover1 || var2 != variationRecover2) {
+        resetRecover();
     }
 #endif
 }
@@ -272,7 +301,7 @@ void EEPROM::writeSettings() {
 uint8_t EEPROM::computeChecksum() {
     unsigned int i;
     uint8_t checksum = 0;
-    for (i = 0; i < 4096; i++) {
+    for (i = 0; i < reservedEnd; i++) {
         if (i == EPR_INTEGRITY_BYTE)
             continue;
         checksum += HAL::eprGetByte(i);
@@ -501,3 +530,37 @@ void EEPROM::handleByte(uint pos, PGM_P text, int32_t& var) {
     }
 #endif
 }
+#if EEPROM_MODE != 0
+void EEPROM::resetRecover() {
+    Com::printFLN(PSTR("Resetting rescue data block"));
+    for (int i = 2; i < reservedRecoverEnd; i++) {
+        setRecoverByte(i, 0);
+    }
+    setRecoverByte(0, variationRecover1);
+    setRecoverByte(1, variationRecover2);
+}
+float EEPROM::getRecoverFloat(uint pos) {
+    return HAL::eprGetFloat(pos + reservedEnd);
+}
+int32_t EEPROM::getRecoverLong(uint pos) {
+    return HAL::eprGetInt32(pos + reservedEnd);
+}
+int16_t EEPROM::getRecoverInt(uint pos) {
+    return HAL::eprGetInt16(pos + reservedEnd);
+}
+uint8_t EEPROM::getRecoverByte(uint pos) {
+    return HAL::eprGetByte(pos + reservedEnd);
+}
+void EEPROM::setRecoverFloat(uint pos, float val) {
+    HAL::eprSetFloat(pos + reservedEnd, val);
+}
+void EEPROM::setRecoverLong(uint pos, int32_t val) {
+    HAL::eprSetInt32(pos + reservedEnd, val);
+}
+void EEPROM::setRecoverInt(uint pos, int16_t val) {
+    HAL::eprSetInt16(pos + reservedEnd, val);
+}
+void EEPROM::setRecoverByte(uint pos, uint8_t val) {
+    HAL::eprSetByte(pos + reservedEnd, val);
+}
+#endif

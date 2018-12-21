@@ -154,6 +154,10 @@ public:
     static void eepromHandleTools();
     static void updateDerivedTools();
     static void disableMotors();
+    static void enableMotors();
+    static void pauseHeaters();
+    static void unpauseHeaters();
+    static void waitForTemperatures();
     static void minMaxOffsetForAxis(fast8_t axis, float& min, float& max);
 };
 

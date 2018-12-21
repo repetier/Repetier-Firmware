@@ -129,6 +129,7 @@ FSTRINGVALUE(Com::tUnitBaud, "baud")
 FSTRINGVALUE(Com::tUnitPercent, "%")
 FSTRINGVALUE(Com::tUnitDegCelsius, "°C")
 FSTRINGVALUE(Com::tUnitStepsPerMM, "steps/mm")
+FSTRINGVALUE(Com::tM999, "Fail mode active. Send M999 to disable failed mode!")
 #if JSON_OUTPUT
 FSTRINGVALUE(Com::tJSONDir, "{\"dir\":\"")
 FSTRINGVALUE(Com::tJSONFiles, "\",\"files\":[")

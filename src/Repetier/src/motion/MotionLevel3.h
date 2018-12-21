@@ -108,18 +108,6 @@ public:
                 Motion1::motors[E_AXIS]->unstep();
             }
         }
-        /* if (Motion1::dittoMode) {
-            for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
-                Tool* t = Tool::getTool(i);
-                if (t != nullptr) {
-                    t->unstepMotor();
-                }
-            }
-        } else {
-            if (Motion1::motors[E_AXIS]) {
-                Motion1::motors[E_AXIS]->unstep();
-            }
-        } */
 #if NUM_AXES > A_AXIS
         AMotor.unstep();
 #endif
@@ -129,12 +117,6 @@ public:
 #if NUM_AXES > C_AXIS
         CMotor.unstep();
 #endif
-        /*        for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
-            if (Motion1::motors[i] != nullptr) {
-                Motion1::motors[i]->unstep();
-            }
-        } */
     }
-    // static void removeParentId(uint8_t pid);
     static void reportBuffers();
 };

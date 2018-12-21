@@ -71,8 +71,11 @@ class EEPROM {
     static void callHandle();
     static char prefix[20];
     static void updateVariation(fast8_t data);
-    static uint reservedEnd; // Last position for reserved data
+    static void updateVariationRecover(fast8_t data);
+    static uint reservedEnd;        // Last position for reserved data
+    static uint reservedRecoverEnd; // Last position for reserved data
     static unsigned int variation1, variation2;
+    static unsigned int variationRecover1, variationRecover2;
     static fast8_t changedTimer;
     static uint8_t computeChecksum();
     static void updateChecksum();
@@ -94,6 +97,7 @@ public:
      *       5: Heater
      *  */
     static uint reserve(uint8_t sig, uint8_t version, uint length);
+    static uint reserveRecover(uint8_t sig, uint8_t version, uint length);
     static void storeDataIntoEEPROM(uint8_t corrupted = 0);
     static void readDataFromEEPROM();
     static void restoreEEPROMSettingsFromConfiguration();
@@ -109,6 +113,17 @@ public:
     static void handlePrefix(PGM_P text);
     static void handlePrefix(PGM_P text, int id);
     static void removePrefix();
+#if EEPROM_MODE != 0
+    static float getRecoverFloat(uint pos);
+    static int32_t getRecoverLong(uint pos);
+    static int16_t getRecoverInt(uint pos);
+    static uint8_t getRecoverByte(uint pos);
+    static void setRecoverFloat(uint pos, float val);
+    static void setRecoverLong(uint pos, int32_t val);
+    static void setRecoverInt(uint pos, int16_t val);
+    static void setRecoverByte(uint pos, uint8_t val);
+    static void resetRecover();
+#endif
 
     static inline void setVersion(uint8_t v) {
 #if EEPROM_MODE != 0

@@ -125,7 +125,7 @@ void GCode_28(GCode* com) {
 
 void GCode_29(GCode* com) {
 #if FEATURE_Z_PROBE
-    Printer::prepareForProbing();
+    // Printer::prepareForProbing();
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
     float actTemp[NUM_EXTRUDER];
     for (int i = 0; i < NUM_EXTRUDER; i++)
@@ -305,7 +305,7 @@ void GCode_91(GCode* com) {
 void GCode_92(GCode* com) {
     Motion1::fillPosFromGCode(*com, Motion1::tmpPosition, IGNORE_COORDINATE);
     FOR_ALL_AXES(i) {
-        if (Motion1::tmpPosition[i] != IGNORE_COORDINATE) {
+        if (i != E_AXIS && Motion1::tmpPosition[i] != IGNORE_COORDINATE) {
             Motion1::g92Offsets[i] = Motion1::tmpPosition[i] - Motion1::currentPosition[i];
         }
     }

@@ -82,7 +82,7 @@ public:
         } else {
             position--;
         }
-        step();
+        stepper->step();
     }
     /// Set step signal low
     virtual void unstep() final {

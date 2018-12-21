@@ -84,6 +84,8 @@ Custom M Codes
 - M3 Sx - Spindle on, Clockwise or Laser on during G1 moves. Sx = laser intensity 0-255 if driver supports this (default ignores it)
 - M4 - Spindle on, Counterclockwise.
 - M5 - Spindle off, Laser off.
+- M17 - Enable all motors or only named motors
+- M18 - Disable all motors or named motors
 - M20  - List SD card
 - M21  - Initialize SD card
 - M22  - Release SD card

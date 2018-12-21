@@ -26,6 +26,7 @@ int Commands::lowestRAMValueSend = MAX_RAM;
 volatile uint8_t executePeriodical = 0;
 unsigned int counterPeriodical = 0;
 uint8_t counter500ms = 5;
+millis_t lastCommandReceived = 0;
 
 void Commands::commandLoop() {
 //while(true) {
@@ -50,6 +51,15 @@ void Commands::commandLoop() {
 #endif
                 Commands::executeGCode(code);
             code->popCurrentCommand();
+            lastCommandReceived = HAL::timeInMilliseconds();
+        } else {
+            if (Motion1::buffersUsed() > 0) { // if printing no need to reset
+                lastCommandReceived = HAL::timeInMilliseconds();
+            }
+            if (HAL::timeInMilliseconds() - lastCommandReceived > 2000) {
+                lastCommandReceived = HAL::timeInMilliseconds();
+                Printer::parkSafety(); // will handle allowed conditions it self
+            }
         }
     } else {
         GCode::keepAlive(Paused);
@@ -142,11 +152,11 @@ void Commands::waitMS(uint32_t wait) {
 }
 
 void Commands::waitUntilEndOfAllBuffers() {
-    GCode* code = NULL;
+    GCode* code = nullptr;
 #ifdef DEBUG_PRINT
     debugWaitLoop = 9;
 #endif
-    while (Motion1::length || (code != NULL)) {
+    while (Motion1::length || (code != nullptr)) {
         //GCode::readFromSerial();
         code = GCode::peekCurrentCommand();
         if (code) {
@@ -851,6 +861,9 @@ void Commands::processArc(GCode* com) {
 \brief Execute the G command stored in com.
 */
 void Commands::processGCode(GCode* com) {
+    if (Printer::failedMode) {
+        return;
+    }
     if (EVENT_UNHANDLED_G_CODE(com)) {
         previousMillisCmd = HAL::timeInMilliseconds();
         return;
@@ -951,6 +964,10 @@ void Commands::processGCode(GCode* com) {
 \brief Execute the G command stored in com.
 */
 void Commands::processMCode(GCode* com) {
+    if (Printer::failedMode && !(com->M == 110 || com->M == 999)) {
+        return;
+    }
+
     if (EVENT_UNHANDLED_M_CODE(com)) {
         return;
     }
@@ -1017,6 +1034,9 @@ void Commands::processMCode(GCode* com) {
         break;
     case 83: // M83
         MCode_83(com);
+        break;
+    case 17: // M17 is to enable named axis
+        MCode_17(com);
         break;
     case 18: // M18 is to disable named axis
         MCode_18(com);
@@ -1192,6 +1212,9 @@ void Commands::processMCode(GCode* com) {
     case 408:
         MCode_408(com);
         break;
+    case 415: // host rescue command
+        MCode_415(com);
+        break;
     case 460: // M460 X<minTemp> Y<maxTemp> : Set temperature range for thermo controlled fan
         MCode_460(com);
         break;
@@ -1313,10 +1336,12 @@ void Commands::executeGCode(GCode* com) {
     else if (com->hasM())
         processMCode(com);
     else if (com->hasT()) { // Process T code
-        //com->printCommand(); // for testing if this the source of extruder switches
-        Motion1::waitForEndOfMoves();
-        Tool::selectTool(com->T);
-        // Extruder::selectExtruderById(com->T);
+        if (!Printer::failedMode) {
+            //com->printCommand(); // for testing if this the source of extruder switches
+            Motion1::waitForEndOfMoves();
+            Tool::selectTool(com->T);
+            // Extruder::selectExtruderById(com->T);
+        }
     } else {
         if (Printer::debugErrors()) {
             Com::printF(Com::tUnknownCommand);

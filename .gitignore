@@ -20,3 +20,4 @@ src/private
 workspace.xml
 macrotest.cpp
 macrotest.txt
+.idea

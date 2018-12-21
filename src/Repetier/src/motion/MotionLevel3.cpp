@@ -59,9 +59,6 @@ void Motion3::activateNext() {
 #endif
     YMotor.dir(act->directions & 2);
     ZMotor.dir(act->directions & 4);
-    if (Motion1::motors[E_AXIS]) {
-        Motion1::motors[E_AXIS]->dir(act->directions & 8);
-    }
 #if NUM_AXES > A_AXIS
     AMotor.dir(act->directions & 16);
 #endif
@@ -72,8 +69,12 @@ void Motion3::activateNext() {
     CMotor.dir(act->directions & 64);
 #endif
     if (Motion1::dittoMode) {
-        for (fast8_t i = 1; i < Motion1::dittoMode; i++) {
+        for (fast8_t i = 0; i < Motion1::dittoMode; i++) {
             Tool::tools[i]->directionMotor(act->directions & 8);
+        }
+    } else {
+        if (Motion1::motors[E_AXIS]) {
+            Motion1::motors[E_AXIS]->dir(act->directions & 8);
         }
     }
     // on new line reset triggered axes

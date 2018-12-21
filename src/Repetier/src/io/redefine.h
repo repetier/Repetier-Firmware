@@ -40,6 +40,8 @@ IO_TARGET with following meanings:
 18: Tune menu (if printer is printing)
 19: Main menu
 20: Wizard menu
+21: Store recover data
+22: Restore recover data
 */
 
 // #pragma message(VAR_NAME_VALUE(IO_TARGET))

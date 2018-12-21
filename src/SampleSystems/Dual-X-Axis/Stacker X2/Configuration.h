@@ -58,9 +58,9 @@ Early stage version for Stacke X2 printer - use with care
 #define FEATURE_RETRACTION 1
 #define USE_ADVANCE 1
 #define NUM_AXES 5                   // X,Y,Z and E for extruder A,B,C would be 5,6,7
-#define STEPPER_FREQUENCY 150000     // Maximum stepper frequency.
-#define PREPARE_FREQUENCY 200        // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
-#define BLOCK_FREQUENCY 100          // Number of blocks with constant stepper rate per second.
+#define STEPPER_FREQUENCY 100000     // Maximum stepper frequency.
+#define PREPARE_FREQUENCY 2000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
+#define BLOCK_FREQUENCY 1000         // Number of blocks with constant stepper rate per second.
 #define VELOCITY_PROFILE 2           // 0 = linear, 1 = cubic, 2 = quintic velocity shape
 #define Z_SPEED 5                    // Z positioning speed
 #define XY_SPEED 100                 // XY positioning speed for normal operations
@@ -68,6 +68,10 @@ Early stage version for Stacke X2 printer - use with care
 #define A_SPEED 100                  // Second X axis
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
 #define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
+#define HOST_RESCUE 1                // Enable host rescue help system
+//#define DEBUG_RESCUE                 // Uncomment to add power loss entry in debug menu while printing
+#define POWERLOSS_LEVEL 2            // How much time do we have on powerloss, 0 = no move, 1 = short just raise Z, 2 = long full park move
+#define POWERLOSS_UP 5               // How much to move up if mode 1 is active
 #define Z_PROBE_TYPE 0               // 0 = no z probe, 1 = default z probe, 2 = Nozzle as probe
 #define Z_PROBE_BORDER 2             // Safety border to ensure position is allowed
 #define Z_PROBE_TEMPERATURE 170      // Temperature for type 2

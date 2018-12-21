@@ -186,6 +186,9 @@ void __attribute__((weak)) menuDebug(GUIAction action, void* data) {
     GUI::menuOnOffP(action, PSTR("Dry Run:"), Printer::debugDryrun(), directAction, (void*)GUI_DIRECT_ACTION_TOGGLE_DEBUG_DRYRUN, GUIPageType::ACTION);
     GUI::menuOnOffP(action, PSTR("No Moves:"), Printer::debugNoMoves(), directAction, (void*)GUI_DIRECT_ACTION_TOGGLE_DEBUG_NO_MOVES, GUIPageType::ACTION);
     GUI::menuOnOffP(action, PSTR("Communication:"), Printer::debugCommunication(), directAction, (void*)GUI_DIRECT_ACTION_TOGGLE_DEBUG_COMMUNICATION, GUIPageType::ACTION);
+#ifdef DEBUG_RESCUE
+    GUI::menuSelectableP(action, PSTR("Simulate Power Loss"), directAction, (void*)GUI_DIRECT_ACTION_POWERLOSS, GUIPageType::ACTION);
+#endif
     GUI::menuEnd(action);
 }
 
@@ -206,7 +209,10 @@ void __attribute__((weak)) menuMove(GUIAction action, void* data) {
     GUI::menuTextP(action, PSTR("= Move ="), true);
     GUI::menuBack(action);
     FOR_ALL_AXES(i) {
-        if (i == E_AXIS || (i == A_AXIS && PRINTER_TYPE == PRINTER_TYPE_DUAL_X)) {
+        if (i == A_AXIS && PRINTER_TYPE == PRINTER_TYPE_DUAL_X) {
+            continue;
+        }
+        if (Motion1::motors[i] == nullptr) {
             continue;
         }
         GUI::flashToStringFlash(GUI::tmpString, PSTR("Move @:"), axisNames[i]);
@@ -247,14 +253,13 @@ void __attribute__((weak)) menuFlowMultiplier(GUIAction action, void* data) {
 }
 
 void __attribute__((weak)) menuControls(GUIAction action, void* data) {
-    char help[MAX_COLS + 1];
     GUI::menuStart(action);
     GUI::menuTextP(action, PSTR("= Controls = "), true);
     GUI::menuBack(action);
-    GUI::flashToStringLong(help, PSTR("Speed: @%"), Printer::feedrateMultiply);
-    GUI::menuSelectable(action, help, menuSpeedMultiplier, nullptr, GUIPageType::FIXED_CONTENT);
-    GUI::flashToStringLong(help, PSTR("Flow: @%"), Printer::extrudeMultiply);
-    GUI::menuSelectable(action, help, menuFlowMultiplier, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::flashToStringLong(GUI::tmpString, PSTR("Speed: @%"), Printer::feedrateMultiply);
+    GUI::menuSelectable(action, GUI::tmpString, menuSpeedMultiplier, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::flashToStringLong(GUI::tmpString, PSTR("Flow: @%"), Printer::extrudeMultiply);
+    GUI::menuSelectable(action, GUI::tmpString, menuFlowMultiplier, nullptr, GUIPageType::FIXED_CONTENT);
     GUI::menuSelectableP(action, PSTR("Home"), menuHome, nullptr, GUIPageType::MENU);
     GUI::menuSelectableP(action, PSTR("Move"), menuMove, nullptr, GUIPageType::MENU);
 #if NUM_FANS > 0
@@ -271,9 +276,8 @@ void __attribute__((weak)) menuFan(GUIAction action, void* data) {
     int id = reinterpret_cast<int>(data);
     PWMHandler* pwm = fans[reinterpret_cast<int>(data)];
     int32_t percent = (pwm->get() * 100) / 255;
-    char help[MAX_COLS + 1];
-    GUI::flashToStringLong(help, PSTR("Fan @ Speed:"), id + 1);
-    DRAW_LONG(help, Com::tUnitPercent, percent);
+    GUI::flashToStringLong(GUI::tmpString, PSTR("Fan @ Speed:"), id + 1);
+    DRAW_LONG(GUI::tmpString, Com::tUnitPercent, percent);
     if (GUI::handleLongValueAction(action, percent, 0, 100, 5)) {
         Printer::setFanSpeed((percent * 255) / 100, true, id);
     }
@@ -283,12 +287,11 @@ void __attribute__((weak)) menuFans(GUIAction action, void* data) {
     GUI::menuStart(action);
     GUI::menuTextP(action, PSTR("= Fans = "), true);
     GUI::menuBack(action);
-    char help[MAX_COLS + 1];
     for (int i = 0; i < NUM_FANS; i++) {
         PWMHandler* fan = fans[i];
         int32_t percent = (fan->get() * 100) / 255;
-        GUI::flashToStringLong(help, PSTR("Fan @:"), i + 1);
-        GUI::menuLong(action, help, percent, menuFan, (void*)i, GUIPageType::FIXED_CONTENT);
+        GUI::flashToStringLong(GUI::tmpString, PSTR("Fan @:"), i + 1);
+        GUI::menuLong(action, GUI::tmpString, percent, menuFan, (void*)i, GUIPageType::FIXED_CONTENT);
     }
     GUI::menuEnd(action);
 }
@@ -297,6 +300,16 @@ void __attribute__((weak)) menuTune(GUIAction action, void* data) {
     GUI::menuStart(action);
     GUI::menuTextP(action, PSTR("= Tune = "), true);
     GUI::menuBack(action);
+    GUI::flashToStringLong(GUI::tmpString, PSTR("Speed: @%"), Printer::feedrateMultiply);
+    GUI::menuSelectable(action, GUI::tmpString, menuSpeedMultiplier, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::flashToStringLong(GUI::tmpString, PSTR("Flow: @%"), Printer::extrudeMultiply);
+    GUI::menuSelectable(action, GUI::tmpString, menuFlowMultiplier, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::menuSelectableP(action, PSTR("Home"), menuHome, nullptr, GUIPageType::MENU);
+    GUI::menuSelectableP(action, PSTR("Move"), menuMove, nullptr, GUIPageType::MENU);
+#if NUM_FANS > 0
+    GUI::menuSelectableP(action, PSTR("Fans"), menuFans, nullptr, GUIPageType::MENU);
+#endif
+
 #undef IO_TARGET
 #define IO_TARGET 18
 #include "../io/redefine.h"
@@ -414,7 +427,7 @@ void __attribute__((weak)) menuConfig(GUIAction action, void* data) {
     GUI::menuTextP(action, PSTR("= Configuration = "), true);
     GUI::menuBack(action);
 #if EEPROM_MODE > 0
-    GUI::menuSelectableP(action, PSTR("Baudrate"), menuBaudrate, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::menuLongP(action, PSTR("Baudrate:"), baudrate, menuBaudrate, nullptr, GUIPageType::FIXED_CONTENT);
 #endif
     FOR_ALL_AXES(i) {
         if (i == E_AXIS) {

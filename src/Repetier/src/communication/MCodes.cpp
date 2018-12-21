@@ -46,6 +46,40 @@ void MCode_5(GCode* com) { // Spindle, laser off
     }
 }
 
+void MCode_17(GCode* com) {
+    Motion1::waitForEndOfMoves();
+    bool named = false;
+    if (com->hasX()) {
+        named = true;
+        Motion1::motors[X_AXIS]->enable();
+    }
+    if (com->hasY()) {
+        named = true;
+        Motion1::motors[Y_AXIS]->enable();
+    }
+    if (com->hasZ()) {
+        named = true;
+        Motion1::motors[Z_AXIS]->enable();
+    }
+    if (com->hasE() && Motion1::motors[E_AXIS] != nullptr) {
+        named = true;
+        if (Motion1::motors[E_AXIS]) {
+            Motion1::motors[E_AXIS]->enable();
+        }
+    }
+    if (!named) {
+        Motion1::motors[X_AXIS]->enable();
+        Motion1::motors[Y_AXIS]->enable();
+        Motion1::motors[Z_AXIS]->enable();
+        for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
+            if (Motion1::motors[i]) {
+                Motion1::motors[i]->enable();
+            }
+        }
+        Tool::enableMotors();
+    }
+}
+
 void MCode_18(GCode* com) {
     Motion1::waitForEndOfMoves();
     bool named = false;
@@ -466,6 +500,11 @@ void MCode_115(GCode* com) {
     Com::cap(PSTR("PROGRESS:0"));
 #endif
     Com::cap(PSTR("AUTOREPORT_TEMP:1"));
+#if ENABLED(HOST_RESCUE)
+    Com::cap(PSTR("HOST_RESCUE:1"));
+#else
+    Com::cap(PSTR("HOST_RESCUE:0"));
+#endif
     //#if EEPROM_MODE != 0
     Com::cap(PSTR("EEPROM:1"));
 //#else
@@ -1020,6 +1059,20 @@ void MCode_408(GCode* com) {
 #endif
 }
 
+void MCode_415(GCode* com) {
+#if HOST_RESCUE
+    if (com->hasS()) { // Enable rescue system
+        Printer::enableRescue(com->S != 0);
+    }
+    if (com->hasZ()) { // Replace z
+        Motion1::currentPosition[Z_AXIS] = com->Z;
+        Motion1::updatePositionsFromCurrent();
+        Motion2::setMotorPositionFromTransformed();
+    }
+    Printer::rescueReport();
+#endif
+}
+
 void MCode_460(GCode* com) {
 #if FAN_THERMO_PIN > -1
     if (com->hasX())
@@ -1270,6 +1323,7 @@ void MCode_998(GCode* com) {
 }
 
 void MCode_999(GCode* com) {
+    Printer::failedMode = false;
     if (com->hasS())
         GCode::fatalError(PSTR("Testing fatal error"));
     else

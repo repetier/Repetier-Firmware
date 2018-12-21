@@ -307,7 +307,7 @@ void GCode::pushCommand() {
 */
 GCode* GCode::peekCurrentCommand() {
     if (bufferLength == 0)
-        return NULL; // No more data
+        return nullptr; // No more data
     return &commandsBuffered[bufferReadIndex];
 }
 

@@ -117,18 +117,6 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
     }
 
     // Test X or A range
-    /* if (Motion1::dittoMode) {
-        if (Motion1::dittoMirror) {
-            pos[A_AXIS] = Motion1::maxPos[X_AXIS] + Motion1::minPos[X_AXIS] - pos[X_AXIS];
-        } else {
-            pos[A_AXIS] = pos[X_AXIS] - Motion1::minPos[X_AXIS] + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
-        }
-    } else if (activeAxis) {
-        pos[A_AXIS] = pos[X_AXIS];
-        pos[X_AXIS] = Motion1::currentPositionTransformed[X_AXIS]; // do not move x axis
-    } else {                                                       // left tool active
-        pos[A_AXIS] = Motion1::currentPositionTransformed[A_AXIS];
-    } */
     return pos[X_AXIS] >= endPos[0] && pos[X_AXIS] <= Motion1::maxPos[X_AXIS] && pos[A_AXIS] >= 0 && pos[A_AXIS] <= endPos[1] && pos[A_AXIS] >= pos[X_AXIS] + DUAL_X_MIN_DISTANCE;
 }
 
@@ -298,7 +286,7 @@ void PrinterType::enableMotors(fast8_t axes) {
             }
         }
     }
-    if ((axes & axisBits[E_AXIS]) != 0 && Motion1::dittoMode) {
+    if (Motion1::dittoMode && (axes & axisBits[E_AXIS]) != 0) {
         for (fast8_t i = 1; i <= Motion1::dittoMode; i++) {
             Tool::getTool(i)->enableMotor();
         }

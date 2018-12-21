@@ -53,7 +53,7 @@ StepperDriverBase* Motion1::motors[NUM_AXES];
 EndstopDriver* Motion1::minAxisEndstops[NUM_AXES];
 EndstopDriver* Motion1::maxAxisEndstops[NUM_AXES];
 fast8_t Motion1::homeDir[NUM_AXES];
-fast8_t Motion1::homePriority[NUM_AXES];
+int8_t Motion1::homePriority[NUM_AXES];
 fast8_t Motion1::axesHomed;
 EndstopMode Motion1::endstopMode;
 int32_t Motion1::stepsRemaining[NUM_AXES]; // Steps remaining when testing endstops
@@ -176,7 +176,7 @@ void Motion1::setFromConfig() {
     homePriority[X_AXIS] = X_HOME_PRIORITY;
     homePriority[Y_AXIS] = Y_HOME_PRIORITY;
     homePriority[Z_AXIS] = Z_HOME_PRIORITY;
-    homePriority[E_AXIS] = 0;
+    homePriority[E_AXIS] = -1;
 
     motors[X_AXIS] = &XMotor;
     motors[Y_AXIS] = &YMotor;
@@ -478,12 +478,13 @@ void Motion1::copyCurrentPrinter(float coords[NUM_AXES]) {
         coords[i] = currentPositionTransformed[i];
     }
 }
+
 void Motion1::setTmpPositionXYZ(float x, float y, float z) {
     setIgnoreABC(tmpPosition);
     tmpPosition[X_AXIS] = x;
     tmpPosition[Y_AXIS] = y;
     tmpPosition[Z_AXIS] = z;
-    tmpPosition[E_AXIS] = 0;
+    tmpPosition[E_AXIS] = IGNORE_COORDINATE;
 }
 
 void Motion1::setTmpPositionXYZE(float x, float y, float z, float e) {
@@ -493,8 +494,10 @@ void Motion1::setTmpPositionXYZE(float x, float y, float z, float e) {
     tmpPosition[Z_AXIS] = z;
     tmpPosition[E_AXIS] = e;
 }
+
 // Move with coordinates in official coordinates (before offset, transform, ...)
 bool Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
+    Printer::unparkSafety();
     FOR_ALL_AXES(i) {
         if (coords[i] != IGNORE_COORDINATE) {
             currentPosition[i] = coords[i];
@@ -541,6 +544,7 @@ void Motion1::setToolOffset(float ox, float oy, float oz) {
 
 // Move to the printer coordinates (after offset, transform, ...)
 bool Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
+    Printer::unparkSafety();
     FOR_ALL_AXES(i) {
         if (coords[i] == IGNORE_COORDINATE) {
             destinationPositionTransformed[i] = currentPositionTransformed[i];
@@ -586,6 +590,7 @@ void Motion1::updatePositionsFromCurrentTransformed() {
 
 // Move with coordinates in official coordinates (before offset, transform, ...)
 bool Motion1::moveRelativeByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
+    Printer::unparkSafety();
     FOR_ALL_AXES(i) {
         if (coords[i] != IGNORE_COORDINATE) {
             coords[i] += currentPosition[i];
@@ -596,6 +601,7 @@ bool Motion1::moveRelativeByOfficial(float coords[NUM_AXES], float feedrate, boo
 
 // Move to the printer coordinates (after offset, transform, ...)
 bool Motion1::moveRelativeByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
+    Printer::unparkSafety();
     FOR_ALL_AXES(i) {
         if (coords[i] != IGNORE_COORDINATE) {
             coords[i] += currentPositionTransformed[i];
@@ -608,6 +614,7 @@ bool Motion1::moveRelativeByPrinter(float coords[NUM_AXES], float feedrate, bool
  * It assumes that we can move all axes in parallel.
  */
 void Motion1::moveRelativeBySteps(int32_t coords[NUM_AXES]) {
+    Printer::unparkSafety();
     fast8_t axesUsed = 0;
     FOR_ALL_AXES(i) {
         if (coords[i]) {
@@ -1196,10 +1203,12 @@ void Motion1Buffer::unblock() {
 
 void Motion1::moveToParkPosition() {
     if (isAxisHomed(X_AXIS) && isAxisHomed(Y_AXIS)) {
+        Com::printFLN(PSTR("FR:"), Motion1::moveFeedrate[X_AXIS], 1);
         setTmpPositionXYZ(parkPosition[X_AXIS], parkPosition[Y_AXIS], IGNORE_COORDINATE);
         moveByOfficial(tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
     }
     if (Motion1::parkPosition[Z_AXIS] > 0 && isAxisHomed(Z_AXIS)) {
+        Com::printFLN(PSTR("FRZ:"), Motion1::moveFeedrate[Z_AXIS], 1);
         Motion1::moveByPrinter(Motion1::tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
         setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::min(maxPos[Z_AXIS], parkPosition[Z_AXIS] + currentPosition[Z_AXIS]));
         moveByOfficial(tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
@@ -1226,6 +1235,18 @@ bool Motion1::popFromMemory() {
     memoryPos--;
     FOR_ALL_AXES(i) {
         tmpPosition[i] = memory[memoryPos][i];
+    }
+    Printer::feedrate = memory[memoryPos][NUM_AXES];
+    return true;
+}
+
+bool Motion1::popFromMemory(float coords[NUM_AXES]) {
+    if (memoryPos == 0) {
+        return false;
+    }
+    memoryPos--;
+    FOR_ALL_AXES(i) {
+        coords[i] = memory[memoryPos][i];
     }
     Printer::feedrate = memory[memoryPos][NUM_AXES];
     return true;
@@ -1311,7 +1332,7 @@ void Motion1::homeAxes(fast8_t axes) {
     // Test if all axes are homed
     bool ok = true;
     FOR_ALL_AXES(i) {
-        if (i != E_AXIS && isAxisHomed(i) == false) {
+        if (homePriority[i] >= 0 && isAxisHomed(i) == false) {
             ok = false;
         }
     }

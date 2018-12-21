@@ -27,6 +27,7 @@
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
     extern ToolExtruder name; \
     extern void __attribute__((weak)) menuControl##name(GUIAction action, void* data); \
+    extern void __attribute__((weak)) menuTune##name(GUIAction action, void* data); \
     extern void __attribute__((weak)) menuConfig##name(GUIAction action, void* data);
 
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
@@ -53,6 +54,15 @@
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
         GUI::menuSelectableP(action, PSTR("Select Extruder"), selectToolAction, (void*)name.getToolId(), GUIPageType::ACTION); \
+        name.getHeater()->showControlMenu(action); \
+        GUI::menuEnd(action); \
+    } \
+    void __attribute__((weak)) menuTune##name(GUIAction action, void* data) { \
+        GUI::menuStart(action); \
+        char help[MAX_COLS]; \
+        GUI::flashToStringLong(help, PSTR("= Extruder @ ="), name.getToolId() + 1); \
+        GUI::menuText(action, help, true); \
+        GUI::menuBack(action); \
         name.getHeater()->showControlMenu(action); \
         GUI::menuEnd(action); \
     } \
@@ -164,6 +174,16 @@
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
     GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU);
+
+#define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript)
+#define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript)
+#define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage)
+#define FILAMENT_DETECTOR(name, inputPin, tool)
+
+#elif IO_TARGET == 18 // Control tune manipulate menu
+
+#define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
+    GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuTune##name, nullptr, GUIPageType::MENU);
 
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript)
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript)

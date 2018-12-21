@@ -270,6 +270,15 @@ public:
 #include "io/temperature_tables.h"
 #include "Configuration.h"
 
+#ifndef HOST_RESCUE
+#define HOST_RESCUE 1
+#endif
+#if EEPROM_MODE == 0 && HOST_RESCUE
+#warning HOST_RESCUE requires eeprom support! Disabling feature.
+#undef HOST_RESCUE
+#define HOST_RESCUE
+#endif
+
 #ifndef E_SPEED
 #define E_SPEED 2
 #endif
@@ -496,8 +505,6 @@ extern ServoInterface* servos[NUM_SERVOS];
 /** Total size of the buffer used to store the long filenames */
 #define LONG_FILENAME_LENGTH (13 * MAX_VFAT_ENTRIES + 1)
 #define SD_MAX_FOLDER_DEPTH 2
-
-#include "controller/ui.h"
 
 #if UI_DISPLAY_TYPE != DISPLAY_U8G
 #if (defined(USER_KEY1_PIN) && (USER_KEY1_PIN == UI_DISPLAY_D5_PIN || USER_KEY1_PIN == UI_DISPLAY_D6_PIN || USER_KEY1_PIN == UI_DISPLAY_D7_PIN)) || (defined(USER_KEY2_PIN) && (USER_KEY2_PIN == UI_DISPLAY_D5_PIN || USER_KEY2_PIN == UI_DISPLAY_D6_PIN || USER_KEY2_PIN == UI_DISPLAY_D7_PIN)) || (defined(USER_KEY3_PIN) && (USER_KEY3_PIN == UI_DISPLAY_D5_PIN || USER_KEY3_PIN == UI_DISPLAY_D6_PIN || USER_KEY3_PIN == UI_DISPLAY_D7_PIN)) || (defined(USER_KEY4_PIN) && (USER_KEY4_PIN == UI_DISPLAY_D5_PIN || USER_KEY4_PIN == UI_DISPLAY_D6_PIN || USER_KEY4_PIN == UI_DISPLAY_D7_PIN))

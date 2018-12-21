@@ -142,12 +142,13 @@ public:
 #define HOME_DISTANCE_STEPS (Printer::zMaxSteps - Printer::zMinSteps + 1000)
 #define HOME_DISTANCE_MM (HOME_DISTANCE_STEPS * invAxisStepsPerMM[Z_AXIS])
 // Some defines to make clearer reading, as we overload these Cartesian memory locations for delta
-#define towerAMaxSteps Printer::xMaxSteps
-#define towerBMaxSteps Printer::yMaxSteps
-#define towerCMaxSteps Printer::zMaxSteps
-#define towerAMinSteps Printer::xMinSteps
-#define towerBMinSteps Printer::yMinSteps
-#define towerCMinSteps Printer::zMinSteps
+
+#define EPR_RESCUE_MODE 0
+#define EPR_RESCUE_TOOL 1
+#define EPR_RESCUE_LAST_RECEIVED 2
+#define EPR_RESCUE_LAST_POS EPR_RESCUE_LAST_RECEIVED + 4 * NUM_AXES
+#define EPR_RESCUE_OFFSETS EPR_RESCUE_LAST_POS + 4 * NUM_AXES
+#define EPR_RESCUE_SIZE EPR_RESCUE_OFFSETS + 4 * NUM_AXES
 
 class Plane {
 public:
@@ -266,24 +267,25 @@ public:
     static uint8_t relativeCoordinateMode;         ///< Determines absolute (false) or relative Coordinates (true).
     static uint8_t relativeExtruderCoordinateMode; ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
+    static bool failedMode; // In faile dmode only M111 and M999 is working
     static uint8_t unitIsInches;
+    static uint8_t rescueOn;     // 1 is rescue is enabled
     static uint8_t flag0, flag1; // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t flag2, flag3;
-    static uint32_t interval;   ///< Last step duration in ticks.
-    static uint32_t timer;      ///< used for acceleration/deceleration timing
-    static uint32_t stepNumber; ///< Step number in current move.
-    static millis_t lastTempReport;
+    static uint32_t interval;          ///< Last step duration in ticks.
+    static uint32_t timer;             ///< used for acceleration/deceleration timing
+    static uint32_t stepNumber;        ///< Step number in current move.
+    static millis_t lastTempReport;    ///< Time o flast temperature report for autoreport temperatures
     static int32_t printingTime;       ///< Printing time in seconds
     static float extrudeMultiplyError; ///< Accumulated error during extrusion
     static float extrusionFactor;      ///< Extrusion multiply factor
+    static uint16_t rescuePos;         // EEPROM address for rescue
+    static fast8_t safetyParked;       /// True if moved to a safety position to protect print
 #if DRIVE_SYSTEM != DELTA || defined(DOXYGEN)
     static int32_t zCorrectionStepsIncluded;
 #endif
 #if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM || defined(DOXYGEN)
     static int32_t stepsRemainingAtZHit;
-#endif
-#if FEATURE_AUTOLEVEL || defined(DOXYGEN)
-    static float autolevelTransformation[9]; ///< Transformation matrix
 #endif
 #if FAN_THERMO_PIN > -1 || defined(DOXYGEN)
     static float thermoMinTemp;
@@ -599,11 +601,6 @@ public:
     /** \brief copies currentPosition to parameter. */
     static void realPosition(float& xp, float& yp, float& zp);
 
-    static INLINE void insertStepperHighDelay() {
-#if STEPPER_HIGH_DELAY > 0
-        HAL::delayMicroseconds(STEPPER_HIGH_DELAY);
-#endif
-    }
     static void updateDerivedParameter();
     /** If we are not homing or destination check being disabled, this will reduce _destinationSteps_ to a
     valid value. In other words this works as software endstop. */
@@ -677,23 +674,25 @@ public:
 #if JSON_OUTPUT || defined(DOXYGEN)
     static void showJSONStatus(int type);
 #endif
-    static void homeXAxis();
-    static void homeYAxis();
-    static void homeZAxis();
     static void pausePrint();
     static void continuePrint();
     static void stopPrint();
-#if FEATURE_Z_PROBE || defined(DOXYGEN)
-    /** \brief Prepares printer for probing commands.
 
-    Probing can not start under all conditions. This command therefore makes sure,
-    a probing command can be executed by:
-    - Ensuring all axes are homed.
-    - Going to a low z position for fast measuring.
-    - Go to a position, where enabling the z-probe is possible without leaving the valid print area.
-    */
-    static void prepareForProbing();
-#endif
+    static void enableRescue(bool on);
+    static bool isRescue();
+    static bool isRescueRequired();
+    static void rescueReport(); // Send report
+    static void rescueStoreReceivedPosition();
+    static void rescueStorePosition();
+    static void rescueRecover();
+    static void rescueSetup();
+    static void rescueReset();
+    static int rescueStartTool();
+    static void handlePowerLoss();
+    static void parkSafety();
+    static void unparkSafety();
+    static void enableFailedModeP(PGM_P msg);
+    static void enableFailedMode(char* msg);
 };
 
 #endif // PRINTER_H_INCLUDED

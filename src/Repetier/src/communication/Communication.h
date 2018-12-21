@@ -141,6 +141,7 @@ public:
     FSTRINGVAR(tFatal)
     FSTRINGVAR(tDoorOpen)
     FSTRINGVAR(tBtnOK)
+    FSTRINGVAR(tM999)
     // Units
     FSTRINGVAR(tUnitMM)
     FSTRINGVAR(tUnitMMPS)
