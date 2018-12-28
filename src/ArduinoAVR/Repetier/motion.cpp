@@ -595,7 +595,7 @@ void PrintLine::calculateMove(float axisDistanceMM[], uint8_t pathOptimize, fast
         setNominalMove();
 
     vMax = F_CPU / fullInterval; // maximum steps per second, we can reach
-    // if(p->vMax>46000)  // gets overflow in N computation
+	// if(p->vMax>46000)  // gets overflow in N computation
     //   p->vMax = 46000;
     //p->plateauN = (p->vMax*p->vMax/p->accelerationPrim)>>1;
 #if USE_ADVANCE
@@ -607,7 +607,7 @@ void PrintLine::calculateMove(float axisDistanceMM[], uint8_t pathOptimize, fast
         advanceL = 0;
     } else {
         float advlin = fabs(speedE) * Extruder::current->advanceL * 0.001 * Printer::axisStepsPerMM[E_AXIS];
-        advanceL = (uint16_t)((65536L * advlin) / vMax); //advanceLscaled = (65536*vE*k2)/vMax
+        advanceL = ((65536L * advlin) / vMax); //advanceLscaled = (65536*vE*k2)/vMax
 #if ENABLE_QUADRATIC_ADVANCE
         advanceFull = 65536 * Extruder::current->advanceK * speedE * speedE; // Steps*65536 at full speed
         long steps = (HAL::U16SquaredToU32(vMax)) / (accelerationPrim << 1); // v^2/(2*a) = steps needed to accelerate from 0-vMax
@@ -645,10 +645,12 @@ void PrintLine::calculateMove(float axisDistanceMM[], uint8_t pathOptimize, fast
 #ifdef DEBUG_QUEUE_MOVE
     if(Printer::debugEcho()) {
         logLine();
-        Com::printFLN(Com::tDBGLimitInterval, limitInterval);
+		Com::printF(PSTR("de:"), axisDistanceMM[E_AXIS],5);
+		Com::printFLN(PSTR(" se:"), speedE);
+        //Com::printFLN(Com::tDBGLimitInterval, limitInterval);
         Com::printFLN(Com::tDBGMoveDistance, distance);
         Com::printFLN(Com::tDBGCommandedFeedrate, Printer::feedrate);
-        Com::printFLN(Com::tDBGConstFullSpeedMoveTime, timeForMove);
+        // Com::printFLN(Com::tDBGConstFullSpeedMoveTime, timeForMove);
     }
 #endif
     // Make result permanent
@@ -903,39 +905,53 @@ void PrintLine::updateStepsParameter() {
     vEnd   = vMax * endFactor;
 
 #if CPU_ARCH == ARCH_AVR
-    uint32_t vmax2 = HAL::U16SquaredToU32(vMax);
-    accelSteps = ((vmax2 - HAL::U16SquaredToU32(vStart)) / (accelerationPrim << 1)) + 1; // Always add 1 for missing precision
-    decelSteps = ((vmax2 - HAL::U16SquaredToU32(vEnd))  / (accelerationPrim << 1)) + 1;
+	uint32_t vmax2 = HAL::U16SquaredToU32(vMax);
 #else
-    uint64_t vmax2 = static_cast<uint64_t>(vMax) * static_cast<uint64_t>(vMax);
-    accelSteps = ((vmax2 - static_cast<uint64_t>(vStart) * static_cast<uint64_t>(vStart)) / (accelerationPrim << 1)) + 1; // Always add 1 for missing precision
-    decelSteps = ((vmax2 - static_cast<uint64_t>(vEnd) * static_cast<uint64_t>(vEnd)) / (accelerationPrim << 1)) + 1;
+	uint64_t vmax2 = static_cast<uint64_t>(vMax) * static_cast<uint64_t>(vMax);
 #endif
-
+	if(vStart == vMax) {
+		accelSteps = 0;
+	} else {
+#if CPU_ARCH == ARCH_AVR
+		accelSteps = ((vmax2 - HAL::U16SquaredToU32(vStart)) / (accelerationPrim << 1)) + 1; // Always add 1 for missing precision
+#else
+		accelSteps = ((vmax2 - static_cast<uint64_t>(vStart) * static_cast<uint64_t>(vStart)) / (accelerationPrim << 1)) + 1; // Always add 1 for missing precision
+#endif
+	}
+	if(vEnd == vMax) {
+		decelSteps = 0;
+	} else {
+#if CPU_ARCH == ARCH_AVR
+		decelSteps = ((vmax2 - HAL::U16SquaredToU32(vEnd))  / (accelerationPrim << 1)) + 1;
+#else
+		decelSteps = ((vmax2 - static_cast<uint64_t>(vEnd) * static_cast<uint64_t>(vEnd)) / (accelerationPrim << 1)) + 1;
+#endif
+	}
 #if USE_ADVANCE
 #if ENABLE_QUADRATIC_ADVANCE
     advanceStart = (float)advanceFull * startFactor * startFactor;
     advanceEnd   = (float)advanceFull * endFactor   * endFactor;
 #endif
 #endif
-    if(static_cast<int32_t>(accelSteps + decelSteps) >= stepsRemaining) { // can't reach limit speed
+    if(static_cast<int32_t>(accelSteps + decelSteps) > stepsRemaining) { // can't reach limit speed
         uint32_t red = (accelSteps + decelSteps - stepsRemaining) >> 1;
         accelSteps = accelSteps - RMath::min(static_cast<int32_t>(accelSteps), static_cast<int32_t>(red));
         decelSteps = decelSteps - RMath::min(static_cast<int32_t>(decelSteps), static_cast<int32_t>(red));
     }
     setParameterUpToDate();
 #ifdef DEBUG_QUEUE_MOVE
-    if(Printer::debugEcho()) {
+    if(false && Printer::debugEcho()) {
         Com::printFLN(Com::tDBGId, (int)this);
         Com::printF(Com::tDBGVStartEnd, (long)vStart);
-        Com::printFLN(Com::tSlash, (long)vEnd);
+        Com::printF(Com::tSlash, (long)vEnd);
+        Com::printFLN(Com::tSlash, (long)vMax);
         Com::printF(Com::tDBAccelSteps, (long)accelSteps);
         Com::printF(Com::tSlash, (long)decelSteps);
         Com::printFLN(Com::tSlash, (long)stepsRemaining);
         Com::printF(Com::tDBGStartEndSpeed, startSpeed, 1);
         Com::printFLN(Com::tSlash, endSpeed, 1);
-        Com::printFLN(Com::tDBGFlags, (uint32_t)flags);
-        Com::printFLN(Com::tDBGJoinFlags, (uint32_t)joinFlags);
+        // Com::printFLN(Com::tDBGFlags, (uint32_t)flags);
+        // Com::printFLN(Com::tDBGJoinFlags, (uint32_t)joinFlags);
     }
 #endif
 }
@@ -1137,15 +1153,16 @@ void PrintLine::LaserWarmUp( uint32_t wait) {
 void PrintLine::logLine() {
 #ifdef DEBUG_QUEUE_MOVE
     Com::printFLN(Com::tDBGId, (int)this);
-    Com::printArrayFLN(Com::tDBGDelta, delta);
-    Com::printFLN(Com::tDBGDir, (uint32_t)dir);
-    Com::printFLN(Com::tDBGFlags, (uint32_t)flags);
+    // Com::printArrayFLN(Com::tDBGDelta, delta);
+    // Com::printFLN(Com::tDBGDir, (uint32_t)dir);
+    // Com::printFLN(Com::tDBGFlags, (uint32_t)flags);
     Com::printFLN(Com::tDBGFullSpeed, fullSpeed);
     Com::printFLN(Com::tDBGVMax, (int32_t)vMax);
-    Com::printFLN(Com::tDBGAcceleration, accelerationDistance2);
-    Com::printFLN(Com::tDBGAccelerationPrim, (int32_t)accelerationPrim);
-    Com::printFLN(Com::tDBGRemainingSteps, stepsRemaining);
+    // Com::printFLN(Com::tDBGAcceleration, accelerationDistance2);
+    // Com::printFLN(Com::tDBGAccelerationPrim, (int32_t)accelerationPrim);
+    // Com::printFLN(Com::tDBGRemainingSteps, stepsRemaining);
 #if USE_ADVANCE
+	Com::printFLN(PSTR("adL:"), (int32_t)advanceL);
 #if ENABLE_QUADRATIC_ADVANCE
     Com::printFLN(Com::tDBGAdvanceFull, advanceFull >> 16);
     Com::printFLN(Com::tDBGAdvanceRate, advanceRate);
@@ -2369,13 +2386,14 @@ int32_t PrintLine::bresenhamStep() { // Version for delta printer
         if((cur->error[E_AXIS] -= cur->delta[E_AXIS]) < 0) {
 #if USE_ADVANCE
             if(Printer::isAdvanceActivated()) { // Use interrupt for movement
-                if(cur->isEPositiveMove())
+                if(cur->isEPositiveMove()) {
                     Printer::extruderStepsNeeded++;
-                else
+                } else {
                     Printer::extruderStepsNeeded--;
+				}
             } else
 #endif
-                Extruder::step();
+            {   Extruder::step();}
             cur->error[E_AXIS] += cur_errupd;
         }
         if (curd) {
@@ -2716,13 +2734,14 @@ int32_t PrintLine::bresenhamStep() { // version for Cartesian printer
         if((cur->error[E_AXIS] -= cur->delta[E_AXIS]) < 0) {
 #if USE_ADVANCE
             if(Printer::isAdvanceActivated()) { // Use interrupt for movement
-                if(cur->isEPositiveMove())
+                if(cur->isEPositiveMove()) {
                     Printer::extruderStepsNeeded++;
-                else
+                } else {
                     Printer::extruderStepsNeeded--;
+				}
             } else
 #endif
-                Extruder::step();
+               { Extruder::step();}
             cur->error[E_AXIS] += cur_errupd;
         }
         if(cur->isXMove())
@@ -2763,7 +2782,9 @@ int32_t PrintLine::bresenhamStep() { // version for Cartesian printer
     //If acceleration is enabled on this move and we are in the acceleration segment, calculate the current interval
     if (cur->moveAccelerating()) { // we are accelerating
         Printer::vMaxReached = HAL::ComputeV(Printer::timer, cur->fAcceleration) + cur->vStart; // v = v0 + a * t
-        if(Printer::vMaxReached > cur->vMax) Printer::vMaxReached = cur->vMax;
+        if (Printer::vMaxReached > cur->vMax) {
+			Printer::vMaxReached = cur->vMax;
+		}
         unsigned int v = Printer::updateStepsPerTimerCall(Printer::vMaxReached);
         Printer::interval = HAL::CPUDivU2(v);
         // if(Printer::maxInterval < Printer::interval) // fix timing for very slow speeds

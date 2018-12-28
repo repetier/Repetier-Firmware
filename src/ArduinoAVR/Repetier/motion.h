@@ -186,7 +186,7 @@ private:
     int32_t advanceStart;
     int32_t advanceEnd;
 #endif
-    uint16_t advanceL;         ///< Recomputed L value
+    int32_t advanceL;         ///< Recomputed L value
 #endif
 #ifdef DEBUG_STEPCOUNT
     int32_t totalStepsRemaining;
@@ -498,25 +498,25 @@ public:
             if(advanceTarget < advanceEnd)
                 advanceTarget = advanceEnd;
         }
-        long h = HAL::mulu16xu16to32(v, advanceL);
-        int tred = ((advanceTarget + h) >> 16);
+        // int32_t h = v * advanceL; // HAL::mulu16xu16to32(v, advanceL);
+        int32_t tred = ((advanceTarget + v * advanceL) >> 16);
         HAL::forbidInterrupts();
         Printer::extruderStepsNeeded += tred - Printer::advanceStepsSet;
-        if(tred > 0 && Printer::advanceStepsSet <= 0)
+        /* if(tred > 0 && Printer::advanceStepsSet <= 0)
             Printer::extruderStepsNeeded += Extruder::current->advanceBacklash;
         else if(tred < 0 && Printer::advanceStepsSet >= 0)
-            Printer::extruderStepsNeeded -= Extruder::current->advanceBacklash;
+            Printer::extruderStepsNeeded -= Extruder::current->advanceBacklash; */
         Printer::advanceStepsSet = tred;
         HAL::allowInterrupts();
         Printer::advanceExecuted = advanceTarget;
 #else
-        int tred = HAL::mulu6xu16shift16(v, advanceL);
+        int32_t tred = (v * advanceL) >> 16; // HAL::mulu6xu16shift16(v, advanceL);
         HAL::forbidInterrupts();
         Printer::extruderStepsNeeded += tred - Printer::advanceStepsSet;
-        if(tred > 0 && Printer::advanceStepsSet <= 0)
+        /* if(tred > 0 && Printer::advanceStepsSet <= 0)
             Printer::extruderStepsNeeded += (Extruder::current->advanceBacklash << 1);
         else if(tred < 0 && Printer::advanceStepsSet >= 0)
-            Printer::extruderStepsNeeded -= (Extruder::current->advanceBacklash << 1);
+            Printer::extruderStepsNeeded -= (Extruder::current->advanceBacklash << 1); */
         Printer::advanceStepsSet = tred;
         HAL::allowInterrupts();
 #endif
