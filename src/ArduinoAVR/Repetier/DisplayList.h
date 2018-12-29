@@ -346,7 +346,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_INVERT_MENU_DIRECTION 0
 #define UI_BUTTON_BACK         71
 
-#elif MOTHERBOARD = 403 || MOTHERBOARD = 404
+#elif MOTHERBOARD == 403 || MOTHERBOARD == 404
 
  // ramps-fd lcd adaptor needs to rotate connectors 180° to work!
 #define UI_DISPLAY_RS_PIN         16
