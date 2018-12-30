@@ -290,7 +290,9 @@ public:
     static uint32_t stepNumber;         ///< Step number in current move.
     static float coordinateOffset[Z_AXIS_ARRAY];
     static int32_t currentPositionSteps[E_AXIS_ARRAY];     ///< Position in steps from origin.
-    static float currentPosition[Z_AXIS_ARRAY]; ///< Position in global coordinates
+    static float currentPosition[E_AXIS_ARRAY]; ///< Position in global coordinates
+    static float destinationPositionTransformed[E_AXIS_ARRAY]; ///< Target position in transformed coordinates
+    static float currentPositionTransformed[E_AXIS_ARRAY]; ///< Target position in transformed coordinates
     static float lastCmdPos[Z_AXIS_ARRAY]; ///< Last coordinates (global coordinates) send by g-codes
     static int32_t destinationSteps[E_AXIS_ARRAY];         ///< Target position in steps.
     static millis_t lastTempReport;

@@ -809,6 +809,7 @@ void Extruder::selectExtruderById(uint8_t extruderId) {
     Printer::axisStepsPerMM[E_AXIS] = Extruder::current->stepsPerMM;
     Printer::invAxisStepsPerMM[E_AXIS] = 1.0f / Printer::axisStepsPerMM[E_AXIS];
 #endif
+	Printer::destinationPositionTransformed[E_AXIS] = Printer::currentPositionTransformed[E_AXIS] = Printer::currentPositionSteps[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS];
     Printer::maxFeedrate[E_AXIS] = Extruder::current->maxFeedrate;
 //   max_start_speed_units_per_second[E_AXIS] = Extruder::current->maxStartFeedrate;
     Printer::maxAccelerationMMPerSquareSecond[E_AXIS] = Printer::maxTravelAccelerationMMPerSquareSecond[E_AXIS] = next->maxAcceleration;
@@ -846,7 +847,7 @@ void Extruder::selectExtruderById(uint8_t extruderId) {
                 Printer::lastCmdPos[X_AXIS] = lastX;
 
                 if (Printer::isPositionAllowed(lastX,Printer::currentPosition[Y_AXIS],Printer::currentPosition[Z_AXIS]))
-                    PrintLine::moveRelativeDistanceInSteps(static_cast<int32_t>(floor(lastX * Printer::axisStepsPerMM[X_AXIS] + 0.5f)) - Printer::currentPositionSteps[X_AXIS], 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
+                    PrintLine::moveRelativeDistanceInSteps(lroundf(lastX * Printer::axisStepsPerMM[X_AXIS]) - Printer::currentPositionSteps[X_AXIS], 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
             #else
                 PrintLine::moveRelativeDistanceInSteps(-next->xOffset + dualXPosSteps, 0, 0, 0, EXTRUDER_SWITCH_XY_SPEED, true, false);
                 Printer::currentPositionSteps[X_AXIS] = dualXPosSteps + Printer::xMinSteps;

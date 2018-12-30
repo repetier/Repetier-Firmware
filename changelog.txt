@@ -1,3 +1,7 @@
+Version 1.0.4
+  Added emergency parser.
+  Improved handling of small segments, especially with linear advance.
+  
 Version 1.0.0
   Keep alive/busy signal for host timeout improvement.
   M303 now keeps heaters/fans on.

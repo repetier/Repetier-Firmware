@@ -928,6 +928,7 @@ on this endstop.
 #define ENDSTOP_X_BACK_MOVE 5
 #define ENDSTOP_Y_BACK_MOVE 5
 #define ENDSTOP_Z_BACK_MOVE 5
+
 // If you do z min homing, you might want to rise extruder a bit after homing so it does not heat
 // touching your bed.
 #define Z_UP_AFTER_HOME 0

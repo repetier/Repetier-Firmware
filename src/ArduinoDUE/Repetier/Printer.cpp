@@ -62,7 +62,9 @@ uint8_t Printer::relativeCoordinateMode = false;  ///< Determines absolute (fals
 uint8_t Printer::relativeExtruderCoordinateMode = false;  ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
 long Printer::currentPositionSteps[E_AXIS_ARRAY];
-float Printer::currentPosition[Z_AXIS_ARRAY];
+float Printer::currentPosition[E_AXIS_ARRAY];
+float Printer::destinationPositionTransformed[E_AXIS_ARRAY];
+float Printer::currentPositionTransformed[E_AXIS_ARRAY];
 float Printer::lastCmdPos[Z_AXIS_ARRAY];
 long Printer::destinationSteps[E_AXIS_ARRAY];
 float Printer::coordinateOffset[Z_AXIS_ARRAY] = {0, 0, 0};
@@ -630,16 +632,25 @@ void Printer::moveToParkPosition() {
 
 // This is for untransformed move to coordinates in printers absolute Cartesian space
 uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
-    if(x != IGNORE_COORDINATE)
-        destinationSteps[X_AXIS] = (x + Printer::offsetX) * axisStepsPerMM[X_AXIS];
-    if(y != IGNORE_COORDINATE)
-        destinationSteps[Y_AXIS] = (y + Printer::offsetY) * axisStepsPerMM[Y_AXIS];
-    if(z != IGNORE_COORDINATE)
-        destinationSteps[Z_AXIS] = (z + Printer::offsetZ) * axisStepsPerMM[Z_AXIS];
-    if(e != IGNORE_COORDINATE)
+    if(x != IGNORE_COORDINATE) {
+		destinationPositionTransformed[X_AXIS] = (x + Printer::offsetX);
+        destinationSteps[X_AXIS] = destinationPositionTransformed[X_AXIS] * axisStepsPerMM[X_AXIS];
+	}
+    if(y != IGNORE_COORDINATE) {
+		destinationPositionTransformed[Y_AXIS] = (y + Printer::offsetY);
+        destinationSteps[Y_AXIS] = destinationPositionTransformed[Y_AXIS] * axisStepsPerMM[Y_AXIS];
+	}
+    if(z != IGNORE_COORDINATE) {
+		destinationPositionTransformed[Z_AXIS] = (z + Printer::offsetZ);
+        destinationSteps[Z_AXIS] = destinationPositionTransformed[Z_AXIS] * axisStepsPerMM[Z_AXIS];
+	}
+    if(e != IGNORE_COORDINATE) {
+		destinationPositionTransformed[E_AXIS] = e;
         destinationSteps[E_AXIS] = e * axisStepsPerMM[E_AXIS];
-	else
+	} else {
+		destinationPositionTransformed[E_AXIS] = currentPositionTransformed[E_AXIS];
 		destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS];
+	}
     if(f != IGNORE_COORDINATE)
         feedrate = f;
 #if NONLINEAR_SYSTEM
@@ -651,40 +662,42 @@ uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
 #else
     PrintLine::queueCartesianMove(ALWAYS_CHECK_ENDSTOPS, true);
 #endif
-    updateCurrentPosition(false);
+	updateCurrentPosition(false);
     return 1;
 }
 
 uint8_t Printer::moveToReal(float x, float y, float z, float e, float f, bool pathOptimize) {
+	// Com::printFLN(PSTR("MoveToReal X="),x,2);
+	// Com::printArrayFLN(PSTR("CurPos:"), currentPositionTransformed);
     if(x == IGNORE_COORDINATE)
         x = currentPosition[X_AXIS];
-    else
-        currentPosition[X_AXIS] = x;
+	currentPosition[X_AXIS] = x;
     if(y == IGNORE_COORDINATE)
         y = currentPosition[Y_AXIS];
-    else
-        currentPosition[Y_AXIS] = y;
+	currentPosition[Y_AXIS] = y;
     if(z == IGNORE_COORDINATE)
         z = currentPosition[Z_AXIS];
-    else
-        currentPosition[Z_AXIS] = z;
-    transformToPrinter(x + Printer::offsetX, y + Printer::offsetY, z + Printer::offsetZ, x, y, z);
-    z += offsetZ2;
+	currentPosition[Z_AXIS] = z;
+    transformToPrinter(x + Printer::offsetX, y + Printer::offsetY, z + Printer::offsetZ, destinationPositionTransformed[X_AXIS], destinationPositionTransformed[Y_AXIS], destinationPositionTransformed[Z_AXIS]);
+    destinationPositionTransformed[Z_AXIS] += offsetZ2;
     // There was conflicting use of IGNOR_COORDINATE
-    destinationSteps[X_AXIS] = static_cast<int32_t>(floor(x * axisStepsPerMM[X_AXIS] + 0.5f));
-    destinationSteps[Y_AXIS] = static_cast<int32_t>(floor(y * axisStepsPerMM[Y_AXIS] + 0.5f));
-    destinationSteps[Z_AXIS] = static_cast<int32_t>(floor(z * axisStepsPerMM[Z_AXIS] + 0.5f));
+    destinationSteps[X_AXIS] = lroundf(destinationPositionTransformed[X_AXIS] * axisStepsPerMM[X_AXIS]);
+    destinationSteps[Y_AXIS] = lroundf(destinationPositionTransformed[Y_AXIS] * axisStepsPerMM[Y_AXIS]);
+    destinationSteps[Z_AXIS] = lroundf(destinationPositionTransformed[Z_AXIS] * axisStepsPerMM[Z_AXIS]);
     if(e != IGNORE_COORDINATE && !Printer::debugDryrun()
 #if MIN_EXTRUDER_TEMP > 30
             && (Extruder::current->tempControl.currentTemperatureC > MIN_EXTRUDER_TEMP || Printer::isColdExtrusionAllowed() || Extruder::current->tempControl.sensorType == 0)
 #endif
       ) {
+		destinationPositionTransformed[E_AXIS] = e;
         destinationSteps[E_AXIS] = e * axisStepsPerMM[E_AXIS];
     } else {
+		destinationPositionTransformed[E_AXIS] = currentPositionTransformed[E_AXIS];
 		destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS];
 	}
     if(f != IGNORE_COORDINATE)
         feedrate = f;
+	// Com::printArrayFLN(PSTR("DestPos:"), destinationPositionTransformed);
 
 #if NONLINEAR_SYSTEM
     if (!PrintLine::queueNonlinearMove(ALWAYS_CHECK_ENDSTOPS, pathOptimize, true)) {
@@ -710,17 +723,18 @@ void Printer::setOrigin(float xOff, float yOff, float zOff) {
 void Printer::updateCurrentPosition(bool copyLastCmd) {
 #if DUAL_X_AXIS && LAZY_DUAL_X_AXIS
     if(!sledParked)
-        currentPosition[X_AXIS] = static_cast<float>(currentPositionSteps[X_AXIS]) * invAxisStepsPerMM[X_AXIS];
+        currentPositionTransformed[X_AXIS] = static_cast<float>(currentPositionSteps[X_AXIS]) * invAxisStepsPerMM[X_AXIS];
 #else
-    currentPosition[X_AXIS] = static_cast<float>(currentPositionSteps[X_AXIS]) * invAxisStepsPerMM[X_AXIS];
+    currentPositionTransformed[X_AXIS] = static_cast<float>(currentPositionSteps[X_AXIS]) * invAxisStepsPerMM[X_AXIS];
 #endif
-    currentPosition[Y_AXIS] = static_cast<float>(currentPositionSteps[Y_AXIS]) * invAxisStepsPerMM[Y_AXIS];
+    currentPositionTransformed[Y_AXIS] = static_cast<float>(currentPositionSteps[Y_AXIS]) * invAxisStepsPerMM[Y_AXIS];
 #if NONLINEAR_SYSTEM
-    currentPosition[Z_AXIS] = static_cast<float>(currentPositionSteps[Z_AXIS]) * invAxisStepsPerMM[Z_AXIS] - offsetZ2;
+    currentPositionTransformed[Z_AXIS] = static_cast<float>(currentPositionSteps[Z_AXIS]) * invAxisStepsPerMM[Z_AXIS] - offsetZ2;
 #else
-    currentPosition[Z_AXIS] = static_cast<float>(currentPositionSteps[Z_AXIS] - zCorrectionStepsIncluded) * invAxisStepsPerMM[Z_AXIS] - offsetZ2;
+    currentPositionTransformed[Z_AXIS] = static_cast<float>(currentPositionSteps[Z_AXIS] - zCorrectionStepsIncluded) * invAxisStepsPerMM[Z_AXIS] - offsetZ2;
 #endif
-    transformFromPrinter(currentPosition[X_AXIS], currentPosition[Y_AXIS], currentPosition[Z_AXIS],
+	// currentPosition[E_AXIS] = currentPositionSteps[E_AXIS] * invAxisStepsPerMM[E_AXIS];
+    transformFromPrinter(currentPositionTransformed[X_AXIS], currentPositionTransformed[Y_AXIS], currentPositionTransformed[Z_AXIS],
                          currentPosition[X_AXIS], currentPosition[Y_AXIS], currentPosition[Z_AXIS]);
     currentPosition[X_AXIS] -= Printer::offsetX; // Offset from active extruder or z probe
     currentPosition[Y_AXIS] -= Printer::offsetY;
@@ -736,9 +750,10 @@ void Printer::updateCurrentPositionSteps() {
     float x_rotc, y_rotc, z_rotc;
     transformToPrinter(currentPosition[X_AXIS] + Printer::offsetX, currentPosition[Y_AXIS] + Printer::offsetY, currentPosition[Z_AXIS] +  Printer::offsetZ, x_rotc, y_rotc, z_rotc);
     z_rotc += offsetZ2;
-    currentPositionSteps[X_AXIS] = static_cast<int32_t>(floor(x_rotc * axisStepsPerMM[X_AXIS] + 0.5f));
-    currentPositionSteps[Y_AXIS] = static_cast<int32_t>(floor(y_rotc * axisStepsPerMM[Y_AXIS] + 0.5f));
-    currentPositionSteps[Z_AXIS] = static_cast<int32_t>(floor(z_rotc * axisStepsPerMM[Z_AXIS] + 0.5f));
+    currentPositionSteps[X_AXIS] = lroundf(x_rotc * axisStepsPerMM[X_AXIS]);
+    currentPositionSteps[Y_AXIS] = lroundf(y_rotc * axisStepsPerMM[Y_AXIS]);
+    currentPositionSteps[Z_AXIS] = lroundf(z_rotc * axisStepsPerMM[Z_AXIS]);
+	currentPositionSteps[E_AXIS] = lroundf(currentPosition[E_AXIS] * axisStepsPerMM[E_AXIS]);
 #if NONLINEAR_SYSTEM
     transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
 #endif
@@ -790,19 +805,19 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com) {
     if(!com->hasNoXYZ()) {
 #endif
         if(!relativeCoordinateMode) {
-            if(com->hasX()) lastCmdPos[X_AXIS] = currentPosition[X_AXIS] = convertToMM(com->X) - coordinateOffset[X_AXIS];
-            if(com->hasY()) lastCmdPos[Y_AXIS] = currentPosition[Y_AXIS] = convertToMM(com->Y) - coordinateOffset[Y_AXIS];
-            if(com->hasZ()) lastCmdPos[Z_AXIS] = currentPosition[Z_AXIS] = convertToMM(com->Z) - coordinateOffset[Z_AXIS];
+            if(com->hasX()) currentPosition[X_AXIS] = lastCmdPos[X_AXIS] = convertToMM(com->X) - coordinateOffset[X_AXIS];
+            if(com->hasY()) currentPosition[Y_AXIS] = lastCmdPos[Y_AXIS] = convertToMM(com->Y) - coordinateOffset[Y_AXIS];
+            if(com->hasZ()) currentPosition[Z_AXIS] = lastCmdPos[Z_AXIS] = convertToMM(com->Z) - coordinateOffset[Z_AXIS];
         } else {
             if(com->hasX()) currentPosition[X_AXIS] = (lastCmdPos[X_AXIS] += convertToMM(com->X));
             if(com->hasY()) currentPosition[Y_AXIS] = (lastCmdPos[Y_AXIS] += convertToMM(com->Y));
             if(com->hasZ()) currentPosition[Z_AXIS] = (lastCmdPos[Z_AXIS] += convertToMM(com->Z));
         }
-        transformToPrinter(lastCmdPos[X_AXIS] + Printer::offsetX, lastCmdPos[Y_AXIS] + Printer::offsetY, lastCmdPos[Z_AXIS] +  Printer::offsetZ, x, y, z);
-        z += offsetZ2;
-        destinationSteps[X_AXIS] = static_cast<int32_t>(floor(x * axisStepsPerMM[X_AXIS] + 0.5f));
-        destinationSteps[Y_AXIS] = static_cast<int32_t>(floor(y * axisStepsPerMM[Y_AXIS] + 0.5f));
-        destinationSteps[Z_AXIS] = static_cast<int32_t>(floor(z * axisStepsPerMM[Z_AXIS] + 0.5f));
+        transformToPrinter(lastCmdPos[X_AXIS] + Printer::offsetX, lastCmdPos[Y_AXIS] + Printer::offsetY, lastCmdPos[Z_AXIS] +  Printer::offsetZ, destinationPositionTransformed[X_AXIS], destinationPositionTransformed[Y_AXIS], destinationPositionTransformed[Z_AXIS]);
+        destinationPositionTransformed[Z_AXIS] += offsetZ2;
+        destinationSteps[X_AXIS] = lroundf(destinationPositionTransformed[X_AXIS] * axisStepsPerMM[X_AXIS]);
+        destinationSteps[Y_AXIS] = lroundf(destinationPositionTransformed[Y_AXIS] * axisStepsPerMM[Y_AXIS]);
+        destinationSteps[Z_AXIS] = lroundf(destinationPositionTransformed[Z_AXIS] * axisStepsPerMM[Z_AXIS]);
 #if LAZY_DUAL_X_AXIS
         sledParked = false;
 #endif
@@ -824,19 +839,33 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com) {
 #if MIN_EXTRUDER_TEMP > 20
                 (Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed() && Extruder::current->tempControl.sensorType != 0) ||
 #endif
-                fabs(com->E) * extrusionFactor > EXTRUDE_MAXLENGTH)
-                p = 0;
-            destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS] + p;
+                fabs(com->E) * extrusionFactor > EXTRUDE_MAXLENGTH) {
+					p = 0;
+					destinationPositionTransformed[E_AXIS] = currentPositionTransformed[E_AXIS] = 0;
+				} else {
+					destinationPositionTransformed[E_AXIS] = 0;
+					currentPositionTransformed[E_AXIS] = -convertToMM(com->E);
+				}
+			
+            destinationSteps[E_AXIS] = 0;
+			currentPositionSteps[E_AXIS] = -p;
         } else {
             if(
 #if MIN_EXTRUDER_TEMP > 20
                 (Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP  && !Printer::isColdExtrusionAllowed() && Extruder::current->tempControl.sensorType != 0) ||
 #endif
-                fabs(p - currentPositionSteps[E_AXIS]) * extrusionFactor > EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS])
+                fabs(p - currentPositionSteps[E_AXIS]) * extrusionFactor > EXTRUDE_MAXLENGTH * axisStepsPerMM[E_AXIS]) {
                 currentPositionSteps[E_AXIS] = p;
+					destinationPositionTransformed[E_AXIS] = currentPositionTransformed[E_AXIS] = convertToMM(com->E);
+				} else {
+					destinationPositionTransformed[E_AXIS] = convertToMM(com->E);
+				}
             destinationSteps[E_AXIS] = p;
         }
-    } else Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
+    } else {
+		destinationPositionTransformed[E_AXIS] = currentPositionTransformed[E_AXIS];
+		Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
+	}
     if(com->hasF() && com->F > 0.1) {
         if(unitIsInches)
             feedrate = com->F * 0.0042333f * (float)feedrateMultiply;  // Factor is 25.5/60/100

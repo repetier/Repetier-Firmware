@@ -1322,7 +1322,8 @@ void Commands::processGCode(GCode *com) {
         if(com->hasZ()) zOff = Printer::convertToMM(com->Z) - Printer::currentPosition[Z_AXIS];
         Printer::setOrigin(xOff, yOff, zOff);
         if(com->hasE()) {
-            Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = Printer::convertToMM(com->E) * Printer::axisStepsPerMM[E_AXIS];
+			Printer::destinationPositionTransformed[E_AXIS] = Printer::currentPositionTransformed[E_AXIS] = Printer::convertToMM(com->E);
+            Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = Printer::destinationPositionTransformed[E_AXIS] * Printer::axisStepsPerMM[E_AXIS];
         }
 		if(com->hasX() || com->hasY() || com->hasZ()) {
 			Com::printF(PSTR("X_OFFSET:"), Printer::coordinateOffset[X_AXIS], 3);
