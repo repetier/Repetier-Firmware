@@ -24,7 +24,17 @@
  */
 #ifndef FatApiConstants_h
 #define FatApiConstants_h
-//------------------------------------------------------------------------------
+// Temp fix for particle mesh.
+#ifdef O_RDONLY
+#undef O_RDONLY
+#endif // O_RDONLY
+#ifdef O_RDWR
+#undef O_RDWR
+#endif // O_RDWR
+#ifdef O_WRONLY
+#undef O_WRONLY
+#endif // O_WRONLY
+       //------------------------------------------------------------------------------
 // use the gnu style oflag in open()
 /** open() oflag for reading */
 const uint8_t O_READ = 0X01;
@@ -69,4 +79,4 @@ const uint8_t T_ACCESS = 1;
 const uint8_t T_CREATE = 2;
 /** Set the file's write date and time */
 const uint8_t T_WRITE = 4;
-#endif  // FatApiConstants_h
+#endif // FatApiConstants_h
