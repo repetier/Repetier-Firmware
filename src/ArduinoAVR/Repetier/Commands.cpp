@@ -1159,13 +1159,15 @@ void Commands::processGCode(GCode *com) {
 #endif
 #endif
         bool ok = true;
-        Printer::startProbing(true);
+        ok = Printer::startProbing(true);
         bool oldAutolevel = Printer::isAutolevelActive();
         Printer::setAutolevelActive(false);
         float sum = 0, last, oldFeedrate = Printer::feedrate;
-        Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
-        sum = Printer::runZProbe(true, false, Z_PROBE_REPETITIONS, false);
-        if(sum == ILLEGAL_Z_PROBE) ok = false;
+		if(ok) {
+			Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
+			sum = Printer::runZProbe(true, false, Z_PROBE_REPETITIONS, false);
+			if(sum == ILLEGAL_Z_PROBE) ok = false;
+		}
         if(ok) {
             Printer::moveTo(EEPROM::zProbeX2(), EEPROM::zProbeY2(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
             last = Printer::runZProbe(false, false);
@@ -1536,7 +1538,9 @@ void Commands::processGCode(GCode *com) {
 #ifndef G134_PRECISION
 #define G134_PRECISION 0.05
 #endif
-        Printer::startProbing(true);
+        if(!Printer::startProbing(true)) {
+			break;
+		}
         for(int r = 0; r < G134_REPETITIONS && !bigError; r++) {
             Extruder::selectExtruderById(p);
             float refHeight = Printer::runZProbe(false, false);

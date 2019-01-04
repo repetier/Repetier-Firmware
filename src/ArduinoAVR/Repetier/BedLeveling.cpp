@@ -333,7 +333,9 @@ bool runBedLeveling(int s) {
     Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
 #endif
     Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
-    Printer::startProbing(true);
+    if(!Printer::startProbing(true)) {
+		return false;
+	}
     //GCode::executeFString(Com::tZProbeStartScript);
     Plane plane;
 #if BED_CORRECTION_METHOD == 1
@@ -344,7 +346,9 @@ bool runBedLeveling(int s) {
             Printer::finishProbing();
             Printer::homeAxis(true, true, true);
             Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
-            Printer::startProbing(true);
+            if(!Printer::startProbing(true)) {
+				return false;
+			}
         }
 #endif // DELTA
 #endif // BED_CORRECTION_METHOD == 1

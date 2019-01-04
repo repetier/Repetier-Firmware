@@ -1003,7 +1003,11 @@ enum LsAction {LS_SerialPrint,LS_Count,LS_GetFilename};
 class SDCard
 {
 public:
-    SdFat fat;
+#if ENABLE_SOFTWARE_SPI_CLASS
+	SdFatSoftSpi<SD_SOFT_MISO_PIN, SD_SOFT_MOSI_PIN, SD_SOFT_SCK_PIN> fat;
+#else
+	SdFat fat;
+#endif
     //Sd2Card card; // ~14 Byte
     //SdVolume volume;
     //SdFile root;

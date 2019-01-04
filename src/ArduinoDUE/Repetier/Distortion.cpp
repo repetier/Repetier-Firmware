@@ -208,7 +208,9 @@ bool Distortion::measure(void) {
     zCorrection -= Printer::zBedOffset * Printer::axisStepsPerMM[Z_AXIS];
 #endif
 
-    Printer::startProbing(true);
+    if(!Printer::startProbing(true)) {
+		return false;
+	}
     Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, z, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
     for (iy = DISTORTION_CORRECTION_POINTS - 1; iy >= 0; iy--)
         for (ix = 0; ix < DISTORTION_CORRECTION_POINTS; ix++) {

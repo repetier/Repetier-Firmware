@@ -1818,7 +1818,9 @@ void Printer::homeZAxis() { // Cartesian homing
     if ((MIN_HARDWARE_ENDSTOP_Z && Z_MIN_PIN > -1 && Z_HOME_DIR == -1) || (MAX_HARDWARE_ENDSTOP_Z && Z_MAX_PIN > -1 && Z_HOME_DIR == 1)) {
         offsetZ2 = 0;
 #if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN && FEATURE_Z_PROBE
-        Printer::startProbing(true);
+        if(!Printer::startProbing(true)) {
+			return;
+		}
 #endif
         coordinateOffset[Z_AXIS] = 0; // G92 Z offset
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HOME_Z_ID));

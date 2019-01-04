@@ -578,7 +578,7 @@ SIGNAL (TIMER3_COMPA_vect) {
 #endif
 #endif
 
-long __attribute__((used)) stepperWait = 0;
+volatile long __attribute__((used)) stepperWait = 0;
 
 // ================== Interrupt handling ======================
 
