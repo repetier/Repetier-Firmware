@@ -62,6 +62,8 @@ public:
     millis_t preheatStartTime;    ///< Time (in milliseconds) when heat up was started
     int16_t preheatTemperature;
 
+	/** Return currentTemperatureC but -333 on defect sensor and -444 on decoupled sensor. */
+	float getStatefulTemperature();
     void setTargetTemperature(float target);
     void updateCurrentTemperature();
     void updateTempControlVars();

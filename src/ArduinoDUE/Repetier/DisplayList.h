@@ -21,6 +21,8 @@ which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 #ifndef RF_DISPLAY
 #define RF_DISPLAY
 
+#define UI_FONT_DEFAULT_RU ISO_6x10
+#define UI_FONT_SMALL_RU ISO_5x7
 
 #if FEATURE_CONTROLLER == UICONFIG_CONTROLLER
 #include "uiconfig.h"

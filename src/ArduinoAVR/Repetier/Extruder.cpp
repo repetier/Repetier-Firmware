@@ -2546,6 +2546,15 @@ void Extruder::disableAllHeater() {
     autotuneIndex = 255;
 }
 
+float TemperatureController::getStatefulTemperature() {
+	if(isSensorDefect()) {
+		return -333.0;
+	}
+	if(isSensorDecoupled()) {
+		return -444.0;
+	}
+	return currentTemperatureC;
+}
 void TemperatureController::autotunePID(float temp, uint8_t controllerId, int maxCycles, bool storeValues, int method) {
 	ENSURE_POWER
     if(method < 0) method = 0;

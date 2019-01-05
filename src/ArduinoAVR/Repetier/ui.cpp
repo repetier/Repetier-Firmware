@@ -828,17 +828,42 @@ void u8PrintChar(char c) {
     case 0x7E: // right arrow
         u8g_SetFont(&u8g, u8g_font_6x12_67_75);
         u8_tx += u8g_DrawGlyph(&u8g, u8_tx, u8_ty, 0x52);
+        #if LANGUAGE_RU_ACTIVE // Switch font
+                    if (Com::selectedLanguage != LANGUAGE_RU_ID) {
+                        u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                        } else {
+                        u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
+                        }
+                        #else
         u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                     #endif
         break;
     case CHAR_SELECTOR:
         u8g_SetFont(&u8g, u8g_font_6x12_67_75);
         u8_tx += u8g_DrawGlyph(&u8g, u8_tx, u8_ty, 0xb7);
+                            #if LANGUAGE_RU_ACTIVE // Switch font
+                            if (Com::selectedLanguage != LANGUAGE_RU_ID) {
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                                } else {
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
+                                }
+                                #else
         u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                            #endif
         break;
     case CHAR_SELECTED:
         u8g_SetFont(&u8g, u8g_font_6x12_67_75);
         u8_tx += u8g_DrawGlyph(&u8g, u8_tx, u8_ty, 0xb6);
+        #if LANGUAGE_RU_ACTIVE
+                     #if LANGUAGE_RU_ACTIVE // Switch font
+                            if (Com::selectedLanguage != LANGUAGE_RU_ID) {
         u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                                } else {
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
+                                }
+                                #else
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                            #endif
         break;
     case 253:      //shift one pixel to right
         u8_tx++;
@@ -940,7 +965,17 @@ void initializeLCD() {
         u8g_SetColorIndex(&u8g, 0);
     } while( u8g_NextPage(&u8g) );
 
+                        #if LANGUAGE_RU_ACTIVE // Switch font
+                            if (Com::selectedLanguage != LANGUAGE_RU_ID) {
     u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                                } else {
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
+                                }
+                                #else
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                            #endif
+                
+#endif
     u8g_SetColorIndex(&u8g, 1);
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
 }
@@ -2319,10 +2354,26 @@ void UIDisplay::refreshPage() {
                 u8g_SetColorIndex(&u8g, 1);
                 u8g_draw_box(&u8g, 0, 0, u8g_GetWidth(&u8g), UI_FONT_SMALL_HEIGHT + 1);
                 u8g_SetColorIndex(&u8g, 0);
+                        #if LANGUAGE_RU_ACTIVE //Switch font
+                         if (Com::selectedLanguage != LANGUAGE_RU_ID) {
+                             u8g_SetFont(&u8g, UI_FONT_SMALL);
+                             } else {
+                             u8g_SetFont(&u8g, UI_FONT_SMALL_RU);
+                             }
+                            #else
                 u8g_SetFont(&u8g, UI_FONT_SMALL);
+                            #endif
                 if(u8g_IsBBXIntersection(&u8g, 0, 1, 1, UI_FONT_SMALL_HEIGHT + 1))
                     printU8GRow(1, UI_FONT_SMALL_HEIGHT, head);
+                 #if LANGUAGE_RU_ACTIVE // Switch font
+                            if (Com::selectedLanguage != LANGUAGE_RU_ID) {
                 u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                                } else {
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
+                                }
+                                #else
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                            #endif
                 u8g_SetColorIndex(&u8g, 1);
 
                 drawHProgressBar(0, UI_FONT_HEIGHT * 2 + 2, 128, UI_FONT_HEIGHT - 1, Printer::progress);
@@ -2343,7 +2394,15 @@ void UIDisplay::refreshPage() {
 #endif
                 printRow(0, cache[0], NULL, UI_COLS); // Object name
             } else { // not printing
+                #if LANGUAGE_RU_ACTIVE //Switch font
+                         if (Com::selectedLanguage != LANGUAGE_RU_ID) {
+                             u8g_SetFont(&u8g, UI_FONT_SMALL);
+                             } else {
+                             u8g_SetFont(&u8g, UI_FONT_SMALL_RU);
+                             }
+                            #else
                 u8g_SetFont(&u8g, UI_FONT_SMALL);
+                            #endif
                 uint8_t py = 8;
                 for(uint8_t r = 0; r < 3; r++) {
                     if(u8g_IsBBXIntersection(&u8g, 0, py - UI_FONT_SMALL_HEIGHT, 1, UI_FONT_SMALL_HEIGHT))
@@ -2378,7 +2437,15 @@ void UIDisplay::refreshPage() {
                     u8g_draw_vline(&u8g, 112, 0, 32);
                     u8g_draw_vline(&u8g, 62, 0, 54);
                 }
+                     #if LANGUAGE_RU_ACTIVE // Switch font
+                            if (Com::selectedLanguage != LANGUAGE_RU_ID) {
                 u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                                } else {
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
+                                }
+                                #else
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                            #endif
             } // not printing
         } // menu level 0 page 0
         else {
@@ -2388,19 +2455,51 @@ void UIDisplay::refreshPage() {
             u8g_SetColorIndex(&u8g, 1);
             u8g_draw_box(&u8g, 0, 0, u8g_GetWidth(&u8g), UI_FONT_SMALL_HEIGHT + 1);
             u8g_SetColorIndex(&u8g, 0);
+            #if LANGUAGE_RU_ACTIVE //Switch font
+                         if (Com::selectedLanguage != LANGUAGE_RU_ID) {
             u8g_SetFont(&u8g, UI_FONT_SMALL);
+                             } else {
+                             u8g_SetFont(&u8g, UI_FONT_SMALL_RU);
+                             }
+                            #else
+                            u8g_SetFont(&u8g, UI_FONT_SMALL);
+                            #endif
             if(u8g_IsBBXIntersection(&u8g, 0, 1, 1, UI_FONT_SMALL_HEIGHT + 1))
                 printU8GRow(1, UI_FONT_SMALL_HEIGHT, head);
+             #if LANGUAGE_RU_ACTIVE // Switch font
+                            if (Com::selectedLanguage != LANGUAGE_RU_ID) {
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                                } else {
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
+                                }
+                                #else
             u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                            #endif
             u8g_SetColorIndex(&u8g, 1);
             if(menuLevel == 0) {
+                #if LANGUAGE_RU_ACTIVE //Switch font
+                         if (Com::selectedLanguage != LANGUAGE_RU_ID) {
                 u8g_SetFont(&u8g, UI_FONT_SMALL);
+                             } else {
+                             u8g_SetFont(&u8g, UI_FONT_SMALL_RU);
+                             }
+                            #else
+                            u8g_SetFont(&u8g, UI_FONT_SMALL);
+                            #endif
                 for(y = 0; y < UI_ROWS; y++) {
                     int h0 = UI_FONT_HEIGHT + y * (UI_FONT_SMALL_HEIGHT + 1);
                     if(u8g_IsBBXIntersection(&u8g, 0, h0, 1, UI_FONT_SMALL_HEIGHT + 1))
                         printU8GRow(14, h0 + UI_FONT_SMALL_HEIGHT + 1, &cache[y][off[y]]);
                 }
+                 #if LANGUAGE_RU_ACTIVE // Switch font
+                            if (Com::selectedLanguage != LANGUAGE_RU_ID) {
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                                } else {
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
+                }
+                                #else
                 u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                            #endif
                 printRow(4, &cache[5][off[5]], NULL, UI_COLS);
             } else {
 #endif
@@ -3927,6 +4026,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
         case UI_ACTION_LANGUAGE_PL:
         case UI_ACTION_LANGUAGE_TR:
         case UI_ACTION_LANGUAGE_FI:
+        case UI_ACTION_LANGUAGE_RU:
             Com::selectLanguage(action - UI_ACTION_LANGUAGE_EN);
 #if EEPROM_MODE != 0
             EEPROM::storeDataIntoEEPROM(0); // remember for next start

@@ -96,8 +96,9 @@
 #define LANGUAGE_PL_ID 9
 #define LANGUAGE_TR_ID 10
 #define LANGUAGE_FI_ID 11
+#define LANGUAGE_RU_ID 12
 
-#define NUM_LANGUAGES_KNOWN 12
+#define NUM_LANGUAGES_KNOWN 13
 #define NUM_TRANSLATED_WORDS 314
 
 // For selectable translations we refer to each text by a id which gets
@@ -4500,6 +4501,348 @@
 #define UI_TEXT_MAINPAGE6_4_C_FI "Mul: %om%%%    Spi:%opRPM "
 #define UI_TEXT_JAMCONTROL_FI "%ej Jam Control"
 
+
+//******************* Russian****************************************************************************************************************//
+//*  Перевел Goodfeat (Vladimir Sokolov)  05.01.2018                                                                                        *//
+//*  tehnicalmailone@gmail.com     V 1.0                                                                                                    *//
+//*  Encoding                      ISO-8859-5 (8bit)                                                                                        *//
+//*--#define----------------------------encoding-----------------------------------------------------------------description in Russian-----*//
+
+#define UI_TEXT_ON_RU               "\262\272\273"                                                                  //  ВКЛ.
+#define UI_TEXT_OFF_RU              "\262\313\272\273"                                                              //  ВЫКЛ
+#define UI_TEXT_NA_RU               "\275\325\40\330\341\337\56"                                                    //  Не исп.
+#define UI_TEXT_YES_RU              "\264\320"                                                                      //  Да
+#define UI_TEXT_NO_RU               "\275\325\342"                                                                  //  Нет
+#define UI_TEXT_PRINT_POS_RU        "\277\325\347\320\342\320\325\334\56\56\56"                                     //  Печатаем...
+#define UI_TEXT_PRINTING_RU         "\277\325\347\320\342\320\325\334"                                              //  Печатаем
+#define UI_TEXT_IDLE_RU             "\263\336\342\336\322"                                                          //  Готов
+#define UI_TEXT_NOSDCARD_RU         "\275\325\342\40\123\104\40\332\320\340\342\353"                                //  Нет SD карты
+#define UI_TEXT_ERROR_RU            "\52\52\52\52\40\276\310\270\261\272\260\40\52\52\52\52"                        //  **** ОШИБКА ****
+#define UI_TEXT_BACK_RU             "\275\320\327\320\324 " cUP                                                     //  Назад 
+#define UI_TEXT_QUICK_SETTINGS_RU   "\315\333\325\334\325\335\342\353\40\343\337\340\320\322\333\325\335\330\357"   //  Элементы управления
+#define UI_TEXT_ERRORMSG_RU         "%oe"
+#define UI_TEXT_CONFIGURATION_RU    "\275\320\341\342\340\336\331\332\330"                                          //  Настройки
+#define UI_TEXT_POSITION_RU         "\277\336\327\330\346\330\336\335\330\340\336\322\320\335\330\325"              //  Позиционирование
+#define UI_TEXT_EXTRUDER_RU         "\275\320\323\340\325\322\320\342\325\333\330"                                  //  Нагреватели
+#define UI_TEXT_SD_CARD_RU          "\123\104\40\332\320\340\342\320"                                               //  SD карта
+#define UI_TEXT_DEBUGGING_RU        "\276\342\333\320\324\332\320"                                                  //  Отладка
+#define UI_TEXT_HOME_DELTA_RU       "\303\341\342\320\335\336\322\332\320\40\337\336\327\330\346\330\330\56\56\56"  //  Установка позиции...
+#define UI_TEXT_HOME_ALL_RU         "\264\336\334\336\331"                                                          //  Домой
+#define UI_TEXT_HOME_X_RU           "\264\336\334\336\331\40\337\336\40\130"                                        //  Домой по X
+#define UI_TEXT_HOME_Y_RU           "\264\336\334\336\331\40\337\336\40\131"                                        //  Домой по Y
+#define UI_TEXT_HOME_Z_RU           "\264\336\334\336\331\40\337\336\40\132"                                        //  Домой по Z
+#define UI_TEXT_PREHEAT_SINGLE_RU   "\262\332\333\56\61\40\341\336\337\333\336\40\330\40\341\342\336\333"           //  Вкл.1 сопло и стол
+#define UI_TEXT_PREHEAT_ALL_RU      "\262\332\333\56\322\341\325\40\335\320\323\340\325\322\320\342\325\333\330"    //  Вкл.все нагреватели
+#define UI_TEXT_LIGHTS_ONOFF_RU     "\301\322\325\342:%lo"                                                          //  Свет
+#define UI_TEXT_COOLDOWN_RU         "\276\342\332\333\56\40\335\320\323\340\325\322\320\342\325\333\330"            //  Откл. нагреватели
+#define UI_TEXT_SET_TO_ORIGIN_RU    "\303\341\342\320\335\336\322\330\342\354\40\327\335\320\347\325\335\330\357\41"//  Установить значения!
+#define UI_TEXT_DISABLE_STEPPER_RU  "\276\342\332\333\56\337\330\342\320\335\330\325\40\334\336\342\336\340\336\322"//  Откл.питание моторов
+#define UI_TEXT_X_POSITION_RU       "\277\336\327\56\40\337\336\40\130"                                             //  Поз. по X
+#define UI_TEXT_X_POS_FAST_RU       "\261\353\341\342\340\336\325\40\337\336\327\40\337\336\40\130"                 //  Быстрое поз по X
+#define UI_TEXT_Y_POSITION_RU       "\277\336\327\56\40\337\336\40\131"                                             //  Поз. по Y
+#define UI_TEXT_Y_POS_FAST_RU       "\261\353\341\342\340\336\325\40\337\336\327\40\337\336\40\131"                 //  Быстрое поз по Y
+#define UI_TEXT_Z_POSITION_RU       "\277\336\327\56\40\337\336\40\132"                                             //  Поз. по Z
+#define UI_TEXT_Z_POS_FAST_RU       "\261\353\341\342\340\336\325\40\337\336\327\40\337\336\40\132"                 //  Быстрое поз по Z
+#define UI_TEXT_E_POSITION_RU       "\303\337\340\320\322\333\56\355\332\341\342\340\343\324\325\340\336\334"       //  Управл.экструдером
+#define UI_TEXT_BED_TEMP_RU         "\301\342\336\333\40\40\40\72%eb/%Eb" cDEG "C"                                  //  Стол   :
+#define UI_TEXT_EXTR0_TEMP_RU       "\301\336\337\333\336\40\61\72%e0/%E0" cDEG "C"                                 //  Сопло 1:
+#define UI_TEXT_EXTR1_TEMP_RU       "\301\336\337\333\336\40\62\72%e1/%E1" cDEG "C"                                 //  Сопло 2:
+#define UI_TEXT_EXTR2_TEMP_RU       "\301\336\337\333\336\40\63\72%e2/%E2" cDEG "C"                                 //  Сопло 3:
+#define UI_TEXT_EXTR0_OFF_RU        "\262\353\332\333\356\347\330\342\354\40\341\336\337\333\336\40\61"             //  Выключить сопло 1
+#define UI_TEXT_EXTR1_OFF_RU        "\262\353\332\333\356\347\330\342\354\40\341\336\337\333\336\40\62"             //  Выключить сопло 2
+#define UI_TEXT_EXTR2_OFF_RU        "\262\353\332\333\356\347\330\342\354\40\341\336\337\333\336\40\63"             //  Выключить сопло 3
+#define UI_TEXT_EXTR0_SELECT_RU     "%X0 \262\353\321\340\320\342\354\40\341\336\337\333\336\40\61"                 //  Выбрать сопло 1
+#define UI_TEXT_EXTR1_SELECT_RU     "%X1 \262\353\321\340\320\342\354\40\341\336\337\333\336\40\62"                 //  Выбрать сопло 2
+#define UI_TEXT_EXTR2_SELECT_RU     "%X2 \262\353\321\340\320\342\354\40\341\336\337\333\336\40\63"                 //  Выбрать сопло 3
+#define UI_TEXT_EXTR_ORIGIN_RU      "\303\341\342\320\335\336\322\56\330\327\334\325\335\325\335\330\325\41"        //  Установ.изменение!
+#define UI_TEXT_PRINT_X_RU          "\277\325\347\320\342\354\40\337\336 X:%ax"                                     //  Печать по X
+#define UI_TEXT_PRINT_Y_RU          "\277\325\347\320\342\354\40\337\336 Y:%ay"                                     //  Печать по Y
+#define UI_TEXT_PRINT_Z_RU          "\277\325\347\320\342\354\40\337\336 Z:%az"                                     //  Печать по Z
+#define UI_TEXT_PRINT_Z_DELTA_RU    "\277\325\347\320\342\354:     %az"                                             //  Печать
+#define UI_TEXT_MOVE_X_RU           "\277\325\340\325\334\325\351\56\337\336 X :%aX"                                //  Перемещ.по X
+#define UI_TEXT_MOVE_Y_RU           "\277\325\340\325\334\325\351\56\337\336 Y :%aY"                                //  Перемещ.по Y
+#define UI_TEXT_MOVE_Z_RU           "\277\325\340\325\334\325\351\56\337\336 Z :%aZ"                                //  Перемещ.по Z
+#define UI_TEXT_MOVE_Z_DELTA_RU     "\277\325\340\325\334\325\351\325\335\330\325:%aZ"                              //  Перемещение 
+#define UI_TEXT_JERK_RU             "\300\353\322\336\332:      %aj"                                                //  Рывок
+#define UI_TEXT_ZJERK_RU            "Z-\300\353\322\336\332 :%aJ"                                                   //  Z-Рывок
+#define UI_TEXT_ACCELERATION_RU     "\303\341\332\336\340\325\335\330\325"                                          //  Ускорение
+#define UI_TEXT_STORE_TO_EEPROM_RU  "\301\336\345\340\320\335\330\342\354\40\322\40\105\105\120\122\117\115"        //  Сохранить в EEPROM
+#define UI_TEXT_LOAD_EEPROM_RU      "\267\320\323\340\343\327\330\342\354\40\330\327\40\105\105\120\122\117\115"    //  Загрузить из EEPROM
+#define UI_TEXT_DBG_ECHO_RU         "\276\321\340\320\342\335\320\357\40\341\322\357\327\354:%do"                   //  Обратная связь
+#define UI_TEXT_DBG_INFO_RU         "\270\335\344\336   :%di"                                                       //  Инфо
+#define UI_TEXT_DBG_ERROR_RU        "\276\350\330\321\332\320 :%de"                                                 //  Ошибка
+#define UI_TEXT_DBG_DRYRUN_RU       "\277\340\336\321\335\353\331\40\327\320\337\343\341\332:%dd"                   //  Пробный запуск
+#define UI_TEXT_DBG_RUDSTOP_RU      "\272\336\335\346\325\322\330\332:%dp"                                          //  Концевик
+#define UI_TEXT_OPS_OFF_RU          "%O0 OPS off"
+#define UI_TEXT_OPS_CLASSIC_RU      "%O1 OPS classic"
+#define UI_TEXT_OPS_FAST_RU         "%O2 OPS fast"
+#define UI_TEXT_OPS_RETRACT_RU      "\262\342\357\323\330\322\320\335\330\325:%Or"                                  //  Втягивание
+#define UI_TEXT_OPS_BACKSLASH_RU    "Backsl.   :%Ob"
+#define UI_TEXT_OPS_MINDIST_RU      "\274\330\335\56\40\324\330\341\342\320\335\346\330\357\72%Od"                  //  Мин. дистанция:
+#define UI_TEXT_OPS_MOVE_AFTER_RU   "Move after:%Oa"
+#define UI_TEXT_ANTI_OOZE_RU        "\260\335\342\330\55\343\342\325\347\332\320"                                   //  Анти-утечка
+#define UI_TEXT_PRINT_FILE_RU       "\277\325\347\320\342\354\40\344\320\331\333\320"                               //  Печать файла
+#define UI_TEXT_PAUSE_PRINT_RU      "\277\336\341\342\320\322\330\342\354\40\335\320\40\337\320\343\327\343"        //  Поставить на паузу
+#define UI_TEXT_CONTINUE_PRINT_RU   "\262\336\327\336\321\335\336\322\330\342\354\40\337\325\347\320\342\354"       //  Возобновить печать
+#define UI_TEXT_UNMOUNT_CARD_RU     "\270\327\322\333\325\347\354\40\123\104\55\332\320\340\342\343"                //  Извлечь SD-карту
+#define UI_TEXT_MOUNT_CARD_RU       "\277\336\324\332\333\356\347\330\342\354\40\123\104\55\332\320\340\342\343"    //  Подключить SD-карту
+#define UI_TEXT_DELETE_FILE_RU      "\303\324\320\333\330\342\354\40\344\320\331\333"                               //  Удалить файл
+#define UI_TEXT_FEEDRATE_RU         "\301\332\336\340\336\341\342\354"                                              //  Скорость
+#define UI_TEXT_FEED_MAX_X_RU       "\274\320\332\341\56\337\336 X:%fx"                                             //  Макс.по
+#define UI_TEXT_FEED_MAX_Y_RU       "\274\320\332\341\56\337\336 Y:%fy"                                             //  Макс.по
+#define UI_TEXT_FEED_MAX_Z_RU       "\274\320\332\341\56\337\336 Z:%fz"                                             //  Макс.по
+#define UI_TEXT_FEED_MAX_Z_DELTA_RU "\274\320\332\341\330\334\320\333\354\335\320\357:%fz"                          //  Максимальная
+#define UI_TEXT_FEED_HOME_X_RU      "\301\332\336\340\56\324\336\334\336\331\40\337\336 X:%fX"                      //  Скор.домой по
+#define UI_TEXT_FEED_HOME_Y_RU      "\301\332\336\340\56\324\336\334\336\331\40\337\336 Y:%fY"                      //  Скор.домой по
+#define UI_TEXT_FEED_HOME_Z_RU      "\301\332\336\340\56\324\336\334\336\331\40\337\336 Z:%fZ"                      //  Скор.домой по
+#define UI_TEXT_FEED_HOME_Z_DELTA_RU "\301\332\336\340\56\324\336\334\336\331: %fZ"                                 //  Скор.домой
+#define UI_TEXT_ACTION_XPOSITION4A_RU "X:%x0 \334\334 %dx%dX"                                                       //  мм
+#define UI_TEXT_ACTION_XPOSITION4B_RU "\272\336\335\346\325\322\330\332\40\274\330\335\56 :%sx"                     //  Концевик Мин.
+#define UI_TEXT_ACTION_XPOSITION4C_RU "\272\336\335\346\325\322\330\332\40\274\320\332\341\56:%sX"                  //  Концевик Макс.
+#define UI_TEXT_ACTION_XPOSITION4D_RU ""
+#define UI_TEXT_ACTION_YPOSITION4A_RU "Y:%x1 \334\334 %dy%dY"                                                       //  мм
+#define UI_TEXT_ACTION_YPOSITION4B_RU "\272\336\335\346\325\322\330\332\40\274\330\335\56 :%sy"                     //  Концевик Мин.
+#define UI_TEXT_ACTION_YPOSITION4C_RU "\272\336\335\346\325\322\330\332\40\274\320\332\341\56:%sY"                  //  Концевик Макс.
+#define UI_TEXT_ACTION_YPOSITION4D_RU ""
+#define UI_TEXT_ACTION_ZPOSITION4A_RU "Z:%x2 \334\334 %dz%dZ"                                                       //  мм
+#define UI_TEXT_ACTION_ZPOSITION4B_RU "\272\336\335\346\325\322\330\332\40\274\330\335\56 :%sz"                     //  Концевик Мин.
+#define UI_TEXT_ACTION_ZPOSITION4C_RU "\272\336\335\346\325\322\330\332\40\274\320\332\341\56:%sZ"                  //  Концевик Макс.
+#define UI_TEXT_ACTION_ZPOSITION4D_RU ""
+#define UI_TEXT_ACTION_XPOSITION_FAST4A_RU "X:%x0 \334\334"                                                         //  мм
+#define UI_TEXT_ACTION_XPOSITION_FAST4B_RU "\272\336\335\346\325\322\330\332\40\274\330\335\56 :%sx"                //  Концевик Мин.
+#define UI_TEXT_ACTION_XPOSITION_FAST4C_RU "\272\336\335\346\325\322\330\332\40\274\320\332\341\56:%sX"             //  Концевик Макс.
+#define UI_TEXT_ACTION_XPOSITION_FAST4D_RU ""
+#define UI_TEXT_ACTION_YPOSITION_FAST4A_RU "Y:%x1 \334\334"                                                         //  мм
+#define UI_TEXT_ACTION_YPOSITION_FAST4B_RU "\272\336\335\346\325\322\330\332\40\274\330\335\56 :%sy"                //  Концевик Мин.
+#define UI_TEXT_ACTION_YPOSITION_FAST4C_RU "\272\336\335\346\325\322\330\332\40\274\320\332\341\56:%sY"             //  Концевик Макс.
+#define UI_TEXT_ACTION_YPOSITION_FAST4D_RU ""
+#define UI_TEXT_ACTION_ZPOSITION_FAST4A_RU "Z:%x2 \334\334"                                                         //  мм
+#define UI_TEXT_ACTION_ZPOSITION_FAST4B_RU "\272\336\335\346\325\322\330\332\40\274\330\335\56 :%sz"                //  Концевик Мин.
+#define UI_TEXT_ACTION_ZPOSITION_FAST4C_RU "\272\336\335\346\325\322\330\332\40\274\320\332\341\56:%sZ"             //  Концевик Макс.
+#define UI_TEXT_ACTION_ZPOSITION_FAST4D_RU ""
+#define UI_TEXT_ACTION_EPOSITION_FAST2A_RU "\300\320\341\341\342\336\357\335\330\325:%x3 mm"                        //  Расстояние
+#define UI_TEXT_ACTION_EPOSITION_FAST2B_RU "\61\40\351\325\333\347\325\332\40\75\40\61\40\334\334"                  //  1 щелчек = 1 мм
+#define UI_TEXT_ACTION_XPOSITION2A_RU "X:%x0 \334\334"                                                              //  мм
+#define UI_TEXT_ACTION_XPOSITION2B_RU "\274\330\335\56:%sx \274\320\332\341\56:%sX"                                 //  Мин...  Макс.
+#define UI_TEXT_ACTION_YPOSITION2A_RU "Y:%x1 \334\334"                                                              //  мм
+#define UI_TEXT_ACTION_YPOSITION2B_RU "\274\330\335\56:%sy \274\320\332\341\56:%sY"                                 //  Мин...  Макс.
+#define UI_TEXT_ACTION_ZPOSITION2A_RU "Z:%x2 \334\334"                                                              //  мм
+#define UI_TEXT_ACTION_ZPOSITION2B_RU "\274\330\335\56:%sz \274\320\332\341\56:%sZ"                                 //  Мин...  Макс.
+#define UI_TEXT_ACTION_XPOSITION_FAST2A_RU "X:%x0 \334\334 "                                                        //  мм
+#define UI_TEXT_ACTION_XPOSITION_FAST2B_RU "\274\330\335\56:%sx \274\320\332\341\56:%sX"                            //  Мин...  Макс.
+#define UI_TEXT_ACTION_YPOSITION_FAST2A_RU "Y:%x1 \334\334"                                                         //  мм
+#define UI_TEXT_ACTION_YPOSITION_FAST2B_RU "\274\330\335\56:%sy \274\320\332\341\56:%sY"                            //  Мин...  Макс.
+#define UI_TEXT_ACTION_ZPOSITION_FAST2A_RU "Z:%x2 \334\334"                                                         //  мм
+#define UI_TEXT_ACTION_ZPOSITION_FAST2B_RU "\274\330\335\56:%sz \274\320\332\341\56:%sZ"                            //  Мин...  Макс.
+#define UI_TEXT_FANSPEED_RU          "\301\332\336\340\336\341\342\354\40\332\343\333\325\340\320"                  //  Скорость кулера
+#define UI_TEXT_ACTION_FANSPEED_RU   "\301\332\336\340\336\341\342\354\40\332\343\333\325\340\320:%Fs%%%"           //  Скорость кулера
+#define UI_TEXT_FAN_OFF_RU           "\276\342\332\333\356\347\330\342\354\40\332\343\333\325\340\353"              //  Отключить кулеры
+#define UI_TEXT_FAN_25_RU            "\301\332\340\56\336\345\333\320\326\324\325\335\330\357 25%%%"                //  Скр.охлаждения
+#define UI_TEXT_FAN_50_RU            "\301\332\340\56\336\345\333\320\326\324\325\335\330\357 50%%%"                //  Скр.охлаждения
+#define UI_TEXT_FAN_75_RU            "\301\332\340\56\336\345\333\320\326\324\325\335\330\357 75%%%"                //  Скр.охлаждения
+#define UI_TEXT_FAN_FULL_RU          "\277\336\333\335\320\357\40\301\332\340\56\336\345\333\320\326\324\325\335\330\357"//  Полная Скр.охлаждения
+#define UI_TEXT_STEPPER_INACTIVE_RU  "\303\341\342\56\262\340\325\334\56\324\333\357\40\334\336\342\336\340\336\322"//  Уст.Врем.для моторов
+#define UI_TEXT_STEPPER_INACTIVE2A_RU "\276\342\332\333\56\40\347\325\340\325\327 %is \334\330\335\56"              //  Откл. через:...мин.
+#define UI_TEXT_STEPPER_INACTIVE2B_RU "[min]0 -\335\325\40\336\342\332\333\356\347\320\342\354"                     //  не отключать
+#define UI_TEXT_POWER_INACTIVE_RU    "\274\320\332\341\56\322\340\325\334\357\40\337\340\336\341\342\336\357"       //  Макс.время простоя
+#define UI_TEXT_POWER_INACTIVE2A_RU  "\276\342\332\333\56\40\347\325\340\325\327 %ip \334\330\335\56"               //  Откл. через:...мин.
+#define UI_TEXT_POWER_INACTIVE2B_RU  "[min]0 -\335\325\40\336\342\332\333\356\347\320\342\354"                      //  не отключать
+#define UI_TEXT_GENERAL_RU           "\276\321\351\330\325\40\335\320\341\342\340\336\331\332\330"                  //  Общие настройки
+#define UI_TEXT_BAUDRATE_RU          "\301\332\336\340\56\337\336\340\342\320\72%oc"                                //  Скор.порта:
+#define UI_TEXT_EXTR_STEPS_RU        "\310\320\323\330\57\115\115:    %Se"                                          //  Шаги/MM
+#define UI_TEXT_EXTR_START_FEED_RU   "\275\320\347\56\341\332\336\340\336\341\342\354 :%Xf"                         //  Нач.скорость
+#define UI_TEXT_EXTR_MAX_FEED_RU     "\274\320\332\341\56\341\332\336\340\336\341\342\354:%XF"                      //  Макс.скорость
+#define UI_TEXT_EXTR_ACCEL_RU        "\303\341\332\336\340\325\335\330\325:    %XA"                                 //  Ускорение
+#define UI_TEXT_EXTR_WATCH_RU        "\262\340\325\334\56\341\342\320\321:     %Xw"                                 //  Врем.стаб
+#define UI_TEXT_EXTR_ADVANCE_L_RU    "Advance lin:    %Xl"
+#define UI_TEXT_EXTR_ADVANCE_K_RU    "Advance quad:   %Xa"
+#define UI_TEXT_EXTR_MANAGER_RU      "\300\325\323\343\333\56:%Xh"                                                  //  Регул.
+#define UI_TEXT_EXTR_PGAIN_RU        "\277\270\264\55\277\340\336\337\336\340\346:%Xp"                              //  ПИД-Пропорц
+#define UI_TEXT_EXTR_DEADTIME_RU     "Deadtime:%Xp"
+#define UI_TEXT_EXTR_DMAX_DT_RU      "\272\336\335\342\340\336\333\354\40\310\270\274:%XM"                          //  Контроль ШИМ
+#define UI_TEXT_EXTR_IGAIN_RU        "\277\270\264\55\270\335\342\325\323\340: %Xi"                                 //  ПИД-Интеграц
+#define UI_TEXT_EXTR_DGAIN_RU        "\277\270\264\55\264\330\344\344\325\340\56:%Xd"                               //  ПИД-Диффер. 
+#define UI_TEXT_EXTR_DMIN_RU         "\274\330\335\56\335\320\337\340\357\326\325\335\330\325 :%Xm"                 //  Мин.напряжение
+#define UI_TEXT_EXTR_DMAX_RU         "\274\320\332\341\56\335\320\337\340\357\326\325\335\330\325:%XM"              //  Макс.напряжение
+#define UI_TEXT_EXTR_PMAX_RU         "\277\270\264\55\274\320\332\341\56:      %XD"                                 //  ПИД-Макс.
+#define UI_TEXT_EXTR_XOFF_RU         "X-\301\334\325\351\325\335\330\325:%Xx"                                       //  Смещение
+#define UI_TEXT_EXTR_YOFF_RU         "Y-\301\334\325\351\325\335\330\325:%Xy"                                       //  Смещение
+#define UI_TEXT_STRING_HM_BANGBANG_RU "\277\336\40\342\330\337\343\40\340\325\333\325"                              //  По типу реле
+#define UI_TEXT_STRING_HM_PID_RU     "\277\270\264\55\340\325\323\343\333\357\342\336\340"                          //  ПИД-регулятор
+#define UI_TEXT_STRING_ACTION_RU     "\260\332\342\330\322\335\336:%la"                                             //  Активно
+#define UI_TEXT_HEATING_EXTRUDER_RU  "\275\320\323\340\325\322\320\342\325\333\330"                                 //  Нагреватели
+#define UI_TEXT_HEATING_BED_RU       "\275\320\341\342\340\336\331\332\330\40\324\333\357\40\341\342\336\333\320"   //  Настройки для стола
+#define UI_TEXT_KILLED_RU            "\277\340\336\346\325\341\341\40\343\321\330\342"                              //  Процесс убит
+#define UI_TEXT_STEPPER_DISABLED_RU  "\274\336\342\336\340\353\40\336\342\332\333\356\347\325\335\353"              //  Моторы отключены
+#define UI_TEXT_EEPROM_STOREDA_RU     "\275\320\341\342\340\336\331\332\330"                                        //  Настройки
+#define UI_TEXT_EEPROM_STOREDB_RU     "\327\320\337\330\341\320\335\336\40\322 EEPROM"                              //  записано в
+#define UI_TEXT_EEPROM_LOADEDA_RU     "\275\320\341\342\340\336\331\332\330"                                        //  Настройки
+#define UI_TEXT_EEPROM_LOADEDB_RU     "\327\320\323\340\343\326\325\335\336\40\330\327 EEPROM"                      //  загружено из
+#define UI_TEXT_RESET_EEPROM_RU       "\301\321\340\336\341 EEPROM"                                                 //  Сброс
+#define UI_TEXT_EEPROM_RESETEDA_RU    "\275\320\341\342\340\336\331\332\330"                                        //  Настройки
+#define UI_TEXT_EEPROM_RESETEDB_RU    "\301\321\340\336\341\40\335\320\341\342\340\336\325\332"                     //  Сброс настроек
+#define UI_TEXT_UPLOADING_RU          "\267\320\323\340\343\327\332\320\56\56\56"                                   //  Загрузка...
+#define UI_TEXT_PAGE_BUFFER_RU        "\272\355\350:%oB"                                                            //  Кэш
+#define UI_TEXT_PAGE_EXTRUDER_RU      "\302\325\334\56:%ec/%Ec" cDEG "C" cARROW "%oC"                               //  Тем.
+#define UI_TEXT_PAGE_EXTRUDER1_RU     "\302\325\334\40\61:%e0/%E0" cDEG "C" cARROW "%o0"                            //  Тем 1
+#define UI_TEXT_PAGE_EXTRUDER2_RU     "\302\325\334\40\62:%e1/%E1" cDEG "C" cARROW "%o1"                            //  Тем 2
+#define UI_TEXT_PAGE_EXTRUDER3_RU     "\302\325\334\40\63:%e2/%E2" cDEG "C" cARROW "%o2"                            //  Тем 3
+#define UI_TEXT_PAGE_BED_RU          "\301\342\336\333:%eb/%Eb" cDEG "C" cARROW "%ob"                               //  Стол
+#define UI_TEXT_SPEED_MULTIPLY_RU    "\302\325\334\337\40\337\325\347\320\342\330:    %om%%%"                       //  Темп печати
+#define UI_TEXT_FLOW_MULTIPLY_RU     "\277\336\324\320\347\320\40\337\340\343\342\332\320:  %of%%%"                 //  Подача прутка 
+#define UI_TEXT_SHOW_MEASUREMENT_RU  "\274\325\324\333\325\335\335\336\325\40\330\327\334\325\340\325\335\330\325"  //  Медленное измерение
+#define UI_TEXT_RESET_MEASUREMENT_RU "\301\321\340\336\341\40\330\327\334\325\340\325\335\330\357"                  //  Сброс измерения
+#define UI_TEXT_SET_MEASURED_ORIGIN_RU "\267\320\337\330\341\320\342\354 Z=0"                                       //  Записать
+#define UI_TEXT_ZCALIB_RU             "\272\320\333\330\321\340\336\322\332\320\40\336\341\330\40\132"              //  Калибровка оси Z
+#define UI_TEXT_SET_P1_RU            "\267\320\324\320\342\354\40\120\61"                                           //  Задать P1
+#define UI_TEXT_SET_P2_RU            "\267\320\324\320\342\354\40\120\62"                                           //  Задать P1
+#define UI_TEXT_SET_P3_RU            "\267\320\324\320\342\354\40\120\63"                                           //  Задать P1
+#define UI_TEXT_CALCULATE_LEVELING_RU "\300\320\341\347\325\342\40\343\340\336\322\335\357"                         //  Расчет уровня
+#define UI_TEXT_LEVEL_RU             "\303\340\336\322\325\335\354\40\144\145\154\164\141"                          //  Уровень delta
+#define UI_TEXT_EXTR_WAIT_RETRACT_TEMP_RU "\266\324\320\342\354\40\342\325\334\56:   %XT" cDEG "C"                  //  Ждать тем.
+#define UI_TEXT_EXTR_WAIT_RETRACT_UNITS_RU "\266\324\320\342\354\40\340\325\342\340\320\332\342: %XU mm"          //  Ждать ретракт.
+#define UI_TEXT_SD_REMOVED_RU       "\123\104\55\332\320\340\342\320\40\330\327\322\333\325\347\325\335\320"        //  SD-карта извлечена
+#define UI_TEXT_SD_INSERTED_RU      "\123\104\55\332\320\340\342\320\40\337\336\324\332\333\356\347\325\335\320"    //  SD-карта подключена
+#define UI_TEXT_PRINTER_READY_RU    "\277\340\330\335\342\325\340\40\323\336\342\336\322\56"                        //  Принтер готов.
+// Printtime output gets aggregated like <Days_5gisgits>UI_TEXT_PRINTTIME_DAYS<Hours>UI_TEXT_PRINTTIME_HOURS<Minutes>UI_TEXT_PRINTTIME_MINUTES
+// ___88 days 12:45
+#define UI_TEXT_PRINTTIME_DAYS_RU      " \264\335\325\331 "                                                         //  Дней
+#define UI_TEXT_PRINTTIME_HOURS_RU     ":"
+#define UI_TEXT_PRINTTIME_MINUTES_RU   ""
+#define UI_TEXT_PRINT_TIME_RU          "\262\340\325\334\357\40\337\325\347\320\342\330"                            //  Время печати
+#define UI_TEXT_PRINT_FILAMENT_RU      "\277\336\342\340\320\347\325\335\336\40\344\330\333\320\334\325\335\342\320"//  Потрачено филамента
+#define UI_TEXT_PRINTED_RU              "\277\340\336\324\320\322\333\325\335\336"                                  //  Продавлено
+#define UI_TEXT_POWER_RU                "\303\337\340\56\261\333\56\40\337\330\342\330\335\330\357"                 //  Упр.Бл.питиния
+#define UI_TEXT_STRING_HM_DEADTIME_RU   "\300\325\326\56\104\145\141\144\124\151\155\145"                           //  Реж.DeadTime
+#define UI_TEXT_STRING_HM_SLOWBANG_RU   "\274\325\324\333\56\337\325\340\325\332\333\356\347\325\335\330\325"       //  Медл.переключение
+#define UI_TEXT_STOP_PRINT_RU           "\276\341\342\320\335\336\322\330\342\354\40\337\325\347\320\342\354"       //  Остановить печать
+#define UI_TEXT_Z_BABYSTEPPING_RU       "\132\55\334\330\332\340\336\350\320\323:  %oYmm"                           //  Z-микрошаг
+#define UI_TEXT_CHANGE_FILAMENT_RU      "\267\320\323\340\343\327\332\320\40\344\330\333\320\334\325\335\342\320"   //  Загрузка филамента
+#define UI_TEXT_WIZ_CH_FILAMENT1_RU     "\274\325\335\357\331\342\325\40\335\320\337\340\320\322\333\325\335\330\325"//  Меняйте направление
+#define UI_TEXT_WIZ_CH_FILAMENT2_RU     "\341\40\337\336\334\336\351\354\356\40\340\343\332\336\357\342\332\330"    //  с помощью рукоятки
+#define UI_TEXT_WIZ_CH_FILAMENT3_RU     "\355\335\332\336\324\325\340\320\40\322\333\325\322\336\57\322\337\340\320\322\336"//  энкодера влево/вправо
+#define UI_TEXT_CLICK_DONE_RU           "\76\76\275\320\326\320\342\354\40\324\333\357\40\322\353\345\336\324\320\74\74"//  >>Нажать для выхода<<
+#define UI_TEXT_AUTOLEVEL_ONOFF_RU      "\260\322\342\336\343\340\336\322\325\335\354: %ll"                         //  Автоуровень
+#define UI_TEXT_SERVOPOS_RU             "\277\336\327\330\346\330\357\40\341\325\340\322\336: %oS"                  //  Позиция серво
+#define UI_TEXT_IGNORE_M106_RU          "\270\323\335\336\340\56\332\336\334\320\335\324 M106 %Fi"                  //  Игнор.команд
+#define UI_TEXT_WIZ_REHEAT1_RU          "\262\332\333\356\347\330\342\354\40\335\320\323\340\325\322\320\342\325\333\330"//  Включить нагреватели
+#define UI_TEXT_WIZ_REHEAT2_RU          "\355\332\341\342\340\343\324\325\340\353"                                  //  экструдеры
+#define UI_TEXT_WIZ_WAITTEMP1_RU        "\266\324\320\342\354\40\346\325\333\330"                                   //  Ждать цели
+#define UI_TEXT_WIZ_WAITTEMP2_RU        "\342\325\334\337\325\340\320\342\343\340\320\56\56\56"                     //  температура...
+#define UI_TEXT_EXTRUDER_JAM_RU         "\267\320\334\357\342\330\325\40\355\332\341\342\340\56"                    //  Замятие экстр.
+#define UI_TEXT_STANDBY_RU              "\276\326\330\324\320\335\330\325"                                          //  Ожидание
+#define UI_TEXT_BED_COATING_RU          "\277\336\332\340\353\342\330\325\40\341\342\336\333\320"                   //  Покрытие стола
+#define UI_TEXT_BED_COATING_SET1_RU     "\303\341\342\320\335\336\322\333\325\335\336\40\337\336\332\340\353\342\330\325"//  Установлено покрытие
+#define UI_TEXT_BED_COATING_SET2_RU     ""
+#define UI_TEXT_NOCOATING_RU            "\261\325\327\40\337\336\332\340\353\342\330\357"                           //  Без покрытия
+#define UI_TEXT_BUILDTAK_RU             "\277\336\324\333\336\326\332\320 BuildTak"                                 //  Подложка ...
+#define UI_TEXT_KAPTON_RU               "\272\320\337\340\336\335\336\322\353\331\40\341\332\336\342\347"           //  Капроновый скотч
+#define UI_TEXT_BLUETAPE_RU             "\301\330\335\357\357\40\321\343\334\320\326\56\333\325\335\342\320"        //  Синяя бумаж.лента
+#define UI_TEXT_PETTAPE_RU              "\267\325\333\325\335\320\357\40\120\105\124\40\333\325\335\342\320"        //  Зеленая PET лента
+#define UI_TEXT_GLUESTICK_RU            "\272\333\325\331\55\332\320\340\320\335\324\320\350"                       //  Клей-карандаш
+#define UI_TEXT_CUSTOM_RU               "\264\340\343\323\330\325\40\335\320\341\342\340\336\331\332\330"           //  Другие настройки
+#define UI_TEXT_COATING_CUSTOM_RU       "\264\340\343\323\320\357\72  %BCmm"                                        //  Другая:...
+#define UI_TEXT_LANGUAGE_RU             "\317\327\353\332"                                                          //  Язык
+
+#if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
+#define UI_TEXT_MAINPAGE6_1_RU          "\xa %ec/%Ec\xb0 X:%x0"
+#else   
+#define UI_TEXT_MAINPAGE6_1_RU          "\xa %e0/%E0\x2 X:%x0"
+#endif // NUM_EXTRUDER
+#if NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#define UI_TEXT_MAINPAGE6_2_RU          "\xa %e1/%E1\x2 Y:%x1"
+#elif HAVE_HEATED_BED
+#define UI_TEXT_MAINPAGE6_2_RU          "\xe %eb/%Eb\xb0 Y:%x1"
+#else
+#define UI_TEXT_MAINPAGE6_2_RU          "             Y:%x1"
+#endif
+#if HAVE_HEATED_BED && NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0
+#define UI_TEXT_MAINPAGE6_3_RU          "\xe %eb/%Eb\x2 Z:%x2"
+#elif FEATURE_DITTO_PRINTING
+#define UI_TEXT_MAINPAGE6_3_RU          "Copies: %ed    Z:%x2"
+#else
+#define UI_TEXT_MAINPAGE6_3_RU          "Flow:\xfd %of%%%   Z:%x2"
+#endif
+#define UI_TEXT_MAINPAGE6_4_RU          "\302\325\334\337\72 %om%%% \xfd  E:  %x4m"                                 //  Кэш:
+#define UI_TEXT_MAINPAGE6_5_RU          "\272\355\350\72 %oB"                                                       //  Кэш:
+#define UI_TEXT_MAINPAGE6_6_RU          "%os"
+#define UI_TEXT_MAINPAGE_TEMP_BED_RU cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG
+#define UI_TEXT_MAINPAGE_BED_RU         "B%eB/%Eb" cDEG
+#define UI_TEXT_MAINPAGE_Z_BUF_RU       "Z:%x2  \272\355\350 : %oB"                                                 //  ...Кэш...
+#define UI_TEXT_MAINPAGE_MUL_EUSAGE_RU  "\302\325\334\337\72 %om   E:%x4"                                           //  Темп:
+#define UI_TEXT_MAINPAGE_XY_RU          "X:%x0 Y:%x1"
+#define UI_TEXT_PRINT_TIME_VALUE_RU     "%Ut"
+#define UI_TEXT_PRINT_FILAMENT_VALUE_RU "%Uf m"
+#define UI_TEXT_METER_PRINTED_RU        "%Uf m " UI_TEXT_PRINTED_RU
+#define UI_TEXT_STATUS_RU               "%os"
+#define UI_TEXT_EMPTY_RU                ""
+#define UI_TEXT_TEMP_SET_RU cTEMP       "%ec/%Ec" cDEG
+#define UI_TEXT_CURRENT_TEMP_RU cTEMP   "%ec" cDEG
+#define UI_TEXT_COATING_THICKNESS_RU    " %BCmm"
+#define UI_TEXT_EXTR3_TEMP_RU           "\302\325\334\56 4 :%e3/%E3" cDEG "C"                                       //  Тем.
+#define UI_TEXT_EXTR4_TEMP_RU           "\302\325\334\56 5 :%e4/%E4" cDEG "C"                                       //  Тем.
+#define UI_TEXT_EXTR5_TEMP_RU           "\302\325\334\56 6 :%e5/%E5" cDEG "C"                                       //  Тем.
+#define UI_TEXT_EXTR3_OFF_RU            "\262\353\332\333\356\347\330\342\354\40\341\336\337\333\336\40\64"         //  Выключить сопло. 4
+#define UI_TEXT_EXTR4_OFF_RU            "\262\353\332\333\356\347\330\342\354\40\341\336\337\333\336\40\65"         //  Выключить сопло. 5
+#define UI_TEXT_EXTR5_OFF_RU            "\262\353\332\333\356\347\330\342\354\40\341\336\337\333\336\40\66"         //  Выключить сопло. 6
+#define UI_TEXT_EXTR3_SELECT_RU         "%X3 \262\353\321\340\320\342\354\40\341\336\337\333\336 4"                 //  Выбрать сопло 4
+#define UI_TEXT_EXTR4_SELECT_RU         "%X4 \262\353\321\340\320\342\354\40\341\336\337\333\336 5"                 //  Выбрать сопло 5
+#define UI_TEXT_EXTR5_SELECT_RU         "%X5 \262\353\321\340\320\342\354\40\341\336\337\333\336 6"                 //  Выбрать сопло 6
+#define UI_TEXT_DITTO_0_RU              "%D0 \275\325\342\40\332\336\337\330\331"                                   //  Нет копий
+#define UI_TEXT_DITTO_1_RU              "%D1 1 \332\336\337\330\357"                                                //  копия
+#define UI_TEXT_DITTO_2_RU              "%D2 2 \332\336\337\330\330"                                                //  копии
+#define UI_TEXT_DITTO_3_RU              "%D3 3 \332\336\337\330\330"                                                //  копии
+#define UI_TEXT_ZPROBE_HEIGHT_RU        "\262\353\341\336\342\320\40\132\55\337\340\336\321\353:%zh"                //  Высота Z-пробы
+#define UI_TEXT_OFFSETS_RU              "\303\341\342\320\335\336\322\330\342\354\40\341\334\325\351\325\335\330\357\41"//  Установить смещения!
+#define UI_TEXT_X_OFFSET_RU             "\303\341\342\320\335\336\322\56\130\55\301\334\325\351\41:%T0mm"           //  Установ.Z-Смещ!
+#define UI_TEXT_Y_OFFSET_RU             "\303\341\342\320\335\336\322\56\131\55\301\334\325\351\41:%T1mm"           //  Установ.Z-Смещ!
+#define UI_TEXT_Z_OFFSET_RU             "\303\341\342\320\335\336\322\56\132\55\301\334\325\351\41:%T2mm"           //  Установ.Z-Смещ!
+#define UI_TEXT_LAYER_RU                "\301\333\336\331 %Pl/%PL"                                                  //  Слой
+#define UI_TEXT_PROGRESS_RU             "%Pp%%%"
+#define UI_TEXT_PRINTNAME_RU            "%Pn"
+
+#define UI_TEXT_SETUP_RU "\303\341\342\320\335\336\322\332\330\40\337\340\330\335\342\325\340\320"                  //  Установки принтера
+#define UI_TEXT_MEASURE_DISTORTION_RU "\270\341\337\56\332\340\330\322\330\327\335\353\40\341\342\336\333\320"      //  Исп.кривизны стола
+#define UI_TEXT_DISTORTION_CORR_RU "\301\325\342\332\320\40\332\340\330\322\330\327\335\353:%De"                    //  Сетка кривизны
+#define UI_TEXT_ACTION_FAN2SPEED_RU   "\272\343\333\325\340\40\62.:%FS%%%"                                          //  Кулер 2
+#define UI_TEXT_CANCEL_RU "\276\342\334\325\335\320"                                                                //  Отмена
+#define UI_TEXT_PLEASE_WAIT_RU "\52\52\52\40\262\40\337\340\336\346\325\341\341\325\56\56\56\40\52\52\52"           //  *** В процессе... ***
+#define UI_TEXT_CLEARBED1_RU "\277\325\340\325\324\40\337\336\324\342\322\325\340\326\324\325\335\330\325\334"      //  Перед подтверждением
+#define UI_TEXT_CLEARBED2_RU "\343\321\325\340\330\342\325\40\341\336\40\341\342\336\333\320\40\322\341\325"        //  уберите со стола все
+#define UI_TEXT_CLEARBED3_RU "\337\336\341\342\336\340\336\335\335\330\325\40\337\340\325\324\334\325\342\353"      //  посторонние предметы
+#define UI_TEXT_NOTIFICATION_RU "\303\322\325\324\336\334\333\325\335\330\325\72"                                   //  Уведомление:
+#define UI_TEXT_TEMPSENSOR_DEFECT_RU "\277\336\333\336\334\332\320\40\324\320\342\347\330\332\320\40\342\325\334\337\56"//  Поломка датчика темп.
+#define UI_TEXT_HEATER_DECOUPLED_RU "\276\321\340\353\322\40\324\320\342\347\330\332\320\40\335\320\323\340\325\322\320"//  Обрыв датчика нагрева
+#define UI_TEXT_SLIPPING_RU    "\275\330\342\354\40\337\340\336\341\332\320\333\354\327\353\322\320\325\342"        //  Нить проскальзывает
+#define UI_TEXT_LEVELING_ERROR_RU "\276\350\330\321\332\320\40\322\353\340\320\322\335\330\322\320\335\330\357"     //  Ошибка выравнивания
+#define UI_TEXT_OK_RU           "\40\40\40\40\76\76\76\40\263\336\342\336\322\40\74\74\74"                          //  >>> Готов <<<
+#define UI_TEXT_CALIBRATING_RU "\272\320\333\330\321\340\336\322\332\320\40\341\342\336\333\320"                    //  Калибровка стола"
+#define UI_TEXT_CALIBRATION_ERROR_RU "\276\350\330\321\332\320\40\332\320\333\330\321\340\336\322\332\330"          //  Ошибка калибровки
+#define UI_TEXT_AUTOLEVEL_BED_RU "\260\322\342\336\332\320\333\330\321\340\336\322\332\320\40\341\342\336\333\320"  //  Автокалибровка стола
+#define UI_TEXT_HOMING_RU "\303\341\342\320\335\336\322\332\320\40\337\336\327\330\346\330\330\40\322\40\60"        //  Установка позиции в 0
+#define UI_TEXT_PREHEAT_TEMPS_RU "\303\341\342\320\335\336\322\332\330\40\342\325\334\337\325\340\320\342\343\340"  //  Установки температур
+#define UI_TEXT_PREHEAT_E0_RU "\301\336\337\333\336 1:  %p0" cDEG "C"                                               //  Сопло
+#define UI_TEXT_PREHEAT_E1_RU "\301\336\337\333\336 2:  %p1" cDEG "C"                                               //  Сопло
+#define UI_TEXT_PREHEAT_E2_RU "\301\336\337\333\336 3:  %p2" cDEG "C"                                               //  Сопло
+#define UI_TEXT_PREHEAT_E3_RU "\301\336\337\333\336 4:  %p3" cDEG "C"                                               //  Сопло
+#define UI_TEXT_PREHEAT_E4_RU "\301\336\337\333\336 5:  %p4" cDEG "C"                                               //  Сопло
+#define UI_TEXT_PREHEAT_E5_RU "\301\336\337\333\336 6:  %p5" cDEG "C"                                               //  Сопло
+#define UI_TEXT_PREHEAT_BED_RU "\301\342\336\333   : %pb" cDEG "C"                                                  //  Стол
+#define UI_TEXT_MEAS_ZP_HEIGHT_RU "\267\320\334\325\340\40\322\353\341\336\342\353\40\337\340\336\321\353"          //  Замер высоты пробы
+#define UI_TEXT_CUR_TEMP_RU "\302\325\334\56\335\320\323\340\56 %ec/%Ec" cDEG "C"                                   //  Тем.нагр.
+#define UI_TEXT_REAL_Z_RU "\304\320\332\342\56\132\55\337\336\327\330\346\330\357:%W0mm"                            //  Факт.Z-позиция
+#define UI_TEXT_CONTINUE_RU "\277\336\333\343\320\322\342\336\55\327\320\337\340\320\322\332\320"                   //  Полуавто-заправка
+#define UI_TEXT_CLOSE_RU "\267\320\332\340\353\342\354"                                                             //  Закрыть
+#define UI_TEXT_EXTR_ZOFF_RU "Z-\301\334\325\351\325\335\330\325:%Xz"                                               //  Смещение
+#define UI_TEXT_MEASURING_RU "\270\327\334\325\340\325\335\330\325\40\56\56\56"                                     //  Измерение ...
+#define UI_TEXT_Z_PROBE_RU "\301\342\320\340\342\40\132\55\337\340\336\321\353"                                     //  Старт Z-пробы
+#define UI_TEXT_MAINPAGE6_1_C_RU "Xw:%x5   X:%x0"
+#define UI_TEXT_MAINPAGE6_2_C_RU "Yw:%x6   Y:%x1"
+#define UI_TEXT_MAINPAGE6_3_C_RU "Zw:%x7   Z:%x2"
+#define UI_TEXT_MAINPAGE6_4_L_RU "\302\325\334\337\72 %om%%%    Las:%op W"                                          //  Темп:
+#define UI_TEXT_MAINPAGE6_4_C_RU "\302\325\334\337\72 %om%%%    Spi:%opRPM "                                        //  Темп:
+#define UI_TEXT_JAMCONTROL_RU "%ej \272\336\335\342\340\336\333\354\40\327\320\334\357\342\330\357"                 //  Контроль замятия
+
 #define TRANS(x) UI_STRING(F ## x,x)
 #ifdef CUSTOM_TRANSLATIONS
 #include "CustomTranslations.h"
@@ -4517,4 +4860,5 @@
 #define CUSTOM_TRANS_PL
 #define CUSTOM_TRANS_TR
 #define CUSTOM_TRANS_FI
+#define CUSTOM_TRANS_RU
 #endif

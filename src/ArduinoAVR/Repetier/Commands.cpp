@@ -162,7 +162,7 @@ void Commands::printCurrentPosition() {
 void Commands::printTemperatures(bool showRaw) {
     int error;
 #if NUM_EXTRUDER > 0
-    float temp = Extruder::current->tempControl.currentTemperatureC;
+    float temp = Extruder::current->tempControl.getStatefulTemperature();
 #if HEATED_BED_SENSOR_TYPE == 0
     Com::printF(Com::tTColon, temp);
     Com::printF(Com::tSpaceSlash, Extruder::current->tempControl.targetTemperatureC, 0);
@@ -170,7 +170,7 @@ void Commands::printTemperatures(bool showRaw) {
     Com::printF(Com::tTColon, temp);
     Com::printF(Com::tSpaceSlash, Extruder::current->tempControl.targetTemperatureC, 0);
 #if HAVE_HEATED_BED
-    Com::printF(Com::tSpaceBColon, Extruder::getHeatedBedTemperature());
+    Com::printF(Com::tSpaceBColon, heatedBedController.getStatefulTemperature());
     Com::printF(Com::tSpaceSlash, heatedBedController.targetTemperatureC, 0);
     if((error = heatedBedController.errorState()) > 0) {
         Com::printF(PSTR(" DB:"), error);
@@ -186,7 +186,7 @@ void Commands::printTemperatures(bool showRaw) {
 #if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
     for(uint8_t i = 0; i < NUM_EXTRUDER; i++) {
         Com::printF(Com::tSpaceT, (int)i);
-        Com::printF(Com::tColon, extruder[i].tempControl.currentTemperatureC);
+        Com::printF(Com::tColon, extruder[i].tempControl.getStatefulTemperature());
         Com::printF(Com::tSpaceSlash, extruder[i].tempControl.targetTemperatureC, 0);
         Com::printF(Com::tSpaceAt, (int)i);
         Com::printF(Com::tColon, (pwm_pos[extruder[i].tempControl.pwmIndex])); // Show output of auto tune when tuning!
@@ -209,7 +209,7 @@ void Commands::printTemperatures(bool showRaw) {
     }
 #endif
 #ifdef FAKE_CHAMBER
-    Com::printF(PSTR(" C:"), extruder[0].tempControl.currentTemperatureC);
+    Com::printF(PSTR(" C:"), extruder[0].tempControl.getStatefulTemperature());
     Com::printF(Com::tSpaceSlash, extruder[0].tempControl.targetTemperatureC, 0);
     Com::printF(PSTR(" @:"), (pwm_pos[extruder[0].tempControl.pwmIndex]));
 #endif
