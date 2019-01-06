@@ -1103,10 +1103,26 @@ bool cRefreshPage() {
 					u8g_SetColorIndex(&u8g,1);
 					u8g_draw_box(&u8g, 0, 0, u8g_GetWidth(&u8g), UI_FONT_SMALL_HEIGHT + 1);
 					u8g_SetColorIndex(&u8g, 0);
-					u8g_SetFont(&u8g,UI_FONT_SMALL);
+                        #if LANGUAGE_RU_ACTIVE //Switch font
+                         if (Com::selectedLanguage != LANGUAGE_RU_ID) {
+                             u8g_SetFont(&u8g, UI_FONT_SMALL);
+                             } else {
+                             u8g_SetFont(&u8g, UI_FONT_SMALL_RU);
+                             }
+                            #else
+                u8g_SetFont(&u8g, UI_FONT_SMALL);
+                            #endif
                     if(u8g_IsBBXIntersection(&u8g, 0, 1, 1, UI_FONT_SMALL_HEIGHT+1))
 						printU8GRow(1,UI_FONT_SMALL_HEIGHT,head);
-					u8g_SetFont(&u8g, UI_FONT_DEFAULT);		
+                 #if LANGUAGE_RU_ACTIVE // Switch font
+                            if (Com::selectedLanguage != LANGUAGE_RU_ID) {
+                u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                                } else {
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
+                                }
+                                #else
+                                u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+                            #endif
 					u8g_SetColorIndex(&u8g,1);
 
 #endif
