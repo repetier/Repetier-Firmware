@@ -211,6 +211,9 @@ bool Printer::sledParked = false;
 #endif
 fast8_t Printer::wizardStackPos;
 wizardVar Printer::wizardStack[WIZARD_STACK_SIZE];
+fast8_t Printer::safetyParked = 0; /// True if moved to a safety position to protect print
+uint8_t Printer::rescueOn = false;
+bool Printer::failedMode = false;
 
 #if defined(DRV_TMC2130)
 #if TMC2130_ON_X
@@ -632,6 +635,7 @@ void Printer::moveToParkPosition() {
 
 // This is for untransformed move to coordinates in printers absolute Cartesian space
 uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
+	Printer::unparkSafety();
     if(x != IGNORE_COORDINATE) {
 		destinationPositionTransformed[X_AXIS] = (x + Printer::offsetX);
         destinationSteps[X_AXIS] = destinationPositionTransformed[X_AXIS] * axisStepsPerMM[X_AXIS];
@@ -667,6 +671,7 @@ uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
 }
 
 uint8_t Printer::moveToReal(float x, float y, float z, float e, float f, bool pathOptimize) {
+	Printer::unparkSafety();
 	// Com::printFLN(PSTR("MoveToReal X="),x,2);
 	// Com::printArrayFLN(PSTR("CurPos:"), currentPositionTransformed);
     if(x == IGNORE_COORDINATE)
@@ -771,6 +776,7 @@ position to destinationSteps including rotation and offsets, excluding distortio
  */
 
 uint8_t Printer::setDestinationStepsFromGCode(GCode *com) {
+	unparkSafety();
     register int32_t p;
     float x, y, z;
     bool posAllowed = true;
@@ -1328,6 +1334,7 @@ void Printer::setup() {
         uid.showLanguageSelectionWizard();
     }
 #endif // EEPROM_MODE
+	rescueSetup();
 }
 
 void Printer::defaultLoopActions() {
@@ -1927,13 +1934,16 @@ after doing some initialization work. The order of operation and some extra func
 void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta printer
     bool nocheck = isNoDestinationCheck();
     setNoDestinationCheck(true);
-
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
     bool oldLaser = LaserDriver::laserOn;
     LaserDriver::laserOn = false;
 #endif
     float startX, startY, startZ;
     realPosition(startX, startY, startZ);
+#if DISTORTION_CORRECTION
+	bool distOn = Printer::distortion.isEnabled();
+	Printer::distortion.disable(false);
+#endif
 #if !defined(HOMING_ORDER)
 #define HOMING_ORDER HOME_ORDER_XYZ
 #endif
@@ -2082,9 +2092,14 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
     }
 #endif // HOMING_ORDER != HOME_ORDER_ZXYTZ
     updateCurrentPosition(true);
+#if DISTORTION_CORRECTION
+	if(distOn) {
+		Printer::distortion.enable(false);
+	}
+#endif
 #if defined(Z_UP_AFTER_HOME) && Z_HOME_DIR < 0
 #ifdef HOME_ZUP_FIRST
-    PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS]*Z_UP_AFTER_HOME * Z_HOME_DIR, 0, homingFeedrate[Z_AXIS], true, false);
+    PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * Z_UP_AFTER_HOME * Z_HOME_DIR, 0, homingFeedrate[Z_AXIS], true, false);
 #endif
     if(zaxis)
         startZ = Z_UP_AFTER_HOME;
@@ -2692,6 +2707,224 @@ void Printer::stopPrint() {
 	if(!isUIErrorMessage()) {
 		UI_RESET_MENU
 	}
+}
+
+/** Rescue system uses the following layout in eeprom:
+1 : mode
+4 * NUM_AXES : Last received position
+4 * NUM_AXES : Last position
+4 * NUM_AXES : Last Offsets
+*/
+
+void Printer::enableRescue(bool on) {
+#if HOST_RESCUE
+	if (on && HAL::eprGetByte(EPR_RESCUE_MODE)) {
+		HAL::eprSetByte(EPR_RESCUE_MODE, 0);
+	}
+	rescueOn = on;
+	if (!on) {
+		unparkSafety();
+		UI_CLEAR_STATUS;
+	}
+	rescueReset(); // enabling/disabling removes old values
+#endif
+}
+bool Printer::isRescue() {
+#if HOST_RESCUE
+	return rescueOn;
+#else
+	return false;
+#endif
+}
+void Printer::rescueReport() {
+#if HOST_RESCUE
+	uint8_t mode = HAL::eprGetByte(EPR_RESCUE_MODE);
+	Com::printF(PSTR("RESCUE_STATE:"));
+	if (mode & 1) {
+		for(fast8_t i = 0; i < 4; i++) {
+			Com::print(' ');
+			Com::print('L');
+			Com::printF(axisNames[i]);
+			Com::printF(Com::tColon, HAL::eprGetFloat(EPR_RESCUE_LAST_RECEIVED + sizeof(float) * i), 2);
+		}
+		Com::printF(PSTR(" LT:"), (int)HAL::eprGetByte(EPR_RESCUE_TOOL));
+	}
+	if (mode & 2) {
+		for(fast8_t i = 0; i < 4; i++) {
+			Com::print(' ');
+			Com::printF(axisNames[i]);
+			Com::printF(Com::tColon, HAL::eprGetFloat(EPR_RESCUE_LAST_POS + sizeof(float) * i), 2);
+		}
+	}
+	if (mode == 0) {
+		Com::printFLN(PSTR(" OFF"));
+	}
+	Com::println();
+#endif
+}
+void Printer::rescueStoreReceivedPosition() {
+#if HOST_RESCUE
+	if (!rescueOn) {
+		return;
+	}
+	for(fast8_t i = 0; i < 4; i++) {
+		if(i == 3) {
+			HAL::eprSetFloat(EPR_RESCUE_LAST_RECEIVED + sizeof(float) * i, Printer::currentPositionTransformed[i]);
+		} else {
+			HAL::eprSetFloat(EPR_RESCUE_LAST_RECEIVED + sizeof(float) * i, Printer::lastCmdPos[i]);
+		}
+	}
+	HAL::eprSetByte(EPR_RESCUE_TOOL, Extruder::current->id);
+	HAL::eprSetByte(EPR_RESCUE_MODE, HAL::eprGetByte(EPR_RESCUE_MODE) | 1);
+#endif
+}
+void Printer::rescueStorePosition() {
+#if HOST_RESCUE
+	if (!rescueOn) {
+		return;
+	}
+	for(fast8_t i = 0; i < 4; i++) {
+		
+		if(i != E_AXIS) {
+			HAL::eprSetFloat(EPR_RESCUE_LAST_POS + sizeof(float) * i, Printer::currentPosition[i]);
+			HAL::eprSetFloat(EPR_RESCUE_OFFSETS + sizeof(float) * i, Printer::coordinateOffset[i]);
+		} else {
+			HAL::eprSetFloat(EPR_RESCUE_LAST_POS + sizeof(float) * i, Printer::currentPositionTransformed[i]);
+		}
+	}
+	HAL::eprSetByte(EPR_RESCUE_MODE, HAL::eprGetByte(EPR_RESCUE_MODE) | 2);
+#endif
+}
+void Printer::rescueRecover() {
+#if HOST_RESCUE
+	uint8_t mode = HAL::eprGetByte(EPR_RESCUE_MODE);
+	if (mode == 0) {
+		return;
+	}
+	if (mode & 2) {
+		for(fast8_t i = 0; i < 4; i++) {			
+			if(i < 3) {
+				Printer::coordinateOffset[i] = HAL::eprGetFloat(EPR_RESCUE_OFFSETS + sizeof(float) * i);
+				Printer::currentPosition[i] = HAL::eprGetFloat(EPR_RESCUE_LAST_POS + sizeof(float) * i);
+			} else {
+				Printer::currentPositionTransformed[i] = HAL::eprGetFloat(EPR_RESCUE_LAST_POS + sizeof(float) * i);
+			}
+		}
+		flag3 |= PRINTER_FLAG1_HOMED_ALL | PRINTER_FLAG3_X_HOMED | PRINTER_FLAG3_Y_HOMED | PRINTER_FLAG3_Z_HOMED;
+	} else if (mode & 1) {
+		for(fast8_t i = 0; i < 4; i++) {
+			if(i < 3) {
+				Printer::currentPosition[i] = HAL::eprGetFloat(EPR_RESCUE_LAST_RECEIVED + sizeof(float) * i);
+			} else {
+				Printer::currentPositionTransformed[i] = HAL::eprGetFloat(EPR_RESCUE_LAST_RECEIVED + sizeof(float) * i);
+			}
+		}
+		flag3 |= PRINTER_FLAG1_HOMED_ALL | PRINTER_FLAG3_X_HOMED | PRINTER_FLAG3_Y_HOMED | PRINTER_FLAG3_Z_HOMED;
+	}
+	lastCmdPos[X_AXIS] = currentPosition[X_AXIS];
+	lastCmdPos[Y_AXIS] = currentPosition[Y_AXIS];
+	lastCmdPos[Z_AXIS] = currentPosition[Z_AXIS];
+	updateCurrentPositionSteps();
+#endif
+}
+int Printer::rescueStartTool() {
+#if HOST_RESCUE
+	if (HAL::eprGetByte(EPR_RESCUE_MODE)) {
+		return static_cast<int>(HAL::eprGetByte(EPR_RESCUE_TOOL));
+	} else {
+		return 0;
+}
+#else
+	return 0;
+#endif
+}
+void Printer::rescueSetup() {
+#if HOST_RESCUE
+	uint8_t mode = HAL::eprGetByte(EPR_RESCUE_MODE);
+	if (mode) {
+		rescueReport();
+		enableXStepper();
+		enableYStepper();
+		enableZStepper();
+		Extruder::enableCurrentExtruderMotor();
+		rescueRecover();
+	}
+#endif
+}
+
+bool Printer::isRescueRequired() {
+#if HOST_RESCUE
+	return HAL::eprGetByte(EPR_RESCUE_MODE) != 0;
+#else
+	return false;
+#endif
+}
+void Printer::rescueReset() {
+#if HOST_RESCUE
+	uint8_t mode = HAL::eprGetByte(EPR_RESCUE_MODE);
+	if (mode) {
+		HAL::eprSetByte(EPR_RESCUE_MODE, 0);
+	}
+#endif
+}
+void Printer::handlePowerLoss() {
+    for(uint8_t i = 0; i < NUM_EXTRUDER; i++)
+        Extruder::setTemperatureForExtruder(0, i);
+    Extruder::setHeatedBedTemperature(0);
+	if (rescueOn) {
+		Com::printErrorF(PSTR("POWERLOSS_DETECTED"));
+		rescueStoreReceivedPosition();
+#if POWERLOSS_LEVEL == 1 //z up only
+#endif
+#if POWERLOSS_LEVEL == 2 // full park - we are on a UPC :-)
+		parkSafety();
+#endif
+		Commands::waitUntilEndOfAllMoves();
+		rescueStorePosition();
+		kill(false);
+		enableFailedModeP(PSTR("Power Loss"));
+	}
+}
+
+void Printer::parkSafety() {
+	if (safetyParked || !rescueOn) {
+		return; // nothing to unpark
+	}
+	rescueStoreReceivedPosition();
+	safetyParked = 1;
+	MemoryPosition();
+	moveToParkPosition();
+	Commands::waitUntilEndOfAllMoves();
+	rescueStorePosition();
+	safetyParked = 2;
+	Extruder::pauseExtruders(false);
+	// GUI::setStatusP(PSTR("Waiting f. Data..."), GUIStatusLevel::BUSY); // inform user
+}
+
+void Printer::unparkSafety() {
+	if (!safetyParked) {
+		return; // nothing to unpark
+	}
+	Extruder::unpauseExtruders(true);
+	bool needsPop = safetyParked > 1;
+	safetyParked = 0;
+	GoToMemoryPosition(true, true, false, false, Printer::maxFeedrate[X_AXIS]);
+	GoToMemoryPosition(false, false, true, false, Printer::maxFeedrate[Z_AXIS] * 0.5);
+	UI_CLEAR_STATUS;
+}
+void Printer::enableFailedModeP(PGM_P msg) {
+	failedMode = true;
+	UI_ERROR_P(msg);
+	Com::printErrorFLN(msg);
+	Com::printErrorFLN(Com::tM999);
+}
+void Printer::enableFailedMode(char* msg) {
+	failedMode = true;
+	UI_ERROR_RAM(msg);
+	Com::printErrorF(Com::tEmpty);
+	Com::print(msg);
+	Com::println();
+	Com::printErrorFLN(Com::tM999);
 }
 
 #if defined(DRV_TMC2130)

@@ -29,6 +29,19 @@
 
 // Use new communication model for multiple channels - only until stable, then old version gets deleted
 #define NEW_COMMUNICATION 1
+
+
+// Some helper macros
+
+#define _CAT(a, ...) a##__VA_ARGS__
+#define SWITCH_ENABLED_false 0
+#define SWITCH_ENABLED_true 1
+#define SWITCH_ENABLED_0 0
+#define SWITCH_ENABLED_1 1
+#define SWITCH_ENABLED_ 1
+#define ENABLED(b) _CAT(SWITCH_ENABLED_, b)
+#define DISABLED(b) (!_CAT(SWITCH_ENABLED_, b))
+
 // ##########################################################################################
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################
@@ -210,6 +223,15 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 #include "Configuration.h"
+
+#ifndef HOST_RESCUE
+#define HOST_RESCUE 1
+#endif
+#if EEPROM_MODE == 0 && HOST_RESCUE
+#warning HOST_RESCUE requires eeprom support! Disabling feature.
+#undef HOST_RESCUE
+#define HOST_RESCUE
+#endif
 
 #ifndef EMERGENCY_PARSER
 #if DRIVE_SYSTEM != 3 || CPU_ARCH != ARCH_AVR

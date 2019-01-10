@@ -26,6 +26,8 @@
 #define MAX_DATA_SOURCES 4
 #endif
 
+extern const char* const axisNames[] PROGMEM;
+
 /** This class defines the general interface to handle gcode communication with the firmware. This
 allows it to connect to different data sources and handle them all inside the same data structure.
 If several readers are active, the first one sending a byte pauses all other inputs until the command
@@ -71,6 +73,8 @@ class GCodeSource {
 class Com
 {
     public:
+FSTRINGVAR(tM999)
+FSTRINGVAR(tEmpty)
 FSTRINGVAR(tDebug)
 FSTRINGVAR(tFirmware)
 FSTRINGVAR(tOk)

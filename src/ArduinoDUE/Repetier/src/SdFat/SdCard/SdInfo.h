@@ -119,6 +119,8 @@ const uint8_t SD_CARD_TYPE_SDHC = 3;
 #define SPI_SIXTEENTH_SPEED SD_SCK_HZ(F_CPU / 32)
 //------------------------------------------------------------------------------
 // SD operation timeouts
+/** CMD0 retry count */
+const uint8_t SD_CMD0_RETRY = 10;
 /** CMD0 loop delay ms */
 const uint16_t SD_CMD0_DELAY = 100;
 /** init timeout ms */

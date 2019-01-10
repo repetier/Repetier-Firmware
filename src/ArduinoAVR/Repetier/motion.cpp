@@ -102,6 +102,7 @@ correct positions when changing tools.
 \param pathOptimize If false start and end speeds get fixed to minimum values.
 */
 void PrintLine::moveRelativeDistanceInSteps(int32_t x, int32_t y, int32_t z, int32_t e, float feedrate, bool waitEnd, bool checkEndstop, bool pathOptimize) {
+	Printer::unparkSafety();
 #if NUM_EXTRUDER > 0
     if(Printer::debugDryrun() || (MIN_EXTRUDER_TEMP > 30 && Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed() && Extruder::current->tempControl.sensorType != 0))
         e = 0; // should not be allowed for current temperature
@@ -161,6 +162,7 @@ Will use Printer::isPositionAllowed to prevent illegal moves.
 \param pathOptimize If false start and end speeds get fixed to minimum values.
 */
 void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z, int32_t e, float feedrate, bool waitEnd, bool pathOptimize) {
+	Printer::unparkSafety();
 #if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
     if(!Printer::isHoming() && !Printer::isNoDestinationCheck()) { // prevent movements when not homed
 #if MOVE_X_WHEN_HOMED
@@ -342,9 +344,12 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
         // we are inside correction height so we split all moves in lines of max. 10 mm and add them
         // including a z correction
         int32_t deltas[E_AXIS_ARRAY], start[E_AXIS_ARRAY];
+		int32_t fdeltas[E_AXIS_ARRAY], fstart[E_AXIS_ARRAY];
         for(fast8_t i = 0; i < E_AXIS_ARRAY; i++) {
             deltas[i] = Printer::destinationSteps[i] - Printer::currentPositionSteps[i];
             start[i] = Printer::currentPositionSteps[i];
+            fdeltas[i] = Printer::destinationPositionTransformed[i] - Printer::currentPositionTransformed[i];
+            fstart[i] = Printer::currentPositionTransformed[i];
         }
         deltas[Z_AXIS] += Printer::zCorrectionStepsIncluded;
         start[Z_AXIS] -= Printer::zCorrectionStepsIncluded;
@@ -365,6 +370,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
         for(int i = 1; i <= segments; i++) {
             for(fast8_t j = 0; j < E_AXIS_ARRAY; j++) {
                 Printer::destinationSteps[j] = start[j] + (i * deltas[j]) / segments;
+                Printer::destinationPositionTransformed[j] = fstart[j] + (i * fdeltas[j]) / segments;
             }
             queueCartesianSegmentTo(check_endstops, pathOptimize);
         }

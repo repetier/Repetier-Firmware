@@ -73,6 +73,9 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 
 #include "pins.h"
 
+/** Enable rescue system that helps hosts to reconnect and continue a print after a disconnect. */
+#define HOST_RESCUE 1
+
 // Override pin definitions from pins.h
 //#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.

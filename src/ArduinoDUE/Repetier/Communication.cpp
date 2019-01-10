@@ -37,8 +37,12 @@ uint8_t Com::selectedLanguage;
 #ifndef FIRMWARE_URL
 #define FIRMWARE_URL "https://github.com/repetier/Repetier-Firmware/"
 #endif // FIRMWARE_URL
-
+const char* const axisNames[] PROGMEM = {
+	"X", "Y", "Z", "E", "A", "B", "C"
+};
 FSTRINGVALUE(Com::tFirmware, "FIRMWARE_NAME:Repetier_" REPETIER_VERSION " COMPILED:" __DATE__ " FIRMWARE_URL:" FIRMWARE_URL " PROTOCOL_VERSION:1.0 MACHINE_TYPE:" MACHINE_TYPE " EXTRUDER_COUNT:" XSTR(NUM_EXTRUDER) " REPETIER_PROTOCOL:3")
+FSTRINGVALUE(Com::tM999, "Fail mode active. Send M999 to disable failed mode!")
+FSTRINGVALUE(Com::tEmpty, "")
 FSTRINGVALUE(Com::tDebug, "Debug:")
 FSTRINGVALUE(Com::tOk, "ok")
 FSTRINGVALUE(Com::tNewline, "\r\n")

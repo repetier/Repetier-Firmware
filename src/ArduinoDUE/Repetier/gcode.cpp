@@ -1310,6 +1310,7 @@ void GCode::reportFatalError() {
 
 void GCode::resetFatalError() {
     Com::writeToAll = true;
+	Printer::failedMode = false;
 	TemperatureController::resetAllErrorStates();
 	Printer::debugReset(8); // disable dry run
 	fatalErrorMsg = NULL;

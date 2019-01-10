@@ -133,6 +133,13 @@ have problems with other modules using the eeprom */
 #define EPR_PARK_Y                            1060
 #define EPR_PARK_Z                            1064
 
+#define EPR_RESCUE_START 4096-128
+#define EPR_RESCUE_MODE EPR_RESCUE_START
+#define EPR_RESCUE_TOOL (EPR_RESCUE_START +1 )
+#define EPR_RESCUE_LAST_RECEIVED (EPR_RESCUE_START + 2)
+#define EPR_RESCUE_LAST_POS (EPR_RESCUE_LAST_RECEIVED + 16)
+#define EPR_RESCUE_OFFSETS (EPR_RESCUE_LAST_POS + 16)
+#define EPR_RESCUE_SIZE (EPR_RESCUE_OFFSETS + 16)
 
 
 #if EEPROM_MODE != 0

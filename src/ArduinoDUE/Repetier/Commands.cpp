@@ -24,6 +24,7 @@ which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 const int8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 int Commands::lowestRAMValue = MAX_RAM;
 int Commands::lowestRAMValueSend = MAX_RAM;
+millis_t lastCommandReceived = 0;
 
 void Commands::commandLoop() {
     //while(true) {
@@ -49,6 +50,15 @@ void Commands::commandLoop() {
 #endif
                 Commands::executeGCode(code);
             code->popCurrentCommand();
+            lastCommandReceived = HAL::timeInMilliseconds();
+        } else {
+            if (PrintLine::hasLines()) { // if printing no need to reset
+	            lastCommandReceived = HAL::timeInMilliseconds();
+            }
+            if (HAL::timeInMilliseconds() - lastCommandReceived > 2000) {
+	            lastCommandReceived = HAL::timeInMilliseconds();
+	            Printer::parkSafety(); // will handle allowed conditions it self
+            }
         }
     } else {
         GCode::keepAlive(Paused);
@@ -1010,6 +1020,9 @@ void Commands::processArc(GCode *com) {
 \brief Execute the G command stored in com.
 */
 void Commands::processGCode(GCode *com) {
+    if (Printer::failedMode) {
+	    return;
+    }
     if(EVENT_UNHANDLED_G_CODE(com)) {
         previousMillisCmd = HAL::timeInMilliseconds();
         return;
@@ -1630,6 +1643,9 @@ void Commands::processGCode(GCode *com) {
 \brief Execute the G command stored in com.
 */
 void Commands::processMCode(GCode *com) {
+    if (Printer::failedMode && !(com->M == 110 || com->M == 999)) {
+	    return;
+    }
     if(EVENT_UNHANDLED_M_CODE(com))
         return;
     switch( com->M ) {
@@ -2030,6 +2046,12 @@ void Commands::processMCode(GCode *com) {
         Com::cap(PSTR("PROGRESS:0"));
 #endif
         Com::cap(PSTR("AUTOREPORT_TEMP:1"));
+#if ENABLED(HOST_RESCUE)
+		Com::cap(PSTR("HOST_RESCUE:1"));
+#else
+		Com::cap(PSTR("HOST_RESCUE:0"));
+#endif
+
 #if EEPROM_MODE != 0
         Com::cap(PSTR("EEPROM:1"));
 #else
@@ -2532,6 +2554,21 @@ void Commands::processMCode(GCode *com) {
         Printer::showJSONStatus(com->hasS() ? static_cast<int>(com->S) : 0);
         break;
 #endif
+	case 415: // Host rescue system
+	{
+	#if HOST_RESCUE
+		if (com->hasS()) { // Enable rescue system
+			Printer::enableRescue(com->S != 0);
+		}
+		if (com->hasZ()) { // Replace z
+			Printer::currentPosition[Z_AXIS] = com->Z;
+			Printer::coordinateOffset[Z_AXIS] = 0;
+			Printer::setZHomed(true);
+			Printer::updateCurrentPositionSteps();
+		}
+		Printer::rescueReport();
+	#endif
+	}
     case 450:
         Printer::reportPrinterMode();
         break;
@@ -2832,10 +2869,11 @@ void Commands::processMCode(GCode *com) {
 		UI_MESSAGE(com->S);
 		break;
     case 999: // Stop fatal error take down
-        if(com->hasS())
+        if(com->hasS()) {
             GCode::fatalError(PSTR("Testing fatal error"));
-        else
+        } else {
             GCode::resetFatalError();
+		}
         break;
 #if defined(DRV_TMC2130)
     case 914: // Configure stallguard threshold on Trinamic TMC2130
@@ -2992,9 +3030,11 @@ void Commands::executeGCode(GCode *com) {
     if(com->hasG()) processGCode(com);
     else if(com->hasM()) processMCode(com);
     else if(com->hasT()) {    // Process T code
-        //com->printCommand(); // for testing if this the source of extruder switches
-        Commands::waitUntilEndOfAllMoves();
-        Extruder::selectExtruderById(com->T);
+	    if (!Printer::failedMode) {
+			//com->printCommand(); // for testing if this the source of extruder switches
+			Commands::waitUntilEndOfAllMoves();
+			Extruder::selectExtruderById(com->T);
+		}
     } else {
         if(Printer::debugErrors()) {
             Com::printF(Com::tUnknownCommand);

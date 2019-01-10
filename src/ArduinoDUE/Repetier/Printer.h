@@ -257,6 +257,9 @@ public:
 #endif
 #endif
     static uint16_t menuMode;
+	static bool failedMode; // In failed mode only M110 and M999 is working
+	static uint8_t rescueOn;           // 1 is rescue is enabled
+	static fast8_t safetyParked;       /// True if moved to a safety position to protect print
 #if DUAL_X_RESOLUTION || defined(DOXYGEN)
     static float axisX1StepsPerMM;
     static float axisX2StepsPerMM;
@@ -1272,6 +1275,22 @@ public:
     */
     static void prepareForProbing();
 #endif
+    static void enableRescue(bool on);
+    static bool isRescue();
+    static bool isRescueRequired();
+    static void rescueReport(); // Send report
+    static void rescueStoreReceivedPosition();
+    static void rescueStorePosition();
+    static void rescueRecover();
+    static void rescueSetup();
+    static void rescueReset();
+    static int rescueStartTool();
+    static void handlePowerLoss();
+    static void parkSafety();
+    static void unparkSafety();
+    static void enableFailedModeP(PGM_P msg);
+    static void enableFailedMode(char* msg);
+
 #if defined(DRV_TMC2130)
 #define TRINAMIC_WAIT_RESOLUTION_uS 100
 /// Wait for boolean 'condition' to become true until 'timeout' (in miliseconds)
