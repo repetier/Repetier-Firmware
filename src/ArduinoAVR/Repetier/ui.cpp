@@ -841,29 +841,28 @@ void u8PrintChar(char c) {
     case CHAR_SELECTOR:
         u8g_SetFont(&u8g, u8g_font_6x12_67_75);
         u8_tx += u8g_DrawGlyph(&u8g, u8_tx, u8_ty, 0xb7);
-                            #if LANGUAGE_RU_ACTIVE // Switch font
-                            if (Com::selectedLanguage != LANGUAGE_RU_ID) {
-                                u8g_SetFont(&u8g, UI_FONT_DEFAULT);
-                                } else {
-                                u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
-                                }
-                                #else
+        #if LANGUAGE_RU_ACTIVE // Switch font
+        if (Com::selectedLanguage != LANGUAGE_RU_ID) {
+            u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+        } else {
+            u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
+        }
+        #else
         u8g_SetFont(&u8g, UI_FONT_DEFAULT);
-                            #endif
-        break;
+        #endif
+    break;
     case CHAR_SELECTED:
         u8g_SetFont(&u8g, u8g_font_6x12_67_75);
         u8_tx += u8g_DrawGlyph(&u8g, u8_tx, u8_ty, 0xb6);
-        #if LANGUAGE_RU_ACTIVE
-                     #if LANGUAGE_RU_ACTIVE // Switch font
-                            if (Com::selectedLanguage != LANGUAGE_RU_ID) {
-        u8g_SetFont(&u8g, UI_FONT_DEFAULT);
-                                } else {
-                                u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
-                                }
-                                #else
-                                u8g_SetFont(&u8g, UI_FONT_DEFAULT);
-                            #endif
+            #if LANGUAGE_RU_ACTIVE // Switch font
+            if (Com::selectedLanguage != LANGUAGE_RU_ID) {
+                u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+            } else {
+                u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
+            }
+            #else
+            u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+            #endif
         break;
     case 253:      //shift one pixel to right
         u8_tx++;
@@ -4249,7 +4248,6 @@ const int8_t encoder_table[16] PROGMEM = {0, 0, -1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0
 //const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,1,0,0,0,0,-1,0,0}; // Quart speed
 //const int8_t encoder_table[16] PROGMEM = {0,1,0,0,-1,0,0,0,0,0,0,0,0,0,0,0}; // Quart speed
 const int8_t encoder_table[16] PROGMEM = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0}; // Quart speed
-#endif
 #endif
 #endif
 
