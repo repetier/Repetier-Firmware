@@ -50,7 +50,7 @@ This allows a host to enable a special information mode on LCD display, so that
 users see progress in percent, model being printed and layer being printer and
 total layer. Hosts can also use M117 to send time remaining to status line.
 
-This feature should onely be enabled if a lcd is available to show it, otherwise
+This feature should only be enabled if a lcd is available to show it, otherwise
 the extra commands are useless.
 
 Cap:AUTOLEVEL
@@ -104,4 +104,43 @@ Parameter:
   T<extruder> S<preheatTemp> : Sets preheat temperature for given extruder
   L0 : List preheat temperatures. Returns
   PREHEAT_BED:temp PREHEAT0:extr0 PREHEAT1:extr1 PREHEAT_CHAMBER:temp
+
+Cap:EMERGENCY_PARSER
+
+If enabled will parse for M108/M112/M290 when it reaches input buffer allowing
+to interrupt e.g. a waiting heatup.
+
+Cap:HOST_RESCUE
+
+If enabled advocates the presence of M415 to help to continue a print after
+a connection was lost or you had a power outage (requires special handling
+so is not guaranteed to work, but recover procedure is the same).
+If power loss is detected it will also send a "POWERLOSS_DETECTED" message
+to serial so host software can try to store last position, shutdown, ...
+
+"M415 S1" enables host rescue. Only then firmware will interpret no more motion
+data as a sign of connection lost and store last received position to eeprom
+and move extruder aside to preserve print.
+"M415 S0" should be send when a print is finished if rescue mode was enabled.
+Same is required for pauses from host side.
+"M415 Z<zpos>" defines current Z and markes z as homed. This is used so host
+can set z after reconnect especially if printer can not home z due to the
+interrupted print on the bed.
+"M415" without parameter reports the state (whcih is reported at connect as well).
+Possible answers are
+
+RESCUE_STATE: OFF
+
+Nothing stored, ordinary finish of print.
+  
+RESCUE_STATE: LX:109.66 LY:90.85 LZ:1.70 LE:0.00 LT:0 X:0.00 Y:10.00 Z:11.70 E:0.00
+
+Print did not finish. LX/LY/LZ are the last received positions. LT is the
+last active extruder/tool number.
+
+X/Y/Z/E is the park position that was reached. If park position was not reached
+these parameter will be omited.
+
+Firmware will also assume these positions as start position until M415 S0/S1 
+change the mode and remove the informations.
     

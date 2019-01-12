@@ -854,16 +854,15 @@ void u8PrintChar(char c) {
     case CHAR_SELECTED:
         u8g_SetFont(&u8g, u8g_font_6x12_67_75);
         u8_tx += u8g_DrawGlyph(&u8g, u8_tx, u8_ty, 0xb6);
-        #if LANGUAGE_RU_ACTIVE
-                     #if LANGUAGE_RU_ACTIVE // Switch font
-                            if (Com::selectedLanguage != LANGUAGE_RU_ID) {
+#if LANGUAGE_RU_ACTIVE // Switch font
+        if (Com::selectedLanguage != LANGUAGE_RU_ID) {
+            u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+        } else {
+            u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
+        }
+#else
         u8g_SetFont(&u8g, UI_FONT_DEFAULT);
-                                } else {
-                                u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
-                                }
-                                #else
-                                u8g_SetFont(&u8g, UI_FONT_DEFAULT);
-                            #endif
+#endif
         break;
     case 253:      //shift one pixel to right
         u8_tx++;
@@ -965,16 +964,14 @@ void initializeLCD() {
         u8g_SetColorIndex(&u8g, 0);
     } while( u8g_NextPage(&u8g) );
 
-                        #if LANGUAGE_RU_ACTIVE // Switch font
-                            if (Com::selectedLanguage != LANGUAGE_RU_ID) {
+#if LANGUAGE_RU_ACTIVE // Switch font
+    if (Com::selectedLanguage != LANGUAGE_RU_ID) {
+        u8g_SetFont(&u8g, UI_FONT_DEFAULT);
+    } else {
+        u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
+    }
+#else
     u8g_SetFont(&u8g, UI_FONT_DEFAULT);
-                                } else {
-                                u8g_SetFont(&u8g, UI_FONT_DEFAULT_RU);
-                                }
-                                #else
-                                u8g_SetFont(&u8g, UI_FONT_DEFAULT);
-                            #endif
-                
 #endif
     u8g_SetColorIndex(&u8g, 1);
     uid.lastSwitch = uid.lastRefresh = HAL::timeInMilliseconds();
