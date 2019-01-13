@@ -65,6 +65,7 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 // STACKER 3D Superboard        = 412
 // RURAMPS4D 1.0-1.1            = 414
 // RURAMPS4D 1.3                = 415
+// Shasta                       = 416
 // Alligator Board rev1         = 500
 // Alligator Board rev2         = 501
 // Alligator Board rev3         = 502
@@ -255,6 +256,7 @@ controlled by settings in extruder 0 definition. */
 // 100 is AD595
 // 101 is MAX6675
 // 102 is MAX31855
+// 103 is MAX31855 with software SPI, sensor pin is data input!
 #define EXT0_TEMPSENSOR_TYPE 1
 // Analog input pin for reading temperatures or pin enabling SS for MAX6675
 #define EXT0_TEMPSENSOR_PIN TEMP_0_PIN
@@ -680,7 +682,10 @@ Value is used for all generic tables created. */
 //#define SUPPORT_MAX6675
 // uncomment the following line for MAX31855 support.
 //#define SUPPORT_MAX31855
-
+// If you use software spi for max31855 all chips need to use same CS/CLK pin. Sensor pin is MISO pin!
+//#define SUPPORT_MAX31855_SW
+#define MAX31855_SW_CS  47
+#define MAX31855_SW_CLK 32
 // ############# Heated bed configuration ########################
 
 /** \brief Set true if you have a heated bed connected to your board, false if not */

@@ -263,7 +263,7 @@ bool SdSpiCard::begin(SdSpiDriver* spi, uint8_t csPin, SPISettings settings) {
         error(SD_CARD_ERROR_CMD59);
         goto fail;
     }
-#endif // USE_SD_CRC \
+#endif // USE_SD_CRC
     // check SD version
     if (cardCommand(CMD8, 0x1AA) == (R1_ILLEGAL_COMMAND | R1_IDLE_STATE)) {
         type(SD_CARD_TYPE_SD1);
