@@ -224,6 +224,10 @@ usage or for searching for memory induced errors. Switch it off for production, 
 
 #include "Configuration.h"
 
+#if USE_ADVANCE && ENABLE_QUADRATIC_ADVANCE && ENABLED(TEMP_GAIN)
+#error You can not enable TEMP_GAIN and ENABLE_QUADRATIC_ADVANCE the same time. Please disable one feature.
+#endif
+
 #ifndef HOST_RESCUE
 #define HOST_RESCUE 1
 #endif

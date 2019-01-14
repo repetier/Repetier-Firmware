@@ -2438,13 +2438,16 @@ break;
             newtemp = pgm_read_word(&temptable[i++]);
             if (newraw > currentTemperature) {
                 currentTemperatureC = TEMP_INT_TO_FLOAT(oldtemp + (float)(currentTemperature - oldraw) * (float)(newtemp - oldtemp) / (newraw - oldraw));
-                return;
+				newtemp = 999;
+                break;
             }
             oldtemp = newtemp;
             oldraw = newraw;
         }
         // Overflow: Set to last value in the table
-        currentTemperatureC = TEMP_INT_TO_FLOAT(newtemp);
+		if(newtemp != 999) {
+          currentTemperatureC = TEMP_INT_TO_FLOAT(newtemp);
+		}
     }
     break;
     case 13:
@@ -2466,13 +2469,16 @@ break;
             newtemp = pgm_read_word(&temptable[i++]);
             if (newraw > currentTemperature) {
                 currentTemperatureC = TEMP_INT_TO_FLOAT(oldtemp + (float)(currentTemperature - oldraw) * (float)(newtemp - oldtemp) / (newraw - oldraw));
-                return;
+				newtemp = 999;
+                break;
             }
             oldtemp = newtemp;
             oldraw = newraw;
         }
         // Overflow: Set to last value in the table
-        currentTemperatureC = TEMP_INT_TO_FLOAT(newtemp);
+		if(newtemp != 999) {
+          currentTemperatureC = TEMP_INT_TO_FLOAT(newtemp);
+		}
         break;
     }
     case 60: // AD8495 (Delivers 5mV/degC vs the AD595's 10mV)
@@ -2550,17 +2556,23 @@ break;
             newtemp = temptable[i++];
             if (newraw > currentTemperature) {
                 currentTemperatureC = TEMP_INT_TO_FLOAT(oldtemp + (float)(currentTemperature - oldraw) * (float)(newtemp - oldtemp) / (newraw - oldraw));
-                return;
+				newTemp = 999;
+                break;
             }
             oldtemp = newtemp;
             oldraw = newraw;
         }
         // Overflow: Set to last value in the table
-        currentTemperatureC = TEMP_INT_TO_FLOAT(newtemp);
+		if(newTemp != 999) {
+          currentTemperatureC = TEMP_INT_TO_FLOAT(newtemp);
+		}
         break;
     }
 #endif
     }
+#if ENABLED(TEMP_GAIN)
+	currentTemperatureC = currentTemperatureC * tempGain + tempBias;
+#endif
 }
 
 void TemperatureController::setTargetTemperature(float target) {
@@ -3043,6 +3055,9 @@ Extruder extruder[NUM_EXTRUDER] = {
             0, EXT0_TEMPSENSOR_TYPE, EXT0_SENSOR_INDEX, EXT0_HEAT_MANAGER, 0, 0, 0, 0, 0, 0
             , 0, EXT0_PID_INTEGRAL_DRIVE_MAX, EXT0_PID_INTEGRAL_DRIVE_MIN, EXT0_PID_PGAIN_OR_DEAD_TIME, EXT0_PID_I, EXT0_PID_D, EXT0_PID_MAX, 0, 0
             , 0, 0, 0, EXT0_DECOUPLE_TEST_PERIOD, 0, EXT0_PREHEAT_TEMP
+#if ENABLED(TEMP_GAIN)
+			, 1.0, 0.0
+#endif
         }
         , ext0_select_cmd, ext0_deselect_cmd, EXT0_EXTRUDER_COOLER_SPEED, 0, 0, 0
 #if EXTRUDER_JAM_CONTROL
@@ -3068,6 +3083,9 @@ Extruder extruder[NUM_EXTRUDER] = {
             1, EXT1_TEMPSENSOR_TYPE, EXT1_SENSOR_INDEX, EXT1_HEAT_MANAGER, 0, 0, 0, 0, 0, 0
             , 0, EXT1_PID_INTEGRAL_DRIVE_MAX, EXT1_PID_INTEGRAL_DRIVE_MIN, EXT1_PID_PGAIN_OR_DEAD_TIME, EXT1_PID_I, EXT1_PID_D, EXT1_PID_MAX, 0, 0
             , 0, 0, 0, EXT1_DECOUPLE_TEST_PERIOD, 0, EXT1_PREHEAT_TEMP
+#if ENABLED(TEMP_GAIN)
+, 1.0, 0.0
+#endif
         }
         , ext1_select_cmd, ext1_deselect_cmd, EXT1_EXTRUDER_COOLER_SPEED, 0, 0, 0
 #if EXTRUDER_JAM_CONTROL
@@ -3093,6 +3111,9 @@ Extruder extruder[NUM_EXTRUDER] = {
             2, EXT2_TEMPSENSOR_TYPE, EXT2_SENSOR_INDEX, EXT2_HEAT_MANAGER, 0, 0, 0, 0, 0, 0
             , 0, EXT2_PID_INTEGRAL_DRIVE_MAX, EXT2_PID_INTEGRAL_DRIVE_MIN, EXT2_PID_PGAIN_OR_DEAD_TIME, EXT2_PID_I, EXT2_PID_D, EXT2_PID_MAX, 0, 0
             , 0, 0, 0, EXT2_DECOUPLE_TEST_PERIOD, 0, EXT2_PREHEAT_TEMP
+#if ENABLED(TEMP_GAIN)
+, 1.0, 0.0
+#endif
         }
         , ext2_select_cmd, ext2_deselect_cmd, EXT2_EXTRUDER_COOLER_SPEED, 0, 0, 0
 #if EXTRUDER_JAM_CONTROL
@@ -3118,6 +3139,9 @@ Extruder extruder[NUM_EXTRUDER] = {
             3, EXT3_TEMPSENSOR_TYPE, EXT3_SENSOR_INDEX, EXT3_HEAT_MANAGER, 0, 0, 0, 0, 0, 0
             , 0, EXT3_PID_INTEGRAL_DRIVE_MAX, EXT3_PID_INTEGRAL_DRIVE_MIN, EXT3_PID_PGAIN_OR_DEAD_TIME, EXT3_PID_I, EXT3_PID_D, EXT3_PID_MAX, 0, 0
             , 0, 0, 0, EXT3_DECOUPLE_TEST_PERIOD, 0, EXT3_PREHEAT_TEMP
+#if ENABLED(TEMP_GAIN)
+, 1.0, 0.0
+#endif
         }
         , ext3_select_cmd, ext3_deselect_cmd, EXT3_EXTRUDER_COOLER_SPEED, 0, 0, 0
 #if EXTRUDER_JAM_CONTROL
@@ -3143,6 +3167,9 @@ Extruder extruder[NUM_EXTRUDER] = {
             4, EXT4_TEMPSENSOR_TYPE, EXT4_SENSOR_INDEX, EXT4_HEAT_MANAGER, 0, 0, 0, 0, 0, 0
             , 0, EXT4_PID_INTEGRAL_DRIVE_MAX, EXT4_PID_INTEGRAL_DRIVE_MIN, EXT4_PID_PGAIN_OR_DEAD_TIME, EXT4_PID_I, EXT4_PID_D, EXT4_PID_MAX, 0, 0
             , 0, 0, 0, EXT4_DECOUPLE_TEST_PERIOD, 0, EXT4_PREHEAT_TEMP
+#if ENABLED(TEMP_GAIN)
+, 1.0, 0.0
+#endif
         }
         , ext4_select_cmd, ext4_deselect_cmd, EXT4_EXTRUDER_COOLER_SPEED, 0, 0, 0
 #if EXTRUDER_JAM_CONTROL
@@ -3168,6 +3195,9 @@ Extruder extruder[NUM_EXTRUDER] = {
             5, EXT5_TEMPSENSOR_TYPE, EXT5_SENSOR_INDEX, EXT5_HEAT_MANAGER, 0, 0, 0, 0, 0, 0
             , 0, EXT5_PID_INTEGRAL_DRIVE_MAX, EXT5_PID_INTEGRAL_DRIVE_MIN, EXT5_PID_PGAIN_OR_DEAD_TIME, EXT5_PID_I, EXT5_PID_D, EXT5_PID_MAX, 0, 0
             , 0, 0, 0, EXT5_DECOUPLE_TEST_PERIOD, 0, EXT5_PREHEAT_TEMP
+#if ENABLED(TEMP_GAIN)
+, 1.0, 0.0
+#endif
         }
         , ext5_select_cmd, ext5_deselect_cmd, EXT5_EXTRUDER_COOLER_SPEED, 0, 0, 0
 #if EXTRUDER_JAM_CONTROL
@@ -3183,6 +3213,9 @@ TemperatureController heatedBedController = {
     PWM_HEATED_BED, HEATED_BED_SENSOR_TYPE, BED_SENSOR_INDEX, HEATED_BED_HEAT_MANAGER, 0, 0, 0, 0, 0, 0
     , 0, HEATED_BED_PID_INTEGRAL_DRIVE_MAX, HEATED_BED_PID_INTEGRAL_DRIVE_MIN, HEATED_BED_PID_PGAIN_OR_DEAD_TIME, HEATED_BED_PID_IGAIN, HEATED_BED_PID_DGAIN, HEATED_BED_PID_MAX, 0, 0
     , 0, 0, 0, HEATED_BED_DECOUPLE_TEST_PERIOD, 0, HEATED_BED_PREHEAT_TEMP
+#if ENABLED(TEMP_GAIN)
+, 1.0, 0.0
+#endif
 };
 #endif
 

@@ -61,7 +61,10 @@ public:
     millis_t decoupleTestPeriod; ///< Time between setting and testing decoupling.
     millis_t preheatStartTime;    ///< Time (in milliseconds) when heat up was started
     int16_t preheatTemperature;
-
+#if ENABLED(TEMP_GAIN)
+	float tempGain; ///< temperature gets multiplied with this value
+	float tempBias; ///< and this bias is added after gain was added
+#endif
 	/** Return currentTemperatureC but -333 on defect sensor and -444 on decoupled sensor. */
 	float getStatefulTemperature();
     void setTargetTemperature(float target);

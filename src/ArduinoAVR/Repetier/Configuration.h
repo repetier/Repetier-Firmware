@@ -715,6 +715,9 @@ Value is used for all generic tables created. */
 #define MAX31855_SW_CS  47
 #define MAX31855_SW_CLK 32
 
+/** WIth value 1 you can adjust measured temperature into temp = measured * gain + bias. */
+#define TEMP_GAIN 0
+
 // ############# Heated bed configuration ########################
 
 /** \brief Set true if you have a heated bed connected to your board, false if not */

@@ -340,8 +340,9 @@ uint8_t SdSpiCard::cardCommand(uint8_t cmd, uint32_t arg) {
 
     // send message
     spiSend(buf, 6);
-#else  // USE_SD_CRC \
-       // send command
+#else  
+    // USE_SD_CRC 
+    // send command
     spiSend(cmd | 0x40);
 
     // send argument
@@ -352,7 +353,7 @@ uint8_t SdSpiCard::cardCommand(uint8_t cmd, uint32_t arg) {
 
     // send CRC - correct for CMD0 with arg zero or CMD8 with arg 0X1AA
     spiSend(cmd == CMD0 ? 0X95 : 0X87);
-#endif // USE_SD_CRC \
+#endif // USE_SD_CRC
     // discard first fill byte to avoid MISO pull-up problem.
     spiReceive();
     // there are 1-8 fill bytes before response.  fill bytes should be 0XFF.
@@ -630,7 +631,8 @@ bool SdSpiCard::waitNotBusy(uint16_t timeoutMS) {
         }
     }
     return false;
-#else  // WDT_YIELD_TIME_MICROS \
+#else 
+    // WDT_YIELD_TIME_MICROS
        // Check not busy first since yield is not called in isTimedOut.
     while (spiReceive() != 0XFF) {
         if (isTimedOut(t0, timeoutMS)) {
