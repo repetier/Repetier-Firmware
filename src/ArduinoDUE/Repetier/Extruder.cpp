@@ -2556,14 +2556,14 @@ break;
             newtemp = temptable[i++];
             if (newraw > currentTemperature) {
                 currentTemperatureC = TEMP_INT_TO_FLOAT(oldtemp + (float)(currentTemperature - oldraw) * (float)(newtemp - oldtemp) / (newraw - oldraw));
-				newTemp = 999;
+				newtemp = 999;
                 break;
             }
             oldtemp = newtemp;
             oldraw = newraw;
         }
         // Overflow: Set to last value in the table
-		if(newTemp != 999) {
+		if(newtemp != 999) {
           currentTemperatureC = TEMP_INT_TO_FLOAT(newtemp);
 		}
         break;
