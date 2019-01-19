@@ -1081,7 +1081,7 @@ writeFloat(EPR_X2AXIS_STEPS_PER_MM, Com::tEPRX2StepsPerMM, 4);
     writeByte(EPR_BED_PID_MAX, Com::tEPRBedPISMaxValue);
 #if ENABLED(TEMP_GAIN)
     writeFloat(EPR_HEATED_BED_GAIN, PSTR("Bed Temp. Gain"),4);
-    writeFloat(EPR_HEATED_BED_BIAS, PSTR("Bed Temp. Bias [°C]"),4);
+    writeFloat(EPR_HEATED_BED_BIAS, PSTR("Bed Temp. Bias [degC]"),4);
 #endif
 #endif
 #if FEATURE_RETRACTION
@@ -1115,7 +1115,7 @@ writeFloat(EPR_X2AXIS_STEPS_PER_MM, Com::tEPRX2StepsPerMM, 4);
         writeFloat(o + EPR_EXTRUDER_PID_DGAIN, Com::tEPRDGain,4);
 #if ENABLED(TEMP_GAIN)
         writeFloat(o + EPR_EXTRUDER_GAIN, PSTR("Temp. Gain"),4);
-        writeFloat(o + EPR_EXTRUDER_BIAS, PSTR("Temp. Bias [°C]"),4);
+        writeFloat(o + EPR_EXTRUDER_BIAS, PSTR("Temp. Bias [degC]"),4);
 #endif
         writeByte(o + EPR_EXTRUDER_PID_MAX, Com::tEPRPIDMaxValue);
         writeLong(o + EPR_EXTRUDER_X_OFFSET, Com::tEPRXOffset);

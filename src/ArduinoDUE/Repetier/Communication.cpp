@@ -410,13 +410,13 @@ FSTRINGVALUE(Com::tEPRXOffset, "X-offset [steps]")
 FSTRINGVALUE(Com::tEPRYOffset, "Y-offset [steps]")
 FSTRINGVALUE(Com::tEPRZOffset, "Z-offset [steps]")
 FSTRINGVALUE(Com::tEPRStabilizeTime, "temp. stabilize time [s]")
-FSTRINGVALUE(Com::tEPRRetractionWhenHeating, "temp. for retraction when heating [C]")
+FSTRINGVALUE(Com::tEPRRetractionWhenHeating, "temp. for retraction when heating [degC]")
 FSTRINGVALUE(Com::tEPRDistanceRetractHeating, "distance to retract when heating [mm]")
 FSTRINGVALUE(Com::tEPRExtruderCoolerSpeed, "extruder cooler speed [0-255]")
 FSTRINGVALUE(Com::tEPRAdvanceK, "advance K [0=off]")
 FSTRINGVALUE(Com::tEPRAdvanceL, "advance L [0=off]")
-FSTRINGVALUE(Com::tEPRPreheatTemp, "Preheat temp. [°C]")
-FSTRINGVALUE(Com::tEPRPreheatBedTemp, "Bed Preheat temp. [°C]")
+FSTRINGVALUE(Com::tEPRPreheatTemp, "Preheat temp. [degC]")
+FSTRINGVALUE(Com::tEPRPreheatBedTemp, "Bed Preheat temp. [degC]")
 
 #endif
 #if SDSUPPORT

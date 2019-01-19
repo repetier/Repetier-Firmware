@@ -1826,14 +1826,17 @@ inline uint16_t PrintLine::calculateNonlinearSubSegments(uint8_t softEndstop) {
 uint8_t PrintLine::calculateDistance(float axisDistanceMM[], uint8_t dir, float *distance) {
     // Calculate distance depending on direction
     if(dir & XYZ_STEP) {
-        if(dir & XSTEP)
+        if(dir & XSTEP) {
             *distance = axisDistanceMM[X_AXIS] * axisDistanceMM[X_AXIS];
-        else
+        } else {
             *distance = 0;
-        if(dir & YSTEP)
+		}
+        if(dir & YSTEP) {
             *distance += axisDistanceMM[Y_AXIS] * axisDistanceMM[Y_AXIS];
-        if(dir & ZSTEP)
+		}
+        if(dir & ZSTEP) {
             *distance += axisDistanceMM[Z_AXIS] * axisDistanceMM[Z_AXIS];
+		}
         *distance = RMath::max((float)sqrt(*distance), axisDistanceMM[E_AXIS]);
         return 1;
     } else {
@@ -2097,7 +2100,7 @@ uint8_t PrintLine::queueNonlinearMove(uint8_t check_endstops, uint8_t pathOptimi
         }
     }
     Printer::currentPositionSteps[E_AXIS] = Printer::destinationSteps[E_AXIS] = oldEDestination;
-	for(fast8_t i = 0; i < E_AXIS; i++) {
+	for(fast8_t i = 0; i <= E_AXIS; i++) {
 		Printer::currentPositionTransformed[i] = Printer::destinationPositionTransformed[i];
 	}
     lastMoveID++; // Will wrap at 255
