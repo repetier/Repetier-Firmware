@@ -191,6 +191,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define CONTROLLER_ORCABOTXXLPRO2 25
 #define CONTROLLER_AZSMZ_12864 26
 #define CONTROLLER_REPRAPWORLD_GLCD 27
+#define CONTROLLER_AZSMZ_12864_OLED 28
 
 //direction flags
 #define X_DIRPOS 1

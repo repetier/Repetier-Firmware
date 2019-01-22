@@ -605,6 +605,14 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_E1_ENABLE_PIN 30
  
 #define SDPOWER   -1
+
+// Smart RAMPS has no hardware SPI so we need to use software spi instead
+#define ENABLE_SOFTWARE_SPI_CLASS 1
+
+#define SD_SOFT_MISO_PIN 50
+#define SD_SOFT_MOSI_PIN 51
+#define SD_SOFT_SCK_PIN 52
+
 // 10 if using HW spi. 53 if using SW SPI
 #define SDSS 53 
 #define LED_PIN   13

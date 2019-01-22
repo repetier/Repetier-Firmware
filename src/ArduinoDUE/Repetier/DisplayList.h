@@ -1568,7 +1568,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #endif
 #endif // Controller VIKI 2
 
-#if FEATURE_CONTROLLER == CONTROLLER_AZSMZ_12864
+#if FEATURE_CONTROLLER == CONTROLLER_AZSMZ_12864 || FEATURE_CONTROLLER == CONTROLLER_AZSMZ_12864_OLED
 #define UI_HAS_KEYS 1
 #define UI_HAS_BACK_KEY 0
 #define UI_DISPLAY_TYPE DISPLAY_U8G
@@ -1596,7 +1596,11 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_ENCODER_SPEED 2
 //#define SDCARDDETECT        -1
 //#define UI_DISPLAY_RW_PIN -1
+#if FEATURE_CONTROLLER == CONTROLLER_AZSMZ_12864
 #define UI_ROTATE_180
+#endif
+
+
 
 #define BEEPER_TYPE 1
 
@@ -1608,6 +1612,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 
 #undef SDCARDDETECT
 #define SDCARDDETECT 49 // sd card detect as shown on drawing
+
 
 #undef BEEPER_PIN
 #define BEEPER_PIN         66
@@ -1640,7 +1645,7 @@ void uiInitKeys() {
     #endif
 }
 void uiCheckKeys(uint16_t &action) {
-    UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_B, UI_ENCODER_A);
+    UI_KEYS_CLICKENCODER_LOW_REV(UI_ENCODER_A, UI_ENCODER_B);
     UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK, UI_ACTION_OK);
     #if UI_RESET_PIN > -1
     UI_KEYS_BUTTON_LOW(UI_RESET_PIN, UI_ACTION_RESET);

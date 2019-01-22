@@ -1890,6 +1890,7 @@ inline void PrintLine::queueEMove(int32_t extrudeDiff, uint8_t check_endstops, u
         p->dir = ESTEP;
     }
     Printer::currentPositionSteps[E_AXIS] = Printer::destinationSteps[E_AXIS];
+	Printer::currentPositionTransformed[E_AXIS] = Printer::destinationPositionTransformed[E_AXIS];
 
     p->numNonlinearSegments = 0;
     //Define variables that are needed for the Bresenham algorithm. Please note that  Z is not currently included in the Bresenham algorithm.

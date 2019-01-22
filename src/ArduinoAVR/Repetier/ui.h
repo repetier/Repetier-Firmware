@@ -580,6 +580,12 @@ const UIMenu name PROGMEM = {5,action,5,name ## _entries};
 #define SDSUPPORT 1
 #endif
 
+#if FEATURE_CONTROLLER == CONTROLLER_AZSMZ_12864 || FEATURE_CONTROLLER == CONTROLLER_AZSMZ_12864_OLED
+#undef SDSUPPORT
+#define SDSUPPORT 1
+#undef SDCARDDETECTINVERTED
+#define SDCARDDETECTINVERTED 0
+#endif
 
 // Maximum size of a row - if row is larger, text gets scrolled
 #if defined(UI_DISPLAY_TYPE) && UI_DISPLAY_TYPE == DISPLAY_GAMEDUINO2
