@@ -2867,6 +2867,8 @@ int16_t read_max31855(uint8_t ss_pin, fast8_t idx) {
 Thermocouple with spi interface
 https://datasheets.maximintegrated.com/en/ds/MAX31855.pdf
 */
+
+
 int16_t read_max31855_sw_spi(uint8_t inPin, fast8_t idx) {
 	static bool firstRun = true;
 	static int8_t max31855_errors[NUM_PWM];
@@ -2876,10 +2878,10 @@ int16_t read_max31855_sw_spi(uint8_t inPin, fast8_t idx) {
 		}
 		firstRun = false;
 	}
+
 	uint32_t data = 0;
 	int16_t temperature;
 
-	WRITE(MAX31855_SW_CLK, 0);
 	WRITE(MAX31855_SW_CS, 0); // start reading
 	HAL::delayMicroseconds(1);
 	for(fast8_t i = 0; i < 32; i++) { // read 32 bit
@@ -2906,7 +2908,7 @@ int16_t read_max31855_sw_spi(uint8_t inPin, fast8_t idx) {
 
 		if (data & 0x00002000) {
 			data = ~data;
-			temperature = -1 * ((data & 0x00001FFF) + 1);
+			temperature = -((data & 0x00001FFF) + 1);
 		}
 		max31855_errors[idx] = 0;
 	}

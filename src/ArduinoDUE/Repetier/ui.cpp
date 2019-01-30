@@ -1954,6 +1954,7 @@ void UIDisplay::updateSDFileCount() {
         if (nFilesOnCard > 5000) // Arbitrary maximum, limited only by how long someone would scroll
             return;
     }
+	// Com::printFLN(PSTR("FCount:"), (int32_t)nFilesOnCard);
 #endif
 }
 
@@ -2028,12 +2029,13 @@ void sdrefresh(uint16_t &r, char cache[UI_ROWS][MAX_COLS + 1]) {
     sd.fat.chdir(uid.cwd);
     root = sd.fat.vwd();
     root->rewind();
-
+	// Com::printFLN(PSTR("sdresfresh"), (int32_t)r);
     skip = (offset > 0 ? offset - 1 : 0);
 
     while (r + offset < nFilesOnCard + 1 && r < UI_ROWS && file.openNext(root, O_READ)) {
         HAL::pingWatchdog();
         file.getName(tempLongFilename, LONG_FILENAME_LENGTH);
+		// Com::printFLN(PSTR("File:"), tempLongFilename);
         //while ((p = root->getLongFilename(p, NULL, 0, NULL))) {
         // if (! (file.isFile() || file.isDir())) continue;
         if (uid.folderLevel >= SD_MAX_FOLDER_DEPTH && strcmp(tempLongFilename, "..") == 0) {
@@ -4062,11 +4064,11 @@ void UIDisplay::mediumAction() {
 #endif
 }
 
-// Gets calls from main tread only
+// Gets calls from main thread only
 void UIDisplay::slowAction(bool allowMoves) {
     millis_t time = HAL::timeInMilliseconds();
     uint8_t refresh = 0;
-#if UI_HAS_KEYS == 1
+#if UI_HAS_KEYS == 1 || defined(HAS_USER_KEYS)
     // delayed action open?
     if(allowMoves && delayedAction != 0) {
         executeAction(delayedAction, true);

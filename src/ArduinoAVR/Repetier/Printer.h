@@ -785,7 +785,8 @@ public:
 
     static INLINE void setBlockingReceive(uint8_t b) {
         flag2 = (b ? flag2 | PRINTER_FLAG2_BLOCK_RECEIVING : flag2 & ~PRINTER_FLAG2_BLOCK_RECEIVING);
-        Com::printFLN(b ? Com::tPauseCommunication : Com::tContinueCommunication);
+		// Blocking enables busy - pause would allow communication!
+        // Com::printFLN(b ? Com::tPauseCommunication : Com::tContinueCommunication);
     }
 
     static INLINE uint8_t isAutoretract() {

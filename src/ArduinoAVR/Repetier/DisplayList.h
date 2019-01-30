@@ -372,6 +372,24 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #undef SDSUPPORT
 #define SDSUPPORT              1
 
+#elif MOTHERBOARD == 408 || MOTHERBOARD == 413
+
+// SMART RAMPS FOR DUE - CRITICAL NOTE: MUST REMOVE THE RESET HEADER JUMPER NEXT TO AUX-2 OTHERWISE BOARD WILL RESET LOOP CONTINUOUSLY
+#define UI_DISPLAY_RS_PIN         44 //CS
+#define UI_DISPLAY_ENABLE_PIN     42 //MOSI
+#define UI_DISPLAY_D4_PIN         40 //SCK
+#define UI_DISPLAY_D5_PIN         -1 //A0 LCD RS
+#define UI_DISPLAY_D6_PIN         -1
+#define UI_DISPLAY_D7_PIN         -1
+#define BEEPER_PIN                66
+#define UI_ENCODER_A              50
+#define UI_ENCODER_B              47
+#define UI_ENCODER_CLICK          67
+#define UI_RESET_PIN              53
+#define UI_DELAYPERCHAR           50
+#define UI_INVERT_MENU_DIRECTION   0
+#define UI_BUTTON_BACK            -1
+
 #else  // RAMPS
 
 #undef BEEPER_PIN
@@ -1910,6 +1928,7 @@ inline void uiCheckSlowKeys(uint16_t &action) {}
 
 
 extern void beep(uint8_t duration, uint8_t count);
+#ifdef UI_MAIN
 #if (defined(USER_KEY1_PIN) && USER_KEY1_PIN > -1 && defined(USER_KEY1_ACTION)) || (defined(USER_KEY2_PIN) && USER_KEY2_PIN > -1 && defined(USER_KEY2_ACTION)) || (defined(USER_KEY3_PIN) && USER_KEY3_PIN > -1 && defined(USER_KEY3_ACTION)) || (defined(USER_KEY4_PIN) && USER_KEY4_PIN > -1 && defined(USER_KEY4_ACTION))
 #define HAS_USER_KEYS
 static void ui_check_Ukeys(uint16_t &action) {
@@ -1927,6 +1946,6 @@ static void ui_check_Ukeys(uint16_t &action) {
     #endif
 }
 #endif
-
+#endif
 
 #endif

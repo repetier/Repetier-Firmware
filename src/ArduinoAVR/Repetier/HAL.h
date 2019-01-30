@@ -250,6 +250,7 @@ public:
     int outputUnused(void); // Used for output in interrupts
 };
 extern RFHardwareSerial RFSerial;
+#undef RFSERIAL
 #define RFSERIAL RFSerial
 //extern ring_buffer tx_buffer;
 #define WAIT_OUT_EMPTY while(tx_buffer.head != tx_buffer.tail) {}

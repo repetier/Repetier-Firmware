@@ -564,6 +564,24 @@ const UIMenu name PROGMEM = {5,action,5,name ## _entries};
 #define SDSUPPORT 1
 #endif // FEATURE_CONTROLLER == CONTROLLER_RADDS_FGSC
 
+#if (MOTHERBOARD == 408 || MOTHERBOARD == 413) && (FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS || FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD)
+// Smart RAMPS has no hardware SPI so we need to use software spi instead
+#define ENABLE_SOFTWARE_SPI_CLASS 1
+
+#define SD_SOFT_MISO_PIN 17
+#define SD_SOFT_MOSI_PIN 51
+#define SD_SOFT_SCK_PIN 16
+#undef SDSS
+#define SDSS                      49
+#undef SDCARDDETECT
+#define SDCARDDETECT              52
+#undef SDCARDDETECTINVERTED
+#define SDCARDDETECTINVERTED      0
+#undef SDSUPPORT
+#define SDSUPPORT                 1
+#endif
+
+
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI2
 #undef SDCARDDETECT
 #define SDCARDDETECT -1
@@ -585,6 +603,14 @@ const UIMenu name PROGMEM = {5,action,5,name ## _entries};
 #define SDSUPPORT 1
 #undef SDCARDDETECTINVERTED
 #define SDCARDDETECTINVERTED 0
+#if MOTHERBOARD == 408 || MOTHERBOARD == 413
+// Smart RAMPS has no hardware SPI so we need to use software spi instead
+#define ENABLE_SOFTWARE_SPI_CLASS 1
+
+#define SD_SOFT_MISO_PIN 50
+#define SD_SOFT_MOSI_PIN 51
+#define SD_SOFT_SCK_PIN 52
+#endif
 #endif
 
 // Maximum size of a row - if row is larger, text gets scrolled

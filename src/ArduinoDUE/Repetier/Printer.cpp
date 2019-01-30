@@ -2219,7 +2219,9 @@ void Printer::handleInterruptEvent() {
             break;
         }
 #endif // SDSUPPORT
+        GCodeSource::printAllFLN(PSTR("// action:out_of_filament T"), (int32_t)Extruder::current->id);
         GCodeSource::printAllFLN(PSTR("RequestPause:Extruder Jam Detected!"));
+        // GCodeSource::printAllFLN(PSTR("// action:pause")); // add later when host/server know new meaning!
 #endif // JAM_ACTION
 		EVENT_JAM_DETECTED_END;
         break;

@@ -235,7 +235,7 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #if EEPROM_MODE == 0 && HOST_RESCUE
 #warning HOST_RESCUE requires eeprom support! Disabling feature.
 #undef HOST_RESCUE
-#define HOST_RESCUE
+#define HOST_RESCUE 0
 #endif
 
 #ifndef EMERGENCY_PARSER
