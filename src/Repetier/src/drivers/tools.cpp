@@ -738,7 +738,9 @@ void JamDetectorHW<inputPin, ObserverType>::testForJam() {
                 return;
             }
 #endif // SDSUPPORT
+            GCodeSource::printAllFLN(PSTR("// action:out_of_filament T"), (int32_t)tool->getToolId());
             GCodeSource::printAllFLN(PSTR("RequestPause:Extruder Jam Detected!"));
+            // GCodeSource::printAllFLN(PSTR("// action:pause")); // add later when host/server know new meaning!
             EVENT_JAM_DETECTED_END;
         }
     }
@@ -792,7 +794,9 @@ void FilamentDetector<inputPin>::testFilament() {
                 return;
             }
 #endif // SDSUPPORT
+            GCodeSource::printAllFLN(PSTR("// action:out_of_filament T"), (int32_t)tool->getToolId());
             GCodeSource::printAllFLN(PSTR("RequestPause:No filament detected!"));
+            // GCodeSource::printAllFLN(PSTR("// action:pause")); // add later when host/server know new meaning!
             EVENT_JAM_DETECTED_END;
         }
     }

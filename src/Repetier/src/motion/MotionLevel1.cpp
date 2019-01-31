@@ -745,12 +745,12 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
     if ((buf.axisUsed & 15) > 8) { // not pure e move
         // Need to scale feedrate so E component is not part of speed
         float exceptE = 1.0f / sqrt(length2 - e2);
-        buf.feedrate = feedrate * buf.length * exceptE;
+        buf.feedrate = feedrate * buf.length * exceptE; // increase so xyz speed remains F neglecting E part
         if (dirUsed & axisBits[E_AXIS] && delta[E_AXIS] > 0) {
             if (advanceEDRatio > 0.000001) {
                 buf.eAdv = advanceEDRatio * advanceK * resolution[E_AXIS] * 0.001;
             } else {
-                buf.eAdv = delta[E_AXIS] * exceptE * advanceK * resolution[E_AXIS] * 0.001;
+                buf.eAdv = delta[E_AXIS] / buf.length * advanceK * resolution[E_AXIS] * 0.001;
             }
             buf.setAdvance();
         } else {
@@ -1203,12 +1203,10 @@ void Motion1Buffer::unblock() {
 
 void Motion1::moveToParkPosition() {
     if (isAxisHomed(X_AXIS) && isAxisHomed(Y_AXIS)) {
-        Com::printFLN(PSTR("FR:"), Motion1::moveFeedrate[X_AXIS], 1);
         setTmpPositionXYZ(parkPosition[X_AXIS], parkPosition[Y_AXIS], IGNORE_COORDINATE);
         moveByOfficial(tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
     }
     if (Motion1::parkPosition[Z_AXIS] > 0 && isAxisHomed(Z_AXIS)) {
-        Com::printFLN(PSTR("FRZ:"), Motion1::moveFeedrate[Z_AXIS], 1);
         Motion1::moveByPrinter(Motion1::tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
         setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::min(maxPos[Z_AXIS], parkPosition[Z_AXIS] + currentPosition[Z_AXIS]));
         moveByOfficial(tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
@@ -1313,6 +1311,7 @@ void Motion1::homeAxes(fast8_t axes) {
                     }
                 }
                 PrinterType::homeAxis(i);
+                g92Offsets[i] = 0;
                 if (i == Z_AXIS && ZProbe != nullptr && homeDir[Z_AXIS] < 0) {
                     ZProbeHandler::deactivate();
                 }

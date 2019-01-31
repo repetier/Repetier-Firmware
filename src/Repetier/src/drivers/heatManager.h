@@ -73,7 +73,7 @@ public:
             Com::println();
             return;
         }
-        if (temp == 0) {
+        if (temp <= 0) {
             decoupleMode = DecoupleMode::NO_HEATING;
         } else if (temp < currentTemperature) {
             decoupleMode = DecoupleMode::COOLING;
@@ -88,8 +88,10 @@ public:
         return decoupleMode != DecoupleMode::PAUSED && targetTemperature > MAX_ROOM_TEMPERATURE;
     }
     inline void pause() {
-        decoupleMode = DecoupleMode::PAUSED;
-        output->set(0);
+        if (decoupleMode != NO_HEATING) {
+            decoupleMode = DecoupleMode::PAUSED;
+            output->set(0);
+        }
     }
     inline void unpause() {
         setTargetTemperature(targetTemperature);
@@ -100,6 +102,7 @@ public:
     inline void setCurrentTemperature(float temp) {
         currentTemperature = temp;
     }
+    float getStatefulTemperature(); ///< Returns temp or -333 on defect, -444 on decoupled
     inline float getCurrentTemperature() { return currentTemperature; }
     inline float getPreheatTemperature() { return preheatTemperature; }
     inline HeaterError getError() { return error; }

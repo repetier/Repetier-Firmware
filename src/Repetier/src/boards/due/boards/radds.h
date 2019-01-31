@@ -161,7 +161,7 @@
 
 #else
 
-// This is for offcial display port usage
+// This is for official display port usage
 
 #define BEEPER_PIN 41
 #define UI_DISPLAY_RS_PIN 42

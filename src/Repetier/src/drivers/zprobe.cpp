@@ -339,7 +339,7 @@ void ZProbeHandler::deactivate() {
 
 float ZProbeHandler::runProbe() {
     float zCorr = 0;
-#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
+#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN && Z_PROBE_REPETITIONS > 1
     float measurements[Z_PROBE_REPETITIONS];
 #endif
     if (ZProbe->update()) {
@@ -377,7 +377,7 @@ float ZProbeHandler::runProbe() {
     Motion1::waitForEndOfMoves();
     Motion1::endstopMode = EndstopMode::DISABLED;
     float z = secureDistance * ((fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]));
-#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
+#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN && Z_PROBE_REPETITIONS > 1
     measurements[0] = z;
 #endif
     FOR_ALL_AXES(i) {

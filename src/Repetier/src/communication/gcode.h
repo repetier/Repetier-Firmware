@@ -41,7 +41,7 @@ class SerialGCodeSource : public GCodeSource {
     uint8_t sendAsBinary;                   ///< Flags the command as binary input.
     uint8_t commentDetected;                ///< Flags true if we are reading the comment part of a command.
     uint8_t binaryCommandSize;              ///< Expected size of the incoming binary command.
-    fast8_t bufWritePos, bufReadPos, bufLength;
+    ufast8_t bufWritePos, bufReadPos, bufLength;
 #endif
 public:
     SerialGCodeSource(Stream* p);

@@ -142,6 +142,7 @@ public:
     FSTRINGVAR(tDoorOpen)
     FSTRINGVAR(tBtnOK)
     FSTRINGVAR(tM999)
+    FSTRINGVAR(tTestM999)
     // Units
     FSTRINGVAR(tUnitMM)
     FSTRINGVAR(tUnitMMPS)

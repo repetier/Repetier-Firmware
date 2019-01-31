@@ -192,7 +192,7 @@ void Motion2::timer() {
         int* delta = m3->delta;
         uint8_t* bits = axisBits;
         FOR_ALL_AXES(i) {
-            if (i == E_AXIS && (advanceSteps != 0 || actM1->eAdv != 0)) {
+            if (i == E_AXIS && (advanceSteps != 0 || actM1->isAdvance())) {
                 // handle advance of E
                 *delta = *np - *lp;
                 int advTarget = velocityProfile->f * actM1->eAdv;
@@ -205,27 +205,14 @@ void Motion2::timer() {
 
                 *delta += advDiff;
                 if (*delta > 0) { // extruding
-                    /* if (*delta < 0) { // prevent reversal, add later
-                        advDiff -= *delta;
-                        *delta = 0;
-                    } */
                     *delta <<= 1;
                     m3->directions |= *bits;
                     m3->usedAxes |= *bits;
                 } else { // retracting, advDiff is always negative
-                    /* int half = *delta >> 1;
-                    if (half < 1) {
-                        half = 1;
-                    }
-                    if (half < advDiff) { // last correction
-                        half = advDiff;
-                    }
-                    advDiff = half;
-                    *delta += half;*/
                     *delta = (-*delta) << 1;
                     m3->usedAxes |= *bits;
                 }
-                advanceSteps += advDiff;
+                advanceSteps = advTarget;
             } else {
                 if ((*delta = ((*np - *lp) << 1)) < 0) {
                     *delta = -*delta;

@@ -31,58 +31,63 @@
 #if defined(ARDUINO)
 #include <Arduino.h>
 #include <SPI.h>
-#elif defined(PLATFORM_ID)  // Only defined if a Particle device
+#elif defined(PLATFORM_ID) // Only defined if a Particle device
 #include "application.h"
-#else  // defined(ARDUINO)
+#else // defined(ARDUINO)
 #error "Unknown system"
-#endif  // defined(ARDUINO)
+#endif // defined(ARDUINO)
 //-----------------------------------------------------------------------------
 #ifdef ESP8266
 // undefine F macro if ESP8266.
 #undef F
-#endif  // ESP8266
+#endif // ESP8266
 //-----------------------------------------------------------------------------
 #ifndef F
 /** Define macro for strings stored in flash. */
 #define F(str) (str)
-#endif  // F
+#endif // F
 //-----------------------------------------------------------------------------
 /** \return the time in milliseconds. */
 inline uint16_t curTimeMS() {
-  return millis();
+    return millis();
 }
 //-----------------------------------------------------------------------------
+/** Delay milliseconds */
+inline void delayMS(uint16_t ms) {
+    delay(ms);
+}
+//------------------------------------------------------------------------------
 /**
  * \class SysCall
  * \brief SysCall - Class to wrap system calls.
  */
 class SysCall {
- public:
-  /** Halt execution of this thread. */
-  static void halt() {
-    while (1) {
-      yield();
+public:
+    /** Halt execution of this thread. */
+    static void halt() {
+        while (1) {
+            yield();
+        }
     }
-  }
-  /** Yield to other threads. */
-  static void yield();
+    /** Yield to other threads. */
+    static void yield();
 };
 
 #if defined(ESP8266)
 inline void SysCall::yield() {
-  // Avoid ESP8266 bug
-  delay(0);
+    // Avoid ESP8266 bug
+    delay(0);
 }
 #elif defined(ARDUINO)
 inline void SysCall::yield() {
-  // Use the external Arduino yield() function.
-  ::yield();
+    // Use the external Arduino yield() function.
+    ::yield();
 }
-#elif defined(PLATFORM_ID)  // Only defined if a Particle device
+#elif defined(PLATFORM_ID) // Only defined if a Particle device
 inline void SysCall::yield() {
-  Particle.process();
+    Particle.process();
 }
-#else  // ESP8266
+#else                      // ESP8266
 inline void SysCall::yield() {}
-#endif  // ESP8266
-#endif  // SysCall_h
+#endif                     // ESP8266
+#endif                     // SysCall_h

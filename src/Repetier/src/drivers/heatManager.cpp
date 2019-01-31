@@ -11,6 +11,7 @@ void menuSetTemperature(GUIAction action, void* data) {
         hm->setTargetTemperature(value);
     }
 }
+
 void menuHMMaxPWM(GUIAction action, void* data) {
     HeatManager* hm = reinterpret_cast<HeatManager*>(data);
     float value = hm->getMaxPWM();
@@ -19,6 +20,7 @@ void menuHMMaxPWM(GUIAction action, void* data) {
         hm->setMaxPWM(static_cast<uint8_t>(value));
     }
 }
+
 HeatManager::HeatManager(char htType, fast8_t _index, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod, bool _hotPluggable)
     : error(HeaterError::NO_ERROR)
     , targetTemperature(0)
@@ -35,9 +37,21 @@ HeatManager::HeatManager(char htType, fast8_t _index, IOTemperature* i, PWMHandl
     , index(_index)
     , hotPluggable(_hotPluggable) {
 }
+
 void HeatManager::init() {
     eepromPos = EEPROM::reserve(EEPROM_SIGNATURE_HEAT_MANAGER, 1, eepromSizeLocal() + 13);
 }
+
+float HeatManager::getStatefulTemperature() { ///< Returns temp or -333 on defect, -444 on decoupled
+    if (error == HeaterError::SENSOR_DEFECT) {
+        return -333.0;
+    }
+    if (error != HeaterError::NO_ERROR) {
+        return -444.0;
+    }
+    return currentTemperature;
+}
+
 void HeatManager::update() {
     if (error != HeaterError::NO_ERROR) {
         return; // do nothing in error state
@@ -46,9 +60,11 @@ void HeatManager::update() {
         errorCount--;
     }
     if (decoupleMode == CALIBRATING) {
+        setCurrentTemperature(input->get());
         return; // do not interfere with calibration
     }
     if (decoupleMode == PAUSED) {
+        setCurrentTemperature(input->get());
         return; // do nothing in pause mode
     }
     if (decoupleMode == UNPLUGGED) {
@@ -187,7 +203,7 @@ void HeatManager::reportTemperature(char c, int idx) {
         Com::print(idx);
     }
     Com::print(':');
-    Com::printFloat(currentTemperature, 1);
+    Com::printFloat(getStatefulTemperature(), 1);
     Com::printF(Com::tSpaceSlash, targetTemperature, 0);
     Com::print(' ');
     if (c == 'B') {

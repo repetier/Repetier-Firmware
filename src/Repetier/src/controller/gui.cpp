@@ -54,7 +54,7 @@ void GUI::update() {
     handleKeypress(); // Test for new keys
 
     if (nextAction != GUIAction::NONE && nextAction != GUIAction::CLICK_PROCESSED && nextAction != GUIAction::BACK_PROCESSED) {
-        Com::printFLN(PSTR("Action:"), (int32_t)nextAction);
+        // Com::printFLN(PSTR("Action:"), (int32_t)nextAction);
         callbacks[level](nextAction, data[level]);
         nextAction = nextAction == GUIAction::CLICK ? GUIAction::CLICK_PROCESSED : (nextAction == GUIAction::BACK ? GUIAction::BACK_PROCESSED : GUIAction::NONE);
         nextActionRepeat = 0;

@@ -116,6 +116,10 @@
 #include "boards/bam_and_dice.h"
 #endif
 
+#if MOTHERBOARD == 408 || MOTHERBOARD == 413
+#include "boards/smart_ramps.h"
+#endif
+
 #if MOTHERBOARD == 409
 #include "boards/ultratronics.h"
 #endif
@@ -130,6 +134,10 @@
 
 #if MOTHERBOARD == 414
 #include "boards/ruramps4d.h"
+#endif
+
+#if MOTHERBOARD == 416
+#include "boards/shasta.h"
 #endif
 
 #if MOTHERBOARD == 500 || MOTHERBOARD == 501 || MOTHERBOARD == 502

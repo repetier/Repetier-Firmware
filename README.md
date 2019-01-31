@@ -142,11 +142,14 @@ to extend.
 
 If you want to start developing on V2, you will not get happy with the
 Arduino IDE. It will not show most files at all, also it will still compile
-all files. Best solution for developing is to use Visual Studio Code with
+all files. In fact our solution does not even compile using the 
+ Arduino IDE.  Best solution for developing is to use Visual Studio Code with
 the following plugins:
-- Arduino
-- C++ (required by Arduino so gets installed directly)
+- Platform IO
 - Clang-Format (for formatting, style guid is included in sources) 
+
+Platform IO also works stand alone or with other editors, but we will not discuss
+these solutions.
 
 If you have clang-format installed (requires llvm compile to be installed)
 it will format the sources according to our styling definition on save.

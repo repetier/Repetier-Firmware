@@ -1258,7 +1258,7 @@ Rescue system uses the following layout in eeprom:
 
 void Printer::enableRescue(bool on) {
 #if HOST_RESCUE
-    if (on && EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE)) {
+    if (on && EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE) != 0) {
         EEPROM::setRecoverByte(rescuePos + EPR_RESCUE_MODE, 0);
     }
     rescueOn = on;
@@ -1269,6 +1269,7 @@ void Printer::enableRescue(bool on) {
     rescueReset(); // enabling/disabling removes old values
 #endif
 }
+
 bool Printer::isRescue() {
 #if HOST_RESCUE
     return rescueOn;
@@ -1276,6 +1277,7 @@ bool Printer::isRescue() {
     return false;
 #endif
 }
+
 void Printer::rescueReport() {
 #if HOST_RESCUE
     uint8_t mode = EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE);
@@ -1302,6 +1304,7 @@ void Printer::rescueReport() {
     Com::println();
 #endif
 }
+
 void Printer::rescueStoreReceivedPosition() {
 #if HOST_RESCUE
     if (!rescueOn) {
@@ -1314,6 +1317,7 @@ void Printer::rescueStoreReceivedPosition() {
     EEPROM::setRecoverByte(rescuePos + EPR_RESCUE_MODE, EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE) | 1);
 #endif
 }
+
 void Printer::rescueStorePosition() {
 #if HOST_RESCUE
     if (!rescueOn) {
@@ -1326,6 +1330,7 @@ void Printer::rescueStorePosition() {
     EEPROM::setRecoverByte(rescuePos + EPR_RESCUE_MODE, EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE) | 2);
 #endif
 }
+
 void Printer::rescueRecover() {
 #if HOST_RESCUE
     uint8_t mode = EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE);
@@ -1346,6 +1351,7 @@ void Printer::rescueRecover() {
     }
 #endif
 }
+
 int Printer::rescueStartTool() {
 #if HOST_RESCUE
     if (EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE)) {
@@ -1357,6 +1363,7 @@ int Printer::rescueStartTool() {
     return 0;
 #endif
 }
+
 void Printer::rescueSetup() {
 #if HOST_RESCUE
     uint8_t mode = EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE);
@@ -1379,6 +1386,7 @@ bool Printer::isRescueRequired() {
     return false;
 #endif
 }
+
 void Printer::rescueReset() {
 #if HOST_RESCUE
     uint8_t mode = EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_MODE);
@@ -1387,10 +1395,11 @@ void Printer::rescueReset() {
     }
 #endif
 }
+
 void Printer::handlePowerLoss() {
     HeatManager::disableAllHeaters();
     if (rescueOn) {
-        Com::printErrorF(PSTR("POWERLOSS_DETECTED"));
+        Com::printErrorFLN(PSTR("POWERLOSS_DETECTED"));
         rescueStoreReceivedPosition();
 #if POWERLOSS_LEVEL == 1 //z up only
 #endif
@@ -1404,6 +1413,7 @@ void Printer::handlePowerLoss() {
         enableFailedModeP(PSTR("Power Loss"));
     }
 }
+
 void Printer::parkSafety() {
     if (safetyParked || !rescueOn) {
         return; // nothing to unpark
@@ -1440,12 +1450,14 @@ void Printer::unparkSafety() {
     }
     GUI::popBusy();
 }
+
 void Printer::enableFailedModeP(PGM_P msg) {
     failedMode = true;
     GUI::setStatusP(msg, GUIStatusLevel::ERROR);
     Com::printErrorFLN(msg);
     Com::printErrorFLN(Com::tM999);
 }
+
 void Printer::enableFailedMode(char* msg) {
     failedMode = true;
     GUI::setStatus(msg, GUIStatusLevel::ERROR);

@@ -42,6 +42,7 @@ IO_TEMPERATURE_TABLE(name,analog,table)
 #undef IO_TEMP_TABLE_NTC
 #undef IO_TEMP_TABLE_PTC
 #undef IO_TEMPERATURE_TABLE
+#undef IO_TEMPERATURE_MAX31855_SW_SPI
 #undef IO_HOTTEST_OF_2
 #undef IO_COOLEST_OF_2
 
@@ -50,6 +51,13 @@ IO_TEMPERATURE_TABLE(name,analog,table)
 #define IO_TEMP_TABLE_NTC(name, dataname)
 #define IO_TEMP_TABLE_PTC(name, dataname)
 #define IO_TEMPERATURE_TABLE(name, analog, table)
+#define IO_TEMPERATURE_MAX31855_SW_SPI(name, csPin, clkPin, dataPin) \
+    SET_OUTPUT(csPin) \
+    SET_OUTPUT(clkPin) \
+    SET_INPUT(dataPin) \
+    WRITE(csPin, 1) \
+    WRITE(clkPin, 0)
+
 #define IO_HOTTEST_OF_2(name, temp1, temp2)
 #define IO_COOLEST_OF_2(name, temp1, temp2)
 
@@ -95,6 +103,62 @@ public:
     }; \
     extern name##Class name;
 
+#define IO_TEMPERATURE_MAX31855_SW_SPI(name, csPin, clkPin, dataPin) \
+    class name##Class : public IOTemperature { \
+        int8_t errors; \
+        float temp; \
+        int32_t getData() { \
+            uint32_t data = 0; \
+            WRITE(clkPin, 0); \
+            WRITE(csPin, 0); \
+            HAL::delayMicroseconds(1); \
+            for (fast8_t i = 0; i < 32; i++) { \
+                WRITE(clkPin, 1); \
+                HAL::delayMicroseconds(1); \
+                data += data + (HAL::digitalRead(inPin) ? 1 : 0); \
+                WRITE(clkPin, 0); \
+                HAL::delayMicroseconds(1); \
+            } \
+            WRITE(csPin, 1); \
+            return data; \
+        } \
+\
+    public: \
+        name##Class() \
+            : errors(0) \
+            , temp(0) {} \
+        float get() { \
+            if (errors == 0) { \
+                isDefect(); \
+            } \
+            if (errors < 0) { \
+                errors = 0; \
+            } \
+            return temp; \
+        } \
+        bool isDefect() { \
+            uint32_t data = getData(); \
+            if (data & 65536) { \
+                if (errors > 5) { \
+                    return true; \
+                } \
+                errors++; \
+                return false; \
+            } else { \
+                data = data >> 18; \
+                int32_t temperature; \
+                temperature = data & 0x00001FFF; \
+                if (data & 0x00002000) { \
+                    data = ~data; \
+                    temperature = -1 * ((data & 0x00001FFF) + 1); \
+                } \
+                errors = -1; \
+                temp = static_cast<float>(temperature) * 0.25f; \
+            } \
+        } \
+    }; \
+    extern name##Class name;
+
 #define IO_HOTTEST_OF_2(name, temp1, temp2) \
     class name##Class : public IOTemperature { \
     public: \
@@ -128,6 +192,9 @@ public:
 #define IO_TEMPERATURE_TABLE(name, analog, table) \
     name##Class name;
 
+#define IO_TEMPERATURE_MAX31855_SW_SPI(name, csPin, clkPin, dataPin) \
+    name##Class name;
+
 #define IO_HOTTEST_OF_2(name, temp1, temp2) \
     name##Class name;
 
@@ -139,6 +206,7 @@ public:
 #define IO_TEMP_TABLE_NTC(name, dataname)
 #define IO_TEMP_TABLE_PTC(name, dataname)
 #define IO_TEMPERATURE_TABLE(name, analog, table)
+#define IO_TEMPERATURE_MAX31855_SW_SPI(name, csPin, clkPin, dataPin)
 #define IO_HOTTEST_OF_2(name, temp1, temp2)
 #define IO_COOLEST_OF_2(name, temp1, temp2)
 

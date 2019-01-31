@@ -1066,6 +1066,7 @@ void MCode_415(GCode* com) {
     }
     if (com->hasZ()) { // Replace z
         Motion1::currentPosition[Z_AXIS] = com->Z;
+        Motion1::g92Offsets[Z_AXIS] = 0;
         Motion1::updatePositionsFromCurrent();
         Motion2::setMotorPositionFromTransformed();
     }
@@ -1324,8 +1325,11 @@ void MCode_998(GCode* com) {
 
 void MCode_999(GCode* com) {
     Printer::failedMode = false;
-    if (com->hasS())
-        GCode::fatalError(PSTR("Testing fatal error"));
-    else
+    if (com->hasS()) {
+        GCode::fatalError(Com::tTestM999);
+        Printer::failedMode = true;
+        GUI::setStatusP(Com::tTestM999, GUIStatusLevel::ERROR);
+    } else {
         GCode::resetFatalError();
+    }
 }
