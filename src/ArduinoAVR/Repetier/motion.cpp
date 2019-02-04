@@ -353,8 +353,8 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
         }
         deltas[Z_AXIS] += Printer::zCorrectionStepsIncluded;
         start[Z_AXIS] -= Printer::zCorrectionStepsIncluded;
-        float dx = Printer::invAxisStepsPerMM[X_AXIS] * deltas[X_AXIS];
-        float dy = Printer::invAxisStepsPerMM[Y_AXIS] * deltas[Y_AXIS];
+        float dx = fdeltas[X_AXIS];
+        float dy = fdeltas[Y_AXIS];
         float len = dx * dx + dy * dy;
         if(len < 100) { // no splitting required
             queueCartesianSegmentTo(check_endstops, pathOptimize);
@@ -473,12 +473,14 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
     p->stepsRemaining = p->delta[p->primaryAxis];
     if(p->isXYZMove()) {
         xydist2 = axisDistanceMM[X_AXIS] * axisDistanceMM[X_AXIS] + axisDistanceMM[Y_AXIS] * axisDistanceMM[Y_AXIS];
-        if(p->isZMove())
+        if(p->isZMove()) {
             p->distance = RMath::max((float)sqrt(xydist2 + axisDistanceMM[Z_AXIS] * axisDistanceMM[Z_AXIS]), fabs(axisDistanceMM[E_AXIS]));
-        else
+        } else {
             p->distance = RMath::max((float)sqrt(xydist2), fabs(axisDistanceMM[E_AXIS]));
-    } else
+		}
+    } else {
         p->distance = fabs(axisDistanceMM[E_AXIS]);
+	}
     p->calculateMove(axisDistanceMM, pathOptimize, p->primaryAxis);
 }
 #endif

@@ -639,14 +639,23 @@ uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
     if(x != IGNORE_COORDINATE) {
 		destinationPositionTransformed[X_AXIS] = (x + Printer::offsetX);
         destinationSteps[X_AXIS] = destinationPositionTransformed[X_AXIS] * axisStepsPerMM[X_AXIS];
+	} else {
+		destinationPositionTransformed[X_AXIS] = currentPositionTransformed[X_AXIS];
+		destinationSteps[X_AXIS] = currentPositionSteps[X_AXIS];
 	}
     if(y != IGNORE_COORDINATE) {
 		destinationPositionTransformed[Y_AXIS] = (y + Printer::offsetY);
         destinationSteps[Y_AXIS] = destinationPositionTransformed[Y_AXIS] * axisStepsPerMM[Y_AXIS];
+	} else {
+		destinationPositionTransformed[Y_AXIS] = currentPositionTransformed[Y_AXIS];
+		destinationSteps[Y_AXIS] = currentPositionSteps[Y_AXIS];
 	}
     if(z != IGNORE_COORDINATE) {
 		destinationPositionTransformed[Z_AXIS] = (z + Printer::offsetZ);
         destinationSteps[Z_AXIS] = destinationPositionTransformed[Z_AXIS] * axisStepsPerMM[Z_AXIS];
+	} else {
+		destinationPositionTransformed[Z_AXIS] = currentPositionTransformed[Z_AXIS];
+		destinationSteps[Z_AXIS] = currentPositionSteps[Z_AXIS];
 	}
     if(e != IGNORE_COORDINATE) {
 		destinationPositionTransformed[E_AXIS] = e;
@@ -655,8 +664,9 @@ uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
 		destinationPositionTransformed[E_AXIS] = currentPositionTransformed[E_AXIS];
 		destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS];
 	}
-    if(f != IGNORE_COORDINATE)
+    if(f != IGNORE_COORDINATE) {
         feedrate = f;
+	}
 #if NONLINEAR_SYSTEM
     // Disable software end stop or we get wrong distances when length < real length
     if (!PrintLine::queueNonlinearMove(ALWAYS_CHECK_ENDSTOPS, true, false)) {

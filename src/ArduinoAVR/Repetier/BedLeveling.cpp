@@ -258,6 +258,8 @@ void correctAutolevel(Plane &plane) {
     // h1 is reference heights, h2 => motor 0, h3 => motor 1
     h2 -= h1;
     h3 -= h1;
+	Com::printFLN(PSTR("Correction Motor 2:"), h2, 3);
+	Com::printFLN(PSTR("Correction Motor 3:"), h3, 3);
 #if defined(LIMIT_MOTORIZED_CORRECTION)
     if(h2 < -LIMIT_MOTORIZED_CORRECTION) h2 = -LIMIT_MOTORIZED_CORRECTION;
     if(h2 > LIMIT_MOTORIZED_CORRECTION) h2 = LIMIT_MOTORIZED_CORRECTION;
