@@ -791,22 +791,6 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com) {
         return 0; // Fake no move so nothing gets added
     }
 #endif
-#if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
-    if(!isNoDestinationCheck()) {
-#if MOVE_X_WHEN_HOMED
-        if(!isXHomed())
-            com->unsetX();
-#endif
-#if MOVE_Y_WHEN_HOMED
-        if(!isYHomed())
-            com->unsetY();
-#endif
-#if MOVE_Z_WHEN_HOMED
-        if(!isZHomed())
-            com->unsetZ();
-#endif
-    }
-#endif
 #if DISTORTION_CORRECTION == 0
     if(!com->hasNoXYZ()) {
 #endif
@@ -824,6 +808,30 @@ uint8_t Printer::setDestinationStepsFromGCode(GCode *com) {
         destinationSteps[X_AXIS] = lroundf(destinationPositionTransformed[X_AXIS] * axisStepsPerMM[X_AXIS]);
         destinationSteps[Y_AXIS] = lroundf(destinationPositionTransformed[Y_AXIS] * axisStepsPerMM[Y_AXIS]);
         destinationSteps[Z_AXIS] = lroundf(destinationPositionTransformed[Z_AXIS] * axisStepsPerMM[Z_AXIS]);
+
+#if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
+if(!isNoDestinationCheck()) {
+	#if MOVE_X_WHEN_HOMED
+	if(!isXHomed()) {
+		currentPositionSteps[X_AXIS] = destinationSteps[X_AXIS];
+		currentPosition[X_AXIS] = destinationPositionTransformed[X_AXIS];
+	}
+	#endif
+	#if MOVE_Y_WHEN_HOMED
+	if(!isYHomed()) {
+		currentPositionSteps[Y_AXIS] = destinationSteps[Y_AXIS];
+		currentPosition[Y_AXIS] = destinationPositionTransformed[Y_AXIS];
+	}	
+	#endif
+	#if MOVE_Z_WHEN_HOMED
+	if(!isZHomed()) {
+			currentPositionSteps[Z_AXIS] = destinationSteps[Z_AXIS];
+			currentPosition[Z_AXIS] = destinationPositionTransformed[Z_AXIS];
+	}	
+	#endif
+}
+#endif
+
 #if LAZY_DUAL_X_AXIS
         sledParked = false;
 #endif
