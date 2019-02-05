@@ -2054,6 +2054,7 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
 //        startX = ZHOME_X_POS;
 //#endif
         }
+
 #if ZHOME_Y_POS == IGNORE_COORDINATE
         if(yaxis)
 #else
@@ -2068,12 +2069,14 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
 //        startY = ZHOME_Y_POS;
 //#endif
         }
+
         if(zaxis) {
 #if ZHOME_X_POS != IGNORE_COORDINATE || ZHOME_Y_POS != IGNORE_COORDINATE
             moveToReal(ZHOME_X_POS, ZHOME_Y_POS, IGNORE_COORDINATE, IGNORE_COORDINATE, homingFeedrate[X_AXIS]); // correct rotation!
             Commands::waitUntilEndOfAllMoves();
 #endif
             homeZAxis(); // real z distance at that point to zero
+
             if(Z_HOME_DIR < 0) startZ = Printer::zMin;
             else startZ = Printer::zMin + Printer::zLength - zBedOffset;
             moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]); // correct rotation!
@@ -2090,6 +2093,7 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
 #endif
         }
     }
+
 #endif // elif HOMING_ORDER == HOME_ORDER_ZXYTZ || HOMING_ORDER == HOME_ORDER_XYTZ
 #if HOMING_ORDER != HOME_ORDER_ZXYTZ && HOMING_ORDER != HOME_ORDER_XYTZ
     if(xaxis) {

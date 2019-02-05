@@ -1018,17 +1018,23 @@ void cOkWizard(int action) {
 void cRelaxExtruderEndstop() {
 #ifndef NO_RELAX_ENDSTOPS
   uint8_t oldJam = Printer::isJamcontrolDisabled();
-  Printer::setJamcontrolDisabled(true); // prevent jam message when no filament is inserted 
+  Printer::setJamcontrolDisabled(true); // prevent jam message when no filament is inserted
+  bool nocheck = Printer::isNoDestinationCheck();
+  Printer::setNoDestinationCheck(false); 
   int activeExtruder = Extruder::current->id;
   Printer::setColdExtrusionAllowed(true);
   Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = 0;
-  Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,0.25,10);
+  Printer::destinationPositionTransformed[E_AXIS] = Printer::currentPositionTransformed[E_AXIS] = 0;
+  Printer::moveTo(IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,0.25,10);
   Extruder::selectExtruderById(1 - activeExtruder);
   Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = 0;
-  Printer::moveToReal(IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,0.25,10);
+  Printer::destinationPositionTransformed[E_AXIS] = Printer::currentPositionTransformed[E_AXIS] = 0;
+  Printer::moveTo(IGNORE_COORDINATE,IGNORE_COORDINATE,IGNORE_COORDINATE,0.25,10);
   Printer::setColdExtrusionAllowed(false);
   Extruder::selectExtruderById(activeExtruder);
   Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = 0;
+  Printer::destinationPositionTransformed[E_AXIS] = Printer::currentPositionTransformed[E_AXIS] = 0;
+  Printer::setNoDestinationCheck(nocheck); 
   Printer::setJamcontrolDisabled(oldJam);
 #endif  
 }

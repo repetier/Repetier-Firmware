@@ -230,7 +230,7 @@ void PrintLine::queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOpti
     p->dir = 0;
     //Find direction
     //Printer::zCorrectionStepsIncluded = 0;
-    for(uint8_t axis = 0; axis < 4; axis++) {
+    for(uint8_t axis = 0; axis < E_AXIS_ARRAY; axis++) {
         p->delta[axis] = Printer::destinationSteps[axis] - Printer::currentPositionSteps[axis];
         p->secondSpeed = Printer::fanSpeed;
         // axisDistanceMM[axis] = p->delta[axis] * Printer::invAxisStepsPerMM[axis];
@@ -256,13 +256,14 @@ void PrintLine::queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOpti
             p->setPositiveDirectionForAxis(axis);
         else
             p->delta[axis] = -p->delta[axis];
-        if(p->delta[axis]) p->setMoveOfAxis(axis);
+        if(axisDistanceMM[axis] != 0) p->setMoveOfAxis(axis);
         Printer::currentPositionSteps[axis] = Printer::destinationSteps[axis];
         Printer::currentPositionTransformed[axis] = Printer::destinationPositionTransformed[axis];
     }
     if(p->isNoMove()) {
-        if(newPath)   // need to delete dummy elements, otherwise commands can get locked.
+        if(newPath) {  // need to delete dummy elements, otherwise commands can get locked.
             PrintLine::resetPathPlanner();
+		}
         return; // No steps included
     }
     float xydist2;
@@ -344,7 +345,7 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
         // we are inside correction height so we split all moves in lines of max. 10 mm and add them
         // including a z correction
         int32_t deltas[E_AXIS_ARRAY], start[E_AXIS_ARRAY];
-		int32_t fdeltas[E_AXIS_ARRAY], fstart[E_AXIS_ARRAY];
+		float fdeltas[E_AXIS_ARRAY], fstart[E_AXIS_ARRAY];
         for(fast8_t i = 0; i < E_AXIS_ARRAY; i++) {
             deltas[i] = Printer::destinationSteps[i] - Printer::currentPositionSteps[i];
             start[i] = Printer::currentPositionSteps[i];
@@ -414,17 +415,17 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
         } else {
 		    axisDistanceMM[axis] = fabs(Printer::destinationPositionTransformed[axis] - Printer::currentPositionTransformed[axis]);
 		}
-        if(p->delta[axis] >= 0)
+        if(p->delta[axis] >= 0) {
             p->setPositiveDirectionForAxis(axis);
-        else
+        } else {
             p->delta[axis] = -p->delta[axis];
-        if(p->delta[axis]) p->setMoveOfAxis(axis);
-        Printer::currentPositionSteps[axis] = Printer::destinationSteps[axis];
-		Printer::currentPositionTransformed[axis] = Printer::destinationPositionTransformed[axis];
+		}
+        if(axisDistanceMM[axis] != 0) p->setMoveOfAxis(axis);
     }
     if(p->isNoMove()) {
-        if(newPath)   // need to delete dummy elements, otherwise commands can get locked.
+        if(newPath) {  // need to delete dummy elements, otherwise commands can get locked.
             resetPathPlanner();
+		}
         return; // No steps included
     }
     float xydist2;
@@ -481,7 +482,18 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
     } else {
         p->distance = fabs(axisDistanceMM[E_AXIS]);
 	}
+    if(p->distance == 0) {
+	    if(newPath) {  // need to delete dummy elements, otherwise commands can get locked.
+		    resetPathPlanner();
+	    }
+	    return; // No steps included
+    }
+
     p->calculateMove(axisDistanceMM, pathOptimize, p->primaryAxis);
+	for(uint8_t axis = 0; axis < 4; axis++) {
+		Printer::currentPositionSteps[axis] = Printer::destinationSteps[axis];
+		Printer::currentPositionTransformed[axis] = Printer::destinationPositionTransformed[axis];
+	}
 }
 #endif
 
@@ -668,10 +680,10 @@ void PrintLine::calculateMove(float axisDistanceMM[], uint8_t pathOptimize, fast
         logLine();
 		Com::printF(PSTR("de:"), axisDistanceMM[E_AXIS],5);
 		Com::printFLN(PSTR(" se:"), speedE);
-        //Com::printFLN(Com::tDBGLimitInterval, limitInterval);
-        Com::printFLN(Com::tDBGMoveDistance, distance);
+        Com::printFLN(Com::tDBGLimitInterval, limitInterval);
+        Com::printFLN(Com::tDBGMoveDistance, distance, 4);
         Com::printFLN(Com::tDBGCommandedFeedrate, Printer::feedrate);
-        // Com::printFLN(Com::tDBGConstFullSpeedMoveTime, timeForMove);
+        Com::printFLN(Com::tDBGConstFullSpeedMoveTime, timeForMove);
     }
 #endif
     // Make result permanent
@@ -1175,7 +1187,7 @@ void PrintLine::logLine() {
 #ifdef DEBUG_QUEUE_MOVE
     Com::printFLN(Com::tDBGId, (int)this);
     // Com::printArrayFLN(Com::tDBGDelta, delta);
-    // Com::printFLN(Com::tDBGDir, (uint32_t)dir);
+    Com::printFLN(Com::tDBGDir, (uint32_t)dir);
     // Com::printFLN(Com::tDBGFlags, (uint32_t)flags);
     Com::printFLN(Com::tDBGFullSpeed, fullSpeed);
     Com::printFLN(Com::tDBGVMax, (int32_t)vMax);
