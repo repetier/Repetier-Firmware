@@ -16,38 +16,41 @@
 
     This firmware is a nearly complete rewrite of the sprinter firmware
     by kliment (https://github.com/kliment/Sprinter)
-    which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
+    which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm
+  firmware.
 
-  Functions in this file are used to communicate using ascii or repetier protocol.
+  Functions in this file are used to communicate using ascii or repetier
+  protocol.
 */
 
 #ifndef COMMANDS_H_INCLUDED
 #define COMMANDS_H_INCLUDED
 
-class Commands
-{
+class Commands {
 public:
-    static void commandLoop();
-    static void checkForPeriodicalActions(bool allowNewMoves);
-    static void processArc(GCode *com);
-    static void processGCode(GCode *com);
-    static void processMCode(GCode *com);
-    static void executeGCode(GCode *com);
-    static void waitUntilEndOfAllMoves();
-    static void waitUntilEndOfAllBuffers();
-    static void printCurrentPosition();
-    static void printTemperatures(bool showRaw = false);
-    static void setFanSpeed(int speed, bool immediately = false); /// Set fan speed 0..255
-    static void setFan2Speed(int speed); /// Set fan speed 0..255
-    static void changeFeedrateMultiply(int factorInPercent);
-    static void changeFlowrateMultiply(int factorInPercent);
-    static void reportPrinterUsage();
-    static void emergencyStop();
-    static void checkFreeMemory();
-    static void writeLowestFreeRAM();
+  static void commandLoop();
+  static void checkForPeriodicalActions(bool allowNewMoves);
+  static void processArc(GCode *com);
+  static void processGCode(GCode *com);
+  static void processMCode(GCode *com);
+  static void executeGCode(GCode *com);
+  static void waitUntilEndOfAllMoves();
+  static void waitUntilEndOfAllBuffers();
+  static void printCurrentPosition();
+  static void printTemperatures(bool showRaw = false);
+  static void setFanSpeed(int speed,
+                          bool immediately = false); /// Set fan speed 0..255
+  static void setFan2Speed(int speed);               /// Set fan speed 0..255
+  static void changeFeedrateMultiply(int factorInPercent);
+  static void changeFlowrateMultiply(int factorInPercent);
+  static void reportPrinterUsage();
+  static void emergencyStop();
+  static void checkFreeMemory();
+  static void writeLowestFreeRAM();
+
 private:
-    static int lowestRAMValue;
-    static int lowestRAMValueSend;
+  static int lowestRAMValue;
+  static int lowestRAMValueSend;
 };
 
 #endif // COMMANDS_H_INCLUDED

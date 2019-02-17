@@ -18,7 +18,7 @@
 #if !defined(_UI_MENU_H)
 #define _UI_MENU_H
 
-/*moved to uilang.h
+/* moved to uilang.h
   #define cUP "\001"
   #define cDEG "\002"
   #define cSEL "\003"

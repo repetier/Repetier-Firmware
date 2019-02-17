@@ -1,6 +1,9 @@
 Version 1.0.4
   Added emergency parser.
   Improved handling of small segments, especially with linear advance.
+  Linear advance gives better results now.
+  Added host rescue system.
+  Added files so it compiles with PlatformIO or Arduino IDE.
   
 Version 1.0.0
   Keep alive/busy signal for host timeout improvement.

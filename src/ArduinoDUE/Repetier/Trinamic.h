@@ -10,12 +10,9 @@
 _TMC_COUNT determines the number of Trinamic chips to configure.
 It counts how many ChipSelect pins were configured by the user.
 */
-#define _TMC_COUNT ( TMC2130_ON_X + \
-                     TMC2130_ON_Y + \
-                     TMC2130_ON_Z + \
-                  TMC2130_ON_EXT0 + \
-                  TMC2130_ON_EXT1 + \
-                  TMC2130_ON_EXT2 )
+#define _TMC_COUNT                                                  \
+    (TMC2130_ON_X + TMC2130_ON_Y + TMC2130_ON_Z + TMC2130_ON_EXT0 + \
+     TMC2130_ON_EXT1 + TMC2130_ON_EXT2)
 #if _TMC_COUNT < 1
 #error "Trinamic TMC2130 support enabled but no CS pins defined."
 #endif
@@ -23,7 +20,8 @@ It counts how many ChipSelect pins were configured by the user.
 #if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MANUAL
 #undef STEPPER_CURRENT_CONTROL
 #else
-#error "When using Trinamic drivers you can't enable another STEPPER_CURRENT_CONTROL method."
+#error \
+    "When using Trinamic drivers you can't enable another STEPPER_CURRENT_CONTROL method."
 #endif
 #define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_TMC2130
 

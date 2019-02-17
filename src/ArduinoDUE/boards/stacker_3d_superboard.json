@@ -1,0 +1,58 @@
+{
+  "build": {
+    "core": "sam",
+    "cpu": "cortex-m3",
+    "extra_flags": "-D__SAM3X8E__ -DARDUINO_ARCH_SAM -DARDUINO_SAM_DUE",
+    "f_cpu": "84000000L",
+    "hwids": [
+      [
+        "0x2341",
+        "0x003E"
+      ],
+      [
+        "0x2341",
+        "0x003D"
+      ],
+      [
+        "0x2A03",
+        "0x003D"
+      ]
+    ],
+    "ldscript": "flash.ld",
+    "mcu": "at91sam3x8e",
+    "usb_product": "due",
+    "variant": "stacker_3d_superboard_dbg"
+  },
+  "connectivity": [
+    "can"
+  ],
+  "debug": {
+    "jlink_device": "ATSAM3X8E",
+    "openocd_chipname": "at91sam3X8E",
+    "svd_path": "ATSAM3X8E.svd"
+  },
+  "frameworks": [
+    "arduino",
+    "simba"
+  ],
+  "name": "STACKER 3d Superboard (Programming Port)",
+  "upload": {
+    "disable_flushing": true,
+    "maximum_ram_size": 98304,
+    "maximum_size": 524288,
+    "native_usb": false,
+    "protocol": "sam-ba",
+    "protocols": [
+      "sam-ba",
+      "jlink",
+      "blackmagic",
+      "atmel-ice",
+      "stlink"
+    ],
+    "require_upload_port": true,
+    "use_1200bps_touch": true,
+    "wait_for_upload_port": false
+  },
+  "url": "http://stacker3d.com",
+  "vendor": "STACKER 3D"
+}

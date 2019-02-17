@@ -1,0 +1,8 @@
+{
+    "editor.formatOnSave": true,
+    "files.autoSave": "onWindowChange",
+    "terminal.integrated.env.osx": {
+        "PATH": "/Users/littwin/.platformio/penv/bin:/Users/littwin/.platformio/penv:/Users/littwin/anaconda3/bin:/opt/local/bin:/opt/local/sbin:/usr/local/go/bin:/usr/local/texlive/2017/bin/x86_64-darwin:/opt/mongodb/bin:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/TeX/texbin:/usr/local/go/bin:/opt/X11/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Applications/Wireshark.app/Contents/MacOS:/Users/littwin/Documents/Projekte/android/sdk/platform-tools:/Users/littwin/Documents/Projekte/android/sdk/tools:/Users/littwin/go/bin",
+        "PLATFORMIO_CALLER": "vscode"
+    }
+}
