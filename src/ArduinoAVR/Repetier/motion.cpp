@@ -248,14 +248,15 @@ void PrintLine::queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOpti
                 p->delta[E_AXIS] = 0;
             }
 #endif
-			axisDistanceMM[axis] = fabs(axisDistanceMM[axis]);
         } else {
-			axisDistanceMM[axis] = fabs(Printer::destinationPositionTransformed[axis] - Printer::currentPositionTransformed[axis]);
+			axisDistanceMM[axis] = Printer::destinationPositionTransformed[axis] - Printer::currentPositionTransformed[axis];
 		}
-        if(p->delta[axis] >= 0)
+        if(axisDistanceMM[axis] >= 0) {
             p->setPositiveDirectionForAxis(axis);
-        else
+        } else {
             p->delta[axis] = -p->delta[axis];
+			axisDistanceMM[axis] = -axisDistanceMM[axis];
+		}
         if(axisDistanceMM[axis] != 0) p->setMoveOfAxis(axis);
         Printer::currentPositionSteps[axis] = Printer::destinationSteps[axis];
         Printer::currentPositionTransformed[axis] = Printer::destinationPositionTransformed[axis];
@@ -318,7 +319,6 @@ void PrintLine::queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOpti
     } else
         p->distance = fabs(axisDistanceMM[E_AXIS]);
     p->calculateMove(axisDistanceMM, pathOptimize, p->primaryAxis);
-
 }
 #endif
 /**
@@ -411,15 +411,15 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
                 p->delta[E_AXIS] = 0;
             }
 #endif
-			axisDistanceMM[axis] = fabs(axisDistanceMM[axis]);
         } else {
-		    axisDistanceMM[axis] = fabs(Printer::destinationPositionTransformed[axis] - Printer::currentPositionTransformed[axis]);
+		    axisDistanceMM[axis] = Printer::destinationPositionTransformed[axis] - Printer::currentPositionTransformed[axis];
 		}
-        if(p->delta[axis] >= 0) {
+        if(axisDistanceMM[axis] >= 0) {
             p->setPositiveDirectionForAxis(axis);
         } else {
-            p->delta[axis] = -p->delta[axis];
-		}
+	        p->delta[axis] = -p->delta[axis];
+	        axisDistanceMM[axis] = -axisDistanceMM[axis];
+        }
         if(axisDistanceMM[axis] != 0) p->setMoveOfAxis(axis);
     }
     if(p->isNoMove()) {
@@ -498,6 +498,9 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
 #endif
 
 void PrintLine::calculateMove(float axisDistanceMM[], uint8_t pathOptimize, fast8_t drivingAxis) {
+	if(stepsRemaining == 0) { // need at least one step for bresenham
+		return;
+	}
 #if NONLINEAR_SYSTEM
     long axisInterval[VIRTUAL_AXIS_ARRAY]; // shortest interval possible for that axis
 #else
@@ -554,22 +557,22 @@ void PrintLine::calculateMove(float axisDistanceMM[], uint8_t pathOptimize, fast
     }
     float inverseTimeS = (float)F_CPU / timeForMove;
     if(isXMove()) {
-        axisInterval[X_AXIS] = timeForMove / delta[X_AXIS];
+        axisInterval[X_AXIS] = static_cast<int32_t>(timeForMove / (axisDistanceMM[X_AXIS] * Printer::axisStepsPerMM[X_AXIS]));
         speedX = axisDistanceMM[X_AXIS] * inverseTimeS;
         if(isXNegativeMove()) speedX = -speedX;
     } else speedX = 0;
     if(isYMove()) {
-        axisInterval[Y_AXIS] = timeForMove / delta[Y_AXIS];
+        axisInterval[Y_AXIS] = static_cast<int32_t>(timeForMove / (axisDistanceMM[Y_AXIS] * Printer::axisStepsPerMM[Y_AXIS]));
         speedY = axisDistanceMM[Y_AXIS] * inverseTimeS;
         if(isYNegativeMove()) speedY = -speedY;
     } else speedY = 0;
     if(isZMove()) {
-        axisInterval[Z_AXIS] = timeForMove / delta[Z_AXIS];
+        axisInterval[Z_AXIS] = static_cast<int32_t>(timeForMove / (axisDistanceMM[Z_AXIS] * Printer::axisStepsPerMM[Z_AXIS]));
         speedZ = axisDistanceMM[Z_AXIS] * inverseTimeS;
         if(isZNegativeMove()) speedZ = -speedZ;
     } else speedZ = 0;
     if(isEMove()) {
-        axisInterval[E_AXIS] = timeForMove / delta[E_AXIS];
+        axisInterval[E_AXIS] = static_cast<int32_t>(timeForMove / (axisDistanceMM[E_AXIS] * Printer::axisStepsPerMM[E_AXIS]));
         speedE = axisDistanceMM[E_AXIS] * inverseTimeS;
         if(isENegativeMove()) speedE = -speedE;
     } else speedE = 0;
@@ -1687,12 +1690,13 @@ bool NonlinearSegment::checkEndstops(PrintLine *cur, bool checkall) {
     return r != 0;
 }
 
-void PrintLine::calculateDirectionAndDelta(int32_t difference[], ufast8_t *dir, int32_t delta[]) {
+void PrintLine::calculateDirectionAndDelta(float fdifference[], int32_t difference[], ufast8_t *dir, int32_t delta[]) {
     *dir = 0;
     //Find direction
-    if(difference[X_AXIS] != 0) {
-        if(difference[X_AXIS] < 0) {
+    if(fdifference[X_AXIS] != 0) {
+        if(fdifference[X_AXIS] < 0) {
             delta[X_AXIS] = -difference[X_AXIS];
+			fdifference[X_AXIS] = -fdifference[X_AXIS];
             *dir |= XSTEP;
         } else {
             delta[X_AXIS] = difference[X_AXIS];
@@ -1702,9 +1706,10 @@ void PrintLine::calculateDirectionAndDelta(int32_t difference[], ufast8_t *dir, 
         delta[X_AXIS] = 0;
     }
 
-    if(difference[Y_AXIS] != 0) {
-        if(difference[Y_AXIS] < 0) {
+    if(fdifference[Y_AXIS] != 0) {
+        if(fdifference[Y_AXIS] < 0) {
             delta[Y_AXIS] = -difference[Y_AXIS];
+			fdifference[Y_AXIS] = -fdifference[Y_AXIS];
             *dir |= YSTEP;
         } else {
             delta[Y_AXIS] = difference[Y_AXIS];
@@ -1713,9 +1718,10 @@ void PrintLine::calculateDirectionAndDelta(int32_t difference[], ufast8_t *dir, 
     } else {
         delta[Y_AXIS] = 0;
     }
-    if(difference[Z_AXIS] != 0) {
-        if(difference[Z_AXIS] < 0) {
+    if(fdifference[Z_AXIS] != 0) {
+        if(fdifference[Z_AXIS] < 0) {
             delta[Z_AXIS] = -difference[Z_AXIS];
+			fdifference[Z_AXIS] = -fdifference[Z_AXIS];
             *dir |= ZSTEP;
         } else {
             delta[Z_AXIS] = difference[Z_AXIS];
@@ -1724,9 +1730,10 @@ void PrintLine::calculateDirectionAndDelta(int32_t difference[], ufast8_t *dir, 
     } else {
         delta[Z_AXIS] = 0;
     }
-    if(difference[E_AXIS] != 0) {
-        if(difference[E_AXIS] < 0) {
+    if(fdifference[E_AXIS] != 0) {
+        if(fdifference[E_AXIS] < 0) {
             delta[E_AXIS] = -difference[E_AXIS];
+			fdifference[E_AXIS] = -fdifference[E_AXIS];
             *dir |= ESTEP;
         } else {
             delta[E_AXIS] = difference[E_AXIS];
@@ -1948,17 +1955,17 @@ uint8_t PrintLine::queueNonlinearMove(uint8_t check_endstops, uint8_t pathOptimi
                 axisDistanceMM[E_AXIS] = 0;
             }
 #endif
-			axisDistanceMM[E_AXIS] = fabs(axisDistanceMM[E_AXIS]);
         } else {
             // axisDistanceMM[axis] = fabs(difference[axis] * Printer::invAxisStepsPerMM[axis]);
-			axisDistanceMM[axis] = fabs(Printer::destinationPositionTransformed[axis] - Printer::currentPositionTransformed[axis]);
+			axisDistanceMM[axis] = Printer::destinationPositionTransformed[axis] - Printer::currentPositionTransformed[axis];
 		}
     }
 
     float cartesianDistance;
     ufast8_t cartesianDir;
     int32_t cartesianDeltaSteps[E_AXIS_ARRAY];
-    calculateDirectionAndDelta(difference, &cartesianDir, cartesianDeltaSteps);
+	// axisDistanceMM will be positive after it is used to compute direction!
+    calculateDirectionAndDelta(axisDistanceMM, difference, &cartesianDir, cartesianDeltaSteps);
     if (!calculateDistance(axisDistanceMM, cartesianDir, &cartesianDistance)) {
         // Appears the intent is to do nothing if no distance is detected.
         // This apparently is not an error condition, just early exit.
@@ -2049,9 +2056,12 @@ uint8_t PrintLine::queueNonlinearMove(uint8_t check_endstops, uint8_t pathOptimi
             for (fast8_t i = 0; i < E_AXIS_ARRAY; i++) {
                 Printer::destinationSteps[i] = startPosition[i] + (difference[i] * lineNumber) / numLines;
                 fractionalSteps[i] = Printer::destinationSteps[i] - Printer::currentPositionSteps[i];
+				if((cartesianDir & (16 << i)) == 0) {
+					axisDistanceMM[i] = -axisDistanceMM[i]; // restore direction for calculateDirectionAndDelta
+				}
                 // axisDistanceMM[i] = fabs(fractionalSteps[i] * Printer::invAxisStepsPerMM[i]);
             }
-            calculateDirectionAndDelta(fractionalSteps, &p->dir, p->delta);
+            calculateDirectionAndDelta(axisDistanceMM, fractionalSteps, &p->dir, p->delta);
             p->distance = cartesianDistance;
         }
 

@@ -132,6 +132,9 @@ void Printer::prepareForProbing() {
     // 2. Go to z probe bed distance for probing
     Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::max(EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0), static_cast<float>(ZHOME_HEAT_HEIGHT)), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
     // 3. Ensure we can activate z probe at current xy position
+#ifndef NO_SAVE_DEPLOY
+	// Printer::moveToCenter(); // safe position for deploying probe
+#endif
     // Delta is at center already so does not need special testing here!
 #if EXTRUDER_IS_Z_PROBE == 0
     float ZPOffsetX = EEPROM::zProbeXOffset();
@@ -140,16 +143,16 @@ void Printer::prepareForProbing() {
     float targetX = Printer::currentPosition[X_AXIS];
     float targetY = Printer::currentPosition[Y_AXIS];
     if(ZPOffsetX > 0 && targetX - ZPOffsetX < Printer::xMin) {
-        targetX = Printer::xMin + ZPOffsetX;
+        targetX = Printer::xMin + ZPOffsetX + 1;
     }
     if(ZPOffsetY > 0 && targetY - ZPOffsetY < Printer::yMin) {
-        targetY = Printer::yMin + ZPOffsetY;
+        targetY = Printer::yMin + ZPOffsetY + 1;
     }
     if(ZPOffsetX < 0 && targetX - ZPOffsetX > Printer::xMin + Printer::xLength) {
-        targetX = Printer::xMin + Printer::xLength + ZPOffsetX;
+        targetX = Printer::xMin + Printer::xLength + ZPOffsetX - 1;
     }
     if(ZPOffsetY < 0 && targetY - ZPOffsetY > Printer::yMin + Printer::yLength) {
-        targetY = Printer::yMin + Printer::yLength + ZPOffsetY;
+        targetY = Printer::yMin + Printer::yLength + ZPOffsetY - 1;
     }
     Printer::moveToReal(targetX, targetY, IGNORE_COORDINATE, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
     Printer::updateCurrentPosition(true);
@@ -326,13 +329,16 @@ bool runBedLeveling(int s) {
     // It is not possible to go to the edges at the top, also users try
     // it often and wonder why the coordinate system is then wrong.
     // For that reason we ensure a correct behavior by code.
-    Printer::homeAxis(true, true, true);
+    if(!Printer::isHomedAll()) {
+	    Printer::homeAxis(true, true, true);
+	}
     Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0), IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
 #else
     if(!Printer::isXHomed() || !Printer::isYHomed())
         Printer::homeAxis(true, true, false);
     Printer::updateCurrentPosition(true);
-    Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
+    // Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
+    Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
 #endif
     Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
     if(!Printer::startProbing(true)) {
@@ -673,7 +679,7 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
         //Com::printFLN(PSTR("ZHSteps:"),lastCorrection - currentPositionSteps[Z_AXIS]);
         if(r + 1 < repeat) {
             // go only shortest possible move up for repetitions
-            PrintLine::moveRelativeDistanceInSteps(0, 0, shortMove, 0, HOMING_FEEDRATE_Z, true, false);
+            PrintLine::moveRelativeDistanceInSteps(0, 0, shortMove, 0, Printer::homingFeedrate[Z_AXIS], true, false);
 			Endstops::update();
 			Endstops::update(); // need to call twice for full update!
 	        if(Endstops::zProbe()) {
@@ -691,7 +697,7 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat, bool runStartScr
 #endif
 
     // Go back to start position
-    PrintLine::moveRelativeDistanceInSteps(0, 0, lastCorrection - currentPositionSteps[Z_AXIS], 0, HOMING_FEEDRATE_Z, true, false);
+    PrintLine::moveRelativeDistanceInSteps(0, 0, lastCorrection - currentPositionSteps[Z_AXIS], 0, Printer::homingFeedrate[Z_AXIS], true, false);
     Endstops::update();
     Endstops::update(); // need to call twice for full update!
     if(Endstops::zProbe()) { // did we untrigger? If not don't trust result!

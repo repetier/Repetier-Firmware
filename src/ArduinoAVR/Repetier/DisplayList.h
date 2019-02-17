@@ -350,7 +350,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 
 #elif MOTHERBOARD == 403 || MOTHERBOARD == 404
 
- // ramps-fd lcd adaptor needs to rotate connectors 180° to work!
+ // ramps-fd lcd adaptor needs to rotate connectors 180Â° to work!
 #define UI_DISPLAY_RS_PIN         16
 #define UI_DISPLAY_ENABLE_PIN     17
 #define UI_DISPLAY_D4_PIN         23

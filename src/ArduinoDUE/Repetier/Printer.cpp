@@ -680,6 +680,14 @@ uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
     return 1;
 }
 
+void Printer::moveToCenter() {
+#if DRIVE_SYSTEM == DELTA
+	moveToReal(0, 0, IGNORE_COORDINATE,homingFeedrate[Z_AXIS],false);
+#else
+	moveToReal(xMin + 0.5 * xLength, yMin + 0.5 * yLength, IGNORE_COORDINATE,homingFeedrate[X_AXIS],false);
+#endif
+}
+
 uint8_t Printer::moveToReal(float x, float y, float z, float e, float f, bool pathOptimize) {
 	Printer::unparkSafety();
 	// Com::printFLN(PSTR("MoveToReal X="),x,2);
@@ -1445,7 +1453,7 @@ void Printer::homeZAxis() { // Delta z homing
             Endstops::resetAccumulator();
             deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR);
             Endstops::fillFromAccumulator();
-            //Endstops::report();
+            // Endstops::report();
             // Check that all endstops (XYZ) were hit again
             if (Endstops::xMax() && Endstops::yMax() && Endstops::zMax()) {
                 homingSuccess = true; // Assume success in case there is no back move
@@ -1460,7 +1468,9 @@ void Printer::homeZAxis() { // Delta z homing
                 }
 #endif
             }
-        }
+        } else {
+		   Com::printFLN(PSTR("Back move did not untrigger endstops!"), (float)ENDSTOP_Z_BACK_MOVE);
+		}
     }
     // Check if homing failed.  If so, request pause!
     if (!homingSuccess) {

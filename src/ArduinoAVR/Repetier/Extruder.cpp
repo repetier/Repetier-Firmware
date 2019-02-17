@@ -2208,12 +2208,23 @@ const short temptable_11[NUMTEMPS_11][2] PROGMEM = {
     {631 * 4, 97 * 8}, {666 * 4, 92 * 8}, {701 * 4, 87 * 8}, {736 * 4, 81 * 8}, {771 * 4, 76 * 8}, {806 * 4, 70 * 8}, {841 * 4, 63 * 8}, {876 * 4, 56 * 8}, {911 * 4, 48 * 8},
     {946 * 4, 38 * 8}, {981 * 4, 23 * 8}, {1005 * 4, 5 * 8}, {1016 * 4, 0}
 };
-#define NUMTEMPS_12 31 // 100k RS thermistor 198-961 (4.7k pullup)
+#define NUMTEMPS_12 31 // 100k RS thermistor 198-961 (4.7k pull up)
 const short temptable_12[NUMTEMPS_12][2] PROGMEM = {
     {1 * 4, 929 * 8}, {36 * 4, 299 * 8}, {71 * 4, 246 * 8}, {106 * 4, 217 * 8}, {141 * 4, 198 * 8}, {176 * 4, 184 * 8}, {211 * 4, 173 * 8}, {246 * 4, 163 * 8}, {281 * 4, 154 * 8}, {316 * 4, 147 * 8},
     {351 * 4, 140 * 8}, {386 * 4, 134 * 8}, {421 * 4, 128 * 8}, {456 * 4, 122 * 8}, {491 * 4, 117 * 8}, {526 * 4, 112 * 8}, {561 * 4, 107 * 8}, {596 * 4, 102 * 8}, {631 * 4, 97 * 8}, {666 * 4, 91 * 8},
     {701 * 4, 86 * 8}, {736 * 4, 81 * 8}, {771 * 4, 76 * 8}, {806 * 4, 70 * 8}, {841 * 4, 63 * 8}, {876 * 4, 56 * 8}, {911 * 4, 48 * 8}, {946 * 4, 38 * 8}, {981 * 4, 23 * 8}, {1005 * 4, 5 * 8}, {1016 * 4, 0 * 8}
 };
+
+// PT100 with typical amplifier board, normally from E3D
+#if MOTHERBOARD == 412 // stacker has own amplifier with different characteristics
+#define NUMTEMPS_13 20
+const short temptable_13[NUMTEMPS_13][2] PROGMEM = {
+{ 0, 0 }, { 184, 10 * 8 }, { 361, 20 * 8 }, { 531, 30 * 8 }, { 1002, 8 * 60 },
+{ 1554, 8 * 100 }, { 2034, 8 * 140 }, { 2455, 8 * 180 }, { 2647, 8 * 200 },
+{ 2827, 8 * 220 }, { 2998, 8 * 240 }, { 3159, 8 * 260 }, { 3312, 8 * 280 }, { 3456, 8 * 300 }, { 3593, 8 * 320 },
+{ 3724, 8 * 340 }, { 3848, 8 * 360 }, { 3966, 8 * 380 }, { 4079, 8 * 400 }, { 4095, 8 * 1000 }
+};
+#else
 #if CPU_ARCH == ARCH_AVR
 #define NUMTEMPS_13 19
 const short temptable_13[NUMTEMPS_13][2] PROGMEM = {
@@ -2226,6 +2237,8 @@ const short temptable_13[NUMTEMPS_13][2] PROGMEM = {
     {0, 0}, {1365, 8}, {1427, 10 * 8}, {1489, 20 * 8}, {2532, 8 * 230}, {2842, 8 * 300}, {3301, 8 * 400}, {3723, 8 * 500}, {4095, 8 * 600}
 };
 #endif
+#endif
+
 #define NUMTEMPS_14 46
 const short temptable_14[NUMTEMPS_14][2] PROGMEM = {
     {1 * 4, 8 * 938}, {31 * 4, 8 * 314}, {41 * 4, 8 * 290}, {51 * 4, 8 * 272}, {61 * 4, 8 * 258}, {71 * 4, 8 * 247}, {81 * 4, 8 * 237}, {91 * 4, 8 * 229}, {101 * 4, 8 * 221}, {111 * 4, 8 * 215}, {121 * 4, 8 * 209},
@@ -2632,6 +2645,7 @@ void TemperatureController::autotunePID(float temp, uint8_t controllerId, int ma
 
     //Extruder::disableAllHeater(); // switch off all heaters.
     autotuneIndex = controllerId;
+	extruder[controllerId].tempControl.stopDecouple();
     pwm_pos[pwmIndex] = pidMax;
     if(controllerId < NUM_EXTRUDER) {
         extruder[controllerId].coolerPWM = extruder[controllerId].coolerSpeed;

@@ -917,6 +917,7 @@ void EEPROM::init()
         HAL::eprSetByte(EPR_MAGIC_BYTE,EEPROM_MODE); // Make data change permanent
         initalizeUncached();
         storeDataIntoEEPROM(storedcheck != check);
+		HAL::eprSetByte(EPR_RESCUE_MODE, 0);
     }
 #endif
 }
