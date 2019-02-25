@@ -142,7 +142,7 @@ void MCode_251(GCode* com);
 void MCode_280(GCode* com);
 void MCode_281(GCode* com);
 void MCode_190(GCode* com);
-void MCode_290(GCode* com);
+// M290 is defined in PrinterType
 void MCode_300(GCode* com);
 void MCode_302(GCode* com);
 void MCode_303(GCode* com);

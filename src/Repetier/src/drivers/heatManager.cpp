@@ -532,3 +532,259 @@ void HeatManagerPID::autocalibrate(GCode* g) {
     } // loop
     setTargetTemperature(0);
 }
+
+// HeatManagerDynDeadTime
+
+void HeatManagerDynDeadTime::updateLocal(float tempError) {
+    counter = (counter + 1) & 3;
+    float rising = (currentTemperature - lastTemperatures[counter]) * 2.5;
+    lastTemperatures[counter] = currentTemperature;
+    if (rising > 0) {
+        output->set(currentTemperature + deadUp * rising < targetTemperature ? maxPWM : 0);
+    } else {
+        output->set(currentTemperature + deadDown * rising < targetTemperature ? maxPWM : 0);
+    }
+}
+
+void HeatManagerDynDeadTime::setTargetTemperature(float temp) {
+    HeatManager::setTargetTemperature(temp);
+    updateTimings();
+}
+
+void HeatManagerDynDeadTime::updateTimings() {
+    float scale;
+    if (temp1 == temp2) {
+        deadUp = deadUp1;
+        deadDown = deadDown1;
+        return;
+    }
+    scale = (targetTemperature - temp1) / (temp2 - temp1);
+    deadUp = scale * deadUp2 + (1.0 - scale) * deadUp1;
+    deadDown = scale * deadDown2 + (1.0 - scale) * deadDown1;
+    if (deadUp < 1) { // protect against nonsense
+        deadUp = 1;
+    }
+    if (deadDown < 1) {
+        deadDown = 1;
+    }
+    // Com::printFLN(PSTR("DeadUp"), deadUp, 2);
+    // Com::printFLN(PSTR("DeadDown"), deadDown, 2);
+}
+
+void HeatManagerDynDeadTime::resetFromConfig(fast8_t _maxPwm, float decVariance, millis_t decPeriod,
+                                             float _temp1, float _deadUp1, float _deadDown1, float _temp2, float _deadUp2, float _deadDown2) {
+    maxPWM = _maxPwm;
+    decoupleVariance = decVariance;
+    decouplePeriod = decPeriod;
+    temp1 = _temp1;
+    deadUp1 = _deadUp1;
+    deadDown1 = _deadDown1;
+    temp2 = _temp2;
+    deadUp2 = _deadUp2;
+    deadDown2 = _deadDown2;
+    updateTimings();
+}
+
+void HeatManagerDynDeadTime::eepromHandleLocal(int pos) {
+    EEPROM::handleFloat(pos, PSTR("Temp 1 [deg C]"), 0, temp1);
+    EEPROM::handleFloat(pos + 4, PSTR("Up Time 1 [s]"), 2, deadUp1);
+    EEPROM::handleFloat(pos + 8, PSTR("Down Time 1 [s]"), 2, deadDown1);
+    EEPROM::handleFloat(pos + 12, PSTR("Temp 2 [deg C]"), 0, temp2);
+    EEPROM::handleFloat(pos + 16, PSTR("Up Time 2 [s]"), 2, deadUp2);
+    EEPROM::handleFloat(pos + 20, PSTR("Down Time 2 [s]"), 2, deadDown2);
+    updateTimings();
+}
+
+int HeatManagerDynDeadTime::eepromSizeLocal() {
+    return 6 * 4;
+}
+
+void HeatManagerDynDeadTime::showControlMenu(GUIAction action) {
+    GUI::flashToStringLong(GUI::tmpString, PSTR("Set Temp: @°C"), static_cast<int32_t>(lroundf(targetTemperature)));
+    GUI::menuSelectable(action, GUI::tmpString, menuSetTemperature, this, GUIPageType::FIXED_CONTENT);
+}
+
+void menuSetDDPTime1(GUIAction action, void* data) {
+    HeatManagerDynDeadTime* hm = reinterpret_cast<HeatManagerDynDeadTime*>(data);
+    float value = hm->getTemp1();
+    DRAW_FLOAT_P(PSTR("Temp 1:"), Com::tUnitDegCelsius, value, 1);
+    if (GUI::handleFloatValueAction(action, value, 0, 600, 1)) {
+        hm->setTemp1(value);
+    }
+}
+void menuSetDDPTime2(GUIAction action, void* data) {
+    HeatManagerDynDeadTime* hm = reinterpret_cast<HeatManagerDynDeadTime*>(data);
+    float value = hm->getTemp2();
+    DRAW_FLOAT_P(PSTR("Temp 2:"), Com::tUnitDegCelsius, value, 1);
+    if (GUI::handleFloatValueAction(action, value, 0, 600, 1)) {
+        hm->setTemp2(value);
+    }
+}
+void menuSetDDPUp1(GUIAction action, void* data) {
+    HeatManagerDynDeadTime* hm = reinterpret_cast<HeatManagerDynDeadTime*>(data);
+    float value = hm->getDeadUp1();
+    DRAW_FLOAT_P(PSTR("Up Time 1:"), Com::tUnitSeconds, value, 1);
+    if (GUI::handleFloatValueAction(action, value, 0, 600, 0.1)) {
+        hm->setDeadUp1(value);
+    }
+}
+void menuSetDDPUp2(GUIAction action, void* data) {
+    HeatManagerDynDeadTime* hm = reinterpret_cast<HeatManagerDynDeadTime*>(data);
+    float value = hm->getDeadUp2();
+    DRAW_FLOAT_P(PSTR("Up Time 2:"), Com::tUnitSeconds, value, 1);
+    if (GUI::handleFloatValueAction(action, value, 0, 600, 0.1)) {
+        hm->setDeadUp2(value);
+    }
+}
+void menuSetDDPDown1(GUIAction action, void* data) {
+    HeatManagerDynDeadTime* hm = reinterpret_cast<HeatManagerDynDeadTime*>(data);
+    float value = hm->getDeadDown1();
+    DRAW_FLOAT_P(PSTR("Up Time 1:"), Com::tUnitSeconds, value, 1);
+    if (GUI::handleFloatValueAction(action, value, 0, 600, 0.1)) {
+        hm->setDeadDown1(value);
+    }
+}
+void menuSetDDPDown2(GUIAction action, void* data) {
+    HeatManagerDynDeadTime* hm = reinterpret_cast<HeatManagerDynDeadTime*>(data);
+    float value = hm->getDeadDown2();
+    DRAW_FLOAT_P(PSTR("Up Time 2:"), Com::tUnitSeconds, value, 1);
+    if (GUI::handleFloatValueAction(action, value, 0, 600, 0.1)) {
+        hm->setDeadDown2(value);
+    }
+}
+
+void HeatManagerDynDeadTime::showConfigMenu(GUIAction action) {
+    GUI::menuLongP(action, PSTR("Max. PWM:"), maxPWM, menuHMMaxPWM, this, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Temp 1:"), temp1, 0, menuSetDDPTime1, this, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Up Time 1:"), deadUp1, 1, menuSetDDPUp1, this, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Down Time 1:"), deadDown1, 1, menuSetDDPDown1, this, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Temp 2:"), temp2, 0, menuSetDDPTime2, this, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Up Time 2:"), deadUp2, 1, menuSetDDPUp2, this, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Down Time 2:"), deadDown2, 1, menuSetDDPDown2, this, GUIPageType::FIXED_CONTENT);
+}
+
+bool HeatManagerDynDeadTime::detectTimings(float temp, float& up, float& down, float reduce) {
+    fast8_t mode = 0;
+    output->set(0);
+    float avg[4], avgTemp;
+    float last[16]; // increased precision 0.025s interval is measured
+    millis_t lastTimes[16];
+    float raise, referenceRaise = 0;
+    int lastPos = 0;
+    int goodCount = 0;
+    millis_t lastTime = HAL::timeInMilliseconds();
+    for (int i = 0; i < 16; i++) {
+        lastTimes[i] = lastTime - 25;
+        last[i] = currentTemperature;
+        avg[i & 3] = currentTemperature;
+    }
+    millis_t timeReference = lastTime;
+    millis_t timeSecond = HAL::timeInMilliseconds();
+    while (mode != 5) {
+        if (Printer::breakLongCommand) {
+            return false;
+        }
+#if FEATURE_WATCHDOG
+        HAL::pingWatchdog();
+#endif
+        Commands::checkForPeriodicalActions(true); // update heaters etc.
+        GCode::keepAlive(WaitHeater);
+        millis_t time = HAL::timeInMilliseconds();
+        if (time - lastTime >= 25) { // store new
+            setCurrentTemperature(input->get());
+            avgTemp = currentTemperature;
+            for (int j = 0; j < 4; j++) {
+                avgTemp += avg[j];
+            }
+            avgTemp *= 0.2;
+            lastPos = (lastPos + 1) & 15;
+            avg[lastPos & 3] = currentTemperature;
+            lastTime = time;
+            raise = (avgTemp - last[lastPos]) * 1000.0 / static_cast<float>(time - lastTimes[lastPos]);
+            // Com::printF(PSTR("Temp:"), avgTemp, 2);
+            // Com::printFLN(PSTR(" Raise:"), raise, 2);
+            last[lastPos] = avgTemp;
+            lastTimes[lastPos] = lastTime;
+            if (time - timeSecond > 1000) {
+                timeSecond = time;
+                Commands::printTemperatures();
+            }
+        } else {
+            continue;
+        }
+        switch (mode) {
+        case 0: // Wait for minimum 10°C below temp to start testing
+            if (currentTemperature < temp - 10) {
+                mode = 1;
+                output->set(maxPWM);
+            }
+            break;
+        case 1: // wait for temp raising
+            if (currentTemperature >= temp) {
+                mode = 2;
+                referenceRaise = raise * reduce;
+                timeReference = time;
+                output->set(0);
+                goodCount = 0;
+            }
+            break;
+        case 2: // wait for curve flattening
+            if (raise < referenceRaise) {
+                goodCount++;
+                if (goodCount == 4) {
+                    up = static_cast<float>(time - timeReference) * 0.001 - goodCount * 0.025;
+                    Com::printFLN(PSTR("Dead Time Up:"), up, 2);
+                    mode = 3;
+                }
+            } else {
+                goodCount = 0;
+            }
+            break;
+        case 3: // wait for temperature lower temp
+            if (currentTemperature < temp) {
+                mode = 4;
+                referenceRaise = raise * reduce;
+                timeReference = time;
+                output->set(maxPWM);
+                goodCount = 0;
+            }
+            break;
+        case 4: // wait for curve turning up
+            if (raise > referenceRaise) {
+                goodCount++;
+                if (goodCount == 4) {
+                    down = static_cast<float>(time - timeReference) * 0.001 - goodCount * 0.025;
+                    Com::printFLN(PSTR("Dead Time Down:"), down, 2);
+                    mode = 5;
+                }
+            } else {
+                goodCount = 0;
+            }
+            break;
+        }
+    }
+    output->set(0);
+    return true;
+}
+
+void HeatManagerDynDeadTime::autocalibrate(GCode* g) {
+    ENSURE_POWER
+    decoupleMode = DecoupleMode::CALIBRATING;
+    float reduce = g->hasF() ? g->F : 0.6f;
+    if (g->hasA()) {
+        Com::printFLN(PSTR("Detect timings for temp:"), g->A);
+        if (detectTimings(g->A, deadUp1, deadDown1, reduce)) {
+            temp1 = g->A;
+        }
+    }
+
+    if (g->hasB()) {
+        Com::printFLN(PSTR("Detect timings for temp:"), g->B);
+        if (detectTimings(g->B, deadUp2, deadDown2, reduce)) {
+            temp2 = g->B;
+        }
+    }
+    EEPROM::markChanged();
+    updateTimings();
+    setTargetTemperature(0);
+}

@@ -1076,6 +1076,8 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
         f->unblock(); // now protected by state!
         // Com::printFLN(" ff:", (int)f->id);
         return f;
+    } else if (f->action == Motion1Action::MOVE_BABYSTEPS) {
+        return f;
     } else {
         // Com::printFLN(PSTR("fw blocked"));
         return nullptr; // try next time

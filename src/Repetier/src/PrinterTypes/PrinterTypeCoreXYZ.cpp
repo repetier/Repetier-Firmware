@@ -197,4 +197,12 @@ bool PrinterType::canSelectTool(fast8_t toolId) {
     return true;
 }
 
+void PrinterType::M290(GCode* com) {
+    InterruptProtectedBlock lock;
+    if (com->hasZ()) {
+        float z = constrain(com->Z, -2, 2);
+        Motion2::openBabysteps[Z_AXIS] += z * Motion1::resolution[Z_AXIS];
+    }
+}
+
 #endif

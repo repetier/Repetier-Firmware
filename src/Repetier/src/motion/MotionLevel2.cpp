@@ -24,6 +24,8 @@ fast8_t Motion2::nextActId;
 Motion2Buffer* Motion2::act;
 Motion1Buffer* Motion2::actM1;
 int32_t Motion2::lastMotorPos[2][NUM_AXES];
+volatile int16_t Motion2::openBabysteps[NUM_AXES];
+const int16_t Motion2::babystepsPerSegment[NUM_AXES] = BABYSTEPS_PER_BLOCK;
 fast8_t Motion2::lastMotorIdx; // index to last pos
 VelocityProfile* Motion2::velocityProfile = nullptr;
 uint8_t Motion2::velocityProfileIndex;
@@ -40,6 +42,7 @@ void Motion2::init() {
     FOR_ALL_AXES(i) {
         lastMotorPos[0][i] = 0;
         lastMotorPos[1][i] = 0;
+        openBabysteps[i] = 0;
     }
 }
 // Timer gets called at PREPARE_FREQUENCY so it has enough time to
@@ -56,7 +59,42 @@ void Motion2::timer() {
     }
     // Check if we need to start a new M1 buffer
     if (actM1 == nullptr) {
-        if (length == NUM_MOTION2_BUFFER || Motion1::lengthUnprocessed == 0) { // buffers full
+        if (Motion1::lengthUnprocessed == 0) { // no moves stored
+            if (length < NUM_MOTION2_BUFFER) {
+                bool doBabystep = false;
+                int16_t* babysteps = const_cast<int16_t*>(openBabysteps);
+                int32_t doSteps[NUM_AXES];
+                FOR_ALL_AXES(i) {
+                    if (*babysteps) { // babysteps needed
+                        doBabystep = true;
+                        if (*babysteps > 0) {
+                            doSteps[i] = RMath::min(babystepsPerSegment[i], *babysteps);
+                        } else {
+                            doSteps[i] = -RMath::min(babystepsPerSegment[i], -*babysteps);
+                        }
+                        // Com::printFLN(PSTR("BS:"), doSteps[i]);
+                        *babysteps -= doSteps[i];
+                    } else {
+                        doSteps[i] = 0;
+                    }
+                    babysteps++; // next pointer
+                }
+                if (doBabystep) { // create pseudo motion
+                    Motion1Buffer& buf = Motion1::reserve();
+                    buf.flags = FLAG_ACTIVE_SECONDARY;
+                    buf.action = Motion1Action::MOVE_BABYSTEPS;
+                    buf.state = Motion1State::BACKWARD_PLANNED;
+                    buf.maxJoinSpeed = 0;
+                    int32_t* start = reinterpret_cast<int32_t*>(buf.start);
+                    FOR_ALL_AXES(i) {
+                        start[i] = doSteps[i];
+                    }
+                }
+            } else {
+                return;
+            }
+        }
+        if (length == NUM_MOTION2_BUFFER) { // buffers full
             return;
         }
         act = &buffers[nextActId++];
@@ -64,7 +102,6 @@ void Motion2::timer() {
         actM1 = Motion1::forward(act);
         if (actM1 == nullptr) { // nothing to do, undo and return
             nextActId--;
-            //       DEBUG_MSG_FAST("fwfail ");
             return;
         }
         if (nextActId == NUM_MOTION2_BUFFER) {
@@ -190,11 +227,47 @@ void Motion2::timer() {
         }
         m3->errorUpdate = m3->stepsRemaining << 1;
         int* delta = m3->delta;
+        int16_t* babysteps = const_cast<int16_t*>(openBabysteps);
         uint8_t* bits = axisBits;
         FOR_ALL_AXES(i) {
+            *delta = *np - *lp;
+            if (*babysteps) { // babysteps needed
+                if (*delta > 0) {
+                    if (*babysteps > 0) {
+                        int16_t steps = RMath::min(babystepsPerSegment[i], *babysteps);
+                        if (*delta + steps > static_cast<int>(m3->stepsRemaining)) {
+                            steps = m3->stepsRemaining - *delta;
+                        }
+                        *babysteps -= steps;
+                        *delta += steps;
+                    } else {
+                        int16_t steps = RMath::min(babystepsPerSegment[i], -*babysteps);
+                        if (steps - *delta > static_cast<int>(m3->stepsRemaining)) {
+                            steps = m3->stepsRemaining + *delta;
+                        }
+                        *babysteps += steps;
+                        *delta -= steps;
+                    }
+                } else {
+                    if (*babysteps < 0) {
+                        int16_t steps = RMath::min(babystepsPerSegment[i], -*babysteps);
+                        if (steps - *delta > static_cast<int>(m3->stepsRemaining)) {
+                            steps = m3->stepsRemaining + *delta;
+                        }
+                        *babysteps += steps;
+                        *delta -= steps;
+                    } else {
+                        int16_t steps = RMath::min(babystepsPerSegment[i], *babysteps);
+                        if (*delta + steps > static_cast<int>(m3->stepsRemaining)) {
+                            steps = m3->stepsRemaining - *delta;
+                        }
+                        *babysteps -= steps;
+                        *delta += steps;
+                    }
+                }
+            }
             if (i == E_AXIS && (advanceSteps != 0 || actM1->isAdvance())) {
                 // handle advance of E
-                *delta = *np - *lp;
                 int advTarget = velocityProfile->f * actM1->eAdv;
                 int advDiff = advTarget - advanceSteps;
                 /* Com::printF("adv:", advTarget);
@@ -214,7 +287,7 @@ void Motion2::timer() {
                 }
                 advanceSteps = advTarget;
             } else {
-                if ((*delta = ((*np - *lp) << 1)) < 0) {
+                if ((*delta <<= 1) < 0) {
                     *delta = -*delta;
                     m3->usedAxes |= *bits;
                 } else if (*delta != 0) {
@@ -227,6 +300,7 @@ void Motion2::timer() {
             np++;
             lp++;
             bits++;
+            babysteps++;
         } // FOR_ALL_AXES
         lastMotorIdx = nextMotorIdx;
         m3->parentId = act->id;
@@ -342,6 +416,38 @@ void Motion2::timer() {
         if (tool) {
             Motion1Buffer* motion1 = act->motion1;
             m3->secondSpeed = tool->computeIntensity(velocityProfile->f, motion1->isActiveSecondary(), motion1->secondSpeed, motion1->secondSpeedPerMMPS);
+        } else {
+            m3->secondSpeed = 0;
+        }
+        PrinterType::enableMotors(m3->usedAxes);
+        if (m3->last) {
+            actM1 = nullptr; // select next on next interrupt
+        }
+    } else if (actM1->action == Motion1Action::MOVE_BABYSTEPS) {
+        int32_t* start = reinterpret_cast<int32_t*>(actM1->start);
+        m3->last = 1;
+        m3->parentId = act->id;
+        // Fill structures used to update bresenham
+        m3->directions = 0;
+        m3->usedAxes = 0;
+        m3->stepsRemaining = static_cast<int32_t>(static_cast<float>(STEPPER_FREQUENCY) / static_cast<float>(BLOCK_FREQUENCY));
+        m3->errorUpdate = (m3->stepsRemaining << 1);
+        FOR_ALL_AXES(i) {
+            m3->delta[i] = start[i] << 1;
+            if (m3->delta[i] < 0) {
+                m3->delta[i] = -m3->delta[i];
+                m3->usedAxes |= axisBits[i];
+            } else if (m3->delta[i] != 0) {
+                m3->directions |= axisBits[i];
+                m3->usedAxes |= axisBits[i];
+            }
+            m3->error[i] = -(m3->stepsRemaining);
+        }
+        m3->checkEndstops = Motion1::endstopMode != EndstopMode::DISABLED;
+        Tool* tool = Tool::getActiveTool();
+        if (tool) {
+            Motion1Buffer* motion1 = act->motion1;
+            m3->secondSpeed = tool->computeIntensity(0, motion1->isActiveSecondary(), motion1->secondSpeed, motion1->secondSpeedPerMMPS);
         } else {
             m3->secondSpeed = 0;
         }

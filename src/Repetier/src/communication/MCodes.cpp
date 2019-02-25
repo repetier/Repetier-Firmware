@@ -936,15 +936,6 @@ void MCode_281(GCode* com) {
 #endif
 }
 
-void MCode_290(GCode* com) {
-#if FEATURE_BABYSTEPPING
-    if (com->hasZ()) {
-        if (abs(com->Z) < (32700 - labs(Printer::zBabystepsMissing)) * Motion1::resolution[Z_AXIS])
-            Printer::zBabystepsMissing += com->Z * Motion1::resolution[Z_AXIS];
-    }
-#endif
-}
-
 void MCode_300(GCode* com) {
 #if defined(BEEPER_PIN) && BEEPER_PIN >= 0
     int beepS = 1;

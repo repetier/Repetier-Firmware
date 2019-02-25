@@ -68,5 +68,6 @@ public:
     static fast8_t axisForTool(fast8_t toolId);
     static fast8_t getActiveAxis() { return activeAxis; }
     static bool canSelectTool(fast8_t toolId);
+    static void M290(GCode* com);
 };
 #endif

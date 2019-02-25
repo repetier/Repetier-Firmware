@@ -96,10 +96,11 @@ enum Motion1State {
 };
 
 enum Motion1Action {
-    WAIT = 0,      // Add a wait - in the hope a next move follows for bette roptimization
-    WARMUP = 1,    // Preheat laser
-    MOVE = 2,      // A plain move
-    MOVE_STEPS = 3 // Distance in motor steps given
+    WAIT = 0,          // Add a wait - in the hope a next move follows for bette roptimization
+    WARMUP = 1,        // Preheat laser
+    MOVE = 2,          // A plain move
+    MOVE_STEPS = 3,    // Distance in motor steps given
+    MOVE_BABYSTEPS = 4 // Babysteps outside of active moves
 };
 
 enum EndstopMode {

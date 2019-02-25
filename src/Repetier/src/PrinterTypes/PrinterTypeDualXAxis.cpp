@@ -444,4 +444,13 @@ void PrinterType::officialToTransformed(float official[NUM_AXES], float trans[NU
 bool PrinterType::canSelectTool(fast8_t toolId) {
     return toolId == 0 || Motion1::dittoMode == 0;
 }
+
+void PrinterType::M290(GCode* com) {
+    InterruptProtectedBlock lock;
+    if (com->hasZ()) {
+        float z = constrain(com->Z, -2, 2);
+        Motion2::openBabysteps[Z_AXIS] += z * Motion1::resolution[Z_AXIS];
+    }
+}
+
 #endif

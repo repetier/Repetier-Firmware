@@ -321,11 +321,6 @@ void Motion3::timer() {
         InterruptProtectedBlock noInts;
         --length;
         act = nullptr;
-        /* if (--length == 0) {
-            act = nullptr;
-        } else {
-            activateNext();
-        } */
     }
 }
 

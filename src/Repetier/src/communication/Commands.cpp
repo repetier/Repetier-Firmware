@@ -1164,7 +1164,7 @@ void Commands::processMCode(GCode* com) {
         break;
     case 290: // M290 Z<babysteps> - Correct by adding baby steps for Z mm
 #if EMERGENCY_PARSER == 0
-        MCode_290(com);
+        PrinterType::M290(com);
 #endif
         break;
     case 300: // M300

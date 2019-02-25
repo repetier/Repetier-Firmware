@@ -1264,7 +1264,7 @@ void SerialGCodeSource::testEmergency(GCode& gcode) {
         } else if (gcode.M == 112) {
             Commands::emergencyStop();
         } else if (gcode.M == 290) { // speed up babystepping
-            MCode_290(&gcode);
+            PrinterType::M290(&gcode);
         }
     }
 }

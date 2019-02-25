@@ -81,5 +81,6 @@ public:
     static void officialToTransformed(float official[NUM_AXES], float trans[NUM_AXES]);
     static void park(GCode* com) { Motion1::moveToParkPosition(); }
     static bool canSelectTool(fast8_t toolId);
+    static void M290(GCode* com);
 };
 #endif

@@ -18,12 +18,15 @@
 
 #undef HEAT_MANAGER_BANG_BANG
 #undef HEAT_MANAGER_PID
+#undef HEAT_MANAGER_DYN_DEAD_TIME
 
 #if IO_TARGET == 3 // 100ms timer
 
 #define HEAT_MANAGER_BANG_BANG(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, hotPlugable) \
     name.update();
 #define HEAT_MANAGER_PID(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable) \
+    name.update();
+#define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
     name.update();
 
 #elif IO_TARGET == 1 // init
@@ -34,12 +37,17 @@
 #define HEAT_MANAGER_PID(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable) \
     name.init();
 
+#define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
+    name.init();
+
 #elif IO_TARGET == 4
 
 #define HEAT_MANAGER_BANG_BANG(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, hotPlugable) \
     extern HeatManagerBangBang name;
 #define HEAT_MANAGER_PID(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable) \
     extern HeatManagerPID name;
+#define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
+    extern HeatManagerDynDeadTime name;
 
 #elif IO_TARGET == 6
 
@@ -49,16 +57,22 @@
 #define HEAT_MANAGER_PID(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable) \
     HeatManagerPID name(tp, index, &input, &output, maxTemp, maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable);
 
+#define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
+    HeatManagerDynDeadTime name(tp, index, &input, &output, maxTemp, maxPwm, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable);
+
 #elif IO_TARGET == 10 // restore from config
 
 #define HEAT_MANAGER_BANG_BANG(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, hotPlugable) \
     name.resetFromConfig(maxPwm, decVariance, decPeriod);
 #define HEAT_MANAGER_PID(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable) \
     name.resetFromConfig(maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax);
+#define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
+    name.resetFromConfig(maxPwm, decVariance, decPeriod, time1, up1, down1, time2, up2, down2);
 
 #else
 
 #define HEAT_MANAGER_BANG_BANG(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, hotPlugable)
 #define HEAT_MANAGER_PID(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable)
+#define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable)
 
 #endif

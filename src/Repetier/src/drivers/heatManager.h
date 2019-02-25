@@ -214,4 +214,63 @@ public:
     void showConfigMenu(GUIAction action);
 };
 
+/**
+ Dynamic Dead Time 
+
+ The normal dead time assumes same time for heating and cooling. Reality is that these
+ differ. They even differ over temperatures, especially cooling at high temperatures
+ is much faster then for lower temperatures. So what we really need are 2 sets - one for
+ the high temperatures and one for the lower ones, then we can interpolate timings.
+
+ deadUp is time to stop heating until the curve slows down.
+ deadDown is time to start heating until you will see a raise.
+*/
+class HeatManagerDynDeadTime : public HeatManager {
+    float temp1, deadUp1, deadDown1;
+    float temp2, deadUp2, deadDown2;
+    float lastTemperatures[4];
+    fast8_t counter;
+    float deadUp, deadDown;
+
+    bool detectTimings(float temp, float& up, float& down, float reduce);
+
+public:
+    HeatManagerDynDeadTime(char htType, fast8_t _index, IOTemperature* input, PWMHandler* output, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod,
+                           float _temp1, float _deadUp1, float _deadDown1, float _temp2, float _deadUp2, float _deadDown2, bool _hotPluggable)
+        : HeatManager(htType, _index, input,
+                      output, maxTemp, maxPwm, decVariance, decPeriod, _hotPluggable)
+        , temp1(_temp1)
+        , deadUp1(_deadUp1)
+        , deadDown1(_deadDown1)
+        , temp2(_temp2)
+        , deadUp2(_deadUp2)
+        , deadDown2(_deadDown2) {
+        lastTemperatures[0] = lastTemperatures[1] = lastTemperatures[2] = lastTemperatures[3] = 20;
+        counter = 0;
+        updateTimings();
+    }
+    void updateLocal(float tempError);
+    void resetFromConfig(fast8_t _maxPwm, float decVariance, millis_t decPeriod,
+                         float _temp1, float _deadUp1, float _deadDown1, float _temp2, float _deadUp2, float _deadDown2);
+    void eepromHandleLocal(int adr);
+    int eepromSizeLocal();
+    void autocalibrate(GCode* g);
+    void setTargetTemperature(float temp);
+    void updateTimings();
+    float getTemp1() { return temp1; }
+    void setTemp1(float val) { temp1 = val; }
+    float getDeadUp1() { return deadUp1; }
+    void setDeadUp1(float val) { deadUp1 = val; }
+    float getDeadDown1() { return deadDown1; }
+    void setDeadDown1(float val) { deadDown1 = val; }
+    float getTemp2() { return temp2; }
+    void setTemp2(float val) { temp2 = val; }
+    float getDeadUp2() { return deadUp2; }
+    void setDeadUp2(float val) { deadUp2 = val; }
+    float getDeadDown2() { return deadDown2; }
+    void setDeadDown2(float val) { deadDown2 = val; }
+    void showControlMenu(GUIAction action);
+    void showConfigMenu(GUIAction action);
+};
+
 extern HeatManager* heaters[];
