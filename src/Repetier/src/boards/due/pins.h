@@ -104,15 +104,15 @@
 #include "boards/radds.h"
 #endif
 
-#if MOTHERBOARD == 403 || MOTHERBOARD == 404
+#if MOTHERBOARD == MOTHERBOARD_RAMPS_FD_INVERTED_HEATER || MOTHERBOARD == MOTHERBOARD_RAMPS_FD
 #include "boards/ramps-fd.h"
 #endif
 
-#if MOTHERBOARD == 405
+#if MOTHERBOARD == MOTHERBOARD_FELIX
 #include "boards/felix.h"
 #endif
 
-#if MOTHERBOARD == 406
+#if MOTHERBOARD == MOTHERBOARD_BAM_AND_DICE
 #include "boards/bam_and_dice.h"
 #endif
 
@@ -120,7 +120,7 @@
 #include "boards/smart_ramps.h"
 #endif
 
-#if MOTHERBOARD == 409
+#if MOTHERBOARD == MOTHERBOARD_ULTRATRONICS
 #include "boards/ultratronics.h"
 #endif
 
@@ -128,19 +128,19 @@
 #include "boards/due3dom.h"
 #endif
 
-#if MOTHERBOARD == 412
+#if MOTHERBOARD == MOTHERBOARD_STACKER_3D_SUPERBOARD
 #include "boards/stacker_3d_superboard.h"
 #endif
 
-#if MOTHERBOARD == 414
+#if MOTHERBOARD == MOTHERBOARD_RURAMPS4D
 #include "boards/ruramps4d.h"
 #endif
 
-#if MOTHERBOARD == 416
+#if MOTHERBOARD == MOTHERBOARD_SHASTA
 #include "boards/shasta.h"
 #endif
 
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || MOTHERBOARD == 502
+#if MOTHERBOARD == MOTHERBOARD_ALLIGATOR_REV1 || MOTHERBOARD == MOTHERBOARD_ALLIGATOR_REV2 || MOTHERBOARD == MOTHERBOARD_ALLIGATOR_REV3
 #include "boards/alligator.h"
 #endif
 

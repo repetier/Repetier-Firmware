@@ -284,16 +284,9 @@ public:
 #if DRIVE_SYSTEM != DELTA || defined(DOXYGEN)
     static int32_t zCorrectionStepsIncluded;
 #endif
-#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM || defined(DOXYGEN)
-    static int32_t stepsRemainingAtZHit;
-#endif
 #if FAN_THERMO_PIN > -1 || defined(DOXYGEN)
     static float thermoMinTemp;
     static float thermoMaxTemp;
-#endif
-#if FEATURE_BABYSTEPPING || defined(DOXYGEN)
-    static int16_t zBabystepsMissing;
-    static int16_t zBabysteps;
 #endif
     static float feedrate;               ///< Last requested feedrate.
     static int feedrateMultiply;         ///< Multiplier for feedrate in percent (factor 1 = 100)
@@ -648,14 +641,6 @@ public:
 
 #if MAX_HARDWARE_ENDSTOP_Z || defined(DOXYGEN)
     static float runZMaxProbe();
-#endif
-#if FEATURE_Z_PROBE || defined(DOXYGEN)
-    static bool startProbing(bool runScript, bool enforceStartHeight = true);
-    static void finishProbing();
-    static float runZProbe(bool first, bool last, uint8_t repeat = Z_PROBE_REPETITIONS, bool runStartScript = true, bool enforceStartHeight = true);
-    static void measureZProbeHeight(float curHeight);
-    static void waitForZProbeStart();
-    static float bendingCorrectionAt(float x, float y);
 #endif
     static void zBabystep();
 

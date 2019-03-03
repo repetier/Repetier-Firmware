@@ -42,7 +42,8 @@ IO_TEMPERATURE_TABLE(name,analog,table)
 #undef IO_TEMP_TABLE_NTC
 #undef IO_TEMP_TABLE_PTC
 #undef IO_TEMPERATURE_TABLE
-#undef IO_TEMPERATURE_MAX31855_SW_SPI
+#undef IO_TEMPERATURE_MAX31855
+#undef IO_TEMPERATURE_MAX6675
 #undef IO_HOTTEST_OF_2
 #undef IO_COOLEST_OF_2
 
@@ -51,12 +52,8 @@ IO_TEMPERATURE_TABLE(name,analog,table)
 #define IO_TEMP_TABLE_NTC(name, dataname)
 #define IO_TEMP_TABLE_PTC(name, dataname)
 #define IO_TEMPERATURE_TABLE(name, analog, table)
-#define IO_TEMPERATURE_MAX31855_SW_SPI(name, csPin, clkPin, dataPin) \
-    SET_OUTPUT(csPin) \
-    SET_OUTPUT(clkPin) \
-    SET_INPUT(dataPin) \
-    WRITE(csPin, 1) \
-    WRITE(clkPin, 0)
+#define IO_TEMPERATURE_MAX31855(name, spiDriver)
+#define IO_TEMPERATURE_MAX6675(name, spiDriver)
 
 #define IO_HOTTEST_OF_2(name, temp1, temp2)
 #define IO_COOLEST_OF_2(name, temp1, temp2)
@@ -103,23 +100,16 @@ public:
     }; \
     extern name##Class name;
 
-#define IO_TEMPERATURE_MAX31855_SW_SPI(name, csPin, clkPin, dataPin) \
+// https://datasheets.maximintegrated.com/en/ds/MAX31855.pdf
+#define IO_TEMPERATURE_MAX31855(name, spiDriver) \
     class name##Class : public IOTemperature { \
         int8_t errors; \
         float temp; \
         int32_t getData() { \
-            uint32_t data = 0; \
-            WRITE(clkPin, 0); \
-            WRITE(csPin, 0); \
+            spiDriver.begin(); \
             HAL::delayMicroseconds(1); \
-            for (fast8_t i = 0; i < 32; i++) { \
-                WRITE(clkPin, 1); \
-                HAL::delayMicroseconds(1); \
-                data += data + (HAL::digitalRead(inPin) ? 1 : 0); \
-                WRITE(clkPin, 0); \
-                HAL::delayMicroseconds(1); \
-            } \
-            WRITE(csPin, 1); \
+            uint32_t data = spiDriver.transfer32(0); \
+            spiDriver.end(); \
             return data; \
         } \
 \
@@ -128,7 +118,7 @@ public:
             : errors(0) \
             , temp(0) {} \
         float get() { \
-            if (errors == 0) { \
+            if (errors >= 0) { \
                 isDefect(); \
             } \
             if (errors < 0) { \
@@ -139,7 +129,7 @@ public:
         bool isDefect() { \
             uint32_t data = getData(); \
             if (data & 65536) { \
-                if (errors > 5) { \
+                if (errors > 1) { \
                     return true; \
                 } \
                 errors++; \
@@ -155,6 +145,55 @@ public:
                 errors = -1; \
                 temp = static_cast<float>(temperature) * 0.25f; \
             } \
+            return false; \
+        } \
+    }; \
+    extern name##Class name;
+
+#define IO_TEMPERATURE_MAX6675(name, spiDriver) \
+    class name##Class : public IOTemperature { \
+        int8_t errors; \
+        millis_t lastRun; \
+        float temp; \
+        int16_t getData() { \
+            spiDriver.begin(); \
+            HAL::delayMicroseconds(1); \
+            uint16_t data = spiDriver.transfer16(0); \
+            spiDriver.end(); \
+            return data; \
+        } \
+\
+    public: \
+        name##Class() \
+            : errors(0) \
+            , lastRun(0) \
+            , temp(0) {} \
+        float get() { \
+            if (errors == 0) { \
+                isDefect(); \
+            } \
+            if (errors < 0) { \
+                errors = 0; \
+            } \
+            return temp; \
+        } \
+        bool isDefect() { \
+            if (HAL::timeInMilliseconds() - lastRun < 230) { \
+                return errors > 1; \
+            } \
+            uint16_t data = getData(); \
+            if (data & 4) { \
+                if (errors > 1) { \
+                    return true; \
+                } \
+                errors++; \
+                return false; \
+            } else { \
+                data = data >> 3; \
+                errors = -1; \
+                temp = static_cast<float>(data & 4095) * 0.25f; \
+            } \
+            return false; \
         } \
     }; \
     extern name##Class name;
@@ -192,7 +231,10 @@ public:
 #define IO_TEMPERATURE_TABLE(name, analog, table) \
     name##Class name;
 
-#define IO_TEMPERATURE_MAX31855_SW_SPI(name, csPin, clkPin, dataPin) \
+#define IO_TEMPERATURE_MAX31855(name, spiDriver) \
+    name##Class name;
+
+#define IO_TEMPERATURE_MAX6675(name, spiDriver) \
     name##Class name;
 
 #define IO_HOTTEST_OF_2(name, temp1, temp2) \
@@ -206,7 +248,8 @@ public:
 #define IO_TEMP_TABLE_NTC(name, dataname)
 #define IO_TEMP_TABLE_PTC(name, dataname)
 #define IO_TEMPERATURE_TABLE(name, analog, table)
-#define IO_TEMPERATURE_MAX31855_SW_SPI(name, csPin, clkPin, dataPin)
+#define IO_TEMPERATURE_MAX31855(name, spiDriver)
+#define IO_TEMPERATURE_MAX6675(name, spiDriver)
 #define IO_HOTTEST_OF_2(name, temp1, temp2)
 #define IO_COOLEST_OF_2(name, temp1, temp2)
 

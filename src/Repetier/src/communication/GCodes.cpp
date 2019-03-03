@@ -124,6 +124,7 @@ void GCode_28(GCode* com) {
 }
 
 void GCode_29(GCode* com) {
+    /*
 #if FEATURE_Z_PROBE
     // Printer::prepareForProbing();
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
@@ -219,6 +220,7 @@ void GCode_29(GCode* com) {
 #endif
 #endif
 #endif
+*/
 }
 
 void GCode_30(GCode* com) {

@@ -59,27 +59,30 @@ IO_OUTPUT_INVERTED(IOE2Enable, ORIG_E1_ENABLE_PIN)
 
 // Controller input pins
 
-#if UI_ENCODER_CLICK >= 0
+
+// Controller input pins
+
+#if defined(UI_ENCODER_CLICK) && UI_ENCODER_CLICK >= 0
 IO_INPUT_INVERTED_PULLUP(ControllerClick, UI_ENCODER_CLICK)
 #else
 IO_INPUT_DUMMY(ControllerClick, false)
 #endif
-#if UI_ENCODER_A >= 0
+#if defined(UI_ENCODER_A) && UI_ENCODER_A >= 0
 IO_INPUT_INVERTED_PULLUP(ControllerEncA, UI_ENCODER_A)
 #else
 IO_INPUT_DUMMY(ControllerEncA, false)
 #endif
-#if UI_ENCODER_B >= 0
+#if defined(UI_ENCODER_B) && UI_ENCODER_B >= 0
 IO_INPUT_INVERTED_PULLUP(ControllerEncB, UI_ENCODER_B)
 #else
 IO_INPUT_DUMMY(ControllerEncB, false)
 #endif
-#if UI_BACK_PIN >= 0
+#if defined(UI_BACK_PIN) && UI_BACK_PIN >= 0
 IO_INPUT_PULLUP(ControllerBack, UI_BACK_PIN)
 #else
 IO_INPUT_DUMMY(ControllerBack, false)
 #endif
-#if UI_RESET_PIN >= 0
+#if defined(UI_RESET_PIN) && UI_RESET_PIN >= 0
 IO_INPUT_PULLUP(ControllerReset, UI_RESET_PIN)
 #else
 IO_INPUT_DUMMY(ControllerReset, false)
@@ -170,9 +173,9 @@ STEPPER_SIMPLE(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, endstopNone, endstopNone)
 // control temperature. Higher level classes take these as input
 // and simple heater like a heated bed use it directly.
 
-HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 70, 255, 10, 300000, 131.1, 3.76, 1143, 80, 255, false)
-HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255, 20, 20000, 18.3, 2.13, 39, 40, 235, false)
-HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 20, 20000, 18.3, 2.13, 39, 40, 235, false)
+HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 70, 255, 1000, 10, 300000, 131.1, 3.76, 1143, 80, 255, false)
+HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255, 1000, 20, 20000, 18.3, 2.13, 39, 40, 235, false)
+HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 1000, 20, 20000, 18.3, 2.13, 39, 40, 235, false)
 COOLER_MANAGER_SENSOR(ExtruderCooler, TempHottestExtruder, CoolerFan, 40, 100, 200, 255)
 
 // Coolers are stand alone functions that allow it to control

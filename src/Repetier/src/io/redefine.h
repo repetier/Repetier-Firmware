@@ -50,6 +50,7 @@ enum class GUIAction;
 
 #include "io_input.h"
 #include "io_output.h"
+#include "io_spi.h"
 #include "io_pwm.h"
 #include "io_servos.h"
 #include "io_analog.h"

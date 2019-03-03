@@ -313,23 +313,6 @@ FSTRINGVALUE(Com::tWait, WAITING_IDENTIFIER)
 #endif // WAITING_IDENTIFIER
 FSTRINGVALUE(Com::tNoEEPROMSupport, "No EEPROM support compiled.\r\n")
 FSTRINGVALUE(Com::tZProbeOffsetZ, "Coating thickness [mm]")
-#if FEATURE_Z_PROBE
-FSTRINGVALUE(Com::tZProbeHeight, "Z-probe height [mm]")
-FSTRINGVALUE(Com::tZProbeBedDitance, "Max. z-probe - bed dist. [mm]")
-FSTRINGVALUE(Com::tZProbeOffsetX, "Z-probe offset x [mm]")
-FSTRINGVALUE(Com::tZProbeOffsetY, "Z-probe offset y [mm]")
-FSTRINGVALUE(Com::tZProbeSpeed, "Z-probe speed [mm/s]")
-FSTRINGVALUE(Com::tZProbeSpeedXY, "Z-probe x-y-speed [mm/s]")
-FSTRINGVALUE(Com::tZProbeX1, "Z-probe X1 [mm]")
-FSTRINGVALUE(Com::tZProbeY1, "Z-probe Y1 [mm]")
-FSTRINGVALUE(Com::tZProbeX2, "Z-probe X2 [mm]")
-FSTRINGVALUE(Com::tZProbeY2, "Z-probe Y2 [mm]")
-FSTRINGVALUE(Com::tZProbeX3, "Z-probe X3 [mm]")
-FSTRINGVALUE(Com::tZProbeY3, "Z-probe Y3 [mm]")
-FSTRINGVALUE(Com::zZProbeBendingCorA, "Z-probe bending correction A [mm]")
-FSTRINGVALUE(Com::zZProbeBendingCorB, "Z-probe bending correction B [mm]")
-FSTRINGVALUE(Com::zZProbeBendingCorC, "Z-probe bending correction C [mm]")
-#endif
 #if FEATURE_AXISCOMP
 FSTRINGVALUE(Com::tAxisCompTanXY, "tanXY Axis Compensation")
 FSTRINGVALUE(Com::tAxisCompTanYZ, "tanYZ Axis Compensation")

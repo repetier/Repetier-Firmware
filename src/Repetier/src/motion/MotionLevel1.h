@@ -309,7 +309,7 @@ public:
     static void correctBumpOffset(); // Adjust position to offset
     static PGM_P getAxisString(fast8_t axis);
     static EndstopDriver& endstopFoxAxisDir(fast8_t axis, bool maxDir);
-#if FEATURE_AUTOLEVEL || defined(DOXYGEN)
+#if LEVELING_METHOD > 0 || defined(DOXYGEN)
     static void resetTransformationMatrix(bool silent);
     //static void buildTransformationMatrix(float h1,float h2,float h3);
     static void buildTransformationMatrix(Plane& plane);

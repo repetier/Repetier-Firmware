@@ -164,6 +164,9 @@ void HAL::setupTimer() {
     SERVO_TIMER->TC_CHANNEL[SERVO_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
     NVIC_EnableIRQ((IRQn_Type)SERVO_TIMER_IRQ);
 #endif
+#ifndef NO_SPI
+    HAL::spiInit();
+#endif
 }
 
 struct PWMPin {
@@ -1087,6 +1090,73 @@ void BEEPER_TIMER_VECTOR() {
     WRITE_VAR(tone_pin, toggle);
     toggle = !toggle;
 }
+
+void HAL::spiInit() {
+    SPI.begin();
+}
+
+#ifdef USE_ARDUINO_SPI_LIB
+void HAL::spiBegin(uint32_t clock, uint8_t mode, uint8_t msbfirst) {
+    SPI.beginTransaction(SPISettings(clock, msbfirst ? MSBFIRST : LSBFIRST, mode));
+}
+uint8_t HAL::spiTransfer(uint8_t data) {
+    return SPI.transfer(data);
+}
+void HAL::spiEnd() {
+    SPI.endTransaction();
+}
+#else
+static bool spiMsbfirst;
+static int spiMode = 0;
+void HAL::spiBegin(uint32_t clock, uint8_t mode, uint8_t msbfirst) {
+    spiMsbfirst = msbfirst;
+    uint8_t div;
+    if (clock < (F_CPU / 255)) {
+        div = 255;
+    } else if (clock >= (F_CPU / 2)) {
+        div = 2;
+    } else {
+        div = (F_CPU / (clock + 1)) + 1;
+    }
+    switch (mode) {
+    case 0:
+        spiMode = 2;
+        break;
+    case 1:
+        spiMode = 0;
+        break;
+    case 2:
+        spiMode = 3;
+        break;
+    case 3:
+        spiMode = 1;
+        break;
+    }
+    uint32_t config = (spiMode & 3) | SPI_CSR_CSAAT | SPI_CSR_SCBR(div) | SPI_CSR_DLYBCT(1);
+    SPI_ConfigureNPCS(SPI_INTERFACE, SPI_INTERFACE_ID, config);
+}
+uint8_t HAL::spiTransfer(uint8_t data) {
+    if (!spiMsbfirst)
+        data = __REV(__RBIT(data));
+    uint32_t d = data | SPI_PCS(SPI_INTERFACE_ID);
+    if (spiMode == SPI_LAST)
+        d |= SPI_TDR_LASTXFER;
+
+    // SPI_Write(spi, _channel, _data);
+    while ((SPI_INTERFACE->SPI_SR & SPI_SR_TDRE) == 0)
+        ;
+    SPI_INTERFACE->SPI_TDR = d;
+
+    // return SPI_Read(spi);
+    while ((SPI_INTERFACE->SPI_SR & SPI_SR_RDRF) == 0)
+        ;
+    d = SPI_INTERFACE->SPI_RDR;
+    // Reverse bit order
+    if (!spiMsbfirst)
+        d = __REV(__RBIT(d));
+    return d & 0xFF;
+}
+#endif
 
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
 RFDoubleSerial::RFDoubleSerial() {

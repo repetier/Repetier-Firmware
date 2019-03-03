@@ -45,18 +45,15 @@ Early stage version for Stacke X2 printer - use with care
 #define NUM_EXTRUDER 2
 #define NUM_SERVOS 0
 #define NUM_TOOLS 2
-#define MOTHERBOARD 412 // Stacker 3d Superboard
+#define MOTHERBOARD MOTHERBOARD_STACKER_3D_SUPERBOARD
 #define EEPROM_MODE 2
 #define RFSERIAL Serial
 #define BLUETOOTH_SERIAL -1
 #define BLUETOOTH_BAUD 250000
 #define WAITING_IDENTIFIER "wait"
 #define JSON_OUTPUT 1
-#define FEATURE_SERVO 1
 #define FEATURE_WATCHDOG 1
-#define FEATURE_Z_PROBE 0
 #define FEATURE_RETRACTION 1
-#define USE_ADVANCE 1
 #define NUM_AXES 5                   // X,Y,Z and E for extruder A,B,C would be 5,6,7
 #define STEPPER_FREQUENCY 100000     // Maximum stepper frequency.
 #define PREPARE_FREQUENCY 2000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
@@ -488,9 +485,6 @@ It also can add a delay to wait for spindle to run on full speed.
 #define BED_MOTOR_2_Y 45
 #define BED_MOTOR_3_X 137
 #define BED_MOTOR_3_Y 210
-#define BENDING_CORRECTION_A 0
-#define BENDING_CORRECTION_B 0
-#define BENDING_CORRECTION_C 0
 #define FEATURE_AXISCOMP 0
 #define AXISCOMP_TANXY 0
 #define AXISCOMP_TANYZ 0

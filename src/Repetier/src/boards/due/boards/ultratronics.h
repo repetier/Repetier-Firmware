@@ -18,7 +18,9 @@
 
 // Ultratronics Board  (experimental, use with care probably even not working!)
 // http://www.reprapworld.com
-#if MOTHERBOARD == 409
+// https://reprapworld.com/documentation/datasheet_ultratronics10_05.pdf
+
+#if MOTHERBOARD == MOTHERBOARD_ULTRATRONICS
 #ifndef __SAM3X8E__
 #error Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu.
 #endif
@@ -88,7 +90,7 @@
 #define ORIG_E3_DIR_PIN 38
 #define ORIG_E3_ENABLE_PIN 40
 
-#define SDSUPPORT -1
+#define SDSUPPORT 1
 #define SDPOWER -1
 // 4,10,52 if using HW SPI.
 #define SDSS 59
@@ -159,4 +161,31 @@
     SET_OUTPUT(SDSS); \
     WRITE(SDSS, HIGH)
 
+#endif
+
+#ifndef CUSTOM_CONTROLLER_PINS
+#if FEATURE_CONTROLLER == CONTROLLER_REPRAPWORLD_GLCD
+#undef BEEPER_PIN
+#define BEEPER_PIN 27
+#define UI_DISPLAY_RS_PIN 62
+#define UI_DISPLAY_ENABLE_PIN 75
+#define UI_DISPLAY_D4_PIN 76
+#define UI_DISPLAY_D5_PIN -1
+#define UI_DISPLAY_D6_PIN -1
+#define UI_DISPLAY_D7_PIN -1
+#define UI_ENCODER_A 20
+#define UI_ENCODER_B 21
+#define UI_ENCODER_CLICK 64
+#define UI_RESET_PIN -1
+#define UI_BACK_PIN -1
+#undef ORIG_SDCARDDETECT
+#define ORIG_SDCARDDETECT 60
+#undef SDCARDDETECTINVERTED
+#define SDCARDDETECTINVERTED 0
+
+#elif FEATURE_CONTROLLER > 1
+
+#error There is no pin definition for the selected display. Please add it to boards/due/ultratronics.h to use it!
+
+#endif
 #endif

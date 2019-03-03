@@ -180,6 +180,7 @@ static const u8x8_display_info_t u8x8_st7920_192x32_display_info = {
     /* pixel_height = */ 32
 };
 
+#ifdef JHGJKGHJK
 static const u8x8_display_info_t u8x8_st7920_128x64_display_info = {
     /* chip_enable_level = */ 1,
     /* chip_disable_level = */ 0,
@@ -192,7 +193,7 @@ static const u8x8_display_info_t u8x8_st7920_128x64_display_info = {
     /* sck_pulse_width_ns = */ 140, /* datasheet ST7920 */
     /* sck_clock_hz = */ 1000000UL, /* since Arduino 1.6.0, the SPI bus speed in Hz. Should be  1000000000/sck_pulse_width_ns */
                                     /* ST7920+Due work with 1MHz but not with 2MHz, ST7920+Uno works with 2MHz */
-    /* spi_mode = */ 3,             /* active high, rising edge, 18 Aug 16: changed from 1 to 3 which works for 101  */
+    /* spi_mode = */ 1,             /* active high, rising edge, 18 Aug 16: changed from 1 to 3 which works for 101  */
                                     /* in theory mode 3 should be correct  */
     /* i2c_bus_clock_100kHz = */ 4,
     /* data_setup_time_ns = */ 30,
@@ -204,6 +205,32 @@ static const u8x8_display_info_t u8x8_st7920_128x64_display_info = {
     /* pixel_width = */ 128,
     /* pixel_height = */ 64
 };
+#else
+static const u8x8_display_info_t u8x8_st7920_128x64_display_info = {
+    /* chip_enable_level = */ 1,
+    /* chip_disable_level = */ 0,
+
+    /* post_chip_enable_wait_ns = */ 8,
+    /* pre_chip_disable_wait_ns = */ 8,
+    /* reset_pulse_width_ms = */ 2,
+    /* post_reset_wait_ms = */ 6,
+    /* sda_setup_time_ns = */ 20,
+    /* sck_pulse_width_ns = */ 140, /* datasheet ST7920 */
+    /* sck_clock_hz = */ 100000UL,  /* since Arduino 1.6.0, the SPI bus speed in Hz. Should be  1000000000/sck_pulse_width_ns */
+                                    /* ST7920+Due work with 1MHz but not with 2MHz, ST7920+Uno works with 2MHz */
+    /* spi_mode = */ 1,             /* active high, rising edge, 18 Aug 16: changed from 1 to 3 which works for 101  */
+                                    /* in theory mode 3 should be correct  */
+    /* i2c_bus_clock_100kHz = */ 4,
+    /* data_setup_time_ns = */ 60,
+    /* write_pulse_width_ns = */ 80,
+    /* tile_width = */ 16,
+    /* tile_hight = */ 8,
+    /* default_x_offset = */ 0,
+    /* flipmode_x_offset = */ 0,
+    /* pixel_width = */ 128,
+    /* pixel_height = */ 64
+};
+#endif
 
 uint8_t u8x8_d_st7920_192x32(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_ptr) {
     switch (msg) {

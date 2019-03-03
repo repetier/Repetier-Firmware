@@ -51,20 +51,22 @@ protected:
     uint8_t maxPWM;
     float decoupleVariance;
     millis_t decouplePeriod;
+    DecoupleMode decoupleMode; // 0 = no heating, 1
+    fast8_t errorCount;
+    char heaterType;     // E = Extruder, B = bed, C = Chamber, O = Other
+    fast8_t index;       // Type index for name reporting
+    bool hotPluggable;   // If true will not panic when sensor is defect, will only disable this heater
+    millis_t sampleTime; // Sample time for updates in ms
 
     millis_t lastDecoupleTest; ///< Last time of decoupling sensor-heater test
     float lastDecoupleTemp;    ///< Temperature on last test
     millis_t preheatStartTime; ///< Time (in milliseconds) when heat up was started
     int16_t preheatTemperature;
-    DecoupleMode decoupleMode; // 0 = no heating, 1
-    fast8_t errorCount;
     fast8_t wasOutsideRange; // 1 = if was above range, 2 = was below range
-    char heaterType;         // E = Extruder, B = bed, C = Chamber, O = Other
-    fast8_t index;           // Type index for name reporting
-    bool hotPluggable;       // If true will not panic when sensor is defect, will only disable this heater
     uint16_t eepromPos;      // Start position in eeprom
+    millis_t lastUpdate;     // Time of last sampling
 public:
-    HeatManager(char htType, fast8_t _index, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod, bool _hotPluggable);
+    HeatManager(char htType, fast8_t _index, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, millis_t _sampleTime, float decVariance, millis_t decPeriod, bool _hotPluggable);
     void init();
     virtual void setTargetTemperature(float temp) {
         if (temp > maxTemperature) {
@@ -121,6 +123,9 @@ public:
     virtual float getI() { return 0; }
     virtual float getD() { return 0; }
     virtual void setPID(float p, float i, float d) {}
+    inline millis_t getSampleTime() {
+        return sampleTime;
+    }
 
     virtual void updateLocal(float tempError) = 0;
     void eepromHandle();
@@ -167,26 +172,23 @@ public:
 
 class HeatManagerPID : public HeatManager {
     float P, I, D;
-    float IMax, IMin;
     float IState;
     float driveMin, driveMax;
     float lastTemperature;
-    float actTemperature;
-    fast8_t counter;
+    float ki, kd;
 
 public:
-    HeatManagerPID(char htType, fast8_t _index, IOTemperature* input, PWMHandler* output, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod,
+    HeatManagerPID(char htType, fast8_t _index, IOTemperature* input, PWMHandler* output, float maxTemp, fast8_t maxPwm, millis_t _sampleTime, float decVariance, millis_t decPeriod,
                    float p, float i, float d, float _driveMin, float _driveMax, bool _hotPluggable)
         : HeatManager(htType, _index, input,
-                      output, maxTemp, maxPwm, decVariance, decPeriod, _hotPluggable)
+                      output, maxTemp, maxPwm, _sampleTime, decVariance, decPeriod, _hotPluggable)
         , P(p)
         , I(i)
         , D(d)
         , driveMin(_driveMin)
         , driveMax(_driveMax) {
         IState = 0;
-        actTemperature = lastTemperature = 20;
-        counter = 0;
+        lastTemperature = 20;
         updateDerived();
     }
     void updateLocal(float tempError);
@@ -235,10 +237,10 @@ class HeatManagerDynDeadTime : public HeatManager {
     bool detectTimings(float temp, float& up, float& down, float reduce);
 
 public:
-    HeatManagerDynDeadTime(char htType, fast8_t _index, IOTemperature* input, PWMHandler* output, float maxTemp, fast8_t maxPwm, float decVariance, millis_t decPeriod,
+    HeatManagerDynDeadTime(char htType, fast8_t _index, IOTemperature* input, PWMHandler* output, float maxTemp, fast8_t maxPwm, millis_t _sampleTime, float decVariance, millis_t decPeriod,
                            float _temp1, float _deadUp1, float _deadDown1, float _temp2, float _deadUp2, float _deadDown2, bool _hotPluggable)
         : HeatManager(htType, _index, input,
-                      output, maxTemp, maxPwm, decVariance, decPeriod, _hotPluggable)
+                      output, maxTemp, maxPwm, _sampleTime, decVariance, decPeriod, _hotPluggable)
         , temp1(_temp1)
         , deadUp1(_deadUp1)
         , deadDown1(_deadDown1)

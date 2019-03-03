@@ -25,10 +25,6 @@ uint8_t Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
 #if DRIVE_SYSTEM != DELTA
 int32_t Printer::zCorrectionStepsIncluded = 0;
 #endif
-#if FEATURE_BABYSTEPPING
-int16_t Printer::zBabystepsMissing = 0;
-int16_t Printer::zBabysteps = 0;
-#endif
 uint8_t Printer::relativeCoordinateMode = false;         ///< Determines absolute (false) or relative Coordinates (true).
 uint8_t Printer::relativeExtruderCoordinateMode = false; ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
@@ -49,12 +45,9 @@ float Printer::progress = 0;
 millis_t Printer::lastTempReport = 0;
 int32_t Printer::printingTime = 0;
 
-uint32_t Printer::interval = 30000; ///< Last step duration in ticks.
-uint32_t Printer::timer;            ///< used for acceleration/deceleration timing
-uint32_t Printer::stepNumber;       ///< Step number in current move.
-#if FEATURE_Z_PROBE || MAX_HARDWARE_ENDSTOP_Z || NONLINEAR_SYSTEM
-int32_t Printer::stepsRemainingAtZHit;
-#endif
+uint32_t Printer::interval = 30000;      ///< Last step duration in ticks.
+uint32_t Printer::timer;                 ///< used for acceleration/deceleration timing
+uint32_t Printer::stepNumber;            ///< Step number in current move.
 float Printer::feedrate;                 ///< Last requested feedrate.
 int Printer::feedrateMultiply;           ///< Multiplier for feedrate in percent (factor 1 = 100)
 unsigned int Printer::extrudeMultiply;   ///< Flow multiplier in percent (factor 1 = 100)
@@ -332,11 +325,13 @@ void Printer::setOrigin(float xOff, float yOff, float zOff) {
 
 void Printer::setPrinting(uint8_t b) {
     if (!!isPrinting != !!b) { // Start with progress on print start
+#if FEATURE_CONTROLLER != NO_CONTROLLER
         if (b) {
             GUI::callbacks[0] = printProgress;
         } else {
             GUI::callbacks[0] = startScreen;
         }
+#endif
     }
     flag3 = (b ? flag3 | PRINTER_FLAG3_PRINTING : flag3 & ~PRINTER_FLAG3_PRINTING);
     Printer::setMenuMode(MENU_MODE_PRINTING, b);
@@ -755,8 +750,8 @@ void Printer::showConfiguration() {
     Com::config(PSTR("SupportG10G11:"), FEATURE_RETRACTION);
     Com::config(PSTR("SupportLocalFilamentchange:"), FEATURE_RETRACTION);
     Com::config(PSTR("CaseLights:"), CASE_LIGHTS_PIN > -1);
-    Com::config(PSTR("ZProbe:"), FEATURE_Z_PROBE);
-    Com::config(PSTR("Autolevel:"), FEATURE_AUTOLEVEL);
+    Com::config(PSTR("ZProbe:"), Z_PROBE_TYPE > 0 ? 1 : 0);
+    Com::config(PSTR("Autolevel:"), LEVELING_METHOD > 0 ? 1 : 0);
     Com::config(PSTR("EEPROM:"), EEPROM_MODE != 0);
     Com::config(PSTR("PrintlineCache:"), PRINTLINE_CACHE_SIZE);
     Com::config(PSTR("JerkXY:"), Motion1::maxYank[X_AXIS]);

@@ -44,7 +44,7 @@
     SPI1 SPI1_NPCS3 PF2 
 */
 
-#if MOTHERBOARD == 408 || MOTHERBOARD == 413
+#if MOTHERBOARD == MOTHERBOARD_SMARTRAMPS_NO_EEPROM || MOTHERBOARD == MOTHERBOARD_SMARTRAMPS_EEPROM
 #ifndef __SAM3X8E__
 #erro oops !Be sure to have 'due Arduino' selected from the 'tools-> Boards menu'.
 #endif
@@ -105,7 +105,7 @@
 #define E1_PINS ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN,
 
 #define TWI_CLOCK_FREQ 100000
-#if MOTHERBOARD == 408
+#if MOTHERBOARD == MOTHERBOARD_SMARTRAMPS_NO_EEPROM
 //	20 or 70
 #define SDA_PIN -1
 // 21 or 71

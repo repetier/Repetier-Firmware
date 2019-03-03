@@ -38,6 +38,8 @@
 #ifndef HAL_H
 #define HAL_H
 
+#define USE_ARDUINO_SPI_LIB
+
 #include <inttypes.h>
 #include "pins.h"
 #include "Print.h"
@@ -695,12 +697,21 @@ public:
     static int getFreeRam();
     static void resetHardware();
 
+    static void spiInit(); // only called once to initialize for spi usage
+    static void spiBegin(uint32_t clock, uint8_t mode, uint8_t msbfirst);
+    static uint8_t spiTransfer(uint8_t);
+#ifndef USE_ARDUINO_SPI_LIB
+    static void spiEnd() {}
+#else
+    static void spiEnd();
+#endif
     // SPI related functions
 #ifdef OLD_SPI
 #ifdef DUE_SOFTWARE_SPI
     // bitbanging transfer
     // run at ~100KHz (necessary for init)
-    static uint8_t spiTransfer(uint8_t b) // using Mode 0
+    static uint8_t
+    spiTransfer(uint8_t b) // using Mode 0
     {
         for (int bits = 0; bits < 8; bits++) {
             if (b & 0x80) {
@@ -782,7 +793,8 @@ public:
 #else
 
     // hardware SPI
-    static void spiBegin(uint8_t ssPin = 0);
+    static void
+    spiBegin(uint8_t ssPin = 0);
     // spiClock is 0 to 6, relecting AVR clock dividers 2,4,8,16,32,64,128
     // Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
     static void spiInit(uint8_t spiClock);

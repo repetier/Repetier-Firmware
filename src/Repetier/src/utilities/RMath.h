@@ -75,3 +75,29 @@ public:
         return a * a;
     }
 };
+
+class Quadratic1D {
+public:
+    float a, b, c;
+    Quadratic1D(float _a = 0, float _b = 0, float _c = 0)
+        : a(_a)
+        , b(_b)
+        , c(_c) {}
+    inline float y(float x) {
+        return a * x * x + b * x + c;
+    }
+};
+
+/** One dimensional least squre curve 
+  y = a * x^2 + b * x + c
+  based of any number of xy pairs. */
+
+class LeastSquareQuadraticRegression1D {
+    float n, x, x2, x3, x4;
+    float y, xy, x2y;
+
+public:
+    void reset();
+    void add(float px, float py);
+    Quadratic1D getRegression();
+};

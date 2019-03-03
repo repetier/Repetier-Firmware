@@ -510,12 +510,12 @@ void MCode_115(GCode* com) {
 //#else
 //    Com::cap(PSTR("EEPROM:0"));
 //#endif
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
+#if LEVELING_METHOD > 0 && Z_PROBE_TYPE > 0
     Com::cap(PSTR("AUTOLEVEL:1"));
 #else
     Com::cap(PSTR("AUTOLEVEL:0"));
 #endif
-#if FEATURE_Z_PROBE
+#if Z_PROBE_TYPE > 0
     Com::cap(PSTR("Z_PROBE:1"));
 #else
     Com::cap(PSTR("Z_PROBE:0"));
@@ -1231,7 +1231,7 @@ void MCode_669(GCode* com) {
 }
 
 void MCode_890(GCode* com) {
-#if FEATURE_AUTOLEVEL && FEATURE_Z_PROBE
+#if LEVELING_METHOD > 0 && FEATURE_Z_PROBE
     if (com->hasX() && com->hasY()) {
         float c = Printer::bendingCorrectionAt(com->X, com->Y);
         Com::printF(PSTR("Bending at ("), com->X);

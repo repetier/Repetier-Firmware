@@ -81,27 +81,27 @@ IO_INPUT(IOJam2, 33)
 
 // Controller input pins
 
-#if UI_ENCODER_CLICK >= 0
+#if defined(UI_ENCODER_CLICK) && UI_ENCODER_CLICK >= 0
 IO_INPUT_INVERTED_PULLUP(ControllerClick, UI_ENCODER_CLICK)
 #else
 IO_INPUT_DUMMY(ControllerClick, false)
 #endif
-#if UI_ENCODER_A >= 0
+#if defined(UI_ENCODER_A) && UI_ENCODER_A >= 0
 IO_INPUT_INVERTED_PULLUP(ControllerEncA, UI_ENCODER_A)
 #else
 IO_INPUT_DUMMY(ControllerEncA, false)
 #endif
-#if UI_ENCODER_B >= 0
+#if defined(UI_ENCODER_B) && UI_ENCODER_B >= 0
 IO_INPUT_INVERTED_PULLUP(ControllerEncB, UI_ENCODER_B)
 #else
 IO_INPUT_DUMMY(ControllerEncB, false)
 #endif
-#if UI_BACK_PIN >= 0
+#if defined(UI_BACK_PIN) && UI_BACK_PIN >= 0
 IO_INPUT_PULLUP(ControllerBack, UI_BACK_PIN)
 #else
 IO_INPUT_DUMMY(ControllerBack, false)
 #endif
-#if UI_RESET_PIN >= 0
+#if defined(UI_RESET_PIN) && UI_RESET_PIN >= 0
 IO_INPUT_PULLUP(ControllerReset, UI_RESET_PIN)
 #else
 IO_INPUT_DUMMY(ControllerReset, false)
@@ -182,12 +182,12 @@ SERVO_ANALOG(Servo1, 0, Servo1Pin, 500, 2500, 1050)
 // control temperature. Higher level classes take these as input
 // and simple heater like a heated bed use it directly.
 
-HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 120, 255, 5, 30000, 12.0, 33.0, 290.0, 80, 255, true)
-HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
-HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
+HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 120, 255, 1000, 5, 30000, 12.0, 33.0, 290.0, 80, 255, true)
+HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255, 1000, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
+HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 1000, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
 
-// HEAT_MANAGER_DYN_DEAD_TIME(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255, 10, 20000, 150, 7, 7, 200, 7, 7, false)
-// HEAT_MANAGER_DYN_DEAD_TIME(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 10, 20000, 150, 7, 7, 200, 7, 7, false)
+// HEAT_MANAGER_DYN_DEAD_TIME(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255, 100, 10, 20000, 150, 7, 7, 200, 7, 7, false)
+// HEAT_MANAGER_DYN_DEAD_TIME(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 100, 10, 20000, 150, 7, 7, 200, 7, 7, false)
 
 // Coolers are stand alone functions that allow it to control
 // a fan with external sensors. Many extruders require a cooling

@@ -344,22 +344,6 @@ public:
 
     FSTRINGVAR(tNoEEPROMSupport)
     FSTRINGVAR(tZProbeOffsetZ)
-#if FEATURE_Z_PROBE
-    FSTRINGVAR(tZProbeHeight)
-    FSTRINGVAR(tZProbeOffsetX)
-    FSTRINGVAR(tZProbeOffsetY)
-    FSTRINGVAR(tZProbeSpeed)
-    FSTRINGVAR(tZProbeSpeedXY)
-    FSTRINGVAR(tZProbeX1)
-    FSTRINGVAR(tZProbeY1)
-    FSTRINGVAR(tZProbeX2)
-    FSTRINGVAR(tZProbeY2)
-    FSTRINGVAR(tZProbeX3)
-    FSTRINGVAR(tZProbeY3)
-    FSTRINGVAR(zZProbeBendingCorA)
-    FSTRINGVAR(zZProbeBendingCorB)
-    FSTRINGVAR(zZProbeBendingCorC)
-#endif
 #if FEATURE_AXISCOMP
     FSTRINGVAR(tAxisCompTanXY)
     FSTRINGVAR(tAxisCompTanYZ)

@@ -20,6 +20,14 @@ U8G2_ST7920_128X64_2_SW_SPI lcd(DISPLAY_ROTATION, UI_SPI_SCK, UI_SPI_MOSI, UI_SP
 #endif
 #endif
 
+#if ENABLED(DISPLAY_ST7920_HW)
+#if ENABLED(DISPLAY_FULL_BUFFER)
+U8G2_ST7920_128X64_F_HW_SPI lcd(DISPLAY_ROTATION, UI_SPI_CS);
+#else
+U8G2_ST7920_128X64_2_HW_SPI lcd(DISPLAY_ROTATION, UI_SPI_CS);
+#endif
+#endif
+
 #if ENABLED(U8GLIB_ST7565_NHD_C2832_HW_SPI)
 #if ENABLED(DISPLAY_FULL_BUFFER)
 U8G2_ST7565_NHD_C12864_F_4W_HW_SPI(DISPLAY_ROTATION, UI_SPI_CS, UI_DC, U8X8_PIN_NONE);
@@ -81,7 +89,9 @@ void GUI::init() {
     } while (lcd.nextPage());
     lastRefresh = HAL::timeInMilliseconds() + UI_START_SCREEN_DELAY; // Show start screen 4s but will not delay start process
 }
+
 static fast8_t refresh_counter = 0;
+
 void GUI::refresh() {
     /* draw something on the display with the `firstPage()`/`nextPage()` loop*/
     refresh_counter++;

@@ -45,10 +45,7 @@
 #define RFSERIAL Serial
 #define WAITING_IDENTIFIER "wait"
 #define JSON_OUTPUT 1
-#define FEATURE_SERVO 1
 #define FEATURE_WATCHDOG 0
-#define FEATURE_AUTOLEVEL 1
-#define FEATURE_Z_PROBE 0
 #define FEATURE_RETRACTION 1
 #define NUM_AXES 4 // X,Y,Z and E for extruder A,B,C would be 5,6,7
 // #define STEPPER_FREQUENCY 153000     // Maximum stepper frequency.
@@ -468,9 +465,6 @@ It also can add a delay to wait for spindle to run on full speed.
 #define BUMP_CORRECTION_END_HEIGHT 2      // From this height on we do no correction
 #define BUMP_LIMIT_TO 0                   // Maximum allowed correction up/down, <= 0 off.
 
-#define BENDING_CORRECTION_A 0
-#define BENDING_CORRECTION_B 0
-#define BENDING_CORRECTION_C 0
 #define FEATURE_AXISCOMP 0
 #define AXISCOMP_TANXY 0
 #define AXISCOMP_TANYZ 0

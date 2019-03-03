@@ -20,7 +20,7 @@
  * Felix Printers Due Board
  * http://www.felixprinters.com
  ******************************************************************/
-#if MOTHERBOARD == 405
+#if MOTHERBOARD == MOTHERBOARD_FELIX
 #ifndef __SAM3X8E__
 #error Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu.
 #endif
