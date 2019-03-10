@@ -1874,9 +1874,13 @@ void Commands::processMCode(GCode *com) {
 #if SDSUPPORT
   case 20: // M20 - list SD card
 #if JSON_OUTPUT
-    if (com->hasString() && com->text[1] == '2') { // " S2 P/folder"
+    if (com->hasString() &&
+        com->text[1] == '2') { // M20 S2 P/folder or M20 S2 P0:/folder
       if (com->text[3] == 'P') {
-        sd.lsJSON(com->text + 4);
+        char *slashPos = strchr(com->text, '/');
+        if (*slashPos) {
+          sd.lsJSON(slashPos);
+        }
       }
     } else
       sd.ls();
@@ -2915,7 +2919,7 @@ void Commands::processMCode(GCode *com) {
     break;
 #endif // EXTRUDER_JAM_CONTROL
        //- M530 S<printing> L<layer> - Enables explicit printing mode (S1) or
-       //disables it (S0). L can set layer count
+       // disables it (S0). L can set layer count
   case 530:
     if (com->hasL())
       Printer::maxLayer = static_cast<int>(com->L);

@@ -254,10 +254,13 @@ void Extruder::manageTemperatures() {
                 act->startHoldDecouple(time);
                 // Com::printF(PSTR(" CUR:"),act->currentTemperatureC); Com::printFLN(PSTR(" IST:"),(act->pidIGain * act->tempIState * 0.1),1);
                 float pidTerm = act->pidPGain * error;
+                // Com::printF(PSTR("PID PT:"), pidTerm);
                 act->tempIState = constrain(act->tempIState + error, act->tempIStateLimitMin, act->tempIStateLimitMax);
+                // Com::printF(PSTR(" IT:"), act->pidIGain * act->tempIState * 0.1);
                 pidTerm += act->pidIGain * act->tempIState * 0.1; // 0.1 = 10Hz
                 // float dgain = act->pidDGain * (act->tempArray[act->tempPointer] - act->currentTemperatureC) * 3.333f;
                 float dgain = act->pidDGain * (act->lastTemperatureC - act->temperatureC);
+                // Com::printFLN(PSTR(" DT:"), dgain);
                 pidTerm += dgain;
 #if SCALE_PID_TO_MAX == 1
                 pidTerm = (pidTerm * act->pidMax) * 0.0039215;

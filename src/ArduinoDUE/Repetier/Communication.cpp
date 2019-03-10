@@ -443,7 +443,6 @@ FSTRINGVALUE(Com::tEPRPreheatTemp, "Preheat temp. [degC]")
 FSTRINGVALUE(Com::tEPRPreheatBedTemp, "Bed Preheat temp. [degC]")
 
 #endif
-#if SDSUPPORT
 // FSTRINGVALUE(Com::tSDRemoved,UI_TEXT_SD_REMOVED)
 // FSTRINGVALUE(Com::tSDInserted,UI_TEXT_SD_INSERTED)
 FSTRINGVALUE(Com::tSDInitFail, "SD init fail")
@@ -464,7 +463,6 @@ FSTRINGVALUE(Com::tDeletionFailed, "Deletion failed")
 FSTRINGVALUE(Com::tDirectoryCreated, "Directory created")
 FSTRINGVALUE(Com::tCreationFailed, "Creation failed")
 FSTRINGVALUE(Com::tSDErrorCode, "SD errorCode:")
-#endif // SDSUPPORT
 FSTRINGVALUE(Com::tHeaterDecoupled, "Heater decoupled")
 FSTRINGVALUE(
     Com::tHeaterDecoupledWarning,
@@ -505,136 +503,167 @@ FSTRINGVALUE(Com::tTrinamicMicrostepMode, "Trinamic microstep mode:")
 #endif
 bool Com::writeToAll = true; // transmit start messages to all devices!
 
-void Com::cap(FSTRINGPARAM(text)) {
+void Com::cap(FSTRINGPARAM(text))
+{
   printF(tCap);
   printFLN(text);
 }
-void Com::config(FSTRINGPARAM(text)) {
+void Com::config(FSTRINGPARAM(text))
+{
   printF(tConfig);
   printFLN(text);
 }
-void Com::config(FSTRINGPARAM(text), int value) {
+void Com::config(FSTRINGPARAM(text), int value)
+{
   printF(tConfig);
   printFLN(text, value);
 }
-void Com::config(FSTRINGPARAM(text), const char *msg) {
+void Com::config(FSTRINGPARAM(text), const char *msg)
+{
   printF(tConfig);
   printF(text);
   print(msg);
   println();
 }
-void Com::config(FSTRINGPARAM(text), int32_t value) {
+void Com::config(FSTRINGPARAM(text), int32_t value)
+{
   printF(tConfig);
   printFLN(text, value);
 }
-void Com::config(FSTRINGPARAM(text), uint32_t value) {
+void Com::config(FSTRINGPARAM(text), uint32_t value)
+{
   printF(tConfig);
   printFLN(text, value);
 }
-void Com::config(FSTRINGPARAM(text), float value, uint8_t digits) {
+void Com::config(FSTRINGPARAM(text), float value, uint8_t digits)
+{
   printF(tConfig);
   printFLN(text, value, digits);
 }
-void Com::printWarningF(FSTRINGPARAM(text)) {
+void Com::printWarningF(FSTRINGPARAM(text))
+{
   printF(tWarning);
   printF(text);
 }
-void Com::printWarningFLN(FSTRINGPARAM(text)) {
+void Com::printWarningFLN(FSTRINGPARAM(text))
+{
   printF(tWarning);
   printFLN(text);
 }
-void Com::printInfoF(FSTRINGPARAM(text)) {
+void Com::printInfoF(FSTRINGPARAM(text))
+{
   printF(tInfo);
   printF(text);
 }
-void Com::printInfoFLN(FSTRINGPARAM(text)) {
+void Com::printInfoFLN(FSTRINGPARAM(text))
+{
   printF(tInfo);
   printFLN(text);
 }
 
-void Com::printErrorF(FSTRINGPARAM(text)) {
+void Com::printErrorF(FSTRINGPARAM(text))
+{
   printF(tError);
   printF(text);
 }
-void Com::printErrorFLN(FSTRINGPARAM(text)) {
+void Com::printErrorFLN(FSTRINGPARAM(text))
+{
   printF(tError);
   printFLN(text);
 }
-void Com::printFLN(FSTRINGPARAM(text)) {
+void Com::printFLN(FSTRINGPARAM(text))
+{
   printF(text);
   println();
 }
-void Com::printFLN(FSTRINGPARAM(text), const char *msg) {
+void Com::printFLN(FSTRINGPARAM(text), const char *msg)
+{
   printF(text);
   print(msg);
   println();
 }
 
-void Com::printF(FSTRINGPARAM(ptr)) {
+void Com::printF(FSTRINGPARAM(ptr))
+{
   char c;
   while ((c = HAL::readFlashByte(ptr++)) != 0)
     GCodeSource::writeToAll(c);
 }
-void Com::printF(FSTRINGPARAM(text), const char *msg) {
+void Com::printF(FSTRINGPARAM(text), const char *msg)
+{
   printF(text);
   print(msg);
 }
 
-void Com::printF(FSTRINGPARAM(text), int value) {
+void Com::printF(FSTRINGPARAM(text), int value)
+{
   printF(text);
   print(value);
 }
-void Com::printF(FSTRINGPARAM(text), int32_t value) {
+void Com::printF(FSTRINGPARAM(text), int32_t value)
+{
   printF(text);
   print(value);
 }
-void Com::printF(FSTRINGPARAM(text), uint32_t value) {
+void Com::printF(FSTRINGPARAM(text), uint32_t value)
+{
   printF(text);
   printNumber(value);
 }
-void Com::printFLN(FSTRINGPARAM(text), int value) {
+void Com::printFLN(FSTRINGPARAM(text), int value)
+{
   printF(text);
   print(value);
   println();
 }
-void Com::printFLN(FSTRINGPARAM(text), int32_t value) {
+void Com::printFLN(FSTRINGPARAM(text), int32_t value)
+{
   printF(text);
   print(value);
   println();
 }
-void Com::printFLN(FSTRINGPARAM(text), uint32_t value) {
+void Com::printFLN(FSTRINGPARAM(text), uint32_t value)
+{
   printF(text);
   printNumber(value);
   println();
 }
-void Com::printFLN(FSTRINGPARAM(text), float value, uint8_t digits) {
+void Com::printFLN(FSTRINGPARAM(text), float value, uint8_t digits)
+{
   printF(text);
   printFloat(value, digits);
   println();
 }
-void Com::printF(FSTRINGPARAM(text), float value, uint8_t digits) {
+void Com::printF(FSTRINGPARAM(text), float value, uint8_t digits)
+{
   printF(text);
   printFloat(value, digits);
 }
 
-void Com::print(const char *text) {
-  while (*text) {
+void Com::print(const char *text)
+{
+  while (*text)
+  {
     GCodeSource::writeToAll(*text++);
   }
 }
-void Com::print(long value) {
-  if (value < 0) {
+void Com::print(long value)
+{
+  if (value < 0)
+  {
     GCodeSource::writeToAll('-');
     value = -value;
   }
   printNumber(value);
 }
 
-void Com::printNumber(uint32_t n) {
+void Com::printNumber(uint32_t n)
+{
   char buf[11]; // Assumes 8-bit chars plus zero byte.
   char *str = &buf[10];
   *str = '\0';
-  do {
+  do
+  {
     unsigned long m = n;
     n /= 10;
     *--str = '0' + (m - 10 * n);
@@ -643,30 +672,36 @@ void Com::printNumber(uint32_t n) {
   print(str);
 }
 void Com::printArrayFLN(FSTRINGPARAM(text), float *arr, uint8_t n,
-                        uint8_t digits) {
+                        uint8_t digits)
+{
   printF(text);
   for (uint8_t i = 0; i < n; i++)
     printF(Com::tSpace, arr[i], digits);
   println();
 }
-void Com::printArrayFLN(FSTRINGPARAM(text), int32_t *arr, uint8_t n) {
+void Com::printArrayFLN(FSTRINGPARAM(text), int32_t *arr, uint8_t n)
+{
   printF(text);
   for (uint8_t i = 0; i < n; i++)
     printF(Com::tSpace, arr[i]);
   println();
 }
 
-void Com::printFloat(float number, uint8_t digits) {
-  if (isnan(number)) {
+void Com::printFloat(float number, uint8_t digits)
+{
+  if (isnan(number))
+  {
     printF(tNAN);
     return;
   }
-  if (isinf(number)) {
+  if (isinf(number))
+  {
     printF(tINF);
     return;
   }
   // Handle negative numbers
-  if (number < 0.0) {
+  if (number < 0.0)
+  {
     print('-');
     number = -number;
   }
@@ -687,7 +722,8 @@ void Com::printFloat(float number, uint8_t digits) {
     print('.');
 
   // Extract digits from the remainder one at a time
-  while (digits-- > 0) {
+  while (digits-- > 0)
+  {
     remainder *= 10.0;
     int toPrint = int(remainder);
     print(toPrint);

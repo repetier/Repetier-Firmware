@@ -365,21 +365,20 @@ the menu as top-menu closing all othe submenus that were open.
 //#define UI_MATRIX_ACTIONS
 //{2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015}
 // Define your matrix actions
-#define UI_MATRIX_ACTIONS                                                     \
-  {                                                                           \
-    UI_ACTION_HOME_ALL, UI_ACTION_TOP_MENU, UI_ACTION_SET_ORIGIN,             \
-        UI_ACTION_NEXT, UI_ACTION_HOME_Z, UI_ACTION_MENU_ZPOS,                \
-        UI_ACTION_COOLDOWN, UI_ACTION_OK, UI_ACTION_HOME_Y,                   \
-        UI_ACTION_MENU_YPOSFAST, UI_ACTION_PREHEAT_ALL, UI_ACTION_PREVIOUS,   \
-        UI_ACTION_HOME_X, UI_ACTION_MENU_XPOSFAST, UI_ACTION_DISABLE_STEPPER, \
-        UI_ACTION_BACK                                                        \
+#define UI_MATRIX_ACTIONS                                                      \
+  {                                                                            \
+    UI_ACTION_HOME_ALL, UI_ACTION_TOP_MENU, UI_ACTION_SET_ORIGIN,              \
+        UI_ACTION_NEXT, UI_ACTION_HOME_Z, UI_ACTION_MENU_ZPOS,                 \
+        UI_ACTION_COOLDOWN, UI_ACTION_OK, UI_ACTION_HOME_Y,                    \
+        UI_ACTION_MENU_YPOSFAST, UI_ACTION_PREHEAT_ALL, UI_ACTION_PREVIOUS,    \
+        UI_ACTION_HOME_X, UI_ACTION_MENU_XPOSFAST, UI_ACTION_DISABLE_STEPPER,  \
+        UI_ACTION_BACK                                                         \
   }
 #ifdef UI_MATRIX_ACTIONS
 const int matrixActions[] PROGMEM = UI_MATRIX_ACTIONS;
 #endif
 
-void uiInitKeys()
-{
+void uiInitKeys() {
 #if UI_HAS_KEYS != 0
   // UI_KEYS_INIT_CLICKENCODER_LOW(33,31); // click encoder on pins 47 and 45.
   // Phase is connected with gnd for signals.
@@ -395,8 +394,7 @@ void uiInitKeys()
 //  UI_KEYS_INIT_MATRIX(32,47,45,43,41,39,37,35);
 #endif
 }
-void uiCheckKeys(uint16_t &action)
-{
+void uiCheckKeys(uint16_t &action) {
 #if UI_HAS_KEYS != 0
 
   // UI_KEYS_CLICKENCODER_LOW_REV(33,31); // click encoder on pins 47 and 45.
@@ -412,8 +410,7 @@ void uiCheckKeys(uint16_t &action)
 //  UI_KEYS_BUTTON_LOW(43,UI_ACTION_OK); // push button, connects gnd to pin
 #endif
 }
-inline void uiCheckSlowEncoder()
-{
+inline void uiCheckSlowEncoder() {
 #if defined(UI_HAS_I2C_KEYS) && UI_HAS_KEYS != 0
 #if UI_DISPLAY_I2C_CHIPTYPE == 0
   HAL::i2cStartWait(UI_I2C_KEY_ADDRESS + I2C_READ);
@@ -435,8 +432,7 @@ inline void uiCheckSlowEncoder()
                        // gnd for signals.
 #endif
 }
-void uiCheckSlowKeys(uint16_t &action)
-{
+void uiCheckSlowKeys(uint16_t &action) {
 #if defined(UI_HAS_I2C_KEYS) && UI_HAS_KEYS != 0
 #if UI_DISPLAY_I2C_CHIPTYPE == 0
   HAL::i2cStartWait(UI_I2C_KEY_ADDRESS + I2C_READ);

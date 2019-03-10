@@ -41,7 +41,8 @@ Available source types are:
 - sd card
 - flash memory
 */
-class GCodeSource {
+class GCodeSource
+{
   static fast8_t numSources; ///< Number of data sources available
   static fast8_t numWriteSources;
   static GCodeSource *sources[MAX_DATA_SOURCES];
@@ -75,7 +76,8 @@ public:
   virtual void prefetchContent() {} // Used for emergency parsing to read ahaed
 };
 
-class Com {
+class Com
+{
 public:
   FSTRINGVAR(tM999)
   FSTRINGVAR(tEmpty)
@@ -432,7 +434,6 @@ public:
   FSTRINGVAR(tEPRPreheatTemp)
   FSTRINGVAR(tEPRPreheatBedTemp)
 #endif
-#if SDSUPPORT
   // FSTRINGVAR(tSDRemoved)
   // FSTRINGVAR(tSDInserted)
   FSTRINGVAR(tSDInitFail)
@@ -453,7 +454,6 @@ public:
   FSTRINGVAR(tDirectoryCreated)
   FSTRINGVAR(tCreationFailed)
   FSTRINGVAR(tSDErrorCode)
-#endif // SDSUPPORT
   FSTRINGVAR(tHeaterDecoupled)
   FSTRINGVAR(tHeaterDecoupledWarning)
 #if DISTORTION_CORRECTION
@@ -528,7 +528,8 @@ public:
   static inline void print(char c) { GCodeSource::writeToAll(c); }
   static void printFloat(float number, uint8_t digits);
   static inline void print(float number) { printFloat(number, 6); }
-  static inline void println() {
+  static inline void println()
+  {
     GCodeSource::writeToAll('\r');
     GCodeSource::writeToAll('\n');
   }
@@ -543,40 +544,40 @@ private:
 };
 
 #ifdef DEBUG
-#define SHOW(x)                                                                \
-  {                                                                            \
-    Com::printF(PSTR(" " #x "="));                                             \
-    Com::print(x);                                                             \
-    Com::println();                                                            \
+#define SHOW(x)                    \
+  {                                \
+    Com::printF(PSTR(" " #x "=")); \
+    Com::print(x);                 \
+    Com::println();                \
   }
-#define SHOWS(x)                                                               \
-  {                                                                            \
-    Com::printF(PSTR(" " #x "="));                                             \
-    Com::print(x);                                                             \
-    Com::print(" steps  ");                                                    \
-    Com::print(x / 80);                                                        \
-    Com::printFLN(PSTR(" mm"));                                                \
+#define SHOWS(x)                   \
+  {                                \
+    Com::printF(PSTR(" " #x "=")); \
+    Com::print(x);                 \
+    Com::print(" steps  ");        \
+    Com::print(x / 80);            \
+    Com::printFLN(PSTR(" mm"));    \
   }
-#define SHOWM(x)                                                               \
-  {                                                                            \
-    Com::printF(PSTR(" " #x "="));                                             \
-    Com::print((long)x * 80);                                                  \
-    Com::print(" steps  ");                                                    \
-    Com::print(x);                                                             \
-    Com::printFLN(PSTR(" mm"));                                                \
+#define SHOWM(x)                   \
+  {                                \
+    Com::printF(PSTR(" " #x "=")); \
+    Com::print((long)x * 80);      \
+    Com::print(" steps  ");        \
+    Com::print(x);                 \
+    Com::printFLN(PSTR(" mm"));    \
   }
 #define SHOT(x) Com::printF(PSTR(x " "))
-#define SHOWA(t, a, n)                                                         \
-  {                                                                            \
-    SHOT(t);                                                                   \
-    for (int i = 0; i < n; i++)                                                \
-      SHOWS(a[i]);                                                             \
+#define SHOWA(t, a, n)          \
+  {                             \
+    SHOT(t);                    \
+    for (int i = 0; i < n; i++) \
+      SHOWS(a[i]);              \
   }
-#define SHOWAM(t, a, n)                                                        \
-  {                                                                            \
-    SHOT(t);                                                                   \
-    for (int i = 0; i < n; i++)                                                \
-      SHOWM(a[i]);                                                             \
+#define SHOWAM(t, a, n)         \
+  {                             \
+    SHOT(t);                    \
+    for (int i = 0; i < n; i++) \
+      SHOWM(a[i]);              \
   }
 
 #else
