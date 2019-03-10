@@ -158,6 +158,11 @@ to the position. 0 = no contribution. */
 #define DISABLE_Y 0
 #define DISABLE_Z 0
 
+#define FEATURE_AXISCOMP 1
+#define AXISCOMP_TANXY 0
+#define AXISCOMP_TANYZ 0
+#define AXISCOMP_TANXZ 0
+
 // Next 7 lines are required to make the following work, do not change!
 #include "boards/pins.h"
 #undef IO_TARGET
@@ -479,10 +484,6 @@ It also can add a delay to wait for spindle to run on full speed.
 #define BED_MOTOR_2_Y 45
 #define BED_MOTOR_3_X 137
 #define BED_MOTOR_3_Y 210
-#define FEATURE_AXISCOMP 0
-#define AXISCOMP_TANXY 0
-#define AXISCOMP_TANYZ 0
-#define AXISCOMP_TANXZ 0
 
 #ifndef SDSUPPORT // Some boards have sd support on board. These define the values already in pins.h
 #define SDSUPPORT 1

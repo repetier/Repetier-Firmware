@@ -30,8 +30,10 @@ void LevelingCorrector::correct(Plane* plane) {
     Motion1::currentPositionTransformed[Z_AXIS] = plane->z(Motion1::currentPositionTransformed[X_AXIS], Motion1::currentPositionTransformed[X_AXIS]);
     Motion1::updatePositionsFromCurrentTransformed();
     // enable rotation
+#if LEVELING_METHOD > 0
     Motion1::buildTransformationMatrix(*plane);
     Motion1::setAutolevelActive(true);
+#endif
     EEPROM::markChanged();
 }
 

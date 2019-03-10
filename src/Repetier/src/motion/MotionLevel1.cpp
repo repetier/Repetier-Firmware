@@ -101,7 +101,9 @@ void Motion1::init() {
     last = first = length = 0;
     process = lengthUnprocessed = 0;
     endstopMode = EndstopMode::DISABLED;
+#if LEVELING_METHOD > 0
     resetTransformationMatrix(true);
+#endif
     setFromConfig(); // initial config
     updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
@@ -1573,9 +1575,9 @@ void Motion1::eepromHandle() {
     EEPROM::handleByte(eprStart + EPR_M1_ALWAYS_CHECK_ENDSTOPS, PSTR("Always check endstops"), alwaysCheckEndstops);
     EEPROM::handleByte(eprStart + EPR_M1_VELOCITY_PROFILE, PSTR("Velocity Profile [0-2]"), Motion2::velocityProfileIndex);
 #if FEATURE_AXISCOMP
-    EEPROM::handleFloat(eprStart + EPR_AXISCOMP_TANXY, Com::tAxisCompTanXY, 6, axisCompTanXY);
-    EEPROM::handleFloat(eprStart + EPR_AXISCOMP_TANYZ, Com::tAxisCompTanYZ, 6, axisCompTanYZ);
-    EEPROM::handleFloat(eprStart + EPR_AXISCOMP_TANXZ, Com::tAxisCompTanXZ, 6, axisCompTanXZ);
+    EEPROM::handleFloat(eprStart + EPR_M1_AXIS_COMP_XY, Com::tAxisCompTanXY, 6, axisCompTanXY);
+    EEPROM::handleFloat(eprStart + EPR_M1_AXIS_COMP_XZ, Com::tAxisCompTanYZ, 6, axisCompTanYZ);
+    EEPROM::handleFloat(eprStart + EPR_M1_AXIS_COMP_YZ, Com::tAxisCompTanXZ, 6, axisCompTanXZ);
 #endif
 }
 void Motion1::updateDerived() {
@@ -1644,6 +1646,7 @@ void Motion1::transformFromPrinter(float x, float y, float z, float& transX, flo
 #endif
 }
 
+#if LEVELING_METHOD > 0
 void Motion1::resetTransformationMatrix(bool silent) {
     autolevelTransformation[0] = autolevelTransformation[4] = autolevelTransformation[8] = 1;
     autolevelTransformation[1] = autolevelTransformation[2] = autolevelTransformation[3] = autolevelTransformation[5] = autolevelTransformation[6] = autolevelTransformation[7] = 0;
@@ -1681,3 +1684,4 @@ void Motion1::buildTransformationMatrix(Plane& plane) {
 
     Com::printArrayFLN(Com::tTransformationMatrix, autolevelTransformation, 9, 6);
 }
+#endif

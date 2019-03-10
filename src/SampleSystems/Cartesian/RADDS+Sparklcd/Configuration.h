@@ -139,6 +139,11 @@ to the position. 0 = no contribution. */
 #define DISABLE_Y 0
 #define DISABLE_Z 0
 
+#define FEATURE_AXISCOMP 1
+#define AXISCOMP_TANXY 0
+#define AXISCOMP_TANYZ 0
+#define AXISCOMP_TANXZ 0
+
 // Next 7 lines are required to make the following work, do not change!
 #include "boards/pins.h"
 #undef IO_TARGET
@@ -464,11 +469,6 @@ It also can add a delay to wait for spindle to run on full speed.
 #define BUMP_CORRECTION_START_DEGRADE 0.5 // Until this height we correct 100%
 #define BUMP_CORRECTION_END_HEIGHT 2      // From this height on we do no correction
 #define BUMP_LIMIT_TO 0                   // Maximum allowed correction up/down, <= 0 off.
-
-#define FEATURE_AXISCOMP 0
-#define AXISCOMP_TANXY 0
-#define AXISCOMP_TANYZ 0
-#define AXISCOMP_TANXZ 0
 
 #ifndef SDSUPPORT // Some boards have sd support on board. These define the values already in pins.h
 #define SDSUPPORT 1

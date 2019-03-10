@@ -22,3 +22,4 @@ macrotest.cpp
 macrotest.txt
 .idea
 src/SampleSystems/privat
+settings.json

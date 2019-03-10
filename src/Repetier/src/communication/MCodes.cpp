@@ -974,19 +974,23 @@ void MCode_320(GCode* com) {
 }
 
 void MCode_321(GCode* com) {
+#if LEVELING_METHOD > 0
     Motion1::setAutolevelActive(false);
     if (com->hasS() && com->S) {
         if (com->S == 3)
             Motion1::resetTransformationMatrix(false);
         EEPROM::markChanged();
     }
+#endif
 }
 
 void MCode_322(GCode* com) {
+#if LEVELING_METHOD > 0
     Motion1::resetTransformationMatrix(false);
     if (com->hasS() && com->S) {
         EEPROM::markChanged();
     }
+#endif
 }
 
 void MCode_323(GCode* com) {
