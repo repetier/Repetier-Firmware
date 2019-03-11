@@ -285,28 +285,6 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define MIN_EXTRUDER_TEMP 150
 #define MILLISECONDS_PREHEAT_TIME 30000
 
-// ##                              CNC configuration                                       ##
-
-/*
-If the firmware is in CNC mode, it can control a mill with M3/M4/M5. It works
-similar to laser mode, but mill keeps enabled during G0 moves and it allows
-setting rpm (only with event extension that supports this) and milling direction.
-It also can add a delay to wait for spindle to run on full speed.
-*/
-
-#define SUPPORT_CNC 0
-#define CNC_WAIT_ON_ENABLE 300
-#define CNC_WAIT_ON_DISABLE 0
-#define CNC_ENABLE_PIN -1
-#define CNC_ENABLE_WITH 1
-#define CNC_DIRECTION_PIN -1
-#define CNC_DIRECTION_CW 1
-#define CNC_PWM_MAX 255
-#define CNC_RPM_MAX 8000
-#define CNC_SAFE_Z 150
-
-#define DEFAULT_PRINTER_MODE 0
-
 // ################ Endstop/homing configuration #####################
 
 #define DOOR_PIN -1

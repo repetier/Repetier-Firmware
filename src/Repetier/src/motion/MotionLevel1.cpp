@@ -1302,6 +1302,7 @@ void Motion1::homeAxes(fast8_t axes) {
                 continue;
             }
             if (homePriority[i] == priority) {
+                g92Offsets[i] = 0;
                 if (i <= Z_AXIS) {
                     toolOffset[i] = 0;
                 }

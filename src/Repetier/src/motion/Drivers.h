@@ -198,38 +198,4 @@ extern MotorDriverInterface* getMotorDriver(int idx);
 extern void initializeAllMotorDrivers();
 #endif
 
-#if defined(SUPPORT_CNC) && SUPPORT_CNC
-/**
-The CNC driver differs a bit from laser driver. Here only M3,M4,M5 have an influence on the spindle.
-The motor also keeps running for G0 moves. M3 and M4 wait for old moves to be finished and then enables
-the motor. It then waits CNC_WAIT_ON_ENABLE milliseconds for the spindle to reach target speed.
-*/
-class CNCDriver {
-public:
-    static int8_t direction;
-    static secondspeed_t spindleSpeed;
-    static uint16_t spindleRpm;
-
-    /** Initialize cnc pins. EVENT_INITIALIZE_CNC should return false to prevent default initialization.*/
-    static void initialize();
-    /** Turns off spindle. For event override implement
-    EVENT_SPINDLE_OFF
-    returning false.
-    */
-    static void spindleOff();
-    /** Turns spindle on. Default implementation uses a enable pin CNC_ENABLE_PIN. If
-    CNC_DIRECTION_PIN is not -1 it sets direction to CNC_DIRECTION_CW. rpm is ignored.
-    To override with event system, return false for the event
-    EVENT_SPINDLE_CW(rpm)
-    */
-    static void spindleOnCW(int32_t rpm);
-    /** Turns spindle on. Default implementation uses a enable pin CNC_ENABLE_PIN. If
-    CNC_DIRECTION_PIN is not -1 it sets direction to !CNC_DIRECTION_CW. rpm is ignored.
-    To override with event system, return false for the event
-    EVENT_SPINDLE_CCW(rpm)
-    */
-    static void spindleOnCCW(int32_t rpm);
-};
-#endif
-
 #endif // DRIVERS_H_INCLUDED

@@ -530,9 +530,6 @@ void Printer::setup() {
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
     LaserDriver::initialize();
 #endif // defined
-#if defined(SUPPORT_CNC) && SUPPORT_CNC
-    CNCDriver::initialize();
-#endif // defined
 
 #ifdef RED_BLUE_STATUS_LEDS
     SET_OUTPUT(RED_STATUS_LED);
