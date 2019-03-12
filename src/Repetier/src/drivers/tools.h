@@ -20,6 +20,20 @@ extern void menuExtruderMaxAcceleration(GUIAction action, void* data);
 extern void menuExtruderMaxYank(GUIAction action, void* data);
 extern void menuExtruderFilamentDiameter(GUIAction action, void* data);
 
+class Tool;
+
+class ToolChangeHandler {
+public:
+    virtual void M6(GCode* com, Tool* tool) = 0;
+};
+
+class CoolantHandler {
+public:
+    virtual void M7(GCode* com, Tool* tool) = 0;
+    virtual void M8(GCode* com, Tool* tool) = 0;
+    virtual void M9(GCode* com, Tool* tool) = 0;
+};
+
 class Tool {
     friend class Motion3;
     friend class Motion1;
@@ -79,6 +93,10 @@ public:
     virtual void M3(GCode* com) {}
     virtual void M4(GCode* com) {}
     virtual void M5(GCode* com) {}
+    virtual void M6(GCode* com) {}
+    virtual void M7(GCode* com) {}
+    virtual void M8(GCode* com) {}
+    virtual void M9(GCode* com) {}
     /// Called when the tool gets activated.
     virtual void activate() = 0;
     /// Gets called when the tool gets disabled.
@@ -333,6 +351,8 @@ class ToolCNC : public Tool {
     float rpm;
     int32_t startStopDelay;
     bool active;
+    ToolChangeHandler* toolChangeHandler;
+    CoolantHandler* coolantHandler;
 
 public:
     ToolCNC(float offX, float offY, float offZ,
@@ -345,7 +365,15 @@ public:
         , startScript(_startScript)
         , endScript(_endScript)
         , rpm(_rpm)
-        , startStopDelay(_startStopDelay) {
+        , startStopDelay(_startStopDelay)
+        , toolChangeHandler(nullptr)
+        , coolantHandler(nullptr) {
+    }
+    void setToolChangeHandle(ToolChangeHandler* th) {
+        toolChangeHandler = th;
+    }
+    void setCoolantHandler(CoolantHandler* ch) {
+        coolantHandler = ch;
     }
     void reset(float offx, float offy, float offz, float _rpm, int32_t _startStopDelay);
     bool supportsTemperatures() final { return false; }
@@ -372,6 +400,10 @@ public:
     virtual void M3(GCode* com);
     virtual void M4(GCode* com);
     virtual void M5(GCode* com);
+    virtual void M6(GCode* com);
+    virtual void M7(GCode* com);
+    virtual void M8(GCode* com);
+    virtual void M9(GCode* com);
     virtual ToolTypes getToolType() { return ToolTypes::MILL; }
 };
 

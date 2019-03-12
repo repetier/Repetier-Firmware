@@ -981,6 +981,18 @@ void Commands::processMCode(GCode* com) {
     case 5: // Spindle/laser off
         MCode_5(com);
         break;
+    case 6: // Tool change
+        MCode_6(com);
+        break;
+    case 7: // Mist coolant on
+        MCode_7(com);
+        break;
+    case 8: // Flood coolant on
+        MCode_8(com);
+        break;
+    case 9: // Coolant off
+        MCode_9(com);
+        break;
     case 20: // M20 - list SD card
         MCode_20(com);
         break;

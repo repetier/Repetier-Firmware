@@ -691,6 +691,34 @@ void ToolCNC<dirPin, enabledPin, activePin>::M5(GCode* com) {
     Commands::waitMS(startStopDelay);
 }
 
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::M6(GCode* com) {
+    if (toolChangeHandler) {
+        toolChangeHandler->M6(com, this);
+    }
+}
+
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::M7(GCode* com) {
+    if (coolantHandler) {
+        coolantHandler->M7(com, this);
+    }
+}
+
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::M8(GCode* com) {
+    if (coolantHandler) {
+        coolantHandler->M8(com, this);
+    }
+}
+
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::M9(GCode* com) {
+    if (coolantHandler) {
+        coolantHandler->M9(com, this);
+    }
+}
+
 // ------------ JamDetectorHW ------------
 
 template <class inputPin, class ObserverType>
