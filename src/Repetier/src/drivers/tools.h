@@ -27,6 +27,13 @@ public:
     virtual void M6(GCode* com, Tool* tool) = 0;
 };
 
+class ToolChangeCustomEvent : ToolChangeHandler {
+public:
+    ToolChangeCustomEvent(Tool* tool);
+    void M6(GCode* com, Tool* tool) final;
+    void setup(Tool* tool);
+};
+
 class CoolantHandler {
 public:
     virtual void M7(GCode* com, Tool* tool) = 0;
@@ -97,6 +104,9 @@ public:
     virtual void M7(GCode* com) {}
     virtual void M8(GCode* com) {}
     virtual void M9(GCode* com) {}
+    virtual void setToolChangeHandler(ToolChangeHandler* th) {}
+    virtual void setCoolantHandler(CoolantHandler* ch) {}
+
     /// Called when the tool gets activated.
     virtual void activate() = 0;
     /// Gets called when the tool gets disabled.
@@ -369,10 +379,10 @@ public:
         , toolChangeHandler(nullptr)
         , coolantHandler(nullptr) {
     }
-    void setToolChangeHandle(ToolChangeHandler* th) {
+    void setToolChangeHandler(ToolChangeHandler* th) final {
         toolChangeHandler = th;
     }
-    void setCoolantHandler(CoolantHandler* ch) {
+    void setCoolantHandler(CoolantHandler* ch) final {
         coolantHandler = ch;
     }
     void reset(float offx, float offy, float offz, float _rpm, int32_t _startStopDelay);

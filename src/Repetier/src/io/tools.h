@@ -21,6 +21,7 @@
 #undef TOOL_CNC
 #undef JAM_DETECTOR_HW
 #undef FILAMENT_DETECTOR
+#undef TOOL_CHANGE_CUSTOM_EVENT
 
 #if IO_TARGET == 4 // declare variable
 
@@ -42,6 +43,9 @@
 
 #define FILAMENT_DETECTOR(name, inputPin, tool) \
     extern FilamentDetector<inputPin> name;
+
+#define TOOL_CHANGE_CUSTOM_EVENT(name, tool) \
+    extern ToolChangeCustomEvent name;
 
 #elif IO_TARGET == 6 // define variables
 
@@ -94,6 +98,9 @@
 #define FILAMENT_DETECTOR(name, inputPin, tool) \
     FilamentDetector<inputPin> name(&tool);
 
+#define TOOL_CHANGE_CUSTOM_EVENT(name, tool) \
+    ToolChangeCustomEvent name(static_cast<Tool*>(&tool));
+
 #elif IO_TARGET == 10 // reset configs
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScrip, fan) \
@@ -105,6 +112,7 @@
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage) \
     name.reset(distanceSteps, jitterSteps, jamPercentage);
 #define FILAMENT_DETECTOR(name, inputPin, tool)
+#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
 #elif IO_TARGET == 13 // template definitions in tools.cpp
 
@@ -117,6 +125,7 @@
     template class JamDetectorHW<inputPin, observer##Type>;
 #define FILAMENT_DETECTOR(name, inputPin, tool) \
     template class FilamentDetector<inputPin>;
+#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
 #elif IO_TARGET == 1 // Setup
 
@@ -127,6 +136,7 @@
     attachInterrupt(inputPin::pin(), name##Int, CHANGE);
 #define FILAMENT_DETECTOR(name, inputPin, tool) \
     name.setup();
+#define TOOL_CHANGE_CUSTOM_EVENT(name, tool) name.setup(&tool);
 
 #elif IO_TARGET == 8 // call eepromHandle if required
 
@@ -136,6 +146,7 @@
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage) \
     name.eepromHandle();
 #define FILAMENT_DETECTOR(name, inputPin, tool)
+#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
 #elif IO_TARGET == 14 // resolve firmware events
 
@@ -149,6 +160,7 @@
         Com::printFLN(PSTR(" steps")); \
     }
 #define FILAMENT_DETECTOR(name, inputPin, tool)
+#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
 #elif IO_TARGET == 15 // Periodical actions
 
@@ -159,6 +171,7 @@
     name.testForJam();
 #define FILAMENT_DETECTOR(name, inputPin, tool) \
     name.testFilament();
+#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
 #elif IO_TARGET == 16 // Control tools manipulate menu
 
@@ -169,6 +182,7 @@
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript)
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage)
 #define FILAMENT_DETECTOR(name, inputPin, tool)
+#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
 #elif IO_TARGET == 17 // config menu
 
@@ -179,6 +193,7 @@
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript)
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage)
 #define FILAMENT_DETECTOR(name, inputPin, tool)
+#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
 #elif IO_TARGET == 18 // Control tune manipulate menu
 
@@ -189,6 +204,7 @@
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript)
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage)
 #define FILAMENT_DETECTOR(name, inputPin, tool)
+#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
 #else
 
@@ -197,5 +213,6 @@
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript)
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage)
 #define FILAMENT_DETECTOR(name, inputPin, tool)
+#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
 #endif

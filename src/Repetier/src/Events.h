@@ -152,4 +152,10 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_BEFORE_Z_HOME \
     {}
 
+// Called from the custom tool change implementation
+#define EVENT_CUSTOM_TOOL_CHANGE_M6(gcode, tool) \
+    {}
+#define EVENT_CUSTOM_TOOL_CHANGE_SETUP(tool) \
+    {}
+
 #endif // EVENTS_H_INCLUDED

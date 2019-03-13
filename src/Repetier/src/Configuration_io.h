@@ -204,6 +204,7 @@ TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, /*AL1Motor */ E1Motor, 1.
 TOOL_EXTRUDER(ToolExtruder2, 16.775, 0.615, -0.97, HeaterExtruder2, /*AL2Motor */ E2Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1500 R600\nG4 P300", "M340 P0 S800 R600\nG4 P300", &Fan1PWM)
 TOOL_LASER(Laser3, 0, 0, 0, Fan1NoKSPWM, fakeOut, fakeOut, 3000, 1, 100, 150.0, 1.5, "", "")
 TOOL_CNC(CNC4, 0, 0, 0, Fan1NoKSPWM, fakeOut, fakeOut, fakeOut, 7000, 3000, "", "")
+TOOL_CHANGE_CUSTOM_EVENT(CNC4_ToolChange, CNC4)
 
 // Use a signal that changes while extruder moves
 JAM_DETECTOR_HW(JamExtruder1, E1Motor, IOJam1, ToolExtruder1, 220, 10, 500)

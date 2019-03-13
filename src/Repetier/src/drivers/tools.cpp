@@ -14,6 +14,16 @@ fast8_t Tool::activeToolId = 255;
 Tool* Tool::activeTool = nullptr;
 Tool* const Tool::tools[NUM_TOOLS] = TOOLS;
 
+ToolChangeCustomEvent::ToolChangeCustomEvent(Tool* tool) {
+    tool->setToolChangeHandler(this);
+}
+void ToolChangeCustomEvent::M6(GCode* com, Tool* _tool) {
+    EVENT_CUSTOM_TOOL_CHANGE_M6(com, _tool);
+}
+void ToolChangeCustomEvent::setup(Tool* _tool) {
+    EVENT_CUSTOM_TOOL_CHANGE_SETUP(_tool);
+}
+
 void __attribute__((weak)) menuExtruderStepsPerMM(GUIAction action, void* data) {
     ToolExtruder* ext = reinterpret_cast<ToolExtruder*>(data);
     DRAW_FLOAT_P(PSTR("Resolution:"), Com::tUnitStepsPerMM, ext->getResolution(), 2);
