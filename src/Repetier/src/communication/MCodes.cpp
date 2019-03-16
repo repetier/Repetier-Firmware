@@ -49,28 +49,28 @@ void MCode_5(GCode* com) { // Spindle, laser off
 void MCode_6(GCode* com) { // Tool Change
     Tool* t = Tool::getActiveTool();
     if (t) {
-        t->M5(com);
+        t->M6(com);
     }
 }
 
 void MCode_7(GCode* com) { // Mist cooland On
     Tool* t = Tool::getActiveTool();
     if (t) {
-        t->M5(com);
+        t->M7(com);
     }
 }
 
 void MCode_8(GCode* com) { // Flood Coolant on
     Tool* t = Tool::getActiveTool();
     if (t) {
-        t->M5(com);
+        t->M8(com);
     }
 }
 
 void MCode_9(GCode* com) { // Coolant off
     Tool* t = Tool::getActiveTool();
     if (t) {
-        t->M5(com);
+        t->M9(com);
     }
 }
 

@@ -701,5 +701,5 @@ void selectToolAction(GUIAction action, void* data) {
 }
 
 #if defined(CUSTOM_EVENTS)
-#include "CustomEventsImpl.h"
+#include "../custom/CustomEventsImpl.h"
 #endif
