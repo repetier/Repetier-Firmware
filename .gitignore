@@ -34,3 +34,4 @@ src/ArduinoAVR/Repetier.zip
 workspace.xml
 .idea
 settings.json
+src/ArduinoDUE/.vscode

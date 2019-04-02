@@ -36,6 +36,22 @@ bool probeValueOld;
 char probeMessageOld[22];
 bool changeFilWaitTarget = false;
 
+void reportPrintStatus() {
+   int idle = 1;
+#if NUM_TEMPERATURE_LOOPS > 0
+    for(uint8_t i = 0; i <= HEATED_BED_INDEX; i++) {
+        TemperatureController *c = tempController[i];
+        if(c->targetTemperatureC > 0) {
+          idle = 0;
+        }
+    }
+#endif
+   if(PrintLine::hasLines()) {
+      idle = 0;
+   }
+   Com::printFLN(PSTR("PrinterIdle:"), idle);
+}
+
 void Felix500MS() {
   #ifndef TEC4
   if(PrintLine::linesCount == 0) {
@@ -3576,6 +3592,9 @@ bool customMCode(GCode *com) {
     cZPHeight2(false);
     break; 
 #endif
+  case 4210:
+    reportPrintStatus(); // Report if printer is moving or not and if all heaters are off.
+    break;
   default:
      return false;
   }
