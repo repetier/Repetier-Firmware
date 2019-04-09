@@ -1458,7 +1458,7 @@ https://github.com/teemuatlut/TMC2130Stepper
 */
 #define TMC2130_STEALTHCHOP         1  // Enable extremely quiet stepping
 #define TMC2130_INTERPOLATE_256  true  // Enable internal driver microstep interpolation
-#define TMC2130_STALLGUARD          0  // Sensorless homing sensitivity (between -63 and +64)
+#define TMC2130_STALLGUARD          0  // Sensorless homing sensitivity threshold (between -63 and +64)
 
 /** PWM values for chopper tuning
     only change if you know what you're doing
