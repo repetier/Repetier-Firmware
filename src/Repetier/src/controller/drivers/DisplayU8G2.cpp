@@ -597,6 +597,7 @@ void GUI::showValueP(PGM_P text, PGM_P unit, char* value) {
     lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
     lcd.setDrawColor(1);
 }
+
 void GUI::showValue(char* text, PGM_P unit, char* value) {
     // Value y 24 - 48, x 0 - 127
 
@@ -640,22 +641,17 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
         // X position
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("X:"));
-#if PRINTER_TYPE == 3
-        // GUI::bufAddFloat(Motion1::currentPosition[PrinterType::getActiveAxis() ? A_AXIS : X_AXIS], 4, 2);
-        GUI::bufAddFloat(Motion1::currentPosition[X_AXIS], 4, 2);
-#else
-        GUI::bufAddFloat(Motion1::currentPosition[X_AXIS], 4, 2);
-#endif
+        GUI::bufAddFloat(Motion1::getShowPosition(X_AXIS), 4, 2);
         lcd.drawUTF8(66, 16, GUI::buf);
         // Y position
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Y:"));
-        GUI::bufAddFloat(Motion1::currentPosition[Y_AXIS], 4, 2);
+        GUI::bufAddFloat(Motion1::getShowPosition(Y_AXIS), 4, 2);
         lcd.drawUTF8(66, 23, GUI::buf);
         // Z position
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Z:"));
-        GUI::bufAddFloat(Motion1::currentPosition[Z_AXIS], 4, 2);
+        GUI::bufAddFloat(Motion1::getShowPosition(Z_AXIS), 4, 2);
         lcd.drawUTF8(66, 30, GUI::buf);
         // FeedRate multiplier
         GUI::bufClear();

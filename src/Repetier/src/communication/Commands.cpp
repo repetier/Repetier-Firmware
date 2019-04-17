@@ -33,7 +33,20 @@ void Commands::commandLoop() {
 #ifdef DEBUG_PRINT
     debugWaitLoop = 1;
 #endif
+    Printer::breakLongCommand = false; // block is now finished
     if (!Printer::isBlockingReceive()) {
+#if SDSUPPORT
+        if (sd.sdmode == 20) {
+            if (Motion1::buffersUsed() == 0) {
+                sd.pausePrintPart2();
+            }
+        }
+        if (sd.sdmode == 21) {
+            if (Motion1::buffersUsed() == 0) {
+                sd.stopPrintPart2();
+            }
+        }
+#endif
         GCode::readFromSerial();
         GCode* code = GCode::peekCurrentCommand();
         //UI_SLOW; // do longer timed user interface action

@@ -225,7 +225,7 @@ public:
     }
 
 #define DRAW_LONG_P(text, unit, val) \
-    float v = val; \
+    int32_t v = val; \
     if (action == GUIAction::DRAW) { \
         GUI::bufClear(); \
         GUI::bufAddLong(v, 0); \
@@ -233,7 +233,7 @@ public:
     }
 
 #define DRAW_LONG(text, unit, val) \
-    float v = val; \
+    int32_t v = val; \
     if (action == GUIAction::DRAW) { \
         GUI::bufClear(); \
         GUI::bufAddLong(v, 0); \

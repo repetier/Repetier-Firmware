@@ -152,7 +152,12 @@ public:
     FSTRINGVAR(tUnitPercent)
     FSTRINGVAR(tUnitDegCelsius)
     FSTRINGVAR(tUnitStepsPerMM)
+    FSTRINGVAR(tUnitSteps)
     FSTRINGVAR(tUnitSeconds)
+    FSTRINGVAR(tUnitMilliSeconds)
+    FSTRINGVAR(tUnitMilliWatt)
+    FSTRINGVAR(tUnitPWM)
+    FSTRINGVAR(tUnitRPM)
 #if JSON_OUTPUT
     FSTRINGVAR(tJSONDir)
     FSTRINGVAR(tJSONFiles)

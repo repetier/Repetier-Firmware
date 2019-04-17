@@ -50,4 +50,4 @@ extern void endstopTriggered(fast8_t axis, bool dir);
 #include "zprobe.h"
 #include "heatManager.h"
 #include "coolerManager.h"
-#include "tools.h"
+#include "../tools/tools.h"

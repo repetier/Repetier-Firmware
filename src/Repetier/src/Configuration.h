@@ -43,6 +43,13 @@
 #define MOTHERBOARD MOTHERBOARD_FELIX // 405
 #define EEPROM_MODE 1
 #define RFSERIAL Serial
+//#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
+// Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
+// If it is incompatible you will get compiler errors about write functions not being compatible!
+//#define COMPAT_PRE1
+#define BLUETOOTH_SERIAL -1
+#define BLUETOOTH_BAUD 115200
+
 #define WAITING_IDENTIFIER "wait"
 #define JSON_OUTPUT 1
 #define FEATURE_WATCHDOG 1
@@ -249,12 +256,6 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #undef Z_MAX_PIN
 #define Z_MAX_PIN -1
 
-//#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
-// Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
-// If it is incompatible you will get compiler errors about write functions not being compatible!
-//#define COMPAT_PRE1
-#define BLUETOOTH_SERIAL -1
-#define BLUETOOTH_BAUD 115200
 #define MIXING_EXTRUDER 0
 
 #define DRIVE_SYSTEM 0

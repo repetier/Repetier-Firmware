@@ -378,6 +378,12 @@ void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback[
 #endif
 }
 
+float Motion1::getShowPosition(fast8_t axis) {
+    if (Tool::getActiveTool()->showMachineCoordinates()) {
+        return currentPosition[axis];
+    }
+    return currentPosition[axis] + g92Offsets[axis];
+}
 void Motion1::setMotorForAxis(StepperDriverBase* motor, fast8_t axis) {
     waitForEndOfMoves();
     motors[axis] = motor;
@@ -1372,7 +1378,7 @@ EndstopDriver& Motion1::endstopFoxAxisDir(fast8_t axis, bool maxDir) {
             break;
 #endif
 #if NUM_AXES > B_AXIS
-        case A_AXIS:
+        case B_AXIS:
             return endstopBMax;
             break;
 #endif
@@ -1404,7 +1410,7 @@ EndstopDriver& Motion1::endstopFoxAxisDir(fast8_t axis, bool maxDir) {
             break;
 #endif
 #if NUM_AXES > B_AXIS
-        case A_AXIS:
+        case B_AXIS:
             return endstopBMin;
             break;
 #endif

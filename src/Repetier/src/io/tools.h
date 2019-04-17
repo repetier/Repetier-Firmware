@@ -32,14 +32,21 @@
     extern void __attribute__((weak)) menuConfig##name(GUIAction action, void* data);
 
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
-    extern ToolLaser<toolPin, enablePin> name;
+    extern ToolLaser<toolPin, enablePin> name; \
+    extern void __attribute__((weak)) menuControl##name(GUIAction action, void* data); \
+    extern void __attribute__((weak)) menuTune##name(GUIAction action, void* data); \
+    extern void __attribute__((weak)) menuConfig##name(GUIAction action, void* data);
 
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript) \
-    extern ToolCNC<dirPin, toolPin, enablePin> name;
+    extern ToolCNC<dirPin, toolPin, enablePin> name; \
+    extern void __attribute__((weak)) menuControl##name(GUIAction action, void* data); \
+    extern void __attribute__((weak)) menuTune##name(GUIAction action, void* data); \
+    extern void __attribute__((weak)) menuConfig##name(GUIAction action, void* data);
 
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage) \
     extern JamDetectorHW<inputPin, observer##Type> name; \
-    extern void name##Int();
+    extern void name##Int(); \
+    extern void __attribute__((weak)) menuConfig##name(GUIAction action, void* data);
 
 #define FILAMENT_DETECTOR(name, inputPin, tool) \
     extern FilamentDetector<inputPin> name;
@@ -81,19 +88,93 @@
         GUI::menuFloatP(action, PSTR("Max Accel. :"), name.getAcceleration(), 0, menuExtruderMaxAcceleration, &name, GUIPageType::FIXED_CONTENT); \
         GUI::menuFloatP(action, PSTR("Max Jerk   :"), name.getMaxYank(), 1, menuExtruderMaxYank, &name, GUIPageType::FIXED_CONTENT); \
         GUI::menuFloatP(action, PSTR("Diameter   :"), name.getDiameter(), 2, menuExtruderFilamentDiameter, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuFloatP(action, PSTR("Offset X   :"), name.getOffsetX(), 2, menuToolOffsetX, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuFloatP(action, PSTR("Offset Y   :"), name.getOffsetY(), 2, menuToolOffsetY, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuFloatP(action, PSTR("Offset Z   :"), name.getOffsetZ(), 2, menuToolOffsetZ, &name, GUIPageType::FIXED_CONTENT); \
         name.getHeater()->showConfigMenu(action); \
         GUI::menuEnd(action); \
     }
 
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
-    ToolLaser<toolPin, enablePin> name(offx, offy, offz, &output, milliWatt, warmupUS, warmupPWM, bias, gamma, PSTR(startScript), PSTR(endScript));
+    ToolLaser<toolPin, enablePin> name(offx, offy, offz, &output, milliWatt, warmupUS, warmupPWM, bias, gamma, PSTR(startScript), PSTR(endScript)); \
+    void __attribute__((weak)) menuControl##name(GUIAction action, void* data) { \
+        GUI::menuStart(action); \
+        char help[MAX_COLS]; \
+        GUI::flashToStringLong(help, PSTR("= Laser @ ="), name.getToolId() + 1); \
+        GUI::menuText(action, help, true); \
+        GUI::menuBack(action); \
+        GUI::menuSelectableP(action, PSTR("Select Laser"), selectToolAction, (void*)name.getToolId(), GUIPageType::ACTION); \
+        GUI::menuEnd(action); \
+    } \
+    void __attribute__((weak)) menuTune##name(GUIAction action, void* data) { \
+        GUI::menuStart(action); \
+        char help[MAX_COLS]; \
+        GUI::flashToStringLong(help, PSTR("= Laser @ ="), name.getToolId() + 1); \
+        GUI::menuText(action, help, true); \
+        GUI::menuBack(action); \
+        GUI::menuEnd(action); \
+    } \
+    void __attribute__((weak)) menuConfig##name(GUIAction action, void* data) { \
+        GUI::menuStart(action); \
+        char help[MAX_COLS]; \
+        GUI::flashToStringLong(help, PSTR("= Laser @ ="), name.getToolId() + 1); \
+        GUI::menuText(action, help, true); \
+        GUI::menuBack(action); \
+        GUI::menuFloatP(action, PSTR("Power       :"), name.getMilliWatt(), 0, ToolLaser<toolPin, enablePin>::menuToolLaserMilliWatt, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuLongP(action, PSTR("Warmup Power:"), name.getWarmupPower(), ToolLaser<toolPin, enablePin>::menuToolLaserWarmupPower, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuLongP(action, PSTR("Warmup Time :"), name.getWarmupTime(), ToolLaser<toolPin, enablePin>::menuToolLaserWarmupTime, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuFloatP(action, PSTR("Offset X    :"), name.getOffsetX(), 2, menuToolOffsetX, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuFloatP(action, PSTR("Offset Y    :"), name.getOffsetY(), 2, menuToolOffsetY, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuFloatP(action, PSTR("Offset Z    :"), name.getOffsetZ(), 2, menuToolOffsetZ, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuEnd(action); \
+    }
 
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript) \
-    ToolCNC<dirPin, toolPin, enablePin> name(offx, offy, offz, &output, rpm, startStopDelay, PSTR(startScript), PSTR(endScript));
+    ToolCNC<dirPin, toolPin, enablePin> name(offx, offy, offz, &output, rpm, startStopDelay, PSTR(startScript), PSTR(endScript)); \
+    void __attribute__((weak)) menuControl##name(GUIAction action, void* data) { \
+        GUI::menuStart(action); \
+        char help[MAX_COLS]; \
+        GUI::flashToStringLong(help, PSTR("= CNC @ ="), name.getToolId() + 1); \
+        GUI::menuText(action, help, true); \
+        GUI::menuBack(action); \
+        GUI::menuSelectableP(action, PSTR("Select CNC"), selectToolAction, (void*)name.getToolId(), GUIPageType::ACTION); \
+        GUI::menuEnd(action); \
+    } \
+    void __attribute__((weak)) menuTune##name(GUIAction action, void* data) { \
+        GUI::menuStart(action); \
+        char help[MAX_COLS]; \
+        GUI::flashToStringLong(help, PSTR("= CNC @ ="), name.getToolId() + 1); \
+        GUI::menuText(action, help, true); \
+        GUI::menuBack(action); \
+        GUI::menuEnd(action); \
+    } \
+    void __attribute__((weak)) menuConfig##name(GUIAction action, void* data) { \
+        GUI::menuStart(action); \
+        char help[MAX_COLS]; \
+        GUI::flashToStringLong(help, PSTR("= CNC @ ="), name.getToolId() + 1); \
+        GUI::menuText(action, help, true); \
+        GUI::menuBack(action); \
+        GUI::menuFloatP(action, PSTR("Max. RPM :"), name.getRPM(), 0, ToolCNC<dirPin, toolPin, enablePin>::menuRPM, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuFloatP(action, PSTR("Offset X :"), name.getOffsetX(), 2, menuToolOffsetX, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuFloatP(action, PSTR("Offset Y :"), name.getOffsetY(), 2, menuToolOffsetY, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuFloatP(action, PSTR("Offset Z :"), name.getOffsetZ(), 2, menuToolOffsetZ, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuEnd(action); \
+    }
 
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage) \
     JamDetectorHW<inputPin, observer##Type> name(&observer, &tool, distanceSteps, jitterSteps, jamPercentage); \
-    void name##Int() { name.interruptSignaled(); }
+    void name##Int() { name.interruptSignaled(); } \
+    void __attribute__((weak)) menuConfig##name(GUIAction action, void* data) { \
+        GUI::menuStart(action); \
+        char help[MAX_COLS]; \
+        GUI::flashToStringLong(help, PSTR("= Jam Detector @ ="), tool.getToolId() + 1); \
+        GUI::menuText(action, help, true); \
+        GUI::menuBack(action); \
+        GUI::menuLongP(action, PSTR("Sig. Distance:"), name.getDistanceSteps(), JamDetectorHW<inputPin, observer##Type>::menuDistanceSteps, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuLongP(action, PSTR("Jitter Tresh.:"), name.getJitterSteps(), JamDetectorHW<inputPin, observer##Type>::menuJitterSteps, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuLongP(action, PSTR("Jam Treshold :"), name.getJamPercentage(), JamDetectorHW<inputPin, observer##Type>::menuJamPercentage, &name, GUIPageType::FIXED_CONTENT); \
+        GUI::menuEnd(action); \
+    }
 
 #define FILAMENT_DETECTOR(name, inputPin, tool) \
     FilamentDetector<inputPin> name(&tool);
@@ -178,8 +259,12 @@
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
     GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuControl##name, nullptr, GUIPageType::MENU);
 
-#define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript)
-#define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript)
+#define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
+    GUI::menuLongP(action, PSTR("Laser "), name.getToolId() + 1, menuControl##name, nullptr, GUIPageType::MENU);
+
+#define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript) \
+    GUI::menuLongP(action, PSTR("CNC "), name.getToolId() + 1, menuControl##name, nullptr, GUIPageType::MENU);
+
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage)
 #define FILAMENT_DETECTOR(name, inputPin, tool)
 #define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
@@ -189,9 +274,15 @@
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
     GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU);
 
-#define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript)
-#define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript)
-#define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage)
+#define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
+    GUI::menuLongP(action, PSTR("Laser "), name.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU);
+
+#define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript) \
+    GUI::menuLongP(action, PSTR("CNC "), name.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU);
+
+#define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage) \
+    GUI::menuLongP(action, PSTR("Jam Detector "), tool.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU);
+
 #define FILAMENT_DETECTOR(name, inputPin, tool)
 #define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
@@ -200,8 +291,12 @@
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
     GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuTune##name, nullptr, GUIPageType::MENU);
 
-#define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript)
-#define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript)
+#define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
+    GUI::menuLongP(action, PSTR("Laser "), name.getToolId() + 1, menuTune##name, nullptr, GUIPageType::MENU);
+
+#define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript) \
+    GUI::menuLongP(action, PSTR("CNC "), name.getToolId() + 1, menuTune##name, nullptr, GUIPageType::MENU);
+
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage)
 #define FILAMENT_DETECTOR(name, inputPin, tool)
 #define TOOL_CHANGE_CUSTOM_EVENT(name, tool)

@@ -267,6 +267,7 @@ public:
     static void setFromConfig();
     static void fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback);
     static void fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback[NUM_AXES]);
+    static float getShowPosition(fast8_t axis);
     // Move with coordinates in official coordinates (before offset, transform, ...)
     static bool moveByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove);
     // Move to the printer coordinates (after offset, transform, ...)

@@ -649,8 +649,10 @@ public:
     void unmount();
     void startPrint();
     void pausePrint(bool intern = false);
+    void pausePrintPart2();
     void continuePrint(bool intern = false);
     void stopPrint();
+    void stopPrintPart2();
     inline void setIndex(uint32_t newpos) {
         if (!sdactive)
             return;

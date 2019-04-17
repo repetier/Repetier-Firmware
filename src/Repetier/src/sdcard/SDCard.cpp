@@ -163,21 +163,29 @@ void SDCard::pausePrint(bool intern) {
     Printer::setPrinting(false);
 #endif
     GCodeSource::removeSource(&sdSource);
-    if (EVENT_SD_PAUSE_START(intern)) {
-        if (intern) {
-            Commands::waitUntilEndOfAllBuffers();
-            //sdmode = 0; // why ?
-            Motion1::pushToMemory();
-            Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE,
-                                Motion1::currentPosition[E_AXIS] - RETRACT_ON_PAUSE,
-                                Motion1::maxFeedrate[E_AXIS] / 2);
-            Tool* tool = Tool::getActiveTool();
-            if (tool) {
-                tool->afterPause();
-            }
-            Motion1::moveToParkPosition();
-            GCode::executeFString(PSTR(PAUSE_START_COMMANDS));
+    if (intern) {
+        sdmode = 20;
+    } else {
+        EVENT_SD_PAUSE_START(intern);
+        EVENT_SD_PAUSE_END(intern);
+    }
+}
+
+void SDCard::pausePrintPart2() {
+    sdmode = 2;
+    if (EVENT_SD_PAUSE_START(true)) {
+        Commands::waitUntilEndOfAllBuffers();
+        //sdmode = 0; // why ?
+        Motion1::pushToMemory();
+        Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE,
+                            Motion1::currentPosition[E_AXIS] - RETRACT_ON_PAUSE,
+                            Motion1::maxFeedrate[E_AXIS] / 2);
+        Tool* tool = Tool::getActiveTool();
+        if (tool) {
+            tool->afterPause();
         }
+        Motion1::moveToParkPosition();
+        GCode::executeFString(PSTR(PAUSE_START_COMMANDS));
     }
     EVENT_SD_PAUSE_END(intern);
 }
@@ -222,10 +230,15 @@ void SDCard::stopPrint() {
         return;
     if (sdmode)
         Com::printFLN(PSTR("SD print stopped by user."));
-    sdmode = 0;
+    sdmode = 21;
     Printer::setMenuMode(MENU_MODE_SD_PRINTING, false);
     Printer::setMenuMode(MENU_MODE_PAUSED, false);
     Printer::setPrinting(0);
+    Printer::breakLongCommand = true; // stop waiting heatup if running
+}
+
+void SDCard::stopPrintPart2() {
+    sdmode = 0;
     Motion1::moveToParkPosition();
     GCodeSource::removeSource(&sdSource);
     if (EVENT_SD_STOP_START) {

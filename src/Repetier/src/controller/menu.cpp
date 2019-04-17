@@ -4,10 +4,31 @@ const char* const axisNames[] PROGMEM = {
     "X", "Y", "Z", "E", "A", "B", "C"
 };
 
+void __attribute__((weak)) menuMoveAxisFine(GUIAction action, void* data) {
+    int axis = reinterpret_cast<int>(data);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Move @-Axis (0.01mm):"), axisNames[axis]);
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::getShowPosition(axis), 2);
+    if (!Tool::getActiveTool()->showMachineCoordinates()) {
+        v -= Motion1::g92Offsets[axis];
+    }
+    if (GUI::handleFloatValueAction(action, v, Motion1::minPos[X_AXIS], Motion1::maxPos[X_AXIS], 0.01)) {
+        Motion1::copyCurrentOfficial(Motion1::tmpPosition);
+        Motion1::tmpPosition[axis] = v;
+        Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[axis], false);
+    }
+}
+
 void __attribute__((weak)) menuMoveAxis(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Move @-Axis:"), axisNames[axis]);
-    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::currentPosition[axis], 2);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Move @-Axis (1mm):"), axisNames[axis]);
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::getShowPosition(axis), 2);
+    if (!Tool::getActiveTool()->showMachineCoordinates()) {
+        v -= Motion1::g92Offsets[axis];
+    }
+    if (action == GUIAction::CLICK) { // catch default action
+        GUI::replace(menuMoveAxisFine, data, GUIPageType::FIXED_CONTENT);
+        return;
+    }
     if (GUI::handleFloatValueAction(action, v, Motion1::minPos[X_AXIS], Motion1::maxPos[X_AXIS], 1.0)) {
         Motion1::copyCurrentOfficial(Motion1::tmpPosition);
         Motion1::tmpPosition[axis] = v;
@@ -216,7 +237,7 @@ void __attribute__((weak)) menuMove(GUIAction action, void* data) {
             continue;
         }
         GUI::flashToStringFlash(GUI::tmpString, PSTR("Move @:"), axisNames[i]);
-        GUI::menuFloat(action, GUI::tmpString, Motion1::currentPosition[i], 2, menuMoveAxis, (void*)(int)i, GUIPageType::FIXED_CONTENT);
+        GUI::menuFloat(action, GUI::tmpString, Motion1::getShowPosition(i), 2, menuMoveAxis, (void*)(int)i, GUIPageType::FIXED_CONTENT);
     }
     GUI::menuEnd(action);
 }
