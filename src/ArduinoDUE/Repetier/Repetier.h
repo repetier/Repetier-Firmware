@@ -48,13 +48,13 @@
 // ##########################################################################################
 // These are run time switchable debug flags
 enum debugFlags {
-  DEB_ECHO = 0x1,
-  DEB_INFO = 0x2,
-  DEB_ERROR = 0x4,
-  DEB_DRYRUN = 0x8,
-  DEB_COMMUNICATION = 0x10,
-  DEB_NOMOVES = 0x20,
-  DEB_DEBUG = 0x40
+    DEB_ECHO = 0x1,
+    DEB_INFO = 0x2,
+    DEB_ERROR = 0x4,
+    DEB_DRYRUN = 0x8,
+    DEB_COMMUNICATION = 0x10,
+    DEB_NOMOVES = 0x20,
+    DEB_DEBUG = 0x40
 };
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes!
@@ -102,32 +102,32 @@ Switch it off for production, it costs execution time. */
 // debugging below the following line
 //#define DEBUG
 
-#define DEBUG_MSG(x)                                                           \
-  {                                                                            \
-    if (Printer::debugEcho()) {                                                \
-      Com::printFLN(PSTR(x));                                                  \
-      HAL::delayMilliseconds(20);                                              \
-    }                                                                          \
-  }
-#define DEBUG_MSG2(x, y)                                                       \
-  {                                                                            \
-    if (Printer::debugEcho()) {                                                \
-      Com::printFLN(PSTR(x), y);                                               \
-      HAL::delayMilliseconds(20);                                              \
-    }                                                                          \
-  }
-#define DEBUG_MSG_FAST(x)                                                      \
-  {                                                                            \
-    if (Printer::debugEcho()) {                                                \
-      Com::printFLN(PSTR(x));                                                  \
-    }                                                                          \
-  }
-#define DEBUG_MSG2_FAST(x, y)                                                  \
-  {                                                                            \
-    if (Printer::debugEcho()) {                                                \
-      Com::printFLN(PSTR(x), y);                                               \
-    }                                                                          \
-  }
+#define DEBUG_MSG(x) \
+    { \
+        if (Printer::debugEcho()) { \
+            Com::printFLN(PSTR(x)); \
+            HAL::delayMilliseconds(20); \
+        } \
+    }
+#define DEBUG_MSG2(x, y) \
+    { \
+        if (Printer::debugEcho()) { \
+            Com::printFLN(PSTR(x), y); \
+            HAL::delayMilliseconds(20); \
+        } \
+    }
+#define DEBUG_MSG_FAST(x) \
+    { \
+        if (Printer::debugEcho()) { \
+            Com::printFLN(PSTR(x)); \
+        } \
+    }
+#define DEBUG_MSG2_FAST(x, y) \
+    { \
+        if (Printer::debugEcho()) { \
+            Com::printFLN(PSTR(x), y); \
+        } \
+    }
 
 #define CARTESIAN 0
 #define XY_GANTRY 1
@@ -159,10 +159,14 @@ Switch it off for production, it costs execution time. */
 #define ANALYZER_CH7 57 // ysig
 
 #ifdef ANALYZER
-#define ANALYZER_ON(a)                                                         \
-  { WRITE(a, HIGH); }
-#define ANALYZER_OFF(a)                                                        \
-  { WRITE(a, LOW); }
+#define ANALYZER_ON(a) \
+    { \
+        WRITE(a, HIGH); \
+    }
+#define ANALYZER_OFF(a) \
+    { \
+        WRITE(a, LOW); \
+    }
 #else
 #define ANALYZER_ON(a)
 #define ANALYZER_OFF(a)
@@ -342,17 +346,14 @@ typedef uint8_t secondspeed_t;
 #define MAX_JERK_DISTANCE 0.6
 #endif
 
-#if defined(FAST_COREXYZ) &&                                                   \
-    !(DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == YX_GANTRY ||                \
-      DRIVE_SYSTEM == XZ_GANTRY || DRIVE_SYSTEM == ZX_GANTRY ||                \
-      DRIVE_SYSTEM == GANTRY_FAKE)
+#if defined(FAST_COREXYZ) && !(DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == YX_GANTRY || DRIVE_SYSTEM == XZ_GANTRY || DRIVE_SYSTEM == ZX_GANTRY || DRIVE_SYSTEM == GANTRY_FAKE)
 #undef FAST_COREXYZ
 #endif
 #ifdef FAST_COREXYZ
 #if DELTA_SEGMENTS_PER_SECOND_PRINT > 30
 #undef DELTA_SEGMENTS_PER_SECOND_PRINT
-#define DELTA_SEGMENTS_PER_SECOND_PRINT                                        \
-  30 // core is linear, no subsegments needed
+#define DELTA_SEGMENTS_PER_SECOND_PRINT \
+    30 // core is linear, no subsegments needed
 #endif
 #if DELTA_SEGMENTS_PER_SECOND_MOVE > 30
 #undef DELTA_SEGMENTS_PER_SECOND_MOVE
@@ -360,11 +361,11 @@ typedef uint8_t secondspeed_t;
 #endif
 #endif
 
-inline void memcopy2(void *dest, void *source) {
-  *((int16_t *)dest) = *((int16_t *)source);
+inline void memcopy2(void* dest, void* source) {
+    *((int16_t*)dest) = *((int16_t*)source);
 }
-inline void memcopy4(void *dest, void *source) {
-  *((int32_t *)dest) = *((int32_t *)source);
+inline void memcopy4(void* dest, void* source) {
+    *((int32_t*)dest) = *((int32_t*)source);
 }
 
 #ifndef JSON_OUTPUT
@@ -432,16 +433,14 @@ inline void memcopy4(void *dest, void *source) {
 #define MULTI_ZENDSTOP_HOMING 0
 #endif
 
-#if (X_HOME_DIR < 0 && HAS_PIN(X2_MIN) && MIN_HARDWARE_ENDSTOP_X2) ||          \
-    (X_HOME_DIR > 0 && HAS_PIN(X2_MAX) && MAX_HARDWARE_ENDSTOP_X2)
+#if (X_HOME_DIR < 0 && HAS_PIN(X2_MIN) && MIN_HARDWARE_ENDSTOP_X2) || (X_HOME_DIR > 0 && HAS_PIN(X2_MAX) && MAX_HARDWARE_ENDSTOP_X2)
 #define MULTI_XENDSTOP_HOMING 1
 #define MULTI_XENDSTOP_ALL 3
 #else
 #define MULTI_XENDSTOP_HOMING 0
 #endif
 
-#if (Y_HOME_DIR < 0 && HAS_PIN(Y2_MIN) && MIN_HARDWARE_ENDSTOP_Y2) ||          \
-    (Y_HOME_DIR > 0 && HAS_PIN(Y2_MAX) && MAX_HARDWARE_ENDSTOP_Y2)
+#if (Y_HOME_DIR < 0 && HAS_PIN(Y2_MIN) && MIN_HARDWARE_ENDSTOP_Y2) || (Y_HOME_DIR > 0 && HAS_PIN(Y2_MAX) && MAX_HARDWARE_ENDSTOP_Y2)
 #define MULTI_YENDSTOP_HOMING 1
 #define MULTI_YENDSTOP_ALL 3
 #else
@@ -452,23 +451,22 @@ inline void memcopy4(void *dest, void *source) {
 #define SPEED_MAX_MILLIS 60
 #define SPEED_MAGNIFICATION 100.0f
 
-#define SOFTWARE_LEVELING                                                      \
-  ((FEATURE_SOFTWARE_LEVELING) && (DRIVE_SYSTEM == DELTA))
+#define SOFTWARE_LEVELING \
+    ((FEATURE_SOFTWARE_LEVELING) && (DRIVE_SYSTEM == DELTA))
 /**  \brief Horizontal distance bridged by the diagonal push rod when the end
  * effector is in the center. It is pretty close to 50% of the push rod length
  * (250 mm).
  */
 #if !defined(ROD_RADIUS) && DRIVE_SYSTEM == DELTA
-#define ROD_RADIUS                                                             \
-  (PRINTER_RADIUS - END_EFFECTOR_HORIZONTAL_OFFSET - CARRIAGE_HORIZONTAL_OFFSET)
+#define ROD_RADIUS \
+    (PRINTER_RADIUS - END_EFFECTOR_HORIZONTAL_OFFSET - CARRIAGE_HORIZONTAL_OFFSET)
 #endif
 
 #ifndef UI_SPEEDDEPENDENT_POSITIONING
 #define UI_SPEEDDEPENDENT_POSITIONING 1
 #endif
 
-#if DRIVE_SYSTEM == DELTA || DRIVE_SYSTEM == TUGA || DRIVE_SYSTEM == BIPOD ||  \
-    defined(FAST_COREXYZ)
+#if DRIVE_SYSTEM == DELTA || DRIVE_SYSTEM == TUGA || DRIVE_SYSTEM == BIPOD || defined(FAST_COREXYZ)
 #define NONLINEAR_SYSTEM 1
 #else
 #define NONLINEAR_SYSTEM 0
@@ -478,10 +476,8 @@ inline void memcopy4(void *dest, void *source) {
 #define MANUAL_CONTROL 1
 #endif
 
-#define GANTRY                                                                 \
-  (DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == YX_GANTRY ||                   \
-   DRIVE_SYSTEM == XZ_GANTRY || DRIVE_SYSTEM == ZX_GANTRY ||                   \
-   DRIVE_SYSTEM == GANTRY_FAKE)
+#define GANTRY \
+    (DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == YX_GANTRY || DRIVE_SYSTEM == XZ_GANTRY || DRIVE_SYSTEM == ZX_GANTRY || DRIVE_SYSTEM == GANTRY_FAKE)
 
 // Step to split a circle in small Lines
 #ifndef MM_PER_ARC_SEGMENT
@@ -495,30 +491,15 @@ inline void memcopy4(void *dest, void *source) {
 #define N_ARC_CORRECTION 25
 
 // Test for shared cooler
-#if NUM_EXTRUDER == 6 && EXT0_EXTRUDER_COOLER_PIN > -1 &&                      \
-    EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN &&                    \
-    EXT2_EXTRUDER_COOLER_PIN == EXT3_EXTRUDER_COOLER_PIN &&                    \
-    EXT4_EXTRUDER_COOLER_PIN == EXT5_EXTRUDER_COOLER_PIN &&                    \
-    EXT0_EXTRUDER_COOLER_PIN == EXT2_EXTRUDER_COOLER_PIN &&                    \
-    EXT0_EXTRUDER_COOLER_PIN == EXT4_EXTRUDER_COOLER_PIN
+#if NUM_EXTRUDER == 6 && EXT0_EXTRUDER_COOLER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN && EXT2_EXTRUDER_COOLER_PIN == EXT3_EXTRUDER_COOLER_PIN && EXT4_EXTRUDER_COOLER_PIN == EXT5_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN == EXT2_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN == EXT4_EXTRUDER_COOLER_PIN
 #define SHARED_COOLER 1
-#elif NUM_EXTRUDER == 5 && EXT0_EXTRUDER_COOLER_PIN > -1 &&                    \
-    EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN &&                    \
-    EXT2_EXTRUDER_COOLER_PIN == EXT3_EXTRUDER_COOLER_PIN &&                    \
-    EXT3_EXTRUDER_COOLER_PIN == EXT5_EXTRUDER_COOLER_PIN &&                    \
-    EXT0_EXTRUDER_COOLER_PIN == EXT2_EXTRUDER_COOLER_PIN
+#elif NUM_EXTRUDER == 5 && EXT0_EXTRUDER_COOLER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN && EXT2_EXTRUDER_COOLER_PIN == EXT3_EXTRUDER_COOLER_PIN && EXT3_EXTRUDER_COOLER_PIN == EXT5_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN == EXT2_EXTRUDER_COOLER_PIN
 #define SHARED_COOLER 1
-#elif NUM_EXTRUDER == 4 && EXT0_EXTRUDER_COOLER_PIN > -1 &&                    \
-    EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN &&                    \
-    EXT2_EXTRUDER_COOLER_PIN == EXT3_EXTRUDER_COOLER_PIN &&                    \
-    EXT0_EXTRUDER_COOLER_PIN == EXT2_EXTRUDER_COOLER_PIN
+#elif NUM_EXTRUDER == 4 && EXT0_EXTRUDER_COOLER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN && EXT2_EXTRUDER_COOLER_PIN == EXT3_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN == EXT2_EXTRUDER_COOLER_PIN
 #define SHARED_COOLER 1
-#elif NUM_EXTRUDER == 3 && EXT0_EXTRUDER_COOLER_PIN > -1 &&                    \
-    EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN &&                    \
-    EXT2_EXTRUDER_COOLER_PIN == EXT0_EXTRUDER_COOLER_PIN
+#elif NUM_EXTRUDER == 3 && EXT0_EXTRUDER_COOLER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN && EXT2_EXTRUDER_COOLER_PIN == EXT0_EXTRUDER_COOLER_PIN
 #define SHARED_COOLER 1
-#elif NUM_EXTRUDER == 2 && EXT0_EXTRUDER_COOLER_PIN > -1 &&                    \
-    EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN
+#elif NUM_EXTRUDER == 2 && EXT0_EXTRUDER_COOLER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN
 #define SHARED_COOLER 1
 #else
 #define SHARED_COOLER 0
@@ -548,12 +529,7 @@ inline void memcopy4(void *dest, void *source) {
 #define UI_SERVO_CONTROL FEATURE_SERVO
 #endif
 
-#if (defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1) ||                            \
-    (defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1) ||                            \
-    (defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1) ||                            \
-    (defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1) ||                            \
-    (defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1) ||                            \
-    (defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1)
+#if (defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1) || (defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1) || (defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1) || (defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1) || (defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1) || (defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1)
 #define EXTRUDER_JAM_CONTROL 1
 #else
 #define EXTRUDER_JAM_CONTROL 0
@@ -600,8 +576,8 @@ inline void memcopy4(void *dest, void *source) {
 
 #if NUM_EXTRUDER > 3 && EXT3_TEMPSENSOR_TYPE < 101
 #define EXT3_ANALOG_INPUTS 1
-#define EXT3_SENSOR_INDEX                                                      \
-  EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS
+#define EXT3_SENSOR_INDEX \
+    EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS
 #define EXT3_ANALOG_CHANNEL ACCOMMA2 EXT3_TEMPSENSOR_PIN
 #define ACCOMMA3 ,
 #else
@@ -613,9 +589,8 @@ inline void memcopy4(void *dest, void *source) {
 
 #if NUM_EXTRUDER > 4 && EXT4_TEMPSENSOR_TYPE < 101
 #define EXT4_ANALOG_INPUTS 1
-#define EXT4_SENSOR_INDEX                                                      \
-  EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS +               \
-      EXT3_ANALOG_INPUTS
+#define EXT4_SENSOR_INDEX \
+    EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS + EXT3_ANALOG_INPUTS
 #define EXT4_ANALOG_CHANNEL ACCOMMA3 EXT4_TEMPSENSOR_PIN
 #define ACCOMMA4 ,
 #else
@@ -627,9 +602,8 @@ inline void memcopy4(void *dest, void *source) {
 
 #if NUM_EXTRUDER > 5 && EXT5_TEMPSENSOR_TYPE < 101
 #define EXT5_ANALOG_INPUTS 1
-#define EXT5_SENSOR_INDEX                                                      \
-  EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS +               \
-      EXT3_ANALOG_INPUTS + EXT4_ANALOG_INPUTS
+#define EXT5_SENSOR_INDEX \
+    EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS + EXT3_ANALOG_INPUTS + EXT4_ANALOG_INPUTS
 #define EXT5_ANALOG_CHANNEL ACCOMMA4 EXT5_TEMPSENSOR_PIN
 #define ACCOMMA5 ,
 #else
@@ -641,9 +615,8 @@ inline void memcopy4(void *dest, void *source) {
 
 #if HAVE_HEATED_BED && HEATED_BED_SENSOR_TYPE < 101
 #define BED_ANALOG_INPUTS 1
-#define BED_SENSOR_INDEX                                                       \
-  EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS +               \
-      EXT3_ANALOG_INPUTS + EXT4_ANALOG_INPUTS + EXT5_ANALOG_INPUTS
+#define BED_SENSOR_INDEX \
+    EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS + EXT3_ANALOG_INPUTS + EXT4_ANALOG_INPUTS + EXT5_ANALOG_INPUTS
 #define BED_ANALOG_CHANNEL ACCOMMA5 HEATED_BED_SENSOR_PIN
 #define BED_KOMMA ,
 #else
@@ -655,10 +628,8 @@ inline void memcopy4(void *dest, void *source) {
 
 #if FAN_THERMO_THERMISTOR_PIN > -1 && FAN_THERMO_PIN > -1
 #define THERMO_ANALOG_INPUTS 1
-#define THERMO_ANALOG_INDEX                                                    \
-  EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS +               \
-      EXT3_ANALOG_INPUTS + EXT4_ANALOG_INPUTS + EXT5_ANALOG_INPUTS +           \
-      BED_ANALOG_INPUTS
+#define THERMO_ANALOG_INDEX \
+    EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS + EXT3_ANALOG_INPUTS + EXT4_ANALOG_INPUTS + EXT5_ANALOG_INPUTS + BED_ANALOG_INPUTS
 #define THERMO_ANALOG_CHANNEL BED_KOMMA FAN_THERMO_THERMISTOR_PIN
 #define THERMO_COMMA ,
 #else
@@ -669,10 +640,8 @@ inline void memcopy4(void *dest, void *source) {
 
 #if defined(ADC_KEYPAD_PIN) && (ADC_KEYPAD_PIN > -1)
 #define KEYPAD_ANALOG_INPUTS 1
-#define KEYPAD_ANALOG_INDEX                                                    \
-  EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS +               \
-      EXT3_ANALOG_INPUTS + EXT4_ANALOG_INPUTS + EXT5_ANALOG_INPUTS +           \
-      BED_ANALOG_INPUTS + THERMO_ANALOG_INPUTS
+#define KEYPAD_ANALOG_INDEX \
+    EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS + EXT3_ANALOG_INPUTS + EXT4_ANALOG_INPUTS + EXT5_ANALOG_INPUTS + BED_ANALOG_INPUTS + THERMO_ANALOG_INPUTS
 #define KEYPAD_ANALOG_CHANNEL THERMO_COMMA ADC_KEYPAD_PIN
 #else
 #define KEYPAD_ANALOG_INPUTS 0
@@ -685,24 +654,20 @@ inline void memcopy4(void *dest, void *source) {
 #define DEBUG_MEMORY Commands::checkFreeMemory();
 #endif
 
-#define NUM_ANALOG_TEMP_SENSORS                                                \
-  EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS +               \
-      EXT3_ANALOG_INPUTS + EXT4_ANALOG_INPUTS + EXT5_ANALOG_INPUTS +           \
-      BED_ANALOG_INPUTS + THERMO_ANALOG_INPUTS
+#define NUM_ANALOG_TEMP_SENSORS \
+    EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS + EXT3_ANALOG_INPUTS + EXT4_ANALOG_INPUTS + EXT5_ANALOG_INPUTS + BED_ANALOG_INPUTS + THERMO_ANALOG_INPUTS
 /** \brief number of analog input signals. Normally 1 for each temperature
  * sensor */
-#define ANALOG_INPUTS                                                          \
-  (EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS +              \
-   EXT3_ANALOG_INPUTS + EXT4_ANALOG_INPUTS + EXT5_ANALOG_INPUTS +              \
-   BED_ANALOG_INPUTS + THERMO_ANALOG_INPUTS + KEYPAD_ANALOG_INPUTS)
+#define ANALOG_INPUTS \
+    (EXT0_ANALOG_INPUTS + EXT1_ANALOG_INPUTS + EXT2_ANALOG_INPUTS + EXT3_ANALOG_INPUTS + EXT4_ANALOG_INPUTS + EXT5_ANALOG_INPUTS + BED_ANALOG_INPUTS + THERMO_ANALOG_INPUTS + KEYPAD_ANALOG_INPUTS)
 #if ANALOG_INPUTS > 0
 /** Channels are the MUX-part of ADMUX register */
-#define ANALOG_INPUT_CHANNELS                                                  \
-  {                                                                            \
-    EXT0_ANALOG_CHANNEL EXT1_ANALOG_CHANNEL EXT2_ANALOG_CHANNEL                \
-        EXT3_ANALOG_CHANNEL EXT4_ANALOG_CHANNEL EXT5_ANALOG_CHANNEL            \
-            BED_ANALOG_CHANNEL THERMO_ANALOG_CHANNEL KEYPAD_ANALOG_CHANNEL     \
-  }
+#define ANALOG_INPUT_CHANNELS \
+    { \
+        EXT0_ANALOG_CHANNEL EXT1_ANALOG_CHANNEL EXT2_ANALOG_CHANNEL \
+            EXT3_ANALOG_CHANNEL EXT4_ANALOG_CHANNEL EXT5_ANALOG_CHANNEL \
+                BED_ANALOG_CHANNEL THERMO_ANALOG_CHANNEL KEYPAD_ANALOG_CHANNEL \
+    }
 #endif
 
 #define MENU_MODE_SD_MOUNTED 1
@@ -752,18 +717,7 @@ inline void memcopy4(void *dest, void *source) {
 #include "ui.h"
 
 #if UI_DISPLAY_TYPE != DISPLAY_U8G
-#if (defined(USER_KEY1_PIN) && (USER_KEY1_PIN == UI_DISPLAY_D5_PIN ||          \
-                                USER_KEY1_PIN == UI_DISPLAY_D6_PIN ||          \
-                                USER_KEY1_PIN == UI_DISPLAY_D7_PIN)) ||        \
-    (defined(USER_KEY2_PIN) && (USER_KEY2_PIN == UI_DISPLAY_D5_PIN ||          \
-                                USER_KEY2_PIN == UI_DISPLAY_D6_PIN ||          \
-                                USER_KEY2_PIN == UI_DISPLAY_D7_PIN)) ||        \
-    (defined(USER_KEY3_PIN) && (USER_KEY3_PIN == UI_DISPLAY_D5_PIN ||          \
-                                USER_KEY3_PIN == UI_DISPLAY_D6_PIN ||          \
-                                USER_KEY3_PIN == UI_DISPLAY_D7_PIN)) ||        \
-    (defined(USER_KEY4_PIN) && (USER_KEY4_PIN == UI_DISPLAY_D5_PIN ||          \
-                                USER_KEY4_PIN == UI_DISPLAY_D6_PIN ||          \
-                                USER_KEY4_PIN == UI_DISPLAY_D7_PIN))
+#if (defined(USER_KEY1_PIN) && (USER_KEY1_PIN == UI_DISPLAY_D5_PIN || USER_KEY1_PIN == UI_DISPLAY_D6_PIN || USER_KEY1_PIN == UI_DISPLAY_D7_PIN)) || (defined(USER_KEY2_PIN) && (USER_KEY2_PIN == UI_DISPLAY_D5_PIN || USER_KEY2_PIN == UI_DISPLAY_D6_PIN || USER_KEY2_PIN == UI_DISPLAY_D7_PIN)) || (defined(USER_KEY3_PIN) && (USER_KEY3_PIN == UI_DISPLAY_D5_PIN || USER_KEY3_PIN == UI_DISPLAY_D6_PIN || USER_KEY3_PIN == UI_DISPLAY_D7_PIN)) || (defined(USER_KEY4_PIN) && (USER_KEY4_PIN == UI_DISPLAY_D5_PIN || USER_KEY4_PIN == UI_DISPLAY_D6_PIN || USER_KEY4_PIN == UI_DISPLAY_D7_PIN))
 #error You cannot use DISPLAY_D5_PIN, DISPLAY_D6_PIN or DISPLAY_D7_PIN for "User Keys" with character LCD display
 #endif
 #endif
@@ -782,8 +736,7 @@ inline void memcopy4(void *dest, void *source) {
 
 #include "gcode.h"
 
-#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM != CARTESIAN &&               \
-    !defined(ENFORCE_BACKLASH)
+#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM != CARTESIAN && !defined(ENFORCE_BACKLASH)
 #undef ENABLE_BACKLASH_COMPENSATION
 #define ENABLE_BACKLASH_COMPENSATION false
 #endif
@@ -799,74 +752,84 @@ inline void memcopy4(void *dest, void *source) {
 
 class RMath {
 public:
-  static inline float min(float a, float b) {
-    if (a < b)
-      return a;
-    return b;
-  }
-  static inline float max(float a, float b) {
-    if (a < b)
-      return b;
-    return a;
-  }
-  static inline int32_t min(int32_t a, int32_t b) {
-    if (a < b)
-      return a;
-    return b;
-  }
-  static inline int32_t min(int32_t a, int32_t b, int32_t c) {
-    if (a < b)
-      return a < c ? a : c;
-    return b < c ? b : c;
-  }
-  static inline float min(float a, float b, float c) {
-    if (a < b)
-      return a < c ? a : c;
-    return b < c ? b : c;
-  }
-  static inline int32_t max(int32_t a, int32_t b) {
-    if (a < b)
-      return b;
-    return a;
-  }
-  static inline int min(int a, int b) {
-    if (a < b)
-      return a;
-    return b;
-  }
-  static inline uint16_t min(uint16_t a, uint16_t b) {
-    if (a < b)
-      return a;
-    return b;
-  }
-  static inline int16_t max(int16_t a, int16_t b) {
-    if (a < b)
-      return b;
-    return a;
-  }
-  static inline uint16_t max(uint16_t a, uint16_t b) {
-    if (a < b)
-      return b;
-    return a;
-  }
-  static inline unsigned long absLong(long a) { return a >= 0 ? a : -a; }
-  static inline int32_t sqr(int32_t a) { return a * a; }
-  static inline uint32_t sqr(uint32_t a) { return a * a; }
+    static inline float min(float a, float b) {
+        if (a < b)
+            return a;
+        return b;
+    }
+    static inline float max(float a, float b) {
+        if (a < b)
+            return b;
+        return a;
+    }
+    static inline int32_t min(int32_t a, int32_t b) {
+        if (a < b)
+            return a;
+        return b;
+    }
+    static inline int32_t min(int32_t a, int32_t b, int32_t c) {
+        if (a < b)
+            return a < c ? a : c;
+        return b < c ? b : c;
+    }
+    static inline float min(float a, float b, float c) {
+        if (a < b)
+            return a < c ? a : c;
+        return b < c ? b : c;
+    }
+    static inline int32_t max(int32_t a, int32_t b) {
+        if (a < b)
+            return b;
+        return a;
+    }
+    static inline int min(int a, int b) {
+        if (a < b)
+            return a;
+        return b;
+    }
+    static inline uint16_t min(uint16_t a, uint16_t b) {
+        if (a < b)
+            return a;
+        return b;
+    }
+    static inline int16_t max(int16_t a, int16_t b) {
+        if (a < b)
+            return b;
+        return a;
+    }
+    static inline uint16_t max(uint16_t a, uint16_t b) {
+        if (a < b)
+            return b;
+        return a;
+    }
+    static inline unsigned long absLong(long a) { return a >= 0 ? a : -a; }
+    static inline int32_t sqr(int32_t a) { return a * a; }
+    static inline uint32_t sqr(uint32_t a) { return a * a; }
 #ifdef SUPPORT_64_BIT_MATH
-  static inline int64_t sqr(int64_t a) { return a * a; }
-  static inline uint64_t sqr(uint64_t a) { return a * a; }
+    static inline int64_t sqr(int64_t a) {
+        return a * a;
+    }
+    static inline uint64_t sqr(uint64_t a) { return a * a; }
 #endif
 
-  static inline float sqr(float a) { return a * a; }
+    static inline float sqr(float a) {
+        return a * a;
+    }
 };
 
 class RVector3 {
 public:
-  float x, y, z;
-  RVector3(float _x = 0, float _y = 0, float _z = 0) : x(_x), y(_y), z(_z){};
-  RVector3(const RVector3 &a) : x(a.x), y(a.y), z(a.z){};
+    float x, y, z;
+    RVector3(float _x = 0, float _y = 0, float _z = 0)
+        : x(_x)
+        , y(_y)
+        , z(_z){};
+    RVector3(const RVector3& a)
+        : x(a.x)
+        , y(a.y)
+        , z(a.z){};
 
-  /*    const float &operator[](std::size_t idx) const
+    /*    const float &operator[](std::size_t idx) const
       {
           if(idx == 0) return x;
           if(idx == 1) return y;
@@ -883,129 +846,129 @@ public:
           return 0;
       };*/
 
-  inline bool operator==(const RVector3 &rhs) {
-    return x == rhs.x && y == rhs.y && z == rhs.z;
-  }
-  inline bool operator!=(const RVector3 &rhs) { return !(*this == rhs); }
-  inline RVector3 &operator=(const RVector3 &rhs) {
-    if (this != &rhs) {
-      x = rhs.x;
-      y = rhs.y;
-      z = rhs.z;
+    inline bool operator==(const RVector3& rhs) {
+        return x == rhs.x && y == rhs.y && z == rhs.z;
     }
-    return *this;
-  }
+    inline bool operator!=(const RVector3& rhs) { return !(*this == rhs); }
+    inline RVector3& operator=(const RVector3& rhs) {
+        if (this != &rhs) {
+            x = rhs.x;
+            y = rhs.y;
+            z = rhs.z;
+        }
+        return *this;
+    }
 
-  inline RVector3 &operator+=(const RVector3 &rhs) {
-    x += rhs.x;
-    y += rhs.y;
-    z += rhs.z;
-    return *this;
-  }
+    inline RVector3& operator+=(const RVector3& rhs) {
+        x += rhs.x;
+        y += rhs.y;
+        z += rhs.z;
+        return *this;
+    }
 
-  inline RVector3 &operator-=(const RVector3 &rhs) {
-    x -= rhs.x;
-    y -= rhs.y;
-    z -= rhs.z;
-    return *this;
-  }
-  inline RVector3 operator-() const { return RVector3(-x, -y, -z); }
+    inline RVector3& operator-=(const RVector3& rhs) {
+        x -= rhs.x;
+        y -= rhs.y;
+        z -= rhs.z;
+        return *this;
+    }
+    inline RVector3 operator-() const { return RVector3(-x, -y, -z); }
 
-  inline float length() const { return sqrt(x * x + y * y + z * z); }
+    inline float length() const { return sqrt(x * x + y * y + z * z); }
 
-  inline float lengthSquared() const { return (x * x + y * y + z * z); }
+    inline float lengthSquared() const { return (x * x + y * y + z * z); }
 
-  inline RVector3 cross(const RVector3 &b) const {
-    return RVector3(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x);
-  }
-  inline float scalar(const RVector3 &b) const {
-    return (x * b.x + y * b.y + z * b.z);
-  }
-  inline RVector3 scale(float factor) const {
-    return RVector3(x * factor, y * factor, z * factor);
-  }
-  inline void scaleIntern(float factor) {
-    x *= factor;
-    y *= factor;
-    z *= factor;
-  }
-  inline void setMinimum(const RVector3 &b) {
-    x = RMath::min(x, b.x);
-    y = RMath::min(y, b.y);
-    z = RMath::min(z, b.z);
-  }
-  inline void setMaximum(const RVector3 &b) {
-    x = RMath::max(x, b.x);
-    y = RMath::max(y, b.y);
-    z = RMath::max(z, b.z);
-  }
-  inline float distance(const RVector3 &b) const {
-    float dx = b.x - x, dy = b.y - y, dz = b.z - z;
-    return (sqrt(dx * dx + dy * dy + dz * dz));
-  }
-  inline float angle(RVector3 &direction) {
-    return static_cast<float>(
-        acos(scalar(direction) / (length() * direction.length())));
-  }
+    inline RVector3 cross(const RVector3& b) const {
+        return RVector3(y * b.z - z * b.y, z * b.x - x * b.z, x * b.y - y * b.x);
+    }
+    inline float scalar(const RVector3& b) const {
+        return (x * b.x + y * b.y + z * b.z);
+    }
+    inline RVector3 scale(float factor) const {
+        return RVector3(x * factor, y * factor, z * factor);
+    }
+    inline void scaleIntern(float factor) {
+        x *= factor;
+        y *= factor;
+        z *= factor;
+    }
+    inline void setMinimum(const RVector3& b) {
+        x = RMath::min(x, b.x);
+        y = RMath::min(y, b.y);
+        z = RMath::min(z, b.z);
+    }
+    inline void setMaximum(const RVector3& b) {
+        x = RMath::max(x, b.x);
+        y = RMath::max(y, b.y);
+        z = RMath::max(z, b.z);
+    }
+    inline float distance(const RVector3& b) const {
+        float dx = b.x - x, dy = b.y - y, dz = b.z - z;
+        return (sqrt(dx * dx + dy * dy + dz * dz));
+    }
+    inline float angle(RVector3& direction) {
+        return static_cast<float>(
+            acos(scalar(direction) / (length() * direction.length())));
+    }
 
-  inline RVector3 normalize() const {
-    float len = length();
-    if (len != 0)
-      len = static_cast<float>(1.0 / len);
-    return RVector3(x * len, y * len, z * len);
-  }
+    inline RVector3 normalize() const {
+        float len = length();
+        if (len != 0)
+            len = static_cast<float>(1.0 / len);
+        return RVector3(x * len, y * len, z * len);
+    }
 
-  inline RVector3 interpolatePosition(const RVector3 &b, float pos) const {
-    float pos2 = 1.0f - pos;
-    return RVector3(x * pos2 + b.x * pos, y * pos2 + b.y * pos,
-                    z * pos2 + b.z * pos);
-  }
+    inline RVector3 interpolatePosition(const RVector3& b, float pos) const {
+        float pos2 = 1.0f - pos;
+        return RVector3(x * pos2 + b.x * pos, y * pos2 + b.y * pos,
+                        z * pos2 + b.z * pos);
+    }
 
-  inline RVector3 interpolateDirection(const RVector3 &b, float pos) const {
-    // float pos2 = 1.0f - pos;
+    inline RVector3 interpolateDirection(const RVector3& b, float pos) const {
+        // float pos2 = 1.0f - pos;
 
-    float dot = scalar(b);
-    if (dot > 0.9995 || dot < -0.9995)
-      return interpolatePosition(
-          b, pos); // cases cause trouble, use linear interpolation here
+        float dot = scalar(b);
+        if (dot > 0.9995 || dot < -0.9995)
+            return interpolatePosition(
+                b, pos); // cases cause trouble, use linear interpolation here
 
-    float theta = acos(dot) * pos; // interpolated position
-    float st = sin(theta);
-    RVector3 t(b);
-    t -= scale(dot);
-    float lengthSq = t.lengthSquared();
-    float dl = st * ((lengthSq < 0.0001f) ? 1.0f : 1.0f / sqrt(lengthSq));
-    t.scaleIntern(dl);
-    t += scale(cos(theta));
-    return t.normalize();
-  }
+        float theta = acos(dot) * pos; // interpolated position
+        float st = sin(theta);
+        RVector3 t(b);
+        t -= scale(dot);
+        float lengthSq = t.lengthSquared();
+        float dl = st * ((lengthSq < 0.0001f) ? 1.0f : 1.0f / sqrt(lengthSq));
+        t.scaleIntern(dl);
+        t += scale(cos(theta));
+        return t.normalize();
+    }
 };
 inline RVector3
 operator+(RVector3 lhs,
-          const RVector3 &rhs) // first arg by value, second by const ref
+          const RVector3& rhs) // first arg by value, second by const ref
 {
-  lhs.x += rhs.x;
-  lhs.y += rhs.y;
-  lhs.z += rhs.z;
-  return lhs;
+    lhs.x += rhs.x;
+    lhs.y += rhs.y;
+    lhs.z += rhs.z;
+    return lhs;
 }
 
 inline RVector3
 operator-(RVector3 lhs,
-          const RVector3 &rhs) // first arg by value, second by const ref
+          const RVector3& rhs) // first arg by value, second by const ref
 {
-  lhs.x -= rhs.x;
-  lhs.y -= rhs.y;
-  lhs.z -= rhs.z;
-  return lhs;
+    lhs.x -= rhs.x;
+    lhs.y -= rhs.y;
+    lhs.z -= rhs.z;
+    return lhs;
 }
 
-inline RVector3 operator*(const RVector3 &lhs, float rhs) {
-  return lhs.scale(rhs);
+inline RVector3 operator*(const RVector3& lhs, float rhs) {
+    return lhs.scale(rhs);
 }
 
-inline RVector3 operator*(float lhs, const RVector3 &rhs) {
-  return rhs.scale(lhs);
+inline RVector3 operator*(float lhs, const RVector3& rhs) {
+    return rhs.scale(lhs);
 }
 
 #if !defined(MAX_FAN_PWM) || MAX_FAN_PWM == 255
@@ -1013,8 +976,8 @@ inline RVector3 operator*(float lhs, const RVector3 &rhs) {
 #undef MAX_FAN_PWM
 #define MAX_FAN_PWM 255
 #else
-#define TRIM_FAN_PWM(x)                                                        \
-  static_cast<uint8_t>(static_cast<unsigned int>(x) * MAX_FAN_PWM / 255)
+#define TRIM_FAN_PWM(x) \
+    static_cast<uint8_t>(static_cast<unsigned int>(x) * MAX_FAN_PWM / 255)
 #endif
 
 extern const uint8 osAnalogInputChannels[] PROGMEM;
@@ -1089,76 +1052,81 @@ extern uint8_t fan2Kickstart;
 #endif
 
 extern char tempLongFilename[LONG_FILENAME_LENGTH + 1];
-extern char fullName[LONG_FILENAME_LENGTH * SD_MAX_FOLDER_DEPTH +
-                     SD_MAX_FOLDER_DEPTH + 1];
+extern char fullName[LONG_FILENAME_LENGTH * SD_MAX_FOLDER_DEPTH + SD_MAX_FOLDER_DEPTH + 1];
 #if SDSUPPORT
 #define SHORT_FILENAME_LENGTH 14
 #include "src/SdFat/SdFat.h"
 
-enum LsAction { LS_SerialPrint, LS_Count, LS_GetFilename };
+enum LsAction {
+    LS_SerialPrint,
+    LS_Count,
+    LS_GetFilename
+};
 class SDCard {
 public:
 #if defined(ENABLE_SOFTWARE_SPI_CLASS) && ENABLE_SOFTWARE_SPI_CLASS
-  SdFatSoftSpi<SD_SOFT_MISO_PIN, SD_SOFT_MOSI_PIN, SD_SOFT_SCK_PIN> fat;
+    SdFatSoftSpi<SD_SOFT_MISO_PIN, SD_SOFT_MOSI_PIN, SD_SOFT_SCK_PIN> fat;
 #else
-  SdFat fat;
+    SdFat fat;
 #endif
-  // Sd2Card card; // ~14 Byte
-  // SdVolume volume;
-  // SdFile root;
-  // SdFile dir[SD_MAX_FOLDER_DEPTH+1];
-  SdFile file;
+    // Sd2Card card; // ~14 Byte
+    // SdVolume volume;
+    // SdFile root;
+    // SdFile dir[SD_MAX_FOLDER_DEPTH+1];
+    SdFile file;
 #if JSON_OUTPUT
-  GCodeFileInfo fileInfo;
+    GCodeFileInfo fileInfo;
 #endif
-  uint32_t filesize;
-  uint32_t sdpos;
-  // char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
-  char *shortname; // Pointer to start of filename itself
-  char *pathend;   // File to char where pathname in fullname ends
-  uint8_t sdmode;  // 1 if we are printing from sd card, 2 = stop accepting new
-                   // commands
-  bool sdactive;
-  // int16_t n;
-  bool savetosd;
-  SdBaseFile parentFound;
+    uint32_t filesize;
+    uint32_t sdpos;
+    // char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
+    char* shortname; // Pointer to start of filename itself
+    char* pathend;   // File to char where pathname in fullname ends
+    uint8_t sdmode;  // 1 if we are printing from sd card, 2 = stop accepting new
+                     // commands, 20 = wait for empty moves to switch to 2
+    bool sdactive;
+    // int16_t n;
+    bool savetosd;
+    SdBaseFile parentFound;
 
-  SDCard();
-  void initsd();
-  void writeCommand(GCode *code);
-  bool selectFile(const char *filename, bool silent = false);
-  void mount();
-  void unmount();
-  void startPrint();
-  void pausePrint(bool intern = false);
-  void continuePrint(bool intern = false);
-  void stopPrint();
-  inline void setIndex(uint32_t newpos) {
-    if (!sdactive)
-      return;
-    sdpos = newpos;
-    file.seekSet(sdpos);
-  }
-  void printStatus();
-  void ls();
+    SDCard();
+    void initsd();
+    void writeCommand(GCode* code);
+    bool selectFile(const char* filename, bool silent = false);
+    void mount();
+    void unmount();
+    void startPrint();
+    void pausePrint(bool intern = false);
+    void pausePrintPart2();
+    void continuePrint(bool intern = false);
+    void stopPrint();
+    void stopPrintPart2();
+    inline void setIndex(uint32_t newpos) {
+        if (!sdactive)
+            return;
+        sdpos = newpos;
+        file.seekSet(sdpos);
+    }
+    void printStatus();
+    void ls();
 #if JSON_OUTPUT
-  void lsJSON(const char *filename);
-  void JSONFileInfo(const char *filename);
-  static void printEscapeChars(const char *s);
+    void lsJSON(const char* filename);
+    void JSONFileInfo(const char* filename);
+    static void printEscapeChars(const char* s);
 #endif
-  void startWrite(char *filename);
-  void deleteFile(char *filename);
-  void finishWrite();
-  char *createFilename(char *buffer, const dir_t &p);
-  void makeDirectory(char *filename);
-  bool showFilename(const uint8_t *name);
-  void automount();
+    void startWrite(char* filename);
+    void deleteFile(char* filename);
+    void finishWrite();
+    char* createFilename(char* buffer, const dir_t& p);
+    void makeDirectory(char* filename);
+    bool showFilename(const uint8_t* name);
+    void automount();
 #ifdef GLENN_DEBUG
-  void writeToFile();
+    void writeToFile();
 #endif
 private:
-  uint8_t lsRecursive(SdBaseFile *parent, uint8_t level, char *findFilename);
-  // SdFile *getDirectory(char* name);
+    uint8_t lsRecursive(SdBaseFile* parent, uint8_t level, char* findFilename);
+    // SdFile *getDirectory(char* name);
 };
 
 extern SDCard sd;
@@ -1166,7 +1134,7 @@ extern SDCard sd;
 
 extern volatile int waitRelax; // Delay filament relax at the end of print,
                                // could be a simple timeout
-extern void updateStepsParameter(PrintLine *p /*,uint8_t caller*/);
+extern void updateStepsParameter(PrintLine* p /*,uint8_t caller*/);
 
 #ifdef DEBUG_PRINT
 extern int debugWaitLoop;
@@ -1182,25 +1150,25 @@ extern int debugWaitLoop;
 #include "Eeprom.h"
 
 #if CPU_ARCH == ARCH_AVR
-#define DELAY1MICROSECOND                                                      \
-  __asm__("nop\n\t"                                                            \
-          "nop\n\t"                                                            \
-          "nop\n\t"                                                            \
-          "nop\n\t"                                                            \
-          "nop\n\t"                                                            \
-          "nop\n\t")
-#define DELAY2MICROSECOND                                                      \
-  __asm__("nop\n\t"                                                            \
-          "nop\n\t"                                                            \
-          "nop\n\t"                                                            \
-          "nop\n\t"                                                            \
-          "nop\n\t"                                                            \
-          "nop\n\tnop\n\t"                                                     \
-          "nop\n\t"                                                            \
-          "nop\n\t"                                                            \
-          "nop\n\t"                                                            \
-          "nop\n\t"                                                            \
-          "nop\n\t")
+#define DELAY1MICROSECOND \
+    __asm__("nop\n\t" \
+            "nop\n\t" \
+            "nop\n\t" \
+            "nop\n\t" \
+            "nop\n\t" \
+            "nop\n\t")
+#define DELAY2MICROSECOND \
+    __asm__("nop\n\t" \
+            "nop\n\t" \
+            "nop\n\t" \
+            "nop\n\t" \
+            "nop\n\t" \
+            "nop\n\tnop\n\t" \
+            "nop\n\t" \
+            "nop\n\t" \
+            "nop\n\t" \
+            "nop\n\t" \
+            "nop\n\t")
 #else
 #define DELAY1MICROSECOND HAL::delayMicroseconds(1);
 #define DELAY2MICROSECOND HAL::delayMicroseconds(2);
@@ -1213,46 +1181,35 @@ extern int debugWaitLoop;
 #endif
 
 class PlaneBuilder {
-  float sum_xx, sum_xy, sum_yy, sum_x, sum_y, sum_xz, sum_yz, sum_z, n;
+    float sum_xx, sum_xy, sum_yy, sum_x, sum_y, sum_xz, sum_yz, sum_z, n;
 
 public:
-  PlaneBuilder() { reset(); }
-  void reset() {
-    sum_xx = sum_xy = sum_yy = sum_x = sum_y = sum_xz = sum_yz = sum_z = n = 0;
-  }
-  void addPoint(float x, float y, float z) {
-    n++;
-    sum_xx += x * x;
-    sum_xy += x * y;
-    sum_yy += y * y;
-    sum_x += x;
-    sum_y += y;
-    sum_xz += x * z;
-    sum_yz += y * z;
-    sum_z += z;
-  }
-  void createPlane(Plane &plane, bool silent = false) {
-    float det = (sum_x * (sum_xy * sum_y - sum_x * sum_yy) +
-                 sum_xx * (n * sum_yy - sum_y * sum_y) +
-                 sum_xy * (sum_x * sum_y - n * sum_xy));
-    plane.a = ((sum_xy * sum_y - sum_x * sum_yy) * sum_z +
-               (sum_x * sum_y - n * sum_xy) * sum_yz +
-               sum_xz * (n * sum_yy - sum_y * sum_y)) /
-              det;
-    plane.b = ((sum_x * sum_xy - sum_xx * sum_y) * sum_z +
-               (n * sum_xx - sum_x * sum_x) * sum_yz +
-               sum_xz * (sum_x * sum_y - n * sum_xy)) /
-              det;
-    plane.c = ((sum_xx * sum_yy - sum_xy * sum_xy) * sum_z +
-               (sum_x * sum_xy - sum_xx * sum_y) * sum_yz +
-               sum_xz * (sum_xy * sum_y - sum_x * sum_yy)) /
-              det;
-    if (!silent) {
-      Com::printF(PSTR("plane: a = "), plane.a, 4);
-      Com::printF(PSTR(" b = "), plane.b, 4);
-      Com::printFLN(PSTR(" c = "), plane.c, 4);
+    PlaneBuilder() { reset(); }
+    void reset() {
+        sum_xx = sum_xy = sum_yy = sum_x = sum_y = sum_xz = sum_yz = sum_z = n = 0;
     }
-  }
+    void addPoint(float x, float y, float z) {
+        n++;
+        sum_xx += x * x;
+        sum_xy += x * y;
+        sum_yy += y * y;
+        sum_x += x;
+        sum_y += y;
+        sum_xz += x * z;
+        sum_yz += y * z;
+        sum_z += z;
+    }
+    void createPlane(Plane& plane, bool silent = false) {
+        float det = (sum_x * (sum_xy * sum_y - sum_x * sum_yy) + sum_xx * (n * sum_yy - sum_y * sum_y) + sum_xy * (sum_x * sum_y - n * sum_xy));
+        plane.a = ((sum_xy * sum_y - sum_x * sum_yy) * sum_z + (sum_x * sum_y - n * sum_xy) * sum_yz + sum_xz * (n * sum_yy - sum_y * sum_y)) / det;
+        plane.b = ((sum_x * sum_xy - sum_xx * sum_y) * sum_z + (n * sum_xx - sum_x * sum_x) * sum_yz + sum_xz * (sum_x * sum_y - n * sum_xy)) / det;
+        plane.c = ((sum_xx * sum_yy - sum_xy * sum_xy) * sum_z + (sum_x * sum_xy - sum_xx * sum_y) * sum_yz + sum_xz * (sum_xy * sum_y - sum_x * sum_yy)) / det;
+        if (!silent) {
+            Com::printF(PSTR("plane: a = "), plane.a, 4);
+            Com::printF(PSTR(" b = "), plane.b, 4);
+            Com::printFLN(PSTR(" c = "), plane.c, 4);
+        }
+    }
 };
 
 #include "Drivers.h"

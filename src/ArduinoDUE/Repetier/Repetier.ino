@@ -140,6 +140,7 @@ communication, no actions
 - M115- Capabilities string
 - M116 - Wait for all temperatures in a +/- 1 degree range
 - M117 <message> - Write message in status row on lcd
+- M118 <message> - Write message to host
 - M119 - Report endstop status
 - M140 S<temp> H1 O<offset> F1 - Set bed target temp, F1 makes a beep when
 temperature is reached the first time

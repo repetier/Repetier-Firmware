@@ -1,0 +1,19 @@
+BasedOnStyle: Webkit
+IndentWidth: 4
+AlignAfterOpenBracket: Align
+AlignEscapedNewlines: DontAlign
+AlignTrailingComments: true
+AllowShortBlocksOnASingleLine: true
+AllowShortFunctionsOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: false
+BraceWrapping:
+  AfterEnum: false
+  AfterStruct: false
+  AfterClass: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterUnion: false
+  SplitEmptyFunction: false
+  BeforeCatch: false
+BreakBeforeBraces: Attach
+SortIncludes: false
