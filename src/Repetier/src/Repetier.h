@@ -46,6 +46,12 @@
 #define MOTHERBOARD_ALLIGATOR_REV2 501
 #define MOTHERBOARD_ALLIGATOR_REV3 502
 
+// SAMD51 based boards
+#define MOTHERBOARD_AGC_SMARTRAMPS_NO_EEPROM 1000
+#define MOTHERBOARD_AGC_SMARTRAMPS_EEPROM 1001
+#define MOTHERBOARD_AGC_USER_DEFINED 1002
+#define MOTHERBOARD_AGC_RADDS 1003
+
 // Some helper macros
 
 #define _CAT(a, ...) a##__VA_ARGS__
@@ -486,12 +492,20 @@ extern ServoInterface* servos[NUM_SERVOS];
 #define KEEP_ALIVE_INTERVAL 2000
 #endif
 
+/*
 #ifdef AVR_BOARD
 #include "boards/avr/HAL.h"
 #endif
 #ifdef DUE_BOARD
 #include "boards/due/HAL.h"
 #endif
+#ifdef SAMD51_BOARD
+#include "boards/SAMD51/HAL.h"
+#endif
+#ifdef M0_BOARD
+#include "boards/M0/HAL.h"
+#endif
+*/
 
 #ifndef MAX_VFAT_ENTRIES
 #ifdef AVR_BOARD

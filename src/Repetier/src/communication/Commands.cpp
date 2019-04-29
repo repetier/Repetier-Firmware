@@ -1121,6 +1121,9 @@ void Commands::processMCode(GCode* com) {
     case 117: // M117 message to lcd
         MCode_117(com);
         break;
+    case 118: // M118
+        MCode_118(com);
+        break;
     case 119: // M119
         MCode_119(com);
         break;

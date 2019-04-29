@@ -18,9 +18,9 @@
 
 // RADDS Board
 // http://www.dr-henschke.de/RADDS_due.html
-#if MOTHERBOARD == 402
-#ifndef __SAM3X8E__
-#error Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu.
+#if MOTHERBOARD == MOTHERBOARD_AGC_RADDS
+#ifndef __SAMD51__
+#error oops !Be sure to have 'adafruit grand central' selected from the 'tools-> Boards menu'.
 #endif
 
 #define KNOWN_BOARD

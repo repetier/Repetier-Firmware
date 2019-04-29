@@ -121,6 +121,7 @@ void MCode_114(GCode* com);
 void MCode_115(GCode* com);
 void MCode_116(GCode* com);
 void MCode_117(GCode* com);
+void MCode_118(GCode* com);
 void MCode_119(GCode* com);
 void MCode_120(GCode* com);
 void MCode_140(GCode* com);

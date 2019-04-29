@@ -585,6 +585,11 @@ void MCode_117(GCode* com) {
     }
 }
 
+void MCode_118(GCode* com) {
+    if (com->hasString()) {
+    }
+}
+
 void reportEndstop(EndstopDriver& d, PGM_P text) {
     if (d.implemented()) {
         Com::printF(text);
