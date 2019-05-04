@@ -1056,7 +1056,7 @@ STEPPER_CURRENT_CONTROL
 // Definition for current control
 #define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_MCP4728
 
-#define MCP4728_I2C_ADDRESS 0x60 << 1      // Base Address (0x60); Pre-Shifted Left 1 bit for Repetier HAL.
+#define MCP4728_I2C_ADDRESS 0x60           // Base Address (0x60);
 #define MCP4728_GENERALCALL_ADDRESS 0x00   // General Call Address. Weird, but OK...
 #define MCP4728_CMD_MULTI_WRITE 0B01000000 // Writes DAC Settings, Does not update EEPROM.
 #define MCP4728_CMD_SEQ_WRITE 0B01010000   // Writes DAC Settings, also persists to EEPROM.

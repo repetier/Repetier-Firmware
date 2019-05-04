@@ -45,6 +45,11 @@
 #include "Print.h"
 #include "fastio.h"
 
+// Which I2C port to use?
+#ifndef WIRE_PORT
+#define WIRE_PORT Wire
+#endif
+
 // Hack to make 84 MHz Due clock work without changes to pre-existing code
 // which would otherwise have problems with int overflow.
 #undef F_CPU
@@ -130,8 +135,8 @@ typedef char prog_char;
 //#define SERIAL_PORT_VECTOR      UART_Handler
 
 // TWI1 if SDA pin = 20  TWI0 for pin = 70
-#define TWI_INTERFACE TWI1
-#define TWI_ID ID_TWI1
+// #define TWI_INTERFACE TWI1
+// #define TWI_ID ID_TWI1
 
 #define EXTRUDER_CLOCK_FREQ 60000 // extruder stepper interrupt frequency
 // #define PWM_CLOCK_FREQ          3906
@@ -161,6 +166,11 @@ extern bool analogEnabled[MAX_ANALOG_INPUTS];
 #define WATCHDOG_INTERVAL 1024u // 8sec  (~16 seconds max)
 
 #include "Arduino.h"
+#ifdef MAX_WIRE_INTERFACES
+#undef WIRE_INTERFACES_COUNT
+#define WIRE_INTERFACES_COUNT MAX_WIRE_INTERFACES
+#endif
+#include <Wire.h>
 
 //#define	READ(pin)  PIO_Get(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin)
 /* #define READ_VAR(pin) (g_APinDescription[pin].pPort->PIO_PDSR & g_APinDescription[pin].ulPin ? 1 : 0) // does return 0 or pin value
@@ -175,17 +185,19 @@ extern bool analogEnabled[MAX_ANALOG_INPUTS];
             g_APinDescription[pin].pPort->PIO_CODR = g_APinDescription[pin].ulPin; \
         } \
     } while (0)
+*/
+#define _READ(pin) ((PORT->Group[DIO##port##_PORT].IN.reg & DIO##port##_PIN) ? 1 : 0)
 #define _WRITE(port, v) \
     do { \
         if (v) { \
-            DIO##port##_PORT->PIO_SODR = DIO##port##_PIN; \
+            PORT->Group[DIO##port##_PORT].OUTSET.reg = DIO##port##_PIN; \
         } else { \
-            DIO##port##_PORT->PIO_CODR = DIO##port##_PIN; \
+            PORT->Group[DIO##port##_PORT].OUTCLR.reg = DIO##port##_PIN; \
         }; \
     } while (0)
-#define WRITE(pin, v) _WRITE(pin, v) */
+#define WRITE(pin, v) _WRITE(pin, v)
 #define READ_VAR(pin) !!(PORT->Group[g_APinDescription[pin].ulPort].IN.reg & (1ul << g_APinDescription[pin].ulPin))
-#define READ(pin) READ_VAR(pin)
+#define READ(pin) _READ(pin)
 #define WRITE_VAR(pin, v) \
     do { \
         if (v) { \
@@ -194,7 +206,7 @@ extern bool analogEnabled[MAX_ANALOG_INPUTS];
             PORT->Group[g_APinDescription[pin].ulPort].OUTCLR.reg = (1ul << g_APinDescription[pin].ulPin); \
         } \
     } while (0)
-#define WRITE(pin, v) WRITE_VAR(pin, v)
+#define WRITE(pin, v) _WRITE(pin, v)
 
 #define SET_INPUT(pin) ::pinMode(pin, INPUT);
 // pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId);
@@ -269,21 +281,14 @@ public:
 #define ANALOG_REDUCE_FACTOR 1
 
 // maximum available RAM
-#define MAX_RAM 98303
+#define MAX_RAM 196608 // Value for M4 metro grand central
 
 #define bit_clear(x, y) x &= ~(1 << y) //cbi(x,y)
 #define bit_set(x, y) x |= (1 << y)    //sbi(x,y)
 
-/** defines the data direction (reading from I2C device) in i2cStart(),i2cRepStart() */
-#define I2C_READ 1
-/** defines the data direction (writing to I2C device) in i2cStart(),i2cRepStart() */
-#define I2C_WRITE 0
-
 #ifndef DUE_SOFTWARE_SPI
 extern int spiDueDividors[];
 #endif
-
-static uint32_t tone_pin;
 
 /** Set max. frequency to 500000 Hz */
 #define LIMIT_INTERVAL (F_CPU / 500000)
@@ -366,7 +371,7 @@ public:
         WDT_Disable(WDT);
 #endif
 
-#if EEPROM_AVAILABLE == EEPROM_I2C || UI_DISPLAY_TYPE == 3 //init i2c when EEPROM installed or using i2c display
+#if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
         HAL::i2cInit(TWI_CLOCK_FREQ);
 #endif
 #if defined(EEPROM_AVAILABLE) && defined(EEPROM_SPI_ALLIGATOR) && EEPROM_AVAILABLE == EEPROM_SPI_ALLIGATOR
@@ -374,7 +379,7 @@ public:
 #endif
         // make debugging startup easier
         //Serial.begin(115200);
-        TimeTick_Configure(F_CPU_TRUE);
+        // TimeTick_Configure(F_CPU_TRUE); // use arduino function
 
         // setup microsecond delay timer
         /* pmc_enable_periph_clk(DELAY_TIMER_IRQ);
@@ -431,16 +436,7 @@ public:
         return F_CPU / divisor;
     }
     static INLINE void delayMicroseconds(uint32_t usec) { //usec += 3;
-        uint32_t n = usec * (F_CPU_TRUE / 3000000);
-        asm volatile(
-            "L2_%=_delayMicroseconds:"
-            "\n\t"
-            "subs   %0, #1"
-            "\n\t"
-            "bge    L2_%=_delayMicroseconds"
-            "\n"
-            : "+r"(n)
-            :);
+        ::delayMicroseconds(usec);
     }
     static inline void delayMilliseconds(unsigned int delayMs) {
         unsigned int del;
@@ -454,6 +450,8 @@ public:
         }
     }
     static inline void tone(uint8_t pin, int frequency) {
+        tone(pin, frequency);
+        /*
         // set up timer counter 1 channel 0 to generate interrupts for
         // toggling output pin.
         SET_OUTPUT(pin);
@@ -469,11 +467,12 @@ public:
         TC_Start(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
         BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
         BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
-        NVIC_EnableIRQ((IRQn_Type)BEEPER_TIMER_IRQ);
+        NVIC_EnableIRQ((IRQn_Type)BEEPER_TIMER_IRQ);*/
     }
     static inline void noTone(uint8_t pin) {
-        TC_Stop(TC1, 0);
-        WRITE_VAR(pin, LOW);
+        noTone(pin);
+        // TC_Stop(TC1, 0);
+        // WRITE_VAR(pin, LOW);
     }
 
 #if EEPROM_AVAILABLE == EEPROM_SDCARD
@@ -580,19 +579,16 @@ public:
         WRITE(SPI_EEPROM1_CS, HIGH);
         delayMilliseconds(EEPROM_PAGE_WRITE_TIME); // wait for page write to complete
 #elif EEPROM_AVAILABLE == EEPROM_I2C
-        i2cStartAddr(EEPROM_SERIAL_ADDR << 1 | I2C_WRITE, pos);
+        i2cStartAddr(EEPROM_SERIAL_ADDR, pos, 0);
         i2cWrite(newvalue.b[0]); // write first byte
         for (int i = 1; i < size; i++) {
             pos++;
-            // writes cannot cross page boundary
+            // writes can not cross page boundary
             if ((pos % EEPROM_PAGE_SIZE) == 0) {
                 // burn current page then address next one
                 i2cStop();
                 delayMilliseconds(EEPROM_PAGE_WRITE_TIME);
-                i2cStartAddr(EEPROM_SERIAL_ADDR << 1, pos);
-            } else {
-                while ((TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) != TWI_SR_TXRDY)
-                    ; // wait for transmission register to empty
+                i2cStartAddr(EEPROM_SERIAL_ADDR, pos, 0);
             }
             i2cWrite(newvalue.b[i]);
         }
@@ -630,15 +626,12 @@ public:
 #elif EEPROM_AVAILABLE == EEPROM_I2C
         int i;
         eeval_t v;
-        size--;
         // set read location
-        i2cStartAddr(EEPROM_SERIAL_ADDR << 1 | I2C_READ, pos);
+        i2cStartAddr(EEPROM_SERIAL_ADDR, pos, size);
         for (i = 0; i < size; i++) {
             // read an incomming byte
-            v.b[i] = i2cReadAck();
+            v.b[i] = i2cRead();
         }
-        // read last byte
-        v.b[i] = i2cReadNak();
         return v;
 #else
         eeval_t v;
@@ -658,7 +651,7 @@ public:
         //__disable_irq();
     }
     static inline millis_t timeInMilliseconds() {
-        return GetTickCount(); // millis();
+        return millis();
     }
     static inline char readFlashByte(PGM_P ptr) {
         return pgm_read_byte(ptr);
@@ -668,7 +661,7 @@ public:
     }
 
     static inline void serialSetBaudrate(long baud) {
-        Serial.setInterruptPriority(1);
+        // Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
         BTAdapter.begin(baud);
 #else
@@ -829,26 +822,20 @@ public:
 #endif
     // I2C Support
     static void i2cSetClockspeed(uint32_t clockSpeedHz);
-    static void i2cInit(unsigned long clockSpeedHz);
-    static void i2cStartWait(unsigned char address);
-    static uint8_t i2cStart(unsigned char address);
-    static void i2cStartAddr(unsigned char address, unsigned int pos);
+    static void i2cInit(uint32_t clockSpeedHz);
+    static void i2cStartRead(uint8_t address7bit, uint8_t bytes);
+    static void i2cStart(uint8_t address7bit);
+    static void i2cStartAddr(uint8_t address7bit, unsigned int pos, uint8_t readBytes);
     static void i2cStop(void);
-    static void i2cStartBit(void);
-    static void i2cCompleted(void);
-    static void i2cTxFinished(void);
     static void i2cWrite(uint8_t data);
-    static uint8_t i2cReadAck(void);
-    static uint8_t i2cReadNak(void);
+    static int i2cRead(void);
 
     // Watchdog support
     inline static void startWatchdog() {
-        //WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | 0x0fff0000; //(WATCHDOG_INTERVAL << 16);
-        //WDT->WDT_CR = 0xA5000001;
-        WDT->WDT_CR = 0xA5000001; //reset clock before updating WDD
-        delayMicroseconds(92);    //must wait a minimum of 3 slow clocks before updating WDT_MR after writing WDT_CR
-        WDT->WDT_MR = WDT_MR_WDRSTEN | WATCHDOG_INTERVAL | (WATCHDOG_INTERVAL << 16);
-        WDT->WDT_CR = 0xA5000001;
+        REG_WDT_CONFIG = WDT_CONFIG_PER_CYC4096; // Set the WDT reset timeout to 4 seconds
+        REG_WDT_CTRLA = WDT_CTRLA_ENABLE;        // Enable the WDT in normal mode
+        while (WDT->SYNCBUSY.bit.ENABLE)
+            ; // Wait for synchronization
     };
     inline static void stopWatchdog() {}
     inline static void pingWatchdog() {

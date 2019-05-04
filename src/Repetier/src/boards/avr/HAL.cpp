@@ -312,102 +312,45 @@ void HAL::analogStart() {
 
 /****************************************************************************************
  Setting for I2C Clock speed. needed to change  clock speed for different peripherals
- here is just the same as i2cInit  , added to be compatible to DUE Version
 ****************************************************************************************/
 
-void HAL::i2cSetClockspeed(uint32_t clockSpeedHz) {
-    /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
-    TWSR = 0;                                 /* no prescaler */
-    TWBR = ((F_CPU / clockSpeedHz) - 16) / 2; /* must be > 10 for stable operation */
+void HAL::i2cSetClockspeed(uint32_t clockSpeedHz)
+
+{
+    WIRE_PORT.setClock(clockSpeedHz);
 }
 
 /*************************************************************************
  Initialization of the I2C bus interface. Need to be called only once
 *************************************************************************/
-void HAL::i2cInit(uint32_t clockSpeedHz) {
-    /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
-    TWSR = 0;                                 /* no prescaler */
-    TWBR = ((F_CPU / clockSpeedHz) - 16) / 2; /* must be > 10 for stable operation */
+void HAL::i2cInit(unsigned long clockSpeedHz) {
+    WIRE_PORT.begin(); // create I2C master access
+    WIRE_PORT.setClock(clockSpeedHz);
 }
 
 /*************************************************************************
   Issues a start condition and sends address and transfer direction.
-  return 0 = device accessible, 1= failed to access device
 *************************************************************************/
-unsigned char HAL::i2cStart(uint8_t address) {
-    uint8_t twst;
-
-    // send START condition
-    TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
-
-    // wait until transmission completed
-    while (!(TWCR & (1 << TWINT)))
-        ;
-
-    // check value of TWI Status Register. Mask prescaler bits.
-    twst = TW_STATUS & 0xF8;
-    if ((twst != TW_START) && (twst != TW_REP_START))
-        return 1;
-
-    // send device address
-    TWDR = address;
-    TWCR = (1 << TWINT) | (1 << TWEN);
-
-    // wail until transmission completed and ACK/NACK has been received
-    while (!(TWCR & (1 << TWINT)))
-        ;
-
-    // check value of TWI Status Register. Mask prescaler bits.
-    twst = TW_STATUS & 0xF8;
-    if ((twst != TW_MT_SLA_ACK) && (twst != TW_MR_SLA_ACK))
-        return 1;
-
-    return 0;
+void HAL::i2cStart(unsigned char address) {
+    WIRE_PORT.beginTransmission(address);
 }
 
+void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
+    WIRE_PORT.requestFrom(address, bytes);
+}
 /*************************************************************************
  Issues a start condition and sends address and transfer direction.
- If device is busy, use ack polling to wait until device is ready
+ Also specifies internal address of device
 
- Input:   address and transfer direction of I2C device
+ Input:   address and transfer direction of I2C device, internal address
 *************************************************************************/
-void HAL::i2cStartWait(unsigned char address) {
-    uint8_t twst;
-    while (1) {
-        // send START condition
-        TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
-
-        // wait until transmission completed
-        while (!(TWCR & (1 << TWINT)))
-            ;
-
-        // check value of TWI Status Register. Mask prescaler bits.
-        twst = TW_STATUS & 0xF8;
-        if ((twst != TW_START) && (twst != TW_REP_START))
-            continue;
-
-        // send device address
-        TWDR = address;
-        TWCR = (1 << TWINT) | (1 << TWEN);
-
-        // wail until transmission completed
-        while (!(TWCR & (1 << TWINT)))
-            ;
-
-        // check value of TWI Status Register. Mask prescaler bits.
-        twst = TW_STATUS & 0xF8;
-        if ((twst == TW_MT_SLA_NACK) || (twst == TW_MR_DATA_NACK)) {
-            /* device busy, send stop condition to terminate write operation */
-            TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWSTO);
-
-            // wait until stop condition is executed and bus released
-            while (TWCR & (1 << TWSTO))
-                ;
-
-            continue;
-        }
-        //if( twst != TW_MT_SLA_ACK) return 1;
-        break;
+void HAL::i2cStartAddr(unsigned char address, unsigned int pos, unsigned int readBytes) {
+    WIRE_PORT.beginTransmission(address);
+    WIRE_PORT.write(pos >> 8);
+    WIRE_PORT.write(pos & 255);
+    if (readBytes) {
+        WIRE_PORT.endTransmission();
+        WIRE_PORT.requestFrom(address, readBytes);
     }
 }
 
@@ -415,56 +358,29 @@ void HAL::i2cStartWait(unsigned char address) {
  Terminates the data transfer and releases the I2C bus
 *************************************************************************/
 void HAL::i2cStop(void) {
-    /* send stop condition */
-    TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWSTO);
-    // wait until stop condition is executed and bus released
-    while (TWCR & (1 << TWSTO))
-        ;
+    WIRE_PORT.endTransmission();
 }
 
 /*************************************************************************
   Send one byte to I2C device
 
   Input:    byte to be transfered
-  Return:   0 write successful
-            1 write failed
 *************************************************************************/
-void HAL::i2cWrite(unsigned char data) {
-    //uint8_t   twst;
-    // send data to the previously addressed device
-    TWDR = data;
-    TWCR = (1 << TWINT) | (1 << TWEN);
-    // wait until transmission completed
-    while (!(TWCR & (1 << TWINT)))
-        ;
-    // check value of TWI Status Register. Mask prescaler bits
-    //twst = TW_STATUS & 0xF8;
-    //if( twst != TW_MT_DATA_ACK) return 1;
-    //return 0;
+void HAL::i2cWrite(uint8_t data) {
+    WIRE_PORT.write(data);
 }
 
 /*************************************************************************
  Read one byte from the I2C device, request more data from device
  Return:  byte read from I2C device
 *************************************************************************/
-unsigned char HAL::i2cReadAck(void) {
-    TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
-    while (!(TWCR & (1 << TWINT)))
-        ;
-    return TWDR;
+int HAL::i2cRead(void) {
+    if (WIRE_PORT.available()) {
+        return WIRE_PORT.read();
+    }
+    return -1; // should never happen, but better then blocking
 }
 
-/*************************************************************************
- Read one byte from the I2C device, read is followed by a stop condition
-
- Return:  byte read from I2C device
-*************************************************************************/
-unsigned char HAL::i2cReadNak(void) {
-    TWCR = (1 << TWINT) | (1 << TWEN);
-    while (!(TWCR & (1 << TWINT)))
-        ;
-    return TWDR;
-}
 
 #if NUM_SERVOS > 0
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__) || defined(__AVR_ATmega128__) || defined(__AVR_ATmega1281__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega2561__)

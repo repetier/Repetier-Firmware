@@ -452,12 +452,13 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
 void Printer::setup() {
     HAL::stopWatchdog();
 
-    // Start serial
-    HAL::hwSetup();
     // Main board specific extra initialization
 #if defined(MB_SETUP)
     MB_SETUP;
 #endif
+    // HAL::serialSetBaudrate(115200);
+    // Start serial
+    HAL::hwSetup();
 
     EEPROM::initBaudrate();
     HAL::serialSetBaudrate(baudrate);

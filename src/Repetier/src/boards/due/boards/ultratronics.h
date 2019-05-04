@@ -126,14 +126,18 @@
 #define EEPROM_SERIAL_ADDR 0x50  // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64      // page write buffer size
 #define EEPROM_PAGE_WRITE_TIME 7 // page write time in milliseconds (docs say 5ms but that is too short)
-// specify size of eeprom address register
-// TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
-#define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
 // Ultronics has no eeprom for storing changeable data
 // as a solution you can use sd card. But this requires always
 // the same sd card when powering up the printer
 //#define EEPROM_AVAILABLE EEPROM_NONE
 #define EEPROM_AVAILABLE EEPROM_SDCARD
+
+#ifndef WIRE_PORT
+#define WIRE_PORT Wire1
+#endif
+#ifndef MAX_WIRE_INTERFACES
+#define MAX_WIRE_INTERFACES 2
+#endif
 
 #define MB_SETUP \
     SET_OUTPUT(ORIG_FAN_PIN); \

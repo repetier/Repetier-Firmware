@@ -400,27 +400,25 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_INVERT_MENU_DIRECTION 1
 #define UI_HAS_I2C_KEYS
 #define UI_HAS_I2C_ENCODER 0
-#define UI_I2C_KEY_ADDRESS 0x40
+#define UI_I2C_KEY_ADDRESS 0x20
 #ifdef UI_MAIN
 void uiInitKeys() {}
 void uiCheckKeys(uint16_t &action) {}
 inline void uiCheckSlowEncoder() {
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS + I2C_WRITE);
+  HAL::i2cStart(UI_DISPLAY_I2C_ADDRESS);
   HAL::i2cWrite(0x12); // GIOA
   HAL::i2cStop();
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS + I2C_READ);
-  uint16_t keymask = HAL::i2cReadAck();
-  keymask = keymask + (HAL::i2cReadNak() << 8);
-  HAL::i2cStop();
+  HAL::i2cStartRead(UI_DISPLAY_I2C_ADDRESS, 2);
+  uint16_t keymask = HAL::i2cRead();
+  keymask = keymask + (HAL::i2cRead() << 8);
 }
 void uiCheckSlowKeys(uint16_t &action) {
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS + I2C_WRITE);
+  HAL::i2cStart(UI_DISPLAY_I2C_ADDRESS);
   HAL::i2cWrite(0x12); // GPIOA
   HAL::i2cStop();
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS + I2C_READ);
-  uint16_t keymask = HAL::i2cReadAck();
-  keymask = keymask + (HAL::i2cReadNak() << 8);
-  HAL::i2cStop();
+  HAL::i2cStartRead(UI_DISPLAY_I2C_ADDRESS, 2);
+  uint16_t keymask = HAL::i2cRead();
+  keymask = keymask + (HAL::i2cRead() << 8);
   UI_KEYS_I2C_BUTTON_LOW(4, UI_ACTION_PREVIOUS); // Up button
   UI_KEYS_I2C_BUTTON_LOW(8, UI_ACTION_NEXT); // down button
   UI_KEYS_I2C_BUTTON_LOW(16, UI_ACTION_BACK); // left button
@@ -533,7 +531,7 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_INVERT_MENU_DIRECTION 0
 #define UI_HAS_I2C_KEYS
 #define UI_HAS_I2C_ENCODER 0
-#define UI_I2C_KEY_ADDRESS 0x40
+#define UI_I2C_KEY_ADDRESS 0x20
 #ifdef UI_MAIN
 void uiInitKeys() {
   UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A, UI_ENCODER_B); // click encoder on real pins. Phase is connected with gnd for signals.
@@ -545,13 +543,12 @@ void uiCheckKeys(uint16_t &action) {
 }
 inline void uiCheckSlowEncoder() { }// not used in Viki
 void uiCheckSlowKeys(uint16_t &action) {
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS + I2C_WRITE);
+  HAL::i2cStart(UI_DISPLAY_I2C_ADDRESS);
   HAL::i2cWrite(0x12); // GPIOA
   HAL::i2cStop();
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS + I2C_READ);
-  unsigned int keymask = HAL::i2cReadAck();
-  keymask = keymask + (HAL::i2cReadNak() << 8);
-  HAL::i2cStop();
+  HAL::i2cStartRead(UI_DISPLAY_I2C_ADDRESS, 2);
+  unsigned int keymask = HAL::i2cRead();
+  keymask = keymask + (HAL::i2cRead() << 8);
   UI_KEYS_I2C_BUTTON_LOW(4, UI_ACTION_MENU_SDCARD);       // Up button
   UI_KEYS_I2C_BUTTON_LOW(8, UI_ACTION_MENU_QUICKSETTINGS); // down button
   UI_KEYS_I2C_BUTTON_LOW(16, UI_ACTION_BACK);             // left button
@@ -939,28 +936,26 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_INVERT_MENU_DIRECTION false
 #define UI_HAS_I2C_KEYS
 #define UI_HAS_I2C_ENCODER 0
-#define UI_I2C_KEY_ADDRESS 0x40
+#define UI_I2C_KEY_ADDRESS 0x20
 
 #ifdef UI_MAIN
 void uiInitKeys() {}
 void uiCheckKeys(uint16_t &action) {}
 inline void uiCheckSlowEncoder() {
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS + I2C_WRITE);
+  HAL::i2cStart(UI_DISPLAY_I2C_ADDRESS);
   HAL::i2cWrite(0x12); // GIOA
   HAL::i2cStop();
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS + I2C_READ);
-  uint16_t keymask = HAL::i2cReadAck();
-  keymask = keymask + (HAL::i2cReadNak() << 8);
-  HAL::i2cStop();
+  HAL::i2cStartRead(UI_DISPLAY_I2C_ADDRESS, 2);
+  uint16_t keymask = HAL::i2cRead();
+  keymask = keymask + (HAL::i2cRead() << 8);
 }
 void uiCheckSlowKeys(uint16_t &action) {
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS + I2C_WRITE);
+  HAL::i2cStart(UI_DISPLAY_I2C_ADDRESS);
   HAL::i2cWrite(0x12); // GPIOA
   HAL::i2cStop();
-  HAL::i2cStartWait(UI_DISPLAY_I2C_ADDRESS + I2C_READ);
-  uint16_t keymask = HAL::i2cReadAck();
-  keymask = keymask + (HAL::i2cReadNak() << 8);
-  HAL::i2cStop();
+  HAL::i2cStartRead(UI_DISPLAY_I2C_ADDRESS, 2);
+  uint16_t keymask = HAL::i2cRead();
+  keymask = keymask + (HAL::i2cRead() << 8);
   UI_KEYS_I2C_BUTTON_LOW(_BV(4), UI_ACTION_OK); // push button, connects gnd to pin
   UI_KEYS_I2C_BUTTON_LOW(_BV(1), UI_ACTION_BACK); // push button, connects gnd to pin
   UI_KEYS_I2C_BUTTON_LOW(_BV(0), UI_ACTION_SD_PRINT); // push button, connects gnd to pin

@@ -492,21 +492,6 @@ extern ServoInterface* servos[NUM_SERVOS];
 #define KEEP_ALIVE_INTERVAL 2000
 #endif
 
-/*
-#ifdef AVR_BOARD
-#include "boards/avr/HAL.h"
-#endif
-#ifdef DUE_BOARD
-#include "boards/due/HAL.h"
-#endif
-#ifdef SAMD51_BOARD
-#include "boards/SAMD51/HAL.h"
-#endif
-#ifdef M0_BOARD
-#include "boards/M0/HAL.h"
-#endif
-*/
-
 #ifndef MAX_VFAT_ENTRIES
 #ifdef AVR_BOARD
 #define MAX_VFAT_ENTRIES (2)

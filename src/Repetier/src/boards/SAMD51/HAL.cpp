@@ -417,7 +417,7 @@ void HAL::importEEPROM() {
     } else {
         Com::printFLN("EEPROM read from sd card.");
     }
-    EEPROM::readDataFromEEPROM();
+    EEPROM::readDataFromEspi::beginEPROM();
 }
 
 #endif
@@ -702,177 +702,68 @@ void HAL::spiSendBlock(uint8_t token, const uint8_t* buf) {
 void HAL::i2cSetClockspeed(uint32_t clockSpeedHz)
 
 {
-    // Set i2c clock rate
-    uint32_t dwCkDiv = 0;
-    uint32_t dwClDiv;
-    while (dwClDiv == 0) {
-        dwClDiv = ((F_CPU_TRUE / (2 * clockSpeedHz)) - 4) / (1 << dwCkDiv);
-
-        if (dwClDiv > 255) {
-            dwCkDiv++;
-            dwClDiv = 0;
-        }
-    }
-    TWI_INTERFACE->TWI_CWGR = 0;
-    TWI_INTERFACE->TWI_CWGR = (dwCkDiv << 16) | (dwClDiv << 8) | dwClDiv;
+    WIRE_PORT.setClock(clockSpeedHz);
 }
 
 /*************************************************************************
  Initialization of the I2C bus interface. Need to be called only once
 *************************************************************************/
-void HAL::i2cInit(unsigned long clockSpeedHz) {
-    // enable TWI
-    pmc_enable_periph_clk(TWI_ID);
-
-    // Configure pins
-#if SDA_PIN >= 0
-    PIO_Configure(g_APinDescription[SDA_PIN].pPort,
-                  g_APinDescription[SDA_PIN].ulPinType,
-                  g_APinDescription[SDA_PIN].ulPin,
-                  g_APinDescription[SDA_PIN].ulPinConfiguration);
-#endif
-#if SCL_PIN >= 0
-    PIO_Configure(g_APinDescription[SCL_PIN].pPort,
-                  g_APinDescription[SCL_PIN].ulPinType,
-                  g_APinDescription[SCL_PIN].ulPin,
-                  g_APinDescription[SCL_PIN].ulPinConfiguration);
-#endif
-    /*
-     // Set to Master mode with known state
-     TWI_INTERFACE->TWI_CR = TWI_CR_SVEN;
-     TWI_INTERFACE->TWI_CR = TWI_CR_SWRST;
-     //TWI_INTERFACE->TWI_RHR;  // no action???
-     TWI_INTERFACE->TWI_IMR = 0;
-
-     TWI_INTERFACE->TWI_CR = TWI_CR_SVDIS;
-     TWI_INTERFACE->TWI_CR = TWI_CR_MSDIS;
-     TWI_INTERFACE->TWI_CR = TWI_CR_MSEN;   */
-    // Set to Master mode with known state
-    TWI_INTERFACE->TWI_CR = TWI_CR_SWRST; // Reset
-    TWI_INTERFACE->TWI_CR = TWI_CR_SVDIS; // Slave disable
-    TWI_INTERFACE->TWI_CR = TWI_CR_MSEN;  //Master enable
-
-    i2cSetClockspeed(clockSpeedHz);
+void HAL::i2cInit(uint32_t clockSpeedHz) {
+    WIRE_PORT.begin(); // create I2C master access
+    WIRE_PORT.setClock(clockSpeedHz);
 }
 
 /*************************************************************************
   Issues a start condition and sends address and transfer direction.
-  return 0 = device accessible, 1= failed to access device
 *************************************************************************/
-unsigned char HAL::i2cStart(unsigned char address_and_direction) {
-    uint32_t twiDirection = address_and_direction & 1;
-    uint32_t address = address_and_direction >> 1;
-
-    // set master mode register with no internal address
-    TWI_INTERFACE->TWI_MMR = 0;
-    TWI_INTERFACE->TWI_MMR = (twiDirection << 12) | TWI_MMR_IADRSZ_NONE | TWI_MMR_DADR(address);
-    TWI_INTERFACE->TWI_CR = TWI_CR_MSEN | TWI_CR_SVDIS; //set master mode disable slave mode
-    if (twiDirection)
-        TWI_INTERFACE->TWI_CR = TWI_CR_START; //send Start Bit for receiving data
-    // returning readiness to send/recieve not device accessibility
-    // return value not used in code anyway
-    return !(TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP);
+void HAL::i2cStart(uint8_t address) {
+    WIRE_PORT.beginTransmission(address);
 }
 
-/*************************************************************************
- Issues a start condition and sends address and transfer direction.
- If device is busy, use ack polling to wait until device is ready
-
- Input:   address and transfer direction of I2C device
-*************************************************************************/
-void HAL::i2cStartWait(unsigned char address_and_direction) {
-    uint32_t twiDirection = address_and_direction & 1;
-    uint32_t address = address_and_direction >> 1;
-
-    while (!(TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP))
-        ;
-
-    // set master mode register with no internal address
-
-    TWI_INTERFACE->TWI_MMR = 0;
-    TWI_INTERFACE->TWI_MMR = (twiDirection << 12) | TWI_MMR_IADRSZ_NONE | TWI_MMR_DADR(address);
-
-    TWI_INTERFACE->TWI_CR = TWI_CR_MSEN | TWI_CR_SVDIS; //set master mode disable slave mode
-
-    if (twiDirection)
-        TWI_INTERFACE->TWI_CR = TWI_CR_START; //send Start Bit for receiving data
+void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
+    WIRE_PORT.requestFrom(address, bytes);
 }
-
 /*************************************************************************
  Issues a start condition and sends address and transfer direction.
  Also specifies internal address of device
 
  Input:   address and transfer direction of I2C device, internal address
 *************************************************************************/
-void HAL::i2cStartAddr(unsigned char address_and_direction, unsigned int pos) {
-#if EEPROM_AVAILABLE == EEPROM_I2C
-    uint32_t twiDirection = address_and_direction & 1;
-    uint32_t address = address_and_direction >> 1;
-
-    // if 1 byte address, eeprom uses lower address bits for pos > 255
-    if (EEPROM_ADDRSZ_BYTES == TWI_MMR_IADRSZ_1_BYTE) {
-        address |= pos >> 8;
-        pos &= 0xFF;
+void HAL::i2cStartAddr(uint8_t address, unsigned int pos, uint8_t readBytes) {
+    WIRE_PORT.beginTransmission(address);
+    WIRE_PORT.write(pos >> 8);
+    WIRE_PORT.write(pos & 255);
+    if (readBytes) {
+        WIRE_PORT.endTransmission();
+        WIRE_PORT.requestFrom(address, readBytes);
     }
-
-    // set master mode register with internal address
-    TWI_INTERFACE->TWI_MMR = 0;
-    TWI_INTERFACE->TWI_MMR = (twiDirection << 12) | EEPROM_ADDRSZ_BYTES | TWI_MMR_DADR(address);
-
-    // write internal address register
-    TWI_INTERFACE->TWI_IADR = 0;
-    TWI_INTERFACE->TWI_IADR = TWI_IADR_IADR(pos);
-
-    if (twiDirection)
-        TWI_INTERFACE->TWI_CR = TWI_CR_START; //send Start Bit for receiving data
-#endif
 }
 
 /*************************************************************************
  Terminates the data transfer and releases the I2C bus
 *************************************************************************/
 void HAL::i2cStop(void) {
-    while ((TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) != TWI_SR_TXRDY)
-        ;                                //wait for transmission finished
-    TWI_INTERFACE->TWI_CR = TWI_CR_STOP; // send Stop
-    while (!((TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP) == TWI_SR_TXCOMP))
-        ; //wait for i2cCompleted
+    WIRE_PORT.endTransmission();
 }
 
 /*************************************************************************
   Send one byte to I2C device
 
   Input:    byte to be transfered
-  Return:   0 write successful
-            1 write failed
 *************************************************************************/
 void HAL::i2cWrite(uint8_t data) {
-    TWI_INTERFACE->TWI_THR = data;
-    while ((TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) != TWI_SR_TXRDY)
-        ; // wait for transmission finished
+    WIRE_PORT.write(data);
 }
 
 /*************************************************************************
  Read one byte from the I2C device, request more data from device
  Return:  byte read from I2C device
 *************************************************************************/
-uint8_t HAL::i2cReadAck(void) {
-    while ((TWI_INTERFACE->TWI_SR & TWI_SR_RXRDY) != TWI_SR_RXRDY)
-        ; //wait for received byte
-    return TWI_INTERFACE->TWI_RHR;
-}
-
-/*************************************************************************
- Read one byte from the I2C device, read is followed by a stop condition
-
- Return:  byte read from I2C device
-*************************************************************************/
-uint8_t HAL::i2cReadNak(void) {
-    TWI_INTERFACE->TWI_CR = TWI_CR_STOP; // send Stop
-    uint8_t data = i2cReadAck();         //read last byte
-    while (!((TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP) == TWI_SR_TXCOMP))
-        ; // wait for i2cCompleted ;
-    return data;
+int HAL::i2cRead(void) {
+    if (WIRE_PORT.available()) {
+        return WIRE_PORT.read();
+    }
+    return -1; // should never happen, but better then blocking
 }
 
 #if NUM_SERVOS > 0
@@ -1038,7 +929,10 @@ void PWM_TIMER_VECTOR() {
     GUI::handleKeypress();
 #if FEATURE_WATCHDOG
     if (HAL::wdPinged) {
-        WDT->WDT_CR = 0xA5000001;
+        if (!WDT->SYNCBUSY.bit.CLEAR) // Check if the WDT registers are synchronized
+        {
+            REG_WDT_CLEAR = WDT_CLEAR_CLEAR_KEY; // Clear the watchdog timer
+        }
         HAL::wdPinged = false;
     }
 #endif

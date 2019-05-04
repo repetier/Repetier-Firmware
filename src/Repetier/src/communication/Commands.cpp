@@ -489,19 +489,19 @@ int16_t _valuesEp[] = { 0, 0, 0, 0 };
 uint8_t dac_stepper_channel[] = MCP4728_STEPPER_ORDER;
 
 int dacSimpleCommand(uint8_t simple_command) {
-    HAL::i2cStartWait(MCP4728_GENERALCALL_ADDRESS + I2C_WRITE);
+    HAL::i2cStart(MCP4728_GENERALCALL_ADDRESS);
     HAL::i2cWrite(simple_command);
     HAL::i2cStop();
 }
 
 void dacReadStatus() {
     HAL::delayMilliseconds(500);
-    HAL::i2cStartWait(MCP4728_I2C_ADDRESS | I2C_READ);
+    HAL::i2cStartRead(MCP4728_I2C_ADDRESS, 16);
 
     for (int i = 0; i < 8; i++) { // 2 sets of 4 Channels (1 EEPROM, 1 Runtime)
-        uint8_t deviceID = HAL::i2cReadAck();
-        uint8_t hiByte = HAL::i2cReadAck();
-        uint8_t loByte = ((i < 7) ? HAL::i2cReadAck() : HAL::i2cReadNak());
+        uint8_t deviceID = HAL::i2cRead();
+        uint8_t hiByte = HAL::i2cRead();
+        uint8_t loByte = ((i < 7) ? HAL::i2cRead() : HAL::i2cRead());
 
         uint8_t isEEPROM = (deviceID & 0B00001000) >> 3;
         uint8_t channel = (deviceID & 0B00110000) >> 4;
@@ -524,7 +524,7 @@ void dacReadStatus() {
 void dacAnalogUpdate(bool saveEEPROM = false) {
     uint8_t dac_write_cmd = MCP4728_CMD_SEQ_WRITE;
 
-    HAL::i2cStartWait(MCP4728_I2C_ADDRESS + I2C_WRITE);
+    HAL::i2cStart(MCP4728_I2C_ADDRESS);
     if (saveEEPROM)
         HAL::i2cWrite(dac_write_cmd);
 

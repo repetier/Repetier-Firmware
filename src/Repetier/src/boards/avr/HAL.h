@@ -53,6 +53,12 @@
 
 #include <avr/eeprom.h>
 #include <avr/wdt.h>
+
+// Which I2C port to use?
+#ifndef WIRE_PORT
+#define WIRE_PORT Wire
+#endif
+
 /** \brief Prescale factor, timer0 runs at.
 
 All known Arduino boards use 64. This value is needed for the extruder timing. */
@@ -81,6 +87,7 @@ extern bool analogEnabled[MAX_ANALOG_INPUTS];
 #define SERIAL_RX_BUFFER_SIZE 128
 #endif
 #include "Arduino.h"
+#include <Wire.h>
 #if CPU_ARCH == ARCH_AVR
 #include "fastio.h"
 #else
@@ -130,11 +137,6 @@ public:
 
 #define bit_clear(x, y) x &= ~(1 << y) //cbi(x,y)
 #define bit_set(x, y) x |= (1 << y)    //sbi(x,y)
-
-/** defines the data direction (reading from I2C device) in i2cStart(),i2cRepStart() */
-#define I2C_READ 1
-/** defines the data direction (writing to I2C device) in i2cStart(),i2cRepStart() */
-#define I2C_WRITE 0
 
 #if NONLINEAR_SYSTEM
 // Maximum speed with 100% interrupt utilization is 27000 Hz at 16MHz cpu
@@ -679,12 +681,12 @@ public:
 
     static void i2cSetClockspeed(uint32_t clockSpeedHz);
     static void i2cInit(uint32_t clockSpeedHz);
-    static unsigned char i2cStart(uint8_t address);
-    static void i2cStartWait(uint8_t address);
+    static void i2cStartRead(uint8_t address7bit, uint8_t bytes);
+    static void i2cStart(uint8_t address7bit);
+    static void i2cStartAddr(uint8_t address7bit, unsigned int pos, uint8_t readBytes);
     static void i2cStop(void);
     static void i2cWrite(uint8_t data);
-    static uint8_t i2cReadAck(void);
-    static uint8_t i2cReadNak(void);
+    static int i2cRead(void);
 
     // Watchdog support
 
