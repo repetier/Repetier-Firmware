@@ -38,7 +38,7 @@
 
 // 13 - AMBER LED
 #define DIO13_PORT PORTA
-#define DIO13_PIN PORT_PB01
+#define DIO13_PIN PORT_PA17
 
 // 14 - 27
 #define DIO14_PORT PORTB
