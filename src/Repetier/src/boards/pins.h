@@ -1,6 +1,8 @@
 #ifndef _pins_h_main
 #define _pins_h_main
 
+#include "Arduino.h"
+
 #define ARCH_AVR 1
 #define ARCH_ARM 2
 #define ARCH_DUE 2

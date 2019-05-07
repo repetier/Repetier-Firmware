@@ -296,6 +296,10 @@ void HAL::setHardwarePWM(int id, int value) {
     // TODO: timers can also produce PWM
 }
 
+void HAL::analogEnable(int channel) {
+    analogEnabled[channel] = true;
+}
+
 //#if ANALOG_INPUTS > 0
 // Initialize ADC channels
 void HAL::analogStart(void) {
@@ -760,7 +764,7 @@ void HAL::servoMicroseconds(uint8_t servo, int microsec, uint16_t autoOff) {
 
 ServoInterface* analogServoSlots[4] = { nullptr, nullptr, nullptr, nullptr };
 // Servo timer Interrupt handler
-void SERVO_COMPA_VECTOR() {
+void SERVO_TIMER_VECTOR() {
     InterruptProtectedBlock noInt;
     static uint32_t interval;
 
@@ -806,7 +810,7 @@ TcChannel* stepperChannel = (TIMER1_TIMER->TC_CHANNEL + TIMER1_TIMER_CHANNEL);
 
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
-void TIMER1_COMPA_VECTOR() {
+void TIMER1_TIMER_VECTOR() {
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_STEPPER_PIN, 1);
 #endif

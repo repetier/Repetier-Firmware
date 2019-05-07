@@ -59,11 +59,6 @@
 #define WIRE_PORT Wire
 #endif
 
-/** \brief Prescale factor, timer0 runs at.
-
-All known Arduino boards use 64. This value is needed for the extruder timing. */
-#define TIMER0_PRESCALE 64
-
 #define ANALOG_PRESCALER _BV(ADPS0) | _BV(ADPS1) | _BV(ADPS2)
 #define MAX_ANALOG_INPUTS 16
 extern bool analogEnabled[MAX_ANALOG_INPUTS];
@@ -706,9 +701,6 @@ public:
         wdPinged = true;
 #endif
     };
-    inline static float maxExtruderTimerFrequency() {
-        return (float)F_CPU / TIMER0_PRESCALE;
-    }
 #if NUM_SERVOS > 0
     static unsigned int servoTimings[4];
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);

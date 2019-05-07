@@ -47,21 +47,21 @@
 #define ORIG_Z_MAX_PIN 38
 #define ORIG_Z_ENABLE_PIN 15
 
-// Note that on the Due pin A0 on the board is channel 2 on the ARM chip
+// MGC uses pin numbers for analog inputs
 #define HEATER_0_PIN 13
 // Due analog pin #54
-#define TEMP_0_PIN 7
+#define TEMP_0_PIN PIN_A0 // 7
 #define HEATER_1_PIN 7
-#define TEMP_1_PIN 3
+#define TEMP_1_PIN PIN_A4 // 3
 // Due analog pin #58
 #define HEATER_2_PIN 12
 // Due analog pin #55
-#define TEMP_2_PIN 6
+#define TEMP_2_PIN PIN_A1 // 6
 #define HEATER_3_PIN 11
 // Due analog pin #56
-#define TEMP_3_PIN 5
+#define TEMP_3_PIN PIN_A2 // 5
 // Due analog pin #57
-#define TEMP_4_PIN 4
+#define TEMP_4_PIN PIN_A3 // 4
 
 // Due analog pin #59 = A5 -> AD 2
 #define THERMOCOUPLE_0_PIN 2
@@ -112,7 +112,7 @@
 // To set microstepping on startup set START_GCODE to e.g.
 // "M42 P67 S255\nM42 P68 S255\nM42 P69 S255"
 
-#define SDSUPPORT 1
+#define SDSUPPORT 0
 #define SDPOWER -1
 // 4,10,52 if using HW SPI.
 #define SDSS 4
@@ -133,7 +133,25 @@
 #define SERVO1 5
 #define SERVO2 6
 #define SERVO3 39
-// Controller related default pins
+
+#define E0_PINS ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN,
+#define E1_PINS ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN,
+#define E2_PINS ORIG_E2_STEP_PIN, ORIG_E2_DIR_PIN, ORIG_E2_ENABLE_PIN,
+#define E3_PINS ORIG_E3_STEP_PIN, ORIG_E3_DIR_PIN, ORIG_E3_ENABLE_PIN,
+#define E4_PINS ORIG_E4_STEP_PIN, ORIG_E4_DIR_PIN, ORIG_E4_ENABLE_PIN,
+#define E5_PINS ORIG_E5_STEP_PIN, ORIG_E5_DIR_PIN, ORIG_E5_ENABLE_PIN,
+
+#ifndef TWI_CLOCK_FREQ
+#define TWI_CLOCK_FREQ 400000
+#endif
+
+// see eeprom device data sheet for the following values these are for 24xx256
+#define EEPROM_SERIAL_ADDR 0x50  // 7 bit i2c address (without R/W bit)
+#define EEPROM_PAGE_SIZE 64      // page write buffer size
+#define EEPROM_PAGE_WRITE_TIME 7 // page write time in milliseconds (docs say 5ms but that is too short)
+#ifndef EEPROM_AVAILABLE
+#define EEPROM_AVAILABLE EEPROM_I2C
+#endif
 
 #ifndef CUSTOM_CONTROLLER_PINS
 #if FEATURE_CONTROLLER == CONTROLLER_SPARKLCD
@@ -187,24 +205,4 @@
 #endif
 #endif
 
-// Servo pins: 5,6 und 39
-
-#define E0_PINS ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN,
-#define E1_PINS ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN,
-#define E2_PINS ORIG_E2_STEP_PIN, ORIG_E2_DIR_PIN, ORIG_E2_ENABLE_PIN,
-#define E3_PINS ORIG_E3_STEP_PIN, ORIG_E3_DIR_PIN, ORIG_E3_ENABLE_PIN,
-#define E4_PINS ORIG_E4_STEP_PIN, ORIG_E4_DIR_PIN, ORIG_E4_ENABLE_PIN,
-#define E5_PINS ORIG_E5_STEP_PIN, ORIG_E5_DIR_PIN, ORIG_E5_ENABLE_PIN,
-
-#define TWI_CLOCK_FREQ 400000
-// see eeprom device data sheet for the following values these are for 24xx256
-#define EEPROM_SERIAL_ADDR 0x50  // 7 bit i2c address (without R/W bit)
-#define EEPROM_PAGE_SIZE 64      // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME 7 // page write time in milliseconds (docs say 5ms but that is too short)
-// specify size of eeprom address register
-// TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
-#define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
-#ifndef EEPROM_AVAILABLE
-#define EEPROM_AVAILABLE EEPROM_I2C
-#endif
 #endif

@@ -66,7 +66,6 @@
 #if MOTHERBOARD != 409 // special case ultratronics
 #undef SOFTWARE_SPI
 #endif
-#define TIMER0_PRESCALE 128
 
 // Some structures assume no padding, need to add this attribute on ARM
 #define PACK __attribute__((packed))
@@ -114,20 +113,15 @@ typedef char prog_char;
 #define TIMER1_TIMER TC2
 #define TIMER1_TIMER_CHANNEL 2
 #define TIMER1_TIMER_IRQ ID_TC8
-#define TIMER1_COMPA_VECTOR TC8_Handler
+#define TIMER1_TIMER_VECTOR TC8_Handler
 #define SERVO_TIMER TC2
 #define SERVO_TIMER_CHANNEL 0
 #define SERVO_TIMER_IRQ ID_TC6
-#define SERVO_COMPA_VECTOR TC6_Handler
+#define SERVO_TIMER_VECTOR TC6_Handler
 #define BEEPER_TIMER TC1
 #define BEEPER_TIMER_CHANNEL 0
 #define BEEPER_TIMER_IRQ ID_TC3
 #define BEEPER_TIMER_VECTOR TC3_Handler
-#define DELAY_TIMER TC1
-#define DELAY_TIMER_CHANNEL 1
-#define DELAY_TIMER_IRQ ID_TC4 // IRQ not really used, needed for pmc id
-#define DELAY_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK2
-#define DELAY_TIMER_PRESCALE 8
 
 //#define SERIAL_BUFFER_SIZE      1024
 //#define SERIAL_PORT             UART
@@ -370,10 +364,6 @@ public:
         //Serial.begin(115200);
         TimeTick_Configure(F_CPU_TRUE);
 
-        // setup microsecond delay timer
-        /* pmc_enable_periph_clk(DELAY_TIMER_IRQ);
-        TC_Configure(DELAY_TIMER, DELAY_TIMER_CHANNEL, TC_CMR_WAVSEL_UP | TC_CMR_WAVE | DELAY_TIMER_CLOCK);
-        TC_Start(DELAY_TIMER, DELAY_TIMER_CHANNEL);*/
 #if EEPROM_AVAILABLE && EEPROM_MODE != EEPROM_NONE && EEPROM_AVAILABLE != EEPROM_SDCARD
         // Copy eeprom to ram for faster access
         int i;
@@ -847,15 +837,14 @@ public:
 #endif
     };
 
-    inline static float maxExtruderTimerFrequency() {
-        return (float)F_CPU_TRUE / 32;
-    }
 #if NUM_SERVOS > 0
     static unsigned int servoTimings[4];
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);
 #endif
 
     static void analogStart(void);
+    static void analogEnable(int channel);
+    static int analogRead(int channel) { return ADC->ADC_CDR[channel]; }
     static volatile uint8_t insideTimer1;
 };
 

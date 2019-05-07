@@ -66,7 +66,6 @@
 #if MOTHERBOARD != 409 // special case ultratronics
 #undef SOFTWARE_SPI
 #endif
-#define TIMER0_PRESCALE 128
 
 // Some structures assume no padding, need to add this attribute on ARM
 #define PACK __attribute__((packed))
@@ -103,31 +102,29 @@ typedef char prog_char;
 #define FSTRINGVAR(var) static const char var[] PROGMEM;
 #define FSTRINGPARAM(var) PGM_P var
 
-#define MOTION2_TIMER TC0
-#define MOTION2_TIMER_CHANNEL 0
-#define MOTION2_TIMER_IRQ ID_TC0
-#define MOTION2_TIMER_VECTOR TC0_Handler
-#define PWM_TIMER TC0
-#define PWM_TIMER_CHANNEL 1
-#define PWM_TIMER_IRQ ID_TC1
+#define MOTION2_TIMER TC2
+#define MOTION2_TIMER_ID TC2_GCLK_ID
+#define MOTION2_TIMER_IRQ TC2_IRQn
+#define MOTION2_TIMER_VECTOR TC2_Handler
+#define PWM_TIMER TC1
+#define PWM_TIMER_ID TC1_GCLK_ID
+#define PWM_TIMER_IRQ TC1_IRQn
 #define PWM_TIMER_VECTOR TC1_Handler
-#define TIMER1_TIMER TC2
-#define TIMER1_TIMER_CHANNEL 2
-#define TIMER1_TIMER_IRQ ID_TC8
-#define TIMER1_COMPA_VECTOR TC8_Handler
-#define SERVO_TIMER TC2
-#define SERVO_TIMER_CHANNEL 0
-#define SERVO_TIMER_IRQ ID_TC6
-#define SERVO_COMPA_VECTOR TC6_Handler
-#define BEEPER_TIMER TC1
-#define BEEPER_TIMER_CHANNEL 0
-#define BEEPER_TIMER_IRQ ID_TC3
-#define BEEPER_TIMER_VECTOR TC3_Handler
-#define DELAY_TIMER TC1
-#define DELAY_TIMER_CHANNEL 1
-#define DELAY_TIMER_IRQ ID_TC4 // IRQ not really used, needed for pmc id
-#define DELAY_TIMER_CLOCK TC_CMR_TCCLKS_TIMER_CLOCK2
-#define DELAY_TIMER_PRESCALE 8
+// Tone function uses TC2!
+/*#define TIMER1_TIMER TC3
+#define TIMER1_TIMER_ID TC3_GCLK_ID
+#define TIMER1_TIMER_IRQ TC3_IRQn
+#define TIMER1_TIMER_VECTOR TC3_Handler*/
+
+#define TIMER1_TIMER TC0
+#define TIMER1_TIMER_ID TC0_GCLK_ID
+#define TIMER1_TIMER_IRQ TC0_IRQn
+#define TIMER1_TIMER_VECTOR TC0_Handler
+
+#define SERVO_TIMER TC4
+#define SERVO_TIMER_ID TC4_GCLK_ID
+#define SERVO_TIMER_IRQ TC4_IRQn
+#define SERVO_TIMER_VECTOR TC4_Handler
 
 //#define SERIAL_BUFFER_SIZE      1024
 //#define SERIAL_PORT             UART
@@ -141,15 +138,21 @@ typedef char prog_char;
 #define EXTRUDER_CLOCK_FREQ 60000 // extruder stepper interrupt frequency
 // #define PWM_CLOCK_FREQ          3906
 // #define PWM_COUNTER_100MS       390
-#define PWM_CLOCK_FREQ 10000
-#define PWM_COUNTER_100MS 1000
+#define PWM_CLOCK_FREQ 5000
+#define PWM_COUNTER_100MS 500
 //#define TIMER1_CLOCK_FREQ       244
 //#define TIMER1_PRESCALE         2
 
+/*
+servo pulses repeat every 20ms, so each block of 4 servos has 5ms as maximum 
+value to wait. So we need F_CPU * 0.005 ticks = 600000 ticks. With 16 bit timer
+that means prescale factor 16 => 7.5*timeInUs ticks
+*/
 #define SERVO_CLOCK_FREQ 1000
-#define SERVO_PRESCALE 2 // Using TCLOCK1 therefore 2
-#define SERVO2500US (((F_CPU_TRUE / SERVO_PRESCALE) / 1000000) * 2500)
-#define SERVO5000US (((F_CPU_TRUE / SERVO_PRESCALE) / 1000000) * 5000)
+#define SERVO_PRESCALE 16 // Using TCLOCK1 therefore 2
+#define SERVO_PRESCALE_DIV TC_CTRLA_PRESCALER_DIV16
+#define SERVO2500US ((((F_CPU_TRUE / SERVO_PRESCALE) / 1000) * 2500) / 1000)
+#define SERVO5000US ((((F_CPU_TRUE / SERVO_PRESCALE) / 1000) * 5000) / 1000)
 
 #define AD_PRESCALE_FACTOR 84 // 500 kHz ADC clock
 #define AD_TRACKING_CYCLES 4  // 0 - 15     + 1 adc clock cycles
@@ -186,7 +189,7 @@ extern bool analogEnabled[MAX_ANALOG_INPUTS];
         } \
     } while (0)
 */
-#define _READ(pin) ((PORT->Group[DIO##port##_PORT].IN.reg & DIO##port##_PIN) ? 1 : 0)
+#define _READ(pin) ((PORT->Group[DIO##pin##_PORT].IN.reg & DIO##pin##_PIN) ? 1 : 0)
 #define _WRITE(port, v) \
     do { \
         if (v) { \
@@ -368,7 +371,9 @@ public:
     static inline void hwSetup(void) {
 #if !FEATURE_WATCHDOG
         // Disable watchdog
-        WDT_Disable(WDT);
+        REG_WDT_CTRLA = 0; // Disable the WDT
+        while (WDT->SYNCBUSY.bit.ENABLE)
+            ; // Wait for synchronization
 #endif
 
 #if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
@@ -379,12 +384,7 @@ public:
 #endif
         // make debugging startup easier
         //Serial.begin(115200);
-        // TimeTick_Configure(F_CPU_TRUE); // use arduino function
 
-        // setup microsecond delay timer
-        /* pmc_enable_periph_clk(DELAY_TIMER_IRQ);
-        TC_Configure(DELAY_TIMER, DELAY_TIMER_CHANNEL, TC_CMR_WAVSEL_UP | TC_CMR_WAVE | DELAY_TIMER_CLOCK);
-        TC_Start(DELAY_TIMER, DELAY_TIMER_CHANNEL);*/
 #if EEPROM_AVAILABLE && EEPROM_MODE != EEPROM_NONE && EEPROM_AVAILABLE != EEPROM_SDCARD
         // Copy eeprom to ram for faster access
         int i;
@@ -393,7 +393,8 @@ public:
             memcopy4(&virtualEeprom[i], &v.i);
         }
 #else
-        int i, n = 0;
+        int i,
+            n = 0;
         for (i = 0; i < EEPROM_BYTES; i += 4) {
             memcopy4(&virtualEeprom[i], &n);
         }
@@ -844,15 +845,14 @@ public:
 #endif
     };
 
-    inline static float maxExtruderTimerFrequency() {
-        return (float)F_CPU_TRUE / 32;
-    }
 #if NUM_SERVOS > 0
     static unsigned int servoTimings[4];
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);
 #endif
 
     static void analogStart(void);
+    static int analogRead(int channel);
+    static void analogEnable(int channel);
     static volatile uint8_t insideTimer1;
 };
 

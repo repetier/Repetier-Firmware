@@ -93,9 +93,9 @@
 #define EEPROM_SERIAL_ADDR 0x50  // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64      // page write buffer size
 #define EEPROM_PAGE_WRITE_TIME 7 // page write time in milliseconds (docs say 5ms but that is too short)
-// TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
-#define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
+#ifndef EEPROM_AVAILABLE
 #define EEPROM_AVAILABLE EEPROM_I2C
+#endif
 #endif
 
 // RADDS Board

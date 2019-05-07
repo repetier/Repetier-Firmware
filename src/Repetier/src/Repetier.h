@@ -52,6 +52,9 @@
 #define MOTHERBOARD_AGC_USER_DEFINED 1002
 #define MOTHERBOARD_AGC_RADDS 1003
 
+// M0/SAMD21 based boards
+#define MOTHERBOARD_MINITRONICS_2_0 2000
+
 // Some helper macros
 
 #define _CAT(a, ...) a##__VA_ARGS__

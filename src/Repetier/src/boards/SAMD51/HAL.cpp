@@ -29,32 +29,16 @@
 #ifdef SAMD51_BOARD
 #include <malloc.h>
 
+// Adds output signals to pins below to measure interrupt timings
+// with a logic analyser. Set to 0 for production!
 #define DEBUG_TIMING 0
-#define DEBUG_ISR_STEPPER_PIN 37
+#define DEBUG_ISR_STEPPER_PIN 39
 #define DEBUG_ISR_MOTION_PIN 35
 #define DEBUG_ISR_TEMP_PIN 33
 
 //extern "C" void __cxa_pure_virtual() { }
 extern "C" char* sbrk(int i);
 extern long bresenham_step();
-
-// New adc handling
-bool analogEnabled[MAX_ANALOG_INPUTS] = { false, false, false, false, false, false, false, false, false, false, false, false };
-// end adc handling
-
-// #define NUM_ADC_SAMPLES 2 + (1 << ANALOG_INPUT_SAMPLE)
-/*
-#if ANALOG_INPUTS > 0
-int32_t osAnalogInputBuildup[ANALOG_INPUTS];
-int32_t osAnalogSamples[ANALOG_INPUTS][ANALOG_INPUT_MEDIAN];
-int32_t osAnalogSamplesSum[ANALOG_INPUTS];
-static int32_t adcSamplesMin[ANALOG_INPUTS];
-static int32_t adcSamplesMax[ANALOG_INPUTS];
-static int adcCounter = 0, adcSamplePos = 0;
-#endif
-*/
-
-static uint32_t adcEnable = 0;
 
 char HAL::virtualEeprom[EEPROM_BYTES] = { 0, 0, 0, 0, 0, 0, 0 };
 bool HAL::wdPinged = true;
@@ -71,6 +55,42 @@ HAL::~HAL() {
     //dtor
 }
 
+/*
+maximum time for 120MHz is 0.55924 seconds with prescaler 1024!
+*/
+#define SYNC_TIMER(timer) \
+    while (timer->COUNT16.SYNCBUSY.reg != 0) {}
+
+void getPrescaleFreq(uint32_t ticks, uint32_t& prescale, uint32_t& freq) {
+    if (ticks < 65536) {
+        prescale = TC_CTRLA_PRESCALER_DIV1;
+        freq = ticks;
+    } else if (ticks < 131072) {
+        prescale = TC_CTRLA_PRESCALER_DIV2;
+        freq = ticks >> 1;
+    } else if (ticks < 262144) {
+        prescale = TC_CTRLA_PRESCALER_DIV4;
+        freq = ticks >> 2;
+    } else if (ticks < 524288) {
+        prescale = TC_CTRLA_PRESCALER_DIV8;
+        freq = ticks >> 3;
+    } else if (ticks < 1048576) {
+        prescale = TC_CTRLA_PRESCALER_DIV16;
+        freq = ticks >> 4;
+    } else if (ticks < 4194304) {
+        prescale = TC_CTRLA_PRESCALER_DIV64;
+        freq = ticks >> 6;
+    } else if (ticks < 16777216) {
+        prescale = TC_CTRLA_PRESCALER_DIV256;
+        freq = ticks >> 8;
+    } else if (ticks < 67108864ul) {
+        prescale = TC_CTRLA_PRESCALER_DIV1024;
+        freq = ticks >> 10;
+    } else { // too slow, set to slowest possible value
+        prescale = TC_CTRLA_PRESCALER_DIV1024;
+        freq = 65535;
+    }
+}
 // Set up all timer interrupts
 void HAL::setupTimer() {
 #if DEBUG_TIMING
@@ -78,152 +98,133 @@ void HAL::setupTimer() {
     SET_OUTPUT(DEBUG_ISR_MOTION_PIN);
     SET_OUTPUT(DEBUG_ISR_TEMP_PIN);
 #endif
+    uint32_t prescale, freq;
 
-    uint32_t tc_count, tc_clock;
-    pmc_set_writeprotect(false);
-    // set 3 bits for interrupt group priority, 1 bits for sub-priority
-    //NVIC_SetPriorityGrouping(4);
+    GCLK->PCHCTRL[MOTION2_TIMER_ID].reg = GCLK_PCHCTRL_GEN_GCLK0_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
+    while (GCLK->SYNCBUSY.reg > 0) {}
 
-    // Timer for extruder control
-    pmc_enable_periph_clk(MOTION2_TIMER_IRQ); // enable power to timer
-    //NVIC_SetPriority((IRQn_Type)EXTRUDER_TIMER_IRQ, NVIC_EncodePriority(4, 4, 1));
+    MOTION2_TIMER->COUNT16.CTRLA.bit.ENABLE = 0; // can only change if disabled
+
+    // Use match mode so that the timer counter resets when the count matches the
+    // compare register
+    MOTION2_TIMER->COUNT16.WAVE.bit.WAVEGEN = TC_WAVE_WAVEGEN_MFRQ;
+    SYNC_TIMER(MOTION2_TIMER);
+
+    // Enable the compare interrupt
+    MOTION2_TIMER->COUNT16.INTENSET.reg = 0;
+    MOTION2_TIMER->COUNT16.INTENSET.bit.MC0 = 1;
+    getPrescaleFreq(F_CPU_TRUE / PREPARE_FREQUENCY, prescale, freq);
+    MOTION2_TIMER->COUNT16.CTRLA.reg &= ~TC_CTRLA_PRESCALER_DIV1024;
+    MOTION2_TIMER->COUNT16.CTRLA.reg |= prescale;
     NVIC_SetPriority((IRQn_Type)MOTION2_TIMER_IRQ, 15);
-
-    // count up to value in RC register using given clock
-    TC_Configure(MOTION2_TIMER, MOTION2_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);
-
-    TC_SetRC(MOTION2_TIMER, MOTION2_TIMER_CHANNEL, (F_CPU_TRUE / 2) / PREPARE_FREQUENCY); // set frequency 43 for 60000Hz
-    TC_Start(MOTION2_TIMER, MOTION2_TIMER_CHANNEL);                                       // start timer running
-
-    // enable RC compare interrupt
-    MOTION2_TIMER->TC_CHANNEL[MOTION2_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
-    // clear the "disable RC compare" interrupt
-    MOTION2_TIMER->TC_CHANNEL[MOTION2_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
-
-    // allow interrupts on timer
-    NVIC_EnableIRQ((IRQn_Type)MOTION2_TIMER_IRQ);
+    NVIC_EnableIRQ(MOTION2_TIMER_IRQ); // Enable IRQ for function call
+    MOTION2_TIMER->COUNT16.COUNT.reg = map(MOTION2_TIMER->COUNT16.COUNT.reg, 0,
+                                           MOTION2_TIMER->COUNT16.CC[0].reg, 0, freq);
+    MOTION2_TIMER->COUNT16.CC[0].reg = freq;
+    SYNC_TIMER(MOTION2_TIMER);
+    MOTION2_TIMER->COUNT16.CTRLA.bit.ENABLE = 1; // enable timer
+    SYNC_TIMER(MOTION2_TIMER);
 
     // Regular interrupts for heater control etc
-    pmc_enable_periph_clk(PWM_TIMER_IRQ);
-    //NVIC_SetPriority((IRQn_Type)PWM_TIMER_IRQ, NVIC_EncodePriority(4, 6, 0));
+
+    GCLK->PCHCTRL[PWM_TIMER_ID].reg = GCLK_PCHCTRL_GEN_GCLK0_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
+    while (GCLK->SYNCBUSY.reg > 0) {}
+
+    PWM_TIMER->COUNT16.CTRLA.bit.ENABLE = 0; // can only change if disabled
+
+    // Use match mode so that the timer counter resets when the count matches the
+    // compare register
+    PWM_TIMER->COUNT16.WAVE.bit.WAVEGEN = TC_WAVE_WAVEGEN_MFRQ;
+    SYNC_TIMER(PWM_TIMER);
+    PWM_TIMER->COUNT16.INTENSET.reg = 0;
+    PWM_TIMER->COUNT16.INTENSET.bit.MC0 = 1;
+    getPrescaleFreq(F_CPU_TRUE / PWM_CLOCK_FREQ, prescale, freq);
+    PWM_TIMER->COUNT16.CTRLA.reg &= ~TC_CTRLA_PRESCALER_DIV1024;
+    PWM_TIMER->COUNT16.CTRLA.reg |= prescale;
     NVIC_SetPriority((IRQn_Type)PWM_TIMER_IRQ, 15);
-
-    TC_FindMckDivisor(PWM_CLOCK_FREQ, F_CPU_TRUE, &tc_count, &tc_clock, F_CPU_TRUE);
-    TC_Configure(PWM_TIMER, PWM_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | tc_clock);
-
-    TC_SetRC(PWM_TIMER, PWM_TIMER_CHANNEL, (F_CPU_TRUE / tc_count) / PWM_CLOCK_FREQ);
-    TC_Start(PWM_TIMER, PWM_TIMER_CHANNEL);
-
-    PWM_TIMER->TC_CHANNEL[PWM_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
-    PWM_TIMER->TC_CHANNEL[PWM_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
-    NVIC_EnableIRQ((IRQn_Type)PWM_TIMER_IRQ);
+    NVIC_EnableIRQ(PWM_TIMER_IRQ); // Enable IRQ for function call
+    PWM_TIMER->COUNT16.COUNT.reg = map(PWM_TIMER->COUNT16.COUNT.reg, 0,
+                                       PWM_TIMER->COUNT16.CC[0].reg, 0, freq);
+    PWM_TIMER->COUNT16.CC[0].reg = freq;
+    SYNC_TIMER(PWM_TIMER);
+    PWM_TIMER->COUNT16.CTRLA.bit.ENABLE = 1; // enable timer
+    SYNC_TIMER(PWM_TIMER);
 
     // Timer for stepper motor control
-    pmc_enable_periph_clk(TIMER1_TIMER_IRQ);
-    //NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ, NVIC_EncodePriority(4, 7, 1)); // highest priority - no surprises here wanted
-    NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ, 2); // highest priority - no surprises here wanted
-    TC_Configure(TIMER1_TIMER, TIMER1_TIMER_CHANNEL,
-                 TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);
-    TC_SetRC(TIMER1_TIMER, TIMER1_TIMER_CHANNEL, (F_CPU_TRUE / 2) / STEPPER_FREQUENCY);
-    TC_Start(TIMER1_TIMER, TIMER1_TIMER_CHANNEL);
 
-    TIMER1_TIMER->TC_CHANNEL[TIMER1_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
-    TIMER1_TIMER->TC_CHANNEL[TIMER1_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
-    NVIC_EnableIRQ((IRQn_Type)TIMER1_TIMER_IRQ);
+    GCLK->PCHCTRL[TIMER1_TIMER_ID].reg = GCLK_PCHCTRL_GEN_GCLK0_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
+    while (GCLK->SYNCBUSY.reg > 0) {}
+
+    TIMER1_TIMER->COUNT16.CTRLA.bit.ENABLE = 0; // can only change if disabled
+
+    // Use match mode so that the timer counter resets when the count matches the
+    // compare register
+    TIMER1_TIMER->COUNT16.WAVE.bit.WAVEGEN = TC_WAVE_WAVEGEN_MFRQ;
+    SYNC_TIMER(TIMER1_TIMER);
+    TIMER1_TIMER->COUNT16.INTENSET.reg = 0;
+    TIMER1_TIMER->COUNT16.INTENSET.bit.MC0 = 1;
+    getPrescaleFreq(F_CPU_TRUE / STEPPER_FREQUENCY, prescale, freq);
+    TIMER1_TIMER->COUNT16.CTRLA.reg &= ~TC_CTRLA_PRESCALER_DIV1024;
+    TIMER1_TIMER->COUNT16.CTRLA.reg |= prescale;
+    NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ, 2);
+    NVIC_EnableIRQ(TIMER1_TIMER_IRQ); // Enable IRQ for function call
+    TIMER1_TIMER->COUNT16.COUNT.reg = map(TIMER1_TIMER->COUNT16.COUNT.reg, 0,
+                                          TIMER1_TIMER->COUNT16.CC[0].reg, 0, freq);
+    TIMER1_TIMER->COUNT16.CC[0].reg = freq;
+    SYNC_TIMER(TIMER1_TIMER);
+    TIMER1_TIMER->COUNT16.CTRLA.bit.ENABLE = 1; // enable timer
+    SYNC_TIMER(TIMER1_TIMER);
 
     // Servo control
 #if NUM_SERVOS > 0
-    /*
-#if SERVO0_PIN > -1
-    SET_OUTPUT(SERVO0_PIN);
-    WRITE(SERVO0_PIN, LOW);
-#endif
-#if SERVO1_PIN > -1
-    SET_OUTPUT(SERVO1_PIN);
-    WRITE(SERVO1_PIN, LOW);
-#endif
-#if SERVO2_PIN > -1
-    SET_OUTPUT(SERVO2_PIN);
-    WRITE(SERVO2_PIN, LOW);
-#endif
-#if SERVO3_PIN > -1
-    SET_OUTPUT(SERVO3_PIN);
-    WRITE(SERVO3_PIN, LOW);
-#endif
-*/
-    pmc_enable_periph_clk(SERVO_TIMER_IRQ);
-    //NVIC_SetPriority((IRQn_Type)SERVO_TIMER_IRQ, NVIC_EncodePriority(4, 5, 0));
+
+    GCLK->PCHCTRL[SERVO_TIMER_ID].reg = GCLK_PCHCTRL_GEN_GCLK1_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
+    while (GCLK->SYNCBUSY.reg > 0)
+        ;
+
+    SERVO_TIMER->COUNT16.CTRLA.bit.ENABLE = 0; // can only change if disabled
+
+    // Use match mode so that the timer counter resets when the count matches the
+    // compare register
+    SERVO_TIMER->COUNT16.WAVE.bit.WAVEGEN = TC_WAVE_WAVEGEN_MFRQ;
+    SYNC_TIMER(SERVO_TIMER);
+    SERVO_TIMER->COUNT16.INTENSET.reg = 0;
+    SERVO_TIMER->COUNT16.INTENSET.bit.MC0 = 1;
+    SERVO_TIMER->COUNT16.CTRLA.reg &= ~TC_CTRLA_PRESCALER_DIV1024;
+    SERVO_TIMER->COUNT16.CTRLA.reg |= SERVO_PRESCALE_DIV;
     NVIC_SetPriority((IRQn_Type)SERVO_TIMER_IRQ, 4);
+    NVIC_EnableIRQ(SERVO_TIMER_IRQ); // Enable IRQ for function call
+    SERVO_TIMER->COUNT16.COUNT.reg = map(SERVO_TIMER->COUNT16.COUNT.reg, 0,
+                                         SERVO_TIMER->COUNT16.CC[0].reg, 0, SERVO5000US);
+    SERVO_TIMER->COUNT16.CC[0].reg = SERVO5000US;
+    SYNC_TIMER(SERVO_TIMER);
+    SERVO_TIMER->COUNT16.CTRLA.bit.ENABLE = 1; // enable timer
+    SYNC_TIMER(SERVO_TIMER);
 
-    TC_Configure(SERVO_TIMER, SERVO_TIMER_CHANNEL, TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);
-
-    TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, (F_CPU_TRUE / SERVO_PRESCALE) / SERVO_CLOCK_FREQ);
-    TC_Start(SERVO_TIMER, SERVO_TIMER_CHANNEL);
-
-    SERVO_TIMER->TC_CHANNEL[SERVO_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
-    SERVO_TIMER->TC_CHANNEL[SERVO_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
-    NVIC_EnableIRQ((IRQn_Type)SERVO_TIMER_IRQ);
 #endif
 #ifndef NO_SPI
     HAL::spiInit();
 #endif
 }
 
-struct PWMPin {
-    int pin;
-    Pio* pio;
-    uint32_t pio_pin;
-    int channel;
-    bool invert;
-};
-
-#define NUM_POSSIBLE_PWM_PINS 30
-static PWMPin pwm_pins[NUM_POSSIBLE_PWM_PINS] = {
-    { 0, PIOA, PIO_PA8B_PWMH0, PWM_CH0, false }, // Channel 0
-    { 20, PIOB, PIO_PB12B_PWMH0, PWM_CH0, false },
-    { 35, PIOC, PIO_PC3B_PWMH0, PWM_CH0, false },
-    { 73, PIOA, PIO_PA21B_PWML0, PWM_CH0, true },
-    { 67, PIOB, PIO_PB16B_PWML0, PWM_CH0, true },
-    { 34, PIOC, PIO_PC2B_PWML0, PWM_CH0, true },
-    { 42, PIOA, PIO_PA19B_PWMH1, PWM_CH1, false }, // Channel 1
-    { 21, PIOB, PIO_PB13B_PWMH1, PWM_CH1, false },
-    { 37, PIOC, PIO_PC5B_PWMH1, PWM_CH1, false },
-    { 64, PIOA, PIO_PA12B_PWML1, PWM_CH1, true },
-    { 62, PIOB, PIO_PB17B_PWML1, PWM_CH1, true },
-    { 36, PIOC, PIO_PC4B_PWML1, PWM_CH1, true },
-    { 16, PIOA, PIO_PA13B_PWMH2, PWM_CH2, false }, // Channel 2
-    { 53, PIOB, PIO_PB14B_PWMH2, PWM_CH2, false },
-    { 39, PIOC, PIO_PC7B_PWMH2, PWM_CH2, false },
-    { 43, PIOA, PIO_PA20B_PWML2, PWM_CH2, true },
-    { 63, PIOB, PIO_PB18B_PWML2, PWM_CH2, true },
-    { 38, PIOC, PIO_PC6B_PWML2, PWM_CH2, true },
-    { 1, PIOA, PIO_PA9B_PWMH3, PWM_CH3, false }, // Channel 3
-    { 66, PIOB, PIO_PB15B_PWMH3, PWM_CH3, false },
-    { 41, PIOC, PIO_PC9B_PWMH3, PWM_CH3, false },
-    { 69, PIOA, PIO_PA0B_PWML3, PWM_CH3, true },
-    { 64, PIOB, PIO_PB19B_PWML3, PWM_CH3, true }, // double value 64
-    { 40, PIOC, PIO_PC8B_PWML3, PWM_CH3, true },
-    // {??, PIOC, PIO_PC20B_PWMH4, PWM_CH4, false} // Channel 4
-    { 9, PIOC, PIO_PC21B_PWML4, PWM_CH4, true },
-    { 44, PIOC, PIO_PC19B_PWMH5, PWM_CH5, false }, // Channel 5
-    { 8, PIOC, PIO_PC22B_PWML5, PWM_CH5, true },
-    { 45, PIOC, PIO_PC18B_PWMH6, PWM_CH6, false }, // Channel 6
-    { 7, PIOC, PIO_PC23B_PWML6, PWM_CH6, true },
-    { 6, PIOC, PIO_PC24B_PWML7, PWM_CH7, true } // Channel 7
-};
-
 struct PWMChannel {
     bool used;
-    PWMPin* pwm; // table index
+    const PinDescription* pwm; // timer
     uint32_t scale;
 };
 
-static PWMChannel pwm_channel[8] = {
+static PWMChannel pwm_channel[13] = {
+    { false, nullptr, 0 }, // 5 Tcc channel
     { false, nullptr, 0 },
     { false, nullptr, 0 },
     { false, nullptr, 0 },
     { false, nullptr, 0 },
-    { false, nullptr, 0 },
+    // 8 Tc channels, 0-4 pre used by timers!
+    { true, nullptr, 0 },           // 0 MOTION2
+    { true, nullptr, 0 },           // 1 PWM_TIMER
+    { true, nullptr, 0 },           // 2 TIMER1
+    { true, nullptr, 0 },           // 3 Tone
+    { NUM_SERVOS > 0, nullptr, 0 }, // 4 servo timer can be used if no servos present
     { false, nullptr, 0 },
     { false, nullptr, 0 },
     { false, nullptr, 0 }
@@ -234,12 +235,108 @@ static void computePWMDivider(uint32_t frequency, uint32_t& div, uint32_t& scale
     div = 0;
     do {
         scale = VARIANT_MCK / (frequency * factor);
-        if (scale <= 65535) {
-            return;
+        if (factor != 32 && factor != 128 && factor != 512) {
+            if (scale < 65535) {
+                return;
+            }
+            div++;
         }
-        div = factor;
         factor <<= 1;
     } while (factor <= 1024);
+}
+static int pinPeripheral(uint32_t ulPin, EPioType ulPeripheral) {
+    // Handle the case the pin isn't usable as PIO
+    if (g_APinDescription[ulPin].ulPinType == PIO_NOT_A_PIN) {
+        return -1;
+    }
+
+    switch (ulPeripheral) {
+    case PIO_DIGITAL:
+    case PIO_INPUT:
+    case PIO_INPUT_PULLUP:
+    case PIO_OUTPUT:
+        // Disable peripheral muxing, done in pinMode
+        //			PORT->Group[g_APinDescription[ulPin].ulPort].PINCFG[g_APinDescription[ulPin].ulPin].bit.PMUXEN = 0 ;
+
+        // Configure pin mode, if requested
+        if (ulPeripheral == PIO_INPUT) {
+            pinMode(ulPin, INPUT);
+        } else {
+            if (ulPeripheral == PIO_INPUT_PULLUP) {
+                pinMode(ulPin, INPUT_PULLUP);
+            } else {
+                if (ulPeripheral == PIO_OUTPUT) {
+                    pinMode(ulPin, OUTPUT);
+                } else {
+                    // PIO_DIGITAL, do we have to do something as all cases are covered?
+                }
+            }
+        }
+        break;
+
+    case PIO_ANALOG:
+    case PIO_SERCOM:
+    case PIO_SERCOM_ALT:
+    case PIO_TIMER:
+    case PIO_TIMER_ALT:
+    case PIO_EXTINT:
+#if defined(__SAMD51__)
+    case PIO_TCC_PDEC:
+    case PIO_COM:
+    case PIO_SDHC:
+    case PIO_I2S:
+    case PIO_PCC:
+    case PIO_GMAC:
+    case PIO_AC_CLK:
+    case PIO_CCL:
+#else
+    case PIO_COM:
+    case PIO_AC_CLK:
+#endif
+#if 0
+      // Is the pio pin in the lower 16 ones?
+      // The WRCONFIG register allows update of only 16 pin max out of 32
+      if ( g_APinDescription[ulPin].ulPin < 16 )
+      {
+        PORT->Group[g_APinDescription[ulPin].ulPort].WRCONFIG.reg = PORT_WRCONFIG_WRPMUX | PORT_WRCONFIG_PMUXEN | PORT_WRCONFIG_PMUX( ulPeripheral ) |
+                                                                    PORT_WRCONFIG_WRPINCFG |
+                                                                    PORT_WRCONFIG_PINMASK( g_APinDescription[ulPin].ulPin ) ;
+      }
+      else
+      {
+        PORT->Group[g_APinDescription[ulPin].ulPort].WRCONFIG.reg = PORT_WRCONFIG_HWSEL |
+                                                                    PORT_WRCONFIG_WRPMUX | PORT_WRCONFIG_PMUXEN | PORT_WRCONFIG_PMUX( ulPeripheral ) |
+                                                                    PORT_WRCONFIG_WRPINCFG |
+                                                                    PORT_WRCONFIG_PINMASK( g_APinDescription[ulPin].ulPin - 16 ) ;
+      }
+#else
+        if (g_APinDescription[ulPin].ulPin & 1) // is pin odd?
+        {
+            uint32_t temp;
+
+            // Get whole current setup for both odd and even pins and remove odd one
+            temp = (PORT->Group[g_APinDescription[ulPin].ulPort].PMUX[g_APinDescription[ulPin].ulPin >> 1].reg) & PORT_PMUX_PMUXE(0xF);
+            // Set new muxing
+            PORT->Group[g_APinDescription[ulPin].ulPort].PMUX[g_APinDescription[ulPin].ulPin >> 1].reg = temp | PORT_PMUX_PMUXO(ulPeripheral);
+            // Enable port mux
+            PORT->Group[g_APinDescription[ulPin].ulPort].PINCFG[g_APinDescription[ulPin].ulPin].reg |= PORT_PINCFG_PMUXEN | PORT_PINCFG_DRVSTR;
+        } else // even pin
+        {
+            uint32_t temp;
+
+            temp = (PORT->Group[g_APinDescription[ulPin].ulPort].PMUX[g_APinDescription[ulPin].ulPin >> 1].reg) & PORT_PMUX_PMUXO(0xF);
+            PORT->Group[g_APinDescription[ulPin].ulPort].PMUX[g_APinDescription[ulPin].ulPin >> 1].reg = temp | PORT_PMUX_PMUXE(ulPeripheral);
+            PORT->Group[g_APinDescription[ulPin].ulPort].PINCFG[g_APinDescription[ulPin].ulPin].reg |= PORT_PINCFG_PMUXEN | PORT_PINCFG_DRVSTR; // Enable port mux
+        }
+#endif
+        break;
+
+    case PIO_NOT_A_PIN:
+        return -1l;
+        break;
+    }
+
+    return 0l;
 }
 
 // Try to initialize pinNumber as hardware PWM. Returns internal
@@ -247,131 +344,196 @@ static void computePWMDivider(uint32_t frequency, uint32_t& div, uint32_t& scale
 // are no pwm support for that pin or an other pin uses same PWM
 // channel.
 int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
-    // Search pin mapping
-    int foundPin = -1;
-    for (int i = 0; i < NUM_POSSIBLE_PWM_PINS; i++) {
-        if (pwm_pins[i].pin == pinNumber) {
-            if (pwm_channel[pwm_pins[i].channel].used == false) { // ensure not used
-                foundPin = i;
-            }
-            break;
-        }
-    }
-    if (foundPin == -1) {
+    if (pinNumber < 0) {
         return -1;
     }
+    // Search pin mapping
+    const PinDescription* pd = &g_APinDescription[pinNumber];
+    uint32_t tcNum = GetTCNumber(pd->ulPWMChannel);
+    uint8_t tcChannel = GetTCChannelNumber(pd->ulPWMChannel);
+    if (pd->ulPWMChannel == NOT_ON_PWM || pwm_channel[tcChannel].used) { // pwm not possible
+        return -1;
+    }
+    uint32_t attr = pd->ulPinAttribute;
+    if (attr & PIN_ATTR_PWM_E)
+        pinPeripheral(pinNumber, PIO_TIMER);
+    else if (attr & PIN_ATTR_PWM_F)
+        pinPeripheral(pinNumber, PIO_TIMER_ALT);
+    else if (attr & PIN_ATTR_PWM_G)
+        pinPeripheral(pinNumber, PIO_TCC_PDEC);
 
-    PWMPin& p = pwm_pins[foundPin];
-    PWMChannel& c = pwm_channel[p.channel];
+    PWMChannel& c = pwm_channel[tcNum];
     c.used = true;
-    c.pwm = &p;
+    c.pwm = pd;
     uint32_t div;
     computePWMDivider(frequency, div, c.scale);
-    pmc_enable_periph_clk(PWM_INTERFACE_ID);
-    // configuring the pwm pin
-    PIO_Configure(
-        p.pio,
-        PIO_PERIPH_B, // port E and F would be A
-        p.pio_pin,
-        PIO_DEFAULT);
+    uint32_t duty = 0;
+    GCLK->PCHCTRL[GCLK_CLKCTRL_IDs[tcNum]].reg = GCLK_PCHCTRL_GEN_GCLK0_Val | (1 << GCLK_PCHCTRL_CHEN_Pos); //use clock generator 0
 
-    PWMC_ConfigureChannelExt(
-        PWM_INTERFACE,
-        p.channel,               // channel
-        div,                     // clock divider
-        0,                       // left aligned
-        p.invert ? 0 : (1 << 9), // polarity
-        0,                       // interrupt on counter event at end's period
-        0,                       // dead-time disabled
-        0,                       // non inverted dead-time high output
-        0                        // non inverted dead-time low output
-    );
+    // Set PORT
+    if (tcNum >= TCC_INST_NUM) {
+        if (div > 0) {
+            div--;
+        }
+        c.scale = 255;
+        // -- Configure TC
+        Tc* TCx = (Tc*)GetTC(pd->ulPWMChannel);
 
-    PWMC_SetPeriod(
-        PWM_INTERFACE,
-        p.channel, // pin_info::channel,
-        c.scale);
+        //reset
+        TCx->COUNT8.CTRLA.bit.SWRST = 1;
+        while (TCx->COUNT8.SYNCBUSY.bit.SWRST)
+            ;
 
-    PWMC_EnableChannel(PWM_INTERFACE, p.channel);
-    setHardwarePWM(p.channel, 0); // init disabled
-    return p.channel;
+        // Disable TCx
+        TCx->COUNT8.CTRLA.bit.ENABLE = 0;
+        while (TCx->COUNT8.SYNCBUSY.bit.ENABLE)
+            ;
+        // Set Timer counter Mode to 16 bits, normal PWM, prescaler dynamic
+        TCx->COUNT8.CTRLA.reg = TC_CTRLA_MODE_COUNT8 | (div << TC_CTRLA_PRESCALER_Pos);
+        TCx->COUNT8.WAVE.reg = TC_WAVE_WAVEGEN_NPWM;
+
+        while (TCx->COUNT8.SYNCBUSY.bit.CC0)
+            ;
+        // Set the initial value
+        TCx->COUNT8.CC[tcChannel].reg = (uint8_t)duty;
+        while (TCx->COUNT8.SYNCBUSY.bit.CC0)
+            ;
+        // Set PER to maximum counter value (resolution : 0xFF)
+        TCx->COUNT8.PER.reg = (uint8_t)0xff;
+        while (TCx->COUNT8.SYNCBUSY.bit.PER)
+            ;
+        // Enable TCx
+        TCx->COUNT8.CTRLA.bit.ENABLE = 1;
+        while (TCx->COUNT8.SYNCBUSY.bit.ENABLE)
+            ;
+    } else {
+        // -- Configure TCC
+        Tcc* TCCx = (Tcc*)GetTC(pd->ulPWMChannel);
+
+        TCCx->CTRLA.bit.SWRST = 1;
+        while (TCCx->SYNCBUSY.bit.SWRST)
+            ;
+
+        // Disable TCCx
+        TCCx->CTRLA.bit.ENABLE = 0;
+        while (TCCx->SYNCBUSY.bit.ENABLE)
+            ;
+        // Set prescaler to 1/256
+        TCCx->CTRLA.reg = (div << TCC_CTRLA_PRESCALER_Pos) | TCC_CTRLA_PRESCSYNC_GCLK;
+
+        // Set TCx as normal PWM
+        TCCx->WAVE.reg = TCC_WAVE_WAVEGEN_NPWM;
+        while (TCCx->SYNCBUSY.bit.WAVE)
+            ;
+
+        while (TCCx->SYNCBUSY.bit.CC0 || TCCx->SYNCBUSY.bit.CC1)
+            ;
+        // Set the initial value
+        TCCx->CC[tcChannel].reg = (uint32_t)duty;
+        while (TCCx->SYNCBUSY.bit.CC0 || TCCx->SYNCBUSY.bit.CC1)
+            ;
+        // Set PER to maximum counter value (resolution : 0xFF)
+        TCCx->PER.reg = c.scale;
+        while (TCCx->SYNCBUSY.bit.PER)
+            ;
+        // Enable TCCx
+        TCCx->CTRLA.bit.ENABLE = 1;
+        while (TCCx->SYNCBUSY.bit.ENABLE)
+            ;
+    }
+    return tcNum;
 }
 // Set pwm output to value. id is id from initHardwarePWM.
 void HAL::setHardwarePWM(int id, int value) {
-    if (id < 0) { // illegal id
+    if (id < 0 || id >= 13) { // illegal id
         return;
     }
-    if (id < 8) { // PWM channel 0..7
-        PWMChannel& c = pwm_channel[id];
-        uint32_t duty = (c.scale * value) / 255;
-        if ((PWM_INTERFACE->PWM_SR & (1 << id)) == 0) { // disabled, set value
-            PWM_INTERFACE->PWM_CH_NUM[id].PWM_CDTY = duty;
-        } else { // just update
-            PWM_INTERFACE->PWM_CH_NUM[id].PWM_CDTYUPD = duty;
-        }
-        return;
+    PWMChannel& c = pwm_channel[id];
+    uint32_t duty = (c.scale * value) / 255;
+    uint8_t tcChannel = GetTCChannelNumber(c.pwm->ulPWMChannel);
+    if (id >= TCC_INST_NUM) {
+        Tc* TCx = (Tc*)GetTC(c.pwm->ulPWMChannel);
+        TCx->COUNT16.CC[tcChannel].reg = (uint16_t)duty;
+        while (TCx->COUNT8.SYNCBUSY.bit.CC0 || TCx->COUNT8.SYNCBUSY.bit.CC1)
+            ;
+    } else {
+        Tcc* TCCx = (Tcc*)GetTC(c.pwm->ulPWMChannel);
+        while (TCCx->SYNCBUSY.bit.CTRLB)
+            ;
+        while (TCCx->SYNCBUSY.bit.CC0 || TCCx->SYNCBUSY.bit.CC1)
+            ;
+        TCCx->CCBUF[tcChannel].reg = (uint32_t)duty;
+        while (TCCx->SYNCBUSY.bit.CC0 || TCCx->SYNCBUSY.bit.CC1)
+            ;
+        TCCx->CTRLBCLR.bit.LUPD = 1;
+        while (TCCx->SYNCBUSY.bit.CTRLB)
+            ;
     }
-    // TODO: timers can also produce PWM
 }
 
 //#if ANALOG_INPUTS > 0
 // Initialize ADC channels
 void HAL::analogStart(void) {
-
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || MOTHERBOARD == 502
-    PIO_Configure(
-        g_APinDescription[58].pPort,
-        g_APinDescription[58].ulPinType,
-        g_APinDescription[58].ulPin,
-        g_APinDescription[58].ulPinConfiguration);
-    PIO_Configure(
-        g_APinDescription[59].pPort,
-        g_APinDescription[59].ulPinType,
-        g_APinDescription[59].ulPin,
-        g_APinDescription[59].ulPinConfiguration);
-#endif // (MOTHERBOARD==500) || (MOTHERBOARD==501) || (MOTHERBOARD==502)
-
-    // ensure we can write to ADC registers
-    ADC->ADC_WPMR = 0x41444300u;   //ADC_WPMR_WPKEY(0);
-    pmc_enable_periph_clk(ID_ADC); // enable adc clock
-
-    for (int i = 0; i < MAX_ANALOG_INPUTS; i++) {
-        if (analogEnabled[i] == false) {
-            continue;
-        }
-        adcEnable |= (0x1u << i);
-    }
-    /*for (int i = 0; i < ANALOG_INPUTS; i++) {
-        osAnalogInputValues[i] = 0;
-        adcSamplesMin[i] = 100000;
-        adcSamplesMax[i] = 0;
-        adcEnable |= (0x1u << osAnalogInputChannels[i]);
-        osAnalogSamplesSum[i] = 2048 * ANALOG_INPUT_MEDIAN;
-        for (int j = 0; j < ANALOG_INPUT_MEDIAN; j++)
-            osAnalogSamples[i][j] = 2048; // we want to prevent early error from bad starting values
-    }*/
-    // enable channels
-    ADC->ADC_CHER = adcEnable;
-    ADC->ADC_CHDR = !adcEnable;
-
-    // Initialize ADC mode register (some of the following params are not used here)
-    // HW trigger disabled, use external Trigger, 12 bit resolution
-    // core and ref voltage stays on, normal sleep mode, normal not free-run mode
-    // startup time 16 clocks, settling time 17 clocks, no changes on channel switch
-    // convert channels in numeric order
-    // set prescaler rate  MCK/((PRESCALE+1) * 2)
-    // set tracking time  (TRACKTIM+1) * clock periods
-    // set transfer period  (TRANSFER * 2 + 3)
-    ADC->ADC_MR = ADC_MR_TRGEN_DIS | ADC_MR_TRGSEL_ADC_TRIG0 | ADC_MR_LOWRES_BITS_12 | ADC_MR_SLEEP_NORMAL | ADC_MR_FWUP_OFF | ADC_MR_FREERUN_OFF | ADC_MR_STARTUP_SUT64 | ADC_MR_SETTLING_AST17 | ADC_MR_ANACH_NONE | ADC_MR_USEQ_NUM_ORDER | ADC_MR_PRESCAL(AD_PRESCALE_FACTOR) | ADC_MR_TRACKTIM(AD_TRACKING_CYCLES) | ADC_MR_TRANSFER(AD_TRANSFER_CYCLES);
-
-    ADC->ADC_IER = 0; // no ADC interrupts
-    ADC->ADC_CGR = 0; // Gain = 1
-    ADC->ADC_COR = 0; // Single-ended, no offset
-
-    // start first conversion
-    ADC->ADC_CR = ADC_CR_START;
+    analogReference(AR_DEFAULT); // 3.3V reference voltage
 }
 
+void HAL::analogEnable(int channel) {
+    pinPeripheral(channel, PIO_ANALOG);
+}
+
+int HAL::analogRead(int pin) {
+    Adc* adc;
+    if (g_APinDescription[pin].ulPinAttribute & PIN_ATTR_ANALOG)
+        adc = ADC0;
+    else if (g_APinDescription[pin].ulPinAttribute & PIN_ATTR_ANALOG_ALT)
+        adc = ADC1;
+    else
+        return 0;
+
+    while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_INPUTCTRL)
+        ;                                                                  //wait for sync
+    adc->INPUTCTRL.bit.MUXPOS = g_APinDescription[pin].ulADCChannelNumber; // Selection for the positive ADC input
+
+    // Control A
+    /*
+   * Bit 1 ENABLE: Enable
+   *   0: The ADC is disabled.
+   *   1: The ADC is enabled.
+   * Due to synchronization, there is a delay from writing CTRLA.ENABLE until the peripheral is enabled/disabled. The
+   * value written to CTRL.ENABLE will read back immediately and the Synchronization Busy bit in the Status register
+   * (STATUS.SYNCBUSY) will be set. STATUS.SYNCBUSY will be cleared when the operation is complete.
+   *
+   * Before enabling the ADC, the asynchronous clock source must be selected and enabled, and the ADC reference must be
+   * configured. The first conversion after the reference is changed must not be used.
+   */
+    while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE)
+        ;                         //wait for sync
+    adc->CTRLA.bit.ENABLE = 0x01; // Enable ADC
+
+    // Start conversion
+    while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE)
+        ; //wait for sync
+
+    adc->SWTRIG.bit.START = 1;
+
+    // Clear the Data Ready flag
+    adc->INTFLAG.reg = ADC_INTFLAG_RESRDY;
+
+    // Start conversion again, since The first conversion after the reference is changed must not be used.
+    adc->SWTRIG.bit.START = 1;
+
+    // Store the value
+    while (adc->INTFLAG.bit.RESRDY == 0)
+        ; // Waiting for conversion to complete
+    int valueRead = adc->RESULT.reg;
+
+    while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE)
+        ;                         //wait for sync
+    adc->CTRLA.bit.ENABLE = 0x00; // Disable ADC
+    while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE)
+        ; //wait for sync
+    return valueRead;
+}
 //#endif
 
 #if EEPROM_AVAILABLE == EEPROM_SDCARD
@@ -424,21 +586,19 @@ void HAL::importEEPROM() {
 
 // Print apparent cause of start/restart
 void HAL::showStartReason() {
-    int mcu = (RSTC->RSTC_SR & RSTC_SR_RSTTYP_Msk) >> RSTC_SR_RSTTYP_Pos;
-    switch (mcu) {
-    case 0:
+    uint8_t mcu = REG_RSTC_RCAUSE;
+    if (mcu & RSTC_RCAUSE_POR) {
         Com::printInfoFLN(Com::tPowerUp);
-        break;
-    case 1:
-        // this is return from backup mode on SAM
+    }
+    // this is return from backup mode on SAM
+    if (mcu & (RSTC_RCAUSE_BODCORE | RSTC_RCAUSE_BODVDD)) {
         Com::printInfoFLN(Com::tBrownOut);
-    case 2:
+    }
+    if (mcu & RSTC_RCAUSE_WDT) {
         Com::printInfoFLN(Com::tWatchdog);
-        break;
-    case 3:
-        Com::printInfoFLN(Com::tSoftwareReset);
-        break;
-    case 4:
+    }
+    Com::printInfoFLN(Com::tSoftwareReset);
+    if (mcu & RSTC_RCAUSE_EXT) {
         Com::printInfoFLN(Com::tExternalReset);
     }
 }
@@ -454,7 +614,7 @@ int HAL::getFreeRam() {
 
 // Reset peripherals and cpu
 void HAL::resetHardware() {
-    RSTC->RSTC_CR = RSTC_CR_KEY(0xA5) | RSTC_CR_PERRST | RSTC_CR_PROCRST;
+    NVIC_SystemReset();
 }
 
 // from http://medialab.freaknet.org/martin/src/sqrt/sqrt.c
@@ -606,57 +766,7 @@ uint8_t HAL::spiReceive() {
     //delayMicroseconds(1);
     return SPI0->SPI_RDR;
 }
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD == 502)
 
-void HAL::spiSend(uint32_t chan, byte b) {
-    uint8_t dummy_read = 0;
-    // wait for transmit register empty
-    while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0)
-        ;
-    // write byte with address and end transmission flag
-    SPI0->SPI_TDR = (uint32_t)b | SPI_PCS(chan) | SPI_TDR_LASTXFER;
-    // wait for receive register
-    while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0)
-        ;
-    // clear status
-    while ((SPI0->SPI_SR & SPI_SR_RDRF) == 1)
-        dummy_read = SPI0->SPI_RDR;
-}
-
-void HAL::spiSend(uint32_t chan, const uint8_t* buf, size_t n) {
-    uint8_t dummy_read = 0;
-    if (n == 0)
-        return;
-    for (int i = 0; i < n - 1; i++) {
-        while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0)
-            ;
-        SPI0->SPI_TDR = (uint32_t)buf[i] | SPI_PCS(chan);
-        while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0)
-            ;
-        while ((SPI0->SPI_SR & SPI_SR_RDRF) == 1)
-            dummy_read = SPI0->SPI_RDR;
-    }
-    spiSend(chan, buf[n - 1]);
-}
-
-uint8_t HAL::spiReceive(uint32_t chan) {
-    uint8_t spirec_tmp;
-    // wait for transmit register empty
-    while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0)
-        ;
-    while ((SPI0->SPI_SR & SPI_SR_RDRF) == 1)
-        spirec_tmp = SPI0->SPI_RDR;
-
-    // write dummy byte with address and end transmission flag
-    SPI0->SPI_TDR = 0x000000FF | SPI_PCS(chan) | SPI_TDR_LASTXFER;
-
-    // wait for receive register
-    while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0)
-        ;
-    // get byte from receive register
-    return SPI0->SPI_RDR;
-}
-#endif
 // Read from SPI into buffer
 void HAL::spiReadBlock(uint8_t* buf, uint16_t nbyte) {
     if (nbyte-- == 0)
@@ -772,7 +882,7 @@ unsigned int servoAutoOff[4] = { 0, 0, 0, 0 };
 static uint8_t servoIndex = 0;
 
 void HAL::servoMicroseconds(uint8_t servo, int microsec, uint16_t autoOff) {
-    servoTimings[servo] = (unsigned int)(((F_CPU_TRUE / SERVO_PRESCALE) / 1000000) * microsec);
+    servoTimings[servo] = (unsigned int)((((F_CPU_TRUE / SERVO_PRESCALE) / 1000) * microsec) / 1000);
     servoAutoOff[servo] = (microsec) ? (autoOff / 20) : 0;
 }
 
@@ -780,68 +890,67 @@ void HAL::servoMicroseconds(uint8_t servo, int microsec, uint16_t autoOff) {
 
 ServoInterface* analogServoSlots[4] = { nullptr, nullptr, nullptr, nullptr };
 // Servo timer Interrupt handler
-void SERVO_COMPA_VECTOR() {
-    InterruptProtectedBlock noInt;
-    static uint32_t interval;
+void SERVO_TIMER_VECTOR() {
+    if (SERVO_TIMER->COUNT16.INTFLAG.bit.MC0 == 1) {
+        SERVO_TIMER->COUNT16.INTFLAG.bit.MC0 = 1;
+        InterruptProtectedBlock noInt;
+        static uint32_t interval;
 
-    // apparently have to read status register
-    TC_GetStatus(SERVO_TIMER, SERVO_TIMER_CHANNEL);
-
-    fast8_t servoId = servoIndex >> 1;
-    ServoInterface* act = analogServoSlots[servoId];
-    if (act == nullptr) {
-        TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, SERVO2500US);
-    } else {
-        if (servoIndex & 1) { // disable
-            act->disable();
-            TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL,
-                     SERVO5000US - interval);
-            if (servoAutoOff[servoId]) {
-                servoAutoOff[servoId]--;
-                if (servoAutoOff[servoId] == 0)
-                    HAL::servoTimings[servoId] = 0;
-            }
-        } else { // enable
-            if (HAL::servoTimings[servoId]) {
-                act->enable();
-                interval = HAL::servoTimings[servoId];
-                TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, interval);
-            } else {
-                interval = SERVO2500US;
-                TC_SetRC(SERVO_TIMER, SERVO_TIMER_CHANNEL, interval);
+        fast8_t servoId = servoIndex >> 1;
+        ServoInterface* act = analogServoSlots[servoId];
+        if (act == nullptr) {
+            SERVO_TIMER->COUNT16.CC[0].reg = SERVO2500US;
+            SYNC_TIMER(SERVO_TIMER);
+        } else {
+            if (servoIndex & 1) { // disable
+                act->disable();
+                SERVO_TIMER->COUNT16.CC[0].reg = SERVO5000US - interval;
+                SYNC_TIMER(SERVO_TIMER);
+                if (servoAutoOff[servoId]) {
+                    servoAutoOff[servoId]--;
+                    if (servoAutoOff[servoId] == 0)
+                        HAL::servoTimings[servoId] = 0;
+                }
+            } else { // enable
+                if (HAL::servoTimings[servoId]) {
+                    act->enable();
+                    interval = HAL::servoTimings[servoId];
+                    SERVO_TIMER->COUNT16.CC[0].reg = interval;
+                    SYNC_TIMER(SERVO_TIMER);
+                } else {
+                    interval = SERVO2500US;
+                    SERVO_TIMER->COUNT16.CC[0].reg = interval;
+                    SYNC_TIMER(SERVO_TIMER);
+                }
             }
         }
-    }
-    servoIndex++;
-    if (servoIndex > 7) {
-        servoIndex = 0;
+        servoIndex++;
+        if (servoIndex > 7) {
+            servoIndex = 0;
+        }
     }
 }
 #endif
 
-TcChannel* stepperChannel = (TIMER1_TIMER->TC_CHANNEL + TIMER1_TIMER_CHANNEL);
-#ifndef STEPPERTIMER_EXIT_TICKS
-#define STEPPERTIMER_EXIT_TICKS 105 // at least 2,5us pause between stepper calls
-#endif
-
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
-void TIMER1_COMPA_VECTOR() {
+void TIMER1_TIMER_VECTOR() {
+    if (TIMER1_TIMER->COUNT16.INTFLAG.bit.MC0 == 1) {
 #if DEBUG_TIMING
-    WRITE(DEBUG_ISR_STEPPER_PIN, 1);
+        WRITE(DEBUG_ISR_STEPPER_PIN, 1);
 #endif
-    // apparently have to read status register
-    stepperChannel->TC_SR;
-    /*  static bool inside = false; // prevent double call when not finished
+        /*  static bool inside = false; // prevent double call when not finished
     if(inside) {
         return;
     }    
     inside = true;*/
-    Motion3::timer();
-    // inside = false;
+        Motion3::timer();
+        // inside = false;
 #if DEBUG_TIMING
-    WRITE(DEBUG_ISR_STEPPER_PIN, 0);
+        WRITE(DEBUG_ISR_STEPPER_PIN, 0);
 #endif
+        TIMER1_TIMER->COUNT16.INTFLAG.bit.MC0 = 1;
+    }
 }
 
 fast8_t pwmSteps[] = { 1, 2, 4, 8, 16 };
@@ -856,7 +965,7 @@ fast8_t pwmMasks[] = { 255, 254, 252, 248, 240 };
     }
 
 /**
-This timer is called 3906 times per second. It is used to update
+This timer is called 5000 times per second. It is used to update
 pwm values for heater and some other frequent jobs.
 */
 void PWM_TIMER_VECTOR() {
@@ -864,81 +973,49 @@ void PWM_TIMER_VECTOR() {
     WRITE(DEBUG_ISR_TEMP_PIN, 1);
 #endif
     //InterruptProtectedBlock noInt;
-    // apparently have to read status register
-    TC_GetStatus(PWM_TIMER, PWM_TIMER_CHANNEL);
+    if (PWM_TIMER->COUNT16.INTFLAG.bit.MC0 == 1) {
+        PWM_TIMER->COUNT16.INTFLAG.bit.MC0 = 1;
 
-    static uint8_t pwm_count0 = 0; // Used my IO_PWM_SOFTWARE!
-    static uint8_t pwm_count1 = 0;
-    static uint8_t pwm_count2 = 0;
-    static uint8_t pwm_count3 = 0;
-    static uint8_t pwm_count4 = 0;
+        static uint8_t pwm_count0 = 0; // Used my IO_PWM_SOFTWARE!
+        static uint8_t pwm_count1 = 0;
+        static uint8_t pwm_count2 = 0;
+        static uint8_t pwm_count3 = 0;
+        static uint8_t pwm_count4 = 0;
 
 // Add all generated pwm handlers
 #undef IO_TARGET
 #define IO_TARGET 2
 #include "io/redefine.h"
 
-    counterPeriodical++;                          // Approximate a 100ms timer
-    if (counterPeriodical >= PWM_COUNTER_100MS) { //  (int)(F_CPU/40960))
-        counterPeriodical = 0;
-        executePeriodical = 1;
-    }
-    // read analog values
-    //#if ANALOG_INPUTS > 0
-    // conversion finished?
-    if ((ADC->ADC_ISR & adcEnable) == adcEnable) {
+        counterPeriodical++;                          // Approximate a 100ms timer
+        if (counterPeriodical >= PWM_COUNTER_100MS) { //  (int)(F_CPU/40960))
+            counterPeriodical = 0;
+            executePeriodical = 1;
+        }
+        // read analog values
 #undef IO_TARGET
 #define IO_TARGET 11
 #include "io/redefine.h"
-        /*if (executePeriodical) {
-            Com::printFLN("bed:",IOAnalogBed0.value);
-        }*/
-        /*adcCounter++;
-        for (int i = 0; i < ANALOG_INPUTS; i++) {
-            int32_t cur = ADC->ADC_CDR[osAnalogInputChannels[i]];
-            osAnalogInputBuildup[i] += cur;
-            adcSamplesMin[i] = RMath::min(adcSamplesMin[i], cur);
-            adcSamplesMax[i] = RMath::max(adcSamplesMax[i], cur);
-            if (adcCounter >= NUM_ADC_SAMPLES) {   // store new conversion result
-                // Strip biggest and smallest value and round correctly
-                osAnalogInputBuildup[i] = osAnalogInputBuildup[i] + (1 << (ANALOG_INPUT_SAMPLE - 1)) - (adcSamplesMin[i] + adcSamplesMax[i]);
-                adcSamplesMin[i] = 100000;
-                adcSamplesMax[i] = 0;
-                osAnalogSamplesSum[i] -= osAnalogSamples[i][adcSamplePos];
-                osAnalogSamplesSum[i] += (osAnalogSamples[i][adcSamplePos] = osAnalogInputBuildup[i] >> ANALOG_INPUT_SAMPLE);
-                if(executePeriodical == 0 || i >= NUM_ANALOG_TEMP_SENSORS) {
-                    osAnalogInputValues[i] = osAnalogSamplesSum[i] / ANALOG_INPUT_MEDIAN;
-                }
-                osAnalogInputBuildup[i] = 0;
-            } // adcCounter >= NUM_ADC_SAMPLES
-        } // for i
-        if (adcCounter >= NUM_ADC_SAMPLES) {
-            adcCounter = 0;
-            adcSamplePos++;
-            if (adcSamplePos >= ANALOG_INPUT_MEDIAN)
-                adcSamplePos = 0;
-        }*/
-        ADC->ADC_CR = ADC_CR_START; // reread values
-    }
-    // #endif // ANALOG_INPUTS > 0
-    pwm_count0++;
-    pwm_count1 += 2;
-    pwm_count2 += 4;
-    pwm_count3 += 8;
-    pwm_count4 += 16;
-    GUI::handleKeypress();
+        // #endif // ANALOG_INPUTS > 0
+        pwm_count0++;
+        pwm_count1 += 2;
+        pwm_count2 += 4;
+        pwm_count3 += 8;
+        pwm_count4 += 16;
+        GUI::handleKeypress();
 #if FEATURE_WATCHDOG
-    if (HAL::wdPinged) {
-        if (!WDT->SYNCBUSY.bit.CLEAR) // Check if the WDT registers are synchronized
-        {
-            REG_WDT_CLEAR = WDT_CLEAR_CLEAR_KEY; // Clear the watchdog timer
+        if (HAL::wdPinged) {
+            if (!WDT->SYNCBUSY.bit.CLEAR) // Check if the WDT registers are synchronized
+            {
+                REG_WDT_CLEAR = WDT_CLEAR_CLEAR_KEY; // Clear the watchdog timer
+            }
+            HAL::wdPinged = false;
         }
-        HAL::wdPinged = false;
-    }
 #endif
 #if DEBUG_TIMING
-    WRITE(DEBUG_ISR_TEMP_PIN, 0);
+        WRITE(DEBUG_ISR_TEMP_PIN, 0);
 #endif
+    }
 }
 
 /** \brief Timer routine for extruder stepper.
@@ -950,7 +1027,6 @@ interrupt, one step is executed. This will keep the extruder
 moving, until the total wanted movement is achieved. This will
 be done with the maximum allowable speed for the extruder.
 */
-TcChannel* motion2Channel = (MOTION2_TIMER->TC_CHANNEL + MOTION2_TIMER_CHANNEL);
 #define SLOW_EXTRUDER_TICKS (F_CPU_TRUE / 32 / 1000)                  // 250us on direction change
 #define NORMAL_EXTRUDER_TICKS (F_CPU_TRUE / 32 / EXTRUDER_CLOCK_FREQ) // 500us on direction change
 #ifndef ADVANCE_DIR_FILTER_STEPS
@@ -959,30 +1035,22 @@ TcChannel* motion2Channel = (MOTION2_TIMER->TC_CHANNEL + MOTION2_TIMER_CHANNEL);
 
 // MOTION2_TIMER IRQ handler
 void MOTION2_TIMER_VECTOR() {
-#if DEBUG_TIMING
-    WRITE(DEBUG_ISR_MOTION_PIN, 1);
-#endif
     static bool inside = false; // prevent double call when not finished
-    motion2Channel->TC_SR;      // faster replacement for above line!
-    if (inside) {
-        return;
-    }
-    inside = true;
-    Motion2::timer();
-    inside = false;
+    if (MOTION2_TIMER->COUNT16.INTFLAG.bit.MC0 == 1) {
+        MOTION2_TIMER->COUNT16.INTFLAG.bit.MC0 = 1;
 #if DEBUG_TIMING
-    WRITE(DEBUG_ISR_MOTION_PIN, 0);
+        WRITE(DEBUG_ISR_MOTION_PIN, 1);
 #endif
-}
-
-// IRQ handler for tone generator
-void BEEPER_TIMER_VECTOR() {
-    static bool toggle;
-
-    TC_GetStatus(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
-
-    WRITE_VAR(tone_pin, toggle);
-    toggle = !toggle;
+        if (inside) {
+            return;
+        }
+        inside = true;
+        Motion2::timer();
+        inside = false;
+#if DEBUG_TIMING
+        WRITE(DEBUG_ISR_MOTION_PIN, 0);
+#endif
+    }
 }
 
 void HAL::spiInit() {
