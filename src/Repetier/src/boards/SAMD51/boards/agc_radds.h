@@ -112,11 +112,18 @@
 // To set microstepping on startup set START_GCODE to e.g.
 // "M42 P67 S255\nM42 P68 S255\nM42 P69 S255"
 
-#define SDSUPPORT 0
+#define SDSUPPORT 1
 #define SDPOWER -1
 // 4,10,52 if using HW SPI.
+#ifndef SDCARD_SPI
 #define SDSS 4
 #define ORIG_SDCARDDETECT 14
+#else
+// on board sd card on MGC
+#define SDSS SDCARD_SS_PIN
+#define ORIG_SDCARDDETECT -1
+#endif
+
 #define SDCARDDETECTINVERTED 0
 #define LED_PIN -1
 #define ORIG_FAN_PIN 9

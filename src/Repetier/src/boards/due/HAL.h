@@ -273,9 +273,6 @@ extern int spiDueDividors[];
 
 static uint32_t tone_pin;
 
-/** Set max. frequency to 500000 Hz */
-#define LIMIT_INTERVAL (F_CPU / 500000)
-
 typedef unsigned int speed_t;
 typedef unsigned long ticks_t;
 typedef unsigned long millis_t;

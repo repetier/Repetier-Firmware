@@ -134,12 +134,6 @@ public:
 #define bit_set(x, y) x |= (1 << y)    //sbi(x,y)
 
 #if NONLINEAR_SYSTEM
-// Maximum speed with 100% interrupt utilization is 27000 Hz at 16MHz cpu
-// leave some margin for all the extra transformations. So we keep inside clean timings.
-#define LIMIT_INTERVAL ((F_CPU / 30000) + 1)
-#else
-#define LIMIT_INTERVAL ((F_CPU / 40000) + 1)
-#endif
 
 typedef uint16_t speed_t;
 typedef uint32_t ticks_t;

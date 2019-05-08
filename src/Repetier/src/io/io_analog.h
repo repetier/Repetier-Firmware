@@ -33,7 +33,7 @@
 #if IO_TARGET == 1 // hardware init
 
 #define IO_ANALOG_INPUT(name, channel, oversample) \
-    analogEnabled[channel] = true;
+    HAL::analogEnable(channel);
 
 #elif IO_TARGET == 4 // class
 class AnalogInput {
@@ -67,7 +67,7 @@ public:
 
 #define IO_ANALOG_INPUT(name, channel, oversample) \
     { \
-        int read = ADC->ADC_CDR[channel]; \
+        int read = HAL::analogRead(channel); \
         name.sum += read; \
         if (read < name.minVal) { \
             name.minVal = read; \

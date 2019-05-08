@@ -25,7 +25,7 @@
 #error Oops!  Make sure you have 'Adafruit Grand Central' selected from the 'Tools -> Boards' menu.
 #endif
 
-#if MOTHERBOARD == MOTHERBOARD_AGC_SMARTRAMPS_NO_EEPROM || MOTHEBOARD == MOTHERBOARD_AGC_SMARTRAMPS_EEPROM
+#if MOTHERBOARD == MOTHERBOARD_AGC_SMARTRAMPS_NO_EEPROM || MOTHERBOARD == MOTHERBOARD_AGC_SMARTRAMPS_EEPROM
 #include "boards/agc_smart_ramps.h"
 #endif
 
