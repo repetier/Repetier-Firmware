@@ -104,17 +104,14 @@
 #define E0_PINS ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN,
 
-#define TWI_CLOCK_FREQ 100000
-#if MOTHERBOARD == MOTHERBOARD_SMARTRAMPS_NO_EEPROM
-//	20 or 70
+#if MOTHERBOARD == MOTHERBOARD_AGC_SMARTRAMPS_NO_EEPROM
 #define SDA_PIN -1
-// 21 or 71
 #define SCL_PIN -1
 #define EEPROM_AVAILABLE EEPROM_NONE
 #else
 // this board supports eeprom
-#define SDA_PIN 20 // 20 or 70
-#define SCL_PIN 21 // 21 or 71
+#define SDA_PIN 20 
+#define SCL_PIN 21 
 
 #define TWI_CLOCK_FREQ 400000
 // see eeprom device data sheet for the following values, these are for 24xx256
