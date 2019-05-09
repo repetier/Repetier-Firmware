@@ -56,7 +56,6 @@
 #define F_CPU 21000000      // should be factor of F_CPU_TRUE
 #define F_CPU_TRUE 84000000 // actual CPU clock frequency
 #define EEPROM_BYTES 4096   // bytes of eeprom we simulate
-#define SUPPORT_64_BIT_MATH // Gives better results with high resultion deltas
 
 // another hack to keep AVR code happy (i.e. SdFat.cpp)
 #define SPR0 0
@@ -110,10 +109,10 @@ typedef char prog_char;
 #define PWM_TIMER_CHANNEL 1
 #define PWM_TIMER_IRQ ID_TC1
 #define PWM_TIMER_VECTOR TC1_Handler
-#define TIMER1_TIMER TC2
-#define TIMER1_TIMER_CHANNEL 2
-#define TIMER1_TIMER_IRQ ID_TC8
-#define TIMER1_TIMER_VECTOR TC8_Handler
+#define MOTION3_TIMER TC2
+#define MOTION3_TIMER_CHANNEL 2
+#define MOTION3_TIMER_IRQ ID_TC8
+#define MOTION3_TIMER_VECTOR TC8_Handler
 #define SERVO_TIMER TC2
 #define SERVO_TIMER_CHANNEL 0
 #define SERVO_TIMER_IRQ ID_TC6
@@ -137,8 +136,8 @@ typedef char prog_char;
 // #define PWM_COUNTER_100MS       390
 #define PWM_CLOCK_FREQ 10000
 #define PWM_COUNTER_100MS 1000
-//#define TIMER1_CLOCK_FREQ       244
-//#define TIMER1_PRESCALE         2
+//#define MOTION3_CLOCK_FREQ       244
+//#define MOTION3_PRESCALE         2
 
 #define SERVO_CLOCK_FREQ 1000
 #define SERVO_PRESCALE 2 // Using TCLOCK1 therefore 2
@@ -375,27 +374,6 @@ public:
         }
 #endif
     }
-
-    static uint32_t integer64Sqrt(uint64_t a);
-    // return val'val
-    static inline unsigned long U16SquaredToU32(unsigned int val) {
-        return (unsigned long)val * (unsigned long)val;
-    }
-    static inline unsigned int ComputeV(long timer, long accel) {
-        return static_cast<unsigned int>((static_cast<int64_t>(timer) * static_cast<int64_t>(accel)) >> 18);
-        //return ((timer>>8)*accel)>>10;
-    }
-    // Multiply two 16 bit values and return 32 bit result
-    static inline unsigned long mulu16xu16to32(unsigned int a, unsigned int b) {
-        return (unsigned long)a * (unsigned long)b;
-    }
-    // Multiply two 16 bit values and return 32 bit result
-    static inline unsigned int mulu6xu16shift16(unsigned int a, unsigned int b) {
-        return ((unsigned long)a * (unsigned long)b) >> 16;
-    }
-    static inline unsigned int Div4U2U(unsigned long a, unsigned int b) {
-        return ((unsigned long)a / (unsigned long)b);
-    }
     static inline void digitalWrite(uint8_t pin, uint8_t value) {
         WRITE_VAR(pin, value);
     }
@@ -407,9 +385,6 @@ public:
             SET_INPUT(pin);
         } else
             SET_OUTPUT(pin);
-    }
-    static long CPUDivU2(speed_t divisor) {
-        return F_CPU / divisor;
     }
     static INLINE void delayMicroseconds(uint32_t usec) { //usec += 3;
         uint32_t n = usec * (F_CPU_TRUE / 3000000);

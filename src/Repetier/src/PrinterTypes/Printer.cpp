@@ -227,19 +227,6 @@ void Printer::updateDerivedParameter() {
 #endif
 #endif
 
-    /*
-    maxInterval = F_CPU / (minimumSpeed * axisStepsPerMM[X_AXIS]);
-    uint32_t tmp = F_CPU / (minimumSpeed * axisStepsPerMM[Y_AXIS]);
-    if(tmp < maxInterval)
-        maxInterval = tmp;
-#if DRIVE_SYSTEM != DELTA
-    tmp = F_CPU / (minimumZSpeed * axisStepsPerMM[Z_AXIS]);
-    if(tmp < maxInterval)
-        maxInterval = tmp;
-#endif
-*/
-    //Com::printFLN(PSTR("Minimum Speed:"),minimumSpeed);
-    //Com::printFLN(PSTR("Minimum Speed Z:"),minimumZSpeed);
     EVENT_UPDATE_DERIVED;
 }
 #if AUTOMATIC_POWERUP
@@ -459,6 +446,7 @@ void Printer::setup() {
     // HAL::serialSetBaudrate(115200);
     // Start serial
     HAL::hwSetup();
+    HAL::analogStart();
 
     EEPROM::initBaudrate();
     HAL::serialSetBaudrate(baudrate);
@@ -568,7 +556,6 @@ void Printer::setup() {
     SET_INPUT(MOTOR_FAULT_PIGGY_PIN);
 #endif              //(MOTHERBOARD == 501) || (MOTHERBOARD == 502)
     EEPROM::init(); // Read settings from eeprom if wanted, run after initialization!
-    HAL::analogStart();
     // Extruder::initExtruder();
     // sets auto leveling in eeprom init
     GUI::init();

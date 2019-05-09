@@ -120,7 +120,8 @@
 #define ORIG_SDCARDDETECT 14
 #else
 // on board sd card on MGC
-#define SDSS SDCARD_SS_PIN
+#define SDSS 83 // SDCARD_SS_PIN
+#define USE_STANDARD_SPI_LIBRARY 1
 #define ORIG_SDCARDDETECT -1
 #endif
 

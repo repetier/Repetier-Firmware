@@ -52,14 +52,6 @@ Level 5: Nonlinear motor step position, only for nonlinear drive systems
     {}
 #endif
 
-union floatLong {
-    float f;
-    uint32_t l;
-#ifdef SUPPORT_64_BIT_MATH
-    uint64_t L;
-#endif
-};
-
 union wizardVar {
     float f;
     int32_t l;

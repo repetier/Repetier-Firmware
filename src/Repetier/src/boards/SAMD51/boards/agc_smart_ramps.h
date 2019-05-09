@@ -104,16 +104,19 @@
 #define E0_PINS ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN,
 
+#ifndef TWI_CLOCK_FREQ
+#define TWI_CLOCK_FREQ 400000
+#endif
+
 #if MOTHERBOARD == MOTHERBOARD_AGC_SMARTRAMPS_NO_EEPROM
 #define SDA_PIN -1
 #define SCL_PIN -1
 #define EEPROM_AVAILABLE EEPROM_NONE
 #else
 // this board supports eeprom
-#define SDA_PIN 20 
-#define SCL_PIN 21 
+#define SDA_PIN 20
+#define SCL_PIN 21
 
-#define TWI_CLOCK_FREQ 400000
 // see eeprom device data sheet for the following values, these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50  // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64      // page write buffer size
@@ -182,6 +185,6 @@
 
 #endif
 
-#endif
+#endif // CUSTOM_CONTROLLER_PINS
 
 #endif

@@ -74,11 +74,11 @@ void SDCard::initsd() {
     HAL::pingWatchdog();
     HAL::delayMilliseconds(50); // wait for stabilization of contacts, bootup ...
 #if ENABLE_SOFTWARE_SPI_CLASS
-    fat.begin(SDSS)
+    fat.begin(SDSS);
 #else
     fat.begin(SDSS, SD_SCK_MHZ(4)); // dummy init of SD_CARD
 #endif
-        HAL::delayMilliseconds(50); // wait for init end
+    HAL::delayMilliseconds(50); // wait for init end
     HAL::pingWatchdog();
     /*if(dir[0].isOpen())
         dir[0].close();*/
@@ -139,6 +139,7 @@ void SDCard::unmount() {
     uid.cwd[1] = 0;
     uid.folderLevel = 0;
 #endif
+    Com::printFLN(PSTR("Card unmounted"));
 }
 
 void SDCard::startPrint() {

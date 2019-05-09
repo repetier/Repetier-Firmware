@@ -119,17 +119,17 @@ void HAL::setupTimer() {
     NVIC_EnableIRQ((IRQn_Type)PWM_TIMER_IRQ);
 
     // Timer for stepper motor control
-    pmc_enable_periph_clk(TIMER1_TIMER_IRQ);
-    //NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ, NVIC_EncodePriority(4, 7, 1)); // highest priority - no surprises here wanted
-    NVIC_SetPriority((IRQn_Type)TIMER1_TIMER_IRQ, 2); // highest priority - no surprises here wanted
-    TC_Configure(TIMER1_TIMER, TIMER1_TIMER_CHANNEL,
+    pmc_enable_periph_clk(MOTION3_TIMER_IRQ);
+    //NVIC_SetPriority((IRQn_Type)MOTION3_TIMER_IRQ, NVIC_EncodePriority(4, 7, 1)); // highest priority - no surprises here wanted
+    NVIC_SetPriority((IRQn_Type)MOTION3_TIMER_IRQ, 2); // highest priority - no surprises here wanted
+    TC_Configure(MOTION3_TIMER, MOTION3_TIMER_CHANNEL,
                  TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);
-    TC_SetRC(TIMER1_TIMER, TIMER1_TIMER_CHANNEL, (F_CPU_TRUE / 2) / STEPPER_FREQUENCY);
-    TC_Start(TIMER1_TIMER, TIMER1_TIMER_CHANNEL);
+    TC_SetRC(MOTION3_TIMER, MOTION3_TIMER_CHANNEL, (F_CPU_TRUE / 2) / STEPPER_FREQUENCY);
+    TC_Start(MOTION3_TIMER, MOTION3_TIMER_CHANNEL);
 
-    TIMER1_TIMER->TC_CHANNEL[TIMER1_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
-    TIMER1_TIMER->TC_CHANNEL[TIMER1_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
-    NVIC_EnableIRQ((IRQn_Type)TIMER1_TIMER_IRQ);
+    MOTION3_TIMER->TC_CHANNEL[MOTION3_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
+    MOTION3_TIMER->TC_CHANNEL[MOTION3_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
+    NVIC_EnableIRQ((IRQn_Type)MOTION3_TIMER_IRQ);
 
     // Servo control
 #if NUM_SERVOS > 0
@@ -443,28 +443,6 @@ void HAL::resetHardware() {
     RSTC->RSTC_CR = RSTC_CR_KEY(0xA5) | RSTC_CR_PERRST | RSTC_CR_PROCRST;
 }
 
-// from http://medialab.freaknet.org/martin/src/sqrt/sqrt.c
-uint32_t HAL::integer64Sqrt(uint64_t a_nInput) {
-    uint64_t op = a_nInput;
-    uint64_t res = 0;
-    uint64_t one = 1uLL << 62; // The second-to-top bit is set: use 1u << 14 for uint16_t type; use 1uL<<30 for uint32_t type
-
-    // "one" starts at the highest power of four <= than the argument.
-    while (one > op)
-        one >>= 2;
-    while (one != 0) {
-        if (op >= res + one) {
-            op = op - (res + one);
-            res = res + 2 * one;
-        }
-        res >>= 1;
-        one >>= 2;
-    }
-    if (op > res) { // Do arithmetic rounding to nearest integer
-        res++;
-    }
-    return res;
-}
 #ifdef OLD_SPI
 #ifndef DUE_SOFTWARE_SPI
 // hardware SPI
@@ -803,14 +781,14 @@ void SERVO_TIMER_VECTOR() {
 }
 #endif
 
-TcChannel* stepperChannel = (TIMER1_TIMER->TC_CHANNEL + TIMER1_TIMER_CHANNEL);
+TcChannel* stepperChannel = (MOTION3_TIMER->TC_CHANNEL + MOTION3_TIMER_CHANNEL);
 #ifndef STEPPERTIMER_EXIT_TICKS
 #define STEPPERTIMER_EXIT_TICKS 105 // at least 2,5us pause between stepper calls
 #endif
 
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
-void TIMER1_TIMER_VECTOR() {
+void MOTION3_TIMER_VECTOR() {
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_STEPPER_PIN, 1);
 #endif

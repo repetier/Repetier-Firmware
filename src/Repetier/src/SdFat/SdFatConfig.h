@@ -75,7 +75,9 @@
  * SdFatEX use the standard Arduino SPI.h library. If USE_STANDARD_SPI_LIBRARY
  * is zero, an optimized custom SPI driver is used if it exists.
  */
+#ifndef USE_STANDARD_SPI_LIBRARY
 #define USE_STANDARD_SPI_LIBRARY 0
+#endif
 //-----------------------------------------------------------------------------
 /**
  * If the symbol ENABLE_SOFTWARE_SPI_CLASS is nonzero, the class SdFatSoftSpi

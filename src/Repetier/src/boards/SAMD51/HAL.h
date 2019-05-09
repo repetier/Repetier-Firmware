@@ -50,13 +50,10 @@
 #define WIRE_PORT Wire
 #endif
 
-// Hack to make 84 MHz Due clock work without changes to pre-existing code
-// which would otherwise have problems with int overflow.
 #undef F_CPU
-#define F_CPU 30000000       // should be factor of F_CPU_TRUE
+#define F_CPU 120000000      // should be factor of F_CPU_TRUE
 #define F_CPU_TRUE 120000000 // actual CPU clock frequency
 #define EEPROM_BYTES 4096    // bytes of eeprom we simulate
-#define SUPPORT_64_BIT_MATH  // Gives better results with high resultion deltas
 
 // another hack to keep AVR code happy (i.e. SdFat.cpp)
 #define SPR0 0
@@ -102,24 +99,19 @@ typedef char prog_char;
 #define FSTRINGVAR(var) static const char var[] PROGMEM;
 #define FSTRINGPARAM(var) PGM_P var
 
-#define MOTION2_TIMER TC2
-#define MOTION2_TIMER_ID TC2_GCLK_ID
-#define MOTION2_TIMER_IRQ TC2_IRQn
-#define MOTION2_TIMER_VECTOR TC2_Handler
+#define MOTION2_TIMER TC5
+#define MOTION2_TIMER_ID TC5_GCLK_ID
+#define MOTION2_TIMER_IRQ TC5_IRQn
+#define MOTION2_TIMER_VECTOR TC5_Handler
 #define PWM_TIMER TC1
 #define PWM_TIMER_ID TC1_GCLK_ID
 #define PWM_TIMER_IRQ TC1_IRQn
 #define PWM_TIMER_VECTOR TC1_Handler
-// Tone function uses TC2!
-/*#define TIMER1_TIMER TC3
-#define TIMER1_TIMER_ID TC3_GCLK_ID
-#define TIMER1_TIMER_IRQ TC3_IRQn
-#define TIMER1_TIMER_VECTOR TC3_Handler*/
 
-#define TIMER1_TIMER TC0
-#define TIMER1_TIMER_ID TC0_GCLK_ID
-#define TIMER1_TIMER_IRQ TC0_IRQn
-#define TIMER1_TIMER_VECTOR TC0_Handler
+#define MOTION3_TIMER TC0
+#define MOTION3_TIMER_ID TC0_GCLK_ID
+#define MOTION3_TIMER_IRQ TC0_IRQn
+#define MOTION3_TIMER_VECTOR TC0_Handler
 
 #define SERVO_TIMER TC4
 #define SERVO_TIMER_ID TC4_GCLK_ID
@@ -140,8 +132,8 @@ typedef char prog_char;
 // #define PWM_COUNTER_100MS       390
 #define PWM_CLOCK_FREQ 5000
 #define PWM_COUNTER_100MS 500
-//#define TIMER1_CLOCK_FREQ       244
-//#define TIMER1_PRESCALE         2
+//#define MOTION3_CLOCK_FREQ       244
+//#define MOTION3_PRESCALE         2
 
 /*
 servo pulses repeat every 20ms, so each block of 4 servos has 5ms as maximum 
@@ -151,16 +143,15 @@ that means prescale factor 16 => 7.5*timeInUs ticks
 #define SERVO_CLOCK_FREQ 1000
 #define SERVO_PRESCALE 16 // Using TCLOCK1 therefore 2
 #define SERVO_PRESCALE_DIV TC_CTRLA_PRESCALER_DIV16
-#define SERVO2500US ((((F_CPU_TRUE / SERVO_PRESCALE) / 1000) * 2500) / 1000)
-#define SERVO5000US ((((F_CPU_TRUE / SERVO_PRESCALE) / 1000) * 5000) / 1000)
+#define SERVO2500US ((((F_CPU_TRUE / SERVO_PRESCALE) / 10) * 25) / 1000)
+#define SERVO5000US ((((F_CPU_TRUE / SERVO_PRESCALE) / 10) * 50) / 1000)
 
 #define AD_PRESCALE_FACTOR 84 // 500 kHz ADC clock
 #define AD_TRACKING_CYCLES 4  // 0 - 15     + 1 adc clock cycles
 #define AD_TRANSFER_CYCLES 1  // 0 - 3      * 2 + 3 adc clock cycles
 
 #define ADC_ISR_EOC(channel) (0x1u << channel)
-#define MAX_ANALOG_INPUTS 12
-extern bool analogEnabled[MAX_ANALOG_INPUTS];
+#define MAX_ANALOG_INPUTS 16
 
 #define PULLUP(IO, v) \
     { ::pinMode(IO, (v != LOW ? INPUT_PULLUP : INPUT)); }
@@ -293,9 +284,6 @@ public:
 extern int spiDueDividors[];
 #endif
 
-/** Set max. frequency to 500000 Hz */
-#define LIMIT_INTERVAL (F_CPU / 500000)
-
 typedef unsigned int speed_t;
 typedef unsigned long ticks_t;
 typedef unsigned long millis_t;
@@ -401,26 +389,6 @@ public:
 #endif
     }
 
-    static uint32_t integer64Sqrt(uint64_t a);
-    // return val'val
-    static inline unsigned long U16SquaredToU32(unsigned int val) {
-        return (unsigned long)val * (unsigned long)val;
-    }
-    static inline unsigned int ComputeV(long timer, long accel) {
-        return static_cast<unsigned int>((static_cast<int64_t>(timer) * static_cast<int64_t>(accel)) >> 18);
-        //return ((timer>>8)*accel)>>10;
-    }
-    // Multiply two 16 bit values and return 32 bit result
-    static inline unsigned long mulu16xu16to32(unsigned int a, unsigned int b) {
-        return (unsigned long)a * (unsigned long)b;
-    }
-    // Multiply two 16 bit values and return 32 bit result
-    static inline unsigned int mulu6xu16shift16(unsigned int a, unsigned int b) {
-        return ((unsigned long)a * (unsigned long)b) >> 16;
-    }
-    static inline unsigned int Div4U2U(unsigned long a, unsigned int b) {
-        return ((unsigned long)a / (unsigned long)b);
-    }
     static inline void digitalWrite(uint8_t pin, uint8_t value) {
         WRITE_VAR(pin, value);
     }
@@ -432,9 +400,6 @@ public:
             SET_INPUT(pin);
         } else
             SET_OUTPUT(pin);
-    }
-    static long CPUDivU2(speed_t divisor) {
-        return F_CPU / divisor;
     }
     static INLINE void delayMicroseconds(uint32_t usec) { //usec += 3;
         ::delayMicroseconds(usec);

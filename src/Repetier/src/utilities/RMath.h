@@ -62,14 +62,6 @@ public:
     static inline uint32_t sqr(uint32_t a) {
         return a * a;
     }
-#ifdef SUPPORT_64_BIT_MATH
-    static inline int64_t sqr(int64_t a) {
-        return a * a;
-    }
-    static inline uint64_t sqr(uint64_t a) {
-        return a * a;
-    }
-#endif
 
     static inline float sqr(float a) {
         return a * a;
