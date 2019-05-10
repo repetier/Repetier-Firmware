@@ -55,23 +55,23 @@
 * Arduino Due pin assignments
 ******************************************************************/
 
-#define ORIG_X_STEP_PIN 54
-#define ORIG_X_DIR_PIN 55
+#define ORIG_X_STEP_PIN 67//54
+#define ORIG_X_DIR_PIN 68//55
 #define ORIG_X_MIN_PIN 3
 #define ORIG_X_MAX_PIN 2
 #define ORIG_X_ENABLE_PIN 38
 
-#define ORIG_Y_STEP_PIN 60
-#define ORIG_Y_DIR_PIN 61
+#define ORIG_Y_STEP_PIN 73//60
+#define ORIG_Y_DIR_PIN 74//61
 #define ORIG_Y_MIN_PIN 14
 #define ORIG_Y_MAX_PIN 15
-#define ORIG_Y_ENABLE_PIN 56
+#define ORIG_Y_ENABLE_PIN 69//56
 
 #define ORIG_Z_STEP_PIN 46
 #define ORIG_Z_DIR_PIN 48
 #define ORIG_Z_MIN_PIN 18
 #define ORIG_Z_MAX_PIN 19
-#define ORIG_Z_ENABLE_PIN 62
+#define ORIG_Z_ENABLE_PIN 54//62
 
 //Note that in due A0 pins on the board is channel 2 on the ARM chip
 #define HEATER_0_PIN 10
@@ -134,12 +134,12 @@
 //76 // SCK pin
 #define UI_DISPLAY_D4_PIN 52 //44
 // Display A0 => LCD RS
-#define UI_DISPLAY_D5_PIN 59
+#define UI_DISPLAY_D5_PIN 72//59
 #define UI_DISPLAY_RS_PIN 44 //10
 #define UI_DISPLAY_RW_PIN -1
-#define UI_ENCODER_A 58
+#define UI_ENCODER_A 71//58
 #define UI_ENCODER_B 40
-#define UI_ENCODER_CLICK 67
+#define UI_ENCODER_CLICK 59//67
 #define UI_RESET_PIN 42
 #define UI_RESET_PIN -1
 #define UI_BACK_PIN -1
@@ -162,10 +162,10 @@
 #define UI_DISPLAY_D5_PIN -1     //A0 LCD RS
 #define UI_DISPLAY_D6_PIN -1
 #define UI_DISPLAY_D7_PIN -1
-#define BEEPER_PIN 66
+#define BEEPER_PIN 58//66
 #define UI_ENCODER_A 50
 #define UI_ENCODER_B 47
-#define UI_ENCODER_CLICK 67
+#define UI_ENCODER_CLICK 59//67
 #define UI_RESET_PIN 53
 #define UI_DELAYPERCHAR 50
 #define UI_INVERT_MENU_DIRECTION 0
