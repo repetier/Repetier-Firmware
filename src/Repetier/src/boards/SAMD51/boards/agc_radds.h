@@ -76,13 +76,13 @@
 // Enable pin of extruder 0
 #define THERMOCOUPLE_3_PIN 10
 
-#define ORIG_E0_STEP_PIN 61
-#define ORIG_E0_DIR_PIN 60
-#define ORIG_E0_ENABLE_PIN 62
+#define ORIG_E0_STEP_PIN 74//61
+#define ORIG_E0_DIR_PIN 73//60
+#define ORIG_E0_ENABLE_PIN 54//62
 
-#define ORIG_E1_STEP_PIN 64
-#define ORIG_E1_DIR_PIN 63
-#define ORIG_E1_ENABLE_PIN 65
+#define ORIG_E1_STEP_PIN 56//64
+#define ORIG_E1_DIR_PIN 55//63
+#define ORIG_E1_ENABLE_PIN 57//65
 
 #define ORIG_E2_STEP_PIN 51
 #define ORIG_E2_DIR_PIN 53
@@ -100,13 +100,13 @@
 #define ORIG_E4_DIR_PIN 27
 #define ORIG_E4_ENABLE_PIN 31
 
-#define ORIG_E5_STEP_PIN 67
-#define ORIG_E5_DIR_PIN 66
-#define ORIG_E5_ENABLE_PIN 68
+#define ORIG_E5_STEP_PIN 59//67
+#define ORIG_E5_DIR_PIN 58//66
+#define ORIG_E5_ENABLE_PIN 60//68
 
-#define EXTENSION_BOARD_MS1 67
-#define EXTENSION_BOARD_MS2 68
-#define EXTENSION_BOARD_MS3 69
+#define EXTENSION_BOARD_MS1 59//67
+#define EXTENSION_BOARD_MS2 58//68
+#define EXTENSION_BOARD_MS3 61//69
 // 66 -> not connected
 // 25 -> not connected
 // To set microstepping on startup set START_GCODE to e.g.
@@ -208,7 +208,7 @@
 #define UI_ENCODER_B 52
 #define UI_ENCODER_CLICK 48
 #define UI_RESET_PIN -1
-#define UI_BACK_PIN 71
+#define UI_BACK_PIN 71 // <-- todo
 
 #endif
 #endif
