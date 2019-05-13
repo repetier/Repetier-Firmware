@@ -977,9 +977,9 @@ void MCode_300(GCode* com) {
         beepS = com->S;
     if (com->hasP())
         beepP = com->P;
-    HAL::tone(BEEPER_PIN, beepS);
+    HAL::tone(beepS);
     HAL::delayMilliseconds(beepP);
-    HAL::noTone(BEEPER_PIN);
+    HAL::noTone();
 #endif
 }
 
@@ -1099,6 +1099,12 @@ void MCode_415(GCode* com) {
         Motion2::setMotorPositionFromTransformed();
     }
     Printer::rescueReport();
+#endif
+}
+
+void MCode_416(GCode* com) {
+#if !EMERGENCY_PARSER
+    Printer::handlePowerLoss();
 #endif
 }
 

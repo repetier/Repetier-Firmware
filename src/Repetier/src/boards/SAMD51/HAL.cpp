@@ -31,11 +31,11 @@
 
 // Adds output signals to pins below to measure interrupt timings
 // with a logic analyser. Set to 0 for production!
-#define DEBUG_TIMING 0
-#define DEBUG_ISR_STEPPER_PIN 39
-#define DEBUG_ISR_MOTION_PIN 35
-#define DEBUG_ISR_TEMP_PIN 33
-#define DEBUG_ISR_ANALOG_PIN 37
+#define DEBUG_TIMING 1
+#define DEBUG_ISR_STEPPER_PIN 37 // 39
+#define DEBUG_ISR_MOTION_PIN 51  // 35
+#define DEBUG_ISR_TEMP_PIN 49    // 33
+#define DEBUG_ISR_ANALOG_PIN 53
 
 //extern "C" void __cxa_pure_virtual() { }
 extern "C" char* sbrk(int i);
@@ -474,6 +474,14 @@ void HAL::setHardwarePWM(int id, int value) {
 #define ANALOG_PIN_TO_CHANNEL(p) (p < 62 ? p - 54 : p - 59)
 int32_t analogValues[16];
 const PinDescription* analogEnabled[16];
+void reportAnalog() {
+    for (int i = 0; i < 16; i++) {
+        if (analogEnabled[i]) {
+            Com::printF("Analog ", i);
+            Com::printFLN(" = ", analogValues[i]);
+        }
+    }
+}
 Adc* analogAdcMap[16] = {
     ADC1,
     ADC1,
@@ -501,6 +509,8 @@ void HAL::analogStart(void) {
     while (GCLK->SYNCBUSY.reg > 0) {}
     ADC0->CTRLA.bit.PRESCALER = 7; // prescaler 256
     ADC1->CTRLA.bit.PRESCALER = 7; // prescaler 256
+    ADC0->CTRLB.reg = ADC_CTRLB_RESSEL_12BIT;
+    ADC1->CTRLB.reg = ADC_CTRLB_RESSEL_12BIT;
     // Interrupt frequency will be around 8Khz and add a 3% CPU load.
     ADC0->INTENSET.bit.RESRDY = 1; // enable interrupt
     ADC1->INTENSET.bit.RESRDY = 1; // enable interrupt
@@ -510,38 +520,43 @@ void HAL::analogStart(void) {
         analogEnabled[i] = nullptr;
     }
 }
-
+bool analogEven = false;
 void analogISRFunction() {
 #ifdef DEBUG_TIMING
     WRITE(DEBUG_ISR_ANALOG_PIN, 1);
 #endif
     Adc* adc;
-    if (analogConvertPos >= 0) { // store result
+    analogEven = false;
+    if (analogConvertPos >= 0 && !analogEven) { // store result
         adc = analogAdcMap[analogConvertPos];
         analogValues[analogConvertPos] = adc->RESULT.reg;
         adc->CTRLA.bit.ENABLE = 0x00;                      // Disable ADC
         while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE) {} //wait for sync
     }
+    analogEven = !analogEven;
     // go to next active
-    do {
-        if (++analogConvertPos == 16) {
-            // Process data
+    if (analogEven) {
+        do {
+            if (++analogConvertPos == 16) {
+                // Process data
 #undef IO_TARGET
 #define IO_TARGET 11
 #include "io/redefine.h"
-            analogConvertPos = 0;
-        }
-    } while (analogEnabled[analogConvertPos] == nullptr);
+                analogConvertPos = 0;
+            }
+        } while (analogEnabled[analogConvertPos] == nullptr);
+    }
 
     // start new conversion
     adc = analogAdcMap[analogConvertPos];
-    while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_INPUTCTRL) {}                            //wait for sync
-    adc->INPUTCTRL.bit.MUXPOS = analogEnabled[analogConvertPos]->ulADCChannelNumber; // Selection for the positive ADC input
-    adc->CTRLA.bit.ENABLE = 0x01;                                                    // Enable ADC
-    while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE) {}                               //wait for sync
-
+    if (analogEven) {
+        while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_INPUTCTRL) {}                            //wait for sync
+        adc->INPUTCTRL.bit.MUXPOS = analogEnabled[analogConvertPos]->ulADCChannelNumber; // Selection for the positive ADC input
+        adc->CTRLA.bit.ENABLE = 0x01;                                                    // Enable ADC
+        while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE) {}                               //wait for sync
+    }
     // Start conversion
-
+    //adc->SWTRIG.bit.START = 1;
     adc->INTFLAG.reg = ADC_INTFLAG_RESRDY; // Clear the Data Ready flag
     // Start conversion again, since The first conversion after the reference is changed must not be used.
     adc->SWTRIG.bit.START = 1;
@@ -920,7 +935,6 @@ ServoInterface* analogServoSlots[4] = { nullptr, nullptr, nullptr, nullptr };
 void SERVO_TIMER_VECTOR() {
     if (SERVO_TIMER->COUNT16.INTFLAG.bit.MC0 == 1) {
         SERVO_TIMER->COUNT16.INTFLAG.bit.MC0 = 1;
-        InterruptProtectedBlock noInt;
         static uint32_t interval;
 
         fast8_t servoId = servoIndex >> 1;
@@ -939,6 +953,7 @@ void SERVO_TIMER_VECTOR() {
                         HAL::servoTimings[servoId] = 0;
                 }
             } else { // enable
+                InterruptProtectedBlock noInt;
                 if (HAL::servoTimings[servoId]) {
                     act->enable();
                     interval = HAL::servoTimings[servoId];
@@ -1034,35 +1049,20 @@ void PWM_TIMER_VECTOR() {
     }
 }
 
-/** \brief Timer routine for extruder stepper.
-
-Several methods need to move the extruder. To get a optimal
-result, all methods update the printer_state.extruderStepsNeeded
-with the number of additional steps needed. During this
-interrupt, one step is executed. This will keep the extruder
-moving, until the total wanted movement is achieved. This will
-be done with the maximum allowable speed for the extruder.
-*/
-#define SLOW_EXTRUDER_TICKS (F_CPU_TRUE / 32 / 1000)                  // 250us on direction change
-#define NORMAL_EXTRUDER_TICKS (F_CPU_TRUE / 32 / EXTRUDER_CLOCK_FREQ) // 500us on direction change
-#ifndef ADVANCE_DIR_FILTER_STEPS
-#define ADVANCE_DIR_FILTER_STEPS 2
-#endif
-
 // MOTION2_TIMER IRQ handler
 void MOTION2_TIMER_VECTOR() {
-    static bool inside = false; // prevent double call when not finished
+    // static bool inside = false; // prevent double call when not finished
     if (MOTION2_TIMER->COUNT16.INTFLAG.bit.MC0 == 1) {
-        MOTION2_TIMER->COUNT16.INTFLAG.bit.MC0 = 1;
 #if DEBUG_TIMING
         WRITE(DEBUG_ISR_MOTION_PIN, 1);
 #endif
-        if (inside) {
+        /*      if (inside) {
             return;
         }
-        inside = true;
+        inside = true;*/
         Motion2::timer();
-        inside = false;
+        //        inside = false;
+        MOTION2_TIMER->COUNT16.INTFLAG.bit.MC0 = 1; // reenable interrupt
 #if DEBUG_TIMING
         WRITE(DEBUG_ISR_MOTION_PIN, 0);
 #endif
@@ -1180,4 +1180,54 @@ RFDoubleSerial BTAdapter;
 // watchdog. We do not need that as we do this our self.
 void watchdogSetup(void) {
 }
+
+#if BEEPER_PIN > -1
+void TC3_Handler(void) {
+    static bool toggle;
+    WRITE(BEEPER_PIN, toggle);
+    toggle = !toggle;
+    TONE_TC->COUNT16.INTFLAG.bit.MC0 = 1; // Clear the interrupt
+}
+#endif
+
+void HAL::tone(int frequency) {
+#if BEEPER_PIN >= 0
+    SET_OUTPUT(BEEPER_PIN);
+    NVIC_SetPriority(TONE_TC_IRQn, 2); // don'r disturb stepper interrupt!
+    GCLK->PCHCTRL[TONE_TC_GCLK_ID].reg = GCLK_PCHCTRL_GEN_GCLK0_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
+    while (GCLK->SYNCBUSY.reg > 0) {}
+
+    TONE_TC->COUNT16.CTRLA.bit.ENABLE = 0; // can only change if disabled
+
+    // Use match mode so that the timer counter resets when the count matches the
+    // compare register
+    TONE_TC->COUNT16.WAVE.bit.WAVEGEN = TC_WAVE_WAVEGEN_MFRQ;
+    SYNC_TIMER(TONE_TC);
+    TONE_TC->COUNT16.INTENSET.reg = 0;
+    TONE_TC->COUNT16.INTENSET.bit.MC0 = 1;
+    uint32_t prescale, freq;
+    getPrescaleFreq(F_CPU_TRUE / (2 * frequency), prescale, freq);
+    TONE_TC->COUNT16.CTRLA.reg &= ~TC_CTRLA_PRESCALER_DIV1024;
+    TONE_TC->COUNT16.CTRLA.reg |= prescale;
+    NVIC_EnableIRQ(TONE_TC_IRQn); // Enable IRQ for function call
+    TONE_TC->COUNT16.COUNT.reg = map(TONE_TC->COUNT16.COUNT.reg, 0,
+                                     TONE_TC->COUNT16.CC[0].reg, 0, freq);
+    TONE_TC->COUNT16.CC[0].reg = freq;
+    SYNC_TIMER(TONE_TC);
+    TONE_TC->COUNT16.CTRLA.bit.ENABLE = 1; // enable timer
+    SYNC_TIMER(TONE_TC);
+#endif
+}
+void HAL::noTone() {
+#if BEEPER_PIN >= 0
+    // Disable TCx
+    TONE_TC->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;
+    while (TONE_TC->COUNT16.SYNCBUSY.bit.ENABLE) {}
+    TONE_TC->COUNT16.CTRLA.reg = TC_CTRLA_SWRST; // Reset timer
+    while (TONE_TC->COUNT16.SYNCBUSY.bit.ENABLE) {}
+    while (TONE_TC->COUNT16.CTRLA.bit.SWRST) {}
+    WRITE(BEEPER_PIN, 0);
+#endif
+}
+
 #endif

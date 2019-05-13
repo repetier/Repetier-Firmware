@@ -109,7 +109,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
 #include "../io/redefine.h"
 #if FEATURE_WATCHDOG
     HAL::pingWatchdog();
-#endif // FEATURE_WATCHDOG
+#endif
 
     // Report temperatures every second, so we do not need to send M105
     if (Printer::isAutoreportTemp()) {
@@ -976,6 +976,7 @@ void Commands::processGCode(GCode* com) {
 /**
 \brief Execute the G command stored in com.
 */
+extern void reportAnalog();
 void Commands::processMCode(GCode* com) {
     if (Printer::failedMode && !(com->M == 110 || com->M == 999)) {
         return;
@@ -985,6 +986,9 @@ void Commands::processMCode(GCode* com) {
         return;
     }
     switch (com->M) {
+    case 0:
+        reportAnalog();
+        break;
     case 3: // Spindle/laser
         MCode_3(com);
         break;
@@ -1242,6 +1246,9 @@ void Commands::processMCode(GCode* com) {
         break;
     case 415: // host rescue command
         MCode_415(com);
+        break;
+    case 416: // host detected power loss
+        MCode_416(com);
         break;
     case 460: // M460 X<minTemp> Y<maxTemp> : Set temperature range for thermo controlled fan
         MCode_460(com);

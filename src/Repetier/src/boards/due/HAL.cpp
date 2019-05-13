@@ -743,7 +743,6 @@ void HAL::servoMicroseconds(uint8_t servo, int microsec, uint16_t autoOff) {
 ServoInterface* analogServoSlots[4] = { nullptr, nullptr, nullptr, nullptr };
 // Servo timer Interrupt handler
 void SERVO_TIMER_VECTOR() {
-    InterruptProtectedBlock noInt;
     static uint32_t interval;
 
     // apparently have to read status register
@@ -764,6 +763,7 @@ void SERVO_TIMER_VECTOR() {
                     HAL::servoTimings[servoId] = 0;
             }
         } else { // enable
+            InterruptProtectedBlock noInt;
             if (HAL::servoTimings[servoId]) {
                 act->enable();
                 interval = HAL::servoTimings[servoId];
@@ -900,21 +900,7 @@ void PWM_TIMER_VECTOR() {
 #endif
 }
 
-/** \brief Timer routine for extruder stepper.
-
-Several methods need to move the extruder. To get a optimal
-result, all methods update the printer_state.extruderStepsNeeded
-with the number of additional steps needed. During this
-interrupt, one step is executed. This will keep the extruder
-moving, until the total wanted movement is achieved. This will
-be done with the maximum allowable speed for the extruder.
-*/
 TcChannel* motion2Channel = (MOTION2_TIMER->TC_CHANNEL + MOTION2_TIMER_CHANNEL);
-#define SLOW_EXTRUDER_TICKS (F_CPU_TRUE / 32 / 1000)                  // 250us on direction change
-#define NORMAL_EXTRUDER_TICKS (F_CPU_TRUE / 32 / EXTRUDER_CLOCK_FREQ) // 500us on direction change
-#ifndef ADVANCE_DIR_FILTER_STEPS
-#define ADVANCE_DIR_FILTER_STEPS 2
-#endif
 
 // MOTION2_TIMER IRQ handler
 void MOTION2_TIMER_VECTOR() {
@@ -940,7 +926,7 @@ void BEEPER_TIMER_VECTOR() {
 
     TC_GetStatus(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
 
-    WRITE_VAR(tone_pin, toggle);
+    WRITE(BEEPER_PIN, toggle);
     toggle = !toggle;
 }
 

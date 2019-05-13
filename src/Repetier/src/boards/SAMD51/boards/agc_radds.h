@@ -18,6 +18,21 @@
 
 // RADDS Board
 // http://www.dr-henschke.de/RADDS_due.html
+
+/*
+
+IMPORTANT: Be aware of the following problems if using with Adafruit Metro Grand Central
+
+Then center SPI pins are also available at pin 50/51/52
+but 50/52 are input for LCD encode on display port and is used as ORIG_E2_STEP_PIN.
+So SPI is not usable with that board. Hence sd card readers on display and RADDS do not work.
+The sd card on the MAGC uses SPI1 and will work.
+
+MAGC also maps I2C pins  20 => 70 and 21 => 71
+Pin 71 is on sd port as UI_BACK_PIN for RADDS 20x4 display, pin 70 is unused. 
+
+*/
+
 #if MOTHERBOARD == MOTHERBOARD_AGC_RADDS
 #ifndef __SAMD51__
 #error oops !Be sure to have 'adafruit grand central' selected from the 'tools-> Boards menu'.
@@ -76,13 +91,13 @@
 // Enable pin of extruder 0
 #define THERMOCOUPLE_3_PIN 10
 
-#define ORIG_E0_STEP_PIN 74//61
-#define ORIG_E0_DIR_PIN 73//60
-#define ORIG_E0_ENABLE_PIN 54//62
+#define ORIG_E0_STEP_PIN 74   //61
+#define ORIG_E0_DIR_PIN 73    //60
+#define ORIG_E0_ENABLE_PIN 54 //62
 
-#define ORIG_E1_STEP_PIN 56//64
-#define ORIG_E1_DIR_PIN 55//63
-#define ORIG_E1_ENABLE_PIN 57//65
+#define ORIG_E1_STEP_PIN 56   //64
+#define ORIG_E1_DIR_PIN 55    //63
+#define ORIG_E1_ENABLE_PIN 57 //65
 
 #define ORIG_E2_STEP_PIN 51
 #define ORIG_E2_DIR_PIN 53
@@ -100,13 +115,13 @@
 #define ORIG_E4_DIR_PIN 27
 #define ORIG_E4_ENABLE_PIN 31
 
-#define ORIG_E5_STEP_PIN 59//67
-#define ORIG_E5_DIR_PIN 58//66
-#define ORIG_E5_ENABLE_PIN 60//68
+#define ORIG_E5_STEP_PIN 59   //67
+#define ORIG_E5_DIR_PIN 58    //66
+#define ORIG_E5_ENABLE_PIN 60 //68
 
-#define EXTENSION_BOARD_MS1 59//67
-#define EXTENSION_BOARD_MS2 58//68
-#define EXTENSION_BOARD_MS3 61//69
+#define EXTENSION_BOARD_MS1 59 //67
+#define EXTENSION_BOARD_MS2 58 //68
+#define EXTENSION_BOARD_MS3 61 //69
 // 66 -> not connected
 // 25 -> not connected
 // To set microstepping on startup set START_GCODE to e.g.
@@ -114,16 +129,10 @@
 
 #define SDSUPPORT 1
 #define SDPOWER -1
-// 4,10,52 if using HW SPI.
-#ifndef SDCARD_SPI
-#define SDSS 4
-#define ORIG_SDCARDDETECT 14
-#else
-// on board sd card on MGC
+// on board sd card on AMGC as RADDS sd card does not work with the board
 #define SDSS 83 // SDCARD_SS_PIN
 #define USE_STANDARD_SPI_LIBRARY 1
 #define ORIG_SDCARDDETECT -1
-#endif
 
 #define SDCARDDETECTINVERTED 0
 #define LED_PIN -1
@@ -132,11 +141,6 @@
 #define ORIG_PS_ON_PIN 40
 #define KILL_PIN -1
 #define SUICIDE_PIN -1 //PIN that has to be turned on right after start, to keep power flowing.
-
-// 20 or 70
-#define SDA_PIN 20
-// 21 or 71
-#define SCL_PIN 21
 
 #define SERVO1 5
 #define SERVO2 6
@@ -148,6 +152,8 @@
 #define E3_PINS ORIG_E3_STEP_PIN, ORIG_E3_DIR_PIN, ORIG_E3_ENABLE_PIN,
 #define E4_PINS ORIG_E4_STEP_PIN, ORIG_E4_DIR_PIN, ORIG_E4_ENABLE_PIN,
 #define E5_PINS ORIG_E5_STEP_PIN, ORIG_E5_DIR_PIN, ORIG_E5_ENABLE_PIN,
+
+#define NO_SPI // spi uses pins on display and E2 extruder and not where required, so it prevents correct usage and must be disabled
 
 #ifndef TWI_CLOCK_FREQ
 #define TWI_CLOCK_FREQ 400000
@@ -208,7 +214,7 @@
 #define UI_ENCODER_B 52
 #define UI_ENCODER_CLICK 48
 #define UI_RESET_PIN -1
-#define UI_BACK_PIN 71 // <-- todo
+#define UI_BACK_PIN -1 // 71 // <-- todo
 
 #endif
 #endif

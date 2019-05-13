@@ -275,11 +275,15 @@ public:
     static inline void delayMilliseconds(unsigned int delayMs) {
         ::delay(delayMs);
     }
-    static inline void tone(uint8_t pin, int duration) {
-        ::tone(pin, duration);
+    static inline void tone(int duration) {
+#if BEEPER_PIN > -1
+        ::tone(BEEPER_PIN, duration);
+#endif
     }
-    static inline void noTone(uint8_t pin) {
-        ::noTone(pin);
+    static inline void noTone() {
+#if BEEPER_PIN > -1
+        ::noTone(BEEPER_PIN);
+#endif
     }
     static inline void eprSetByte(unsigned int pos, uint8_t value) {
         eeprom_write_byte((unsigned char*)(pos), value);

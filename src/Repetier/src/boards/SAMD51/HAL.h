@@ -118,6 +118,11 @@ typedef char prog_char;
 #define SERVO_TIMER_IRQ TC4_IRQn
 #define SERVO_TIMER_VECTOR TC4_Handler
 
+#define TONE_TC TC3
+#define TONE_TC_IRQn TC3_IRQn
+#define TONE_TC_GCLK_ID TC3_GCLK_ID
+#define TONE_TC_VECTOR TC3_Handler
+
 //#define SERIAL_BUFFER_SIZE      1024
 //#define SERIAL_PORT             UART
 //#define SERIAL_IRQ              ID_UART
@@ -359,9 +364,8 @@ public:
     static inline void hwSetup(void) {
 #if !FEATURE_WATCHDOG
         // Disable watchdog
-        REG_WDT_CTRLA = 0; // Disable the WDT
-        while (WDT->SYNCBUSY.bit.ENABLE)
-            ; // Wait for synchronization
+        REG_WDT_CTRLA = 0;                  // Disable the WDT
+        while (WDT->SYNCBUSY.bit.ENABLE) {} // Wait for synchronization
 #endif
 
 #if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
@@ -415,31 +419,8 @@ public:
 #endif
         }
     }
-    static inline void tone(uint8_t pin, int frequency) {
-        tone(pin, frequency);
-        /*
-        // set up timer counter 1 channel 0 to generate interrupts for
-        // toggling output pin.
-        SET_OUTPUT(pin);
-        tone_pin = pin;
-        pmc_set_writeprotect(false);
-        pmc_enable_periph_clk((uint32_t)BEEPER_TIMER_IRQ);
-        // set interrupt to lowest possible priority
-        NVIC_SetPriority((IRQn_Type)BEEPER_TIMER_IRQ, NVIC_EncodePriority(4, 6, 3));
-        TC_Configure(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC | TC_CMR_TCCLKS_TIMER_CLOCK4); // TIMER_CLOCK4 -> 128 divisor
-        uint32_t rc = VARIANT_MCK / 128 / frequency;
-        TC_SetRA(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, rc / 2); // 50% duty cycle
-        TC_SetRC(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, rc);
-        TC_Start(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
-        BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
-        BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
-        NVIC_EnableIRQ((IRQn_Type)BEEPER_TIMER_IRQ);*/
-    }
-    static inline void noTone(uint8_t pin) {
-        noTone(pin);
-        // TC_Stop(TC1, 0);
-        // WRITE_VAR(pin, LOW);
-    }
+    static void tone(int frequency);
+    static void noTone();
 
 #if EEPROM_AVAILABLE == EEPROM_SDCARD
     static void syncEEPROM(); // store to disk if changed

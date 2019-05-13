@@ -569,22 +569,6 @@ bool Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate, bool seconda
         currentPositionTransformed[E_AXIS] = destinationPositionTransformed[E_AXIS];
     }
     PrinterType::transformedToOfficial(destinationPositionTransformed, currentPosition);
-    /* transformFromPrinter(
-        destinationPositionTransformed[X_AXIS],
-        destinationPositionTransformed[Y_AXIS],
-        destinationPositionTransformed[Z_AXIS] - zprobeZOffset,
-        currentPosition[X_AXIS],
-        currentPosition[Y_AXIS],
-        currentPosition[Z_AXIS]);
-    currentPosition[X_AXIS] -= toolOffset[X_AXIS]; // Offset from active extruder or z probe
-    currentPosition[Y_AXIS] -= toolOffset[Y_AXIS];
-    currentPosition[Z_AXIS] -= toolOffset[Z_AXIS];
-#if NUM_AXES > A_AXIS
-    for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
-        currentPosition[i] = destinationPositionTransformed[i];
-    }
-#endif
-*/
     return PrinterType::queueMove(feedrate, secondaryMove);
 }
 
@@ -688,7 +672,7 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
     fast8_t axisUsed = 0;
     fast8_t dirUsed = 0;
     FOR_ALL_AXES(i) {
-        if (motors[i] == nullptr) { // for E, A,B,C make motors removeable
+        if (motors[i] == nullptr) { // for E, A, B, C make motors removeable
             delta[i] = 0;
             continue;
         }
@@ -820,11 +804,7 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
     // Destination becomes new current
     float timeForMove = length / feedrate;
     COPY_ALL_AXES(currentPositionTransformed, destinationPositionTransformed);
-    /* FOR_ALL_AXES(i) {
-        currentPositionTransformed[i] = destinationPositionTransformed[i];
-    }*/
     buf.state = Motion1State::RESERVED; // make it accessible
-
     backplan(buf.id);
     return true;
 }
@@ -862,7 +842,6 @@ void Motion1::WarmUp(uint32_t wait, int secondary) {
 }
 
 void Motion1::backplan(fast8_t actId) {
-    // DEBUG_MSG_FAST("bp1")
     Motion1Buffer* next = nullptr;
     Motion1Buffer* act = nullptr;
     float lastJunctionSpeed;
@@ -906,7 +885,7 @@ void Motion1::backplan(fast8_t actId) {
             continue; // need 2 lines to plan
         }
         if (act->state == Motion1State::RESERVED) {
-            act->calculateMaxJoinSpeed(*next);
+            act->calculateMaxJoinSpeed(*next); // changes act->state
             if (act->state >= Motion1State::BACKWARD_FINISHED) {
                 // join speed is slower then start speed, stop planning
                 break;
@@ -931,10 +910,13 @@ void Motion1::backplan(fast8_t actId) {
         act->state = BACKWARD_PLANNED;
         maxLoops--;
     } while (maxLoops);
-    next->unblock();
+    if (next) {
+        next->unblock();
+    }
     act->unblock();
 }
 
+// Called from motion2 timer interrupt, so only needs to protect for motion3 timer changes!
 Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
     if (lengthUnprocessed == 0) {
         return nullptr;

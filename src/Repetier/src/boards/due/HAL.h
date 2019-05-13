@@ -270,8 +270,6 @@ public:
 extern int spiDueDividors[];
 #endif
 
-static uint32_t tone_pin;
-
 typedef unsigned int speed_t;
 typedef unsigned long ticks_t;
 typedef unsigned long millis_t;
@@ -346,8 +344,7 @@ public:
     // do any hardware-specific initialization here
     static inline void hwSetup(void) {
 #if !FEATURE_WATCHDOG
-        // Disable watchdog
-        WDT_Disable(WDT);
+        WDT_Disable(WDT); // Disable watchdog
 #endif
 
 #if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
@@ -409,11 +406,11 @@ public:
 #endif
         }
     }
-    static inline void tone(uint8_t pin, int frequency) {
+    static inline void tone(int frequency) {
+#if BEEPER_PIN > -1
         // set up timer counter 1 channel 0 to generate interrupts for
         // toggling output pin.
-        SET_OUTPUT(pin);
-        tone_pin = pin;
+        SET_OUTPUT(BEEPER_PIN);
         pmc_set_writeprotect(false);
         pmc_enable_periph_clk((uint32_t)BEEPER_TIMER_IRQ);
         // set interrupt to lowest possible priority
@@ -426,10 +423,13 @@ public:
         BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
         BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
         NVIC_EnableIRQ((IRQn_Type)BEEPER_TIMER_IRQ);
+#endif
     }
     static inline void noTone(uint8_t pin) {
+#if BEEPER_PIN > -1
         TC_Stop(TC1, 0);
-        WRITE_VAR(pin, LOW);
+        WRITE_VAR(BEEPER_PIN, LOW);
+#endif
     }
 
 #if EEPROM_AVAILABLE == EEPROM_SDCARD

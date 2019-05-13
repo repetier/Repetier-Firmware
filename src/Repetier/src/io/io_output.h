@@ -22,6 +22,7 @@ Definies the following macros:
 
 IO_OUTPUT(name, pin)
 IO_OUTPUT_INVERTED(name, pin)
+IO_OUTPUT_FAKE(name)
 
 */
 
@@ -45,20 +46,12 @@ IO_OUTPUT_INVERTED(name, pin)
 
 #define IO_OUTPUT_FAKE(name)
 
-#elif IO_TARGET == 2 // PWM interrupt
-
-#define IO_OUTPUT(name, pin)
-#define IO_OUTPUT_INVERTED(name, pin)
-#define IO_OUTPUT_FAKE(name)
-
 #elif IO_TARGET == 4 // define class
 
-//#define IO_OUTPUT(name, pin) class name {inline static void set(fast8_t val){}};
 #define IO_OUTPUT(name, pin) \
     class name { \
     public: \
-        inline static void set(fast8_t val) \
-        { \
+        inline static void set(fast8_t val) { \
             if (val) { \
                 WRITE(pin, 1); \
             } else { \
@@ -72,8 +65,7 @@ IO_OUTPUT_INVERTED(name, pin)
 #define IO_OUTPUT_INVERTED(name, pin) \
     class name { \
     public: \
-        inline static void set(fast8_t val) \
-        { \
+        inline static void set(fast8_t val) { \
             if (val) { \
                 WRITE(pin, 0); \
             } else { \
@@ -87,9 +79,9 @@ IO_OUTPUT_INVERTED(name, pin)
 #define IO_OUTPUT_FAKE(name) \
     class name { \
     public: \
-        inline static void set(fast8_t val) { } \
-        inline static void on() { } \
-        inline static void off() { } \
+        inline static void set(fast8_t val) {} \
+        inline static void on() {} \
+        inline static void off() {} \
     };
 
 #else

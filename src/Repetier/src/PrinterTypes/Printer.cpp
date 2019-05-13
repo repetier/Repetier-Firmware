@@ -573,7 +573,7 @@ void Printer::setup() {
 #endif
 #if FEATURE_WATCHDOG
     HAL::startWatchdog();
-#endif // FEATURE_WATCHDOG
+#endif
     HAL::delayMilliseconds(20);
 
     Tool::selectTool(rescueStartTool());
@@ -1378,8 +1378,8 @@ void Printer::rescueReset() {
 
 void Printer::handlePowerLoss() {
     HeatManager::disableAllHeaters();
+    Com::printErrorFLN(PSTR("POWERLOSS_DETECTED"));
     if (rescueOn) {
-        Com::printErrorFLN(PSTR("POWERLOSS_DETECTED"));
         rescueStoreReceivedPosition();
 #if POWERLOSS_LEVEL == 1 //z up only
 #endif

@@ -445,7 +445,7 @@ void HeatManagerPID::autocalibrate(GCode* g) {
     while (!Printer::breakLongCommand) {
 #if FEATURE_WATCHDOG
         HAL::pingWatchdog();
-#endif                                             // FEATURE_WATCHDOG
+#endif
         Commands::checkForPeriodicalActions(true); // update heaters etc.
         GCode::keepAlive(WaitHeater);
         setCurrentTemperature(input->get());
