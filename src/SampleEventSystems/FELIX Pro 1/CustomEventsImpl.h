@@ -1266,9 +1266,9 @@ FSTRINGVALUE(extzCalibGCode, "M104 S190 T0\n"
                              "G28\n"
                              "G1 X137 Y45 Z10 F9000\n"
              //"G134 P0 S1\n" //G134 Px Sx Zx - Calibrate nozzle height
-             //difference (need z probe in nozzle!) Px = reference extruder, Sx
+             // difference (need z probe in nozzle!) Px = reference extruder, Sx
              //= only measure extrude x against reference, Zx = add to measured
-             //z distance for Sx for correction. "M104 S0 T0\n" "M104 S0 T1\n"
+             // z distance for Sx for correction. "M104 S0 T0\n" "M104 S0 T1\n"
              //"M400"
 );
 FSTRINGVALUE(extzCalibGCode2, "M104 S0 T0\n"
@@ -3693,7 +3693,7 @@ bool customMCode(GCode *com) {
       EEPROM::storeDataIntoEEPROM(false);
 #endif
     }
-  }
+  } break;
   default:
     return false;
   }
