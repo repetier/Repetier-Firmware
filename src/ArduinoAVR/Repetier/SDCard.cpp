@@ -403,12 +403,11 @@ void SDCard::writeCommand(GCode* code) {
   for(int i=0;i<p;i++)
   Com::printF(PSTR(" "),(int)buf[i]);
   Com::println();*/
-    if (params == 128) {
-        Com::printErrorFLN(Com::tAPIDFinished);
-    } else
+    if (params != 128) { // do not write pure comments
         file.write(buf, p);
-    if (file.getWriteError()) {
-        Com::printFLN(Com::tErrorWritingToFile);
+        if (file.getWriteError()) {
+            Com::printFLN(Com::tErrorWritingToFile);
+        }
     }
 }
 

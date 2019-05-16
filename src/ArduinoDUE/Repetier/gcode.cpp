@@ -1530,6 +1530,8 @@ void SerialGCodeSource::testEmergency(GCode& gcode) {
                     Printer::zBabystepsMissing += gcode.Z * Printer::axisStepsPerMM[Z_AXIS];
             }
 #endif
+        } else if (gcode.M == 416) {
+            Printer::handlePowerLoss();
         }
     }
 }

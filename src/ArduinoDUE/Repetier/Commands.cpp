@@ -2824,6 +2824,11 @@ void Commands::processMCode(GCode* com) {
         Printer::rescueReport();
 #endif
     }
+    case 416:
+#if !EMERGENCY_PARSER
+        Printer::handlePowerLoss();
+#endif
+        break;
     case 450:
         Printer::reportPrinterMode();
         break;

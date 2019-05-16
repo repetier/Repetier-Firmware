@@ -2983,8 +2983,8 @@ void Printer::handlePowerLoss() {
     for (uint8_t i = 0; i < NUM_EXTRUDER; i++)
         Extruder::setTemperatureForExtruder(0, i);
     Extruder::setHeatedBedTemperature(0);
+    Com::printErrorFLN(PSTR("POWERLOSS_DETECTED"));
     if (rescueOn) {
-        Com::printErrorF(PSTR("POWERLOSS_DETECTED"));
         rescueStoreReceivedPosition();
 #if POWERLOSS_LEVEL == 1 //z up only
 #endif
