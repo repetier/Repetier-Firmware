@@ -985,6 +985,9 @@ void initializeLCD()
 #ifdef U8GLIB_ST7920
     u8g_InitSPI(&u8g, &u8g_dev_st7920_128x64_sw_spi, UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN, U8G_PIN_NONE, U8G_PIN_NONE);
 #endif
+#ifdef U8GLIB_ST7920_HW
+    u8g_InitHWSPI(&u8g, &u8g_dev_st7920_128x64_hw_spi, UI_DISPLAY_RS_PIN, U8G_PIN_NONE, U8G_PIN_NONE);
+#endif
 #ifdef U8GLIB_SSD1306_I2C
     u8g_InitI2C(&u8g, &u8g_dev_ssd1306_128x64_i2c, U8G_I2C_OPT_NONE);
 #endif

@@ -91,8 +91,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_FAN_PIN -1
 #define ORIG_PS_ON_PIN 12
 #define KILL_PIN -1
-#define SUICIDE_PIN                                                            \
-  -1 // PIN that has to be turned on right after start, to keep power flowing.
+#define SUICIDE_PIN \
+    -1 // PIN that has to be turned on right after start, to keep power flowing.
 
 // 20 or 70
 #define SDA_PIN 20
@@ -106,8 +106,8 @@ STEPPER_CURRENT_CONTROL
 // see eeprom device data sheet for the following values, these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  7 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    7 // page write time in milliseconds (docs say 5ms but that is too short)
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
 #define EEPROM_AVAILABLE EEPROM_I2C
@@ -220,8 +220,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_FAN2_PIN 8
 #define ORIG_PS_ON_PIN 40
 #define KILL_PIN -1
-#define SUICIDE_PIN                                                            \
-  -1 // PIN that has to be turned on right after start, to keep power flowing.
+#define SUICIDE_PIN \
+    -1 // PIN that has to be turned on right after start, to keep power flowing.
 
 // 20 or 70
 #define SDA_PIN 20
@@ -241,8 +241,8 @@ STEPPER_CURRENT_CONTROL
 // see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  7 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    7 // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
@@ -335,8 +335,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_FAN2_PIN 2
 #define ORIG_PS_ON_PIN 53
 #define KILL_PIN -1
-#define SUICIDE_PIN                                                            \
-  -1 // PIN that has to be turned on right after start, to keep power flowing.
+#define SUICIDE_PIN \
+    -1 // PIN that has to be turned on right after start, to keep power flowing.
 
 // 20 or 70
 #define SDA_PIN 20
@@ -351,8 +351,8 @@ STEPPER_CURRENT_CONTROL
 // see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  7 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    7 // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
@@ -436,8 +436,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_FAN2_PIN -1
 #define ORIG_PS_ON_PIN -1
 #define KILL_PIN -1
-#define SUICIDE_PIN                                                            \
-  -1 // PIN that has to be turned on right after start, to keep power flowing.
+#define SUICIDE_PIN \
+    -1 // PIN that has to be turned on right after start, to keep power flowing.
 
 #define SDA_PIN 20 // 20 or 70
 #define SCL_PIN 21 // 21 or 71
@@ -452,8 +452,8 @@ STEPPER_CURRENT_CONTROL
 // see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  7 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    7 // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
@@ -532,8 +532,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_FAN_PIN 9
 #define ORIG_PS_ON_PIN -1
 #define KILL_PIN 41
-#define SUICIDE_PIN                                                            \
-  -1 // PIN that has to be turned on right after start, to keep power flowing.
+#define SUICIDE_PIN \
+    -1 // PIN that has to be turned on right after start, to keep power flowing.
 
 // 20 or 70
 #define SDA_PIN 20
@@ -547,8 +547,8 @@ STEPPER_CURRENT_CONTROL
 // see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 128    // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  7 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    7 // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
@@ -558,7 +558,7 @@ STEPPER_CURRENT_CONTROL
 // Smart RAMPS without(408) and with EEPROM (413)
 #if MOTHERBOARD == 408 || MOTHERBOARD == 413
 #ifndef __SAM3X8E__
-#erro oops !Be sure to have 'due Arduino' selected from                        \
+#erro oops !Be sure to have 'due Arduino' selected from \
     the 'tools-> Boards menu'.
 #endif
 
@@ -613,9 +613,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_FAN_PIN 9
 #define ORIG_PS_ON_PIN 12
 #define KILL_PIN -1
-#define SUICIDE_PIN                                                            \
-  -1 // Pin that has to be turned right after the start, to keep the power
-     // flowing.
+// Pin that has to be turned right after the start, to keep the power  flowing.
+#define SUICIDE_PIN -1
 
 #define E0_PINS ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN,
@@ -636,8 +635,8 @@ STEPPER_CURRENT_CONTROL
 // see eeprom device data sheet for the following values, these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  7 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    7 // page write time in milliseconds (docs say 5ms but that is too short)
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
 #define EEPROM_AVAILABLE 1
@@ -720,7 +719,15 @@ STEPPER_CURRENT_CONTROL
 #define SDPOWER -1
 // 4,10,52 if using HW SPI.
 #define SDSS 59
-//#define NONSTANDARD_SDSS
+#define SPI_PIN 78
+#define NONSTANDARD_SDSS
+// --- Use software SPI since display does otherwise not work, remove to use hardware SPI
+#define DUE_SOFTWARE_SPI
+#define ENABLE_SOFTWARE_SPI_CLASS 1
+#define SD_SOFT_MISO_PIN 74
+#define SD_SOFT_MOSI_PIN 75
+#define SD_SOFT_SCK_PIN 76
+// --- end switch to software SPI
 #define MOSI_PIN 75
 #define MISO_PIN 74
 #define SCK_PIN 76
@@ -732,8 +739,8 @@ STEPPER_CURRENT_CONTROL
 #define ORIG_FAN2_PIN 5
 #define ORIG_PS_ON_PIN 32
 #define KILL_PIN -1
-#define SUICIDE_PIN                                                            \
-  -1 // PIN that has to be turned on right after start, to keep power flowing.
+#define SUICIDE_PIN \
+    -1 // PIN that has to be turned on right after start, to keep power flowing.
 #define ENC424_SS 61
 
 // 20 or 70
@@ -743,21 +750,21 @@ STEPPER_CURRENT_CONTROL
 
 // Servo pins: 5,6 und 39
 
-#define E0_PINS                                                                \
-  ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN, TEMP_0_PIN,
-#define E1_PINS                                                                \
-  ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN, TEMP_2_PIN,
-#define E2_PINS                                                                \
-  ORIG_E2_STEP_PIN, ORIG_E2_DIR_PIN, ORIG_E2_ENABLE_PIN, TEMP_3_PIN,
-#define E3_PINS                                                                \
-  ORIG_E3_STEP_PIN, ORIG_E3_DIR_PIN, ORIG_E3_ENABLE_PIN, TEMP_4_PIN,
+#define E0_PINS \
+    ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN, TEMP_0_PIN,
+#define E1_PINS \
+    ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN, TEMP_2_PIN,
+#define E2_PINS \
+    ORIG_E2_STEP_PIN, ORIG_E2_DIR_PIN, ORIG_E2_ENABLE_PIN, TEMP_3_PIN,
+#define E3_PINS \
+    ORIG_E3_STEP_PIN, ORIG_E3_DIR_PIN, ORIG_E3_ENABLE_PIN, TEMP_4_PIN,
 
 #define TWI_CLOCK_FREQ 400000
 // see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  7 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    7 // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
@@ -767,31 +774,31 @@ STEPPER_CURRENT_CONTROL
 //#define EEPROM_AVAILABLE EEPROM_NONE
 #define EEPROM_AVAILABLE EEPROM_SDCARD
 
-#define MB_SETUP                                                               \
-  SET_OUTPUT(ORIG_FAN_PIN);                                                    \
-  WRITE(ORIG_FAN_PIN, LOW);                                                    \
-  SET_OUTPUT(ORIG_FAN2_PIN);                                                   \
-  WRITE(ORIG_FAN2_PIN, LOW);                                                   \
-  SET_OUTPUT(HEATER_0_PIN);                                                    \
-  WRITE(HEATER_0_PIN, LOW);                                                    \
-  SET_OUTPUT(HEATER_1_PIN);                                                    \
-  WRITE(HEATER_1_PIN, LOW);                                                    \
-  SET_OUTPUT(HEATER_2_PIN);                                                    \
-  WRITE(HEATER_2_PIN, LOW);                                                    \
-  SET_OUTPUT(HEATER_3_PIN);                                                    \
-  WRITE(HEATER_3_PIN, LOW);                                                    \
-  SET_OUTPUT(THERMOCOUPLE_0_PIN);                                              \
-  WRITE(THERMOCOUPLE_0_PIN, HIGH);                                             \
-  SET_OUTPUT(THERMOCOUPLE_1_PIN);                                              \
-  WRITE(THERMOCOUPLE_1_PIN, HIGH);                                             \
-  SET_OUTPUT(THERMOCOUPLE_2_PIN);                                              \
-  WRITE(THERMOCOUPLE_2_PIN, HIGH);                                             \
-  SET_OUTPUT(THERMOCOUPLE_3_PIN);                                              \
-  WRITE(THERMOCOUPLE_3_PIN, HIGH);                                             \
-  SET_OUTPUT(ENC424_SS);                                                       \
-  WRITE(ENC424_SS, HIGH);                                                      \
-  SET_OUTPUT(SDSS);                                                            \
-  WRITE(SDSS, HIGH)
+#define MB_SETUP \
+    SET_OUTPUT(ORIG_FAN_PIN); \
+    WRITE(ORIG_FAN_PIN, LOW); \
+    SET_OUTPUT(ORIG_FAN2_PIN); \
+    WRITE(ORIG_FAN2_PIN, LOW); \
+    SET_OUTPUT(HEATER_0_PIN); \
+    WRITE(HEATER_0_PIN, LOW); \
+    SET_OUTPUT(HEATER_1_PIN); \
+    WRITE(HEATER_1_PIN, LOW); \
+    SET_OUTPUT(HEATER_2_PIN); \
+    WRITE(HEATER_2_PIN, LOW); \
+    SET_OUTPUT(HEATER_3_PIN); \
+    WRITE(HEATER_3_PIN, LOW); \
+    SET_OUTPUT(THERMOCOUPLE_0_PIN); \
+    WRITE(THERMOCOUPLE_0_PIN, HIGH); \
+    SET_OUTPUT(THERMOCOUPLE_1_PIN); \
+    WRITE(THERMOCOUPLE_1_PIN, HIGH); \
+    SET_OUTPUT(THERMOCOUPLE_2_PIN); \
+    WRITE(THERMOCOUPLE_2_PIN, HIGH); \
+    SET_OUTPUT(THERMOCOUPLE_3_PIN); \
+    WRITE(THERMOCOUPLE_3_PIN, HIGH); \
+    SET_OUTPUT(ENC424_SS); \
+    WRITE(ENC424_SS, HIGH); \
+    SET_OUTPUT(SDSS); \
+    WRITE(SDSS, HIGH)
 
 #endif
 
@@ -886,8 +893,8 @@ STEPPER_CURRENT_CONTROL
 // see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  7 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    7 // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
@@ -999,8 +1006,8 @@ STEPPER_CURRENT_CONTROL
 // see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  7 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    7 // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
@@ -1120,8 +1127,8 @@ AD15 CH15
 #define ORIG_FAN2_PIN 72
 #define ORIG_PS_ON_PIN -1
 #define KILL_PIN -1
-#define SUICIDE_PIN                                                            \
-  -1 // PIN that has to be turned on right after start, to keep power flowing.
+#define SUICIDE_PIN \
+    -1 // PIN that has to be turned on right after start, to keep power flowing.
 
 // 20 or 70
 #define SDA_PIN 20
@@ -1140,8 +1147,8 @@ AD15 CH15
 // see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  7 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    7 // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
@@ -1224,8 +1231,8 @@ AD15 CH15
 #define ORIG_FAN2_PIN 8
 #define ORIG_PS_ON_PIN -1
 #define KILL_PIN -1
-#define SUICIDE_PIN                                                            \
-  -1 // PIN that has to be turned on right after start, to keep power flowing.
+#define SUICIDE_PIN \
+    -1 // PIN that has to be turned on right after start, to keep power flowing.
 
 // 20 or 70
 #define SDA_PIN 20
@@ -1242,8 +1249,8 @@ AD15 CH15
 // see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  7 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    7 // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
@@ -1326,8 +1333,8 @@ AD15 CH15
 #define ORIG_FAN2_PIN 8
 #define ORIG_PS_ON_PIN -1
 #define KILL_PIN -1
-#define SUICIDE_PIN                                                            \
-  -1 // PIN that has to be turned on right after start, to keep power flowing.
+#define SUICIDE_PIN \
+    -1 // PIN that has to be turned on right after start, to keep power flowing.
 
 // 20 or 70
 #define SDA_PIN 20
@@ -1344,8 +1351,8 @@ AD15 CH15
 // see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  7 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    7 // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
@@ -1459,8 +1466,8 @@ AD15 CH15
 #define ORIG_FAN2_PIN 3
 #define ORIG_PS_ON_PIN 32
 #define KILL_PIN -1
-#define SUICIDE_PIN                                                            \
-  -1 // PIN that has to be turned on right after start, to keep power flowing.
+#define SUICIDE_PIN \
+    -1 // PIN that has to be turned on right after start, to keep power flowing.
 #define ENC424_SS 61
 
 // 20 or 70
@@ -1470,21 +1477,21 @@ AD15 CH15
 
 // Servo pins: 5,6 und 39
 
-#define E0_PINS                                                                \
-  ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN, TEMP_0_PIN,
-#define E1_PINS                                                                \
-  ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN, TEMP_2_PIN,
-#define E2_PINS                                                                \
-  ORIG_E2_STEP_PIN, ORIG_E2_DIR_PIN, ORIG_E2_ENABLE_PIN, TEMP_3_PIN,
-#define E3_PINS                                                                \
-  ORIG_E3_STEP_PIN, ORIG_E3_DIR_PIN, ORIG_E3_ENABLE_PIN, TEMP_4_PIN,
+#define E0_PINS \
+    ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN, TEMP_0_PIN,
+#define E1_PINS \
+    ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN, TEMP_2_PIN,
+#define E2_PINS \
+    ORIG_E2_STEP_PIN, ORIG_E2_DIR_PIN, ORIG_E2_ENABLE_PIN, TEMP_3_PIN,
+#define E3_PINS \
+    ORIG_E3_STEP_PIN, ORIG_E3_DIR_PIN, ORIG_E3_ENABLE_PIN, TEMP_4_PIN,
 
 #define TWI_CLOCK_FREQ 400000
 // see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  7 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    7 // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
@@ -1494,23 +1501,23 @@ AD15 CH15
 //#define EEPROM_AVAILABLE EEPROM_NONE
 #define EEPROM_AVAILABLE EEPROM_SDCARD
 
-#define MB_SETUP                                                               \
-  SET_OUTPUT(ORIG_FAN_PIN);                                                    \
-  WRITE(ORIG_FAN_PIN, LOW);                                                    \
-  SET_OUTPUT(ORIG_FAN2_PIN);                                                   \
-  WRITE(ORIG_FAN2_PIN, LOW);                                                   \
-  SET_OUTPUT(HEATER_0_PIN);                                                    \
-  WRITE(HEATER_0_PIN, LOW);                                                    \
-  SET_OUTPUT(HEATER_1_PIN);                                                    \
-  WRITE(HEATER_1_PIN, LOW);                                                    \
-  SET_OUTPUT(HEATER_2_PIN);                                                    \
-  WRITE(HEATER_2_PIN, LOW);                                                    \
-  SET_OUTPUT(HEATER_3_PIN);                                                    \
-  WRITE(HEATER_3_PIN, LOW);                                                    \
-  SET_OUTPUT(ENC424_SS);                                                       \
-  WRITE(ENC424_SS, HIGH);                                                      \
-  SET_OUTPUT(SDSS);                                                            \
-  WRITE(SDSS, HIGH)
+#define MB_SETUP \
+    SET_OUTPUT(ORIG_FAN_PIN); \
+    WRITE(ORIG_FAN_PIN, LOW); \
+    SET_OUTPUT(ORIG_FAN2_PIN); \
+    WRITE(ORIG_FAN2_PIN, LOW); \
+    SET_OUTPUT(HEATER_0_PIN); \
+    WRITE(HEATER_0_PIN, LOW); \
+    SET_OUTPUT(HEATER_1_PIN); \
+    WRITE(HEATER_1_PIN, LOW); \
+    SET_OUTPUT(HEATER_2_PIN); \
+    WRITE(HEATER_2_PIN, LOW); \
+    SET_OUTPUT(HEATER_3_PIN); \
+    WRITE(HEATER_3_PIN, LOW); \
+    SET_OUTPUT(ENC424_SS); \
+    WRITE(ENC424_SS, HIGH); \
+    SET_OUTPUT(SDSS); \
+    WRITE(SDSS, HIGH)
 
 #endif
 
@@ -1692,8 +1699,8 @@ AD15 CH15
 // see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 32     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  10 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    10 // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
@@ -1840,8 +1847,8 @@ AD15 CH15
 #define ORIG_FAN2_PIN 31
 #define ORIG_PS_ON_PIN -1
 #define KILL_PIN -1
-#define SUICIDE_PIN                                                            \
-  -1 // PIN that has to be turned on right after start, to keep power flowing.
+#define SUICIDE_PIN \
+    -1 // PIN that has to be turned on right after start, to keep power flowing.
 
 #define SDA_PIN -1 // i2c not used
 #define SCL_PIN -1 // i2c not used
@@ -1883,8 +1890,8 @@ AD15 CH15
 // see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 32     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  10 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    10 // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
@@ -1994,8 +2001,8 @@ AD15 CH15
 #define ORIG_FAN2_PIN 31
 #define ORIG_PS_ON_PIN -1
 #define KILL_PIN ORIG_X_MIN_PIN
-#define SUICIDE_PIN                                                            \
-  -1 // PIN that has to be turned on right after start, to keep power flowing.
+#define SUICIDE_PIN \
+    -1 // PIN that has to be turned on right after start, to keep power flowing.
 #define HEAT_OFF_INT_PIN 50
 
 #define SDA_PIN -1 // i2c not used
@@ -2030,8 +2037,8 @@ AD15 CH15
 // see eeprom device data sheet for the following values these are for 24xx256
 #define EEPROM_SERIAL_ADDR 0x50 // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 32     // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME                                                 \
-  10 // page write time in milliseconds (docs say 5ms but that is too short)
+#define EEPROM_PAGE_WRITE_TIME \
+    10 // page write time in milliseconds (docs say 5ms but that is too short)
 // specify size of eeprom address register
 // TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
 #define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
@@ -2047,8 +2054,8 @@ AD15 CH15
 #define SDSSORIG -1
 #endif
 
-#ifndef STEPPER_CURRENT_CONTROL // Set default stepper current control if not
-                                // set yet.
+// Set default stepper current control if not set yet.
+#ifndef STEPPER_CURRENT_CONTROL
 #define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_MANUAL
 #endif
 
@@ -2166,12 +2173,12 @@ AD15 CH15
 #endif
 #define SDCARDDETECT ORIG_SDCARDDETECT
 
-#define SENSITIVE_PINS                                                         \
-  {                                                                            \
-    0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN,           \
-        Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, \
-        Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN,                \
-        ORIG_PS_ON_PIN, HEATER_0_PIN, HEATER_1_PIN, FAN_PIN,                   \
-        E0_PINS E1_PINS E2_PINS TEMP_0_PIN, TEMP_1_PIN, SDSS                   \
-  }
+#define SENSITIVE_PINS \
+    { \
+        0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, \
+            Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, \
+            Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, \
+            ORIG_PS_ON_PIN, HEATER_0_PIN, HEATER_1_PIN, FAN_PIN, \
+            E0_PINS E1_PINS E2_PINS TEMP_0_PIN, TEMP_1_PIN, SDSS \
+    }
 #endif

@@ -285,8 +285,13 @@ void uiCheckSlowKeys(uint16_t &action) {}
 
 #undef BEEPER_PIN
 #define BEEPER_PIN             27
+//#undef U8GLIB_ST7920
+//#define U8GLIB_ST7920_HW
+// CS
 #define UI_DISPLAY_RS_PIN      62
+// MOSI
 #define UI_DISPLAY_ENABLE_PIN  75
+// SCK
 #define UI_DISPLAY_D4_PIN      76
 #define UI_DISPLAY_D5_PIN      -1
 #define UI_DISPLAY_D6_PIN      -1
