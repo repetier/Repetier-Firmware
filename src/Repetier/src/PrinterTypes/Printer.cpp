@@ -1066,7 +1066,7 @@ void Printer::showJSONStatus(int type) {
         Com::printF(PSTR("coreXZ"));
 #endif
         Com::printF(PSTR("\",\"name\":\""));
-        Com::printF(PSTR(UI_PRINTER_NAME));
+        Com::printF(Com::tPrinterName);
         Com::printF(PSTR("\",\"tools\":["));
         firstOccurrence = true;
         for (int i = 0; i < NUM_EXTRUDER; i++) {

@@ -65,12 +65,10 @@ void GUI::update() {
     if (level > 0 && !isStickyPageType(pageType[level]) && (HAL::timeInMilliseconds() - lastAction) > UI_AUTORETURN_TO_MENU_AFTER) {
         level = 0;
     }
-#if DISPLAY_DRIVER == DRIVER_U8G2
     if (statusLevel == GUIStatusLevel::BUSY && timeDiff > 500) {
         contentChanged = true; // for faster spinning icon
     }
-#endif
-    if ((timeDiff > 1000 && timeDiff < 60000) || contentChanged) {
+    if (timeDiff < 60000 && (timeDiff > 1000 || contentChanged)) {
         // Com::printFLN(PSTR("upd:"), (int32_t)timeDiff);
         refresh();
         lastRefresh = HAL::timeInMilliseconds();

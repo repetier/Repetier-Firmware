@@ -25,7 +25,9 @@
 #include <math.h>
 #include <stdint.h>
 
+#ifndef REPETIER_VERSION
 #define REPETIER_VERSION "2.0.0dev"
+#endif
 
 #ifndef EMERGENCY_PARSER
 #define EMERGENCY_PARSER 1
