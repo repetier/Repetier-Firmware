@@ -26,13 +26,7 @@ uint8_t Com::selectedLanguage;
 #endif
 
 #ifndef MACHINE_TYPE
-#if DRIVE_SYSTEM == DELTA
-#define MACHINE_TYPE "Delta"
-#elif DRIVE_SYSTEM == CARTESIAN
-#define MACHINE_TYPE "Mendel"
-#else
-#define MACHINE_TYPE "Core_XY"
-#endif
+#define MACHINE_TYPE "Unknown"
 #endif
 #ifndef FIRMWARE_URL
 #define FIRMWARE_URL "https://github.com/repetier/Repetier-Firmware/"
@@ -197,7 +191,6 @@ FSTRINGVALUE(Com::tQuadraticKColon, " quadratic K:")
 FSTRINGVALUE(Com::tFilamentSlipping, "Filament slipping")
 FSTRINGVALUE(Com::tPauseCommunication, "// action:pause")
 FSTRINGVALUE(Com::tContinueCommunication, "// action:resume")
-#if DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tMeasurementReset, "Measurement reset.")
 FSTRINGVALUE(Com::tMeasureDeltaSteps, "Measure/delta (Steps) =")
 FSTRINGVALUE(Com::tMeasureDelta, "Measure/delta =")
@@ -213,23 +206,9 @@ FSTRINGVALUE(Com::tDeltaAlphaC, "Alpha C(90):")
 FSTRINGVALUE(Com::tDeltaRadiusCorrectionA, "Delta Radius A(0):")
 FSTRINGVALUE(Com::tDeltaRadiusCorrectionB, "Delta Radius B(0):")
 FSTRINGVALUE(Com::tDeltaRadiusCorrectionC, "Delta Radius C(0):")
-#endif // DRIVE_SYSTEM
-#if NONLINEAR_SYSTEM
-#if DRIVE_SYSTEM == TUGA
-FSTRINGVALUE(Com::tInvalidDeltaCoordinate, "Invalid coordinate - move ignored")
-FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment, "No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
-#elif DRIVE_SYSTEM == DELTA
 FSTRINGVALUE(Com::tInvalidDeltaCoordinate, "Invalid delta coordinate - move ignored")
 FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment, "No move in delta segment with > 1 segment. This should never happen and may cause a problem!")
-#else
-FSTRINGVALUE(Com::tInvalidDeltaCoordinate, "Invalid coordinate - move ignored")
-FSTRINGVALUE(Com::tDBGDeltaNoMoveinDSegment, "No move in segment with > 1 segment. This should never happen and may cause a problem!")
-#endif
-#endif
 
-#if DRIVE_SYSTEM == TUGA
-FSTRINGVALUE(Com::tEPRDiagonalRodLength, "Long arm length [mm]")
-#endif // DRIVE_SYSTEM
 #ifdef DEBUG_GENERIC
 FSTRINGVALUE(Com::tGenTemp, "GenTemp:")
 #endif // DEBUG_GENERICFSTRINGVALUE(Com::,"")
@@ -349,12 +328,11 @@ FSTRINGVALUE(Com::tEPRYBacklash, "Y backlash [mm]")
 FSTRINGVALUE(Com::tEPRZBacklash, "Z backlash [mm]")
 FSTRINGVALUE(Com::tEPRMaxJerk, "Max. jerk [mm/s]")
 FSTRINGVALUE(Com::tEPRAccelerationFactorAtTop, "Acceleration factor at top [%,100=like bottom]")
-#if DRIVE_SYSTEM == DELTA
-FSTRINGVALUE(Com::tEPRZAcceleration, "Acceleration [mm/s^2]")
-FSTRINGVALUE(Com::tEPRZTravelAcceleration, "Travel acceleration [mm/s^2]")
-FSTRINGVALUE(Com::tEPRZStepsPerMM, "Steps per mm")
-FSTRINGVALUE(Com::tEPRZMaxFeedrate, "Max. feedrate [mm/s]")
-FSTRINGVALUE(Com::tEPRZHomingFeedrate, "Homing feedrate [mm/s]")
+// FSTRINGVALUE(Com::tEPRZAcceleration, "Acceleration [mm/s^2]")
+// FSTRINGVALUE(Com::tEPRZTravelAcceleration, "Travel acceleration [mm/s^2]")
+// FSTRINGVALUE(Com::tEPRZStepsPerMM, "Steps per mm")
+// FSTRINGVALUE(Com::tEPRZMaxFeedrate, "Max. feedrate [mm/s]")
+// FSTRINGVALUE(Com::tEPRZHomingFeedrate, "Homing feedrate [mm/s]")
 
 FSTRINGVALUE(Com::tEPRDiagonalRodLength, "Diagonal rod length [mm]")
 FSTRINGVALUE(Com::tEPRHorizontalRadius, "Horizontal rod radius at 0,0 [mm]")
@@ -368,7 +346,6 @@ FSTRINGVALUE(Com::tDeltaDiagonalCorrectionA, "Corr. diagonal A [mm]")
 FSTRINGVALUE(Com::tDeltaDiagonalCorrectionB, "Corr. diagonal B [mm]")
 FSTRINGVALUE(Com::tDeltaDiagonalCorrectionC, "Corr. diagonal C [mm]")
 
-#else
 FSTRINGVALUE(Com::tEPRMaxZJerk, "Max. Z-jerk [mm/s]")
 FSTRINGVALUE(Com::tEPRXStepsPerMM, "X-axis steps per mm")
 FSTRINGVALUE(Com::tEPRYStepsPerMM, "Y-axis steps per mm")
@@ -385,7 +362,6 @@ FSTRINGVALUE(Com::tEPRZAcceleration, "Z-axis acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRXTravelAcceleration, "X-axis travel acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRYTravelAcceleration, "Y-axis travel acceleration [mm/s^2]")
 FSTRINGVALUE(Com::tEPRZTravelAcceleration, "Z-axis travel acceleration [mm/s^2]")
-#endif
 FSTRINGVALUE(Com::tEPROPSMode, "OPS operation mode [0=Off,1=Classic,2=Fast]")
 FSTRINGVALUE(Com::tEPROPSMoveAfter, "OPS move after x% retract [%]")
 FSTRINGVALUE(Com::tEPROPSMinDistance, "OPS min. distance for fil. retraction [mm]")

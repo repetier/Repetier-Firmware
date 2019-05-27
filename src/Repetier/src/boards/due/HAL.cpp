@@ -921,6 +921,7 @@ void MOTION2_TIMER_VECTOR() {
 }
 
 // IRQ handler for tone generator
+#if BEEPER_PIN > -1
 void BEEPER_TIMER_VECTOR() {
     static bool toggle;
 
@@ -929,6 +930,7 @@ void BEEPER_TIMER_VECTOR() {
     WRITE(BEEPER_PIN, toggle);
     toggle = !toggle;
 }
+#endif
 
 void HAL::spiInit() {
     SPI.begin();

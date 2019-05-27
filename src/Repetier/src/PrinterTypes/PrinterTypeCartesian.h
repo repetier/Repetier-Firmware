@@ -59,5 +59,7 @@ public:
     static void park(GCode* com) { Motion1::moveToParkPosition(); }
     static bool canSelectTool(fast8_t toolId);
     static void M290(GCode* com);
+    static PGM_P getGeometryName();
 };
+#define MACHINE_TYPE "Cartesian"
 #endif

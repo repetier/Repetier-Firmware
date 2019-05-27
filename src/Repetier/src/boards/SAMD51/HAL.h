@@ -20,8 +20,6 @@
 
 
     Main author: repetier
-
-    Initial port of HAL to Arduino Due: John Silvia
 */
 
 /**
@@ -656,117 +654,7 @@ public:
 #else
     static void spiEnd();
 #endif
-    // SPI related functions
-#ifdef OLD_SPI
-#ifdef DUE_SOFTWARE_SPI
-    // bitbanging transfer
-    // run at ~100KHz (necessary for init)
-    static uint8_t
-    spiTransfer(uint8_t b) // using Mode 0
-    {
-        for (int bits = 0; bits < 8; bits++) {
-            if (b & 0x80) {
-                WRITE(MOSI_PIN, HIGH);
-            } else {
-                WRITE(MOSI_PIN, LOW);
-            }
-            b <<= 1;
 
-            WRITE(SCK_PIN, HIGH);
-            delayMicroseconds(5);
-
-            if (READ(MISO_PIN)) {
-                b |= 1;
-            }
-            WRITE(SCK_PIN, LOW);
-            delayMicroseconds(5);
-        }
-        return b;
-    }
-    static inline void spiBegin(uint8_t ssPin = 0) {
-        if (ssPin) {
-            HAL::digitalWrite(ssPin, 0);
-        } else {
-            SET_OUTPUT(SDSS);
-            WRITE(SDSS, HIGH);
-        }
-        SET_OUTPUT(SCK_PIN);
-        SET_INPUT(MISO_PIN);
-        SET_OUTPUT(MOSI_PIN);
-    }
-
-    static inline void spiInit(uint8_t spiClock) {
-        WRITE(SDSS, HIGH);
-        WRITE(MOSI_PIN, HIGH);
-        WRITE(SCK_PIN, LOW);
-    }
-    static inline uint8_t spiReceive() {
-        // WRITE(SDSS, LOW);
-        uint8_t b = spiTransfer(0xff);
-        // WRITE(SDSS, HIGH);
-        return b;
-    }
-    static inline void spiReadBlock(uint8_t* buf, uint16_t nbyte) {
-        if (nbyte == 0)
-            return;
-        // WRITE(SDSS, LOW);
-        for (int i = 0; i < nbyte; i++) {
-            buf[i] = spiTransfer(0xff);
-        }
-        // WRITE(SDSS, HIGH);
-    }
-    static inline void spiSend(uint8_t b) {
-        // WRITE(SDSS, LOW);
-        uint8_t response = spiTransfer(b);
-        // WRITE(SDSS, HIGH);
-    }
-
-    static inline void spiSend(const uint8_t* buf, size_t n) {
-        if (n == 0)
-            return;
-        // WRITE(SDSS, LOW);
-        for (uint16_t i = 0; i < n; i++) {
-            spiTransfer(buf[i]);
-        }
-        // WRITE(SDSS, HIGH);
-    }
-
-    inline __attribute__((always_inline)) static void spiSendBlock(uint8_t token, const uint8_t* buf) {
-        // WRITE(SDSS, LOW);
-        spiTransfer(token);
-
-        for (uint16_t i = 0; i < 512; i++) {
-            spiTransfer(buf[i]);
-        }
-        // WRITE(SDSS, HIGH);
-    }
-
-#else
-
-    // hardware SPI
-    static void
-    spiBegin(uint8_t ssPin = 0);
-    // spiClock is 0 to 6, relecting AVR clock dividers 2,4,8,16,32,64,128
-    // Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
-    static void spiInit(uint8_t spiClock);
-    // Write single byte to SPI
-    static void spiSend(byte b);
-    static void spiSend(const uint8_t* buf, size_t n);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || MOTHERBOARD == 502
-    static void spiSend(uint32_t chan, const uint8_t* buf, size_t n);
-    static void spiSend(uint32_t chan, byte b);
-    static uint8_t spiReceive(uint32_t chan);
-#endif
-    // Read single byte from SPI
-    static uint8_t spiReceive();
-    // Read from SPI into buffer
-    static void spiReadBlock(uint8_t* buf, uint16_t nbyte);
-
-    // Write from buffer to SPI
-
-    static void spiSendBlock(uint8_t token, const uint8_t* buf);
-#endif /*DUE_SOFTWARE_SPI*/
-#endif
     // I2C Support
     static void i2cSetClockspeed(uint32_t clockSpeedHz);
     static void i2cInit(uint32_t clockSpeedHz);

@@ -3,6 +3,27 @@
 	why double up on these macros? see http://gcc.gnu.org/onlinedocs/cpp/Stringification.html
         2012/3/10 AT90USB128x modified by lincomatic to match Teensyduino
 		2019/5/2 SAMD51 Adafruit Grand Central Board by RAyWB/Robert Ayrenschmalz
+
+
+	Pin mappings for analog pins A0-A15 to digital pin differ from due
+	Analog Pin   Due Digital   MAGC Digital
+	0            54            67
+	1            55            68
+	2            56            69
+	3            57            70
+	4            58            71
+	5            59	           72
+	6            60            73
+	7            61            74
+	8            62            54
+	9            63            55
+	10           64            56
+	11           65            57
+	12           66            58
+	13           67            59
+	14           68            60
+	15           69            61
+
 */
 #ifndef _FASTIO_H
 #define _FASTIO_H

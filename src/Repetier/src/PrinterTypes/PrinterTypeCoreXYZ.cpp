@@ -205,4 +205,7 @@ void PrinterType::M290(GCode* com) {
     }
 }
 
+PGM_P PrinterType::getGeometryName() {
+    return PSTR("Core XYZ");
+}
 #endif

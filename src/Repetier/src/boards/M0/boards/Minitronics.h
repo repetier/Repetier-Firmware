@@ -106,7 +106,6 @@
 #define UI_ENCODER_CLICK 23
 #define UI_RESET_PIN 53
 #define UI_DELAYPERCHAR 50
-#define UI_INVERT_MENU_DIRECTION 0
 #define UI_BUTTON_BACK -1
 #undef SDSS
 #define SDSS 2

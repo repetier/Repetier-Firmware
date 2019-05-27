@@ -453,4 +453,7 @@ void PrinterType::M290(GCode* com) {
     }
 }
 
+PGM_P PrinterType::getGeometryName() {
+    return PSTR("Dual X");
+}
 #endif

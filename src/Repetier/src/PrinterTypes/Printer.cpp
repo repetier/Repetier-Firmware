@@ -22,9 +22,6 @@ ServoInterface* servos[NUM_SERVOS] = SERVO_LIST;
 PWMHandler* fans[] = FAN_LIST;
 uint8_t Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
 //Stepper Movement Variables
-#if DRIVE_SYSTEM != DELTA
-int32_t Printer::zCorrectionStepsIncluded = 0;
-#endif
 uint8_t Printer::relativeCoordinateMode = false;         ///< Determines absolute (false) or relative Coordinates (true).
 uint8_t Printer::relativeExtruderCoordinateMode = false; ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
@@ -169,7 +166,7 @@ void Printer::setFanSpeed(int speed, bool immediately, int fanId) {
     if (fanId < 0 || fanId >= NUM_FANS) {
         return;
     }
-    speed = constrain(speed, 0, 255);
+    speed = TRIM_FAN_PWM(constrain(speed, 0, 255));
     Tool* tool = nullptr;
     Tool* activeTool = Tool::getActiveTool();
     Com::printF(PSTR("Fanspeed"), fanId);
@@ -213,7 +210,7 @@ bool Printer::updateDoorOpen() {
 }
 
 void Printer::updateDerivedParameter() {
-#if DRIVE_SYSTEM == DELTA
+    /*#if DRIVE_SYSTEM == DELTA
 #else
 // For which directions do we need backlash compensation
 #if ENABLE_BACKLASH_COMPENSATION
@@ -226,7 +223,7 @@ void Printer::updateDerivedParameter() {
         backlashDir |= 32;
 #endif
 #endif
-
+*/
     EVENT_UPDATE_DERIVED;
 }
 #if AUTOMATIC_POWERUP
@@ -540,9 +537,6 @@ void Printer::setup() {
     msecondsPrinting = 0;
     filamentPrinted = 0;
     flag0 = PRINTER_FLAG0_STEPPER_DISABLED;
-#if DRIVE_SYSTEM == DELTA
-    radius0 = ROD_RADIUS;
-#endif
 #if ENABLE_BACKLASH_COMPENSATION
     backlashX = X_BACKLASH;
     backlashY = Y_BACKLASH;
@@ -932,14 +926,9 @@ void Printer::showJSONStatus(int type) {
     Com::print(Motion1::isAxisHomed(Z_AXIS));
     Com::printF(PSTR("]"));
     if (type == 1) {
-        //  "geometry": "cartesian",
-#if DRIVE_SYSTEM == DELTA
-        Com::printF(PSTR(",\"geometry\":\"Delta\""));
-#else
-        Com::printF(PSTR(",\"geometry\":\"Cartesian\""));
-#endif
-        //  "myName": "Ormerod"
-        Com::printF(PSTR(",\"myName\":\"" UI_PRINTER_NAME "\""));
+        Com::printF(PSTR(",\"geometry\":\""));
+        Com::printF(PrinterType::getGeometryName());
+        Com::printF(PSTR("\",\"myName\":\"" UI_PRINTER_NAME "\""));
         Com::printF(PSTR(",\"firmwareName\":\"Repetier\""));
     }
     Com::printF(PSTR(",\"coords\": {"));
@@ -1056,15 +1045,7 @@ void Printer::showJSONStatus(int type) {
         // UNTIL PRINT ESTIMATE TIMES ARE IMPLEMENTED
         // NO DURATION INFO IS SUPPORTED
         Com::printF(PSTR(",\"coldExtrudeTemp\":0,\"coldRetractTemp\":0.0,\"geometry\":\""));
-#if (DRIVE_SYSTEM == DELTA)
-        Com::printF(PSTR("delta"));
-#elif (DRIVE_SYSTEM == CARTESIAN || DRIVE_SYSTEM == GANTRY_FAKE)
-        Com::printF(PSTR("cartesian"));
-#elif ((DRIVE_SYSTEM == XY_GANTRY) || (DRIVE_SYSTEM == YX_GANTRY))
-        Com::printF(PSTR("coreXY"));
-#elif (DRIVE_SYSTEM == XZ_GANTRY)
-        Com::printF(PSTR("coreXZ"));
-#endif
+        Com::printF(PrinterType::getGeometryName());
         Com::printF(PSTR("\",\"name\":\""));
         Com::printF(Com::tPrinterName);
         Com::printF(PSTR("\",\"tools\":["));

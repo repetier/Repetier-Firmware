@@ -153,16 +153,6 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define VALUE(x) VALUE_TO_STRING(x)
 #define VAR_NAME_VALUE(var) #var "=" VALUE(var)
 
-#define CARTESIAN 0
-#define XY_GANTRY 1
-#define YX_GANTRY 2
-#define DELTA 3
-#define TUGA 4
-#define BIPOD 5
-#define XZ_GANTRY 8
-#define ZX_GANTRY 9
-#define GANTRY_FAKE 10
-
 #define WIZARD_STACK_SIZE 8
 #define IGNORE_COORDINATE 999999
 
@@ -225,15 +215,6 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #include "utilities/RVector3.h"
 extern void updateEndstops();
 
-#define HOME_ORDER_XYZ 1
-#define HOME_ORDER_XZY 2
-#define HOME_ORDER_YXZ 3
-#define HOME_ORDER_YZX 4
-#define HOME_ORDER_ZXY 5
-#define HOME_ORDER_ZYX 6
-#define HOME_ORDER_ZXYTZ 7 // Needs hot hotend for correct homing
-#define HOME_ORDER_XYTZ 8  // Needs hot hotend for correct homing
-
 #define NO_CONTROLLER 0
 #define UICONFIG_CONTROLLER 1
 #define CONTROLLER_SMARTRAMPS 2
@@ -264,10 +245,6 @@ extern void updateEndstops();
 #define CONTROLLER_AZSMZ_12864 26
 #define CONTROLLER_REPRAPWORLD_GLCD 27
 #define CONTROLLER_AZSMZ_12864_OLED 28
-
-#define PRINTER_MODE_FFF 0
-#define PRINTER_MODE_LASER 1
-#define PRINTER_MODE_CNC 2
 
 #define PRINTER_TYPE_CARESIAN 0
 #define PRINTER_TYPE_CORE_XYZ 1
@@ -312,14 +289,6 @@ public:
 
 extern ServoInterface* servos[NUM_SERVOS];
 
-#ifndef SHARED_EXTRUDER_HEATER
-#define SHARED_EXTRUDER_HEATER 0
-#endif
-
-#ifndef DUAL_X_AXIS
-#define DUAL_X_AXIS 0
-#endif
-
 #ifndef LAZY_DUAL_X_AXIS
 #define LAZY_DUAL_X_AXIS 0
 #endif
@@ -332,19 +301,6 @@ extern ServoInterface* servos[NUM_SERVOS];
 #endif
 #ifndef MOVE_Z_WHEN_HOMED
 #define MOVE_Z_WHEN_HOMED 0
-#endif
-
-#if SHARED_EXTRUDER_HEATER || MIXING_EXTRUDER
-#undef EXT1_HEATER_PIN
-#undef EXT2_HEATER_PIN
-#undef EXT3_HEATER_PIN
-#undef EXT4_HEATER_PIN
-#undef EXT5_HEATER_PIN
-#define EXT1_HEATER_PIN -1
-#define EXT2_HEATER_PIN -1
-#define EXT3_HEATER_PIN -1
-#define EXT4_HEATER_PIN -1
-#define EXT5_HEATER_PIN -1
 #endif
 
 #ifndef BOARD_FAN_SPEED
@@ -392,32 +348,6 @@ extern ServoInterface* servos[NUM_SERVOS];
 #define Z_PROBE_REPETITIONS 1
 #endif
 
-#define SPEED_MIN_MILLIS 400
-#define SPEED_MAX_MILLIS 60
-#define SPEED_MAGNIFICATION 100.0f
-
-/**  \brief Horizontal distance bridged by the diagonal push rod when the end effector is in the center. It is pretty close to 50% of the push rod length (250 mm).
-*/
-#if !defined(ROD_RADIUS) && DRIVE_SYSTEM == DELTA
-#define ROD_RADIUS (PRINTER_RADIUS - END_EFFECTOR_HORIZONTAL_OFFSET - CARRIAGE_HORIZONTAL_OFFSET)
-#endif
-
-#ifndef UI_SPEEDDEPENDENT_POSITIONING
-#define UI_SPEEDDEPENDENT_POSITIONING 1
-#endif
-
-#if DRIVE_SYSTEM == DELTA || DRIVE_SYSTEM == TUGA || DRIVE_SYSTEM == BIPOD || defined(FAST_COREXYZ)
-#define NONLINEAR_SYSTEM 1
-#else
-#define NONLINEAR_SYSTEM 0
-#endif
-
-#ifdef FEATURE_Z_PROBE
-#define MANUAL_CONTROL 1
-#endif
-
-#define GANTRY (DRIVE_SYSTEM == XY_GANTRY || DRIVE_SYSTEM == YX_GANTRY || DRIVE_SYSTEM == XZ_GANTRY || DRIVE_SYSTEM == ZX_GANTRY || DRIVE_SYSTEM == GANTRY_FAKE)
-
 //Step to split a circle in small Lines
 #ifndef MM_PER_ARC_SEGMENT
 #define MM_PER_ARC_SEGMENT 1
@@ -427,45 +357,6 @@ extern ServoInterface* servos[NUM_SERVOS];
 #endif
 //After this count of steps a new SIN / COS calculation is started to correct the circle interpolation
 #define N_ARC_CORRECTION 25
-
-// Test for shared cooler
-#if NUM_EXTRUDER == 6 && EXT0_EXTRUDER_COOLER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN && EXT2_EXTRUDER_COOLER_PIN == EXT3_EXTRUDER_COOLER_PIN && EXT4_EXTRUDER_COOLER_PIN == EXT5_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN == EXT2_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN == EXT4_EXTRUDER_COOLER_PIN
-#define SHARED_COOLER 1
-#elif NUM_EXTRUDER == 5 && EXT0_EXTRUDER_COOLER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN && EXT2_EXTRUDER_COOLER_PIN == EXT3_EXTRUDER_COOLER_PIN && EXT3_EXTRUDER_COOLER_PIN == EXT5_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN == EXT2_EXTRUDER_COOLER_PIN
-#define SHARED_COOLER 1
-#elif NUM_EXTRUDER == 4 && EXT0_EXTRUDER_COOLER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN && EXT2_EXTRUDER_COOLER_PIN == EXT3_EXTRUDER_COOLER_PIN && EXT0_EXTRUDER_COOLER_PIN == EXT2_EXTRUDER_COOLER_PIN
-#define SHARED_COOLER 1
-#elif NUM_EXTRUDER == 3 && EXT0_EXTRUDER_COOLER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN && EXT2_EXTRUDER_COOLER_PIN == EXT0_EXTRUDER_COOLER_PIN
-#define SHARED_COOLER 1
-#elif NUM_EXTRUDER == 2 && EXT0_EXTRUDER_COOLER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN == EXT1_EXTRUDER_COOLER_PIN
-#define SHARED_COOLER 1
-#else
-#define SHARED_COOLER 0
-#endif
-
-#ifndef START_STEP_WITH_HIGH
-#define START_STEP_WITH_HIGH 1
-#endif
-
-#if NUM_EXTRUDER > 0 && EXT0_TEMPSENSOR_TYPE == 101
-#define SUPPORT_MAX6675
-#endif
-
-#if NUM_EXTRUDER > 0 && EXT0_TEMPSENSOR_TYPE == 102
-#define SUPPORT_MAX31855
-#endif
-
-// Test for shared coolers between extruders and mainboard
-#if EXT0_EXTRUDER_COOLER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN == FAN_BOARD_PIN
-#define SHARED_COOLER_BOARD_EXT 1
-#else
-#define SHARED_COOLER_BOARD_EXT 0
-#endif
-
-#if defined(UI_SERVO_CONTROL) && UI_SERVO_CONTROL > FEATURE_SERVO
-#undef UI_SERVO_CONTROL
-#define UI_SERVO_CONTROL FEATURE_SERVO
-#endif
 
 #if (defined(EXT0_JAM_PIN) && EXT0_JAM_PIN > -1) || (defined(EXT1_JAM_PIN) && EXT1_JAM_PIN > -1) || (defined(EXT2_JAM_PIN) && EXT2_JAM_PIN > -1) || (defined(EXT3_JAM_PIN) && EXT3_JAM_PIN > -1) || (defined(EXT4_JAM_PIN) && EXT4_JAM_PIN > -1) || (defined(EXT5_JAM_PIN) && EXT5_JAM_PIN > -1)
 #define EXTRUDER_JAM_CONTROL 1
@@ -529,11 +420,6 @@ extern ServoInterface* servos[NUM_SERVOS];
 
 #include "communication/gcode.h"
 
-#if ENABLE_BACKLASH_COMPENSATION && DRIVE_SYSTEM != CARTESIAN && !defined(ENFORCE_BACKLASH)
-#undef ENABLE_BACKLASH_COMPENSATION
-#define ENABLE_BACKLASH_COMPENSATION false
-#endif
-
 #define uint uint16_t
 #define uint8 uint8_t
 #define int8 int8_t
@@ -560,22 +446,8 @@ extern PWMHandler* fans[];
 //extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
 //#endif
 
-void manage_inactivity(uint8_t debug);
-
-extern void finishNextSegment();
-#if NONLINEAR_SYSTEM
-extern uint8_t transformCartesianStepsToDeltaSteps(long cartesianPosSteps[], long deltaPosSteps[]);
-#if SOFTWARE_LEVELING
-extern void calculatePlane(long factors[], long p1[], long p2[], long p3[]);
-extern float calcZOffset(long factors[], long pointX, long pointY);
-#endif
-#endif
-extern void linear_move(long steps_remaining[]);
 #ifndef FEATURE_DITTO_PRINTING
 #define FEATURE_DITTO_PRINTING false
-#endif
-#if FEATURE_DITTO_PRINTING && (NUM_EXTRUDER > 4 || NUM_EXTRUDER < 2)
-#error Ditto printing requires 2 - 4 extruder.
 #endif
 
 extern millis_t previousMillisCmd;
@@ -736,7 +608,7 @@ extern int debugWaitLoop;
 #include "custom/customEvents.h"
 
 // must be after CustomEvents as it might include definitions from there
-#include "controller/DisplayList.h"
+// #include "controller/DisplayList.h"
 
 #include "controller/gui.h"
 #endif

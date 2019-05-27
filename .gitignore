@@ -24,3 +24,6 @@ macrotest.txt
 src/SampleSystems/privat
 settings.json
 src/Repetier/.vscode
+src/Repetier/testconfigs
+src/Repetier/Configuration.h
+src/Repetier/Configuration_io.h

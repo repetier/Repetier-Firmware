@@ -987,7 +987,7 @@ void Commands::processMCode(GCode* com) {
     }
     switch (com->M) {
     case 0:
-        reportAnalog();
+        // reportAnalog();
         break;
     case 3: // Spindle/laser
         MCode_3(com);

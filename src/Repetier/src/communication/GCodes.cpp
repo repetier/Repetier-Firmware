@@ -339,6 +339,7 @@ void GCode_92(GCode* com) {
 // G100 R[n] Add n to radius. Adjust to be above floor if necessary
 // G100 R[0] set radius based on current z measurement. Moves to (0,0,0)
 void GCode_100(GCode* com) {
+    /*
 #if DRIVE_SYSTEM == DELTA
     float currentZmm = Printer::currentPosition[Z_AXIS];
     if (currentZmm / Printer::zLength > 0.1) {
@@ -417,6 +418,7 @@ void GCode_100(GCode* com) {
     // moving gets back into safe zero'ed position with respect to newle set floor or Radius.
     Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, 12.0, IGNORE_COORDINATE, IGNORE_COORDINATE);
 #endif
+*/
 }
 
 void GCode_131(GCode* com) {
@@ -598,7 +600,7 @@ void GCode_134(GCode* com) {
 }
 
 void GCode_135(GCode* com) {
-#if DRIVE_SYSTEM == DELTA
+    /* #if DRIVE_SYSTEM == DELTA
     Com::printF(PSTR("CompDelta:"), Printer::currentNonlinearPositionSteps[A_TOWER]);
     Com::printF(Com::tComma, Printer::currentNonlinearPositionSteps[B_TOWER]);
     Com::printFLN(Com::tComma, Printer::currentNonlinearPositionSteps[C_TOWER]);
@@ -611,6 +613,7 @@ void GCode_135(GCode* com) {
     Motion1::printCurrentPosition();
     break;
 #endif // DRIVE_SYSTEM
+*/
 }
 
 void GCode_201(GCode* com) {

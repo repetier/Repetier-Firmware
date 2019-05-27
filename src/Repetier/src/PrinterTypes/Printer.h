@@ -261,9 +261,6 @@ public:
     static float extrusionFactor;      ///< Extrusion multiply factor
     static uint16_t rescuePos;         // EEPROM address for rescue
     static fast8_t safetyParked;       /// True if moved to a safety position to protect print
-#if DRIVE_SYSTEM != DELTA || defined(DOXYGEN)
-    static int32_t zCorrectionStepsIncluded;
-#endif
 #if FAN_THERMO_PIN > -1 || defined(DOXYGEN)
     static float thermoMinTemp;
     static float thermoMaxTemp;

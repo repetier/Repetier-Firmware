@@ -69,5 +69,8 @@ public:
     static fast8_t getActiveAxis() { return activeAxis; }
     static bool canSelectTool(fast8_t toolId);
     static void M290(GCode* com);
+    static PGM_P getGeometryName();
 };
+#define MACHINE_TYPE "Dual X"
+
 #endif
