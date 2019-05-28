@@ -974,13 +974,17 @@ void UIDisplay::printRow(uint8_t r, char *txt, char *txt2, uint8_t changeAtCol)
 #endif
 }
 
+#ifndef UI_DISPLAY_RESET_PIN
+#define UI_DISPLAY_RESET_PIN U8G_PIN_NONE
+#endif
+
 void initializeLCD()
 {
 #ifdef U8GLIB_MINI12864_2X_SW_SPI
-    u8g_InitSPI(&u8g, &u8g_dev_uc1701_mini12864_2x_sw_spi, UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN, UI_DISPLAY_D5_PIN, U8G_PIN_NONE);
+    u8g_InitSPI(&u8g, &u8g_dev_uc1701_mini12864_2x_sw_spi, UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN, UI_DISPLAY_D5_PIN, UI_DISPLAY_RESET_PIN);
 #endif
 #ifdef U8GLIB_MINI12864_2X_HW_SPI
-    u8g_InitHWSPI(&u8g, &u8g_dev_uc1701_mini12864_2x_hw_spi, UI_DISPLAY_RS_PIN, UI_DISPLAY_D5_PIN, U8G_PIN_NONE);
+    u8g_InitHWSPI(&u8g, &u8g_dev_uc1701_mini12864_2x_hw_spi, UI_DISPLAY_RS_PIN, UI_DISPLAY_D5_PIN, UI_DISPLAY_RESET_PIN);
 #endif
 #ifdef U8GLIB_ST7920
     u8g_InitSPI(&u8g, &u8g_dev_st7920_128x64_sw_spi, UI_DISPLAY_D4_PIN, UI_DISPLAY_ENABLE_PIN, UI_DISPLAY_RS_PIN, U8G_PIN_NONE, U8G_PIN_NONE);
@@ -4350,8 +4354,8 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             Printer::currentPositionSteps[E_AXIS] = 0;
             Printer::moveToParkPosition();
             //Extruder::current->retractDistance(FILAMENTCHANGE_LONGRETRACT);
-            Extruder::pauseExtruders(false);
             Commands::waitUntilEndOfAllMoves();
+            Extruder::pauseExtruders(false);
 #if FILAMENTCHANGE_REHOME
             Printer::disableXStepper();
             Printer::disableYStepper();

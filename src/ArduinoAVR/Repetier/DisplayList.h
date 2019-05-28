@@ -1679,6 +1679,79 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #endif
 #endif // Controller AZSMZ_12864
 
+#if (FEATURE_CONTROLLER == CONTROLLER_FYSETC_MINI_12864_V21)
+#define UI_HAS_KEYS 1
+#define UI_HAS_BACK_KEY 0
+#define UI_DISPLAY_TYPE DISPLAY_U8G
+#define U8GLIB_MINI12864_2X_HW_SPI
+#define UI_LCD_WIDTH 128
+#define UI_LCD_HEIGHT 64
+//select font size
+#define UI_FONT_6X10 //default font
+#ifdef UI_FONT_6X10
+#define UI_FONT_WIDTH 6
+#define UI_FONT_HEIGHT 10
+#define UI_FONT_SMALL_HEIGHT 7
+#define UI_FONT_DEFAULT repetier_6x10
+#define UI_FONT_SMALL repetier_5x7
+#define UI_FONT_SMALL_WIDTH 5 //smaller font for status display
+#endif
+//calculate rows and cols available with current font
+#define UI_COLS (UI_LCD_WIDTH/UI_FONT_SMALL_WIDTH)
+#define UI_ROWS (UI_LCD_HEIGHT/UI_FONT_HEIGHT)
+#define UI_DISPLAY_CHARSET 3
+
+#define BEEPER_TYPE 1
+
+#if MOTHERBOARD == 190  // Fysetc F6
+#define BEEPER_PIN             37
+#define UI_DISPLAY_RESET_PIN   23
+#define UI_DISPLAY_RS_PIN      17
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  51
+#define UI_DISPLAY_D0_PIN      -1
+#define UI_DISPLAY_D1_PIN      -1
+#define UI_DISPLAY_D2_PIN      -1
+#define UI_DISPLAY_D3_PIN      -1
+#define UI_DISPLAY_D4_PIN      52
+#define UI_DISPLAY_D5_PIN      16
+#define UI_DISPLAY_D6_PIN      -1
+#define UI_DISPLAY_D7_PIN      -1
+#define UI_ENCODER_A           33
+#define UI_ENCODER_B           31
+#define UI_ENCODER_CLICK       35
+#define UI_RESET_PIN           41
+#define LCD_CONTRAST           255
+#define UI_INVERT_MENU_DIRECTION   0
+#define UI_ENCODER_SPEED 2
+
+#else
+
+// Untested configuration for the other motherboards. Please adapt the pin mappings.
+// The board connectors and pin mappings could be compatible with e.g. RAMPS but needs testing.
+#error The Fysetc Mini 12864 pin mappings must be adapted to your motherboard in the DisplayList.h
+
+#endif
+
+#ifdef UI_MAIN
+void uiInitKeys() {
+  UI_KEYS_INIT_CLICKENCODER_LOW(UI_ENCODER_A, UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+  UI_KEYS_INIT_BUTTON_LOW(UI_ENCODER_CLICK); // push button, connects gnd to pin
+#if UI_RESET_PIN > -1
+  UI_KEYS_INIT_BUTTON_LOW(UI_RESET_PIN); // Kill pin
+#endif
+}
+void uiCheckKeys(uint16_t &action) {
+  UI_KEYS_CLICKENCODER_LOW(UI_ENCODER_A, UI_ENCODER_B); // click encoder on pins 47 and 45. Phase is connected with gnd for signals.
+  UI_KEYS_BUTTON_LOW(UI_ENCODER_CLICK, UI_ACTION_OK); // push button, connects gnd to pin
+#if UI_RESET_PIN > -1
+  UI_KEYS_BUTTON_LOW(UI_RESET_PIN, UI_ACTION_RESET);
+#endif
+}
+inline void uiCheckSlowEncoder() {}
+void uiCheckSlowKeys(uint16_t &action) {}
+#endif
+#endif // Fysetc Mini 12864 v2.1 Panel
 
 #if FEATURE_CONTROLLER == CONTROLLER_LCD_MP_PHARAOH_DUE
 #define UI_DISPLAY_TYPE 1
