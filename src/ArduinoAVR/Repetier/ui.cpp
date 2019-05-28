@@ -3125,8 +3125,9 @@ int UIDisplay::okAction(bool allowMoves)
                     Printer::GoToMemoryPosition(false, false, true, false, Printer::homingFeedrate[Z_AXIS]);
                 }
                 Extruder::current->retractDistance(-EEPROM_FLOAT(RETRACTION_LENGTH));
-                Printer::currentPositionSteps[E_AXIS] = Printer::popWizardVar().l; // set e to starting position
                 Commands::waitUntilEndOfAllMoves();                                // catch retract/extrude in case no filament was inserted no jam report occurs
+                Printer::currentPositionSteps[E_AXIS] = Printer::popWizardVar().l; // set e to starting position
+                Printer::currentPosition[E_AXIS] =  Printer::currentPositionTransformed[E_AXIS] = Printer::currentPositionSteps[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS];
                 Printer::setJamcontrolDisabled(false);
                 Printer::setBlockingReceive(false);
             }
