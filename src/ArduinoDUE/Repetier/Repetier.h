@@ -233,6 +233,7 @@ Switch it off for production, it costs execution time. */
 #define CONTROLLER_AZSMZ_12864 26
 #define CONTROLLER_REPRAPWORLD_GLCD 27
 #define CONTROLLER_AZSMZ_12864_OLED 28
+#define CONTROLLER_FYSETC_MINI_12864_V21 29
 
 // direction flags
 #define X_DIRPOS 1
