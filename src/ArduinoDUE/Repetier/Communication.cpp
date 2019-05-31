@@ -140,6 +140,7 @@ FSTRINGVALUE(Com::tYColon, "Y:")
 FSTRINGVALUE(Com::tZColon, "Z:")
 FSTRINGVALUE(Com::tE0Colon, "E0:")
 FSTRINGVALUE(Com::tE1Colon, "E1:")
+FSTRINGVALUE(Com::tE2Colon, "E2:")
 FSTRINGVALUE(Com::tMS1MS2Pins, "MS1,MS2 Pins")
 FSTRINGVALUE(Com::tSetOutputSpace, "Set output: ")
 FSTRINGVALUE(Com::tGetInputSpace, "Get Input: ")
@@ -500,6 +501,42 @@ FSTRINGVALUE(Com::tStartupGCode, STARTUP_GCODE)
 #ifdef DRV_TMC2130
 FSTRINGVALUE(Com::tTrinamicMotorCurrent, "Trinamic motor current:")
 FSTRINGVALUE(Com::tTrinamicMicrostepMode, "Trinamic microstep mode:")
+FSTRINGVALUE(Com::tTrinamic2130DiagnosticReadings, "Trinamic 2130 diagnostic readings:")
+FSTRINGVALUE(Com::tTrue, "True");
+FSTRINGVALUE(Com::tFalse, "False");
+FSTRINGVALUE(Com::tDiv32, "/32");
+FSTRINGVALUE(Com::tCross, "X");
+FSTRINGVALUE(Com::tEnabledColon,        "Enabled:")
+FSTRINGVALUE(Com::tSetCurrentColon,     "Set current:")
+FSTRINGVALUE(Com::tRMSCurrentColon,     "RMS current:")
+FSTRINGVALUE(Com::tMaxCurrentColon,     "Max current:")
+FSTRINGVALUE(Com::tRunCurrentColon,     "Run current:")
+FSTRINGVALUE(Com::tHoldCurrentColon,    "Hold current:")
+FSTRINGVALUE(Com::tCSActualColon,       "CS actual:")
+FSTRINGVALUE(Com::tPWMScaleColon,       "PWM scale:")
+FSTRINGVALUE(Com::tVSENSEColon,         "VSENSE:\t")
+FSTRINGVALUE(Com::tStealthchopColon,    "Stealthchop:")
+FSTRINGVALUE(Com::tMicrostepsColon,     "Microsteps:")
+FSTRINGVALUE(Com::tTSTEPColon,          "TSTEP:\t")
+FSTRINGVALUE(Com::tPWMThresholdColon,   "PWM threshold:")
+FSTRINGVALUE(Com::tOTPrewarnColon,      "OT prewarn:")
+FSTRINGVALUE(Com::tOTTriggeredColon,    "OT triggered:")
+FSTRINGVALUE(Com::tOffTimeColon,        "Off time:")
+FSTRINGVALUE(Com::tBlankTimeColon,      "Blank time:")
+FSTRINGVALUE(Com::tHystEndColon,        "Hyst. end:")
+FSTRINGVALUE(Com::tHystStartColon,      "Hyst. start:")
+FSTRINGVALUE(Com::tStallGuardThrColon,  "StallGuard thr:")
+FSTRINGVALUE(Com::tDriverStatus,   "Driver Status")
+FSTRINGVALUE(Com::tPlusStallGuardColon, "+ StallGuard:")
+FSTRINGVALUE(Com::tPlusSGResultColon,   "+ sg_result:")
+FSTRINGVALUE(Com::tPlusFSActiveColon,   "+ fsactive:")
+FSTRINGVALUE(Com::tPlusSTSTColon,       "+ stst:\t")
+FSTRINGVALUE(Com::tPlusOLBColon,        "+ olb:\t")
+FSTRINGVALUE(Com::tPlusOLAColon,        "+ ola:\t")
+FSTRINGVALUE(Com::tPlusS2GBColon,       "+ s2gb:\t")
+FSTRINGVALUE(Com::tPlusS2GAColon,       "+ s2ga:\t")
+FSTRINGVALUE(Com::tPlusOTPWColon,       "+ otpw:\t")
+FSTRINGVALUE(Com::tPlusOTColon,         "+ ot:\t")
 #endif
 bool Com::writeToAll = true; // transmit start messages to all devices!
 
@@ -671,6 +708,26 @@ void Com::printNumber(uint32_t n)
 
   print(str);
 }
+
+void Com::printHexNumber(uint32_t n)
+{
+  char buf[11]; // Assumes 8-bit chars plus zero byte.
+  char *str = &buf[10];
+  buf[0] = '0';
+  buf[1] = 'x';
+  buf[10] = '\0';
+  do
+  {
+    uint8_t nibble = n&0x0F;
+    if (nibble > 9)
+      *--str = 'A'+(nibble-0xA);
+    else
+      *--str = '0'+nibble;
+    n>>=4;
+  } while (str != &buf[2]);
+  print(buf);
+}
+
 void Com::printArrayFLN(FSTRINGPARAM(text), float *arr, uint8_t n,
                         uint8_t digits)
 {
