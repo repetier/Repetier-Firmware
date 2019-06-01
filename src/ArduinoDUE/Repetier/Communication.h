@@ -176,6 +176,7 @@ public:
   FSTRINGVAR(tZColon)
   FSTRINGVAR(tE0Colon)
   FSTRINGVAR(tE1Colon)
+  FSTRINGVAR(tE2Colon)
   FSTRINGVAR(tMS1MS2Pins)
   FSTRINGVAR(tSetOutputSpace)
   FSTRINGVAR(tGetInputSpace)
@@ -490,6 +491,42 @@ public:
 #ifdef DRV_TMC2130
   FSTRINGVAR(tTrinamicMotorCurrent)
   FSTRINGVAR(tTrinamicMicrostepMode)
+  FSTRINGVAR(tTrinamic2130DiagnosticReadings)
+  FSTRINGVAR(tTrue)
+  FSTRINGVAR(tFalse)
+  FSTRINGVAR(tDiv32)
+  FSTRINGVAR(tCross)
+  FSTRINGVAR(tEnabledColon)
+  FSTRINGVAR(tSetCurrentColon)
+  FSTRINGVAR(tRMSCurrentColon)
+  FSTRINGVAR(tMaxCurrentColon)
+  FSTRINGVAR(tRunCurrentColon)
+  FSTRINGVAR(tHoldCurrentColon)
+  FSTRINGVAR(tCSActualColon)
+  FSTRINGVAR(tPWMScaleColon)
+  FSTRINGVAR(tVSENSEColon)
+  FSTRINGVAR(tStealthchopColon)
+  FSTRINGVAR(tMicrostepsColon)
+  FSTRINGVAR(tTSTEPColon)
+  FSTRINGVAR(tPWMThresholdColon)
+  FSTRINGVAR(tOTPrewarnColon)
+  FSTRINGVAR(tOTTriggeredColon)
+  FSTRINGVAR(tOffTimeColon)
+  FSTRINGVAR(tBlankTimeColon)
+  FSTRINGVAR(tHystStartColon)
+  FSTRINGVAR(tHystEndColon)
+  FSTRINGVAR(tStallGuardThrColon)
+  FSTRINGVAR(tDriverStatus)
+  FSTRINGVAR(tPlusStallGuardColon)
+  FSTRINGVAR(tPlusSGResultColon)
+  FSTRINGVAR(tPlusFSActiveColon)
+  FSTRINGVAR(tPlusSTSTColon)
+  FSTRINGVAR(tPlusOLBColon)
+  FSTRINGVAR(tPlusOLAColon)
+  FSTRINGVAR(tPlusS2GBColon)
+  FSTRINGVAR(tPlusS2GAColon)
+  FSTRINGVAR(tPlusOTPWColon)
+  FSTRINGVAR(tPlusOTColon)
 #endif
 
   static void cap(FSTRINGPARAM(text));
@@ -500,6 +537,7 @@ public:
   static void config(FSTRINGPARAM(text), uint32_t value);
   static void config(FSTRINGPARAM(text), float value, uint8_t digits = 2);
   static void printNumber(uint32_t n);
+  static void printHexNumber(uint32_t n);
   static void printWarningF(FSTRINGPARAM(text));
   static void printInfoF(FSTRINGPARAM(text));
   static void printErrorF(FSTRINGPARAM(text));
