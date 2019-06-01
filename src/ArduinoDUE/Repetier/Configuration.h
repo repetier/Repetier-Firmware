@@ -1860,7 +1860,6 @@ The following settings override uiconfig.h!
 26 or CONTROLLER_AZSMZ_12864 
 405 or CONTROLLER_FELIX_DUE Felix LCD für due based board
 27 or CONTROLLER_REPRAPWORLD_GLCD = ReprapWorld Graphical LCD
-29 or CONTROLLER_FYSETC_MINI_12864_V21 = Fysetc Mini-12864 Panel v2.1
 */
 #define FEATURE_CONTROLLER CONTROLLER_RADDS
 

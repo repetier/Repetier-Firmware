@@ -142,6 +142,7 @@ communication, no actions
 - M117 <message> - Write message in status row on lcd
 - M118 <message> - Write message to host
 - M119 - Report endstop status
+- M122 - Output TMC2130 diagnostic readings
 - M140 S<temp> H1 O<offset> F1 - Set bed target temp, F1 makes a beep when
 temperature is reached the first time
 - M155 S<1/0> Enable/disable auto report temperatures. When enabled firmware

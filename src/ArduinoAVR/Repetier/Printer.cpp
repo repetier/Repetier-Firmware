@@ -2209,12 +2209,12 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
 #endif
     updateHomedAll();
     UI_CLEAR_STATUS
-    Commands::printCurrentPosition();
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
     LaserDriver::laserOn = oldLaser;
 #endif
     setNoDestinationCheck(nocheck);
     Printer::updateCurrentPosition();
+    Commands::printCurrentPosition();
 }
 #endif // Not delta printer
 
