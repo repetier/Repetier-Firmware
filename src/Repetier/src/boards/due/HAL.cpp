@@ -320,6 +320,7 @@ void HAL::analogStart(void) {
     // ensure we can write to ADC registers
     ADC->ADC_WPMR = 0x41444300u;   //ADC_WPMR_WPKEY(0);
     pmc_enable_periph_clk(ID_ADC); // enable adc clock
+    adcEnable = 0;
 
     for (int i = 0; i < MAX_ANALOG_INPUTS; i++) {
         if (analogEnabled[i] == false) {
@@ -327,15 +328,7 @@ void HAL::analogStart(void) {
         }
         adcEnable |= (0x1u << i);
     }
-    /*for (int i = 0; i < ANALOG_INPUTS; i++) {
-        osAnalogInputValues[i] = 0;
-        adcSamplesMin[i] = 100000;
-        adcSamplesMax[i] = 0;
-        adcEnable |= (0x1u << osAnalogInputChannels[i]);
-        osAnalogSamplesSum[i] = 2048 * ANALOG_INPUT_MEDIAN;
-        for (int j = 0; j < ANALOG_INPUT_MEDIAN; j++)
-            osAnalogSamples[i][j] = 2048; // we want to prevent early error from bad starting values
-    }*/
+
     // enable channels
     ADC->ADC_CHER = adcEnable;
     ADC->ADC_CHDR = !adcEnable;

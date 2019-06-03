@@ -37,7 +37,7 @@
 */
 
 // The follwing variables are required early to decide on the right modules.
-#define NUM_TOOLS 4
+#define NUM_TOOLS 2
 #define NUM_EXTRUDER 2
 #define NUM_SERVOS 1                  // Number of servos available
 #define MOTHERBOARD MOTHERBOARD_FELIX // 405
@@ -183,7 +183,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define SERVO_LIST \
     { &Servo1 }
 #define TOOLS \
-    { &ToolExtruder1, &ToolExtruder2, &Laser3, &CNC4 }
+    { &ToolExtruder1, &ToolExtruder2 }
 
 // Heaters enumerate all heaters, so we can loop over them
 // or call commands on a specific heater number.

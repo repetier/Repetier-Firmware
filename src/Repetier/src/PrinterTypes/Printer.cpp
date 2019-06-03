@@ -443,7 +443,6 @@ void Printer::setup() {
     // HAL::serialSetBaudrate(115200);
     // Start serial
     HAL::hwSetup();
-    HAL::analogStart();
 
     EEPROM::initBaudrate();
     HAL::serialSetBaudrate(baudrate);
@@ -477,6 +476,8 @@ void Printer::setup() {
 #undef IO_TARGET
 #define IO_TARGET 1
 #include "io/redefine.h"
+
+    HAL::analogStart();
 
     Motion1::init();
     Motion2::init();
