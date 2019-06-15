@@ -149,7 +149,7 @@ typedef char prog_char;
 #define AD_TRANSFER_CYCLES 1  // 0 - 3      * 2 + 3 adc clock cycles
 
 #define ADC_ISR_EOC(channel) (0x1u << channel)
-#define MAX_ANALOG_INPUTS 12
+#define MAX_ANALOG_INPUTS 14
 extern bool analogEnabled[MAX_ANALOG_INPUTS];
 
 #define PULLUP(IO, v) \
