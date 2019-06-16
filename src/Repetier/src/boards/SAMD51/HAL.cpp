@@ -39,7 +39,6 @@
 
 //extern "C" void __cxa_pure_virtual() { }
 extern "C" char* sbrk(int i);
-extern long bresenham_step();
 
 char HAL::virtualEeprom[EEPROM_BYTES] = { 0, 0, 0, 0, 0, 0, 0 };
 bool HAL::wdPinged = true;

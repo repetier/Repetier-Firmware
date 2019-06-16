@@ -36,10 +36,9 @@
 
 //extern "C" void __cxa_pure_virtual() { }
 extern "C" char* sbrk(int i);
-extern long bresenham_step();
 
 // New adc handling
-bool analogEnabled[MAX_ANALOG_INPUTS] = { false, false, false, false, false, false, false, false, false, false, false, false };
+bool analogEnabled[MAX_ANALOG_INPUTS] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
 // end adc handling
 
 // #define NUM_ADC_SAMPLES 2 + (1 << ANALOG_INPUT_SAMPLE)

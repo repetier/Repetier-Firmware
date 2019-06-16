@@ -160,6 +160,9 @@
 #define SD_SOFT_MISO_PIN 50
 #define SD_SOFT_MOSI_PIN 51
 #define SD_SOFT_SCK_PIN 52
+#ifndef BEEPER_PIN
+#define BEEPER_PIN -1
+#endif
 
 #elif FEATURE_CONTROLLER == CONTROLLER_REPRAPDISCOUNT_GLCD || FEATURE_CONTROLLER == CONTROLLER_SMARTRAMPS
 // SMART RAMPS FOR DUE - CRITICAL NOTE: MUST REMOVE THE RESET HEADER JUMPER NEXT TO AUX-2 OTHERWISE BOARD WILL RESET LOOP CONTINUOUSLY
@@ -189,14 +192,20 @@
 #undef SDSUPPORT
 #define SDSUPPORT 1
 
+#elif FEATURE_CONTROLLER == NO_CONTROLLER
+
+#ifndef BEEPER_PIN
+#define BEEPER_PIN -1
+#endif
+#undef SDSUPPORT
+#define SDSUPPORT 0
+
 #else
 
-#if FEATURE_CONTROLLER != NO_CONTROLLER
 #error No known pin assignment for your display. Please define it in Configuration.h
-#endif
 
 #endif
 
-#endif
+#endif // CUSTOM_CONTROLLER_PINS
 
-#endif
+#endif // Motherboard match
