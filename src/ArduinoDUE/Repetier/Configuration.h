@@ -75,6 +75,18 @@ To override EEPROM settings with config settings, set EEPROM_MODE 0
 
 /** Enable rescue system that helps hosts to reconnect and continue a print after a disconnect. */
 #define HOST_RESCUE 1
+/** What to do if power loss during print is detected.
+ * 0 = just stop where you are,
+ * 1 = raise z only
+ * 2 = go to safety park position
+ * Increasing value needs more remaining time with power. USV is required
+ * normally to be able to handle this.
+ */
+#define POWERLOSS_LEVEL 0
+// Pin that signals power loss, -1 = off
+#define POWERLOSS_PIN -1
+// State to signal power loss
+#define POWERLOSS_DETECTED 0
 
 // Override pin definitions from pins.h
 //#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an other pin
@@ -587,23 +599,23 @@ If you have a PTC thermistor instead of a NTC thermistor, keep the adc values in
 */
 /** Number of entries in the user thermistor table 0. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR0 28
-#define USER_THERMISTORTABLE0                                                                                                                                                                    \
-  {                                                                                                                                                                                              \
-    {1 * 4, 864 * 8}, {21 * 4, 300 * 8}, {25 * 4, 290 * 8}, {29 * 4, 280 * 8}, {33 * 4, 270 * 8}, {39 * 4, 260 * 8}, {46 * 4, 250 * 8}, {54 * 4, 240 * 8}, {64 * 4, 230 * 8}, {75 * 4, 220 * 8}, \
-        {90 * 4, 210 * 8}, {107 * 4, 200 * 8}, {128 * 4, 190 * 8}, {154 * 4, 180 * 8}, {184 * 4, 170 * 8}, {221 * 4, 160 * 8}, {265 * 4, 150 * 8}, {316 * 4, 140 * 8}, {375 * 4, 130 * 8},       \
-        {441 * 4, 120 * 8}, {513 * 4, 110 * 8}, {588 * 4, 100 * 8}, {734 * 4, 80 * 8}, {856 * 4, 60 * 8}, {938 * 4, 40 * 8}, {986 * 4, 20 * 8}, {1008 * 4, 0 * 8}, { 1018 * 4, -20 * 8 }         \
-  }
+#define USER_THERMISTORTABLE0 \
+    { \
+        { 1 * 4, 864 * 8 }, { 21 * 4, 300 * 8 }, { 25 * 4, 290 * 8 }, { 29 * 4, 280 * 8 }, { 33 * 4, 270 * 8 }, { 39 * 4, 260 * 8 }, { 46 * 4, 250 * 8 }, { 54 * 4, 240 * 8 }, { 64 * 4, 230 * 8 }, { 75 * 4, 220 * 8 }, \
+            { 90 * 4, 210 * 8 }, { 107 * 4, 200 * 8 }, { 128 * 4, 190 * 8 }, { 154 * 4, 180 * 8 }, { 184 * 4, 170 * 8 }, { 221 * 4, 160 * 8 }, { 265 * 4, 150 * 8 }, { 316 * 4, 140 * 8 }, { 375 * 4, 130 * 8 }, \
+            { 441 * 4, 120 * 8 }, { 513 * 4, 110 * 8 }, { 588 * 4, 100 * 8 }, { 734 * 4, 80 * 8 }, { 856 * 4, 60 * 8 }, { 938 * 4, 40 * 8 }, { 986 * 4, 20 * 8 }, { 1008 * 4, 0 * 8 }, { 1018 * 4, -20 * 8 } \
+    }
 
 /** Number of entries in the user thermistor table 1. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR1 0
 #define USER_THERMISTORTABLE1 \
-  {                           \
-  }
+    { \
+    }
 /** Number of entries in the user thermistor table 2. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR2 0
 #define USER_THERMISTORTABLE2 \
-  {                           \
-  }
+    { \
+    }
 
 /** If defined, creates a thermistor table at startup.
 
@@ -989,29 +1001,29 @@ on this endstop.
 
 // Microstep setting (Only functional when stepper driver microstep pins are connected to MCU. Currently only works for RAMBO boards
 #define MICROSTEP_MODES \
-  {                     \
-    8, 8, 8, 8, 8       \
-  } // [1,2,4,8,16]
+    { \
+        8, 8, 8, 8, 8 \
+    } // [1,2,4,8,16]
 
 // Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
 #if MOTHERBOARD == 301
 //#define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
 #define MOTOR_CURRENT_PERCENT \
-  {                           \
-    53, 53, 53, 53, 53        \
-  }
+    { \
+        53, 53, 53, 53, 53 \
+    }
 #elif MOTHERBOARD == 12
 //#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D Master 35713 = ~1A)
 #define MOTOR_CURRENT_PERCENT \
-  {                           \
-    55, 55, 55, 55, 55        \
-  }
+    { \
+        55, 55, 55, 55, 55 \
+    }
 #elif (MOTHERBOARD == 500) || (MOTHERBOARD == 501) || (MOTHERBOARD == 502) // Alligator boards
 //#define MOTOR_CURRENT {130,130,130,110,110,110,110} // expired method
-#define MOTOR_CURRENT_PERCENT  \
-  {                            \
-    51, 51, 51, 44, 44, 44, 44 \
-  }
+#define MOTOR_CURRENT_PERCENT \
+    { \
+        51, 51, 51, 44, 44, 44, 44 \
+    }
 #endif
 
 /** \brief Number of segments to generate for delta conversions per second of move
@@ -1490,10 +1502,10 @@ https://github.com/teemuatlut/TMC2130Stepper
 #define TMC2130_EXT2_CS_PIN -1
 
 // Per-axis current setting in mA { X, Y, Z, E0, E1, E2}
-#define MOTOR_CURRENT                  \
-  {                                    \
-    1000, 1000, 1000, 1000, 1000, 1000 \
-  }
+#define MOTOR_CURRENT \
+    { \
+        1000, 1000, 1000, 1000, 1000, 1000 \
+    }
 
 /**  Global settings - these apply to all configured drivers
      Per-axis values will override these

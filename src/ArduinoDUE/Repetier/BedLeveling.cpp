@@ -360,8 +360,7 @@ bool runBedLeveling(int s) {
                        static_cast<float>(ZPROBE_MIN_TEMPERATURE)),
             Extruder::current->id, false, true);
 #endif
-#endif //  defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && \
-       //  Z_PROBE_REQUIRES_HEATING
+#endif //  defined(Z_PROBE_MIN_TEMPERATURE) ...
 
     float h1, h2, h3, hc, oldFeedrate = Printer::feedrate;
 #if DISTORTION_CORRECTION

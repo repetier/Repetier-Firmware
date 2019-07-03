@@ -70,7 +70,7 @@ void Commands::commandLoop() {
             }
             if (HAL::timeInMilliseconds() - lastCommandReceived > 2000) {
                 lastCommandReceived = HAL::timeInMilliseconds();
-                Printer::parkSafety(); // will handle allowed conditions it self
+                Printer::parkSafety(false); // will handle allowed conditions it self
             }
         }
     } else {
@@ -94,6 +94,11 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
             LaserDriver::changeIntensity(0);
         }
 #endif
+    }
+#endif
+#if defined(POWERLOSS_PIN) && POWERLOSS_PIN > -1 //  && SUPPORT_LASER should always be respected
+    if (Printer::failedMode && READ(POWERLOSS_PIN) == POWERLOSS_DETECTED) {
+        Printer::handlePowerLoss();
     }
 #endif
     if (!executePeriodical)
@@ -641,291 +646,290 @@ void motorCurrentReadings() {
 #if defined(DRV_TMC2130)
 // Define a struct for all available TMC2130 drivers and their (axis/extruder) names.
 static struct struct_tmc2130_drivers {
-  FSTRINGPARAM(name);
-  TMC2130Stepper **driver;
+    FSTRINGPARAM(name);
+    TMC2130Stepper** driver;
 } tmc2130_drivers[] = {
 #if TMC2130_ON_X
-  {Com::tXColon, &Printer::tmc_driver_x},
+    { Com::tXColon, &Printer::tmc_driver_x },
 #endif
 #if TMC2130_ON_Y
-  {Com::tYColon, &Printer::tmc_driver_y},
+    { Com::tYColon, &Printer::tmc_driver_y },
 #endif
 #if TMC2130_ON_Z
-  {Com::tZColon, &Printer::tmc_driver_z},
+    { Com::tZColon, &Printer::tmc_driver_z },
 #endif
 #if TMC2130_ON_EXT0
-  {Com::tE0Colon, &Printer::tmc_driver_e0},
+    { Com::tE0Colon, &Printer::tmc_driver_e0 },
 #endif
 #if TMC2130_ON_EXT1
-  {Com::tE1Colon, &Printer::tmc_driver_e1},
+    { Com::tE1Colon, &Printer::tmc_driver_e1 },
 #endif
 #if TMC2130_ON_EXT2
-  {Com::tE2Colon, &Printer::tmc_driver_e2},
+    { Com::tE2Colon, &Printer::tmc_driver_e2 },
 #endif
-  {NULL, NULL}
+    { NULL, NULL }
 };
 
-
 void tmc2130DiagnosticReadingSingleDriverLineName(uint8_t line) {
-  switch (line) {
+    switch (line) {
     case 0:
-      Com::printF(PSTR("\t"));
-      break;
+        Com::printF(PSTR("\t"));
+        break;
     case 1:
-      Com::printF(Com::tEnabledColon);
-      break;
+        Com::printF(Com::tEnabledColon);
+        break;
     case 2:
-      Com::printF(Com::tSetCurrentColon);
-      break;
+        Com::printF(Com::tSetCurrentColon);
+        break;
     case 3:
-      Com::printF(Com::tRMSCurrentColon);
-      break;
+        Com::printF(Com::tRMSCurrentColon);
+        break;
     case 4:
-      Com::printF(Com::tMaxCurrentColon);
-      break;
+        Com::printF(Com::tMaxCurrentColon);
+        break;
     case 5:
-      Com::printF(Com::tRunCurrentColon);
-      break;
+        Com::printF(Com::tRunCurrentColon);
+        break;
     case 6:
-      Com::printF(Com::tHoldCurrentColon);
-      break;
+        Com::printF(Com::tHoldCurrentColon);
+        break;
     case 7:
-      Com::printF(Com::tCSActualColon);
-      break;
+        Com::printF(Com::tCSActualColon);
+        break;
     case 8:
-      Com::printF(Com::tPWMScaleColon);
-      break;
+        Com::printF(Com::tPWMScaleColon);
+        break;
     case 9:
-      Com::printF(Com::tVSENSEColon);
-      break;
+        Com::printF(Com::tVSENSEColon);
+        break;
     case 10:
-      Com::printF(Com::tStealthchopColon);
-      break;
+        Com::printF(Com::tStealthchopColon);
+        break;
     case 11:
-      Com::printF(Com::tMicrostepsColon);
-      break;
+        Com::printF(Com::tMicrostepsColon);
+        break;
     case 12:
-      Com::printF(Com::tTSTEPColon);
-      break;
+        Com::printF(Com::tTSTEPColon);
+        break;
     case 13:
-      Com::printF(Com::tPWMThresholdColon);
-      break;
+        Com::printF(Com::tPWMThresholdColon);
+        break;
     case 14:
-      Com::printF(Com::tOTPrewarnColon);
-      break;
+        Com::printF(Com::tOTPrewarnColon);
+        break;
     case 15:
-      Com::printF(Com::tOTTriggeredColon);
-      break;
+        Com::printF(Com::tOTTriggeredColon);
+        break;
     case 16:
-      Com::printF(Com::tOffTimeColon);
-      break;
+        Com::printF(Com::tOffTimeColon);
+        break;
     case 17:
-      Com::printF(Com::tBlankTimeColon);
-      break;
+        Com::printF(Com::tBlankTimeColon);
+        break;
     case 18:
-      Com::printF(Com::tHystEndColon);
-      break;
+        Com::printF(Com::tHystEndColon);
+        break;
     case 19:
-      Com::printF(Com::tHystStartColon);
-      break;
+        Com::printF(Com::tHystStartColon);
+        break;
     case 20:
-      Com::printF(Com::tStallGuardThrColon);
-      break;
+        Com::printF(Com::tStallGuardThrColon);
+        break;
     case 21:
-      Com::printF(Com::tDriverStatus);
-      break;
+        Com::printF(Com::tDriverStatus);
+        break;
     case 22:
-      Com::printF(Com::tPlusStallGuardColon);
-      break;
+        Com::printF(Com::tPlusStallGuardColon);
+        break;
     case 23:
-      Com::printF(Com::tPlusSGResultColon);
-      break;
+        Com::printF(Com::tPlusSGResultColon);
+        break;
     case 24:
-      Com::printF(Com::tPlusFSActiveColon);
-      break;
+        Com::printF(Com::tPlusFSActiveColon);
+        break;
     case 25:
-      Com::printF(Com::tPlusSTSTColon);
-      break;
+        Com::printF(Com::tPlusSTSTColon);
+        break;
     case 26:
-      Com::printF(Com::tPlusOLBColon);
-      break;
+        Com::printF(Com::tPlusOLBColon);
+        break;
     case 27:
-      Com::printF(Com::tPlusOLAColon);
-      break;
+        Com::printF(Com::tPlusOLAColon);
+        break;
     case 28:
-      Com::printF(Com::tPlusS2GBColon);
-      break;
+        Com::printF(Com::tPlusS2GBColon);
+        break;
     case 29:
-      Com::printF(Com::tPlusS2GAColon);
-      break;
+        Com::printF(Com::tPlusS2GAColon);
+        break;
     case 30:
-      Com::printF(Com::tPlusOTPWColon);
-      break;
+        Com::printF(Com::tPlusOTPWColon);
+        break;
     case 31:
-      Com::printF(Com::tPlusOTColon);
-      break;
-  }
+        Com::printF(Com::tPlusOTColon);
+        break;
+    }
 }
 
 void tmc2130DiagnosticReadingSingleDriverLineValue(uint8_t line, TMC2130Stepper* tmc) {
-  switch (line) {
+    switch (line) {
     case 1:
-      if (tmc->isEnabled())
-        Com::printF(Com::tTrue);
-      else
-        Com::printF(Com::tFalse);
-      break;
+        if (tmc->isEnabled())
+            Com::printF(Com::tTrue);
+        else
+            Com::printF(Com::tFalse);
+        break;
     case 2:
-      Com::printNumber(tmc->getCurrent());
-      break;
+        Com::printNumber(tmc->getCurrent());
+        break;
     case 3:
-      Com::printNumber(tmc->rms_current());
-      break;
+        Com::printNumber(tmc->rms_current());
+        break;
     case 4:
-      Com::printFloat((float)tmc->rms_current()*1.41, 0);
-      break;
+        Com::printFloat((float)tmc->rms_current() * 1.41, 0);
+        break;
     case 5:
-      Com::printNumber(tmc->irun()+1);
-      Com::printF(Com::tDiv32);
-      break;
+        Com::printNumber(tmc->irun() + 1);
+        Com::printF(Com::tDiv32);
+        break;
     case 6:
-      Com::printNumber(tmc->ihold()+1);
-      Com::printF(Com::tDiv32);
-      break;
+        Com::printNumber(tmc->ihold() + 1);
+        Com::printF(Com::tDiv32);
+        break;
     case 7:
-      Com::printNumber(tmc->cs_actual()+1);
-      Com::printF(Com::tDiv32);
-      break;
+        Com::printNumber(tmc->cs_actual() + 1);
+        Com::printF(Com::tDiv32);
+        break;
     case 8:
-      Com::printNumber(tmc->PWM_SCALE());
-      break;
+        Com::printNumber(tmc->PWM_SCALE());
+        break;
     case 9:
-      if  (tmc->vsense())
-        Com::printFloat(0.18f,3);
-      else
-        Com::printFloat(0.325f, 3);
-      break;
+        if (tmc->vsense())
+            Com::printFloat(0.18f, 3);
+        else
+            Com::printFloat(0.325f, 3);
+        break;
     case 10:
-      if (tmc->stealthChop())
-        Com::printF(Com::tTrue);
-      else
-        Com::printF(Com::tFalse);
-      break;
+        if (tmc->stealthChop())
+            Com::printF(Com::tTrue);
+        else
+            Com::printF(Com::tFalse);
+        break;
     case 11:
-      Com::printNumber(tmc->microsteps());
-      break;
+        Com::printNumber(tmc->microsteps());
+        break;
     case 12:
-      Com::printNumber(tmc->TSTEP());
-      break;
+        Com::printNumber(tmc->TSTEP());
+        break;
     case 13:
-      Com::printNumber(tmc->TPWMTHRS());
-      break;
+        Com::printNumber(tmc->TPWMTHRS());
+        break;
     case 14:
-      if (tmc->otpw())
-        Com::printF(Com::tTrue);
-      else
-        Com::printF(Com::tFalse);
-      break;
+        if (tmc->otpw())
+            Com::printF(Com::tTrue);
+        else
+            Com::printF(Com::tFalse);
+        break;
     case 15:
-      if (tmc->getOTPW())
-        Com::printF(Com::tTrue);
-      else
-        Com::printF(Com::tFalse);
-      break;
+        if (tmc->getOTPW())
+            Com::printF(Com::tTrue);
+        else
+            Com::printF(Com::tFalse);
+        break;
     case 16:
-      Com::printNumber(tmc->toff());
-      break;
+        Com::printNumber(tmc->toff());
+        break;
     case 17:
-      Com::printNumber(tmc->blank_time());
-      break;
+        Com::printNumber(tmc->blank_time());
+        break;
     case 18:
-      Com::print(tmc->hysteresis_end());
-      break;
+        Com::print(tmc->hysteresis_end());
+        break;
     case 19:
-      Com::printNumber(tmc->hysteresis_start());
-      break;
+        Com::printNumber(tmc->hysteresis_start());
+        break;
     case 20:
-      Com::printNumber(tmc->sgt());
-      break;
+        Com::printNumber(tmc->sgt());
+        break;
     case 21:
-      // blank by purpose
-      break;
+        // blank by purpose
+        break;
     case 22:
-      if (tmc->stallguard())
-        Com::printF(Com::tCross);
-      break;
+        if (tmc->stallguard())
+            Com::printF(Com::tCross);
+        break;
     case 23:
-      Com::printNumber(tmc->sg_result());
-      break;
+        Com::printNumber(tmc->sg_result());
+        break;
     case 24:
-      if (tmc->fsactive())
-        Com::printF(Com::tCross);
-      break;
+        if (tmc->fsactive())
+            Com::printF(Com::tCross);
+        break;
     case 25:
-      if (tmc->stst())
-        Com::printF(Com::tCross);
-      break;
+        if (tmc->stst())
+            Com::printF(Com::tCross);
+        break;
     case 26:
-      if (tmc->olb())
-        Com::printF(Com::tCross);
-      break;
+        if (tmc->olb())
+            Com::printF(Com::tCross);
+        break;
     case 27:
-      if (tmc->ola())
-        Com::printF(Com::tCross);
-      break;
+        if (tmc->ola())
+            Com::printF(Com::tCross);
+        break;
     case 28:
-      if (tmc->s2gb())
-        Com::printF(Com::tCross);
-      break;
+        if (tmc->s2gb())
+            Com::printF(Com::tCross);
+        break;
     case 29:
-      if (tmc->s2ga())
-        Com::printF(Com::tCross);
-      break;
+        if (tmc->s2ga())
+            Com::printF(Com::tCross);
+        break;
     case 30:
-      if (tmc->otpw())
-        Com::printF(Com::tCross);
-      break;
+        if (tmc->otpw())
+            Com::printF(Com::tCross);
+        break;
     case 31:
-      if (tmc->ot())
-        Com::printF(Com::tCross);
-      break;
+        if (tmc->ot())
+            Com::printF(Com::tCross);
+        break;
     default:
-      Com::printF(PSTR("?"));
-      break;
-  }
+        Com::printF(PSTR("?"));
+        break;
+    }
 }
 
-void tmc2130DiagnosticReadingSingleDriver(FSTRINGPARAM(text), TMC2130Stepper *tmc) {
-  Com::printF(text);
-  Com::println();
-  Com::printF(Com::tSpace);
-  Com::printHexNumber(tmc->DRV_STATUS());
-  Com::println();
+void tmc2130DiagnosticReadingSingleDriver(FSTRINGPARAM(text), TMC2130Stepper* tmc) {
+    Com::printF(text);
+    Com::println();
+    Com::printF(Com::tSpace);
+    Com::printHexNumber(tmc->DRV_STATUS());
+    Com::println();
 }
 
 void tmc2130DiagnosticReadings() {
-  struct struct_tmc2130_drivers *drv = tmc2130_drivers;
-  Com::printFLN(Com::tTrinamic2130DiagnosticReadings);
-  tmc2130DiagnosticReadingSingleDriverLineName(0);
-  for (uint8_t idx=0; tmc2130_drivers[idx].driver != NULL; idx++) {
-    Com::printF(PSTR("\t"));
-    Com::printF(tmc2130_drivers[idx].name);
-  }
-  Com::println();
-  for (uint8_t i=1; i<=31; i++) {
-    tmc2130DiagnosticReadingSingleDriverLineName(i);
-    for (uint8_t idx=0; tmc2130_drivers[idx].driver != NULL; idx++) {
-      Com::printF(PSTR("\t"));
-      tmc2130DiagnosticReadingSingleDriverLineValue(i, *(tmc2130_drivers[idx].driver));
+    struct struct_tmc2130_drivers* drv = tmc2130_drivers;
+    Com::printFLN(Com::tTrinamic2130DiagnosticReadings);
+    tmc2130DiagnosticReadingSingleDriverLineName(0);
+    for (uint8_t idx = 0; tmc2130_drivers[idx].driver != NULL; idx++) {
+        Com::printF(PSTR("\t"));
+        Com::printF(tmc2130_drivers[idx].name);
     }
     Com::println();
-  }
-  for (uint8_t idx=0; tmc2130_drivers[idx].driver != NULL; idx++) {
-    Com::printF(tmc2130_drivers[idx].name);
-    Com::printF(PSTR("\t"));
-    Com::printHexNumber((*(tmc2130_drivers[idx].driver))->DRV_STATUS());
-    Com::println();
-  }
+    for (uint8_t i = 1; i <= 31; i++) {
+        tmc2130DiagnosticReadingSingleDriverLineName(i);
+        for (uint8_t idx = 0; tmc2130_drivers[idx].driver != NULL; idx++) {
+            Com::printF(PSTR("\t"));
+            tmc2130DiagnosticReadingSingleDriverLineValue(i, *(tmc2130_drivers[idx].driver));
+        }
+        Com::println();
+    }
+    for (uint8_t idx = 0; tmc2130_drivers[idx].driver != NULL; idx++) {
+        Com::printF(tmc2130_drivers[idx].name);
+        Com::printF(PSTR("\t"));
+        Com::printHexNumber((*(tmc2130_drivers[idx].driver))->DRV_STATUS());
+        Com::println();
+    }
 }
 #endif
 
@@ -2598,7 +2602,8 @@ void Commands::processMCode(GCode* com) {
     case 118: // M118 message to host
         if (com->hasString()) {
             Com::printF(Com::tEcho);
-            Com::printFLN(com->text);
+            Com::print(com->text);
+            Com::println();
         }
         break;
     case 119: // M119
@@ -3185,9 +3190,10 @@ void Commands::processMCode(GCode* com) {
     case 513:
         Extruder::markAllUnjammed();
         break;
-#endif // EXTRUDER_JAM_CONTROL                                                \
-       //- M530 S<printing> L<layer> - Enables explicit printing mode (S1) or \
-       // disables it (S0). L can set layer count
+#endif // EXTRUDER_JAM_CONTROL
+
+        //- M530 S<printing> L<layer> - Enables explicit printing mode (S1) or
+        // disables it (S0). L can set layer count
     case 530:
         if (com->hasL())
             Printer::maxLayer = static_cast<int>(com->L);

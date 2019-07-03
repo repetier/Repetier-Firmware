@@ -1437,8 +1437,6 @@ void EXTRUDER_TIMER_VECTOR() {
     if (!Printer::isAdvanceActivated()) {
         return; // currently no need
     }
-    if (!Printer::isAdvanceActivated())
-        return; // currently no need
     if (Printer::extruderStepsNeeded > 0 && extruderLastDirection != 1) {
         if (Printer::extruderStepsNeeded >= ADVANCE_DIR_FILTER_STEPS) {
             Extruder::setDirection(true);

@@ -104,6 +104,19 @@ override EEPROM settings with config settings, set EEPROM_MODE 0
 /** Enable rescue system that helps hosts to reconnect and continue a print
  * after a disconnect. */
 #define HOST_RESCUE 1
+/** What to do if power loss during print is detected.
+ * 0 = just stop where you are,
+ * 1 = raise z only
+ * 2 = go to safety park position
+ * Increasing value needs more remaining time with power. USV is required
+ * normally to be able to handle this.
+ */
+#define POWERLOSS_LEVEL 0
+// Pin that signals power loss, -1 = off
+#define POWERLOSS_PIN -1
+// State to signal power loss
+#define POWERLOSS_DETECTED 0
+
 // Override pin definitions from pins.h
 //#define FAN_PIN   4  // Extruder 2 uses the default fan output, so move to an
 //other pin #define EXTERNALSERIAL  use Arduino serial library instead of build
@@ -122,8 +135,8 @@ then accordingly set BLUETOOTH_SERIAL to 1,2 or 3
 LCD_RS pins to another pins, and connect BT to: a) signals of Y_MIN, Y_MAX, then
 set BLUETOOTH_SERIAL to 3 (RX from BT to Y_MIN, TX from BT to Y_MAX) b) signals
 of Z_MIN, Z_MAX, then set BLUETOOTH_SERIAL to 1 (RX from BT to Z_MIN, TX from BT
-to Z_MAX) c) pin 17 and 18 of AUX4 connector, then set BLUETOOTH_SERIAL to 2 (RX
-from BT to AUX4 p18, TX from BT to AUX4 p17) Comment out or set the
+to Z_MAX) c) pin 16 and 18 of AUX4 connector, then set BLUETOOTH_SERIAL to 2 (RX
+from BT to AUX4 p18, TX from BT to AUX4 p16) Comment out or set the
 BLUETOOTH_SERIAL to 0 or -1 to disable this feature.
 */
 #define BLUETOOTH_SERIAL -1   // Port number (1..3) - For RUMBA use 3
@@ -200,8 +213,8 @@ pins. Separate multiple GCODEs with \n
 #define MICRO_STEPS 16
 
 // Calculations
-#define AXIS_STEPS_PER_MM                                                      \
-  ((float)(MICRO_STEPS * STEPS_PER_ROTATION) / PULLEY_CIRCUMFERENCE)
+#define AXIS_STEPS_PER_MM \
+    ((float)(MICRO_STEPS * STEPS_PER_ROTATION) / PULLEY_CIRCUMFERENCE)
 #define XAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 #define YAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
 #define ZAXIS_STEPS_PER_MM AXIS_STEPS_PER_MM
@@ -633,9 +646,9 @@ you should prefer the second method.
 */
 #define SCALE_PID_TO_MAX 0
 
-#define HEATER_PWM_SPEED                                                       \
-  1 // How fast ist pwm signal 0 = 15.25Hz, 1 = 30.51Hz, 2 = 61.03Hz, 3 =
-    // 122.06Hz
+#define HEATER_PWM_SPEED \
+    1 // How fast ist pwm signal 0 = 15.25Hz, 1 = 30.51Hz, 2 = 61.03Hz, 3 = \
+        // 122.06Hz
 
 /** Temperature range for target temperature to hold in M109 command. 5 means
 +/-5 degC
@@ -665,29 +678,29 @@ increasing and use thermistor types 50-52 instead of 5-7!
 */
 /** Number of entries in the user thermistor table 0. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR0 28
-#define USER_THERMISTORTABLE0                                                  \
-  {                                                                            \
-    {1 * 4, 864 * 8}, {21 * 4, 300 * 8}, {25 * 4, 290 * 8}, {29 * 4, 280 * 8}, \
-        {33 * 4, 270 * 8}, {39 * 4, 260 * 8}, {46 * 4, 250 * 8},               \
-        {54 * 4, 240 * 8}, {64 * 4, 230 * 8}, {75 * 4, 220 * 8},               \
-        {90 * 4, 210 * 8}, {107 * 4, 200 * 8}, {128 * 4, 190 * 8},             \
-        {154 * 4, 180 * 8}, {184 * 4, 170 * 8}, {221 * 4, 160 * 8},            \
-        {265 * 4, 150 * 8}, {316 * 4, 140 * 8}, {375 * 4, 130 * 8},            \
-        {441 * 4, 120 * 8}, {513 * 4, 110 * 8}, {588 * 4, 100 * 8},            \
-        {734 * 4, 80 * 8}, {856 * 4, 60 * 8}, {938 * 4, 40 * 8},               \
-        {986 * 4, 20 * 8}, {1008 * 4, 0 * 8}, {                                \
-      1018 * 4, -20 * 8                                                        \
-    }                                                                          \
-  }
+#define USER_THERMISTORTABLE0 \
+    { \
+        { 1 * 4, 864 * 8 }, { 21 * 4, 300 * 8 }, { 25 * 4, 290 * 8 }, { 29 * 4, 280 * 8 }, \
+            { 33 * 4, 270 * 8 }, { 39 * 4, 260 * 8 }, { 46 * 4, 250 * 8 }, \
+            { 54 * 4, 240 * 8 }, { 64 * 4, 230 * 8 }, { 75 * 4, 220 * 8 }, \
+            { 90 * 4, 210 * 8 }, { 107 * 4, 200 * 8 }, { 128 * 4, 190 * 8 }, \
+            { 154 * 4, 180 * 8 }, { 184 * 4, 170 * 8 }, { 221 * 4, 160 * 8 }, \
+            { 265 * 4, 150 * 8 }, { 316 * 4, 140 * 8 }, { 375 * 4, 130 * 8 }, \
+            { 441 * 4, 120 * 8 }, { 513 * 4, 110 * 8 }, { 588 * 4, 100 * 8 }, \
+            { 734 * 4, 80 * 8 }, { 856 * 4, 60 * 8 }, { 938 * 4, 40 * 8 }, \
+            { 986 * 4, 20 * 8 }, { 1008 * 4, 0 * 8 }, { \
+            1018 * 4, -20 * 8 \
+        } \
+    }
 
 /** Number of entries in the user thermistor table 1. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR1 0
-#define USER_THERMISTORTABLE1                                                  \
-  {}
+#define USER_THERMISTORTABLE1 \
+    {}
 /** Number of entries in the user thermistor table 2. Set to 0 to disable it. */
 #define NUM_TEMPS_USERTHERMISTOR2 0
-#define USER_THERMISTORTABLE2                                                  \
-  {}
+#define USER_THERMISTORTABLE2 \
+    {}
 
 /** If defined, creates a thermistor table at startup.
 
@@ -887,8 +900,8 @@ automatically disabled.
 #define SUPPORT_LASER 0 // set 1 to enable laser support
 #define LASER_PIN -1    // set to pin enabling laser
 #define LASER_ON_HIGH 1 // Set 0 if low signal enables laser
-#define LASER_WARMUP_TIME                                                      \
-  0 // wait x milliseconds to start material burning before move
+#define LASER_WARMUP_TIME \
+    0                     // wait x milliseconds to start material burning before move
 #define LASER_PWM_MAX 255 // 255 8-bit PWM 4095 for 12Bit PWM
 #define LASER_WATT 1.6    // Laser diode power
 
@@ -905,17 +918,17 @@ direction. It also can add a delay to wait for spindle to run on full speed.
 
 #define SUPPORT_CNC 0          // Set 1 for CNC support
 #define CNC_WAIT_ON_ENABLE 300 // wait x milliseconds after enabling
-#define CNC_WAIT_ON_DISABLE                                                    \
-  0 // delay in milliseconds after disabling spindle. May be required for
-    // direction changes.
+#define CNC_WAIT_ON_DISABLE \
+    0                        // delay in milliseconds after disabling spindle. May be required for \
+        // direction changes.
 #define CNC_ENABLE_PIN -1    // Pin to enable mill
 #define CNC_ENABLE_WITH 1    // Set 0 if low enables spindle
 #define CNC_DIRECTION_PIN -1 // Set to pin if direction control is possible
 #define CNC_DIRECTION_CW 1   // Set signal required for clockwise rotation
 #define CNC_PWM_MAX 255      // 255 8-bit PWM 4095 for 12Bit PWM
 #define CNC_RPM_MAX 25000    // max spindle RPM
-#define CNC_SAFE_Z                                                             \
-  150 // Safe Z height so tool is outside object, used for pause
+#define CNC_SAFE_Z \
+    150 // Safe Z height so tool is outside object, used for pause
 
 /* Select the default mode when the printer gets enables. Possible values are
 PRINTER_MODE_FFF 0
@@ -1097,8 +1110,8 @@ on this endstop.
 
 // Microstep setting (Only functional when stepper driver microstep pins are
 // connected to MCU. Currently only works for RAMBO boards
-#define MICROSTEP_MODES                                                        \
-  { 8, 8, 8, 8, 8 } // [1,2,4,8,16]
+#define MICROSTEP_MODES \
+    { 8, 8, 8, 8, 8 } // [1,2,4,8,16]
 
 // Motor Current setting (Only functional when motor driver current ref pins are
 // connected to a digital trimpot on supported boards) Motor Current setting
@@ -1107,22 +1120,22 @@ on this endstop.
 #if MOTHERBOARD == 301
 //#define MOTOR_CURRENT {135,135,135,135,135} // Values 0-255 (RAMBO 135 =
 //~0.75A, 185 = ~1A)
-#define MOTOR_CURRENT_PERCENT                                                  \
-  { 53, 53, 53, 53, 53 }
+#define MOTOR_CURRENT_PERCENT \
+    { 53, 53, 53, 53, 53 }
 #elif MOTHERBOARD == 12
 //#define MOTOR_CURRENT {35713,35713,35713,35713,35713} // Values 0-65535 (3D
 //Master 35713 = ~1A)
-#define MOTOR_CURRENT_PERCENT                                                  \
-  { 55, 55, 55, 55, 55 }
+#define MOTOR_CURRENT_PERCENT \
+    { 55, 55, 55, 55, 55 }
 #endif
 
 /** \brief Number of segments to generate for delta conversions per second of
  * move
  */
-#define DELTA_SEGMENTS_PER_SECOND_PRINT                                        \
-  180 // Move accurate setting for print moves
-#define DELTA_SEGMENTS_PER_SECOND_MOVE                                         \
-  70 // Less accurate setting for other moves
+#define DELTA_SEGMENTS_PER_SECOND_PRINT \
+    180 // Move accurate setting for print moves
+#define DELTA_SEGMENTS_PER_SECOND_MOVE \
+    70 // Less accurate setting for other moves
 
 // Delta settings
 #if DRIVE_SYSTEM == DELTA
@@ -1648,18 +1661,18 @@ https://github.com/teemuatlut/TMC2130Stepper
 
 // Per-axis current setting in mA { X, Y, Z, E0, E1, E2}
 #ifndef MOTOR_CURRENT
-#define MOTOR_CURRENT                                                          \
-  { 1000, 1000, 1000, 1000, 1000, 1000 }
+#define MOTOR_CURRENT \
+    { 1000, 1000, 1000, 1000, 1000, 1000 }
 #endif
 
 /**  Global settings - these apply to all configured drivers
      Per-axis values will override these
 */
 #define TMC2130_STEALTHCHOP 1 // Enable extremely quiet stepping
-#define TMC2130_INTERPOLATE_256                                                \
-  true // Enable internal driver microstep interpolation
-#define TMC2130_STALLGUARD                                                     \
-  0 // Sensorless homing sensitivity (between -63 and +64)
+#define TMC2130_INTERPOLATE_256 \
+    true // Enable internal driver microstep interpolation
+#define TMC2130_STALLGUARD \
+    0 // Sensorless homing sensitivity (between -63 and +64)
 
 /** PWM values for chopper tuning
     only change if you know what you're doing
@@ -1765,8 +1778,8 @@ to recalibrate z.
 #define Z_PROBE_ON_HIGH 1
 #define Z_PROBE_X_OFFSET 0
 #define Z_PROBE_Y_OFFSET 0
-#define Z_PROBE_BED_DISTANCE                                                   \
-  5.0 // Higher than max bed level distance error in mm
+#define Z_PROBE_BED_DISTANCE \
+    5.0 // Higher than max bed level distance error in mm
 
 // Waits for a signal to start. Valid signals are probe hit and ok button.
 // This is needful if you have the probe trigger by hand.
@@ -1776,11 +1789,11 @@ to recalibrate z.
 /** Delay before going down. Needed for piezo endstops to reload safely. */
 #define Z_PROBE_DELAY 0
 #define Z_PROBE_XY_SPEED 150
-#define Z_PROBE_SWITCHING_DISTANCE                                             \
-  1.5 // Distance to safely switch off probe after it was activated
+#define Z_PROBE_SWITCHING_DISTANCE \
+    1.5                       // Distance to safely switch off probe after it was activated
 #define Z_PROBE_REPETITIONS 5 // Repetitions for probing at one point.
-#define Z_PROBE_USE_MEDIAN                                                     \
-  0 // 1 = use middle value, 0 = use average of measurements.
+#define Z_PROBE_USE_MEDIAN \
+    0 // 1 = use middle value, 0 = use average of measurements.
 /** Distance between nozzle and bed when probe triggers. */
 #define Z_PROBE_HEIGHT 39.91
 /** These scripts are run before resp. after the z-probe is done. Add here code
@@ -1939,7 +1952,7 @@ case!
 #define CASE_LIGHT_DEFAULT_ON 1
 
 /** Set to false to disable SD support: */
-#ifndef SDSUPPORT // Some boards have SD support on board. These define the
+#ifndef SDSUPPORT // Some boards have SD support on board. These define the \
                   // values already in pins.h
 #define SDSUPPORT false
 // Uncomment to enable or change card detection pin. With card detection the
@@ -2192,9 +2205,9 @@ UI_ACTION_DUMMY
 // #define MOTOR_DRIVER_x StepperDriverWithEndstop<int stepPin, int dirPin, int
 // enablePin,bool invertDir, bool invertEnable,int endstop_pin,bool
 // minEndstop,minEndstop, bool endstopPullup> var(300,10,50)
-#define MOTOR_DRIVER_1(var)                                                    \
-  StepperDriver<E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, false, false> var(     \
-      float stepsPerMM, float speed, float maxXPos)
+#define MOTOR_DRIVER_1(var) \
+    StepperDriver<E1_STEP_PIN, E1_DIR_PIN, E1_ENABLE_PIN, false, false> var( \
+        float stepsPerMM, float speed, float maxXPos)
 
 /*
   You can expand firmware functionality with events and you own event handler.

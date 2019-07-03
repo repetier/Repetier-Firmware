@@ -4334,7 +4334,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
                 Printer::MemoryPosition();
             Extruder::current->retractDistance(FILAMENTCHANGE_SHORTRETRACT);
             Printer::currentPositionSteps[E_AXIS] = 0;
-            Printer::moveToParkPosition();
+            Printer::moveToParkPosition(false);
             Extruder::current->retractDistance(FILAMENTCHANGE_LONGRETRACT);
             Extruder::current->disableCurrentExtruderMotor();
         }
@@ -4352,7 +4352,7 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves)
             Printer::MemoryPosition();
             Extruder::current->retractDistance(FILAMENTCHANGE_SHORTRETRACT);
             Printer::currentPositionSteps[E_AXIS] = 0;
-            Printer::moveToParkPosition();
+            Printer::moveToParkPosition(false);
             //Extruder::current->retractDistance(FILAMENTCHANGE_LONGRETRACT);
             Commands::waitUntilEndOfAllMoves();
             Extruder::pauseExtruders(false);

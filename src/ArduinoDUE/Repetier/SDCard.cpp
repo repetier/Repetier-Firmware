@@ -188,7 +188,7 @@ void SDCard::pausePrintPart2() {
                             IGNORE_COORDINATE,
                             Printer::memoryE - RETRACT_ON_PAUSE,
                             Printer::maxFeedrate[E_AXIS] / 2);
-        Printer::moveToParkPosition();
+        Printer::moveToParkPosition(false);
         Printer::lastCmdPos[X_AXIS] = Printer::currentPosition[X_AXIS];
         Printer::lastCmdPos[Y_AXIS] = Printer::currentPosition[Y_AXIS];
         Printer::lastCmdPos[Z_AXIS] = Printer::currentPosition[Z_AXIS];

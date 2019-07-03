@@ -647,9 +647,11 @@ void Printer::updateAdvanceFlags() {
 #endif
 }
 
-void Printer::moveToParkPosition() {
+void Printer::moveToParkPosition(bool zOnly) {
     if (Printer::isHomedAll()) { // for safety move only when homed!
+    if(!zOnly) {
         moveToReal(EEPROM::parkX(), EEPROM::parkY(), IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS], true);
+    }
         moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::min(zMin + zLength, currentPosition[Z_AXIS] + EEPROM::parkZ()), IGNORE_COORDINATE, Printer::maxFeedrate[Z_AXIS], true);
     }
 }
@@ -777,7 +779,7 @@ void Printer::updateCurrentPosition(bool copyLastCmd) {
 #else
     currentPositionTransformed[Z_AXIS] = static_cast<float>(currentPositionSteps[Z_AXIS] - zCorrectionStepsIncluded) * invAxisStepsPerMM[Z_AXIS] - offsetZ2;
 #endif
-    // currentPosition[E_AXIS] = currentPositionSteps[E_AXIS] * invAxisStepsPerMM[E_AXIS];
+    // currentPositionTransformed[E_AXIS] = currentPositionSteps[E_AXIS] * invAxisStepsPerMM[E_AXIS];
     transformFromPrinter(currentPositionTransformed[X_AXIS], currentPositionTransformed[Y_AXIS], currentPositionTransformed[Z_AXIS],
                          currentPosition[X_AXIS], currentPosition[Y_AXIS], currentPosition[Z_AXIS]);
     currentPosition[X_AXIS] -= Printer::offsetX; // Offset from active extruder or z probe
@@ -794,10 +796,10 @@ void Printer::updateCurrentPositionSteps() {
     float x_rotc, y_rotc, z_rotc;
     transformToPrinter(currentPosition[X_AXIS] + Printer::offsetX, currentPosition[Y_AXIS] + Printer::offsetY, currentPosition[Z_AXIS] + Printer::offsetZ, x_rotc, y_rotc, z_rotc);
     z_rotc += offsetZ2;
-    currentPositionSteps[X_AXIS] = lroundf(x_rotc * axisStepsPerMM[X_AXIS]);
-    currentPositionSteps[Y_AXIS] = lroundf(y_rotc * axisStepsPerMM[Y_AXIS]);
-    currentPositionSteps[Z_AXIS] = lroundf(z_rotc * axisStepsPerMM[Z_AXIS]);
-    currentPositionSteps[E_AXIS] = lroundf(currentPosition[E_AXIS] * axisStepsPerMM[E_AXIS]);
+    destinationSteps[X_AXIS] = currentPositionSteps[X_AXIS] = lroundf(x_rotc * axisStepsPerMM[X_AXIS]);
+    destinationSteps[Y_AXIS] = currentPositionSteps[Y_AXIS] = lroundf(y_rotc * axisStepsPerMM[Y_AXIS]);
+    destinationSteps[Z_AXIS] = currentPositionSteps[Z_AXIS] = lroundf(z_rotc * axisStepsPerMM[Z_AXIS]);
+    destinationSteps[E_AXIS] = currentPositionSteps[E_AXIS] = lroundf(currentPositionTransformed[E_AXIS] * axisStepsPerMM[E_AXIS]);
 #if NONLINEAR_SYSTEM
     transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps, Printer::currentNonlinearPositionSteps);
 #endif
@@ -1090,6 +1092,13 @@ void Printer::setup() {
     PULLUP(DOOR_PIN, HIGH);
 #endif
 #endif
+#if defined(POWERLOSS_PIN) && DOOR_POWERLOSS_PINPIN > -1
+    SET_INPUT(POWERLOSS_PIN);
+#if defined(POWERLOSS_PULLUP) && POWERLOSS_PULLUP
+    PULLUP(POWERLOSS_PIN, HIGH);
+#endif
+#endif
+
     Endstops::setup();
 
 #if FEATURE_Z_PROBE && Z_PROBE_PIN > -1
@@ -2007,11 +2016,13 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
 #endif
 #if Z_HOME_DIR < 0
 #if ZHOME_PRE_RAISE == 1
-    if (zaxis && Endstops::zProbe())
+    if (zaxis && Endstops::zProbe()) {
         PrintLine::moveRelativeDistanceInSteps(0, 0, ZHOME_PRE_RAISE_DISTANCE * axisStepsPerMM[Z_AXIS], 0, homingFeedrate[Z_AXIS], true, true);
+    }
 #elif ZHOME_PRE_RAISE == 2
-    if (zaxis)
+    if (zaxis) {
         PrintLine::moveRelativeDistanceInSteps(0, 0, ZHOME_PRE_RAISE_DISTANCE * axisStepsPerMM[Z_AXIS], 0, homingFeedrate[Z_AXIS], true, true);
+    }
 #endif
 #endif
 #if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN && FEATURE_Z_PROBE
@@ -2083,6 +2094,7 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
             Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
 #endif
             Commands::waitUntilEndOfAllMoves();
+
 #if ZHOME_MIN_TEMPERATURE > 20
 #if ZHOME_HEAT_ALL
             for (int i = 0; i < NUM_EXTRUDER; i++) {
@@ -2138,13 +2150,13 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
             Commands::waitUntilEndOfAllMoves();
 #endif
             homeZAxis(); // real z distance at that point to zero
-
             if (Z_HOME_DIR < 0)
                 startZ = Printer::zMin;
             else
                 startZ = Printer::zMin + Printer::zLength - zBedOffset;
             moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]); // correct rotation!
             Commands::waitUntilEndOfAllMoves();
+
 #if ZHOME_MIN_TEMPERATURE > 20
 #if ZHOME_HEAT_ALL
             for (int i = 0; i < NUM_EXTRUDER; i++)
@@ -2922,7 +2934,8 @@ void Printer::rescueRecover() {
                 Printer::currentPositionTransformed[i] = HAL::eprGetFloat(EPR_RESCUE_LAST_POS + sizeof(float) * i);
             }
         }
-        flag3 |= PRINTER_FLAG1_HOMED_ALL | PRINTER_FLAG3_X_HOMED | PRINTER_FLAG3_Y_HOMED | PRINTER_FLAG3_Z_HOMED;
+        flag3 |= PRINTER_FLAG3_X_HOMED | PRINTER_FLAG3_Y_HOMED | PRINTER_FLAG3_Z_HOMED;
+        flag1 |= PRINTER_FLAG1_HOMED_ALL;
     } else if (mode & 1) {
         for (fast8_t i = 0; i < 4; i++) {
             if (i < 3) {
@@ -2931,7 +2944,8 @@ void Printer::rescueRecover() {
                 Printer::currentPositionTransformed[i] = HAL::eprGetFloat(EPR_RESCUE_LAST_RECEIVED + sizeof(float) * i);
             }
         }
-        flag3 |= PRINTER_FLAG1_HOMED_ALL | PRINTER_FLAG3_X_HOMED | PRINTER_FLAG3_Y_HOMED | PRINTER_FLAG3_Z_HOMED;
+        flag3 |= PRINTER_FLAG3_X_HOMED | PRINTER_FLAG3_Y_HOMED | PRINTER_FLAG3_Z_HOMED;
+        flag1 |= PRINTER_FLAG1_HOMED_ALL;
     }
     lastCmdPos[X_AXIS] = currentPosition[X_AXIS];
     lastCmdPos[Y_AXIS] = currentPosition[Y_AXIS];
@@ -2983,29 +2997,33 @@ void Printer::handlePowerLoss() {
     for (uint8_t i = 0; i < NUM_EXTRUDER; i++)
         Extruder::setTemperatureForExtruder(0, i);
     Extruder::setHeatedBedTemperature(0);
-    Com::printErrorFLN(PSTR("POWERLOSS_DETECTED"));
+    Com::printInfoFLN(PSTR("POWERLOSS_DETECTED"));
     if (rescueOn) {
         rescueStoreReceivedPosition();
 #if POWERLOSS_LEVEL == 1 //z up only
+        parkSafety(true);
 #endif
 #if POWERLOSS_LEVEL == 2 // full park - we are on a UPC :-)
-        parkSafety();
+        parkSafety(false);
 #endif
         Commands::waitUntilEndOfAllMoves();
         rescueStorePosition();
+        uint8_t old3 = flag3;
         kill(false);
         enableFailedModeP(PSTR("Power Loss"));
+        rescueReport(); // in case we do survive it tell server position
+        flag3 = old3; // restore homed state
     }
 }
 
-void Printer::parkSafety() {
+void Printer::parkSafety(bool zOnly) {
     if (safetyParked || !rescueOn) {
         return; // nothing to unpark
     }
     rescueStoreReceivedPosition();
     safetyParked = 1;
     MemoryPosition();
-    moveToParkPosition();
+    moveToParkPosition(zOnly);
     Commands::waitUntilEndOfAllMoves();
     rescueStorePosition();
     safetyParked = 2;
