@@ -139,7 +139,7 @@ void HeatManager::update() {
             }
             lastDecoupleTemp = currentTemperature;
         } else if (decoupleMode == DecoupleMode::HOLDING) {
-            if (fabs(error) > decoupleVariance) {
+            if (fabs(tempError) > decoupleVariance) {
                 // Temperature left target range
                 Com::printErrorFLN(PSTR("The temperature for a heater left the reached target area."));
                 Com::printErrorFLN(PSTR("This can happen on a hardware defect or if the decouple temperature variance is set too low."));
@@ -152,7 +152,7 @@ void HeatManager::update() {
         }
         lastDecoupleTest = time;
     }
-    if ((decoupleMode == DecoupleMode::FAST_RISING || decoupleMode == DecoupleMode::COOLING) && fabs(error) < decoupleVariance) {
+    if ((decoupleMode == DecoupleMode::FAST_RISING || decoupleMode == DecoupleMode::COOLING) && fabs(tempError) < decoupleVariance) {
         lastDecoupleTest = time;
         decoupleMode = DecoupleMode::HOLDING;
     }
