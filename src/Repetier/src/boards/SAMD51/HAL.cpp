@@ -202,9 +202,6 @@ void HAL::setupTimer() {
     SYNC_TIMER(SERVO_TIMER);
 
 #endif
-#ifndef NO_SPI
-    HAL::spiInit();
-#endif
 }
 
 struct PWMChannel {

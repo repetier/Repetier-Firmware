@@ -145,9 +145,6 @@ void HAL::setupTimer() {
     SERVO_TIMER->TC_CHANNEL[SERVO_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
     NVIC_EnableIRQ((IRQn_Type)SERVO_TIMER_IRQ);
 #endif
-#ifndef NO_SPI
-    HAL::spiInit();
-#endif
 }
 
 struct PWMPin {
