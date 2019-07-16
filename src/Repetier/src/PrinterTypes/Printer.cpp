@@ -472,6 +472,11 @@ void Printer::setup() {
     PULLUP(SDCARDDETECT, HIGH);
 #endif
 #endif
+
+#ifndef NO_SPI
+    HAL::spiInit();
+#endif
+
     // Define io functions
 #undef IO_TARGET
 #define IO_TARGET 1
