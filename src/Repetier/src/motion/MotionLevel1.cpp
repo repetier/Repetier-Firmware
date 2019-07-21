@@ -528,7 +528,7 @@ bool Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate, bool second
 }
 
 void Motion1::setToolOffset(float ox, float oy, float oz) {
-    if (Motion1::isAxisHomed(X_AXIS) && Motion1::isAxisHomed(Y_AXIS) && Motion1::isAxisHomed(Z_AXIS)) {
+    if (Motion1::isAxisHomed(X_AXIS) && Motion1::isAxisHomed(Y_AXIS)) {
         setTmpPositionXYZ(currentPosition[X_AXIS] + ox - toolOffset[X_AXIS],
                           currentPosition[Y_AXIS] + oy - toolOffset[Y_AXIS],
                           currentPosition[Z_AXIS]);
@@ -1275,7 +1275,7 @@ void Motion1::homeAxes(fast8_t axes) {
     }
 #endif
 #if FIXED_Z_HOME_POSITION
-    if (axes && axisBits[Z_AXIS]) { // ensure x and y are homed
+    if (axes & axisBits[Z_AXIS]) { // ensure x and y are homed
         if (!isAxisHomed(X_AXIS)) {
             axes |= axisBits[X_AXIS];
         }

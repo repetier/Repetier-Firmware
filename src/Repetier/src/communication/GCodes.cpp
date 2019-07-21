@@ -237,6 +237,7 @@ void GCode_30(GCode* com) {
         Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
         float zheight = ZProbeHandler::runProbe();
         if (zheight == ILLEGAL_Z_PROBE) {
+             GCode::fatalError(PSTR("G30 probing failed!"));
             return;
         }
         float zProbeHeight = ZProbeHandler::getZProbeHeight() + startHeight - zheight;
