@@ -1670,9 +1670,9 @@ STEPPER_CURRENT_CONTROL
 
 #endif
 
-#if MOTHERBOARD == 999
+#if MOTHERBOARD == MOTHERBOARD_USER_DEFINED_AVR
 #define KNOWN_BOARD
-#include "userpins.h"
+#include "extra/userpins.h"
 #endif
 
 #ifndef CPU_ARCH // Set default architecture

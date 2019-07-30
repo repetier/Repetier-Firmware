@@ -1,4 +1,5 @@
 class EndstopDriver;
+class GCode;
 
 class StepperDriverBase {
 protected:
@@ -47,12 +48,13 @@ public:
     virtual bool implementsSetMaxCurrent() { return false; }
     /// Set microsteps. Must be a power of 2.
     virtual void setMicrosteps(int microsteps) {}
-    /// Set max current as range 0..255
+    /// Set max current as range 0..255 or mA depedning on driver
     virtual void setMaxCurrent(int max) {}
     // Called before homing starts. Can be used e.g. to disable silent mode
     // or otherwise prepare for endstop detection.
     virtual void beforeHoming() {}
     virtual void afterHoming() {}
+    virtual void handleMCode(GCode& com) {}
     // uint32_t position;
 };
 
@@ -166,5 +168,102 @@ public:
     inline void disable() final {
         motor1->disable();
         motor2->disable();
+    }
+    inline void handleMCode(GCode& com) final {
+        motor1->handleMCode(com);
+        motor2->handleMCode(com);
+    }
+};
+
+/// Plain stepper driver with optional endstops attached.
+class Mirror3StepperDriver : public StepperDriverBase {
+public:
+    StepperDriverBase *motor1, *motor2, *motor3;
+    Mirror3StepperDriver(StepperDriverBase* m1, StepperDriverBase* m2, StepperDriverBase* m3, EndstopDriver* minES, EndstopDriver* maxES)
+        : StepperDriverBase(minES, maxES)
+        , motor1(m1)
+        , motor2(m2)
+        , motor3(m3) {}
+    inline void step() final {
+        motor1->step();
+        motor2->step();
+        motor3->step();
+    }
+    inline void unstep() final {
+        motor1->unstep();
+        motor2->unstep();
+        motor3->unstep();
+    }
+    inline void dir(bool d) final {
+        // Com::printFLN(PSTR("SD:"), (int)d);
+        motor1->dir(d);
+        motor2->dir(d);
+        motor3->dir(d);
+        direction = d;
+    }
+    inline void enable() final {
+        motor1->enable();
+        motor2->enable();
+        motor3->enable();
+    }
+    inline void disable() final {
+        motor1->disable();
+        motor2->disable();
+        motor3->disable();
+    }
+    inline void handleMCode(GCode& com) final {
+        motor1->handleMCode(com);
+        motor2->handleMCode(com);
+        motor3->handleMCode(com);
+    }
+};
+
+/// Plain stepper driver with optional endstops attached.
+class Mirror4StepperDriver : public StepperDriverBase {
+public:
+    StepperDriverBase *motor1, *motor2, *motor3, *motor4;
+    Mirror4StepperDriver(StepperDriverBase* m1, StepperDriverBase* m2, StepperDriverBase* m3, StepperDriverBase* m4, EndstopDriver* minES, EndstopDriver* maxES)
+        : StepperDriverBase(minES, maxES)
+        , motor1(m1)
+        , motor2(m2)
+        , motor3(m3)
+        , motor4(m4) {}
+    inline void step() final {
+        motor1->step();
+        motor2->step();
+        motor3->step();
+        motor4->step();
+    }
+    inline void unstep() final {
+        motor1->unstep();
+        motor2->unstep();
+        motor3->unstep();
+        motor4->unstep();
+    }
+    inline void dir(bool d) final {
+        // Com::printFLN(PSTR("SD:"), (int)d);
+        motor1->dir(d);
+        motor2->dir(d);
+        motor3->dir(d);
+        motor4->dir(d);
+        direction = d;
+    }
+    inline void enable() final {
+        motor1->enable();
+        motor2->enable();
+        motor3->enable();
+        motor4->enable();
+    }
+    inline void disable() final {
+        motor1->disable();
+        motor2->disable();
+        motor3->disable();
+        motor4->disable();
+    }
+    inline void handleMCode(GCode& com) final {
+        motor1->handleMCode(com);
+        motor2->handleMCode(com);
+        motor3->handleMCode(com);
+        motor4->handleMCode(com);
     }
 };

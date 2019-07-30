@@ -27,3 +27,4 @@ src/Repetier/.vscode
 src/Repetier/testconfigs
 src/Repetier/Configuration.h
 src/Repetier/Configuration_io.h
+src/Repetier/.pio

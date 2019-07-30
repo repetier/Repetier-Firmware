@@ -145,9 +145,6 @@ void HAL::setupTimer() {
     SERVO_TIMER->TC_CHANNEL[SERVO_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
     NVIC_EnableIRQ((IRQn_Type)SERVO_TIMER_IRQ);
 #endif
-#ifndef NO_SPI
-    HAL::spiInit();
-#endif
 }
 
 struct PWMPin {
@@ -322,10 +319,9 @@ void HAL::analogStart(void) {
     adcEnable = 0;
 
     for (int i = 0; i < MAX_ANALOG_INPUTS; i++) {
-        if (analogEnabled[i] == false) {
-            continue;
+        if (analogEnabled[i]) {
+            adcEnable |= (0x1u << i);
         }
-        adcEnable |= (0x1u << i);
     }
 
     // enable channels

@@ -81,13 +81,13 @@
 //Note that in due A0 pins on the board is channel 2 on the ARM chip
 #define HEATER_0_PIN 10
 // Because analog pin #
-#define TEMP_0_PIN PIN_A11
+#define TEMP_0_PIN PIN_A9
 #define HEATER_1_PIN 8
 // Because analog pin #
-#define TEMP_1_PIN PIN_A12
+#define TEMP_1_PIN PIN_A10
 #define HEATER_2_PIN 9
 // Because analog pin #
-#define TEMP_2_PIN PIN_A13
+#define TEMP_2_PIN PIN_A11
 
 #define ORIG_E0_STEP_PIN 26
 #define ORIG_E0_DIR_PIN 28
@@ -98,8 +98,7 @@
 #define ORIG_E1_ENABLE_PIN 30
 
 #define SDPOWER -1
-// Onboard SD Card
-#define SDSS SDCARD_SS_PIN
+#define SDSS -1
 #undef SDSUPPORT
 #define SDSUPPORT 1
 #undef ORIG_SDCARDDETECT

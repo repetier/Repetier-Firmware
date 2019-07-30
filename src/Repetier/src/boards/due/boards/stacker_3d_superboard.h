@@ -134,6 +134,7 @@ AD15 CH15
 #define SDA_PIN 20
 // 21 or 71
 #define SCL_PIN 21
+#define BEEPER_PIN -1
 
 // Display controller
 
@@ -143,8 +144,8 @@ AD15 CH15
 #define UI_DISPLAY_ENABLE_PIN 27
 #define UI_DISPLAY_D4_PIN 25
 #define UI_DISPLAY_D5_PIN -1
-#define UI_ENCODER_A 33
-#define UI_ENCODER_B 35
+#define UI_ENCODER_A 35
+#define UI_ENCODER_B 33
 #define UI_ENCODER_CLICK 37
 #define UI_RESET_PIN -1
 #define UI_BACK_PIN -1

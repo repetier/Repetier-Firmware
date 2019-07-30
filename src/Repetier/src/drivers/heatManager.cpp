@@ -144,7 +144,7 @@ void HeatManager::update() {
                 Com::printErrorFLN(PSTR("The temperature for a heater left the reached target area."));
                 Com::printErrorFLN(PSTR("This can happen on a hardware defect or if the decouple temperature variance is set too low."));
                 Com::printErrorF(PSTR("Deviation:"));
-                Com::print(error);
+                Com::printFloat(tempError, 2);
                 Com::println();
                 setError(HeaterError::LEAVING_RANGE);
                 return;

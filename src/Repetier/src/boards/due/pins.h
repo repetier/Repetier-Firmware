@@ -140,11 +140,15 @@
 #include "boards/shasta.h"
 #endif
 
+#if MOTHERBOARD == MOTHERBOARD_IKS3D
+#include "boards/iks3d.h"
+#endif
+
 #if MOTHERBOARD == MOTHERBOARD_ALLIGATOR_REV1 || MOTHERBOARD == MOTHERBOARD_ALLIGATOR_REV2 || MOTHERBOARD == MOTHERBOARD_ALLIGATOR_REV3
 #include "boards/alligator.h"
 #endif
 
-#if MOTHERBOARD == 998
+#if MOTHERBOARD == MOTHERBOARD_USER_DEFINED
 #define KNOWN_BOARD
 #include "../extra/userpins.h"
 #endif
@@ -270,6 +274,10 @@
 #define ORIG_SDCARDDETECT -1
 #endif
 #define SDCARDDETECT ORIG_SDCARDDETECT
+
+#ifndef BEEPER_PIN
+#define BEEPER_PIN -1
+#endif
 
 #define SENSITIVE_PINS \
     { \

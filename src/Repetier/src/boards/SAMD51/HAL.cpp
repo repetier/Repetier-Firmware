@@ -202,9 +202,6 @@ void HAL::setupTimer() {
     SYNC_TIMER(SERVO_TIMER);
 
 #endif
-#ifndef NO_SPI
-    HAL::spiInit();
-#endif
 }
 
 struct PWMChannel {
@@ -446,6 +443,7 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
     }
     return tcNum;
 }
+
 // Set pwm output to value. id is id from initHardwarePWM.
 void HAL::setHardwarePWM(int id, int value) {
     if (id < 0 || id >= 13) { // illegal id
@@ -470,9 +468,9 @@ void HAL::setHardwarePWM(int id, int value) {
 }
 
 // Initialize ADC channels
-#define ANALOG_PIN_TO_CHANNEL(p) (p < 62 ? p - 54 : p - 59)
-int32_t analogValues[16];
-const PinDescription* analogEnabled[16];
+#define ANALOG_PIN_TO_CHANNEL(p) (p < 62 ? p - 54 : p - 67)
+int32_t analogValues[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+const PinDescription* analogEnabled[16] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 void reportAnalog() {
     for (int i = 0; i < 16; i++) {
         if (analogEnabled[i]) {
@@ -501,65 +499,84 @@ Adc* analogAdcMap[16] = {
 };
 static int analogConvertPos = -1;
 void HAL::analogStart(void) {
-    // Set ADC clock to 48MHz clock
-    GCLK->PCHCTRL[ADC0_GCLK_ID].reg = GCLK_PCHCTRL_GEN_GCLK1_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
-    while (GCLK->SYNCBUSY.reg > 0) {}
-    GCLK->PCHCTRL[ADC1_GCLK_ID].reg = GCLK_PCHCTRL_GEN_GCLK1_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
-    while (GCLK->SYNCBUSY.reg > 0) {}
-    ADC0->CTRLA.bit.PRESCALER = 7; // prescaler 256
-    ADC1->CTRLA.bit.PRESCALER = 7; // prescaler 256
-    ADC0->CTRLB.reg = ADC_CTRLB_RESSEL_12BIT;
-    ADC1->CTRLB.reg = ADC_CTRLB_RESSEL_12BIT;
-    // Interrupt frequency will be around 8Khz and add a 3% CPU load.
-    ADC0->INTENSET.bit.RESRDY = 1; // enable interrupt
-    ADC1->INTENSET.bit.RESRDY = 1; // enable interrupt
-    analogReference(AR_DEFAULT);   // 3.3V reference voltage
+    // Analog channels being used are already enabled. Start conversion
+    // only if we have any analog sources.
     for (int i = 0; i < 16; i++) {
-        analogValues[i] = 0;
-        analogEnabled[i] = nullptr;
+        if (analogEnabled[i] != nullptr) {
+            analogConvertPos = i;
+            // Set ADC clock to 48MHz clock
+            GCLK->PCHCTRL[ADC0_GCLK_ID].reg = GCLK_PCHCTRL_GEN_GCLK1_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
+            while (GCLK->SYNCBUSY.reg > 0) {}
+            GCLK->PCHCTRL[ADC1_GCLK_ID].reg = GCLK_PCHCTRL_GEN_GCLK1_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
+            while (GCLK->SYNCBUSY.reg > 0) {}
+            ADC0->CTRLA.bit.PRESCALER = 7; // prescaler 256
+            ADC1->CTRLA.bit.PRESCALER = 7; // prescaler 256
+            ADC0->CTRLB.reg = ADC_CTRLB_RESSEL_12BIT;
+            ADC1->CTRLB.reg = ADC_CTRLB_RESSEL_12BIT;
+            // Interrupt frequency will be around 8Khz and add a 3% CPU load.
+            analogReference(AR_DEFAULT); // 3.3V reference voltage
+
+            // Attach analog conversion ready interrupts
+            NVIC_SetPriority((IRQn_Type)ADC0_1_IRQn, 3);
+            NVIC_EnableIRQ(ADC0_1_IRQn); // Enable IRQ for function call
+            NVIC_SetPriority((IRQn_Type)ADC1_1_IRQn, 3);
+            NVIC_EnableIRQ(ADC1_1_IRQn); // Enable IRQ for function call
+
+            // analogISRFunction(); // Start conversion loop
+            ADC0->INTENSET.bit.RESRDY = 1; // enable interrupt
+            ADC1->INTENSET.bit.RESRDY = 1; // enable interrupt
+            Adc* adc = analogAdcMap[analogConvertPos];
+            while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_INPUTCTRL) {}                            //wait for sync
+            adc->INPUTCTRL.bit.MUXPOS = analogEnabled[analogConvertPos]->ulADCChannelNumber; // Selection for the positive ADC input
+            adc->CTRLA.bit.ENABLE = 0x01;                                                    // Enable ADC
+            while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE) {}                               //wait for sync
+            // Start conversion
+            //adc->SWTRIG.bit.START = 1;
+            adc->INTFLAG.reg = ADC_INTFLAG_RESRDY; // Clear the Data Ready flag
+            // Start conversion again, since The first conversion after the reference is changed must not be used.
+            adc->SWTRIG.bit.START = 1;
+
+            break;
+        }
     }
 }
-bool analogEven = false;
-void analogISRFunction() {
+inline void analogISRFunction() {
 #ifdef DEBUG_TIMING
     WRITE(DEBUG_ISR_ANALOG_PIN, 1);
 #endif
     Adc* adc;
-    analogEven = false;
-    if (analogConvertPos >= 0 && !analogEven) { // store result
+    if (analogConvertPos >= 0) { // store result
         adc = analogAdcMap[analogConvertPos];
         analogValues[analogConvertPos] = adc->RESULT.reg;
         adc->CTRLA.bit.ENABLE = 0x00;                      // Disable ADC
         while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE) {} //wait for sync
     }
-    analogEven = !analogEven;
     // go to next active
-    if (analogEven) {
-        do {
-            if (++analogConvertPos == 16) {
-                // Process data
+    int count = 0;
+    do {
+        count++;
+        if (++analogConvertPos == 16) {
+            // Process data
 #undef IO_TARGET
 #define IO_TARGET 11
 #include "io/redefine.h"
-                analogConvertPos = 0;
-            }
-        } while (analogEnabled[analogConvertPos] == nullptr);
-    }
+            analogConvertPos = 0;
+        }
+    } while (analogEnabled[analogConvertPos] == nullptr && count < 16);
 
     // start new conversion
-    adc = analogAdcMap[analogConvertPos];
-    if (analogEven) {
+    if (analogEnabled[analogConvertPos] != nullptr) {
+        adc = analogAdcMap[analogConvertPos];
         while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_INPUTCTRL) {}                            //wait for sync
         adc->INPUTCTRL.bit.MUXPOS = analogEnabled[analogConvertPos]->ulADCChannelNumber; // Selection for the positive ADC input
         adc->CTRLA.bit.ENABLE = 0x01;                                                    // Enable ADC
         while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE) {}                               //wait for sync
+        // Start conversion
+        //adc->SWTRIG.bit.START = 1;
+        adc->INTFLAG.reg = ADC_INTFLAG_RESRDY; // Clear the Data Ready flag
+        // Start conversion again, since The first conversion after the reference is changed must not be used.
+        adc->SWTRIG.bit.START = 1;
     }
-    // Start conversion
-    //adc->SWTRIG.bit.START = 1;
-    adc->INTFLAG.reg = ADC_INTFLAG_RESRDY; // Clear the Data Ready flag
-    // Start conversion again, since The first conversion after the reference is changed must not be used.
-    adc->SWTRIG.bit.START = 1;
-
 #ifdef DEBUG_TIMING
     WRITE(DEBUG_ISR_ANALOG_PIN, 0);
 #endif
@@ -579,15 +596,6 @@ void HAL::analogEnable(int channel) {
     {
         InterruptProtectedBlock ip;
         analogEnabled[cNum] = &g_APinDescription[channel];
-    }
-    if (analogConvertPos == -1) {
-        // Attach analog conversion ready interrupts
-        NVIC_SetPriority((IRQn_Type)ADC0_1_IRQn, 3);
-        NVIC_EnableIRQ(ADC0_1_IRQn); // Enable IRQ for function call
-        NVIC_SetPriority((IRQn_Type)ADC1_1_IRQn, 3);
-        NVIC_EnableIRQ(ADC1_1_IRQn); // Enable IRQ for function call
-
-        analogISRFunction(); // Start conversion loop
     }
 }
 

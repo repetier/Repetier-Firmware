@@ -21,7 +21,7 @@
     "ldscript": "flash.ld",
     "mcu": "at91sam3x8e",
     "usb_product": "due",
-    "variant": "stacker_3d_superboard_dbg"
+    "variant": "stacker_3d_superboard"
   },
   "connectivity": [
     "can"
@@ -29,6 +29,7 @@
   "debug": {
     "jlink_device": "ATSAM3X8E",
     "openocd_chipname": "at91sam3X8E",
+    "openocd_target": "at91sam3XXX",
     "svd_path": "ATSAM3X8E.svd"
   },
   "frameworks": [
@@ -53,6 +54,6 @@
     "use_1200bps_touch": true,
     "wait_for_upload_port": false
   },
-  "url": "http://stacker3d.com",
+  "url": "https://stacker3d.com",
   "vendor": "STACKER 3D"
 }

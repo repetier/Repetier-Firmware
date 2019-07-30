@@ -566,8 +566,8 @@ void Leveling::measure() {
     Plane plane;
     PlaneBuilder builder;
     builder.reset();
-    float h1, h2, h3, h4;
-    bool ok = true;
+    float h1(0), h2(0), h3(0), h4(0);
+    bool ok(true);
     const float apx = L_P1_X - L_P2_X;
     const float apy = L_P1_Y - L_P2_Y;
     const float abx = L_P3_X - L_P2_X;

@@ -18,7 +18,7 @@
 
 // RADDS Board
 // http://www.dr-henschke.de/RADDS_due.html
-#if MOTHERBOARD == MOTHERBOARD_RADDS
+#if MOTHERBOARD == MOTHERBOARD_IKS3D
 #ifndef __SAM3X8E__
 #error Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu.
 #endif
@@ -33,35 +33,35 @@
 #define ORIG_X_DIR_PIN 23
 #define ORIG_X_MIN_PIN 28
 #define ORIG_X_MAX_PIN 34
-#define ORIG_X_ENABLE_PIN 26
+#define ORIG_X_ENABLE_PIN 69
 
 #define ORIG_Y_STEP_PIN 17
 #define ORIG_Y_DIR_PIN 16
 #define ORIG_Y_MIN_PIN 30
 #define ORIG_Y_MAX_PIN 36
-#define ORIG_Y_ENABLE_PIN 22
+#define ORIG_Y_ENABLE_PIN 69
 
 #define ORIG_Z_STEP_PIN 2
 #define ORIG_Z_DIR_PIN 3
 #define ORIG_Z_MIN_PIN 32
 #define ORIG_Z_MAX_PIN 38
-#define ORIG_Z_ENABLE_PIN 15
+#define ORIG_Z_ENABLE_PIN 69
 
 // Note that on the Due pin A0 on the board is channel 2 on the ARM chip
 #define HEATER_0_PIN 13
 // Due analog pin #54
-#define TEMP_0_PIN 7
-#define HEATER_1_PIN 7
-#define TEMP_1_PIN 3
+#define TEMP_0_PIN 57
+#define HEATER_1_PIN 12
+#define TEMP_1_PIN 58
 // Due analog pin #58
-#define HEATER_2_PIN 12
+#define HEATER_2_PIN 35
 // Due analog pin #55
-#define TEMP_2_PIN 6
-#define HEATER_3_PIN 11
+#define TEMP_2_PIN 62
+#define HEATER_3_PIN 37
 // Due analog pin #56
-#define TEMP_3_PIN 5
+#define TEMP_3_PIN 63
 // Due analog pin #57
-#define TEMP_4_PIN 4
+#define TEMP_4_PIN 44
 
 // Due analog pin #59 = A5 -> AD 2
 #define THERMOCOUPLE_0_PIN 2
@@ -76,17 +76,17 @@
 // Enable pin of extruder 0
 #define THERMOCOUPLE_3_PIN 10
 
-#define ORIG_E0_STEP_PIN 61
-#define ORIG_E0_DIR_PIN 60
-#define ORIG_E0_ENABLE_PIN 62
+#define ORIG_E0_STEP_PIN 56
+#define ORIG_E0_DIR_PIN 55
+#define ORIG_E0_ENABLE_PIN 69
 
-#define ORIG_E1_STEP_PIN 64
-#define ORIG_E1_DIR_PIN 63
-#define ORIG_E1_ENABLE_PIN 65
+#define ORIG_E1_STEP_PIN 60
+#define ORIG_E1_DIR_PIN 59
+#define ORIG_E1_ENABLE_PIN 69
 
 #define ORIG_E2_STEP_PIN 51
 #define ORIG_E2_DIR_PIN 53
-#define ORIG_E2_ENABLE_PIN 49
+#define ORIG_E2_ENABLE_PIN 69
 
 // Extra driver on extension board
 // Might require pin 66 high for some drivers!
@@ -107,12 +107,13 @@
 #define EXTENSION_BOARD_MS1 67
 #define EXTENSION_BOARD_MS2 68
 #define EXTENSION_BOARD_MS3 69
+
 // 66 -> not connected
 // 25 -> not connected
 // To set microstepping on startup set START_GCODE to e.g.
 // "M42 P67 S255\nM42 P68 S255\nM42 P69 S255"
 
-#define SDSUPPORT 1
+#define SDSUPPORT -1
 #define SDPOWER -1
 // 4,10,52 if using HW SPI.
 #define SDSS 4
@@ -130,64 +131,32 @@
 // 21 or 71
 #define SCL_PIN 21
 
-#define SERVO1 5
-#define SERVO2 6
-#define SERVO3 39
+// Servo pins: 5,6 und 39
 
-#define BEEPER_PIN -1
+#define E0_PINS ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN,
+#define E1_PINS ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN,
+#define E2_PINS ORIG_E2_STEP_PIN, ORIG_E2_DIR_PIN, ORIG_E2_ENABLE_PIN,
+#define E3_PINS ORIG_E3_STEP_PIN, ORIG_E3_DIR_PIN, ORIG_E3_ENABLE_PIN,
+#define E4_PINS ORIG_E4_STEP_PIN, ORIG_E4_DIR_PIN, ORIG_E4_ENABLE_PIN,
+#define E5_PINS ORIG_E5_STEP_PIN, ORIG_E5_DIR_PIN, ORIG_E5_ENABLE_PIN,
 
+#define TWI_CLOCK_FREQ 400000
+// see eeprom device data sheet for the following values these are for 24xx256
+#define EEPROM_SERIAL_ADDR 0x50  // 7 bit i2c address (without R/W bit)
+#define EEPROM_PAGE_SIZE 64      // page write buffer size
+#define EEPROM_PAGE_WRITE_TIME 7 // page write time in milliseconds (docs say 5ms but that is too short)
+// specify size of eeprom address register
+// TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
+#define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
+#define EEPROM_AVAILABLE 1
+
+#define SERVO1 -1
+#define SERVO2 -1
+#define SERVO3 -1
 // Controller related default pins
 
 #ifndef CUSTOM_CONTROLLER_PINS
-#if FEATURE_CONTROLLER == CONTROLLER_SPARKLCD
-
-#define UI_DISPLAY_RS_PIN 25
-#define UI_DISPLAY_RW_PIN -1
-#define UI_DISPLAY_ENABLE_PIN 27
-#define UI_DISPLAY_D4_PIN 29
-#define UI_DISPLAY_D5_PIN -1
-#define UI_ENCODER_A 35
-#define UI_ENCODER_B 33
-#define UI_ENCODER_CLICK 37
-#define UI_RESET_PIN -1
-#define UI_BACK_PIN -1
-
-#elif FEATURE_CONTROLLER == CONTROLLER_SPARKLCD_ADAPTER || FEATURE_CONTROLLER == CONTROLLER_ORCABOTXXLPRO2
-
-#define UI_DISPLAY_RS_PIN 44
-#define UI_DISPLAY_RW_PIN -1
-#define UI_DISPLAY_ENABLE_PIN 45
-#define UI_DISPLAY_D4_PIN 46
-#define UI_DISPLAY_D5_PIN -1
-#define UI_ENCODER_A 50
-#define UI_ENCODER_B 52
-#define UI_ENCODER_CLICK 48
-#define UI_RESET_PIN -1
-#define UI_BACK_PIN -1
-
-#else
-
-// This is for official display port usage
-
-#define BEEPER_PIN 41
-#define UI_DISPLAY_RS_PIN 42
-#define UI_DISPLAY_RW_PIN -1
-#define UI_DISPLAY_ENABLE_PIN 43
-#define UI_DISPLAY_D0_PIN 44
-#define UI_DISPLAY_D1_PIN 45
-#define UI_DISPLAY_D2_PIN 46
-#define UI_DISPLAY_D3_PIN 47
-#define UI_DISPLAY_D4_PIN 44
-#define UI_DISPLAY_D5_PIN 45
-#define UI_DISPLAY_D6_PIN 46
-#define UI_DISPLAY_D7_PIN 47
-#define UI_ENCODER_A 50
-#define UI_ENCODER_B 52
-#define UI_ENCODER_CLICK 48
-#define UI_RESET_PIN -1
-#define UI_BACK_PIN 71
-
-#endif
+#error No known pin assignment for your display. Please define it in Configuration.h
 #endif
 
 // Servo pins: 5,6 und 39

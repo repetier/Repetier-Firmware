@@ -1334,6 +1334,18 @@ void Commands::processMCode(GCode* com) {
     case 890:
         MCode_890(com);
         break;
+    case 911: // Report TMC prewarn
+        MCode_Stepper(com);
+        break;
+    case 912: // Clear prewarn
+        MCode_Stepper(com);
+        break;
+    case 913: // Hybrid treshold
+        MCode_Stepper(com);
+        break;
+    case 914: // sensorless homing sensitivity
+        MCode_Stepper(com);
+        break;
     case 998:
         MCode_998(com);
         break;

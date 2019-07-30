@@ -189,5 +189,5 @@ void MCode_909(GCode* com);
 void MCode_910(GCode* com);
 void MCode_998(GCode* com);
 void MCode_999(GCode* com);
-
+void MCode_Stepper(GCode* com);
 #endif // COMMANDS_H_INCLUDED

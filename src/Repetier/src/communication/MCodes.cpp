@@ -587,6 +587,8 @@ void MCode_117(GCode* com) {
 
 void MCode_118(GCode* com) {
     if (com->hasString()) {
+        Com::printF(Com::tEcho);
+        Com::printFLN(com->text);
     }
 }
 
@@ -1365,5 +1367,11 @@ void MCode_999(GCode* com) {
         GUI::setStatusP(Com::tTestM999, GUIStatusLevel::ERROR);
     } else {
         GCode::resetFatalError();
+    }
+}
+
+void MCode_Stepper(GCode* com) {
+    if (com->hasP() && com->hasS() && com->P >= 0 && com->P < NUM_MOTORS) {
+        Motion1::drivers[com->P]->handleMCode(*com);
     }
 }
