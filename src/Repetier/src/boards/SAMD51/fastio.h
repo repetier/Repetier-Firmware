@@ -280,6 +280,10 @@
 #define DIO94_PORT PORTA
 #define DIO94_PIN PORT_PA11
 
+// onboard SD detect 
+#define DIO95_PORT PORTB
+#define DIO95_PIN PORT_PB31
+
 #ifndef DIO0_PIN
 #error pins for this chip not defined in arduino.h! If you write an appropriate pin definition and have this firmware work on your chip, please submit a pull request
 #endif
