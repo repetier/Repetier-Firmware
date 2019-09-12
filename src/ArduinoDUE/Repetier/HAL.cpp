@@ -405,6 +405,7 @@ void HAL::showStartReason() {
     case 1:
         // this is return from backup mode on SAM
         Com::printInfoFLN(Com::tBrownOut);
+        break;
     case 2:
         Com::printInfoFLN(Com::tWatchdog);
         break;

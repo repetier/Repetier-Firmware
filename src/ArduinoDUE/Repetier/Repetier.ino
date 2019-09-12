@@ -212,6 +212,7 @@ coordinates are used. F changes feedrate for that move.
 PanelDue
 - M415 S<0/1> Z<zpos> - Enables (S1) or disables (S0) rescue system. Zx can
 define current Z as homed Z position.
+- M416 - Simulate a power loss
 - M450 - Reports printer mode
 - M451 - Set printer mode to FFF
 - M452 - Set printer mode to laser

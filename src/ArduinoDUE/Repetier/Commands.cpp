@@ -3087,8 +3087,9 @@ void Commands::processMCode(GCode* com) {
     case 355: // M355 S<0/1> - Turn case light on/off, no S = report status
         if (com->hasS()) {
             Printer::setCaseLight(com->S);
-        } else
+        } else {
             Printer::reportCaseLightStatus();
+        }
         break;
     case 360: // M360 - show configuration
         Com::writeToAll = false;
