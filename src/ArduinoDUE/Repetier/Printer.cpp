@@ -2094,7 +2094,6 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
             Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
 #endif
             Commands::waitUntilEndOfAllMoves();
-
 #if ZHOME_MIN_TEMPERATURE > 20
 #if ZHOME_HEAT_ALL
             for (int i = 0; i < NUM_EXTRUDER; i++) {
@@ -2156,7 +2155,6 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
                 startZ = Printer::zMin + Printer::zLength - zBedOffset;
             moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]); // correct rotation!
             Commands::waitUntilEndOfAllMoves();
-
 #if ZHOME_MIN_TEMPERATURE > 20
 #if ZHOME_HEAT_ALL
             for (int i = 0; i < NUM_EXTRUDER; i++)

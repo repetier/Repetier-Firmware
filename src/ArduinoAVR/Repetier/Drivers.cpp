@@ -83,7 +83,7 @@ void commandG203(GCode& code) {
         id = 0;
     Com::printF(PSTR("Motor"), id);
     Com::printF(PSTR(" Pos:"), motorDrivers[id]->getPosition());
-    Com::printFLN(" Endstop Hit:", motorDrivers[id]->endstopHit());
+    Com::printFLN(PSTR(" Endstop Hit:"), motorDrivers[id]->endstopHit());
 }
 // G204 P<motorId> S<0/1>     - Enable/disable motor
 void commandG204(GCode& code) {
