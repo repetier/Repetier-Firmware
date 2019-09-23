@@ -492,6 +492,12 @@ public:
 #if TMC2130_ON_EXT2
     static TMC2130Stepper* tmc_driver_e2;
 #endif
+#if TMC2130_ON_EXT3
+    static TMC2130Stepper* tmc_driver_e3;
+#endif
+#if TMC2130_ON_EXT4
+    static TMC2130Stepper* tmc_driver_e4;
+#endif
 #endif
 
     static void handleInterruptEvent();

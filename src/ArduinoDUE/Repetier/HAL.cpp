@@ -684,7 +684,7 @@ void HAL::i2cSetClockspeed(uint32_t clockSpeedHz)
 {
     // Set i2c clock rate
     uint32_t dwCkDiv = 0;
-    uint32_t dwClDiv;
+    uint32_t dwClDiv = 0;
     while (dwClDiv == 0) {
         dwClDiv = ((F_CPU_TRUE / (2 * clockSpeedHz)) - 4) / (1 << dwCkDiv);
 
@@ -747,8 +747,9 @@ unsigned char HAL::i2cStart(unsigned char address_and_direction) {
     TWI_INTERFACE->TWI_MMR = 0;
     TWI_INTERFACE->TWI_MMR = (twiDirection << 12) | TWI_MMR_IADRSZ_NONE | TWI_MMR_DADR(address);
     TWI_INTERFACE->TWI_CR = TWI_CR_MSEN | TWI_CR_SVDIS; // set master mode disable slave mode
-    if (twiDirection)
+    if (twiDirection) {
         TWI_INTERFACE->TWI_CR = TWI_CR_START; // send Start Bit for receiving data
+    }
     // returning readiness to send/recieve not device accessibility
     // return value not used in code anyway
     return !(TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP);
@@ -764,8 +765,7 @@ void HAL::i2cStartWait(unsigned char address_and_direction) {
     uint32_t twiDirection = address_and_direction & 1;
     uint32_t address = address_and_direction >> 1;
 
-    while (!(TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP))
-        ;
+    while (!(TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP)) {}
 
     // set master mode register with no internal address
 
@@ -774,8 +774,9 @@ void HAL::i2cStartWait(unsigned char address_and_direction) {
 
     TWI_INTERFACE->TWI_CR = TWI_CR_MSEN | TWI_CR_SVDIS; // set master mode disable slave mode
 
-    if (twiDirection)
+    if (twiDirection) {
         TWI_INTERFACE->TWI_CR = TWI_CR_START; // send Start Bit for receiving data
+    }
 }
 
 /*************************************************************************
@@ -803,8 +804,9 @@ void HAL::i2cStartAddr(unsigned char address_and_direction, unsigned int pos) {
     TWI_INTERFACE->TWI_IADR = 0;
     TWI_INTERFACE->TWI_IADR = TWI_IADR_IADR(pos);
 
-    if (twiDirection)
+    if (twiDirection) {
         TWI_INTERFACE->TWI_CR = TWI_CR_START; // send Start Bit for receiving data
+    }
 #endif
 }
 
@@ -812,11 +814,9 @@ void HAL::i2cStartAddr(unsigned char address_and_direction, unsigned int pos) {
  Terminates the data transfer and releases the I2C bus
 *************************************************************************/
 void HAL::i2cStop(void) {
-    while ((TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) != TWI_SR_TXRDY)
-        ;                                // wait for transmission finished
-    TWI_INTERFACE->TWI_CR = TWI_CR_STOP; // send Stop
-    while (!((TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP) == TWI_SR_TXCOMP))
-        ; // wait for i2cCompleted
+    while ((TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) != TWI_SR_TXRDY) {}      // wait for transmission finished
+    TWI_INTERFACE->TWI_CR = TWI_CR_STOP;                                   // send Stop
+    while (!((TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP) == TWI_SR_TXCOMP)) {} // wait for i2cCompleted
 }
 
 /*************************************************************************
@@ -828,8 +828,7 @@ void HAL::i2cStop(void) {
 *************************************************************************/
 void HAL::i2cWrite(uint8_t data) {
     TWI_INTERFACE->TWI_THR = data;
-    while ((TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) != TWI_SR_TXRDY)
-        ; // wait for transmission finished
+    while ((TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) != TWI_SR_TXRDY) {} // wait for transmission finished
 }
 
 /*************************************************************************
@@ -837,8 +836,7 @@ void HAL::i2cWrite(uint8_t data) {
  Return:  byte read from I2C device
 *************************************************************************/
 uint8_t HAL::i2cReadAck(void) {
-    while ((TWI_INTERFACE->TWI_SR & TWI_SR_RXRDY) != TWI_SR_RXRDY)
-        ; // wait for received byte
+    while ((TWI_INTERFACE->TWI_SR & TWI_SR_RXRDY) != TWI_SR_RXRDY) {} // wait for received byte
     return TWI_INTERFACE->TWI_RHR;
 }
 
@@ -848,10 +846,9 @@ uint8_t HAL::i2cReadAck(void) {
  Return:  byte read from I2C device
 *************************************************************************/
 uint8_t HAL::i2cReadNak(void) {
-    TWI_INTERFACE->TWI_CR = TWI_CR_STOP; // send Stop
-    uint8_t data = i2cReadAck();         // read last byte
-    while (!((TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP) == TWI_SR_TXCOMP))
-        ; // wait for i2cCompleted ;
+    TWI_INTERFACE->TWI_CR = TWI_CR_STOP;                                   // send Stop
+    uint8_t data = i2cReadAck();                                           // read last byte
+    while (!((TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP) == TWI_SR_TXCOMP)) {} // wait for i2cCompleted ;
     return data;
 }
 

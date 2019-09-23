@@ -1658,11 +1658,17 @@ https://github.com/teemuatlut/TMC2130Stepper
 #ifndef TMC2130_EXT2_CS_PIN
 #define TMC2130_EXT2_CS_PIN -1
 #endif
+#ifndef TMC2130_EXT3_CS_PIN
+#define TMC2130_EXT3_CS_PIN -1
+#endif
+#ifndef TMC2130_EXT4_CS_PIN
+#define TMC2130_EXT4_CS_PIN -1
+#endif
 
-// Per-axis current setting in mA { X, Y, Z, E0, E1, E2}
+// Per-axis current setting in mA { X, Y, Z, E0, E1, E2, E3, E4}
 #ifndef MOTOR_CURRENT
 #define MOTOR_CURRENT \
-    { 1000, 1000, 1000, 1000, 1000, 1000 }
+    { 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000 }
 #endif
 
 /**  Global settings - these apply to all configured drivers

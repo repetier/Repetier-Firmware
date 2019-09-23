@@ -1494,18 +1494,36 @@ https://github.com/teemuatlut/TMC2130Stepper
 // #define SENSORLESS_HOMING
 
 // The drivers with set CS pin will be used, all others are normal step/dir/enable drivers
+#ifndef TMC2130_X_CS_PIN
 #define TMC2130_X_CS_PIN -1
+#endif
+#ifndef TMC2130_Y_CS_PIN
 #define TMC2130_Y_CS_PIN -1
+#endif
+#ifndef TMC2130_Z_CS_PIN
 #define TMC2130_Z_CS_PIN -1
+#endif
+#ifndef TMC2130_EXT0_CS_PIN
 #define TMC2130_EXT0_CS_PIN -1
+#endif
+#ifndef TMC2130_EXT1_CS_PIN
 #define TMC2130_EXT1_CS_PIN -1
+#endif
+#ifndef TMC2130_EXT2_CS_PIN
 #define TMC2130_EXT2_CS_PIN -1
+#endif
+#ifndef TMC2130_EXT3_CS_PIN
+#define TMC2130_EXT3_CS_PIN -1
+#endif
+#ifndef TMC2130_EXT4_CS_PIN
+#define TMC2130_EXT4_CS_PIN -1
+#endif
 
-// Per-axis current setting in mA { X, Y, Z, E0, E1, E2}
+// Per-axis current setting in mA { X, Y, Z, E0, E1, E2, E3, E4}
+#ifndef MOTOR_CURRENT
 #define MOTOR_CURRENT \
-    { \
-        1000, 1000, 1000, 1000, 1000, 1000 \
-    }
+    { 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000 }
+#endif
 
 /**  Global settings - these apply to all configured drivers
      Per-axis values will override these

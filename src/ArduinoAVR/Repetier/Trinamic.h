@@ -1,18 +1,45 @@
 #include <TMC2130Stepper.h>
 
+#ifndef TMC2130_X_CS_PIN
+#define TMC2130_X_CS_PIN -1
+#endif
+#ifndef TMC2130_Y_CS_PIN
+#define TMC2130_Y_CS_PIN -1
+#endif
+#ifndef TMC2130_Z_CS_PIN
+#define TMC2130_Z_CS_PIN -1
+#endif
+#ifndef TMC2130_EXT0_CS_PIN
+#define TMC2130_EXT0_CS_PIN -1
+#endif
+#ifndef TMC2130_EXT1_CS_PIN
+#define TMC2130_EXT1_CS_PIN -1
+#endif
+#ifndef TMC2130_EXT2_CS_PIN
+#define TMC2130_EXT2_CS_PIN -1
+#endif
+#ifndef TMC2130_EXT3_CS_PIN
+#define TMC2130_EXT3_CS_PIN -1
+#endif
+#ifndef TMC2130_EXT4_CS_PIN
+#define TMC2130_EXT4_CS_PIN -1
+#endif
+
 #define TMC2130_ON_X (TMC2130_X_CS_PIN > 0)
 #define TMC2130_ON_Y (TMC2130_Y_CS_PIN > 0)
 #define TMC2130_ON_Z (TMC2130_Z_CS_PIN > 0)
 #define TMC2130_ON_EXT0 (TMC2130_EXT0_CS_PIN > 0)
 #define TMC2130_ON_EXT1 (TMC2130_EXT1_CS_PIN > 0)
 #define TMC2130_ON_EXT2 (TMC2130_EXT2_CS_PIN > 0)
+#define TMC2130_ON_EXT3 (TMC2130_EXT3_CS_PIN > 0)
+#define TMC2130_ON_EXT4 (TMC2130_EXT4_CS_PIN > 0)
+
 /*
 _TMC_COUNT determines the number of Trinamic chips to configure.
 It counts how many ChipSelect pins were configured by the user.
 */
-#define _TMC_COUNT                                                             \
-  (TMC2130_ON_X + TMC2130_ON_Y + TMC2130_ON_Z + TMC2130_ON_EXT0 +              \
-   TMC2130_ON_EXT1 + TMC2130_ON_EXT2)
+#define _TMC_COUNT \
+    (TMC2130_ON_X + TMC2130_ON_Y + TMC2130_ON_Z + TMC2130_ON_EXT0 + TMC2130_ON_EXT1 + TMC2130_ON_EXT2 + TMC2130_ON_EXT3 + TMC2130_ON_EXT4)
 #if _TMC_COUNT < 1
 #error "Trinamic TMC2130 support enabled but no CS pins defined."
 #endif
@@ -20,7 +47,7 @@ It counts how many ChipSelect pins were configured by the user.
 #if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MANUAL
 #undef STEPPER_CURRENT_CONTROL
 #else
-#error                                                                         \
+#error \
     "When using Trinamic drivers you can't enable another STEPPER_CURRENT_CONTROL method."
 #endif
 #define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_TMC2130
@@ -162,4 +189,48 @@ It counts how many ChipSelect pins were configured by the user.
 #endif
 #if !defined(TMC2130_PWM_FREQ_EXT2) && TMC2130_ON_EXT2
 #define TMC2130_PWM_FREQ_EXT2 TMC2130_PWM_FREQ
+#endif
+
+#if !defined(TMC2130_STEALTHCHOP_EXT3) && TMC2130_ON_EXT3
+#define TMC2130_STEALTHCHOP_EXT3 TMC2130_STEALTHCHOP
+#endif
+#if !defined(TMC2130_INTERPOLATE_256_EXT3) && TMC2130_ON_EXT3
+#define TMC2130_INTERPOLATE_256_EXT3 TMC2130_INTERPOLATE_256
+#endif
+#if !defined(TMC2130_STALLGUARD_EXT3) && TMC2130_ON_EXT3
+#define TMC2130_STALLGUARD_EXT3 TMC2130_STALLGUARD
+#endif
+#if !defined(TMC2130_PWM_AMPL_EXT3) && TMC2130_ON_EXT3
+#define TMC2130_PWM_AMPL_EXT3 TMC2130_PWM_AMPL
+#endif
+#if !defined(TMC2130_PWM_GRAD_EXT3) && TMC2130_ON_EXT3
+#define TMC2130_PWM_GRAD_EXT3 TMC2130_PWM_GRAD
+#endif
+#if !defined(TMC2130_PWM_AUTOSCALE_EXT3) && TMC2130_ON_EXT3
+#define TMC2130_PWM_AUTOSCALE_EXT3 TMC2130_PWM_AUTOSCALE
+#endif
+#if !defined(TMC2130_PWM_FREQ_EXT3) && TMC2130_ON_EXT3
+#define TMC2130_PWM_FREQ_EXT3 TMC2130_PWM_FREQ
+#endif
+
+#if !defined(TMC2130_STEALTHCHOP_EXT4) && TMC2130_ON_EXT4
+#define TMC2130_STEALTHCHOP_EXT4 TMC2130_STEALTHCHOP
+#endif
+#if !defined(TMC2130_INTERPOLATE_256_EXT2) && TMC2130_ON_EXT4
+#define TMC2130_INTERPOLATE_256_EXT4 TMC2130_INTERPOLATE_256
+#endif
+#if !defined(TMC2130_STALLGUARD_EXT4) && TMC2130_ON_EXT4
+#define TMC2130_STALLGUARD_EXT4 TMC2130_STALLGUARD
+#endif
+#if !defined(TMC2130_PWM_AMPL_EXT4) && TMC2130_ON_EXT4
+#define TMC2130_PWM_AMPL_EXT4 TMC2130_PWM_AMPL
+#endif
+#if !defined(TMC2130_PWM_GRAD_EXT4) && TMC2130_ON_EXT4
+#define TMC2130_PWM_GRAD_EXT4 TMC2130_PWM_GRAD
+#endif
+#if !defined(TMC2130_PWM_AUTOSCALE_EXT4) && TMC2130_ON_EXT4
+#define TMC2130_PWM_AUTOSCALE_EXT4 TMC2130_PWM_AUTOSCALE
+#endif
+#if !defined(TMC2130_PWM_FREQ_EXT4) && TMC2130_ON_EXT4
+#define TMC2130_PWM_FREQ_EXT4 TMC2130_PWM_FREQ
 #endif

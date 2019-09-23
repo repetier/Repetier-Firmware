@@ -173,7 +173,10 @@ void SDCard::pausePrint(bool intern) {
     if (intern) {
         sdmode = 20;
     } else {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-value"
         EVENT_SD_PAUSE_START(intern);
+#pragma GCC diagnostic pop
         EVENT_SD_PAUSE_END(intern);
     }
 }
