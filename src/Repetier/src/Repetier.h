@@ -277,6 +277,10 @@ public:
 #include "io/temperature_tables.h"
 #include "Configuration.h"
 
+#ifndef WAITING_IDENTIFIER
+#define WAITING_IDENTIFIER "wait"
+#endif
+
 #ifndef HOST_RESCUE
 #define HOST_RESCUE 1
 #endif

@@ -425,7 +425,7 @@ public:
         NVIC_EnableIRQ((IRQn_Type)BEEPER_TIMER_IRQ);
 #endif
     }
-    static inline void noTone(uint8_t pin) {
+    static inline void noTone() {
 #if BEEPER_PIN > -1
         TC_Stop(TC1, 0);
         WRITE_VAR(BEEPER_PIN, LOW);

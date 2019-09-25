@@ -56,14 +56,6 @@ IO_INPUT_DUMMY(name, state)
 
 #define IO_INPUT_DUMMY(name, state)
 
-#elif IO_TARGET == 2 // PWM interrupt
-
-#define IO_INPUT(name, pin)
-#define IO_INPUT_INVERTED(name, pin)
-#define IO_INPUT_PULLUP(name, pin)
-#define IO_INPUT_INVERTED_PULLUP(name, pin)
-#define IO_INPUT_DUMMY(name, state)
-
 #elif IO_TARGET == 4 // define class
 
 #define IO_INPUT(name, _pin) \

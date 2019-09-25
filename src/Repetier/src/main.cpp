@@ -131,7 +131,7 @@ Custom M Codes
 - M203 X Y Z E A B C - Set maximum feedrate
 - M204 - Set PID parameter X => Kp Y => Ki Z => Kd S<extruder> Default is current extruder. NUM_EXTRUDER=Heated bed
 - M205 - Output EEPROM settings
-- M206 - Set EEPROM value
+- M206 T[type] P[pos] Sint(long] [Xfloat] - Set EEPROM value
 - M207 X<XY jerk> Z<Z Jerk> E<ExtruderJerk> - Changes current jerk values, but do not store them in eeprom.
 - M209 S<0/1> - Enable/disable auto retraction
 - M220 S<Feedrate multiplier in percent> - Increase/decrease given feedrate

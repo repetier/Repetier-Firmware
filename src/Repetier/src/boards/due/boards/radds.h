@@ -169,6 +169,7 @@
 
 // This is for official display port usage
 
+#undef BEEPER_PIN
 #define BEEPER_PIN 41
 #define UI_DISPLAY_RS_PIN 42
 #define UI_DISPLAY_RW_PIN -1

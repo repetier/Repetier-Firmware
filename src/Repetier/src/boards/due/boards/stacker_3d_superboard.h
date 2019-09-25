@@ -17,6 +17,22 @@
 */
 
 // STACKER 3D Superboard
+
+/*
+Board Pin Name  Firmware Name
+HE1             HEATER_0
+HE2             HEATER_2
+HE3             HEATER_3
+HE4             HEATER_4
+HE5             HEATER_5
+HE6             HEATER_6
+HE7             HEATER_7
+HE8             HEATER_8 / ORIG_FAN2_PIN
+FAN             ORIG_FAN_PIN
+H-BED           HEATER_1
+
+*/
+
 #if MOTHERBOARD == 412
 #ifndef __SAM3X8E__
 #error Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu.
@@ -66,14 +82,14 @@ AD13 CH13
 AD14 CH14
 AD15 CH15
 */
-#define HEATER_0_PIN 7
+#define HEATER_0_PIN 7 ///< PWM channel 6
 #define TEMP_0_PIN 7
 // These pins are for bed !
 #define HEATER_1_PIN 98
 #define TEMP_1_PIN 6
-#define HEATER_2_PIN 8
+#define HEATER_2_PIN 8 ///< PWM channel 5
 #define TEMP_2_PIN 5
-#define HEATER_3_PIN 9
+#define HEATER_3_PIN 9 ///< PWM Channel 4
 #define TEMP_3_PIN 4
 // D7
 #define HEATER_4_PIN 11
