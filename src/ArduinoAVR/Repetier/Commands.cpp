@@ -3153,6 +3153,7 @@ void Commands::processMCode(GCode* com) {
         }
         Printer::rescueReport();
 #endif
+        break;
     }
     case 416:
 #if !EMERGENCY_PARSER
