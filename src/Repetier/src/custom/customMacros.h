@@ -60,21 +60,21 @@ Hints:
 
 // Now only add code where you really need it.
 
-#if IO_TARGET == 1    // Init at firmware start
-#elif IO_TARGET == 2  // PWM Interrupt
-#elif IO_TARGET == 3  // 100ms call
-#elif IO_TARGET == 4  // Define class
-#elif IO_TARGET == 5  // Endstop update
-#elif IO_TARGET == 6  // define variables
-#elif IO_TARGET == 7  // Visualization for config
-#elif IO_TARGET == 8  // eepromHandle calls
-#elif IO_TARGET == 9  // updateDerived calls
-#elif IO_TARGET == 10 // restore from config
-#elif IO_TARGET == 11 // analog input loop
-#elif IO_TARGET == 12 // 500ms timer
+#if IO_TARGET == IO_TARGET_INIT                   // Init at firmware start
+#elif IO_TARGET == IO_TARGET_PWM                  // PWM Interrupt
+#elif IO_TARGET == IO_TARGET_100MS                // 100ms call
+#elif IO_TARGET == IO_TARGET_CLASS_DEFINITION     // Define class
+#elif IO_TARGET == IO_TARGET_ENDSTOP_UPDATE       // Endstop update
+#elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES     // define variables
+#elif IO_TARGET == IO_TARGET_CONFIG_VISUALIZATION // Visualization for config
+#elif IO_TARGET == IO_TARGET_EEPROM               // eepromHandle calls
+#elif IO_TARGET == IO_TARGET_UPDATE_DERIVED       // updateDerived calls
+#elif IO_TARGET == IO_TARGET_RESTORE_FROM_CONFIG  // restore from config
+#elif IO_TARGET == IO_TARGET_ANALOG_INPUT_LOOP    // analog input loop
+#elif IO_TARGET == IO_TARGET_500MS                // 500ms timer
+#endif
 
-#undef SAMPLE_MODULE
+#ifndef SAMPLE_MODULE
 #define SAMPLE_MODULE(msg) \
     Com::printFLN(PSTR(msg));
-
 #endif

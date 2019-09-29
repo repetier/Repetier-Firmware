@@ -29,21 +29,22 @@ IO_OUTPUT_INVERTED(IOX1Enable, ORIG_X_ENABLE_PIN)
 
 // X Motor right
 
-IO_OUTPUT(IOAStep, ORIG_E4_STEP_PIN)
-IO_OUTPUT(IOADir, ORIG_E4_DIR_PIN)
-IO_OUTPUT_INVERTED(IOAEnable, ORIG_E4_ENABLE_PIN)
+IO_OUTPUT(IOAStep, ORIG_E2_STEP_PIN)
+IO_OUTPUT_INVERTED(IOADir, ORIG_E2_DIR_PIN)
+IO_OUTPUT_INVERTED(IOAEnable, ORIG_E2_ENABLE_PIN)
 
 // Y Motor
 
 IO_OUTPUT(IOY1Step, ORIG_Y_STEP_PIN)
-IO_OUTPUT(IOY1Dir, ORIG_Y_DIR_PIN)
+IO_OUTPUT_INVERTED(IOY1Dir, ORIG_Y_DIR_PIN)
 IO_OUTPUT_INVERTED(IOY1Enable, ORIG_Y_ENABLE_PIN)
 
 // Z Motor
 
 IO_OUTPUT(IOZ1Step, ORIG_Z_STEP_PIN)
 IO_OUTPUT_INVERTED(IOZ1Dir, ORIG_Z_DIR_PIN)
-IO_OUTPUT_INVERTED(IOZ1Enable, ORIG_Z_ENABLE_PIN)
+IO_OUTPUT_INVERTED(IOZ1EnableT, ORIG_Z_ENABLE_PIN)
+IO_OUTPUT_LOG(IOZ1Enable, IOZ1EnableT, true)
 
 // E0 Motor
 
@@ -59,30 +60,27 @@ IO_OUTPUT_INVERTED(IOE2Enable, ORIG_E1_ENABLE_PIN)
 
 // Controller input pins
 
-
-// Controller input pins
-
-#if defined(UI_ENCODER_CLICK) && UI_ENCODER_CLICK >= 0
+#if UI_ENCODER_CLICK >= 0
 IO_INPUT_INVERTED_PULLUP(ControllerClick, UI_ENCODER_CLICK)
 #else
 IO_INPUT_DUMMY(ControllerClick, false)
 #endif
-#if defined(UI_ENCODER_A) && UI_ENCODER_A >= 0
+#if UI_ENCODER_A >= 0
 IO_INPUT_INVERTED_PULLUP(ControllerEncA, UI_ENCODER_A)
 #else
 IO_INPUT_DUMMY(ControllerEncA, false)
 #endif
-#if defined(UI_ENCODER_B) && UI_ENCODER_B >= 0
+#if UI_ENCODER_B >= 0
 IO_INPUT_INVERTED_PULLUP(ControllerEncB, UI_ENCODER_B)
 #else
 IO_INPUT_DUMMY(ControllerEncB, false)
 #endif
-#if defined(UI_BACK_PIN) && UI_BACK_PIN >= 0
+#if UI_BACK_PIN >= 0
 IO_INPUT_PULLUP(ControllerBack, UI_BACK_PIN)
 #else
 IO_INPUT_DUMMY(ControllerBack, false)
 #endif
-#if defined(UI_RESET_PIN) && UI_RESET_PIN >= 0
+#if UI_RESET_PIN >= 0
 IO_INPUT_PULLUP(ControllerReset, UI_RESET_PIN)
 #else
 IO_INPUT_DUMMY(ControllerReset, false)
@@ -91,10 +89,12 @@ IO_INPUT_DUMMY(ControllerReset, false)
 // Define your endstops inputs
 
 //IO_INPUT_PULLUP(IOEndstopXMax, ORIG_X_MAX_PIN)
-IO_INPUT_PULLUP(IOEndstopXMin, ORIG_X_MIN_PIN)
-IO_INPUT_PULLUP(IOEndstopAMax, ORIG_X_MAX_PIN)
-IO_INPUT_PULLUP(IOEndstopYMin, ORIG_Y_MIN_PIN)
-IO_INPUT_PULLUP(IOEndstopZMin, ORIG_Z_MIN_PIN)
+IO_INPUT_INVERTED_PULLUP(IOEndstopXMin, ORIG_X_MIN_PIN)
+IO_INPUT_INVERTED_PULLUP(IOEndstopAMax, ORIG_X_MAX_PIN)
+IO_INPUT_INVERTED_PULLUP(IOEndstopYMin, ORIG_Y_MIN_PIN)
+IO_INPUT_INVERTED_PULLUP(IOEndstopZMin, ORIG_Z_MIN_PIN)
+IO_INPUT(IOJam1, ORIG_Z_MAX_PIN)
+IO_INPUT(IOJam2, 59)
 
 // Define our endstops solutions
 // You need to define all min and max endstops for all
@@ -115,42 +115,40 @@ ENDSTOP_SWITCH_HW(endstopAMax, IOEndstopAMax, A_AXIS, true)
 // Define fans
 
 IO_OUTPUT(IOFan1, ORIG_FAN_PIN)
-IO_OUTPUT(IOFan2, ORIG_FAN2_PIN)
 IO_OUTPUT(IOCoolerFan1, ORIG_FAN2_PIN)
-
+IO_OUTPUT(IOBoardFan, HEATER_7_PIN)
 IO_PWM_SOFTWARE(Fan1NoKSPWM, IOFan1, 0)
-IO_PWM_SOFTWARE(Fan2NoKSPWM, IOFan2, 0)
 IO_PWM_SOFTWARE(CoolerFan, IOCoolerFan1, 0)
 // IO_PWM_HARDWARE(Fan1PWM, 37,5000)
 // IO_PDM_SOFTWARE(Fan1NoKSPWM, IOFan1) // alternative to PWM signals
 IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20)
-IO_PWM_KICKSTART(Fan2PWM, Fan2NoKSPWM, 20)
-
+IO_PWM_SOFTWARE(BoardFan, IOBoardFan, 4)
+COOLER_MANAGER_MOTORS(BoardFanController, BoardFan, 0, 255, 10)
 // Define temperature sensors
 
 // Typically they require an analog input (12 bit) so define
 // them first.
 
 IO_ANALOG_INPUT(IOAnalogBed1, TEMP_1_PIN, 5)
-IO_ANALOG_INPUT(IOAnalogExt1, TEMP_0_PIN, 5)
-IO_ANALOG_INPUT(IOAnalogExt2, TEMP_2_PIN, 5)
+IO_ANALOG_INPUT(IOAnalogExt1, THERMOCOUPLE_1_PIN, 5)
+IO_ANALOG_INPUT(IOAnalogExt2, THERMOCOUPLE_2_PIN, 5)
 
 // Need a conversion table for epcos NTC
 IO_TEMP_TABLE_NTC(TempTableATC_104GT, ATC_104GT)
-
+IO_TEMP_TABLE_PTC(TempTablePT100, PT100_STACKER)
 // Now create the temperature inputs
 
 IO_TEMPERATURE_TABLE(TempBed1, IOAnalogBed1, TempTableATC_104GT)
-IO_TEMPERATURE_TABLE(TempExt1, IOAnalogExt1, TempTableATC_104GT)
-IO_TEMPERATURE_TABLE(TempExt2, IOAnalogExt2, TempTableATC_104GT)
+IO_TEMPERATURE_TABLE(TempExt1, IOAnalogExt1, TempTablePT100)
+IO_TEMPERATURE_TABLE(TempExt2, IOAnalogExt2, TempTablePT100)
 IO_HOTTEST_OF_2(TempHottestExtruder, TempExt1, TempExt2)
 
 // Use PWM outputs to heat. If using hardware PWM make sure
 // that the selected pin can be used as hardware pwm otherwise
 // select a software pwm model whcih works on all pins.
 
-IO_OUTPUT(IOExtr1, HEATER_0_PIN)
-IO_OUTPUT(IOExtr2, HEATER_2_PIN)
+IO_OUTPUT(IOExtr1, HEATER_2_PIN)
+IO_OUTPUT(IOExtr2, HEATER_3_PIN)
 IO_OUTPUT(IOBed1, HEATER_1_PIN)
 IO_PWM_SOFTWARE(PWMExtruder1, IOExtr1, 1)
 IO_PWM_SOFTWARE(PWMExtruder2, IOExtr2, 1)
@@ -167,16 +165,18 @@ STEPPER_SIMPLE(XMotor, IOX1Step, IOX1Dir, IOX1Enable, endstopNone, endstopNone)
 STEPPER_SIMPLE(AMotor, IOAStep, IOADir, IOAEnable, endstopNone, endstopNone)
 STEPPER_SIMPLE(YMotor, IOY1Step, IOY1Dir, IOY1Enable, endstopNone, endstopNone)
 STEPPER_SIMPLE(ZMotor, IOZ1Step, IOZ1Dir, IOZ1Enable, endstopNone, endstopNone)
-STEPPER_SIMPLE(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, endstopNone, endstopNone)
-STEPPER_SIMPLE(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, endstopNone, endstopNone)
+STEPPER_SIMPLE(E1MotorFinal, IOE1Step, IOE1Dir, IOE1Enable, endstopNone, endstopNone)
+STEPPER_SIMPLE(E2MotorFinal, IOE2Step, IOE2Dir, IOE2Enable, endstopNone, endstopNone)
+STEPPER_ADJUST_RESOLUTION(E1Motor, E1MotorFinal, 500, 367)
+STEPPER_ADJUST_RESOLUTION(E2Motor, E2MotorFinal, 500, 367)
+
 // Heat manages are used for every component that needs to
 // control temperature. Higher level classes take these as input
 // and simple heater like a heated bed use it directly.
-
-HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 70, 255, 1000, 10, 300000, 131.1, 3.76, 1143, 80, 255, false)
-HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255, 1000, 20, 20000, 18.3, 2.13, 39, 40, 235, false)
-HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 1000, 20, 20000, 18.3, 2.13, 39, 40, 235, false)
-COOLER_MANAGER_SENSOR(ExtruderCooler, TempHottestExtruder, CoolerFan, 40, 100, 200, 255)
+HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 120, 255, 1000, 10, 300000, 131.1, 3.76, 1143, 80, 255, false)
+HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 310, 255, 1000, 20, 20000, 18.3, 2.13, 39, 40, 235, false)
+HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 310, 255, 1000, 20, 20000, 18.3, 2.13, 39, 40, 235, false)
+COOLER_MANAGER_SENSOR(ExtruderCooler, TempHottestExtruder, CoolerFan, 70, 200, 150, 255)
 
 // Coolers are stand alone functions that allow it to control
 // a fan with external sensors. Many extruders require a cooling
@@ -187,7 +187,15 @@ COOLER_MANAGER_SENSOR(ExtruderCooler, TempHottestExtruder, CoolerFan, 40, 100, 2
 
 // Define tools. They get inserted into a tool array in configuration.h
 // Typical tools are:
-// TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript)
 
-TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 367, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
-TOOL_EXTRUDER(ToolExtruder2, 0, 0, 0, HeaterExtruder2, E2Motor, 1.75, 367, 5, 30, 5000, 40, "M117 Extruder 2", "", &Fan2PWM)
+TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 500, 5, 30, 5000, 100, "M117 Extruder 1", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder2, 0, 0.1, 0, HeaterExtruder2, E2Motor, 1.75, 500, 5, 30, 5000, 100, "M117 Extruder 2", "", &Fan1PWM)
+
+FILAMENT_DETECTOR(JamDetector1, IOJam1, ToolExtruder1)
+FILAMENT_DETECTOR(JamDetector2, IOJam2, ToolExtruder2)
+
+IO_OUTPUT(caseLightPin, HEATER_6_PIN)
+LIGHT_STATE_MONOCHROME(caseLightState)
+LIGHT_COND(caseLightState, true, Printer::caseLightMode, 255, 255, 255)
+LIGHT_COND(caseLightState, GUI::statusLevel == GUIStatusLevel::ERROR, LIGHT_STATE_BLINK_SLOW, 255, 255, 255)
+LIGHT_SOURCE_MONOCHROME(caseLightDriver, caseLightPin, caseLightState)

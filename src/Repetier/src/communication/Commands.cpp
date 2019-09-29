@@ -96,7 +96,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     }
 #endif
 #undef IO_TARGET
-#define IO_TARGET 15
+#define IO_TARGET IO_TARGET_PERIODICAL_ACTIONS
 #include "../io/redefine.h"
 
     if (!executePeriodical)
@@ -105,7 +105,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     EEPROM::timerHandler(); // store changes after timeout
     // include generic 100ms calls
 #undef IO_TARGET
-#define IO_TARGET 3
+#define IO_TARGET IO_TARGET_100MS
 #include "../io/redefine.h"
 #if FEATURE_WATCHDOG
     HAL::pingWatchdog();
@@ -125,7 +125,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     if (--counter500ms == 0) {
         counter500ms = 5;
 #undef IO_TARGET
-#define IO_TARGET 12
+#define IO_TARGET IO_TARGET_500MS
 #include "../io/redefine.h"
         EVENT_TIMER_500MS;
     }
@@ -1226,7 +1226,7 @@ void Commands::processMCode(GCode* com) {
     case 350: // M350 Set micro stepping mode. Warning: Steps per unit remains unchanged. S code sets stepping mode for all drivers.
         MCode_350(com);
         break;
-    case 355: // M355 S<0/1> - Turn case light on/off, no S = report status
+    case 355: // M355 S<0/1/2/3/4> - Turn case light on/off/burst/blink fast/blink slow , no S = report status
         MCode_355(com);
         break;
     case 360: // M360 - show configuration

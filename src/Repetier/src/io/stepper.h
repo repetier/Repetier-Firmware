@@ -21,8 +21,9 @@
 #undef STEPPER_MIRROR3
 #undef STEPPER_MIRROR4
 #undef STEPPER_OBSERVEABLE
+#undef STEPPER_ADJUST_RESOLUTION
 
-#if IO_TARGET == 4 // declare variable
+#if IO_TARGET == IO_TARGET_CLASS_DEFINITION // declare variable
 
 #define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop) \
     extern SimpleStepperDriver<stepPin, dirPin, enablePin> name; \
@@ -39,8 +40,11 @@
 #define STEPPER_OBSERVEABLE(name, driver) \
     extern ObservableStepperDriver<driver##Type> name; \
     typedef ObservableStepperDriver<driver##Type> name##Type;
+#define STEPPER_ADJUST_RESOLUTION(name, driver, from, to) \
+    extern AdjustResolutionStepperDriver<driver##Type> name; \
+    typedef AdjustResolutionStepperDriver<driver##Type> name##Type;
 
-#elif IO_TARGET == 6 // define variables
+#elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES // define variables
 
 #define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop) \
     SimpleStepperDriver<stepPin, dirPin, enablePin> name(&minEndstop, &maxEndstop);
@@ -52,8 +56,10 @@
     Mirror4StepperDriver name(&motor1, &motor2, &motor3, &motor4, &minEndstop, &maxEndstop);
 #define STEPPER_OBSERVEABLE(name, driver) \
     ObservableStepperDriver<driver##Type> name(&driver);
+#define STEPPER_ADJUST_RESOLUTION(name, driver, from, to) \
+    AdjustResolutionStepperDriver<driver##Type> name(&driver, from, to);
 
-#elif IO_TARGET == 1 // Init drivers at startup
+#elif IO_TARGET == IO_TARGET_INIT // Init drivers at startup
 
 #define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop) \
     name.init();
@@ -63,30 +69,38 @@
     name.init();
 #define STEPPER_MIRROR4(name, motor1, motor2, motor3, motor4, minEndstop, maxEndstop) \
     name.init();
-#define STEPPER_OBSERVEABLE(name, driver)
+#define STEPPER_ADJUST_RESOLUTION(name, driver, from, to) \
+    name.init();
 
-#elif IO_TARGET == 8 // call eepromHandle if required
+#elif IO_TRAGET == IO_TARGET_RESTORE_FROM_CONFIG
 
+#define STEPPER_ADJUST_RESOLUTION(name, driver, from, to) \
+    name.restoreFromConfiguration(to);
+
+#elif IO_TARGET == IO_TARGET_TOOLS_TEMPLATES
+
+#define STEPPER_ADJUST_RESOLUTION(name, driver, from, to) \
+    template class AdjustResolutionStepperDriver<driver##Type>;
+
+#elif IO_TARGET == IO_TARGET_UPDATE_DERIVED // call updatedDerived to activate new settings
+
+#endif
+
+#ifndef STEPPER_SIMPLE
 #define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop)
+#endif
+#ifndef STEPPER_MIRROR2
 #define STEPPER_MIRROR2(name, motor1, motor2, minEndstop, maxEndstop)
+#endif
+#ifndef STEPPER_MIRROR3
 #define STEPPER_MIRROR3(name, motor1, motor2, motor3, minEndstop, maxEndstop)
+#endif
+#ifndef STEPPER_MIRROR4
 #define STEPPER_MIRROR4(name, motor1, motor2, motor3, motor4, minEndstop, maxEndstop)
+#endif
+#ifndef STEPPER_OBSERVEABLE
 #define STEPPER_OBSERVEABLE(name, driver)
-
-#elif IO_TARGET == 9 // call updatedDerived to activate new settings
-
-#define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop)
-#define STEPPER_MIRROR2(name, motor1, motor2, minEndstop, maxEndstop)
-#define STEPPER_MIRROR3(name, motor1, motor2, motor3, minEndstop, maxEndstop)
-#define STEPPER_MIRROR4(name, motor1, motor2, motor3, motor4, minEndstop, maxEndstop)
-#define STEPPER_OBSERVEABLE(name, driver)
-
-#else
-
-#define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop)
-#define STEPPER_MIRROR2(name, motor1, motor2, minEndstop, maxEndstop)
-#define STEPPER_MIRROR3(name, motor1, motor2, motor3, minEndstop, maxEndstop)
-#define STEPPER_MIRROR4(name, motor1, motor2, motor3, motor4, minEndstop, maxEndstop)
-#define STEPPER_OBSERVEABLE(name, driver)
-
+#endif
+#ifndef STEPPER_ADJUST_RESOLUTION
+#define STEPPER_ADJUST_RESOLUTION(name, driver, from, to)
 #endif

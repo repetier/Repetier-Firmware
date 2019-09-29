@@ -32,7 +32,7 @@ float IOTemperatureTable::interpolatePTC(int value, fast8_t num, const short* te
     int oldraw = pgm_read_word(&temptable[0]);
     int oldtemp = pgm_read_word(&temptable[1]);
     int newraw, newtemp = 0;
-    value = 4095 - value;
+    // value = 4095 - value;
     if (value < oldraw) {
         return TEMP_INT_TO_FLOAT(oldtemp);
     }

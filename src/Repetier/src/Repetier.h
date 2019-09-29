@@ -256,6 +256,29 @@ extern void updateEndstops();
 
 #define ILLEGAL_Z_PROBE -888
 
+#define IO_TARGET_INIT 1
+#define IO_TARGET_PWM 2
+#define IO_TARGET_100MS 3
+#define IO_TARGET_CLASS_DEFINITION 4
+#define IO_TARGET_ENDSTOP_UPDATE 5
+#define IO_TARGET_DEFINE_VARIABLES 6
+#define IO_TARGET_CONFIG_VISUALIZATION 7
+#define IO_TARGET_EEPROM 8
+#define IO_TARGET_UPDATE_DERIVED 9
+#define IO_TARGET_RESTORE_FROM_CONFIG 10
+#define IO_TARGET_ANALOG_INPUT_LOOP 11
+#define IO_TARGET_500MS 12
+#define IO_TARGET_TOOLS_TEMPLATES 13
+#define IO_TARGET_FIRMWARE_EVENTS 14
+#define IO_TARGET_PERIODICAL_ACTIONS 15
+#define IO_TARGET_GUI_CONTROLS 16
+#define IO_TARGET_GUI_CONFIG 17
+#define IO_TARGET_GUI_TUNE 18
+#define IO_TARGET_GUI_MAIN_MENU 19
+#define IO_TARGET_GUI_WIZARDS 20
+#define IO_TARGET_STORE_RECOVER_DATA 21
+#define IO_TARGET_RESTORE_RECOVER_DATA 22
+
 // we can not prevent this as some configurations need a parameter and others not
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -480,8 +503,6 @@ extern void microstepInit();
 #include "PrinterTypes/PrinterTypeDualXAxis.h"
 #endif
 #include "motion/VelocityProfile.h"
-
-// #include "src/motion/motion.h"
 
 extern long baudrate;
 

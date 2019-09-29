@@ -50,7 +50,7 @@
 #undef IO_PWM_INVERTED
 #undef IO_PWM_REPORT
 
-#if IO_TARGET == 1 // init
+#if IO_TARGET == IO_TARGET_INIT // init
 
 #define IO_PWM_SOFTWARE(name, pinname, speed)
 #define IO_PDM_SOFTWARE(name, pinname)
@@ -63,7 +63,7 @@
 #define IO_PWM_INVERTED(name, pwmname)
 #define IO_PWM_REPORT(name, pwmname)
 
-#elif IO_TARGET == 2 // PWM interrupt
+#elif IO_TARGET == IO_TARGET_PWM // PWM interrupt
 
 #define IO_PWM_SOFTWARE(name, pinname, speed) \
     if (pwm_count##speed == 0) { \
@@ -91,7 +91,7 @@
 #define IO_PWM_INVERTED(name, pwmname)
 #define IO_PWM_REPORT(name, pwmname)
 
-#elif IO_TARGET == 3 // 100ms
+#elif IO_TARGET == IO_TARGET_100MS // 100ms
 
 #define IO_PWM_SOFTWARE(name, pinname, speed)
 #define IO_PDM_SOFTWARE(name, pinname)
@@ -108,7 +108,7 @@
 #define IO_PWM_INVERTED(name, pwmname)
 #define IO_PWM_REPORT(name, pwmname)
 
-#elif IO_TARGET == 4 // class
+#elif IO_TARGET == IO_TARGET_CLASS_DEFINITION // class
 
 #define IO_PWM_SOFTWARE(name, pinname, speed) \
     template <class pinname> \
@@ -234,20 +234,21 @@
 #define IO_PWM_REPORT(name, pwmname) \
     class name##Class : public PWMHandler { \
         fast8_t lastPwm; \
+\
     public: \
-        name##Class() {lastPwm = 0;} \
+        name##Class() { lastPwm = 0; } \
         void set(fast8_t _pwm) final { \
             pwmname.set(_pwm); \
-            if(lastPwm != _pwm) { \
-              Com::printFLN(PSTR(#name) "=", (int)_pwm); \
-              lastPwm = _pwm; \
+            if (lastPwm != _pwm) { \
+                Com::printFLN(PSTR(#name) "=", (int)_pwm); \
+                lastPwm = _pwm; \
             } \
         } \
         fast8_t get() final { return lastPwm; } \
     }; \
     extern name##Class name;
 
-#elif IO_TARGET == 6 // variable
+#elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES // variable
 
 #define IO_PWM_SOFTWARE(name, pinname, speed) \
     name##Class<pinname> name;

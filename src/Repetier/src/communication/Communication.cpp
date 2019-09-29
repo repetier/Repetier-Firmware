@@ -44,6 +44,7 @@ FSTRINGVALUE(Com::tNewline, "\r\n")
 FSTRINGVALUE(Com::tNAN, "NAN")
 FSTRINGVALUE(Com::tINF, "INF")
 FSTRINGVALUE(Com::tError, "Error:")
+FSTRINGVALUE(Com::tLog, "Log:")
 FSTRINGVALUE(Com::tInfo, "Info:")
 FSTRINGVALUE(Com::tWarning, "Warning:")
 FSTRINGVALUE(Com::tResend, "Resend:")
@@ -292,9 +293,7 @@ FSTRINGVALUE(Com::tZProbeFailed, "Z-probe failed")
 FSTRINGVALUE(Com::tZProbeMax, "Z-probe max:")
 FSTRINGVALUE(Com::tZProbePrinterHeight, "Printer height:")
 //FSTRINGVALUE(Com::,"")
-#ifdef WAITING_IDENTIFIER
 FSTRINGVALUE(Com::tWait, WAITING_IDENTIFIER)
-#endif // WAITING_IDENTIFIER
 FSTRINGVALUE(Com::tNoEEPROMSupport, "No EEPROM support compiled.\r\n")
 FSTRINGVALUE(Com::tZProbeOffsetZ, "Coating thickness [mm]")
 #if FEATURE_AXISCOMP
@@ -503,6 +502,14 @@ void Com::printErrorF(FSTRINGPARAM(text)) {
 void Com::printErrorFLN(FSTRINGPARAM(text)) {
     printF(tError);
     printFLN(text);
+}
+void Com::printLogFLN(FSTRINGPARAM(text)) {
+    printF(tLog);
+    printFLN(text);
+}
+void Com::printLogF(FSTRINGPARAM(text)) {
+    printF(tLog);
+    printF(text);
 }
 void Com::printFLN(FSTRINGPARAM(text)) {
     printF(text);

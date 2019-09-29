@@ -19,14 +19,14 @@
 #undef IO_SPI_HW
 #undef IO_SPI_SW
 
-#if IO_TARGET == 1 // setup
+#if IO_TARGET == IO_TARGET_INIT // setup
 
 #define IO_SPI_HW(name, frequency, mode, msbfirst, csPin) \
     name.init();
 #define IO_SPI_SW(name, delayus, mode, msbfirst, csPin, clkPin, misoPin, mosiPin) \
     name.init();
 
-#elif IO_TARGET == 4 // class
+#elif IO_TARGET == IO_TARGET_CLASS_DEFINITION // class
 
 /**
  * Classes using SPI will get a super easy interface. To start a transfer they
@@ -213,7 +213,7 @@ public:
     }; \
     extern name##Class name;
 
-#elif IO_TARGET == 6 // variable
+#elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES // variable
 
 #define IO_SPI_HW(name, frequency, mode, msbfirst, csPin) \
     name##Class name;

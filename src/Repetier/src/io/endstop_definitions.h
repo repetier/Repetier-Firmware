@@ -25,7 +25,7 @@
 #undef ENDSTOP_MERGE4
 #undef ENDSTOP_SWITCH_HW
 
-#if IO_TARGET == 4
+#if IO_TARGET == IO_TARGET_CLASS_DEFINITION
 
 #define ENDSTOP_NONE(name) extern EndstopNoneDriver name;
 #define ENDSTOP_SWITCH(name, pin) extern EndstopSwitchDriver<pin> name;
@@ -38,7 +38,7 @@
 #define ENDSTOP_MERGE3(name, e1, e2, e3, axis, dir) extern EndstopMerge3 name;
 #define ENDSTOP_MERGE4(name, e1, e2, e3, e4, axis, dir) extern EndstopMerge4 name;
 
-#elif IO_TARGET == 1 // Init
+#elif IO_TARGET == IO_TARGET_INIT // Init
 
 #define ENDSTOP_NONE(name)
 #define ENDSTOP_SWITCH(name, pin)
@@ -52,7 +52,7 @@
 #define ENDSTOP_MERGE3(name, e1, e2, e3, axis, dir)
 #define ENDSTOP_MERGE4(name, e1, e2, e3, e4, axis, dir)
 
-#elif IO_TARGET == 6
+#elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES
 
 #define ENDSTOP_NONE(name) EndstopNoneDriver name;
 #define ENDSTOP_SWITCH(name, pin) EndstopSwitchDriver<pin> name;
@@ -67,7 +67,7 @@
 #define ENDSTOP_MERGE3(name, e1, e2, e3, axis, dir) EndstopMerge3 name(&e1, &e2, &e3, axis, dir);
 #define ENDSTOP_MERGE4(name, e1, e2, e3, e4, axis, dir) EndstopMerge4 name(&e1, &e2, &e3, &e4, axis, dir);
 
-#elif IO_TARGET == 5
+#elif IO_TARGET == IO_TARGET_ENDSTOP_UPDATE
 
 #define ENDSTOP_NONE(name)
 #define ENDSTOP_SWITCH(name, pin) name.update();

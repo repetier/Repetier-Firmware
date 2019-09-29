@@ -23,6 +23,7 @@ Definies the following macros:
 IO_OUTPUT(name, pin)
 IO_OUTPUT_INVERTED(name, pin)
 IO_OUTPUT_FAKE(name)
+IO_OUTPUT_LOG(name, output, changeOnly)
 
 */
 
@@ -33,8 +34,9 @@ IO_OUTPUT_FAKE(name)
 #undef IO_OUTPUT
 #undef IO_OUTPUT_INVERTED
 #undef IO_OUTPUT_FAKE
+#undef IO_OUTPUT_LOG
 
-#if IO_TARGET == 1 // Init pins
+#if IO_TARGET == IO_TARGET_INIT // Init pins
 
 #define IO_OUTPUT(name, pin) \
     SET_OUTPUT(pin); \
@@ -44,9 +46,7 @@ IO_OUTPUT_FAKE(name)
     SET_OUTPUT(pin); \
     WRITE(pin, 1);
 
-#define IO_OUTPUT_FAKE(name)
-
-#elif IO_TARGET == 4 // define class
+#elif IO_TARGET == IO_TARGET_CLASS_DEFINITION // define class
 
 #define IO_OUTPUT(name, pin) \
     class name { \
@@ -84,12 +84,39 @@ IO_OUTPUT_FAKE(name)
         inline static void off() {} \
     };
 
-#else
+#define IO_OUTPUT_LOG(name, output, changeOnly) \
+    class name { \
+        static fast8_t state; \
+\
+    public: \
+        inline static void set(fast8_t val) { \
+            if (state != val || !changeOnly) { \
+                Com::printLogF(PSTR(#name)); \
+                Com::printFLN(PSTR("="), static_cast<int>(val)); \
+            } \
+            state = val; \
+            output::set(val); \
+        } \
+        inline static void on() { set(true); } \
+        inline static void off() { set(false); } \
+    };
+#elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES
 
+#define IO_OUTPUT_LOG(name, output, changeOnly) \
+    fast8_t name::state = false;
+
+#endif
 // Fallback to remove unused macros preventing errors!
 
+#ifndef IO_OUTPUT
 #define IO_OUTPUT(name, pin)
+#endif
+#ifndef IO_OUTPUT_INVERTED
 #define IO_OUTPUT_INVERTED(name, pin)
+#endif
+#ifndef IO_OUTPUT_FAKE
 #define IO_OUTPUT_FAKE(name)
-
+#endif
+#ifndef IO_OUTPUT_LOG
+#define IO_OUTPUT_LOG(name, output, changeOnly)
 #endif

@@ -67,6 +67,7 @@ void ToolExtruder::eepromHandle() {
     EEPROM::handleFloat(pos + 12, PSTR("Acceleration [mm/s^3]"), 2, acceleration);
     EEPROM::handleFloat(pos + 16, PSTR("Advance [steps/mm]"), 2, advance);
     EEPROM::handleFloat(pos + 20, PSTR("Diameter [mm]"), 2, diameter);
+    stepper->eepromHandle();
 }
 
 void ToolExtruder::setAdvance(float adv) {
@@ -89,6 +90,7 @@ void ToolExtruder::disableMotor() {
 
 void ToolExtruder::enableMotor() {
     stepper->enable();
+    Printer::unsetAllSteppersDisabled();
 }
 
 void ToolExtruder::stepMotor() {
@@ -246,5 +248,5 @@ void FilamentDetector<inputPin>::testFilament() {
 }
 
 #undef IO_TARGET
-#define IO_TARGET 13
+#define IO_TARGET IO_TARGET_TOOLS_TEMPLATES
 #include "../io/redefine.h"

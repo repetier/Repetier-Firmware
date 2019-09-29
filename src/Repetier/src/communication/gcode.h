@@ -381,7 +381,6 @@ public:
     static void keepAlive(enum FirmwareState state, int id = 0);
     static uint32_t keepAliveInterval;
     friend class SDCard;
-    friend class UIDisplay;
     static FSTRINGPARAM(fatalErrorMsg);
     friend class GCodeSource;
 

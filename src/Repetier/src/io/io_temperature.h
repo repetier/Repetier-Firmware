@@ -47,7 +47,7 @@ IO_TEMPERATURE_TABLE(name,analog,table)
 #undef IO_HOTTEST_OF_2
 #undef IO_COOLEST_OF_2
 
-#if IO_TARGET == 1 // hardware init
+#if IO_TARGET == IO_TARGET_INIT // hardware init
 
 #define IO_TEMP_TABLE_NTC(name, dataname)
 #define IO_TEMP_TABLE_PTC(name, dataname)
@@ -58,7 +58,7 @@ IO_TEMPERATURE_TABLE(name,analog,table)
 #define IO_HOTTEST_OF_2(name, temp1, temp2)
 #define IO_COOLEST_OF_2(name, temp1, temp2)
 
-#elif IO_TARGET == 4 // class
+#elif IO_TARGET == IO_TARGET_CLASS_DEFINITION // class
 
 class IOTemperatureTable {
 public:
@@ -218,7 +218,7 @@ public:
     }; \
     extern name##Class name;
 
-#elif IO_TARGET == 6 // variable
+#elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES // variable
 
 #define IO_TEMP_TABLE_NTC(name, dataname) \
     const short dataname##_table[NUM_##dataname][2] PROGMEM = { dataname }; \

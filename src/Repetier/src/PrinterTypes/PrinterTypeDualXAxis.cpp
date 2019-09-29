@@ -228,13 +228,13 @@ void PrinterType::activatedTool(fast8_t id) {
         rightParked = false;
         leftParked = false;
         activeAxis = 0;
-    } else if (activeAxis) {                        // right extruder
+    } else if (activeAxis) {                        // right tool
         if (targetReal < Motion1::minPos[X_AXIS]) { // prevent crash
             targetReal = endPos[1];
         }
         Motion1::tmpPosition[A_AXIS] = targetReal;
         rightParked = false;
-    } else {
+    } else {                                        // left tool
         if (targetReal > Motion1::maxPos[X_AXIS]) { // prevent crash
             targetReal = endPos[0];
         }
@@ -293,20 +293,21 @@ void PrinterType::enableMotors(fast8_t axes) {
     }
     Printer::unsetAllSteppersDisabled();
 }
+
 bool PrinterType::queueMove(float feedrate, bool secondaryMove) {
     if (dontChangeCoords) { // don't think about coordinates wanted!
         return Motion1::queueMove(feedrate, secondaryMove);
     }
     targetReal = Motion1::destinationPositionTransformed[X_AXIS];
     // Set current to real position if parked
-    if (leftParked) {
+    if (leftParked || (Motion1::dittoMode == 0 && activeAxis == 1)) {
         Motion1::currentPositionTransformed[X_AXIS] = endPos[0];
     }
-    if (rightParked) {
+    if (rightParked || (Motion1::dittoMode == 0 && activeAxis == 0)) {
         Motion1::currentPositionTransformed[A_AXIS] = endPos[1];
     }
     // Check what we need to do
-    if (lazyMode && leftParked && rightParked) {
+    if (lazyMode && leftParked && rightParked) { // unpark used extruders if needed
         // DEBUG_MSG_FAST("Q2");
         // Seems we are in lazy mode with both tools parked, so test if we need to move one
         if (Motion1::currentPositionTransformed[E_AXIS] < Motion1::destinationPositionTransformed[E_AXIS]) {
@@ -362,14 +363,14 @@ bool PrinterType::queueMove(float feedrate, bool secondaryMove) {
                 Motion1::destinationPositionTransformed[A_AXIS] = Motion1::destinationPositionTransformed[X_AXIS] - Motion1::minPos[X_AXIS] + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
             }
         }
-    } else if (activeAxis) {
-        if (rightParked) { // right tool active
-            Motion1::destinationPositionTransformed[A_AXIS] = Motion1::currentPositionTransformed[A_AXIS];
+    } else if (activeAxis) {                                                                               // move tool 1
+        if (rightParked) {                                                                                 // right tool active
+            Motion1::destinationPositionTransformed[A_AXIS] = Motion1::currentPositionTransformed[A_AXIS]; // parked, do not move
         } else {
-            Motion1::destinationPositionTransformed[A_AXIS] = targetReal;
+            Motion1::destinationPositionTransformed[A_AXIS] = targetReal; // move it to current x
         }
-        Motion1::destinationPositionTransformed[X_AXIS] = endPos[0];                                   // do not move x axis
-    } else if (!leftParked) {                                                                          // left tool active
+        Motion1::destinationPositionTransformed[X_AXIS] = endPos[0];                                   // do not move x0 axis
+    } else if (!leftParked) {                                                                          // move tool 0                                                                        // left tool active
         Motion1::destinationPositionTransformed[A_AXIS] = Motion1::currentPositionTransformed[A_AXIS]; // Don't move right side
     } else {                                                                                           // left side is parked so do not move
         Motion1::destinationPositionTransformed[X_AXIS] = Motion1::currentPositionTransformed[X_AXIS]; // do not move x axis

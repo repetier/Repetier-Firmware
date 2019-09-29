@@ -60,6 +60,7 @@ enum class GUIAction;
 #include "heatManager.h"
 #include "coolerManager.h"
 #include "tools.h"
+#include "io_light.h"
 #include "../custom/customMacros.h"
 
 // Add user configuration

@@ -24,6 +24,9 @@ Early stage version for Stacke X2 printer - use with care
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+// Short version has z max 300, long version 610 mm
+#define STACKER_SHORT 1
+
 /**************** READ FIRST ************************
 
    This configuration file was created with the configuration tool. For that
@@ -45,30 +48,28 @@ Early stage version for Stacke X2 printer - use with care
 #define NUM_EXTRUDER 2
 #define NUM_SERVOS 0
 #define NUM_TOOLS 2
-#define MOTHERBOARD MOTHERBOARD_STACKER_3D_SUPERBOARD
+#define MOTHERBOARD 412 // Stacker 3d Superboard
 #define EEPROM_MODE 2
 #define RFSERIAL Serial
 #define BLUETOOTH_SERIAL -1
 #define BLUETOOTH_BAUD 250000
-#define WAITING_IDENTIFIER "wait"
 #define JSON_OUTPUT 1
+#define FEATURE_SERVO 0
 #define FEATURE_WATCHDOG 1
+#define FEATURE_Z_PROBE 0
 #define FEATURE_RETRACTION 1
+#define USE_ADVANCE 1
 #define NUM_AXES 5                   // X,Y,Z and E for extruder A,B,C would be 5,6,7
 #define STEPPER_FREQUENCY 100000     // Maximum stepper frequency.
 #define PREPARE_FREQUENCY 2000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
 #define BLOCK_FREQUENCY 1000         // Number of blocks with constant stepper rate per second.
 #define VELOCITY_PROFILE 2           // 0 = linear, 1 = cubic, 2 = quintic velocity shape
-#define Z_SPEED 5                    // Z positioning speed
-#define XY_SPEED 100                 // XY positioning speed for normal operations
+#define Z_SPEED 10                   // Z positioning speed
+#define XY_SPEED 150                 // XY positioning speed for normal operations
 #define G0_FEEDRATE 0                // Speed for G0 moves. Independent from set F value! Set 0 to use F value.
-#define A_SPEED 100                  // Second X axis
+#define A_SPEED 150                  // Second X axis
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
 #define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
-#define HOST_RESCUE 1                // Enable host rescue help system
-//#define DEBUG_RESCUE                 // Uncomment to add power loss entry in debug menu while printing
-#define POWERLOSS_LEVEL 2            // How much time do we have on powerloss, 0 = no move, 1 = short just raise Z, 2 = long full park move
-#define POWERLOSS_UP 5               // How much to move up if mode 1 is active
 #define Z_PROBE_TYPE 0               // 0 = no z probe, 1 = default z probe, 2 = Nozzle as probe
 #define Z_PROBE_BORDER 2             // Safety border to ensure position is allowed
 #define Z_PROBE_TEMPERATURE 170      // Temperature for type 2
@@ -77,7 +78,7 @@ Early stage version for Stacke X2 printer - use with care
 #define PRINTER_TYPE PRINTER_TYPE_DUAL_X
 // steps to include as babysteps per 1/BLOCK_FREQUENCY seconds. Must be lower then STEPPER_FREQUENCY/BLOCK_FREQUENCY and be low enough to not loose steps.
 #define BABYSTEPS_PER_BLOCK \
-    { 10, 10, 10 }
+    { 2, 2, 4 }
 // If all axis end stops are hardware based we can skip the time consuming tests each step
 #define NO_SOFTWARE_AXIS_ENDSTOPS
 // Normally only a delta has motor end stops required. Normally you trigger using axis endstops.
@@ -142,11 +143,11 @@ to the position. 0 = no contribution. */
 #define DELTA_HOME_OFFSET_C 0.85f
 
 // Extra parameter in case you have a dual x axis
-#define DUAL_X_LEFT_OFFSET -44.5
-#define DUAL_X_RIGHT_OFFSET 404.7
+#define DUAL_X_LEFT_OFFSET -62
+#define DUAL_X_RIGHT_OFFSET 441.59
 // Minimum distance between both heads
-#define DUAL_X_MIN_DISTANCE 46
-#define LAZY_DUAL_X_AXIS 0
+#define DUAL_X_MIN_DISTANCE 62
+#define LAZY_DUAL_X_AXIS 1
 
 // Set all directions where no explicit test is required.
 // This is for dummy endstops and for hardware endstops.
@@ -164,15 +165,10 @@ to the position. 0 = no contribution. */
 #define DISABLE_Y 0
 #define DISABLE_Z 0
 
-#define FEATURE_AXISCOMP 1
-#define AXISCOMP_TANXY 0
-#define AXISCOMP_TANYZ 0
-#define AXISCOMP_TANXZ 0
-
 // Next 7 lines are required to make the following work, do not change!
 #include "boards/pins.h"
 #undef IO_TARGET
-#define IO_TARGET 4
+#define IO_TARGET IO_TARGET_CLASS_DEFINITION
 #undef CONFIG_EXTERN
 #define CONFIG_EXTERN extern
 #include "drivers/drivers.h"
@@ -189,9 +185,9 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
 // All fans in this list list become controllable with M106/M107
 // by selecteing the fan number with P0..P<NUM_FANS-1>
-#define NUM_FANS 2
+#define NUM_FANS 1
 #define FAN_LIST \
-    { &Fan1PWM, &Fan2PWM }
+    { &Fan1PWM }
 
 #define NUM_HEATED_BEDS 1
 #define HEATED_BED_LIST \
@@ -219,10 +215,17 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define MOTORS \
     { &XMotor, &YMotor, &ZMotor, &AMotor, &E1Motor, &E2Motor }
 
-#define X_MAX_LENGTH 520
+// x axis extruders are 62mm width, distance after homing 503mm
+
+#define X_MAX_LENGTH 379
 #define Y_MAX_LENGTH 385
-#define Z_MAX_LENGTH 610
-#define A_MAX_LENGTH X_MAX_LENGTH
+#if STACKER_SHORT
+#define Z_MAX_LENGTH 300
+#else
+define Z_MAX_LENGTH 610
+#endif
+
+#define A_MAX_LENGTH 441.59
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
@@ -232,31 +235,27 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define BED_Y_MIN Y_MIN_POS
 #define BED_Y_MAX (Y_MIN_POS + Y_MAX_LENGTH)
 // Park position used when pausing from firmware side
-#if PRINTER_TYPE == 2
+#if PRINTER_TYPE == PRINTER_TYPE_DELTA
 #define PARK_POSITION_X (0)
 #define PARK_POSITION_Y (70)
 #else
 #define PARK_POSITION_X (X_MIN_POS)
 #define PARK_POSITION_Y (Y_MIN_POS + Y_MAX_LENGTH)
 #endif
-#define PARK_POSITION_Z_RAISE 10
+#define PARK_POSITION_Z_RAISE 0
 
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 400
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 400
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1000
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1000
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 50
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_A 400
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 1000
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1000
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 50
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_A 1000
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_A 1000
 #define XAXIS_STEPS_PER_MM 146.1
 #define AAXIS_STEPS_PER_MM 146.1
 #define YAXIS_STEPS_PER_MM 146.1
-#define ZAXIS_STEPS_PER_MM 405.82
-#define MAX_FEEDRATE_X 200
-#define MAX_FEEDRATE_Y 200
+#define ZAXIS_STEPS_PER_MM 404.18
+#define MAX_FEEDRATE_X 400
+#define MAX_FEEDRATE_Y 250
 #define MAX_FEEDRATE_Z 12
-#define MAX_FEEDRATE_A 200
+#define MAX_FEEDRATE_A 400
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 // ################ END MANUAL SETTINGS ##########################
@@ -314,7 +313,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define SKIP_M109_IF_WITHIN 5
 #define SCALE_PID_TO_MAX 0
 #define TEMP_HYSTERESIS 0
-#define EXTRUDE_MAXLENGTH 160
+#define EXTRUDE_MAXLENGTH 1000
 
 #define GENERIC_THERM_VREF 5
 #define GENERIC_THERM_NUM_ENTRIES 33
@@ -327,6 +326,28 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define MIN_EXTRUDER_TEMP 150
 #define MILLISECONDS_PREHEAT_TIME 30000
 
+// ##                              CNC configuration                                       ##
+
+/*
+If the firmware is in CNC mode, it can control a mill with M3/M4/M5. It works
+similar to laser mode, but mill keeps enabled during G0 moves and it allows
+setting rpm (only with event extension that supports this) and milling direction.
+It also can add a delay to wait for spindle to run on full speed.
+*/
+
+#define SUPPORT_CNC 0
+#define CNC_WAIT_ON_ENABLE 300
+#define CNC_WAIT_ON_DISABLE 0
+#define CNC_ENABLE_PIN -1
+#define CNC_ENABLE_WITH 1
+#define CNC_DIRECTION_PIN -1
+#define CNC_DIRECTION_CW 1
+#define CNC_PWM_MAX 255
+#define CNC_RPM_MAX 8000
+#define CNC_SAFE_Z 150
+
+#define DEFAULT_PRINTER_MODE 0
+
 // ################ Endstop/homing configuration #####################
 
 #define DOOR_PIN -1
@@ -335,13 +356,13 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define ENDSTOP_X_BACK_MOVE 5
 #define ENDSTOP_Y_BACK_MOVE 5
 #define ENDSTOP_Z_BACK_MOVE 2
-#define ENDSTOP_A_BACK_MOVE 2
-#define ENDSTOP_X_RETEST_REDUCTION_FACTOR 2
-#define ENDSTOP_Y_RETEST_REDUCTION_FACTOR 2
-#define ENDSTOP_Z_RETEST_REDUCTION_FACTOR 2
-#define ENDSTOP_A_RETEST_REDUCTION_FACTOR 2
+#define ENDSTOP_A_BACK_MOVE 5
+#define ENDSTOP_X_RETEST_REDUCTION_FACTOR 3
+#define ENDSTOP_Y_RETEST_REDUCTION_FACTOR 3
+#define ENDSTOP_Z_RETEST_REDUCTION_FACTOR 3
+#define ENDSTOP_A_RETEST_REDUCTION_FACTOR 3
 #define ENDSTOP_X_BACK_ON_HOME 2
-#define ENDSTOP_Y_BACK_ON_HOME 1
+#define ENDSTOP_Y_BACK_ON_HOME 2
 #define ENDSTOP_Z_BACK_ON_HOME 0
 #define ENDSTOP_A_BACK_ON_HOME 2
 #define ALWAYS_CHECK_ENDSTOPS 0
@@ -357,12 +378,12 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define HOMING_FEEDRATE_Y 40
 #define HOMING_FEEDRATE_Z 10
 #define HOMING_FEEDRATE_A 40
-#define ZHOME_PRE_RAISE 0
-#define ZHOME_PRE_RAISE_DISTANCE 10
+#define ZHOME_PRE_RAISE 2
+#define ZHOME_PRE_RAISE_DISTANCE 2
 #define RAISE_Z_ON_TOOLCHANGE 0
 #define ZHOME_MIN_TEMPERATURE 0
 #define ZHOME_HEAT_ALL 0
-#define ZHOME_HEIGHT 10
+#define ZHOME_HEIGHT 0
 #define FIXED_Z_HOME_POSITION 0
 #define ZHOME_X_POS 0
 #define ZHOME_Y_POS 0
@@ -406,7 +427,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define INTERPOLATE_ACCELERATION_WITH_Z 1
 #define ACCELERATION_FACTOR_TOP 75
 #define MAX_JERK 5
-#define MAX_ZJERK 0.3
+#define MAX_ZJERK 0
 #define MAX_AJERK 5
 #define PRINTLINE_CACHE_SIZE 32
 #define MOVE_CACHE_LOW 10
@@ -468,6 +489,13 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define BED_MOTOR_2_Y 45
 #define BED_MOTOR_3_X 137
 #define BED_MOTOR_3_Y 210
+#define BENDING_CORRECTION_A 0
+#define BENDING_CORRECTION_B 0
+#define BENDING_CORRECTION_C 0
+#define FEATURE_AXISCOMP 0
+#define AXISCOMP_TANXY 0
+#define AXISCOMP_TANYZ 0
+#define AXISCOMP_TANXZ 0
 
 #ifndef SDSUPPORT // Some boards have sd support on board. These define the values already in pins.h
 #define SDSUPPORT 1
@@ -508,11 +536,8 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define UI_KEY_REDUCE_REPEAT 50
 #define UI_KEY_MIN_REPEAT 50
 #define FEATURE_BEEPER 0
-#define CASE_LIGHTS_PIN 13
-#define CASE_LIGHT_DEFAULT_ON 1
+#define CASE_LIGHT_DEFAULT_ON 0
 #define UI_START_SCREEN_DELAY 2000
-#define UI_DYNAMIC_ENCODER_SPEED 1
-#define UI_HEAD "E1:%e0\002C E2:%e1\002C B:%eb\002C"
 /**
 Beeper sound definitions for short beeps during key actions
 and longer beeps for important actions.

@@ -825,7 +825,7 @@ void PWM_TIMER_VECTOR() {
 
 // Add all generated pwm handlers
 #undef IO_TARGET
-#define IO_TARGET 2
+#define IO_TARGET IO_TARGET_PWM
 #include "io/redefine.h"
 
     counterPeriodical++;                          // Approximate a 100ms timer
@@ -838,7 +838,7 @@ void PWM_TIMER_VECTOR() {
     // conversion finished?
     if ((ADC->ADC_ISR & adcEnable) == adcEnable) {
 #undef IO_TARGET
-#define IO_TARGET 11
+#define IO_TARGET IO_TARGET_ANALOG_INPUT_LOOP
 #include "io/redefine.h"
         /*if (executePeriodical) {
             Com::printFLN("bed:",IOAnalogBed0.value);

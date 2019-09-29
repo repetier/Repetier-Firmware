@@ -281,11 +281,12 @@ public:
 #endif
     // Print status related
     static int currentLayer;
-    static int maxLayer;       // -1 = unknown
-    static char printName[21]; // max. 20 chars + 0
-    static float progress;
+    static int maxLayer;             // -1 = unknown
+    static char printName[21];       // max. 20 chars + 0
     static fast8_t breakLongCommand; // Set by M108 to stop long tasks
     static fast8_t wizardStackPos;
+    static fast8_t caseLightMode;
+    static float progress;
     static wizardVar wizardStack[WIZARD_STACK_SIZE];
 
     static void handleInterruptEvent();
@@ -631,7 +632,6 @@ public:
         return wizardStack[--wizardStackPos];
     }
     static void showConfiguration();
-    static void setCaseLight(bool on);
     static void reportCaseLightStatus();
 #if JSON_OUTPUT || defined(DOXYGEN)
     static void showJSONStatus(int type);

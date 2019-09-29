@@ -91,6 +91,7 @@ public:
     FSTRINGVAR(tNAN)
     FSTRINGVAR(tINF)
     FSTRINGVAR(tError)
+    FSTRINGVAR(tLog)
     FSTRINGVAR(tInfo)
     FSTRINGVAR(tWarning)
     FSTRINGVAR(tResend)
@@ -336,9 +337,7 @@ public:
     FSTRINGVAR(tZProbeMax)
     FSTRINGVAR(tZProbePrinterHeight)
 
-#ifdef WAITING_IDENTIFIER
     FSTRINGVAR(tWait)
-#endif // WAITING_IDENTIFIER
 
     FSTRINGVAR(tNoEEPROMSupport)
     FSTRINGVAR(tZProbeOffsetZ)
@@ -491,6 +490,8 @@ public:
     static void printWarningFLN(FSTRINGPARAM(text));
     static void printInfoFLN(FSTRINGPARAM(text));
     static void printErrorFLN(FSTRINGPARAM(text));
+    static void printLogFLN(FSTRINGPARAM(text));
+    static void printLogF(FSTRINGPARAM(text));
     static void printFLN(FSTRINGPARAM(text));
     static void printF(FSTRINGPARAM(text));
     static void printF(FSTRINGPARAM(text), int value);

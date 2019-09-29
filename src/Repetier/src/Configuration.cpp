@@ -10,11 +10,11 @@
 // Create class instances form Configuration_io.h
 
 #undef IO_TARGET
-#define IO_TARGET 6
+#define IO_TARGET IO_TARGET_DEFINE_VARIABLES
 #include "io/redefine.h"
 
 void updateEndstops() {
 #undef IO_TARGET
-#define IO_TARGET 5
+#define IO_TARGET IO_TARGET_ENDSTOP_UPDATE
 #include "io/redefine.h"
 }

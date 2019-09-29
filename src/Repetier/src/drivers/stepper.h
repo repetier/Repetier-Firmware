@@ -1,5 +1,6 @@
 class EndstopDriver;
 class GCode;
+enum class GUIAction;
 
 class StepperDriverBase {
 protected:
@@ -55,7 +56,12 @@ public:
     virtual void beforeHoming() {}
     virtual void afterHoming() {}
     virtual void handleMCode(GCode& com) {}
-    // uint32_t position;
+    // If true the stepper usager will not offer resolution modification in GUI
+    virtual bool overridesResolution() { return false; }
+    // Configuration in GUI
+    virtual void menuConfig(GUIAction action, void* data) {}
+    // Allow having own settings e.g. current, microsteps
+    virtual void eepromHandle() {}
 };
 
 /** Holds a position counter that can be observed, otherwise sends
@@ -111,6 +117,88 @@ public:
     // or otherwise prepare for endstop detection.
     virtual void beforeHoming() final { stepper->beforeHoming(); }
     virtual void afterHoming() final { stepper->afterHoming(); }
+    // If true the stepper usage will not offer resolution modification in GUI
+    virtual bool overridesResolution() { return stepper->overridesResolution(); }
+    // Configuration in GUI
+    virtual void menuConfig(GUIAction action, void* data) {
+        stepper->menuConfig(action, data);
+    }
+};
+
+/**
+  Converts incoming step frequency from = steps/length unit to to = steps/length unit steps.
+  The only requirement is that the incoming frequency must be higher then the outgoing
+  frequency. The maximum error is one step.
+ */
+template <class driver>
+class AdjustResolutionStepperDriver : public StepperDriverBase {
+    driver* stepper;
+    uint32_t accumulator;
+    uint32_t from;
+    uint32_t to;
+    uint16_t eprStart;
+
+public:
+    AdjustResolutionStepperDriver(driver* _stepper, int32_t _from, int32_t _to)
+        : StepperDriverBase(_stepper->getMinEndstop(), _stepper->getMaxEndstop())
+        , stepper(_stepper)
+        , accumulator(0)
+        , from(_from)
+        , to(_to) {}
+    virtual ~AdjustResolutionStepperDriver() {}
+    inline EndstopDriver* getMinEndstop() { return minEndstop; }
+    inline EndstopDriver* getMaxEndstop() { return maxEndstop; }
+    /// Always executes the step
+    virtual void step() final {
+        if (direction) {
+            accumulator += to;
+            if (accumulator >= to) {
+                stepper->step();
+                accumulator -= from;
+            }
+        } else {
+            accumulator -= to;
+            if (accumulator <= -to) {
+                stepper->step();
+                accumulator += from;
+            }
+        }
+    }
+    /// Set step signal low
+    virtual void unstep() final {
+        stepper->unstep();
+    }
+    /// Set direction, true = max direction
+    virtual void dir(bool d) final {
+        direction = d;
+        stepper->dir(d);
+    }
+    /// Enable motor driver
+    virtual void enable() final { stepper->enable(); }
+    /// Disable motor driver
+    virtual void disable() final { stepper->disable(); }
+    // Return true if setting microsteps is supported
+    virtual bool implementsSetMicrosteps() final { return stepper->implementsSetMicrosteps(); }
+    // Return true if setting current in software is supported
+    virtual bool implementsSetMaxCurrent() final { return stepper->implementsSetMaxCurrent(); }
+    /// Set microsteps. Must be a power of 2.
+    virtual void setMicrosteps(int microsteps) final { stepper->setMicrosteps(microsteps); }
+    /// Set max current as range 0..255
+    virtual void setMaxCurrent(int max) final { stepper->setMaxCurrent(max); }
+    // Called before homing starts. Can be used e.g. to disable silent mode
+    // or otherwise prepare for endstop detection.
+    virtual void beforeHoming() final { stepper->beforeHoming(); }
+    virtual void afterHoming() final { stepper->afterHoming(); }
+    // If true the stepper usager will not offer resolution modification in GUI
+    virtual bool overridesResolution() final { return true; }
+    static void menuStepsPerMM(GUIAction action, void* data);
+    // Configuration in GUI
+    virtual void menuConfig(GUIAction action, void* data) final;
+    virtual void init() final;
+    virtual void eepromHandle() final;
+    void restoreFromConfiguration(int32_t _to) {
+        to = _to;
+    }
 };
 
 /// Plain stepper driver with optional endstops attached.
@@ -173,6 +261,13 @@ public:
         motor1->handleMCode(com);
         motor2->handleMCode(com);
     }
+    // If true the stepper usage will not offer resolution modification in GUI
+    virtual bool overridesResolution() { return motor1->overridesResolution() || motor2->overridesResolution(); }
+    // Configuration in GUI
+    virtual void menuConfig(GUIAction action, void* data) {
+        motor1->menuConfig(action, data);
+        motor2->menuConfig(action, data);
+    }
 };
 
 /// Plain stepper driver with optional endstops attached.
@@ -215,6 +310,14 @@ public:
         motor1->handleMCode(com);
         motor2->handleMCode(com);
         motor3->handleMCode(com);
+    }
+    // If true the stepper usage will not offer resolution modification in GUI
+    virtual bool overridesResolution() { return motor1->overridesResolution() || motor2->overridesResolution() || motor3->overridesResolution(); }
+    // Configuration in GUI
+    virtual void menuConfig(GUIAction action, void* data) {
+        motor1->menuConfig(action, data);
+        motor2->menuConfig(action, data);
+        motor3->menuConfig(action, data);
     }
 };
 
@@ -265,5 +368,14 @@ public:
         motor2->handleMCode(com);
         motor3->handleMCode(com);
         motor4->handleMCode(com);
+    }
+    // If true the stepper usage will not offer resolution modification in GUI
+    virtual bool overridesResolution() { return motor1->overridesResolution() || motor2->overridesResolution() || motor3->overridesResolution() || motor4->overridesResolution(); }
+    // Configuration in GUI
+    virtual void menuConfig(GUIAction action, void* data) {
+        motor1->menuConfig(action, data);
+        motor2->menuConfig(action, data);
+        motor3->menuConfig(action, data);
+        motor4->menuConfig(action, data);
     }
 };

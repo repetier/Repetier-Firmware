@@ -38,7 +38,7 @@ IO_INPUT_DUMMY(name, state)
 #undef IO_INPUT_INVERTED_PULLUP
 #undef IO_INPUT_DUMMY
 
-#if IO_TARGET == 1 // Init pins
+#if IO_TARGET == IO_TARGET_INIT // Init pins
 
 #define IO_INPUT(name, pin) \
     SET_INPUT(pin);
@@ -56,7 +56,7 @@ IO_INPUT_DUMMY(name, state)
 
 #define IO_INPUT_DUMMY(name, state)
 
-#elif IO_TARGET == 4 // define class
+#elif IO_TARGET == IO_TARGET_CLASS_DEFINITION // define class
 
 #define IO_INPUT(name, _pin) \
     class name { \

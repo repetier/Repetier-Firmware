@@ -21,30 +21,37 @@
 #endif
 
 #undef SERVO_ANALOG
-extern ServoInterface *analogServoSlots[4];
+extern ServoInterface* analogServoSlots[4];
 
-#if IO_TARGET == 4 // class
+#if IO_TARGET == IO_TARGET_CLASS_DEFINITION // class
 
 #define SERVO_ANALOG(name, slot, output, minVal, maxVal, neutral) \
     class name##Class : public ServoInterface { \
         int position; \
+\
     public: \
-        name##Class() {analogServoSlots[slot] = this; \
+        name##Class() { \
+            analogServoSlots[slot] = this; \
             position = neutral; \
-            HAL::servoMicroseconds(slot, neutral, 1000);} \
-        virtual int getPosition() {return position;} \
+            HAL::servoMicroseconds(slot, neutral, 1000); \
+        } \
+        virtual int getPosition() { return position; } \
         virtual void setPosition(int pos, int32_t timeout) { \
-            if(pos < minVal) {pos = minVal;}\
-            if(pos > maxVal) {pos = maxVal;} \
+            if (pos < minVal) { \
+                pos = minVal; \
+            } \
+            if (pos > maxVal) { \
+                pos = maxVal; \
+            } \
             position = pos; \
             HAL::servoMicroseconds(slot, pos, timeout); \
         } \
-        virtual void enable() {output::on();} \
-        virtual void disable() {output::off();} \
+        virtual void enable() { output::on(); } \
+        virtual void disable() { output::off(); } \
     }; \
     extern name##Class name;
 
-#elif IO_TARGET == 6
+#elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES
 
 #define SERVO_ANALOG(name, slot, output, minVal, maxVal, neutral) \
     name##Class name;

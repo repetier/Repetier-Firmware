@@ -20,7 +20,7 @@
 #undef HEAT_MANAGER_PID
 #undef HEAT_MANAGER_DYN_DEAD_TIME
 
-#if IO_TARGET == 15 // periodical action
+#if IO_TARGET == IO_TARGET_PERIODICAL_ACTIONS // periodical action
 
 #define HEAT_MANAGER_BANG_BANG(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, hotPlugable) \
     name.update();
@@ -29,7 +29,7 @@
 #define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
     name.update();
 
-#elif IO_TARGET == 1 // init
+#elif IO_TARGET == IO_TARGET_INIT // init
 
 #define HEAT_MANAGER_BANG_BANG(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, hotPlugable) \
     name.init();
@@ -40,7 +40,7 @@
 #define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
     name.init();
 
-#elif IO_TARGET == 4
+#elif IO_TARGET == IO_TARGET_CLASS_DEFINITION
 
 #define HEAT_MANAGER_BANG_BANG(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, hotPlugable) \
     extern HeatManagerBangBang name;
@@ -49,7 +49,7 @@
 #define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
     extern HeatManagerDynDeadTime name;
 
-#elif IO_TARGET == 6
+#elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES
 
 #define HEAT_MANAGER_BANG_BANG(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, hotPlugable) \
     HeatManagerBangBang name(tp, index, &input, &output, maxTemp, maxPwm, 1000, decVariance, decPeriod, hotPlugable);
@@ -60,7 +60,7 @@
 #define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
     HeatManagerDynDeadTime name(tp, index, &input, &output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable);
 
-#elif IO_TARGET == 10 // restore from config
+#elif IO_TARGET == IO_TARGET_RESTORE_FROM_CONFIG // restore from config
 
 #define HEAT_MANAGER_BANG_BANG(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, hotPlugable) \
     name.resetFromConfig(maxPwm, decVariance, decPeriod);

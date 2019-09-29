@@ -493,6 +493,15 @@ void Motion1::setTmpPositionXYZ(float x, float y, float z) {
     tmpPosition[Y_AXIS] = y;
     tmpPosition[Z_AXIS] = z;
     tmpPosition[E_AXIS] = IGNORE_COORDINATE;
+#if NUM_AXES > A_AXIS
+    tmpPosition[A_AXIS] = IGNORE_COORDINATE;
+#endif
+#if NUM_AXES > B_AXIS
+    tmpPosition[B_AXIS] = IGNORE_COORDINATE;
+#endif
+#if NUM_AXES > C_AXIS
+    tmpPosition[C_AXIS] = IGNORE_COORDINATE;
+#endif
 }
 
 void Motion1::setTmpPositionXYZE(float x, float y, float z, float e) {
@@ -501,6 +510,15 @@ void Motion1::setTmpPositionXYZE(float x, float y, float z, float e) {
     tmpPosition[Y_AXIS] = y;
     tmpPosition[Z_AXIS] = z;
     tmpPosition[E_AXIS] = e;
+#if NUM_AXES > A_AXIS
+    tmpPosition[A_AXIS] = IGNORE_COORDINATE;
+#endif
+#if NUM_AXES > B_AXIS
+    tmpPosition[B_AXIS] = IGNORE_COORDINATE;
+#endif
+#if NUM_AXES > C_AXIS
+    tmpPosition[C_AXIS] = IGNORE_COORDINATE;
+#endif
 }
 
 // Move with coordinates in official coordinates (before offset, transform, ...)
@@ -1265,21 +1283,23 @@ void Motion1::homeAxes(fast8_t axes) {
     waitForEndOfMoves();
     // bool isAL = isAutolevelActive();
     // setAutolevelActive(false);
-    bool bcActive = Leveling::isDistortionEnabled();
-    Leveling::setDistortionEnabled(false);
-    updatePositionsFromCurrent();
-    Motion2::setMotorPositionFromTransformed();
     Printer::setHoming(true);
-    fast8_t activeToolId = Tool::getActiveToolId();
-    callBeforeHomingOnSteppers();
 #if ZHOME_PRE_RAISE
+    float zAmountRaised = 0;
     if (ZHOME_PRE_RAISE == 2 || Motion1::minAxisEndstops[Z_AXIS]->update()) {
         if (!isAxisHomed(Z_AXIS) || currentPosition[Z_AXIS] + ZHOME_PRE_RAISE_DISTANCE < maxPos[Z_AXIS]) {
             setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_PRE_RAISE_DISTANCE);
             moveRelativeByOfficial(tmpPosition, homingFeedrate[Z_AXIS], false);
+            zAmountRaised = ZHOME_PRE_RAISE_DISTANCE;
         }
     }
 #endif
+    bool bcActive = Leveling::isDistortionEnabled();
+    Leveling::setDistortionEnabled(false);
+    updatePositionsFromCurrent();
+    Motion2::setMotorPositionFromTransformed();
+    fast8_t activeToolId = Tool::getActiveToolId();
+    callBeforeHomingOnSteppers();
 #if FIXED_Z_HOME_POSITION
     if (axes & axisBits[Z_AXIS]) { // ensure x and y are homed
         if (!isAxisHomed(X_AXIS)) {
@@ -1336,9 +1356,15 @@ void Motion1::homeAxes(fast8_t axes) {
     }
     Printer::setHomedAll(ok);
     Leveling::setDistortionEnabled(bcActive);
-    if (Tool::getActiveTool() != nullptr) {
+    if (Tool::getActiveTool() != nullptr && ok) { // select only if all is homed or we get unwanted moves!
         Tool::selectTool(activeToolId, true);
     }
+#if ZHOME_PRE_RAISE
+    if (zAmountRaised > 0 && !(axes & axisBits[Z_AXIS])) { // undo preraise if z was not homed
+        setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, -zAmountRaised);
+        moveRelativeByOfficial(tmpPosition, homingFeedrate[Z_AXIS], false);
+    }
+#endif
     Motion1::printCurrentPosition();
     GUI::popBusy();
 }
@@ -1562,6 +1588,7 @@ void Motion1::eepromHandle() {
         EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_POS, PSTR("max. position [mm]"), 3, maxPos[i]);
         EEPROM::handleFloat(eprStart + p + EPR_M1_ENDSTOP_DISTANCE, PSTR("endstop distance after homing [mm]"), 3, homeEndstopDistance[i]);
         p += EPR_M1_ENDSTOP_DISTANCE + 4;
+        motors[i]->eepromHandle();
     }
     EEPROM::removePrefix();
     EEPROM::handleFloat(eprStart + EPR_M1_PARK_X, PSTR("Park position X [mm]"), 2, parkPosition[X_AXIS]);

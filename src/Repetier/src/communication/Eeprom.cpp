@@ -124,7 +124,7 @@ void EEPROM::callHandle() {
     Tool::eepromHandleTools();
     // Add generic eepromHandle calls
 #undef IO_TARGET
-#define IO_TARGET 8
+#define IO_TARGET IO_TARGET_EEPROM
 #include "../io/redefine.h"
     if (mode == 1 || mode == 3) {
         // Update derived data if needed
@@ -133,7 +133,7 @@ void EEPROM::callHandle() {
         Tool::updateDerivedTools();
         // Add generic updateDerived calls
 #undef IO_TARGET
-#define IO_TARGET 9
+#define IO_TARGET IO_TARGET_UPDATE_DERIVED
 #include "../io/redefine.h"
     }
     int eCnt = 1, bCnt = 1, cCnt = 1, oCnt = 1;
@@ -158,7 +158,7 @@ void EEPROM::callHandle() {
 
 void EEPROM::restoreEEPROMSettingsFromConfiguration() {
 #undef IO_TARGET
-#define IO_TARGET 10
+#define IO_TARGET IO_TARGET_RESTORE_FROM_CONFIG
 #include "../io/redefine.h"
     PrinterType::restoreFromConfiguration();
     Motion1::setFromConfig();

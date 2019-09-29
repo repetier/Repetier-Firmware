@@ -288,7 +288,7 @@ void __attribute__((weak)) menuControls(GUIAction action, void* data) {
 #endif
     GUI::menuSelectableP(action, PSTR("Disable Motors"), directAction, (void*)GUI_DIRECT_ACTION_DISABLE_MOTORS, GUIPageType::ACTION);
 #undef IO_TARGET
-#define IO_TARGET 16
+#define IO_TARGET IO_TARGET_GUI_CONTROLS
 #include "../io/redefine.h"
     GUI::menuEnd(action);
 }
@@ -332,7 +332,7 @@ void __attribute__((weak)) menuTune(GUIAction action, void* data) {
 #endif
 
 #undef IO_TARGET
-#define IO_TARGET 18
+#define IO_TARGET IO_TARGET_GUI_TUNE
 #include "../io/redefine.h"
     GUI::menuEnd(action);
 }
@@ -458,7 +458,7 @@ void __attribute__((weak)) menuConfig(GUIAction action, void* data) {
         GUI::menuSelectable(action, GUI::tmpString, menuConfigAxis, (void*)((int)i), GUIPageType::MENU);
     }
 #undef IO_TARGET
-#define IO_TARGET 17
+#define IO_TARGET IO_TARGET_GUI_CONFIG
 #include "../io/redefine.h"
     GUI::menuSelectableP(action, PSTR("Store Settings"), directAction, (void*)GUI_DIRECT_ACTION_STORE_EEPROM, GUIPageType::ACTION);
     GUI::menuSelectableP(action, PSTR("Factory Reset"), directAction, (void*)GUI_DIRECT_ACTION_FACTORY_RESET, GUIPageType::ACTION);
@@ -493,7 +493,7 @@ void __attribute__((weak)) mainMenu(GUIAction action, void* data) {
 #endif
 #endif
 #undef IO_TARGET
-#define IO_TARGET 19
+#define IO_TARGET IO_TARGET_GUI_MAIN_MENU
 #include "../io/redefine.h"
     GUI::menuSelectableP(action, PSTR("Information"), menuInfo, nullptr, GUIPageType::MENU);
     GUI::menuSelectableP(action, PSTR("Configuration"), menuConfig, nullptr, GUIPageType::MENU);

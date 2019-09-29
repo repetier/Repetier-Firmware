@@ -106,6 +106,7 @@ void MCode_17(GCode* com) {
         }
         Tool::enableMotors();
     }
+    Printer::unsetAllSteppersDisabled();
 }
 
 void MCode_18(GCode* com) {
@@ -328,14 +329,18 @@ void MCode_92(GCode* com) {
 
 void MCode_99(GCode* com) {
     millis_t wait = 10000;
-    if (com->hasS())
+    if (com->hasS()) {
         wait = 1000 * com->S;
-    if (com->hasX())
+    }
+    if (com->hasX()) {
         Motion1::motors[X_AXIS]->disable();
-    if (com->hasY())
+    }
+    if (com->hasY()) {
         Motion1::motors[Y_AXIS]->disable();
-    if (com->hasZ())
+    }
+    if (com->hasZ()) {
         Motion1::motors[Z_AXIS]->disable();
+    }
     wait += HAL::timeInMilliseconds();
 #ifdef DEBUG_PRINT
     debugWaitLoop = 2;
@@ -343,12 +348,16 @@ void MCode_99(GCode* com) {
     while (wait - HAL::timeInMilliseconds() < 100000) {
         Printer::defaultLoopActions();
     }
-    if (com->hasX())
+    if (com->hasX()) {
         Motion1::motors[X_AXIS]->enable();
-    if (com->hasY())
+    }
+    if (com->hasY()) {
         Motion1::motors[Y_AXIS]->enable();
-    if (com->hasZ())
+    }
+    if (com->hasZ()) {
         Motion1::motors[Z_AXIS]->enable();
+    }
+    Printer::unsetAllSteppersDisabled();
 }
 
 void MCode_104(GCode* com) {
@@ -360,8 +369,9 @@ void MCode_104(GCode* com) {
 #ifdef EXACT_TEMPERATURE_TIMING
     Motion1::waitForEndOfMoves();
 #else
-    if (com->hasP() || (com->hasS() && com->S == 0))
+    if (com->hasP() || (com->hasS() && com->S == 0)) {
         Motion1::waitForEndOfMoves();
+    }
 #endif
     Tool* tool = Tool::getActiveTool();
     if (com->hasT()) {
@@ -1059,9 +1069,9 @@ void MCode_350(GCode* com) {
 
 void MCode_355(GCode* com) {
     if (com->hasS()) {
-        Printer::setCaseLight(com->S);
-    } else
-        Printer::reportCaseLightStatus();
+        Printer::caseLightMode = static_cast<uint8_t>(com->S);
+    }
+    Printer::reportCaseLightStatus();
 }
 
 void MCode_360(GCode* com) {

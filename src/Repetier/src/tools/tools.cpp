@@ -323,5 +323,5 @@ void Tool::minMaxOffsetForAxis(fast8_t axis, float& min, float& max) {
 }
 
 #undef IO_TARGET
-#define IO_TARGET 13
+#define IO_TARGET IO_TARGET_TOOLS_TEMPLATES
 #include "../io/redefine.h"

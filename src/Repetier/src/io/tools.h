@@ -23,7 +23,7 @@
 #undef FILAMENT_DETECTOR
 #undef TOOL_CHANGE_CUSTOM_EVENT
 
-#if IO_TARGET == 4 // declare variable
+#if IO_TARGET == IO_TARGET_CLASS_DEFINITION // declare variable
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
     extern ToolExtruder name; \
@@ -54,7 +54,7 @@
 #define TOOL_CHANGE_CUSTOM_EVENT(name, tool) \
     extern ToolChangeCustomEvent name;
 
-#elif IO_TARGET == 6 // define variables
+#elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES // define variables
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
     ToolExtruder name(offx, offy, offz, &heater, &stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, PSTR(startScript), PSTR(endScript), fan); \
@@ -83,7 +83,11 @@
         GUI::flashToStringLong(help, PSTR("= Extruder @ ="), name.getToolId() + 1); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
-        GUI::menuFloatP(action, PSTR("Resolution:"), name.getResolution(), 2, menuExtruderStepsPerMM, &name, GUIPageType::FIXED_CONTENT); \
+        if (stepper.overridesResolution()) { \
+            stepper.menuConfig(action, data); \
+        } else { \
+            GUI::menuFloatP(action, PSTR("Resolution:"), name.getResolution(), 2, menuExtruderStepsPerMM, &name, GUIPageType::FIXED_CONTENT); \
+        } \
         GUI::menuFloatP(action, PSTR("Max Speed  :"), name.getMaxSpeed(), 0, menuExtruderMaxSpeed, &name, GUIPageType::FIXED_CONTENT); \
         GUI::menuFloatP(action, PSTR("Max Accel. :"), name.getAcceleration(), 0, menuExtruderMaxAcceleration, &name, GUIPageType::FIXED_CONTENT); \
         GUI::menuFloatP(action, PSTR("Max Jerk   :"), name.getMaxYank(), 1, menuExtruderMaxYank, &name, GUIPageType::FIXED_CONTENT); \
@@ -182,7 +186,7 @@
 #define TOOL_CHANGE_CUSTOM_EVENT(name, tool) \
     ToolChangeCustomEvent name(static_cast<Tool*>(&tool));
 
-#elif IO_TARGET == 10 // reset configs
+#elif IO_TARGET == IO_TARGET_RESTORE_FROM_CONFIG // reset configs
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScrip, fan) \
     name.reset(offx, offy, offz, diameter, resolution, yank, maxSpeed, acceleration, advance);
@@ -192,10 +196,8 @@
     name.reset(offx, offy, offz, rpm, startStopDelay);
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage) \
     name.reset(distanceSteps, jitterSteps, jamPercentage);
-#define FILAMENT_DETECTOR(name, inputPin, tool)
-#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
-#elif IO_TARGET == 13 // template definitions in tools.cpp
+#elif IO_TARGET == IO_TARGET_TOOLS_TEMPLATES // template definitions in tools.cpp
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScrip, fan)
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
@@ -206,9 +208,8 @@
     template class JamDetectorHW<inputPin, observer##Type>;
 #define FILAMENT_DETECTOR(name, inputPin, tool) \
     template class FilamentDetector<inputPin>;
-#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
-#elif IO_TARGET == 1 // Setup
+#elif IO_TARGET == IO_TARGET_INIT // Setup
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScrip, fan)
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript)
@@ -219,17 +220,15 @@
     name.setup();
 #define TOOL_CHANGE_CUSTOM_EVENT(name, tool) name.setup(&tool);
 
-#elif IO_TARGET == 8 // call eepromHandle if required
+#elif IO_TARGET == IO_TARGET_EEPROM // call eepromHandle if required
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScrip, fan)
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript)
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript)
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage) \
     name.eepromHandle();
-#define FILAMENT_DETECTOR(name, inputPin, tool)
-#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
-#elif IO_TARGET == 14 // resolve firmware events
+#elif IO_TARGET == IO_TARGET_FIRMWARE_EVENTS // resolve firmware events
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScrip, fan)
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript)
@@ -240,10 +239,8 @@
         Com::printF(PSTR(" switch after "), act.param2.l); \
         Com::printFLN(PSTR(" steps")); \
     }
-#define FILAMENT_DETECTOR(name, inputPin, tool)
-#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
-#elif IO_TARGET == 15 // Periodical actions
+#elif IO_TARGET == IO_TARGET_PERIODICAL_ACTIONS // Periodical actions
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScrip, fan)
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript)
@@ -252,9 +249,8 @@
     name.testForJam();
 #define FILAMENT_DETECTOR(name, inputPin, tool) \
     name.testFilament();
-#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
 
-#elif IO_TARGET == 16 // Control tools manipulate menu
+#elif IO_TARGET == IO_TARGET_GUI_CONTROLS // Control tools manipulate menu
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
     GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuControl##name, nullptr, GUIPageType::MENU);
@@ -265,11 +261,7 @@
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript) \
     GUI::menuLongP(action, PSTR("CNC "), name.getToolId() + 1, menuControl##name, nullptr, GUIPageType::MENU);
 
-#define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage)
-#define FILAMENT_DETECTOR(name, inputPin, tool)
-#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
-
-#elif IO_TARGET == 17 // config menu
+#elif IO_TARGET == IO_TARGET_GUI_CONFIG // config menu
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
     GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU);
@@ -283,10 +275,7 @@
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage) \
     GUI::menuLongP(action, PSTR("Jam Detector "), tool.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU);
 
-#define FILAMENT_DETECTOR(name, inputPin, tool)
-#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
-
-#elif IO_TARGET == 18 // Control tune manipulate menu
+#elif IO_TARGET == IO_TARGET_GUI_TUNE // Control tune manipulate menu
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
     GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuTune##name, nullptr, GUIPageType::MENU);
@@ -297,17 +286,23 @@
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript) \
     GUI::menuLongP(action, PSTR("CNC "), name.getToolId() + 1, menuTune##name, nullptr, GUIPageType::MENU);
 
-#define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage)
-#define FILAMENT_DETECTOR(name, inputPin, tool)
-#define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
+#endif
 
-#else
-
+#ifndef TOOL_EXTRUDER
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan)
+#endif
+#ifndef TOOL_LASER
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript)
+#endif
+#ifndef TOOL_CNC
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript)
+#endif
+#ifndef JAM_DETECTOR_HW
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage)
+#endif
+#ifndef FILAMENT_DETECTOR
 #define FILAMENT_DETECTOR(name, inputPin, tool)
+#endif
+#ifndef TOOL_CHANGE_CUSTOM_EVENT
 #define TOOL_CHANGE_CUSTOM_EVENT(name, tool)
-
 #endif

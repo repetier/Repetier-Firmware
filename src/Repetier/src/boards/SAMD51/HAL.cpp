@@ -558,7 +558,7 @@ inline void analogISRFunction() {
         if (++analogConvertPos == 16) {
             // Process data
 #undef IO_TARGET
-#define IO_TARGET 11
+#define IO_TARGET IO_TARGET_ANALOG_INPUT_LOOP
 #include "io/redefine.h"
             analogConvertPos = 0;
         }
@@ -1027,7 +1027,7 @@ void PWM_TIMER_VECTOR() {
 
 // Add all generated pwm handlers
 #undef IO_TARGET
-#define IO_TARGET 2
+#define IO_TARGET IO_TARGET_PWM
 #include "io/redefine.h"
 
         counterPeriodical++;                          // Approximate a 100ms timer

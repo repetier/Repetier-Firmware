@@ -18,6 +18,20 @@
 
 #include "Repetier.h"
 
+#if X_STEP_PIN < 0 || Y_STEP_PIN < 0 || Z_STEP_PIN < 0
+#error One of the following pins is not assigned: X_STEP_PIN,Y_STEP_PIN,Z_STEP_PIN
+#endif
+#if PRINTLINE_CACHE_SIZE < 4
+#error PRINTLINE_CACHE_SIZE must be at least 5
+#endif
+
+//Inactivity shutdown variables
+millis_t previousMillisCmd = 0;
+millis_t maxInactiveTime = MAX_INACTIVE_TIME * 1000L;
+millis_t stepperInactiveTime = STEPPER_INACTIVE_TIME * 1000L;
+long baudrate = BAUDRATE;   ///< Communication speed rate.
+volatile int waitRelax = 0; // Delay filament relax at the end of print, could be a simple timeout
+
 ServoInterface* servos[NUM_SERVOS] = SERVO_LIST;
 PWMHandler* fans[] = FAN_LIST;
 uint8_t Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
@@ -71,6 +85,10 @@ uint16_t Printer::rescuePos;       // EEPROM address for rescue
 fast8_t Printer::safetyParked = 0; /// True if moved to a safety position to protect print
 uint8_t Printer::rescueOn = false;
 bool Printer::failedMode = false;
+#ifndef CASE_LIGHT_DEFAULT_ON
+#define CASE_LIGHT_DEFAULT_ON 0
+#endif
+fast8_t Printer::caseLightMode = CASE_LIGHT_DEFAULT_ON;
 
 FirmwareEvent FirmwareEvent::eventList[4];
 volatile fast8_t FirmwareEvent::start = 0;
@@ -95,7 +113,7 @@ void FirmwareEvent::handleEvents() {
     while (length > 0) {
         FirmwareEvent& act = eventList[start];
 #undef IO_TARGET
-#define IO_TARGET 14
+#define IO_TARGET IO_TARGET_FIRMWARE_EVENTS
 #include "io/redefine.h"
         {
             InterruptProtectedBlock lock;
@@ -477,7 +495,7 @@ void Printer::setup() {
 #endif
     // Define io functions
 #undef IO_TARGET
-#define IO_TARGET 1
+#define IO_TARGET IO_TARGET_INIT
 #include "io/redefine.h"
 
     HAL::analogStart();
@@ -509,10 +527,6 @@ void Printer::setup() {
 #endif
 #endif
 
-#if CASE_LIGHTS_PIN >= 0
-    SET_OUTPUT(CASE_LIGHTS_PIN);
-    WRITE(CASE_LIGHTS_PIN, CASE_LIGHT_DEFAULT_ON);
-#endif // CASE_LIGHTS_PIN
 #if defined(UI_VOLTAGE_LEVEL) && defined(EXP_VOLTAGE_LEVEL_PIN) && EXP_VOLTAGE_LEVEL_PIN > -1
     SET_OUTPUT(EXP_VOLTAGE_LEVEL_PIN);
     WRITE(EXP_VOLTAGE_LEVEL_PIN, UI_VOLTAGE_LEVEL);
@@ -593,12 +607,14 @@ void Printer::defaultLoopActions() {
         previousMillisCmd = curtime;
     else {
         curtime -= previousMillisCmd;
-        if (maxInactiveTime != 0 && curtime > maxInactiveTime)
+        if (maxInactiveTime != 0 && curtime > maxInactiveTime) {
             Printer::kill(false);
-        else
+        } else {
             Printer::setAllKilled(false); // prevent repeated kills
-        if (stepperInactiveTime != 0 && curtime > stepperInactiveTime)
+        }
+        if (stepperInactiveTime != 0 && curtime > stepperInactiveTime) {
             Printer::kill(true);
+        }
     }
 #if SDCARDDETECT > -1 && SDSUPPORT
     sd.automount();
@@ -610,22 +626,15 @@ void Printer::defaultLoopActions() {
     DEBUG_MEMORY;
 }
 
-void Printer::setCaseLight(bool on) {
-#if CASE_LIGHTS_PIN > -1
-    WRITE(CASE_LIGHTS_PIN, on);
-    reportCaseLightStatus();
-#endif
-}
-
 void Printer::reportCaseLightStatus() {
-#if CASE_LIGHTS_PIN > -1
-    if (READ(CASE_LIGHTS_PIN))
+    if (Printer::caseLightMode) {
         Com::printInfoFLN(PSTR("Case lights on"));
-    else
+    } else {
         Com::printInfoFLN(PSTR("Case lights off"));
-#else
-    Com::printInfoFLN(PSTR("No case lights"));
-#endif
+    }
+    Com::printInfoF(PSTR("Case light mode:"));
+    Com::print((int32_t)caseLightMode);
+    Com::println();
 }
 
 void Printer::handleInterruptEvent() {
@@ -732,7 +741,7 @@ void Printer::showConfiguration() {
 #endif
     Com::config(PSTR("SupportG10G11:"), FEATURE_RETRACTION);
     Com::config(PSTR("SupportLocalFilamentchange:"), FEATURE_RETRACTION);
-    Com::config(PSTR("CaseLights:"), CASE_LIGHTS_PIN > -1);
+    Com::config(PSTR("CaseLights:"), 1);
     Com::config(PSTR("ZProbe:"), Z_PROBE_TYPE > 0 ? 1 : 0);
     Com::config(PSTR("Autolevel:"), LEVELING_METHOD > 0 ? 1 : 0);
     Com::config(PSTR("EEPROM:"), EEPROM_MODE != 0);
@@ -1339,6 +1348,7 @@ void Printer::rescueSetup() {
                 Motion1::motors[i]->enable();
             }
         }
+        Printer::unsetAllSteppersDisabled();
         rescueRecover();
     }
 #endif
