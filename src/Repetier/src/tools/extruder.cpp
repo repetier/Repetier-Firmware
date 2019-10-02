@@ -61,7 +61,9 @@ void ToolExtruder::init() {
 void ToolExtruder::eepromHandle() {
     Tool::eepromHandle();
     uint pos = getEepromStart() + Tool::eepromSize();
-    EEPROM::handleFloat(pos, PSTR("Steps per mm [steps/mm]"), 2, stepsPerMM);
+    if (!stepper->overridesResolution()) {
+        EEPROM::handleFloat(pos, PSTR("Steps per mm [steps/mm]"), 2, stepsPerMM);
+    }
     EEPROM::handleFloat(pos + 4, PSTR("Yank [mm/s]"), 2, yank);
     EEPROM::handleFloat(pos + 8, PSTR("Max Speed [mm/s]"), 2, maxSpeed);
     EEPROM::handleFloat(pos + 12, PSTR("Acceleration [mm/s^3]"), 2, acceleration);

@@ -31,12 +31,13 @@ Lights are updated in the 100ms timer. First state store resets light to off, wh
 The following tests update store and last one wins. 
 
 Example: You have a monochrome led that should be switched by M355 Sx. In case of an error
-you want the light to blink slowly. M355 stores last send state in Printer::caseLightState
-variable. SO first we need a output pin for the light, create a monochrome store and store
+you want the light to blink slowly. M355 stores last send state in Printer::caseLightMode
+variable. So first we need a output pin for the light, create a monochrome store and store
 the variable in it. Then the driver should put the state to the output pin.
 
 IO_OUTPUT(caseLightPin, 13)
 LIGHT_STATE_MONOCHROME(caseLightState)
+LIGHT_COND(caseLightState, true, Printer::caseLightMode, 255, 255, 255)
 LIGHT_COND(caseLightState, Printer::isUIErrorMessage(), LIGHT_STATE_BLINK_SLOW, 255, 255, 255)
 LIGHT_SOURCE_MONOCHROME(caseLightDriver, caseLightPin, caseLightState)
 

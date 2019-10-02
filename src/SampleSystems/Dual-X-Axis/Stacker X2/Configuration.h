@@ -78,7 +78,7 @@ Early stage version for Stacke X2 printer - use with care
 #define PRINTER_TYPE PRINTER_TYPE_DUAL_X
 // steps to include as babysteps per 1/BLOCK_FREQUENCY seconds. Must be lower then STEPPER_FREQUENCY/BLOCK_FREQUENCY and be low enough to not loose steps.
 #define BABYSTEPS_PER_BLOCK \
-    { 2, 2, 4 }
+    { 1, 1, 1 }
 // If all axis end stops are hardware based we can skip the time consuming tests each step
 #define NO_SOFTWARE_AXIS_ENDSTOPS
 // Normally only a delta has motor end stops required. Normally you trigger using axis endstops.
@@ -246,7 +246,7 @@ define Z_MAX_LENGTH 610
 
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1000
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1000
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 50
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 20
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_A 1000
 #define XAXIS_STEPS_PER_MM 146.1
 #define AAXIS_STEPS_PER_MM 146.1
@@ -254,7 +254,7 @@ define Z_MAX_LENGTH 610
 #define ZAXIS_STEPS_PER_MM 404.18
 #define MAX_FEEDRATE_X 400
 #define MAX_FEEDRATE_Y 250
-#define MAX_FEEDRATE_Z 12
+#define MAX_FEEDRATE_Z 10
 #define MAX_FEEDRATE_A 400
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
@@ -374,10 +374,10 @@ It also can add a delay to wait for spindle to run on full speed.
 #define MOVE_Y_WHEN_HOMED 0
 #define MOVE_Z_WHEN_HOMED 0
 #define MOVE_A_WHEN_HOMED 0
-#define HOMING_FEEDRATE_X 40
-#define HOMING_FEEDRATE_Y 40
-#define HOMING_FEEDRATE_Z 10
-#define HOMING_FEEDRATE_A 40
+#define HOMING_FEEDRATE_X 50
+#define HOMING_FEEDRATE_Y 50
+#define HOMING_FEEDRATE_Z 8
+#define HOMING_FEEDRATE_A 50
 #define ZHOME_PRE_RAISE 2
 #define ZHOME_PRE_RAISE_DISTANCE 2
 #define RAISE_Z_ON_TOOLCHANGE 0
@@ -390,7 +390,7 @@ It also can add a delay to wait for spindle to run on full speed.
 
 // ################# XYZ movements ###################
 
-#define PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT 1
+#define PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT 0
 
 #define DISTORTION_CORRECTION_POINTS 5
 #define DISTORTION_LIMIT_TO 2
@@ -410,7 +410,6 @@ It also can add a delay to wait for spindle to run on full speed.
 // ##########################################################################################
 
 #define FEATURE_BABYSTEPPING 1
-#define BABYSTEP_MULTIPLICATOR 64
 
 // Delta settings
 #define DELTA_HOME_ON_POWER 0
@@ -422,13 +421,9 @@ It also can add a delay to wait for spindle to run on full speed.
 #define X_BACKLASH 0
 #define Y_BACKLASH 0
 #define Z_BACKLASH 0
-#define STEPPER_HIGH_DELAY 0
-#define DIRECTION_DELAY 0
-#define INTERPOLATE_ACCELERATION_WITH_Z 1
-#define ACCELERATION_FACTOR_TOP 75
-#define MAX_JERK 5
+#define MAX_JERK 10
 #define MAX_ZJERK 0
-#define MAX_AJERK 5
+#define MAX_AJERK 10
 #define PRINTLINE_CACHE_SIZE 32
 #define MOVE_CACHE_LOW 10
 #define LOW_TICKS_PER_MOVE 250000

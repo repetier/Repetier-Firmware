@@ -272,14 +272,17 @@ void Printer::kill(uint8_t onlySteppers) {
 #if defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT) && PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT == 0
     ZMotor.disable();
 #else
-    if (!onlySteppers)
+    if (!onlySteppers) {
         ZMotor.disable();
+    }
 #endif
     for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
         Motion1::motors[i]->disable();
     }
     Tool::disableMotors();
+#if defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT) && PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT == 0
     setAllSteppersDiabled();
+#endif
     unsetHomedAll();
     if (!onlySteppers) {
         for (uint8_t i = 0; i < NUM_TOOLS; i++) {

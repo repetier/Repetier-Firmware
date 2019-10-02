@@ -95,7 +95,7 @@ public:
 };
 
 #define PRINTER_FLAG0_STEPPER_DISABLED 1
-#define PRINTER_FLAG0_SEPERATE_EXTRUDER_INT 2
+// #define PRINTER_FLAG0_SEPERATE_EXTRUDER_INT 2
 #define PRINTER_FLAG0_TEMPSENSOR_DEFECT 4
 #define PRINTER_FLAG0_FORCE_CHECKSUM 8
 #define PRINTER_FLAG0_MANUAL_MOVE_MODE 16
@@ -363,13 +363,13 @@ public:
 
     /** For large machines, the nonlinear transformation can exceed integer 32bit range, so floating point math is needed. */
 
-    static INLINE uint8_t isAdvanceActivated() {
+    /* static INLINE uint8_t isAdvanceActivated() {
         return flag0 & PRINTER_FLAG0_SEPERATE_EXTRUDER_INT;
     }
 
     static INLINE void setAdvanceActivated(uint8_t b) {
         flag0 = (b ? flag0 | PRINTER_FLAG0_SEPERATE_EXTRUDER_INT : flag0 & ~PRINTER_FLAG0_SEPERATE_EXTRUDER_INT);
-    }
+    } */
 
     static INLINE uint8_t isHomedAll() {
         return flag1 & PRINTER_FLAG1_HOMED_ALL;

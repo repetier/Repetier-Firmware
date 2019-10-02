@@ -762,7 +762,7 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
         // Need to scale feedrate so E component is not part of speed
         float exceptE = 1.0f / sqrt(length2 - e2);
         buf.feedrate = feedrate * buf.length * exceptE; // increase so xyz speed remains F neglecting E part
-        if (dirUsed & axisBits[E_AXIS] && delta[E_AXIS] > 0) {
+        if ((dirUsed & axisBits[E_AXIS]) != 0 && delta[E_AXIS] > 0) {
             if (advanceEDRatio > 0.000001) {
                 buf.eAdv = advanceEDRatio * advanceK * resolution[E_AXIS] * 0.001;
             } else {
@@ -1119,7 +1119,7 @@ float Motion1Buffer::calculateSaveStartEndSpeed() {
 void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next) {
     if (isAdvance() != next.isAdvance()) {
         // ensure starting with 0 velocity for advance
-        maxJoinSpeed = endSpeed;
+        maxJoinSpeed = 0; // endSpeed;
         state = Motion1State::BACKWARD_FINISHED;
         return;
     }

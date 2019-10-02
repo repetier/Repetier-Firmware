@@ -26,7 +26,8 @@ protected:
     static float ds1, ds2, ds3, ds4, ds5, ds6;
 
 public:
-    static float f, s;
+    static float f; ///< speed
+    static float s; ///< position 0..1
     static int segmentsLeft, segments, stepsPerSegment;
     /**
     Computes the first speed and initializes variables for
