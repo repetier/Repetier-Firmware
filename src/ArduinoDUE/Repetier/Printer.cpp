@@ -61,12 +61,12 @@ int16_t Printer::zBabysteps = 0;
 uint8_t Printer::relativeCoordinateMode = false;         ///< Determines absolute (false) or relative Coordinates (true).
 uint8_t Printer::relativeExtruderCoordinateMode = false; ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
-long Printer::currentPositionSteps[E_AXIS_ARRAY];
+int32_t Printer::currentPositionSteps[E_AXIS_ARRAY];
 float Printer::currentPosition[E_AXIS_ARRAY];
 float Printer::destinationPositionTransformed[E_AXIS_ARRAY];
 float Printer::currentPositionTransformed[E_AXIS_ARRAY];
 float Printer::lastCmdPos[Z_AXIS_ARRAY];
-long Printer::destinationSteps[E_AXIS_ARRAY];
+int32_t Printer::destinationSteps[E_AXIS_ARRAY];
 float Printer::coordinateOffset[Z_AXIS_ARRAY] = { 0, 0, 0 };
 uint8_t Printer::flag0 = 0;
 uint8_t Printer::flag1 = 0;
@@ -1098,7 +1098,7 @@ void Printer::setup() {
     PULLUP(DOOR_PIN, HIGH);
 #endif
 #endif
-#if defined(POWERLOSS_PIN) && DOOR_POWERLOSS_PINPIN > -1
+#if defined(POWERLOSS_PIN) && POWERLOSS_PIN > -1
     SET_INPUT(POWERLOSS_PIN);
 #if defined(POWERLOSS_PULLUP) && POWERLOSS_PULLUP
     PULLUP(POWERLOSS_PIN, HIGH);
@@ -1577,6 +1577,7 @@ void Printer::homeZAxis() { // Delta z homing
 }
 // This home axis is for delta
 void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // Delta homing code
+    unparkSafety();
     bool nocheck = isNoDestinationCheck();
     setNoDestinationCheck(true);
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
@@ -2015,6 +2016,7 @@ after doing some initialization work. The order of operation and some extra func
 \param zaxis True if homing of z axis is wanted.
 */
 void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta printer
+    unparkSafety();
     bool nocheck = isNoDestinationCheck();
     setNoDestinationCheck(true);
 #if defined(SUPPORT_LASER) && SUPPORT_LASER
@@ -3007,9 +3009,11 @@ void Printer::rescueReset() {
     }
 #endif
 }
+
 void Printer::handlePowerLoss() {
-    for (uint8_t i = 0; i < NUM_EXTRUDER; i++)
+    for (uint8_t i = 0; i < NUM_EXTRUDER; i++) {
         Extruder::setTemperatureForExtruder(0, i);
+    }
     Extruder::setHeatedBedTemperature(0);
     Com::printInfoFLN(PSTR("POWERLOSS_DETECTED"));
     if (rescueOn) {

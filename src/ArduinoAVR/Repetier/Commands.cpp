@@ -97,7 +97,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     }
 #endif
 #if defined(POWERLOSS_PIN) && POWERLOSS_PIN > -1 //  && SUPPORT_LASER should always be respected
-    if (Printer::failedMode && READ(POWERLOSS_PIN) == POWERLOSS_DETECTED) {
+    if (!Printer::failedMode && READ(POWERLOSS_PIN) == POWERLOSS_DETECTED) {
         Printer::handlePowerLoss();
     }
 #endif
