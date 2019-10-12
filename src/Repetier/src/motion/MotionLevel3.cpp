@@ -18,6 +18,10 @@
 
 #include "Repetier.h"
 
+#ifndef SHORT_STEP_PULSES
+#define SHORT_STEP_PULSES 0
+#endif
+
 Motion3Buffer Motion3::buffers[NUM_MOTION3_BUFFER];
 fast8_t volatile Motion3::length;
 fast8_t Motion3::last, Motion3::nextActId;
@@ -105,7 +109,9 @@ void Motion3::timer() {
     static fast8_t testMotorId = 0;
 #endif
 
+#if SHORT_STEP_PULSES == 0
     unstepMotors();
+#endif
     if (act == nullptr) {  // need new segment
         if (length == 0) { // nothing prepared
             return;
@@ -322,6 +328,9 @@ void Motion3::timer() {
         --length;
         act = nullptr;
     }
+#if SHORT_STEP_PULSES == 1
+    unstepMotors();
+#endif
 }
 
 void Motion3::reportBuffers() {

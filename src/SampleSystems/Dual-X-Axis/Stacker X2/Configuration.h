@@ -214,6 +214,34 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define NUM_MOTORS 6
 #define MOTORS \
     { &XMotor, &YMotor, &ZMotor, &AMotor, &E1Motor, &E2Motor }
+#define MOTOR_NAMES \
+    { PSTR("X left"), PSTR("Y"), PSTR("Z"), PSTR(" X right"), PSTR("E0"), PSTR("E1") }
+
+// Some common settings for trinamic driver settings
+/**
+ Chopper timing is an array with
+ {toff, hend, hstrt}
+ See TMC datasheets for more details. There are some predefined values to get you started:
+ CHOPPER_TIMING_DEFAULT_12V = { 3, -1, 1 }
+ CHOPPER_TIMING_DEFAULT_19V = { 4, 1, 1 }
+ CHOPPER_TIMING_DEFAULT_24V = { 4, 2, 1 }
+ CHOPPER_TIMING_DEFAULT_36V = { 5, 2, 4 }
+ CHOPPER_TIMING_PRUSAMK3_24V = { 3, -2, 6 }
+
+*/
+#define TMC_CHOPPER_TIMING CHOPPER_TIMING_DEFAULT_12V
+// true = interpolate to 256 microsteps for smoother motion
+#define TMC_INTERPOLATE true
+// Current used when motor stands still
+#define TMC_HOLD_MULTIPLIER 0.5
+// Reduce current on over temperature warnings by x milli ampere, 0 = disable
+#define TMC_CURRENT_STEP_DOWN 50
+// Define which data should be stored to eeprom
+#define STORE_MOTOR_MICROSTEPPING 1
+#define STORE_MOTOR_CURRENT 1
+#define STORE_MOTOR_HYBRID_TRESHOLD 1
+#define STORE_MOTOR_STEALTH 1
+#define STORE_MOTOR_STALL_SENSITIVITY 1
 
 // x axis extruders are 62mm width, distance after homing 503mm
 

@@ -53,16 +53,19 @@ void ZProbeHandler::deactivate() {
 }
 
 float ZProbeHandler::runProbe() {
+    Motion1::callBeforeHomingOnSteppers();
     float zCorr = 0;
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
     float measurements[Z_PROBE_REPETITIONS];
 #endif
     if (ZProbe->update()) {
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
+        Motion1::callAfterHomingOnSteppers();
         return ILLEGAL_Z_PROBE;
     }
     if (Leveling::isDistortionEnabled()) {
         Com::printErrorFLN(PSTR("z-probe stopped because bump correction is active. This will influence the result."));
+        Motion1::callAfterHomingOnSteppers();
         return ILLEGAL_Z_PROBE;
     }
     bool wasActivated = activated;
@@ -210,6 +213,7 @@ float ZProbeHandler::runProbe() {
     }
     if (ZProbe->update()) {
         Com::printErrorFLN(PSTR("z-probe did not untrigger after going back to start position."));
+        Motion1::callAfterHomingOnSteppers();
         return ILLEGAL_Z_PROBE;
     }
     Com::printF(Com::tZProbe, z, 3);
@@ -224,7 +228,7 @@ float ZProbeHandler::runProbe() {
 #else
     Com::printFLN(Com::tSpaceYColon, Motion1::currentPosition[Y_AXIS]);
 #endif
-
+    Motion1::callAfterHomingOnSteppers();
     return z;
 }
 
@@ -339,15 +343,18 @@ void ZProbeHandler::deactivate() {
 
 float ZProbeHandler::runProbe() {
     float zCorr = 0;
+    Motion1::callBeforeHomingOnSteppers();
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN && Z_PROBE_REPETITIONS > 1
     float measurements[Z_PROBE_REPETITIONS];
 #endif
     if (ZProbe->update()) {
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
+        Motion1::callAfterHomingOnSteppers();
         return ILLEGAL_Z_PROBE;
     }
     if (Leveling::isDistortionEnabled()) {
         Com::printErrorFLN(PSTR("z-probe stopped because bump correction is active. This will influence the result."));
+        Motion1::callAfterHomingOnSteppers();
         return ILLEGAL_Z_PROBE;
     }
     bool wasActivated = activated;
@@ -495,6 +502,7 @@ float ZProbeHandler::runProbe() {
     }
     if (ZProbe->update()) {
         Com::printErrorFLN(PSTR("z-probe did not untrigger after going back to start position."));
+        Motion1::callAfterHomingOnSteppers();
         return ILLEGAL_Z_PROBE;
     }
     Com::printF(Com::tZProbe, z, 3);
@@ -509,7 +517,7 @@ float ZProbeHandler::runProbe() {
 #else
     Com::printFLN(Com::tSpaceYColon, Motion1::currentPosition[Y_AXIS]);
 #endif
-
+    Motion1::callAfterHomingOnSteppers();
     return z;
 }
 

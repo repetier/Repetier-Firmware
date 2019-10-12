@@ -513,12 +513,13 @@ void Printer::setup() {
     Tool::initTools();
     rescuePos = EEPROM::reserveRecover(1, 1, EPR_RESCUE_SIZE);
 
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_INIT_LATE
+#include "io/redefine.h"
+
 #if FEATURE_CONTROLLER == CONTROLLER_VIKI
     HAL::delayMilliseconds(100);
 #endif // FEATURE_CONTROLLER
-#if UI_DISPLAY_TYPE != NO_DISPLAY
-    Com::selectLanguage(0); // just make sure we have a language in case someone uses it early
-#endif
     //HAL::delayMilliseconds(500);  // add a delay at startup to give hardware time for initalization
 
     EVENT_INITIALIZE_EARLY
@@ -550,7 +551,7 @@ void Printer::setup() {
 #if defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS > 0
     initializeAllMotorDrivers();
 #endif // defined
-    microstepInit();
+    // microstepInit();
     feedrate = 50; ///< Current feedrate in mm/s.
     feedrateMultiply = 100;
     extrudeMultiply = 100;

@@ -452,44 +452,54 @@ void Com::cap(FSTRINGPARAM(text)) {
     printF(tCap);
     printFLN(text);
 }
+
 void Com::config(FSTRINGPARAM(text)) {
     printF(tConfig);
     printFLN(text);
 }
+
 void Com::config(FSTRINGPARAM(text), int value) {
     printF(tConfig);
     printFLN(text, value);
 }
+
 void Com::config(FSTRINGPARAM(text), const char* msg) {
     printF(tConfig);
     printF(text);
     print(msg);
     println();
 }
+
 void Com::config(FSTRINGPARAM(text), int32_t value) {
     printF(tConfig);
     printFLN(text, value);
 }
+
 void Com::config(FSTRINGPARAM(text), uint32_t value) {
     printF(tConfig);
     printFLN(text, value);
 }
+
 void Com::config(FSTRINGPARAM(text), float value, uint8_t digits) {
     printF(tConfig);
     printFLN(text, value, digits);
 }
+
 void Com::printWarningF(FSTRINGPARAM(text)) {
     printF(tWarning);
     printF(text);
 }
+
 void Com::printWarningFLN(FSTRINGPARAM(text)) {
     printF(tWarning);
     printFLN(text);
 }
+
 void Com::printInfoF(FSTRINGPARAM(text)) {
     printF(tInfo);
     printF(text);
 }
+
 void Com::printInfoFLN(FSTRINGPARAM(text)) {
     printF(tInfo);
     printFLN(text);
@@ -499,22 +509,27 @@ void Com::printErrorF(FSTRINGPARAM(text)) {
     printF(tError);
     printF(text);
 }
+
 void Com::printErrorFLN(FSTRINGPARAM(text)) {
     printF(tError);
     printFLN(text);
 }
+
 void Com::printLogFLN(FSTRINGPARAM(text)) {
     printF(tLog);
     printFLN(text);
 }
+
 void Com::printLogF(FSTRINGPARAM(text)) {
     printF(tLog);
     printF(text);
 }
+
 void Com::printFLN(FSTRINGPARAM(text)) {
     printF(text);
     println();
 }
+
 void Com::printFLN(FSTRINGPARAM(text), const char* msg) {
     printF(text);
     print(msg);
@@ -526,43 +541,62 @@ void Com::printF(FSTRINGPARAM(ptr)) {
     while ((c = HAL::readFlashByte(ptr++)) != 0)
         GCodeSource::writeToAll(c);
 }
+
 void Com::printF(FSTRINGPARAM(text), const char* msg) {
     printF(text);
     print(msg);
+}
+
+void Com::printF(FSTRINGPARAM(text), bool value, BoolFormat format) {
+    printF(text);
+    print(value, format);
 }
 
 void Com::printF(FSTRINGPARAM(text), int value) {
     printF(text);
     print(value);
 }
+
 void Com::printF(FSTRINGPARAM(text), int32_t value) {
     printF(text);
     print(value);
 }
+
 void Com::printF(FSTRINGPARAM(text), uint32_t value) {
     printF(text);
     printNumber(value);
 }
+
 void Com::printFLN(FSTRINGPARAM(text), int value) {
     printF(text);
     print(value);
     println();
 }
+
 void Com::printFLN(FSTRINGPARAM(text), int32_t value) {
     printF(text);
     print(value);
     println();
 }
+
 void Com::printFLN(FSTRINGPARAM(text), uint32_t value) {
     printF(text);
     printNumber(value);
     println();
 }
+
+void Com::printFLN(FSTRINGPARAM(text), bool value, BoolFormat format) {
+    printF(text);
+    print(value, format);
+    println();
+}
+
 void Com::printFLN(FSTRINGPARAM(text), float value, uint8_t digits) {
     printF(text);
     printFloat(value, digits);
     println();
 }
+
 void Com::printF(FSTRINGPARAM(text), float value, uint8_t digits) {
     printF(text);
     printFloat(value, digits);
@@ -580,7 +614,31 @@ void Com::print(long value) {
     }
     printNumber(value);
 }
-
+void Com::print(bool value, BoolFormat format) {
+    switch (format) {
+    case BoolFormat::TRUEFALSE:
+        if (value) {
+            printF(PSTR("True"));
+        } else {
+            printF(PSTR("False"));
+        }
+        break;
+    case BoolFormat::YESNO:
+        if (value) {
+            printF(PSTR("Yes"));
+        } else {
+            printF(PSTR("No"));
+        }
+        break;
+    case BoolFormat::ONOFF:
+        if (value) {
+            printF(PSTR("On"));
+        } else {
+            printF(PSTR("Off"));
+        }
+        break;
+    }
+}
 void Com::printNumber(uint32_t n) {
     char buf[11]; // Assumes 8-bit chars plus zero byte.
     char* str = &buf[10];

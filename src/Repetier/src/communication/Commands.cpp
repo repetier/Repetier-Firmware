@@ -1134,6 +1134,9 @@ void Commands::processMCode(GCode* com) {
     case 120: // M120 Test beeper function
         MCode_120(com);
         break;
+    case 122: // debug stepper driver
+        MCode_Stepper(com);
+        break;
     case 163: // M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
         MCode_163(com);
         break;
@@ -1282,6 +1285,9 @@ void Commands::processMCode(GCode* com) {
         break;
     case 540: // report motion buffers
         MCode_540(com);
+        break;
+    case 569: // Set stealthchop
+        MCode_Stepper(com);
         break;
     case 600:
         MCode_600(com);

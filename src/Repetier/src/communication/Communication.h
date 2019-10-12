@@ -26,6 +26,10 @@
 #define MAX_DATA_SOURCES 4
 #endif
 
+enum class BoolFormat { TRUEFALSE,
+                        ONOFF,
+                        YESNO };
+
 /** This class defines the general interface to handle gcode communication with the firmware. This
 allows it to connect to different data sources and handle them all inside the same data structure.
 If several readers are active, the first one sending a byte pauses all other inputs until the command
@@ -494,11 +498,13 @@ public:
     static void printLogF(FSTRINGPARAM(text));
     static void printFLN(FSTRINGPARAM(text));
     static void printF(FSTRINGPARAM(text));
+    static void printF(FSTRINGPARAM(text), bool value, BoolFormat format = BoolFormat::TRUEFALSE);
     static void printF(FSTRINGPARAM(text), int value);
     static void printF(FSTRINGPARAM(text), const char* msg);
     static void printF(FSTRINGPARAM(text), int32_t value);
     static void printF(FSTRINGPARAM(text), uint32_t value);
     static void printF(FSTRINGPARAM(text), float value, uint8_t digits = 2);
+    static void printFLN(FSTRINGPARAM(text), bool value, BoolFormat format = BoolFormat::TRUEFALSE);
     static void printFLN(FSTRINGPARAM(text), int value);
     static void printFLN(FSTRINGPARAM(text), int32_t value);
     static void printFLN(FSTRINGPARAM(text), uint32_t value);
@@ -506,6 +512,7 @@ public:
     static void printFLN(FSTRINGPARAM(text), float value, uint8_t digits = 2);
     static void printArrayFLN(FSTRINGPARAM(text), float* arr, uint8_t n = 4, uint8_t digits = 2);
     static void printArrayFLN(FSTRINGPARAM(text), long* arr, uint8_t n = 4);
+    static void print(bool value, BoolFormat format = BoolFormat::TRUEFALSE);
     static void print(long value);
     static inline void print(uint32_t value) { printNumber(value); }
     static inline void print(int value) { print((int32_t)value); }

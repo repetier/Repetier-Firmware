@@ -16,8 +16,13 @@
 
 */
 
-// RADDS Board
-// http://www.dr-henschke.de/RADDS_due.html
+/*
+
+IKS3D board developed by Mocontronic Systems GmbH
+
+Stepper drivers are TMC2130 with Rsense = 0.15 ohm
+
+*/
 #if MOTHERBOARD == MOTHERBOARD_IKS3D
 #ifndef __SAM3X8E__
 #error Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu.
@@ -34,18 +39,21 @@
 #define ORIG_X_MIN_PIN 28
 #define ORIG_X_MAX_PIN 34
 #define ORIG_X_ENABLE_PIN 69
+#define ORIG_X_CS_PIN 68
 
 #define ORIG_Y_STEP_PIN 17
 #define ORIG_Y_DIR_PIN 16
 #define ORIG_Y_MIN_PIN 30
 #define ORIG_Y_MAX_PIN 36
 #define ORIG_Y_ENABLE_PIN 69
+#define ORIG_Y_CS_PIN 31
 
 #define ORIG_Z_STEP_PIN 2
 #define ORIG_Z_DIR_PIN 3
 #define ORIG_Z_MIN_PIN 32
 #define ORIG_Z_MAX_PIN 38
 #define ORIG_Z_ENABLE_PIN 69
+#define ORIG_Z_CS_PIN 70
 
 // Note that on the Due pin A0 on the board is channel 2 on the ARM chip
 #define HEATER_0_PIN 13
@@ -79,41 +87,26 @@
 #define ORIG_E0_STEP_PIN 56
 #define ORIG_E0_DIR_PIN 55
 #define ORIG_E0_ENABLE_PIN 69
+#define ORIG_E0_CS_PIN 14
 
 #define ORIG_E1_STEP_PIN 60
 #define ORIG_E1_DIR_PIN 59
 #define ORIG_E1_ENABLE_PIN 69
+#define ORIG_E1_CS_PIN 15
 
 #define ORIG_E2_STEP_PIN 51
 #define ORIG_E2_DIR_PIN 53
 #define ORIG_E2_ENABLE_PIN 69
-
-// Extra driver on extension board
-// Might require pin 66 high for some drivers!
-#define ORIG_E3_STEP_PIN 35
-#define ORIG_E3_DIR_PIN 33
-#define ORIG_E3_ENABLE_PIN 37
-
-// Extra driver on extension port
-// Might require pin 25 high for some drivers!
-#define ORIG_E4_STEP_PIN 29
-#define ORIG_E4_DIR_PIN 27
-#define ORIG_E4_ENABLE_PIN 31
-
-#define ORIG_E5_STEP_PIN 67
-#define ORIG_E5_DIR_PIN 66
-#define ORIG_E5_ENABLE_PIN 68
-
-#define EXTENSION_BOARD_MS1 67
-#define EXTENSION_BOARD_MS2 68
-#define EXTENSION_BOARD_MS3 69
+#define ORIG_E2_CS_PIN 29
 
 // 66 -> not connected
 // 25 -> not connected
 // To set microstepping on startup set START_GCODE to e.g.
 // "M42 P67 S255\nM42 P68 S255\nM42 P69 S255"
 
+#ifndef SDSUPPORT
 #define SDSUPPORT -1
+#endif
 #define SDPOWER -1
 // 4,10,52 if using HW SPI.
 #define SDSS 4
@@ -131,42 +124,18 @@
 // 21 or 71
 #define SCL_PIN 21
 
-// Servo pins: 5,6 und 39
-
 #define E0_PINS ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN,
 #define E1_PINS ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN,
 #define E2_PINS ORIG_E2_STEP_PIN, ORIG_E2_DIR_PIN, ORIG_E2_ENABLE_PIN,
-#define E3_PINS ORIG_E3_STEP_PIN, ORIG_E3_DIR_PIN, ORIG_E3_ENABLE_PIN,
-#define E4_PINS ORIG_E4_STEP_PIN, ORIG_E4_DIR_PIN, ORIG_E4_ENABLE_PIN,
-#define E5_PINS ORIG_E5_STEP_PIN, ORIG_E5_DIR_PIN, ORIG_E5_ENABLE_PIN,
-
-#define TWI_CLOCK_FREQ 400000
-// see eeprom device data sheet for the following values these are for 24xx256
-#define EEPROM_SERIAL_ADDR 0x50  // 7 bit i2c address (without R/W bit)
-#define EEPROM_PAGE_SIZE 64      // page write buffer size
-#define EEPROM_PAGE_WRITE_TIME 7 // page write time in milliseconds (docs say 5ms but that is too short)
-// specify size of eeprom address register
-// TWI_MMR_IADRSZ_1_BYTE for 1 byte, or TWI_MMR_IADRSZ_2_BYTE for 2 byte
-#define EEPROM_ADDRSZ_BYTES TWI_MMR_IADRSZ_2_BYTE
-#define EEPROM_AVAILABLE 1
+#define E3_PINS
+#define E4_PINS
+#define E5_PINS
 
 #define SERVO1 -1
 #define SERVO2 -1
 #define SERVO3 -1
+
 // Controller related default pins
-
-#ifndef CUSTOM_CONTROLLER_PINS
-#error No known pin assignment for your display. Please define it in Configuration.h
-#endif
-
-// Servo pins: 5,6 und 39
-
-#define E0_PINS ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN,
-#define E1_PINS ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN,
-#define E2_PINS ORIG_E2_STEP_PIN, ORIG_E2_DIR_PIN, ORIG_E2_ENABLE_PIN,
-#define E3_PINS ORIG_E3_STEP_PIN, ORIG_E3_DIR_PIN, ORIG_E3_ENABLE_PIN,
-#define E4_PINS ORIG_E4_STEP_PIN, ORIG_E4_DIR_PIN, ORIG_E4_ENABLE_PIN,
-#define E5_PINS ORIG_E5_STEP_PIN, ORIG_E5_DIR_PIN, ORIG_E5_ENABLE_PIN,
 
 #define TWI_CLOCK_FREQ 400000
 // see eeprom device data sheet for the following values these are for 24xx256
@@ -179,6 +148,18 @@
 
 #ifndef MAX_WIRE_INTERFACES
 #define MAX_WIRE_INTERFACES 1
+#endif
+
+#ifndef CUSTOM_CONTROLLER_PINS
+#if FEATURE_CONTROLLER == NO_CONTROLLER
+#define UI_ENCODER_A -1
+#define UI_ENCODER_B -1
+#define UI_ENCODER_CLICK -1
+#define UI_RESET_PIN -1
+#define UI_BACK_PIN -1
+#else
+#error No known pin assignment for your display. Please define it in Configuration.h
+#endif
 #endif
 
 #endif

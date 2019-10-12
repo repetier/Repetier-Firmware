@@ -20,6 +20,7 @@
   This is a segment run at constant velocity. 
 */
 #define NUM_MOTION3_BUFFER 32
+
 class Motion3Buffer { // 28 byte 4 axis 8 bit processor
 public:
     fast8_t id;

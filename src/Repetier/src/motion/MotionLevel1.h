@@ -318,14 +318,14 @@ public:
     static void updateDerived();
     static void eepromHandle();
     static void eepromReset();
+    static void callBeforeHomingOnSteppers();
+    static void callAfterHomingOnSteppers();
 
 private:
     // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on
     // system without Z-probe
     static void transformToPrinter(float x, float y, float z, float& transX, float& transY, float& transZ);
     static void transformFromPrinter(float x, float y, float z, float& transX, float& transY, float& transZ);
-    static void callBeforeHomingOnSteppers();
-    static void callAfterHomingOnSteppers();
     static void insertWaitIfNeeded();
     static void backplan(fast8_t actId);
     static Motion1Buffer& reserve();

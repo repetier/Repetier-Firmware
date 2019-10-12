@@ -40,6 +40,7 @@ public:
     virtual uint8_t transfer(uint8_t data) = 0;
     virtual void end() = 0;
     virtual bool msbFirst() = 0;
+    virtual void csDoubleToggle() = 0;
     uint16_t transfer16(uint16_t data) {
         union {
             uint16_t val;
@@ -104,6 +105,11 @@ public:
             WRITE(csPin, 1); \
             HAL::spiEnd(); \
         } \
+        virtual void csDoubleToggle() { \
+            WRITE(csPin, 1); \
+            HAL::delayMicroseconds(10); \
+            WRITE(csPin, 0); \
+        } \
         virtual bool msbFirst() { return msbfirst; } \
     }; \
     extern name##Class name;
@@ -134,6 +140,11 @@ public:
                     HAL::delayMicroseconds(delayus); \
                 } \
             } \
+            WRITE(csPin, 0); \
+        } \
+        virtual void csDoubleToggle() { \
+            WRITE(csPin, 1); \
+            HAL::delayMicroseconds(10); \
             WRITE(csPin, 0); \
         } \
         virtual uint8_t transfer(uint8_t data) { \

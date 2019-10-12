@@ -1,3 +1,5 @@
+#include <TMCStepper.h>
+
 class EndstopDriver;
 class GCode;
 enum class GUIAction;
@@ -14,7 +16,9 @@ public:
     StepperDriverBase(EndstopDriver* minES, EndstopDriver* maxES)
         : minEndstop(minES)
         , maxEndstop(maxES)
-        , direction(true) {}
+        , direction(true)
+        , axisBit(8)
+        , axis(E_AXIS) {}
     virtual ~StepperDriverBase() {}
     inline EndstopDriver* getMinEndstop() { return minEndstop; }
     inline EndstopDriver* getMaxEndstop() { return maxEndstop; }
@@ -25,12 +29,13 @@ public:
             return minEndstop->update();
         }
     }
-    inline void setAxis(fast8_t ax) {
+    virtual void setAxis(fast8_t ax) {
         axisBit = 1 << ax;
         axis = ax;
     }
     inline fast8_t getAxisBit() { return axisBit; }
     inline fast8_t getAxis() { return axis; }
+    void printMotorNumberAndName(bool newline = true);
     /// Allows initialization of driver e.g. current, microsteps
     virtual void init() {}
     /// Always executes the step
@@ -56,12 +61,14 @@ public:
     virtual void beforeHoming() {}
     virtual void afterHoming() {}
     virtual void handleMCode(GCode& com) {}
-    // If true the stepper usager will not offer resolution modification in GUI
+    // If true the stepper usage will not offer resolution modification in GUI
     virtual bool overridesResolution() { return false; }
     // Configuration in GUI
     virtual void menuConfig(GUIAction action, void* data) {}
     // Allow having own settings e.g. current, microsteps
     virtual void eepromHandle() {}
+    int motorIndex();
+    void printMotorName();
 };
 
 /** Holds a position counter that can be observed, otherwise sends
@@ -148,6 +155,10 @@ public:
     virtual ~AdjustResolutionStepperDriver() {}
     inline EndstopDriver* getMinEndstop() { return minEndstop; }
     inline EndstopDriver* getMaxEndstop() { return maxEndstop; }
+    virtual void setAxis(fast8_t ax) {
+        StepperDriverBase::setAxis(ax);
+        stepper->setAxis(ax);
+    }
     /// Always executes the step
     virtual void step() final {
         if (direction) {
@@ -227,6 +238,132 @@ public:
     }
 };
 
+class ProgrammableStepperBase {
+protected:
+    int16_t microsteps;
+    int16_t currentMillis;
+    float hybridSpeed;
+    bool stealthChop;
+    int8_t debug;
+    bool otpw;
+    uint8_t otpwCount;
+    int8_t stallguardSensitivity;
+    uint16_t eprStart;
+
+public:
+    ProgrammableStepperBase(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallguardSensitivity)
+        : microsteps(_microsteps)
+        , currentMillis(_current_millis)
+        , hybridSpeed(_hybridThrs)
+        , stealthChop(_stealthChop)
+        , debug(-1)
+        , otpw(false)
+        , otpwCount(0)
+        , stallguardSensitivity(_stallguardSensitivity) {}
+    int16_t getMicrosteps() { return microsteps; }
+    int16_t getCurrentMillis() { return currentMillis; }
+    bool getStealthChop() { return stealthChop; }
+    float getHybridSpeed() { return hybridSpeed; }
+    inline bool hasStallguard() { return stallguardSensitivity != -128; }
+    void reserveEEPROM(uint16_t extraBytes);
+    void processEEPROM(uint8_t flags);
+};
+
+/// Plain stepper driver with optional endstops attached.
+template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
+class TMCStepper2130Driver : public StepperDriverBase, public ProgrammableStepperBase {
+    TMC2130Stepper* driver;
+
+public:
+    TMCStepper2130Driver(EndstopDriver* minES, EndstopDriver* maxES,
+                         TMC2130Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity)
+        : StepperDriverBase(minES, maxES)
+        , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
+        , driver(_driver) {}
+    virtual void init();
+    void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity);
+    inline void step() final {
+        stepCls::on();
+    }
+    inline void unstep() final {
+        stepCls::off();
+    }
+    inline void dir(bool d) final {
+        // Com::printFLN(PSTR("SD:"), (int)d);
+        dirCls::set(d);
+        direction = d;
+    }
+    inline void enable() final {
+        enableCls::on();
+    }
+    inline void disable() final {
+        enableCls::off();
+    }
+    void eepromHandle();
+    void eepromReserve();
+    // Return true if setting microsteps is supported
+    virtual bool implementsSetMicrosteps() final { return true; }
+    // Return true if setting current in software is supported
+    virtual bool implementsSetMaxCurrent() final { return true; }
+    /// Set microsteps. Must be a power of 2.
+    virtual void setMicrosteps(int microsteps) final;
+    /// Set max current as range 0..255 or mA depedning on driver
+    virtual void setMaxCurrent(int max) final;
+    // Called before homing starts. Can be used e.g. to disable silent mode
+    // or otherwise prepare for endstop detection.
+    virtual void beforeHoming() final;
+    virtual void afterHoming() final;
+    virtual void handleMCode(GCode& com) final;
+    void timer500ms();
+};
+
+template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
+class TMCStepper5160Driver : public StepperDriverBase, public ProgrammableStepperBase {
+    TMC5160Stepper* driver;
+
+public:
+    TMCStepper5160Driver(EndstopDriver* minES, EndstopDriver* maxES,
+                         TMC5160Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity)
+        : StepperDriverBase(minES, maxES)
+        , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
+        , driver(_driver) {}
+    virtual void init();
+    void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity);
+    inline void step() final {
+        stepCls::on();
+    }
+    inline void unstep() final {
+        stepCls::off();
+    }
+    inline void dir(bool d) final {
+        // Com::printFLN(PSTR("SD:"), (int)d);
+        dirCls::set(d);
+        direction = d;
+    }
+    inline void enable() final {
+        enableCls::on();
+    }
+    inline void disable() final {
+        enableCls::off();
+    }
+    void eepromHandle();
+    void eepromReserve();
+    // Return true if setting microsteps is supported
+    virtual bool implementsSetMicrosteps() final { return true; }
+    // Return true if setting current in software is supported
+    virtual bool implementsSetMaxCurrent() final { return true; }
+    /// Set microsteps. Must be a power of 2.
+    virtual void setMicrosteps(int microsteps) final;
+    /// Set max current as range 0..255 or mA depedning on driver
+    virtual void setMaxCurrent(int max) final;
+    // Called before homing starts. Can be used e.g. to disable silent mode
+    // or otherwise prepare for endstop detection.
+    virtual void beforeHoming() final;
+    virtual void afterHoming() final;
+    virtual void handleMCode(GCode& com) final;
+    void timer500ms();
+};
+
 /// Plain stepper driver with optional endstops attached.
 class Mirror2StepperDriver : public StepperDriverBase {
 public:
@@ -235,6 +372,11 @@ public:
         : StepperDriverBase(minES, maxES)
         , motor1(m1)
         , motor2(m2) {}
+    virtual void setAxis(fast8_t ax) {
+        StepperDriverBase::setAxis(ax);
+        motor1->setAxis(ax);
+        motor2->setAxis(ax);
+    }
     inline void step() final {
         motor1->step();
         motor2->step();
@@ -279,6 +421,12 @@ public:
         , motor1(m1)
         , motor2(m2)
         , motor3(m3) {}
+    virtual void setAxis(fast8_t ax) {
+        StepperDriverBase::setAxis(ax);
+        motor1->setAxis(ax);
+        motor2->setAxis(ax);
+        motor3->setAxis(ax);
+    }
     inline void step() final {
         motor1->step();
         motor2->step();
@@ -331,6 +479,13 @@ public:
         , motor2(m2)
         , motor3(m3)
         , motor4(m4) {}
+    virtual void setAxis(fast8_t ax) {
+        StepperDriverBase::setAxis(ax);
+        motor1->setAxis(ax);
+        motor2->setAxis(ax);
+        motor3->setAxis(ax);
+        motor4->setAxis(ax);
+    }
     inline void step() final {
         motor1->step();
         motor2->step();

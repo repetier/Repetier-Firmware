@@ -1381,7 +1381,12 @@ void MCode_999(GCode* com) {
 }
 
 void MCode_Stepper(GCode* com) {
-    if (com->hasP() && com->hasS() && com->P >= 0 && com->P < NUM_MOTORS) {
+    if (com->hasP() && com->P >= 0 && com->P < NUM_MOTORS) {
         Motion1::drivers[com->P]->handleMCode(*com);
+    }
+    if (!com->hasP()) {
+        for (fast8_t i = 0; i < NUM_MOTORS; i++) {
+            Motion1::drivers[i]->handleMCode(*com);
+        }
     }
 }

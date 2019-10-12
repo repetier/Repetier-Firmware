@@ -1521,7 +1521,7 @@ bool Motion1::simpleHome(fast8_t axis) {
     updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
     endstopMode = oldMode;
-    setAxisHomed(axis, true);
+    setAxisHomed(axis, false);
     Motion1::axesTriggered = 0;
     return ok;
 }

@@ -112,7 +112,9 @@
 // To set microstepping on startup set START_GCODE to e.g.
 // "M42 P67 S255\nM42 P68 S255\nM42 P69 S255"
 
+#ifndef SDSUPPORT
 #define SDSUPPORT 1
+#endif
 #define SDPOWER -1
 // 4,10,52 if using HW SPI.
 #define SDSS 4

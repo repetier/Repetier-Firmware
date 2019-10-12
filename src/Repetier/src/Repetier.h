@@ -278,6 +278,18 @@ extern void updateEndstops();
 #define IO_TARGET_GUI_WIZARDS 20
 #define IO_TARGET_STORE_RECOVER_DATA 21
 #define IO_TARGET_RESTORE_RECOVER_DATA 22
+#define IO_TARGET_INIT_LATE 23
+
+#define CHOPPER_TIMING_DEFAULT_12V \
+    { 3, -1, 1 }
+#define CHOPPER_TIMING_DEFAULT_19V \
+    { 4, 1, 1 }
+#define CHOPPER_TIMING_DEFAULT_24V \
+    { 4, 2, 1 }
+#define CHOPPER_TIMING_DEFAULT_36V \
+    { 5, 2, 4 }
+#define CHOPPER_TIMING_PRUSAMK3_24V \
+    { 3, -2, 6 }
 
 // we can not prevent this as some configurations need a parameter and others not
 #pragma GCC diagnostic ignored "-Wunused-parameter"
