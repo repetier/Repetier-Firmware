@@ -143,13 +143,13 @@ void EEPROM::callHandle() {
             EEPROM::handlePrefix(PSTR("Extr."), eCnt++);
         }
         if (h->isBedHeater()) {
-            EEPROM::handlePrefix(PSTR("Bed"), bCnt++);
+            EEPROM::handlePrefix(PSTR("Bed "), bCnt++);
         }
         if (h->isChamberHeater()) {
-            EEPROM::handlePrefix(PSTR("Chamber"), cCnt++);
+            EEPROM::handlePrefix(PSTR("Chamber "), cCnt++);
         }
         if (h->isOtherHeater()) {
-            EEPROM::handlePrefix(PSTR("Misc Heater"), oCnt++);
+            EEPROM::handlePrefix(PSTR("Misc Heater "), oCnt++);
         }
         h->eepromHandle();
         EEPROM::removePrefix();

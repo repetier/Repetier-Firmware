@@ -289,7 +289,6 @@ public:
         stepCls::off();
     }
     inline void dir(bool d) final {
-        // Com::printFLN(PSTR("SD:"), (int)d);
         dirCls::set(d);
         direction = d;
     }
@@ -336,7 +335,6 @@ public:
         stepCls::off();
     }
     inline void dir(bool d) final {
-        // Com::printFLN(PSTR("SD:"), (int)d);
         dirCls::set(d);
         direction = d;
     }
@@ -346,7 +344,54 @@ public:
     inline void disable() final {
         enableCls::off();
     }
-    void eepromHandle();
+    virtual void eepromHandle() final;
+    void eepromReserve();
+    // Return true if setting microsteps is supported
+    virtual bool implementsSetMicrosteps() final { return true; }
+    // Return true if setting current in software is supported
+    virtual bool implementsSetMaxCurrent() final { return true; }
+    /// Set microsteps. Must be a power of 2.
+    virtual void setMicrosteps(int microsteps) final;
+    /// Set max current as range 0..255 or mA depedning on driver
+    virtual void setMaxCurrent(int max) final;
+    // Called before homing starts. Can be used e.g. to disable silent mode
+    // or otherwise prepare for endstop detection.
+    virtual void beforeHoming() final;
+    virtual void afterHoming() final;
+    virtual void handleMCode(GCode& com) final;
+    void timer500ms();
+};
+
+// TMC2208 does not have stallguard!
+template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
+class TMCStepper2208Driver : public StepperDriverBase, public ProgrammableStepperBase {
+    TMC2208Stepper* driver;
+
+public:
+    TMCStepper2208Driver(EndstopDriver* minES, EndstopDriver* maxES,
+                         TMC2208Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs)
+        : StepperDriverBase(minES, maxES)
+        , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, -128)
+        , driver(_driver) {}
+    virtual void init();
+    void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs);
+    inline void step() final {
+        stepCls::on();
+    }
+    inline void unstep() final {
+        stepCls::off();
+    }
+    inline void dir(bool d) final {
+        dirCls::set(d);
+        direction = d;
+    }
+    inline void enable() final {
+        enableCls::on();
+    }
+    inline void disable() final {
+        enableCls::off();
+    }
+    virtual void eepromHandle() final;
     void eepromReserve();
     // Return true if setting microsteps is supported
     virtual bool implementsSetMicrosteps() final { return true; }
@@ -410,6 +455,10 @@ public:
         motor1->menuConfig(action, data);
         motor2->menuConfig(action, data);
     }
+    virtual void eepromHandle() final {
+        motor1->eepromHandle();
+        motor2->eepromHandle();
+    }
 };
 
 /// Plain stepper driver with optional endstops attached.
@@ -466,6 +515,11 @@ public:
         motor1->menuConfig(action, data);
         motor2->menuConfig(action, data);
         motor3->menuConfig(action, data);
+    }
+    virtual void eepromHandle() final {
+        motor1->eepromHandle();
+        motor2->eepromHandle();
+        motor3->eepromHandle();
     }
 };
 
@@ -532,5 +586,11 @@ public:
         motor2->menuConfig(action, data);
         motor3->menuConfig(action, data);
         motor4->menuConfig(action, data);
+    }
+    virtual void eepromHandle() final {
+        motor1->eepromHandle();
+        motor2->eepromHandle();
+        motor3->eepromHandle();
+        motor4->eepromHandle();
     }
 };
