@@ -30,8 +30,9 @@ void GCode_0_1(GCode* com) {
         Printer::feedrate = G0_FEEDRATE;
     }
 #endif
-    if (com->hasP())
+    if (com->hasP()) {
         Printer::setNoDestinationCheck(com->P == 0);
+    }
     Tool::getActiveTool()->extractG1(com);
     Printer::setDestinationStepsFromGCode(com); // For X Y Z E F
 #if defined(G0_FEEDRATE) && G0_FEEDRATE > 0
@@ -65,6 +66,215 @@ void GCode_0_1(GCode* com) {
 
 void GCode_2_3(GCode* com) {
 #if ARC_SUPPORT
+    float position[NUM_AXES];
+    Motion1::copyCurrentOfficial(position);
+    float offset[2] = { Printer::convertToMM(com->hasI() ? com->I : 0), Printer::convertToMM(com->hasJ() ? com->J : 0) };
+    float target[NUM_AXES];
+
+    float p;
+    float x, y, z;
+    bool posAllowed = true;
+    Motion1::copyCurrentOfficial(target);
+    bool secondaryMove = false;
+#if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
+    if (!isNoDestinationCheck()) {
+#if MOVE_X_WHEN_HOMED
+        if (!Motion1::isAxisHomed(X_AXIS))
+            com->unsetX();
+#endif
+#if MOVE_Y_WHEN_HOMED
+        if (!Motion1::isAxisHomed(Y_AXIS))
+            com->unsetY();
+#endif
+#if MOVE_Z_WHEN_HOMED
+        if (!Motion1::isAxisHomed(Z_AXIS))
+            com->unsetZ();
+#endif
+#if NUM_AXES > A_AXIS && MOVE_A_WHEN_HOMED
+        if (!Motion1::isAxisHomed(A_AXIS))
+            com->unsetA();
+#endif
+#if NUM_AXES > B_AXIS && MOVE_B_WHEN_HOMED
+        if (!Motion1::isAxisHomed(B_AXIS))
+            com->unsetB();
+#endif
+#if NUM_AXES > C_AXIS && MOVE_C_WHEN_HOMED
+        if (!Motion1::isAxisHomed(C_AXIS))
+            com->unsetC();
+#endif
+    }
+#endif
+    if (!Printer::relativeCoordinateMode) {
+        if (com->hasX())
+            target[X_AXIS] = Printer::convertToMM(com->X) - Motion1::g92Offsets[X_AXIS];
+        if (com->hasY())
+            target[Y_AXIS] = Printer::convertToMM(com->Y) - Motion1::g92Offsets[Y_AXIS];
+        if (com->hasZ())
+            target[Z_AXIS] = Printer::convertToMM(com->Z) - Motion1::g92Offsets[Z_AXIS];
+#if NUM_AXES > A_AXIS
+        if (com->hasA())
+            target[A_AXIS] = Printer::convertToMM(com->A) - Motion1::g92Offsets[A_AXIS];
+#endif
+#if NUM_AXES > B_AXIS
+        if (com->hasB())
+            target[B_AXIS] = Printer::convertToMM(com->B) - Motion1::g92Offsets[B_AXIS];
+#endif
+#if NUM_AXES > C_AXIS
+        if (com->hasC())
+            target[C_AXIS] = Printer::convertToMM(com->C) - Motion1::g92Offsets[C_AXIS];
+#endif
+    } else {
+        if (com->hasX())
+            target[X_AXIS] += Printer::convertToMM(com->X);
+        if (com->hasY())
+            target[Y_AXIS] += Printer::convertToMM(com->Y);
+        if (com->hasZ())
+            target[Z_AXIS] += Printer::convertToMM(com->Z);
+#if NUM_AXES > A_AXIS
+        if (com->hasA())
+            target[A_AXIS] += Printer::convertToMM(com->A);
+#endif
+#if NUM_AXES > B_AXIS
+        if (com->hasB())
+            target[B_AXIS] += Printer::convertToMM(com->B);
+#endif
+#if NUM_AXES > C_AXIS
+        if (com->hasC())
+            target[C_AXIS] += Printer::convertToMM(com->C);
+#endif
+    }
+    if (com->hasE() && !Printer::debugDryrun()) {
+        p = Printer::convertToMM(com->E);
+        HeatManager* heater = Tool::getActiveTool()->getHeater();
+        if (Printer::relativeCoordinateMode || Printer::relativeExtruderCoordinateMode) {
+            if (fabs(com->E) * Printer::extrusionFactor > EXTRUDE_MAXLENGTH) {
+                Com::printWarningF(PSTR("MAx. extrusion distance per move exceeded - ignoring move."));
+                p = 0;
+            }
+            target[E_AXIS] = Motion1::currentPosition[E_AXIS] + p;
+        } else {
+            if (fabs(p - Motion1::currentPosition[E_AXIS]) * Printer::extrusionFactor > EXTRUDE_MAXLENGTH) {
+                p = Motion1::currentPosition[E_AXIS];
+            }
+            target[E_AXIS] = p;
+        }
+        secondaryMove = Tool::getActiveTool()->isSecondaryMove(com->hasG() && com->G == 0, true);
+    } else {
+        target[E_AXIS] = Motion1::currentPosition[E_AXIS];
+        secondaryMove = Tool::getActiveTool()->isSecondaryMove(com->hasG() && com->G == 0, false);
+    }
+    if (com->hasF() && com->F > 0.1) {
+        if (Printer::unitIsInches) {
+            Printer::feedrate = com->F * 0.0042333f * (float)Printer::feedrateMultiply; // Factor is 25.4/60/100
+        } else {
+            Printer::feedrate = com->F * (float)Printer::feedrateMultiply * 0.00016666666f; // Factor is 1/60/100
+        }
+    }
+
+    Motion1::fillPosFromGCode(*com, target, position);
+    float r;
+    if (com->hasR()) {
+        /*
+        We need to calculate the center of the circle that has the designated radius and passes
+        through both the current position and the target position. This method calculates the following
+        set of equations where [x,y] is the vector from current to target position, d == magnitude of
+        that vector, h == hypotenuse of the triangle formed by the radius of the circle, the distance to
+        the center of the travel vector. A vector perpendicular to the travel vector [-y,x] is scaled to the
+        length of h [-y/d*h, x/d*h] and added to the center of the travel vector [x/2,y/2] to form the new point
+        [i,j] at [x/2-y/d*h, y/2+x/d*h] which will be the center of our arc.
+
+        d^2 == x^2 + y^2
+        h^2 == r^2 - (d/2)^2
+        i == x/2 - y/d*h
+        j == y/2 + x/d*h
+
+        O <- [i,j]
+        -  |
+        r      -     |
+        -        |
+        -           | h
+        -              |
+        [0,0] ->  C -----------------+--------------- T  <- [x,y]
+        | <------ d/2 ---->|
+
+        C - Current position
+        T - Target position
+        O - center of circle that pass through both C and T
+        d - distance from C to T
+        r - designated radius
+        h - distance from center of CT to O
+
+        Expanding the equations:
+
+        d -> sqrt(x^2 + y^2)
+        h -> sqrt(4 * r^2 - x^2 - y^2)/2
+        i -> (x - (y * sqrt(4 * r^2 - x^2 - y^2)) / sqrt(x^2 + y^2)) / 2
+        j -> (y + (x * sqrt(4 * r^2 - x^2 - y^2)) / sqrt(x^2 + y^2)) / 2
+
+        Which can be written:
+
+        i -> (x - (y * sqrt(4 * r^2 - x^2 - y^2))/sqrt(x^2 + y^2))/2
+        j -> (y + (x * sqrt(4 * r^2 - x^2 - y^2))/sqrt(x^2 + y^2))/2
+
+        Which we for size and speed reasons optimize to:
+
+        h_x2_div_d = sqrt(4 * r^2 - x^2 - y^2)/sqrt(x^2 + y^2)
+        i = (x - (y * h_x2_div_d))/2
+        j = (y + (x * h_x2_div_d))/2
+
+        */
+        r = Printer::convertToMM(com->R);
+        // Calculate the change in position along each selected axis
+        double x = target[X_AXIS] - position[X_AXIS];
+        double y = target[Y_AXIS] - position[Y_AXIS];
+
+        double h_x2_div_d = -sqrt(4 * r * r - x * x - y * y) / hypot(x, y); // == -(h * 2 / d)
+        // If r is smaller than d, the arc is now traversing the complex plane beyond the reach of any
+        // real CNC, and thus - for practical reasons - we will terminate promptly:
+        if (isnan(h_x2_div_d)) {
+            Com::printErrorFLN(Com::tInvalidArc);
+            return;
+        }
+        // Invert the sign of h_x2_div_d if the circle is counter clockwise (see sketch below)
+        if (com->G == 3) {
+            h_x2_div_d = -h_x2_div_d;
+        }
+
+        /* The counter clockwise circle lies to the left of the target direction. When offset is positive,
+        the left hand circle will be generated - when it is negative the right hand circle is generated.
+
+
+        T  <-- Target position
+
+        ^
+        Clockwise circles with this center         |          Clockwise circles with this center will have
+        will have > 180 deg of angular travel      |          < 180 deg of angular travel, which is a good thing!
+        \         |          /
+        center of arc when h_x2_div_d is positive ->  x <----- | -----> x <- center of arc when h_x2_div_d is negative
+        |
+        |
+
+        C  <-- Current position                                 */
+
+        // Negative R is g-code-alias for "I want a circle with more than 180 degrees of travel" (go figure!),
+        // even though it is advised against ever generating such circles in a single line of g-code. By
+        // inverting the sign of h_x2_div_d the center of the circles is placed on the opposite side of the line of
+        // travel and thus we get the inadvisable long arcs as prescribed.
+        if (r < 0) {
+            h_x2_div_d = -h_x2_div_d;
+            r = -r; // Finished with r. Set to positive for mc_arc
+        }
+        // Complete the operation by calculating the actual center of the arc
+        offset[0] = 0.5 * (x - (y * h_x2_div_d));
+        offset[1] = 0.5 * (y + (x * h_x2_div_d));
+
+    } else {                             // Offset mode specific computations
+        r = hypot(offset[0], offset[1]); // Compute arc radius for arc
+    }
+    // Set clockwise/counter-clockwise sign for arc computations
+    uint8_t isclockwise = com->G == 2;
+    // Trace the arc
+    Motion1::arc(position, target, offset, r, isclockwise, Printer::feedrate, secondaryMove);
 #endif
 }
 

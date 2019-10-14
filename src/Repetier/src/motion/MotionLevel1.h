@@ -270,6 +270,7 @@ public:
     static float getShowPosition(fast8_t axis);
     // Move with coordinates in official coordinates (before offset, transform, ...)
     static bool moveByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove);
+    static void arc(float position[NUM_AXES], float target[NUM_AXES], float* offset, float radius, uint8_t isclockwise, float feedrate, bool secondaryMove);
     // Move to the printer coordinates (after offset, transform, ...)
     static bool moveByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove);
     // Move with coordinates in official coordinates (before offset, transform, ...)
