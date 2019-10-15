@@ -38,7 +38,7 @@ uint8_t Com::selectedLanguage;
 #ifndef FIRMWARE_URL
 #define FIRMWARE_URL "https://github.com/repetier/Repetier-Firmware/"
 #endif // FIRMWARE_URL
-const char *const axisNames[] PROGMEM = {"X", "Y", "Z", "E", "A", "B", "C"};
+const char* const axisNames[] PROGMEM = { "X", "Y", "Z", "E", "A", "B", "C" };
 FSTRINGVALUE(Com::tFirmware,
              "FIRMWARE_NAME:Repetier_" REPETIER_VERSION " COMPILED:" __DATE__
              " FIRMWARE_URL:" FIRMWARE_URL
@@ -141,6 +141,8 @@ FSTRINGVALUE(Com::tZColon, "Z:")
 FSTRINGVALUE(Com::tE0Colon, "E0:")
 FSTRINGVALUE(Com::tE1Colon, "E1:")
 FSTRINGVALUE(Com::tE2Colon, "E2:")
+FSTRINGVALUE(Com::tE3Colon, "E3:")
+FSTRINGVALUE(Com::tE4Colon, "E4:")
 FSTRINGVALUE(Com::tMS1MS2Pins, "MS1,MS2 Pins")
 FSTRINGVALUE(Com::tSetOutputSpace, "Set output: ")
 FSTRINGVALUE(Com::tGetInputSpace, "Get Input: ")
@@ -506,284 +508,244 @@ FSTRINGVALUE(Com::tTrue, "True");
 FSTRINGVALUE(Com::tFalse, "False");
 FSTRINGVALUE(Com::tDiv32, "/32");
 FSTRINGVALUE(Com::tCross, "X");
-FSTRINGVALUE(Com::tEnabledColon,        "Enabled:")
-FSTRINGVALUE(Com::tSetCurrentColon,     "Set current:")
-FSTRINGVALUE(Com::tRMSCurrentColon,     "RMS current:")
-FSTRINGVALUE(Com::tMaxCurrentColon,     "Max current:")
-FSTRINGVALUE(Com::tRunCurrentColon,     "Run current:")
-FSTRINGVALUE(Com::tHoldCurrentColon,    "Hold current:")
-FSTRINGVALUE(Com::tCSActualColon,       "CS actual:")
-FSTRINGVALUE(Com::tPWMScaleColon,       "PWM scale:")
-FSTRINGVALUE(Com::tVSENSEColon,         "VSENSE:\t")
-FSTRINGVALUE(Com::tStealthchopColon,    "Stealthchop:")
-FSTRINGVALUE(Com::tMicrostepsColon,     "Microsteps:")
-FSTRINGVALUE(Com::tTSTEPColon,          "TSTEP:\t")
-FSTRINGVALUE(Com::tPWMThresholdColon,   "PWM threshold:")
-FSTRINGVALUE(Com::tOTPrewarnColon,      "OT prewarn:")
-FSTRINGVALUE(Com::tOTTriggeredColon,    "OT triggered:")
-FSTRINGVALUE(Com::tOffTimeColon,        "Off time:")
-FSTRINGVALUE(Com::tBlankTimeColon,      "Blank time:")
-FSTRINGVALUE(Com::tHystEndColon,        "Hyst. end:")
-FSTRINGVALUE(Com::tHystStartColon,      "Hyst. start:")
-FSTRINGVALUE(Com::tStallGuardThrColon,  "StallGuard thr:")
-FSTRINGVALUE(Com::tDriverStatus,   "Driver Status")
+FSTRINGVALUE(Com::tEnabledColon, "Enabled:")
+FSTRINGVALUE(Com::tSetCurrentColon, "Set current:")
+FSTRINGVALUE(Com::tRMSCurrentColon, "RMS current:")
+FSTRINGVALUE(Com::tMaxCurrentColon, "Max current:")
+FSTRINGVALUE(Com::tRunCurrentColon, "Run current:")
+FSTRINGVALUE(Com::tHoldCurrentColon, "Hold current:")
+FSTRINGVALUE(Com::tCSActualColon, "CS actual:")
+FSTRINGVALUE(Com::tPWMScaleColon, "PWM scale:")
+FSTRINGVALUE(Com::tVSENSEColon, "VSENSE:\t")
+FSTRINGVALUE(Com::tStealthchopColon, "Stealthchop:")
+FSTRINGVALUE(Com::tMicrostepsColon, "Microsteps:")
+FSTRINGVALUE(Com::tTSTEPColon, "TSTEP:\t")
+FSTRINGVALUE(Com::tPWMThresholdColon, "PWM threshold:")
+FSTRINGVALUE(Com::tOTPrewarnColon, "OT prewarn:")
+FSTRINGVALUE(Com::tOTTriggeredColon, "OT triggered:")
+FSTRINGVALUE(Com::tOffTimeColon, "Off time:")
+FSTRINGVALUE(Com::tBlankTimeColon, "Blank time:")
+FSTRINGVALUE(Com::tHystEndColon, "Hyst. end:")
+FSTRINGVALUE(Com::tHystStartColon, "Hyst. start:")
+FSTRINGVALUE(Com::tStallGuardThrColon, "StallGuard thr:")
+FSTRINGVALUE(Com::tDriverStatus, "Driver Status")
 FSTRINGVALUE(Com::tPlusStallGuardColon, "+ StallGuard:")
-FSTRINGVALUE(Com::tPlusSGResultColon,   "+ sg_result:")
-FSTRINGVALUE(Com::tPlusFSActiveColon,   "+ fsactive:")
-FSTRINGVALUE(Com::tPlusSTSTColon,       "+ stst:\t")
-FSTRINGVALUE(Com::tPlusOLBColon,        "+ olb:\t")
-FSTRINGVALUE(Com::tPlusOLAColon,        "+ ola:\t")
-FSTRINGVALUE(Com::tPlusS2GBColon,       "+ s2gb:\t")
-FSTRINGVALUE(Com::tPlusS2GAColon,       "+ s2ga:\t")
-FSTRINGVALUE(Com::tPlusOTPWColon,       "+ otpw:\t")
-FSTRINGVALUE(Com::tPlusOTColon,         "+ ot:\t")
+FSTRINGVALUE(Com::tPlusSGResultColon, "+ sg_result:")
+FSTRINGVALUE(Com::tPlusFSActiveColon, "+ fsactive:")
+FSTRINGVALUE(Com::tPlusSTSTColon, "+ stst:\t")
+FSTRINGVALUE(Com::tPlusOLBColon, "+ olb:\t")
+FSTRINGVALUE(Com::tPlusOLAColon, "+ ola:\t")
+FSTRINGVALUE(Com::tPlusS2GBColon, "+ s2gb:\t")
+FSTRINGVALUE(Com::tPlusS2GAColon, "+ s2ga:\t")
+FSTRINGVALUE(Com::tPlusOTPWColon, "+ otpw:\t")
+FSTRINGVALUE(Com::tPlusOTColon, "+ ot:\t")
 #endif
 bool Com::writeToAll = true; // transmit start messages to all devices!
 
-void Com::cap(FSTRINGPARAM(text))
-{
-  printF(tCap);
-  printFLN(text);
+void Com::cap(FSTRINGPARAM(text)) {
+    printF(tCap);
+    printFLN(text);
 }
-void Com::config(FSTRINGPARAM(text))
-{
-  printF(tConfig);
-  printFLN(text);
+void Com::config(FSTRINGPARAM(text)) {
+    printF(tConfig);
+    printFLN(text);
 }
-void Com::config(FSTRINGPARAM(text), int value)
-{
-  printF(tConfig);
-  printFLN(text, value);
+void Com::config(FSTRINGPARAM(text), int value) {
+    printF(tConfig);
+    printFLN(text, value);
 }
-void Com::config(FSTRINGPARAM(text), const char *msg)
-{
-  printF(tConfig);
-  printF(text);
-  print(msg);
-  println();
+void Com::config(FSTRINGPARAM(text), const char* msg) {
+    printF(tConfig);
+    printF(text);
+    print(msg);
+    println();
 }
-void Com::config(FSTRINGPARAM(text), int32_t value)
-{
-  printF(tConfig);
-  printFLN(text, value);
+void Com::config(FSTRINGPARAM(text), int32_t value) {
+    printF(tConfig);
+    printFLN(text, value);
 }
-void Com::config(FSTRINGPARAM(text), uint32_t value)
-{
-  printF(tConfig);
-  printFLN(text, value);
+void Com::config(FSTRINGPARAM(text), uint32_t value) {
+    printF(tConfig);
+    printFLN(text, value);
 }
-void Com::config(FSTRINGPARAM(text), float value, uint8_t digits)
-{
-  printF(tConfig);
-  printFLN(text, value, digits);
+void Com::config(FSTRINGPARAM(text), float value, uint8_t digits) {
+    printF(tConfig);
+    printFLN(text, value, digits);
 }
-void Com::printWarningF(FSTRINGPARAM(text))
-{
-  printF(tWarning);
-  printF(text);
+void Com::printWarningF(FSTRINGPARAM(text)) {
+    printF(tWarning);
+    printF(text);
 }
-void Com::printWarningFLN(FSTRINGPARAM(text))
-{
-  printF(tWarning);
-  printFLN(text);
+void Com::printWarningFLN(FSTRINGPARAM(text)) {
+    printF(tWarning);
+    printFLN(text);
 }
-void Com::printInfoF(FSTRINGPARAM(text))
-{
-  printF(tInfo);
-  printF(text);
+void Com::printInfoF(FSTRINGPARAM(text)) {
+    printF(tInfo);
+    printF(text);
 }
-void Com::printInfoFLN(FSTRINGPARAM(text))
-{
-  printF(tInfo);
-  printFLN(text);
+void Com::printInfoFLN(FSTRINGPARAM(text)) {
+    printF(tInfo);
+    printFLN(text);
 }
 
-void Com::printErrorF(FSTRINGPARAM(text))
-{
-  printF(tError);
-  printF(text);
+void Com::printErrorF(FSTRINGPARAM(text)) {
+    printF(tError);
+    printF(text);
 }
-void Com::printErrorFLN(FSTRINGPARAM(text))
-{
-  printF(tError);
-  printFLN(text);
+void Com::printErrorFLN(FSTRINGPARAM(text)) {
+    printF(tError);
+    printFLN(text);
 }
-void Com::printFLN(FSTRINGPARAM(text))
-{
-  printF(text);
-  println();
+void Com::printFLN(FSTRINGPARAM(text)) {
+    printF(text);
+    println();
 }
-void Com::printFLN(FSTRINGPARAM(text), const char *msg)
-{
-  printF(text);
-  print(msg);
-  println();
+void Com::printFLN(FSTRINGPARAM(text), const char* msg) {
+    printF(text);
+    print(msg);
+    println();
 }
 
-void Com::printF(FSTRINGPARAM(ptr))
-{
-  char c;
-  while ((c = HAL::readFlashByte(ptr++)) != 0)
-    GCodeSource::writeToAll(c);
+void Com::printF(FSTRINGPARAM(ptr)) {
+    char c;
+    while ((c = HAL::readFlashByte(ptr++)) != 0)
+        GCodeSource::writeToAll(c);
 }
-void Com::printF(FSTRINGPARAM(text), const char *msg)
-{
-  printF(text);
-  print(msg);
+void Com::printF(FSTRINGPARAM(text), const char* msg) {
+    printF(text);
+    print(msg);
 }
 
-void Com::printF(FSTRINGPARAM(text), int value)
-{
-  printF(text);
-  print(value);
+void Com::printF(FSTRINGPARAM(text), int value) {
+    printF(text);
+    print(value);
 }
-void Com::printF(FSTRINGPARAM(text), int32_t value)
-{
-  printF(text);
-  print(value);
+void Com::printF(FSTRINGPARAM(text), int32_t value) {
+    printF(text);
+    print(value);
 }
-void Com::printF(FSTRINGPARAM(text), uint32_t value)
-{
-  printF(text);
-  printNumber(value);
+void Com::printF(FSTRINGPARAM(text), uint32_t value) {
+    printF(text);
+    printNumber(value);
 }
-void Com::printFLN(FSTRINGPARAM(text), int value)
-{
-  printF(text);
-  print(value);
-  println();
+void Com::printFLN(FSTRINGPARAM(text), int value) {
+    printF(text);
+    print(value);
+    println();
 }
-void Com::printFLN(FSTRINGPARAM(text), int32_t value)
-{
-  printF(text);
-  print(value);
-  println();
+void Com::printFLN(FSTRINGPARAM(text), int32_t value) {
+    printF(text);
+    print(value);
+    println();
 }
-void Com::printFLN(FSTRINGPARAM(text), uint32_t value)
-{
-  printF(text);
-  printNumber(value);
-  println();
+void Com::printFLN(FSTRINGPARAM(text), uint32_t value) {
+    printF(text);
+    printNumber(value);
+    println();
 }
-void Com::printFLN(FSTRINGPARAM(text), float value, uint8_t digits)
-{
-  printF(text);
-  printFloat(value, digits);
-  println();
+void Com::printFLN(FSTRINGPARAM(text), float value, uint8_t digits) {
+    printF(text);
+    printFloat(value, digits);
+    println();
 }
-void Com::printF(FSTRINGPARAM(text), float value, uint8_t digits)
-{
-  printF(text);
-  printFloat(value, digits);
+void Com::printF(FSTRINGPARAM(text), float value, uint8_t digits) {
+    printF(text);
+    printFloat(value, digits);
 }
 
-void Com::print(const char *text)
-{
-  while (*text)
-  {
-    GCodeSource::writeToAll(*text++);
-  }
+void Com::print(const char* text) {
+    while (*text) {
+        GCodeSource::writeToAll(*text++);
+    }
 }
-void Com::print(long value)
-{
-  if (value < 0)
-  {
-    GCodeSource::writeToAll('-');
-    value = -value;
-  }
-  printNumber(value);
+void Com::print(long value) {
+    if (value < 0) {
+        GCodeSource::writeToAll('-');
+        value = -value;
+    }
+    printNumber(value);
 }
 
-void Com::printNumber(uint32_t n)
-{
-  char buf[11]; // Assumes 8-bit chars plus zero byte.
-  char *str = &buf[10];
-  *str = '\0';
-  do
-  {
-    unsigned long m = n;
-    n /= 10;
-    *--str = '0' + (m - 10 * n);
-  } while (n);
+void Com::printNumber(uint32_t n) {
+    char buf[11]; // Assumes 8-bit chars plus zero byte.
+    char* str = &buf[10];
+    *str = '\0';
+    do {
+        unsigned long m = n;
+        n /= 10;
+        *--str = '0' + (m - 10 * n);
+    } while (n);
 
-  print(str);
+    print(str);
 }
 
-void Com::printHexNumber(uint32_t n)
-{
-  char buf[11]; // Assumes 8-bit chars plus zero byte.
-  char *str = &buf[10];
-  buf[0] = '0';
-  buf[1] = 'x';
-  buf[10] = '\0';
-  do
-  {
-    uint8_t nibble = n&0x0F;
-    if (nibble > 9)
-      *--str = 'A'+(nibble-0xA);
-    else
-      *--str = '0'+nibble;
-    n>>=4;
-  } while (str != &buf[2]);
-  print(buf);
+void Com::printHexNumber(uint32_t n) {
+    char buf[11]; // Assumes 8-bit chars plus zero byte.
+    char* str = &buf[10];
+    buf[0] = '0';
+    buf[1] = 'x';
+    buf[10] = '\0';
+    do {
+        uint8_t nibble = n & 0x0F;
+        if (nibble > 9)
+            *--str = 'A' + (nibble - 0xA);
+        else
+            *--str = '0' + nibble;
+        n >>= 4;
+    } while (str != &buf[2]);
+    print(buf);
 }
 
-void Com::printArrayFLN(FSTRINGPARAM(text), float *arr, uint8_t n,
-                        uint8_t digits)
-{
-  printF(text);
-  for (uint8_t i = 0; i < n; i++)
-    printF(Com::tSpace, arr[i], digits);
-  println();
+void Com::printArrayFLN(FSTRINGPARAM(text), float* arr, uint8_t n,
+                        uint8_t digits) {
+    printF(text);
+    for (uint8_t i = 0; i < n; i++)
+        printF(Com::tSpace, arr[i], digits);
+    println();
 }
-void Com::printArrayFLN(FSTRINGPARAM(text), int32_t *arr, uint8_t n)
-{
-  printF(text);
-  for (uint8_t i = 0; i < n; i++)
-    printF(Com::tSpace, arr[i]);
-  println();
+void Com::printArrayFLN(FSTRINGPARAM(text), int32_t* arr, uint8_t n) {
+    printF(text);
+    for (uint8_t i = 0; i < n; i++)
+        printF(Com::tSpace, arr[i]);
+    println();
 }
 
-void Com::printFloat(float number, uint8_t digits)
-{
-  if (isnan(number))
-  {
-    printF(tNAN);
-    return;
-  }
-  if (isinf(number))
-  {
-    printF(tINF);
-    return;
-  }
-  // Handle negative numbers
-  if (number < 0.0)
-  {
-    print('-');
-    number = -number;
-  }
-  // Round correctly so that print(1.999, 2) prints as "2.00"
-  float rounding = 0.5;
-  for (uint8_t i = 0; i < digits; ++i)
-    rounding /= 10.0;
+void Com::printFloat(float number, uint8_t digits) {
+    if (isnan(number)) {
+        printF(tNAN);
+        return;
+    }
+    if (isinf(number)) {
+        printF(tINF);
+        return;
+    }
+    // Handle negative numbers
+    if (number < 0.0) {
+        print('-');
+        number = -number;
+    }
+    // Round correctly so that print(1.999, 2) prints as "2.00"
+    float rounding = 0.5;
+    for (uint8_t i = 0; i < digits; ++i)
+        rounding /= 10.0;
 
-  number += rounding;
+    number += rounding;
 
-  // Extract the integer part of the number and print it
-  unsigned long int_part = (unsigned long)number;
-  float remainder = number - (float)int_part;
-  printNumber(int_part);
+    // Extract the integer part of the number and print it
+    unsigned long int_part = (unsigned long)number;
+    float remainder = number - (float)int_part;
+    printNumber(int_part);
 
-  // Print the decimal point, but only if there are digits beyond
-  if (digits > 0)
-    print('.');
+    // Print the decimal point, but only if there are digits beyond
+    if (digits > 0)
+        print('.');
 
-  // Extract digits from the remainder one at a time
-  while (digits-- > 0)
-  {
-    remainder *= 10.0;
-    int toPrint = int(remainder);
-    print(toPrint);
-    remainder -= toPrint;
-  }
+    // Extract digits from the remainder one at a time
+    while (digits-- > 0) {
+        remainder *= 10.0;
+        int toPrint = int(remainder);
+        print(toPrint);
+        remainder -= toPrint;
+    }
 }
