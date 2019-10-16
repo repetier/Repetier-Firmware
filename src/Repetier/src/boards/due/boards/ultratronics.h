@@ -109,6 +109,8 @@
 #define SUICIDE_PIN -1 //PIN that has to be turned on right after start, to keep power flowing.
 #define ENC424_SS 61
 
+#define BEEPER_PIN 27
+
 // 20 or 70
 #define SDA_PIN 70
 //21 or 71

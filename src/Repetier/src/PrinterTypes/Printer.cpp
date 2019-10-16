@@ -710,7 +710,7 @@ void Printer::showConfiguration() {
     Com::config(PSTR("InputBuffer:"), SERIAL_BUFFER_SIZE - 1);
 #endif
     Com::config(PSTR("NumExtruder:"), NUM_TOOLS);
-    Com::config(PSTR("MixingExtruder:"), MIXING_EXTRUDER);
+    // Com::config(PSTR("MixingExtruder:"), MIXING_EXTRUDER);
     Com::config(PSTR("HeatedBed:"), NUM_HEATED_BEDS);
     Com::config(PSTR("SDCard:"), SDSUPPORT);
     Com::config(PSTR("Fan:"), NUM_FANS > 0);
@@ -1067,7 +1067,7 @@ void Printer::showJSONStatus(int type) {
         Com::printF(Com::tPrinterName);
         Com::printF(PSTR("\",\"tools\":["));
         firstOccurrence = true;
-        for (int i = 0; i < NUM_EXTRUDER; i++) {
+        for (int i = 0; i < NUM_TOOLS; i++) {
             if (!firstOccurrence)
                 Com::print(',');
             Com::printF(PSTR("{\"number\":"));

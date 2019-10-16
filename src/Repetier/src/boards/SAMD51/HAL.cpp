@@ -719,7 +719,7 @@ void HAL::spiBegin(uint8_t ssPin) {
         SPI_Enable(SPI0);
 #if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD == 502)
         SET_OUTPUT(DAC0_SYNC);
-#if NUM_EXTRUDER > 1
+#if NUM_TOOLS > 1
         SET_OUTPUT(DAC1_SYNC);
         WRITE(DAC1_SYNC, HIGH);
 #endif

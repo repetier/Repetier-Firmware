@@ -387,7 +387,9 @@ float Motion1::getShowPosition(fast8_t axis) {
 void Motion1::setMotorForAxis(StepperDriverBase* motor, fast8_t axis) {
     waitForEndOfMoves();
     motors[axis] = motor;
-    motor->setAxis(axis);
+    if (motor != nullptr) {
+        motor->setAxis(axis);
+    }
 }
 
 fast8_t Motion1::buffersUsed() {

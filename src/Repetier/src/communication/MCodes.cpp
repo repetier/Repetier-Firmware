@@ -678,13 +678,46 @@ void MCode_140(GCode* com) {
 #endif
 }
 
+void MCode_141(GCode* com) {
+#if NUM_HEATED_CHAMBERS > 0
+    {
+        previousMillisCmd = HAL::timeInMilliseconds();
+        if (Printer::debugDryrun()) {
+            return;
+        }
+        if (HeatManager::reportTempsensorError()) {
+            return;
+        }
+        if (com->hasH()) { // one bed
+            if (com->H < 0 || com->H >= NUM_HEATED_CHAMBERS) {
+                return;
+            }
+            fast8_t i = static_cast<fast8_t>(com->H);
+            if (com->hasS()) {
+                heatedChambers[i]->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
+            } else if (com->hasP()) {
+                heatedChambers[i]->setTargetTemperature(heatedChambers[i]->getPreheatTemperature() + (com->hasO() ? com->O : 0));
+            }
+        } else { // all beds
+            for (fast8_t i = 0; i < NUM_HEATED_CHAMBERS; i++) {
+                if (com->hasS()) {
+                    heatedChambers[i]->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
+                } else if (com->hasP()) {
+                    heatedChambers[i]->setTargetTemperature(heatedChambers[i]->getPreheatTemperature() + (com->hasO() ? com->O : 0));
+                }
+            }
+        }
+    }
+#endif
+}
+
 void MCode_155(GCode* com) {
     Printer::setAutoreportTemp((com->hasS() && com->S != 0) || !com->hasS());
     Printer::lastTempReport = HAL::timeInMilliseconds();
 }
 
 void MCode_163(GCode* com) {
-#if MIXING_EXTRUDER > 0
+#if 0 // mixing extruder
     if (com->hasS() && com->hasP() && com->S < NUM_EXTRUDER && com->S >= 0)
         Extruder::setMixingWeight(com->S, com->P);
     Extruder::recomputeMixingExtruderSteps();
@@ -692,7 +725,7 @@ void MCode_163(GCode* com) {
 }
 
 void MCode_164(GCode* com) {
-#if MIXING_EXTRUDER > 0
+#if 0 // mixing extruder
     if (!com->hasS() || com->S < 0 || com->S >= VIRTUAL_EXTRUDER)
         break; // ignore illegal values
     for (uint8_t i = 0; i < NUM_EXTRUDER; i++) {
@@ -790,6 +823,46 @@ void MCode_190(GCode* com) {
             }
             for (fast8_t i = 0; i < NUM_HEATED_BEDS; i++) {
                 heatedBeds[i]->waitForTargetTemperature();
+            }
+        }
+        EVENT_HEATING_FINISHED(-1);
+        UI_CLEAR_STATUS;
+        previousMillisCmd = HAL::timeInMilliseconds();
+    }
+#endif
+}
+
+void MCode_191(GCode* com) {
+#if NUM_HEATED_CHAMBERS > 0
+    {
+        previousMillisCmd = HAL::timeInMilliseconds();
+        if (Printer::debugDryrun() || HeatManager::reportTempsensorError()) {
+            return;
+        }
+        UI_STATUS_UPD("Heating Chamber");
+        Motion1::waitForEndOfMoves();
+        EVENT_WAITING_HEATER(-1);
+        if (com->hasH()) { // one bed
+            if (com->H < 0 || com->H >= NUM_HEATED_CHAMBERS) {
+                return;
+            }
+            fast8_t i = static_cast<fast8_t>(com->H);
+            if (com->hasS()) {
+                heatedChambers[i]->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
+            } else if (com->hasP()) {
+                heatedChambers[i]->setTargetTemperature(heatedChambers[i]->getPreheatTemperature() + (com->hasO() ? com->O : 0));
+            }
+            heatedChambers[i]->waitForTargetTemperature();
+        } else { // all beds
+            for (fast8_t i = 0; i < NUM_HEATED_CHAMBERS; i++) {
+                if (com->hasS()) {
+                    heatedChambers[i]->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
+                } else if (com->hasP()) {
+                    heatedChambers[i]->setTargetTemperature(heatedChambers[i]->getPreheatTemperature() + (com->hasO() ? com->O : 0));
+                }
+            }
+            for (fast8_t i = 0; i < NUM_HEATED_CHAMBERS; i++) {
+                heatedChambers[i]->waitForTargetTemperature();
             }
         }
         EVENT_HEATING_FINISHED(-1);

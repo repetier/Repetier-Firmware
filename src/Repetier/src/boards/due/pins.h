@@ -165,16 +165,6 @@
 #define FAN_BOARD_PIN -1
 #endif
 
-#if NUM_EXTRUDER < 2
-#undef E1_PINS
-#define E1_PINS
-#endif
-
-#if NUM_EXTRUDER < 3
-#undef E2_PINS
-#define E2_PINS
-#endif
-
 #ifndef HEATER_PINS_INVERTED
 #define HEATER_PINS_INVERTED 0
 #endif

@@ -9,6 +9,7 @@
 #endif
 
 HeatManager* heatedBeds[] = HEATED_BED_LIST;
+HeatManager* heatedChambers[] = HEATED_CHAMBER_LIST;
 
 fast8_t Tool::activeToolId = 255;
 Tool* Tool::activeTool = nullptr;

@@ -6,6 +6,8 @@ enum class ToolTypes {
 };
 
 extern HeatManager* heatedBeds[];
+extern HeatManager* heatedChambers[];
+
 class Motion3;
 class Motion1;
 class GCode;
