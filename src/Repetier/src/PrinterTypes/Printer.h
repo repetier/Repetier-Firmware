@@ -508,8 +508,8 @@ public:
         return (flag2 & PRINTER_FLAG2_DEBUG_JAM) != 0;
     }
 
-    static INLINE uint8_t isDebugJamOrDisabled() {
-        return (flag2 & (PRINTER_FLAG2_DEBUG_JAM | PRINTER_FLAG2_JAMCONTROL_DISABLED)) != 0;
+    static INLINE uint8_t isTestJamRequired() {
+        return isDebugJam() || !isJamcontrolDisabled();
     }
 
     static INLINE void setDebugJam(uint8_t b) {

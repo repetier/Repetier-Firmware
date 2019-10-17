@@ -94,8 +94,8 @@ IO_INPUT_INVERTED_PULLUP(IOEndstopXMin, ORIG_X_MIN_PIN)
 IO_INPUT_INVERTED_PULLUP(IOEndstopAMax, ORIG_X_MAX_PIN)
 IO_INPUT_INVERTED_PULLUP(IOEndstopYMin, ORIG_Y_MIN_PIN)
 IO_INPUT_INVERTED_PULLUP(IOEndstopZMin, ORIG_Z_MIN_PIN)
-IO_INPUT(IOJam1, ORIG_Z_MAX_PIN)
-IO_INPUT(IOJam2, 59)
+IO_INPUT(IOJam1, 61)
+IO_INPUT(IOJam2, 60)
 
 // Define our endstops solutions
 // You need to define all min and max endstops for all
@@ -189,8 +189,8 @@ COOLER_MANAGER_SENSOR(ExtruderCooler, TempHottestExtruder, CoolerFan, 70, 200, 1
 // Define tools. They get inserted into a tool array in configuration.h
 // Typical tools are:
 
-TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 500, 5, 30, 5000, 100, "M117 Extruder 1", "", &Fan1PWM)
-TOOL_EXTRUDER(ToolExtruder2, 0, 0.1, 0, HeaterExtruder2, E2Motor, 1.75, 500, 5, 30, 5000, 100, "M117 Extruder 2", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 500, 5, 30, 5000, 160, "M117 Extruder 1", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder2, 0, 0.1, 0, HeaterExtruder2, E2Motor, 1.75, 500, 5, 30, 5000, 160, "M117 Extruder 2", "", &Fan1PWM)
 
 FILAMENT_DETECTOR(JamDetector1, IOJam1, ToolExtruder1)
 FILAMENT_DETECTOR(JamDetector2, IOJam2, ToolExtruder2)

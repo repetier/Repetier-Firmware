@@ -25,7 +25,9 @@ IO_INPUT_INVERTED(name, pin)
 IO_INPUT_PULLUP(name, pin)
 IO_INPUT_INVERTED_PULLUP(name, pin)
 IO_INPUT_DUMMY(name, state)
-
+IO_INPUT_LOG(name, input, changeOnly)
+IO_INPUT_OR(name, input1, input2)
+IO_INPUT_AND(name, input1, input2)
 */
 
 #ifndef IO_TARGET
@@ -37,6 +39,9 @@ IO_INPUT_DUMMY(name, state)
 #undef IO_INPUT_PULLUP
 #undef IO_INPUT_INVERTED_PULLUP
 #undef IO_INPUT_DUMMY
+#undef IO_INPUT_LOG
+#undef INPUT_OR
+#undef INPUT_AND
 
 #if IO_TARGET == IO_TARGET_INIT // Init pins
 
@@ -53,8 +58,6 @@ IO_INPUT_DUMMY(name, state)
 #define IO_INPUT_INVERTED_PULLUP(name, pin) \
     SET_INPUT(pin); \
     PULLUP(pin, HIGH);
-
-#define IO_INPUT_DUMMY(name, state)
 
 #elif IO_TARGET == IO_TARGET_CLASS_DEFINITION // define class
 
@@ -103,12 +106,69 @@ IO_INPUT_DUMMY(name, state)
         inline static uint8_t pin() { return 255; } \
     };
 
-#else
+#define IO_INPUT_LOG(name, input, changeOnly) \
+    class name { \
+        static fast8_t state; \
+\
+    public: \
+        inline static fast8_t get() { \
+            fast8_t val = input::get(); \
+            if (state != val || !changeOnly) { \
+                Com::printLogF(PSTR(#name)); \
+                Com::printFLN(PSTR("="), static_cast<int>(val)); \
+            } \
+            state = val; \
+            return state; \
+        } \
+        inline static uint8_t pin() { return input::pin(); } \
+    };
 
+#define IO_INPUT_OR(name, input1, input2) \
+    class name { \
+    public: \
+        inline static fast8_t get() { \
+            return input1::get() || input2::get(); \
+        } \
+        inline static uint8_t pin() { return 255; } \
+    };
+
+#define IO_INPUT_AND(name, input1, input2) \
+    class name { \
+    public: \
+        inline static fast8_t get() { \
+            return input1::get() && input2::get(); \
+        } \
+        inline static uint8_t pin() { return 255; } \
+    };
+
+#elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES
+
+#define IO_INPUT_LOG(name, input, changeOnly) \
+    fast8_t name::state = false;
+
+#endif
+
+#ifndef IO_INPUT
 #define IO_INPUT(name, pin)
+#endif
+#ifndef IO_INPUT_INVERTED
 #define IO_INPUT_INVERTED(name, pin)
+#endif
+#ifndef IO_INPUT_PULLUP
 #define IO_INPUT_PULLUP(name, pin)
+#endif
+#ifndef IO_INPUT_INVERTED_PULLUP
 #define IO_INPUT_INVERTED_PULLUP(name, pin)
+#endif
+#ifndef IO_INPUT_DUMMY
 #define IO_INPUT_DUMMY(name, state)
-
+#endif
+#ifndef IO_INPUT_LOG
+#define IO_INPUT_LOG(name, input, changeOnly)
+#endif
+#ifndef IO_INPUT_OR
+#define IO_INPUT_OR(name, input1, input2)
+#endif
+#ifndef IO_INPUT_AND
+#define IO_INPUT_AND(name, input1, input2)
 #endif

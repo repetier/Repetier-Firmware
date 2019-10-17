@@ -145,7 +145,10 @@ void JamDetectorHW<inputPin, ObserverType>::eepromHandle() {
 
 template <class inputPin, class ObserverType>
 void JamDetectorHW<inputPin, ObserverType>::testForJam() {
-    if (!Printer::isDebugJamOrDisabled()) {
+    if (Tool::getActiveTool() != tool) {
+        return;
+    }
+    if (Printer::isTestJamRequired()) {
         int32_t diff = labs(static_cast<int32_t>(observer->position - lastSignal));
         if (diff > errorSteps && !tool->hasError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT)) { // handle error
             tool->setError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT);
@@ -215,6 +218,7 @@ void __attribute__((weak)) JamDetectorHW<inputPin, ObserverType>::menuJamPercent
 template <class inputPin>
 FilamentDetector<inputPin>::FilamentDetector(Tool* _tool) {
     tool = _tool;
+    lastFound = HAL::timeInMilliseconds();
 }
 
 template <class inputPin>
@@ -226,11 +230,17 @@ void FilamentDetector<inputPin>::setup() {
 
 template <class inputPin>
 void FilamentDetector<inputPin>::testFilament() {
+    if (Tool::getActiveTool() != tool) { // trigger only if active
+        return;
+    }
     if (inputPin::get()) {
         lastFound = HAL::timeInMilliseconds();
-        tool->resetError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT);
-    } else if (!Printer::isDebugJamOrDisabled()) {
-        if (!inputPin::get() && !tool->hasError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT) && (HAL::timeInMilliseconds() - lastFound) > 2000) { // handle error
+        if (tool->hasError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT)) {
+            tool->resetError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT);
+            Com::printFLN(PSTR("Filament inserted"));
+        }
+    } else if (Printer::isTestJamRequired()) {
+        if (!tool->hasError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT) && (HAL::timeInMilliseconds() - lastFound) > 2000) { // handle error
             tool->setError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT);
             EVENT_JAM_DETECTED;
             Com::printFLN(PSTR("important:No Filament detected"));
