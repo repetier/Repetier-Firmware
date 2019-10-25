@@ -73,7 +73,7 @@ void Motion3::activateNext() {
     CMotor.dir(act->directions & 64);
 #endif
     if (Motion1::dittoMode) {
-        for (fast8_t i = 0; i < Motion1::dittoMode; i++) {
+        for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
             Tool::tools[i]->directionMotor(act->directions & 8);
         }
     } else {

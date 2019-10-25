@@ -287,7 +287,7 @@ void PrinterType::enableMotors(fast8_t axes) {
         }
     }
     if (Motion1::dittoMode && (axes & axisBits[E_AXIS]) != 0) {
-        for (fast8_t i = 1; i <= Motion1::dittoMode; i++) {
+        for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
             Tool::getTool(i)->enableMotor();
         }
     }
