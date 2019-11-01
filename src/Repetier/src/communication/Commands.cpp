@@ -566,8 +566,10 @@ void Commands::processMCode(GCode* com) {
     case 204: // M204
         MCode_204(com);
         break;
-    case 205: // M205 Show EEPROM settings
+    case 205: // M205 Show EEPROM settings 
+    #if EMERGENCY_PARSER == 0
         MCode_205(com);
+    #endif
         break;
     case 206: // M206 T[type] P[pos] [Sint(long] [Xfloat]  Set eeprom value
         MCode_206(com);

@@ -1267,7 +1267,9 @@ void SerialGCodeSource::testEmergency(GCode& gcode) {
             PrinterType::M290(&gcode);
         } else if (gcode.M == 416) {
             Printer::handlePowerLoss();
-        }
+        } else if (gcode.M == 205) { 
+            EEPROM::writeSettings(); 
+        } 
     }
 }
 
