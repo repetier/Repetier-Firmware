@@ -42,8 +42,9 @@
 
 #define ENDSTOP_NONE(name)
 #define ENDSTOP_SWITCH(name, pin)
+
 #define ENDSTOP_SWITCH_HW(name, _pin, axis, dir) \
-    attachInterrupt(digitalPinToInterrupt(_pin::pin()), name##_cb, CHANGE); \
+    attachInterrupt((CPU_ARCH != ARCH_AVR) ? _pin::pin() : digitalPinToInterrupt(_pin::pin()), name##_cb, CHANGE); \
     name.updateReal();
 
 #define ENDSTOP_SWITCH_DEBOUNCE(name, pin, level)
