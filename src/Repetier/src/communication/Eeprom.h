@@ -44,6 +44,7 @@
 #define EPR_BAUDRATE2 24             // Connection baudrate for second connector
 #define EPR_SELECTED_LANGUAGE 25     // Active language
 #define EPR_VERSION 26               // Version id for updates in EEPROM storage
+#define EPR_TONES_ENABLED 27         // Tones/sounds currently enabled
 #define EEPROM_PROTOCOL_VERSION 1    // Protocol version
 
 #define EPR_START_RESERVE 40

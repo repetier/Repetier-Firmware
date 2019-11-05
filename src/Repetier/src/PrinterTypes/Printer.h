@@ -291,6 +291,38 @@ public:
 
     static void handleInterruptEvent();
 
+#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
+    //Moses - tone generation
+    struct tonePacket
+    {
+        //If the frquency is 0, it'll behave similar to putting a G4 P(duration) command in between M300's.
+        uint16_t frequency; 
+        uint16_t duration; 
+    }; 
+    
+    static void processToneQueue();
+    static void addToToneQueue(tonePacket packet);
+    static void killTones();  
+
+    static INLINE void tonesKillNext() {
+        seekToneIndex = (curToneIndex != -1 ? (curToneIndex + 1) : -1);
+    }
+    static INLINE bool areTonesPlaying() {
+        return seekToneIndex == -1 ? false : true;
+    }
+
+    static INLINE void setTonesEnabled(bool set) {
+        killTones();
+        tonesEnabled = set;
+    }
+    
+    static uint8_t tonesEnabled;
+    static fast8_t curToneIndex; 
+    static fast8_t seekToneIndex; 
+    static millis_t lastToneTime; 
+    const static fast8_t toneBufSize = 32; 
+    
+#endif
     static INLINE void setInterruptEvent(uint8_t evt, bool highPriority) {
         if (highPriority || interruptEvent == 0)
             interruptEvent = evt;

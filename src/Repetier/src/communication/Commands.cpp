@@ -82,6 +82,7 @@ void Commands::commandLoop() {
 
 void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     Printer::handleInterruptEvent();
+    Printer::processToneQueue(); 
     FirmwareEvent::handleEvents();
 #if EMERGENCY_PARSER
     GCodeSource::prefetchAll();
