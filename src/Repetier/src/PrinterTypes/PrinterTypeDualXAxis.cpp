@@ -16,6 +16,23 @@
 
 */
 
+/*
+Information about coordinate system tweaking:
+
+Axis X and A are used to position the two tools. On the other side from command line
+only X axis is used to position the tool even for the right extruder. This is done
+by adding some tweaks to the different coordinate systems. The relevant coordinate system
+is the transformed coordinate system, whcih therefor must show the real tool position on both axis.
+In th eofficial coordinate system the A axis is ignored and transformations are mapped
+according to active tool and ditto mode to X/A transformed. Same for back transformation.
+The help variable targetReal always contains the transformed X position we should have set.
+
+The help variable dontChangeCoords is true if queueMove is not allowed to do any
+coordinate tweaking. Mainly used in internal function for homing x axis and changing tools.
+If false it will set targetReal from destinationPositionTransformed and then perform mapping
+so that destinationPositionTransformed matches active tools and coordinates.
+
+*/
 #include "Repetier.h"
 
 #if PRINTER_TYPE == PRINTER_TYPE_DUAL_X
@@ -24,6 +41,7 @@ bool PrinterType::leftParked = false;
 bool PrinterType::rightParked = false;
 uint8_t PrinterType::lazyMode = false;
 float PrinterType::endPos[2];
+float PrinterType::bedCenter;
 float PrinterType::targetReal;              // Official position
 bool PrinterType::dontChangeCoords = false; // if true queueMove will not adjust positions!
 float PrinterType::bedRectangle[2][2];
@@ -32,6 +50,9 @@ fast8_t PrinterType::activeAxis = 0;
 
 void PrinterType::homeAxis(fast8_t axis) {
     if (axis == X_AXIS) {
+        fast8_t oldDitto = Motion1::dittoMode;
+        Motion1::dittoMode = 0;
+        updateDerived();
         dontChangeCoords = true;
         leftParked = rightParked = false;
         Motion1::simpleHome(X_AXIS);
@@ -39,6 +60,8 @@ void PrinterType::homeAxis(fast8_t axis) {
         Motion1::simpleHome(A_AXIS);
         targetReal = /* lazyMode ? Motion1::minPos[X_AXIS] : */ endPos[activeAxis];
         leftParked = rightParked = lazyMode;
+        Motion1::dittoMode = oldDitto;
+        updateDerived();
         Motion1::currentPositionTransformed[X_AXIS] = endPos[0];
         Motion1::currentPositionTransformed[A_AXIS] = endPos[1];
         Motion1::updatePositionsFromCurrentTransformed();
@@ -48,11 +71,11 @@ void PrinterType::homeAxis(fast8_t axis) {
             FOR_ALL_AXES(i) {
                 Motion1::tmpPosition[i] = Motion1::currentPositionTransformed[i];
             }
-            Motion1::tmpPosition[X_AXIS] = Motion1::minPos[X_AXIS];
+            Motion1::tmpPosition[X_AXIS] = bedRectangle[X_AXIS][0];
             if (Motion1::dittoMirror) {
-                Motion1::tmpPosition[A_AXIS] = Motion1::maxPos[X_AXIS];
+                Motion1::tmpPosition[A_AXIS] = 2.0f * bedCenter - bedRectangle[X_AXIS][0];
             } else {
-                Motion1::tmpPosition[A_AXIS] = Motion1::tmpPosition[X_AXIS] + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
+                Motion1::tmpPosition[A_AXIS] = bedCenter;
             }
             targetReal = Motion1::tmpPosition[X_AXIS];
             leftParked = rightParked = false;
@@ -94,30 +117,38 @@ void PrinterType::park(GCode* com) {
 
 // Is called after normalizing position coordinates!
 bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
-    /*    Com::printF(PSTR("Test PA XT:"), pos[X_AXIS], 2);
+    /* Com::printF(PSTR("Test PA XT:"), pos[X_AXIS], 2);
     Com::printF(PSTR(" YT:"), pos[Y_AXIS], 2);
     Com::printF(PSTR(" ZT:"), pos[Z_AXIS], 2);
 #if NUM_AXES > A_AXIS
     Com::printF(PSTR(" AT:"), pos[A_AXIS], 2);
 #endif
-    Com::println();
-*/
+    Com::println(); */
+
     if (Printer::isNoDestinationCheck() || dontChangeCoords) {
         return true;
     }
     if (Printer::isHoming() || Motion1::endstopMode == EndstopMode::PROBING) {
         return true;
     }
-    for (fast8_t i = 1; i < 3; i++) {
+    for (fast8_t i = 0; i <= A_AXIS; i++) {
+        if (i == E_AXIS) {
+            continue;
+        }
+        //Com::printF(PSTR("Axis"), (int)i);
+        //Com::printF(PSTR(" min:"), Motion1::minPos[i]);
+        //Com::printF(PSTR(" max:"), Motion1::maxPos[i]);
         if (Motion1::axesHomed & axisBits[i]) {
             if (pos[i] < Motion1::minPos[i] || pos[i] > Motion1::maxPos[i]) {
+                // Com::printFLN(PSTR(" hit"));
                 return false;
             }
-        }
+            // Com::printFLN(PSTR(" hit"));
+        } /*else {
+            Com::printFLN(PSTR(" untested:"), (int)Motion1::axesHomed);
+        }*/
     }
-
-    // Test X or A range
-    return pos[X_AXIS] >= endPos[0] && pos[X_AXIS] <= Motion1::maxPos[X_AXIS] && pos[A_AXIS] >= 0 && pos[A_AXIS] <= endPos[1] && pos[A_AXIS] >= pos[X_AXIS] + DUAL_X_MIN_DISTANCE;
+    return pos[A_AXIS] >= pos[X_AXIS] + DUAL_X_MIN_DISTANCE;
 }
 
 void PrinterType::closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety) {
@@ -198,16 +229,16 @@ void PrinterType::deactivatedTool(fast8_t id) {
     }
     // Move into park position
     COPY_ALL_AXES(Motion1::tmpPosition, Motion1::currentPositionTransformed);
-    dontChangeCoords = true;
+    Motion1::tmpPosition[X_AXIS] = endPos[axisId];
+    float rPos = targetReal;
+    Motion1::moveByPrinter(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
+    targetReal = rPos;
+    Motion1::updatePositionsFromCurrentTransformed();
     if (axisId) { // right extruder
-        Motion1::tmpPosition[A_AXIS] = endPos[1];
         rightParked = lazyMode;
     } else {
-        Motion1::tmpPosition[X_AXIS] = endPos[0];
         leftParked = lazyMode;
     }
-    Motion1::moveByPrinter(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
-    dontChangeCoords = false;
 }
 
 void PrinterType::activatedTool(fast8_t id) {
@@ -217,32 +248,29 @@ void PrinterType::activatedTool(fast8_t id) {
     }
     // Move out of park position
     COPY_ALL_AXES(Motion1::tmpPosition, Motion1::currentPositionTransformed);
-    dontChangeCoords = true;
     if (Motion1::dittoMode) {
-        Motion1::tmpPosition[X_AXIS] = targetReal;
-        if (Motion1::dittoMirror) {
-            Motion1::tmpPosition[A_AXIS] = Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS] - targetReal;
-        } else {
-            Motion1::tmpPosition[A_AXIS] = targetReal - Motion1::minPos[X_AXIS] + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
+        if (targetReal > Motion1::maxPos[X_AXIS]) {
+            targetReal = Motion1::maxPos[X_AXIS];
         }
+        Motion1::tmpPosition[X_AXIS] = targetReal;
         rightParked = false;
         leftParked = false;
         activeAxis = 0;
     } else if (activeAxis) {                        // right tool
-        if (targetReal < Motion1::minPos[X_AXIS]) { // prevent crash
-            targetReal = endPos[1];
+        if (targetReal < Motion1::minPos[A_AXIS]) { // prevent crash
+            targetReal = Motion1::minPos[A_AXIS];
         }
-        Motion1::tmpPosition[A_AXIS] = targetReal;
+        Motion1::tmpPosition[X_AXIS] = targetReal;
         rightParked = false;
     } else {                                        // left tool
         if (targetReal > Motion1::maxPos[X_AXIS]) { // prevent crash
-            targetReal = endPos[0];
+            targetReal = Motion1::maxPos[X_AXIS];
         }
         Motion1::tmpPosition[X_AXIS] = targetReal;
         leftParked = false;
     }
     Motion1::moveByPrinter(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
-    dontChangeCoords = false;
+    Motion1::updatePositionsFromCurrentTransformed();
 }
 
 void PrinterType::eepromHandle() {
@@ -251,8 +279,8 @@ void PrinterType::eepromHandle() {
     EEPROM::handleFloat(eeprom + 13, PSTR("Bed X Max [mm]"), 2, bedRectangle[X_AXIS][1]);
     EEPROM::handleFloat(eeprom + 17, PSTR("Bed Y Min [mm]"), 2, bedRectangle[Y_AXIS][0]);
     EEPROM::handleFloat(eeprom + 21, PSTR("Bed Y Max [mm]"), 2, bedRectangle[Y_AXIS][1]);
-    EEPROM::handleFloat(eeprom + 0, PSTR("Offset Left [mm]"), 2, endPos[0]);
-    EEPROM::handleFloat(eeprom + 4, PSTR("Offset Right [mm]"), 2, endPos[1]);
+    EEPROM::handleFloat(eeprom + 0, PSTR("Pos. Parked Left [mm]"), 2, endPos[0]);
+    EEPROM::handleFloat(eeprom + 4, PSTR("Pos. Parked Right [mm]"), 2, endPos[1]);
     EEPROM::handleByte(eeprom + 8, PSTR("Lazy Homing [0/1]"), lazyMode);
 }
 
@@ -268,12 +296,41 @@ void PrinterType::restoreFromConfiguration() {
     PrinterType::updateDerived();
 }
 
+void PrinterType::M360() {
+    Com::config(PSTR("PrinterType:Cartesian"));
+    Com::config(PSTR("BedXMin:"), bedRectangle[X_AXIS][0]);
+    Com::config(PSTR("BedYMin:"), bedRectangle[Y_AXIS][0]);
+    Com::config(PSTR("BedXMax:"), bedRectangle[X_AXIS][1]);
+    Com::config(PSTR("BedYMax:"), bedRectangle[Y_AXIS][1]);
+}
+
 void PrinterType::init() {
     PrinterType::restoreFromConfiguration();
     eeprom = EEPROM::reserve(EEPROM_SIGNATURE_DUAL_X, 1, 25);
 }
 
-void PrinterType::updateDerived() {}
+void PrinterType::updateDerived() {
+    Motion1::homingFeedrate[A_AXIS] = Motion1::homingFeedrate[X_AXIS];
+    Motion1::maxAcceleration[A_AXIS] = Motion1::maxAcceleration[X_AXIS];
+    Motion1::maxFeedrate[A_AXIS] = Motion1::maxFeedrate[X_AXIS];
+    Motion1::moveFeedrate[A_AXIS] = Motion1::moveFeedrate[X_AXIS];
+    Motion1::maxYank[A_AXIS] = Motion1::maxYank[X_AXIS];
+    Motion1::minPos[X_AXIS] = endPos[0];
+    Motion1::maxPos[X_AXIS] = endPos[1] - DUAL_X_MIN_DISTANCE;
+    Motion1::minPos[A_AXIS] = endPos[0] + DUAL_X_MIN_DISTANCE;
+    Motion1::maxPos[A_AXIS] = endPos[1];
+    bedRectangle[X_AXIS][0] = RMath::max(bedRectangle[X_AXIS][0], Motion1::minPos[A_AXIS]);
+    bedRectangle[X_AXIS][1] = RMath::min(bedRectangle[X_AXIS][1], Motion1::maxPos[X_AXIS]);
+    bedCenter = 0.5f * (bedRectangle[X_AXIS][0] + bedRectangle[X_AXIS][1]);
+    if (Motion1::dittoMode) { // limit allowed area for ditto to prevent crashes
+        if (Motion1::dittoMirror) {
+            Motion1::minPos[X_AXIS] = RMath::max(Motion1::minPos[X_AXIS], bedCenter + bedCenter - endPos[1]);
+            Motion1::maxPos[X_AXIS] = bedCenter - 0.5f * DUAL_X_MIN_DISTANCE;
+        } else {
+            Motion1::maxPos[X_AXIS] = RMath::min(bedCenter, bedRectangle[X_AXIS][0] + Motion1::maxPos[A_AXIS] - bedCenter - 1.0 /* safety */);
+        }
+    }
+}
 
 void PrinterType::enableMotors(fast8_t axes) {
     FOR_ALL_AXES(i) {
@@ -321,9 +378,9 @@ bool PrinterType::queueMove(float feedrate, bool secondaryMove) {
             dontChangeCoords = true;
             if (Motion1::dittoMode) {
                 if (Motion1::dittoMirror) {
-                    Motion1::destinationPositionTransformed[A_AXIS] = Motion1::maxPos[X_AXIS] + Motion1::minPos[X_AXIS] - targetReal;
+                    Motion1::destinationPositionTransformed[A_AXIS] = bedCenter + bedCenter - targetReal;
                 } else {
-                    Motion1::destinationPositionTransformed[A_AXIS] = targetReal - Motion1::minPos[X_AXIS] + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
+                    Motion1::destinationPositionTransformed[A_AXIS] = targetReal - bedRectangle[X_AXIS][0] + bedCenter;
                 }
                 Motion1::destinationPositionTransformed[X_AXIS] = targetReal;
                 rightParked = false;
@@ -358,9 +415,9 @@ bool PrinterType::queueMove(float feedrate, bool secondaryMove) {
     if (Motion1::dittoMode) {
         if (!leftParked) {
             if (Motion1::dittoMirror) {
-                Motion1::destinationPositionTransformed[A_AXIS] = Motion1::maxPos[X_AXIS] + Motion1::minPos[X_AXIS] - Motion1::destinationPositionTransformed[X_AXIS];
+                Motion1::destinationPositionTransformed[A_AXIS] = bedCenter + bedCenter - Motion1::destinationPositionTransformed[X_AXIS];
             } else {
-                Motion1::destinationPositionTransformed[A_AXIS] = Motion1::destinationPositionTransformed[X_AXIS] - Motion1::minPos[X_AXIS] + (Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]) * 0.5f;
+                Motion1::destinationPositionTransformed[A_AXIS] = Motion1::destinationPositionTransformed[X_AXIS] - bedRectangle[X_AXIS][0] + bedCenter;
             }
         }
     } else if (activeAxis) {                                                                               // move tool 1
@@ -408,7 +465,7 @@ bool PrinterType::ignoreAxisForLength(fast8_t axis) {
 
 /** Converts transformed to real coordinates. Will use the 
  * official x position stored in targetReal instead of input.
- * This is ok because moves are based on reverse and thisis only called to update
+ * This is ok because moves are based on reverse and this is only called to update
  * current position. */
 void PrinterType::transformedToOfficial(float trans[NUM_AXES], float official[NUM_AXES]) {
     Motion1::transformFromPrinter(

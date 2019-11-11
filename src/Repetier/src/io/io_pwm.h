@@ -33,7 +33,6 @@
  // time100ms = kickstart time in 100ms intervals.
  IO_PWM_KICKSTART(name,pwmname,time100ms)
  
- TODO: Add hardware PWM
  */
 
 #ifndef IO_TARGET

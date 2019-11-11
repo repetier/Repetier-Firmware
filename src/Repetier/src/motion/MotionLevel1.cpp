@@ -472,8 +472,11 @@ void Motion1::printCurrentPosition() {
     Com::printF(PSTR(" OffZ2:"), Motion1::zprobeZOffset);
     Com::printF(PSTR(" XS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][X_AXIS]);
     Com::printF(PSTR(" YS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Y_AXIS]);
-    Com::printFLN(PSTR(" ZS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Z_AXIS]);
-
+    Com::printF(PSTR(" ZS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Z_AXIS]);
+#if NUM_AXES > A_AXIS
+    Com::printF(PSTR(" ZA:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][A_AXIS]);
+#endif
+    Com::println();
 #endif
 }
 
@@ -861,13 +864,17 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
     buf.invLength = 1.0 / buf.length;
     /* if (Printer::debugEcho()) {
         Com::printF("Move CX:", currentPositionTransformed[X_AXIS]);
-        // Com::printF(" AX:", currentPositionTransformed[A_AXIS]);
+#if NUM_AXES > A_AXIS
+        Com::printF(" AX:", currentPositionTransformed[A_AXIS]);
+#endif
         Com::printF(" CY:", currentPositionTransformed[Y_AXIS]);
         Com::printF(" CZ:", currentPositionTransformed[Z_AXIS]);
         Com::printF(" l:", buf.length);
         Com::printFLN(" f:", feedrate);
         Com::printF("Move DX:", delta[X_AXIS]);
-        // Com::printF(" DA:", delta[A_AXIS]);
+#if NUM_AXES > A_AXIS
+        Com::printF(" DA:", delta[A_AXIS]);
+#endif
         Com::printF(" DE:", delta[E_AXIS]);
         Com::printF(" DY:", delta[Y_AXIS]);
         Com::printFLN(" DZ:", delta[Z_AXIS]);
@@ -1647,7 +1654,7 @@ bool Motion1::simpleHome(fast8_t axis) {
     updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
     endstopMode = oldMode;
-    setAxisHomed(axis, false);
+    setAxisHomed(axis, true);
     Motion1::axesTriggered = 0;
     return ok;
 }
@@ -1705,13 +1712,19 @@ void Motion1::eepromHandle() {
         }
         EEPROM::handlePrefix(getAxisString(i));
         EEPROM::handleFloat(eprStart + p + EPR_M1_RESOLUTION, PSTR("steps per mm"), 3, resolution[i]);
-        EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_FEEDRATE, PSTR("max. feedrate [mm/s]"), 3, maxFeedrate[i]);
-        EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_ACCELERATION, PSTR("max. acceleration [mm/s^2]"), 3, maxAcceleration[i]);
-        EEPROM::handleFloat(eprStart + p + EPR_M1_HOMING_FEEDRATE, PSTR("homing feedrate [mm/s]"), 3, homingFeedrate[i]);
-        EEPROM::handleFloat(eprStart + p + EPR_M1_MOVE_FEEDRATE, PSTR("move feedrate [mm/s]"), 3, moveFeedrate[i]);
-        EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_YANK, PSTR("max. yank(jerk) [mm/s]"), 3, maxYank[i]);
-        EEPROM::handleFloat(eprStart + p + EPR_M1_MIN_POS, PSTR("min. position [mm]"), 3, minPos[i]);
-        EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_POS, PSTR("max. position [mm]"), 3, maxPos[i]);
+#if PRINTER_TYPE == PRINTER_TYPE_DUAL_X
+        if (i != A_AXIS) {
+#endif
+            EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_FEEDRATE, PSTR("max. feedrate [mm/s]"), 3, maxFeedrate[i]);
+            EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_ACCELERATION, PSTR("max. acceleration [mm/s^2]"), 3, maxAcceleration[i]);
+            EEPROM::handleFloat(eprStart + p + EPR_M1_HOMING_FEEDRATE, PSTR("homing feedrate [mm/s]"), 3, homingFeedrate[i]);
+            EEPROM::handleFloat(eprStart + p + EPR_M1_MOVE_FEEDRATE, PSTR("move feedrate [mm/s]"), 3, moveFeedrate[i]);
+            EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_YANK, PSTR("max. yank(jerk) [mm/s]"), 3, maxYank[i]);
+            EEPROM::handleFloat(eprStart + p + EPR_M1_MIN_POS, PSTR("min. position [mm]"), 3, minPos[i]);
+            EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_POS, PSTR("max. position [mm]"), 3, maxPos[i]);
+#if PRINTER_TYPE == PRINTER_TYPE_DUAL_X
+        }
+#endif
         EEPROM::handleFloat(eprStart + p + EPR_M1_ENDSTOP_DISTANCE, PSTR("endstop distance after homing [mm]"), 3, homeEndstopDistance[i]);
         p += EPR_M1_ENDSTOP_DISTANCE + 4;
         motors[i]->eepromHandle();

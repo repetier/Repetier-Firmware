@@ -91,7 +91,6 @@ void Motion3::activateNext() {
         Motion3::skipParentId = 255;
     }
     lastParentId = act->parentId;
-    // TODO: Extruder and A,B,C motors
 
     if (nextActId == NUM_MOTION3_BUFFER) {
         nextActId = 0;

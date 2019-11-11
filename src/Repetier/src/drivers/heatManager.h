@@ -140,13 +140,15 @@ public:
     virtual void autocalibrate(GCode* g) {
         Com::printWarningFLN(PSTR("Autocalibration for this tool not supported!"));
     }
-    virtual void showControlMenu(GUIAction action) {}
+    virtual void showControlMenu(GUIAction action); // Default set temperature
     virtual void showConfigMenu(GUIAction action) {}
-    bool isExtruderHeater() { return heaterType == 'E'; }
-    bool isBedHeater() { return heaterType == 'B'; }
-    bool isChamberHeater() { return heaterType == 'C'; }
-    bool isOtherHeater() { return heaterType == 'O'; }
+    virtual bool hasConfigMenu();
+    bool isExtruderHeater() const { return heaterType == 'E'; }
+    bool isBedHeater() const { return heaterType == 'B'; }
+    bool isChamberHeater() const { return heaterType == 'C'; }
+    bool isOtherHeater() const { return heaterType == 'O'; }
     void printName();
+    fast8_t getIndex() const { return index; }
     static bool reportTempsensorError();
     static void disableAllHeaters();
     static void resetAllErrorStates();
@@ -165,6 +167,9 @@ public:
         maxPWM = _maxPwm;
         decoupleVariance = decVariance;
         decouplePeriod = decPeriod;
+    }
+    virtual void autocalibrate(GCode* g) {
+        Com::printInfoFLN(PSTR("No parameter needed. Nothing to calibrate!"));
     }
     void eepromHandleLocal(int adr);
     int eepromSizeLocal();
@@ -212,8 +217,9 @@ public:
         driveMax = dm;
         updateDerived();
     }
-    void showControlMenu(GUIAction action);
+    // void showControlMenu(GUIAction action);
     void showConfigMenu(GUIAction action);
+    virtual bool hasConfigMenu();
 };
 
 /**
@@ -273,6 +279,7 @@ public:
     void setDeadDown2(float val) { deadDown2 = val; }
     void showControlMenu(GUIAction action);
     void showConfigMenu(GUIAction action);
+    virtual bool hasConfigMenu() { return true; }
 };
 
 extern HeatManager* heaters[];

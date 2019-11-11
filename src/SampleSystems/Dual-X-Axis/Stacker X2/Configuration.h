@@ -45,6 +45,10 @@ Early stage version for Stacke X2 printer - use with care
 */
 
 // The follwing variables are required early to decide on the right modules.
+
+// #define RAPS128_XY // define for usage of RAPS128 on xy axis
+// #define DEBUG_POS
+
 #define NUM_SERVOS 0
 #define NUM_TOOLS 2
 #define MOTHERBOARD 412 // Stacker 3d Superboard
@@ -59,12 +63,12 @@ Early stage version for Stacke X2 printer - use with care
 #define FEATURE_RETRACTION 1
 #define USE_ADVANCE 1
 #define NUM_AXES 5                   // X,Y,Z and E for extruder A,B,C would be 5,6,7
-#define STEPPER_FREQUENCY 100000     // Maximum stepper frequency.
+#define STEPPER_FREQUENCY 200000     // Maximum stepper frequency.
 #define PREPARE_FREQUENCY 2000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
 #define BLOCK_FREQUENCY 1000         // Number of blocks with constant stepper rate per second.
 #define VELOCITY_PROFILE 2           // 0 = linear, 1 = cubic, 2 = quintic velocity shape
 #define Z_SPEED 8                    // Z positioning speed
-#define XY_SPEED 200                 // XY positioning speed for normal operations
+#define XY_SPEED 150                 // XY positioning speed for normal operations
 #define G0_FEEDRATE 0                // Speed for G0 moves. Independent from set F value! Set 0 to use F value.
 #define A_SPEED 150                  // Second X axis
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
@@ -88,6 +92,8 @@ Early stage version for Stacke X2 printer - use with care
 #define DISPLAY_FULL_BUFFER 1
 // Direction 1 or -1
 #define ENCODER_DIRECTION -1
+// Uncomment to hide toogle light menu entry in controls
+// #define NO_LIGHT_CONTROL
 // Encoder speed 0 = fastest, 1 or 2 = slowest - set so 1 click is one menu move
 // Default is 2 if not set by controller. Us eonly to fix wrong setting
 // #define ENCODER_SPEED 2
@@ -142,11 +148,11 @@ to the position. 0 = no contribution. */
 #define DELTA_HOME_OFFSET_C 0.85f
 
 // Extra parameter in case you have a dual x axis
-#define DUAL_X_LEFT_OFFSET -62
-#define DUAL_X_RIGHT_OFFSET 441.59
+#define DUAL_X_LEFT_OFFSET -64
+#define DUAL_X_RIGHT_OFFSET 450
 // Minimum distance between both heads
-#define DUAL_X_MIN_DISTANCE 62
-#define LAZY_DUAL_X_AXIS 1
+#define DUAL_X_MIN_DISTANCE 64
+#define LAZY_DUAL_X_AXIS 0
 
 // Set all directions where no explicit test is required.
 // This is for dummy endstops and for hardware endstops.
@@ -252,13 +258,13 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 define Z_MAX_LENGTH 610
 #endif
 
-#define A_MAX_LENGTH 441.59
+#define A_MAX_LENGTH 452
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
 #define A_MIN_POS X_MIN_POS
-#define BED_X_MIN X_MIN_POS
-#define BED_X_MAX (X_MIN_POS + X_MAX_LENGTH)
+#define BED_X_MIN 0
+#define BED_X_MAX DUAL_X_RIGHT_OFFSET - DUAL_X_MIN_DISTANCE
 #define BED_Y_MIN Y_MIN_POS
 #define BED_Y_MAX (Y_MIN_POS + Y_MAX_LENGTH)
 // Park position used when pausing from firmware side
@@ -275,9 +281,15 @@ define Z_MAX_LENGTH 610
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1000
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 20
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_A 1000
+#ifdef RAPS128_XY
+#define XAXIS_STEPS_PER_MM 146.1 * 4.0
+#define AAXIS_STEPS_PER_MM 146.1 * 4.0
+#define YAXIS_STEPS_PER_MM 146.1 * 4.0
+#else
 #define XAXIS_STEPS_PER_MM 146.1
 #define AAXIS_STEPS_PER_MM 146.1
 #define YAXIS_STEPS_PER_MM 146.1
+#endif
 #define ZAXIS_STEPS_PER_MM 404.18
 #define MAX_FEEDRATE_X 400
 #define MAX_FEEDRATE_Y 250

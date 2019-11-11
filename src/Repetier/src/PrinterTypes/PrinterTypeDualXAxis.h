@@ -22,6 +22,10 @@
 
 #if PRINTER_TYPE == PRINTER_TYPE_DUAL_X
 
+#if NUM_AXES < 5
+#error Dual X requires A axis for second X axis. So minimum NUM_AXES required is 5!
+#endif
+
 class PrinterType {
     static bool leftParked, rightParked;
     static uint8_t lazyMode;
@@ -29,6 +33,7 @@ class PrinterType {
     static float endPos[2], targetReal;
     static bool dontChangeCoords;
     static float bedRectangle[2][2];
+    static float bedCenter;
     static uint16_t eeprom; // start position eeprom
     static fast8_t activeAxis;
 
@@ -69,6 +74,7 @@ public:
     static fast8_t getActiveAxis() { return activeAxis; }
     static bool canSelectTool(fast8_t toolId);
     static void M290(GCode* com);
+    static void M360();
     static PGM_P getGeometryName();
 };
 #define MACHINE_TYPE "Dual X"

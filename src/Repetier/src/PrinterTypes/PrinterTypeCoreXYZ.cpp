@@ -72,6 +72,14 @@ void PrinterType::getBedRectangle(float& xmin, float& xmax, float& ymin, float& 
     ymax = bedRectangle[Y_AXIS][1];
 }
 
+void PrinterType::M360() {
+    Com::config(PSTR("PrinterType:Cartesian"));
+    Com::config(PSTR("BedXMin:"), bedRectangle[X_AXIS][0]);
+    Com::config(PSTR("BedYMin:"), bedRectangle[Y_AXIS][0]);
+    Com::config(PSTR("BedXMax:"), bedRectangle[X_AXIS][1]);
+    Com::config(PSTR("BedYMax:"), bedRectangle[Y_AXIS][1]);
+}
+
 void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]) {
     motor[X_AXIS] = lroundl((COREXYZ_X_X * pos[X_AXIS] + COREXYZ_X_Y * pos[Y_AXIS] + COREXYZ_X_Z * pos[Z_AXIS]) * Motion1::resolution[X_AXIS]);
     motor[Y_AXIS] = lroundl((COREXYZ_Y_X * pos[X_AXIS] + COREXYZ_Y_Y * pos[Y_AXIS] + COREXYZ_Y_Z * pos[Z_AXIS]) * Motion1::resolution[Y_AXIS]);

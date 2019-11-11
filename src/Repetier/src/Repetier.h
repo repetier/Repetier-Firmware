@@ -312,6 +312,10 @@ public:
 #include "io/temperature_tables.h"
 #include "Configuration.h"
 
+#if NUM_AXES < 4
+#error The minimum NUM_AXES allowed is 4!
+#endif
+
 #ifndef WAITING_IDENTIFIER
 #define WAITING_IDENTIFIER "wait"
 #endif

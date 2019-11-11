@@ -525,7 +525,11 @@ void MCode_114(GCode* com) {
     if (com->hasS() && com->S) {
         Com::printF(PSTR("XS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][X_AXIS]);
         Com::printF(PSTR(" YS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Y_AXIS]);
-        Com::printFLN(PSTR(" ZS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Z_AXIS]);
+        Com::printF(PSTR(" ZS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Z_AXIS]);
+#if NUM_AXES > A_AXIS
+        Com::printF(PSTR(" AS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][A_AXIS]);
+#endif
+        Com::println();
     }
 }
 

@@ -174,6 +174,11 @@ void PrinterType::getBedRectangle(float& xmin, float& xmax, float& ymin, float& 
     ymax = bedRadius;
 }
 
+void PrinterType::M360() {
+    Com::config(PSTR("PrinterType:Delta"));
+    Com::config(PSTR("BedRadiusXMin:"), bedRadius);
+}
+
 void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]) {
     for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
         motor[i] = lroundf(pos[i] * Motion1::resolution[i]);

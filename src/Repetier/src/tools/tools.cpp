@@ -264,7 +264,7 @@ void Tool::eepromHandleTools() {
 }
 
 void Tool::eepromHandle() {
-#if PRINTER_TYPE != 3
+#if PRINTER_TYPE != PRINTER_TYPE_DUAL_X
     EEPROM::handleFloat(eepromStart, PSTR("X Offset [mm]"), 3, offsetX);
 #endif
     EEPROM::handleFloat(eepromStart + 4, PSTR("Y Offset [mm]"), 3, offsetY);

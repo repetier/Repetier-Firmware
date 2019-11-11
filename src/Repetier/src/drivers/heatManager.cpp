@@ -211,6 +211,10 @@ void HeatManager::waitForTargetTemperature() {
     }
 }
 
+bool HeatManager::hasConfigMenu() {
+    return false;
+}
+
 void HeatManager::reportTemperature(char c, int idx) {
     Com::print(c);
     if (idx >= 0) {
@@ -269,6 +273,13 @@ bool HeatManager::reportTempsensorError() {
     return true;
 #else
     return false;
+#endif
+}
+
+void HeatManager::showControlMenu(GUIAction action) {
+#if FEATURE_CONTROLLER != NO_CONTROLLER
+    GUI::flashToStringLong(GUI::tmpString, PSTR("Set Temp: @°C"), static_cast<int32_t>(lroundf(targetTemperature)));
+    GUI::menuSelectable(action, GUI::tmpString, menuSetTemperature, this, GUIPageType::FIXED_CONTENT);
 #endif
 }
 
@@ -339,11 +350,15 @@ void HeatManagerPID::setPID(float p, float i, float d) {
     updateDerived();
 }
 
-void HeatManagerPID::showControlMenu(GUIAction action) {
+/* void HeatManagerPID::showControlMenu(GUIAction action) {
 #if FEATURE_CONTROLLER != NO_CONTROLLER
     GUI::flashToStringLong(GUI::tmpString, PSTR("Set Temp: @°C"), static_cast<int32_t>(lroundf(targetTemperature)));
     GUI::menuSelectable(action, GUI::tmpString, menuSetTemperature, this, GUIPageType::FIXED_CONTENT);
 #endif
+} */
+
+bool HeatManagerPID::hasConfigMenu() {
+    return true;
 }
 
 void menuSetPIDP(GUIAction action, void* data) {

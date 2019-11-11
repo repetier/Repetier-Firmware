@@ -16,10 +16,30 @@ identify the function.
 and will add the semicolon if required.
 
 */
-
 /* Define motor pins here. Each motor needs a setp, dir and enable pin. */
 
 ENDSTOP_NONE(endstopNone)
+
+#ifdef RAPS128_XY
+// X Motor left
+
+IO_OUTPUT(IOX1Step, ORIG_X_STEP_PIN)
+IO_OUTPUT_INVERTED(IOX1Dir, ORIG_X_DIR_PIN)
+IO_OUTPUT(IOX1Enable, ORIG_X_ENABLE_PIN)
+
+// X Motor right
+
+IO_OUTPUT(IOAStep, ORIG_E2_STEP_PIN)
+IO_OUTPUT(IOADir, ORIG_E2_DIR_PIN)
+IO_OUTPUT(IOAEnable, ORIG_E2_ENABLE_PIN)
+
+// Y Motor
+
+IO_OUTPUT(IOY1Step, ORIG_Y_STEP_PIN)
+IO_OUTPUT(IOY1Dir, ORIG_Y_DIR_PIN)
+IO_OUTPUT(IOY1Enable, ORIG_Y_ENABLE_PIN)
+
+#else
 
 // X Motor left
 
@@ -38,6 +58,8 @@ IO_OUTPUT_INVERTED(IOAEnable, ORIG_E2_ENABLE_PIN)
 IO_OUTPUT(IOY1Step, ORIG_Y_STEP_PIN)
 IO_OUTPUT_INVERTED(IOY1Dir, ORIG_Y_DIR_PIN)
 IO_OUTPUT_INVERTED(IOY1Enable, ORIG_Y_ENABLE_PIN)
+
+#endif
 
 // Z Motor
 
@@ -124,7 +146,7 @@ IO_PWM_SOFTWARE(CoolerFan, IOCoolerFan1, 0)
 // IO_PDM_SOFTWARE(Fan1NoKSPWM, IOFan1) // alternative to PWM signals
 IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20)
 IO_PWM_SOFTWARE(BoardFan, IOBoardFan, 4)
-COOLER_MANAGER_MOTORS(BoardFanController, BoardFan, 0, 255, 10)
+COOLER_MANAGER_MOTORS(BoardFanController, BoardFan, 0, 192, 10) // reduced max power for more silent fan
 // Define temperature sensors
 
 // Typically they require an analog input (12 bit) so define
@@ -189,9 +211,11 @@ COOLER_MANAGER_SENSOR(ExtruderCooler, TempHottestExtruder, CoolerFan, 70, 200, 1
 // Define tools. They get inserted into a tool array in configuration.h
 // Typical tools are:
 
-TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 500, 5, 30, 5000, 160, "M117 Extruder 1", "", &Fan1PWM)
-TOOL_EXTRUDER(ToolExtruder2, 0, 0.1, 0, HeaterExtruder2, E2Motor, 1.75, 500, 5, 30, 5000, 160, "M117 Extruder 2", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 500, 5, 30, 5000, 177, "M117 Extruder 1", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder2, 0, 0.1, 0, HeaterExtruder2, E2Motor, 1.75, 500, 5, 30, 5000, 177, "M117 Extruder 2", "", &Fan1PWM)
 
+// IO_INPUT_LOG(IOJam1Mon, IOJam1, true)
+// IO_INPUT_LOG(IOJam2Mon, IOJam2, true)
 FILAMENT_DETECTOR(JamDetector1, IOJam1, ToolExtruder1)
 FILAMENT_DETECTOR(JamDetector2, IOJam2, ToolExtruder2)
 

@@ -712,6 +712,7 @@ void Printer::showConfiguration() {
     Com::config(PSTR("NumExtruder:"), NUM_TOOLS);
     // Com::config(PSTR("MixingExtruder:"), MIXING_EXTRUDER);
     Com::config(PSTR("HeatedBed:"), NUM_HEATED_BEDS);
+    Com::config(PSTR("HeatedChamber:"), NUM_HEATED_CHAMBERS);
     Com::config(PSTR("SDCard:"), SDSUPPORT);
     Com::config(PSTR("Fan:"), NUM_FANS > 0);
 #if NUM_FANS > 1
@@ -780,13 +781,12 @@ void Printer::showConfiguration() {
     Com::config(PSTR("XTravelAccel:"), Motion1::maxAcceleration[X_AXIS]);
     Com::config(PSTR("YTravelAccel:"), Motion1::maxAcceleration[Y_AXIS]);
     Com::config(PSTR("ZTravelAccel:"), Motion1::maxAcceleration[Z_AXIS]);
-#if PRINTER_TYPE == 2
-    Com::config(PSTR("PrinterType:Delta"));
-#else
-    Com::config(PSTR("PrinterType:Cartesian"));
-#endif // PRINTER_TYPE
+    PrinterType::M360();
     if (NUM_HEATED_BEDS > 0) {
         Com::config(PSTR("MaxBedTemp:"), heatedBeds[0]->getMaxTemperature());
+    }
+    if (NUM_HEATED_CHAMBERS > 0) {
+        Com::config(PSTR("MaxChamberTemp:"), heatedChambers[0]->getMaxTemperature());
     }
     for (fast8_t i = 0; i < NUM_TOOLS; i++) {
         Tool* t = Tool::getTool(i);

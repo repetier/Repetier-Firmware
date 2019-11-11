@@ -273,6 +273,52 @@ void __attribute__((weak)) menuFlowMultiplier(GUIAction action, void* data) {
     }
 }
 
+void __attribute__((weak)) menuTempControl(GUIAction action, void* data) {
+    HeatManager* hm = reinterpret_cast<HeatManager*>(data);
+    GUI::menuStart(action);
+    char help[MAX_COLS];
+    if (hm->isBedHeater()) {
+#if NUM_HEATED_BEDS > 1
+        GUI::flashToStringLong(help, PSTR("= Bed @ ="), hm->getIndex() + 1);
+#else
+        GUI::flashToString(help, PSTR("= Bed ="));
+#endif
+    } else {
+#if NUM_HEATED_CHAMBERS > 1
+        GUI::flashToStringLong(help, PSTR("= Chamber @ ="), hm->getIndex() + 1);
+#else
+        GUI::flashToString(help, PSTR("= Chamber ="));
+#endif
+    }
+    GUI::menuText(action, help, true);
+    GUI::menuBack(action);
+    hm->showControlMenu(action);
+    GUI::menuEnd(action);
+}
+
+void __attribute__((weak)) menuTempConfig(GUIAction action, void* data) {
+    HeatManager* hm = reinterpret_cast<HeatManager*>(data);
+    GUI::menuStart(action);
+    char help[MAX_COLS];
+    if (hm->isBedHeater()) {
+#if NUM_HEATED_BEDS > 1
+        GUI::flashToStringLong(help, PSTR("= Bed @ ="), hm->getIndex() + 1);
+#else
+        GUI::flashToString(help, PSTR("= Bed ="));
+#endif
+    } else {
+#if NUM_HEATED_CHAMBERS > 1
+        GUI::flashToStringLong(help, PSTR("= Chamber @ ="), hm->getIndex() + 1);
+#else
+        GUI::flashToString(help, PSTR("= Chamber ="));
+#endif
+    }
+    GUI::menuText(action, help, true);
+    GUI::menuBack(action);
+    hm->showConfigMenu(action);
+    GUI::menuEnd(action);
+}
+
 void __attribute__((weak)) menuControls(GUIAction action, void* data) {
     GUI::menuStart(action);
     GUI::menuTextP(action, PSTR("= Controls = "), true);
@@ -281,6 +327,9 @@ void __attribute__((weak)) menuControls(GUIAction action, void* data) {
     GUI::menuSelectable(action, GUI::tmpString, menuSpeedMultiplier, nullptr, GUIPageType::FIXED_CONTENT);
     GUI::flashToStringLong(GUI::tmpString, PSTR("Flow: @%"), Printer::extrudeMultiply);
     GUI::menuSelectable(action, GUI::tmpString, menuFlowMultiplier, nullptr, GUIPageType::FIXED_CONTENT);
+#ifndef NO_LIGHT_CONTROL
+    GUI::menuSelectableP(action, PSTR("Toggle lights"), directAction, (void*)GUI_DIRECT_ACTION_TOGGLE_LIGHT, GUIPageType::ACTION);
+#endif
     GUI::menuSelectableP(action, PSTR("Home"), menuHome, nullptr, GUIPageType::MENU);
     GUI::menuSelectableP(action, PSTR("Move"), menuMove, nullptr, GUIPageType::MENU);
 #if NUM_FANS > 0
@@ -290,6 +339,21 @@ void __attribute__((weak)) menuControls(GUIAction action, void* data) {
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_GUI_CONTROLS
 #include "../io/redefine.h"
+    // Bed and chamber have no own entry so add it and point to temperature manager
+    for (fast8_t i = 0; i < NUM_HEATED_BEDS; i++) {
+#if NUM_HEATED_BEDS > 1
+        GUI::menuLongP(action, PSTR("Bed "), i + 1, menuTempControl, heatedBeds[i], GUIPageType::MENU);
+#else
+        GUI::menuSelectableP(action, PSTR("Bed "), menuTempControl, heatedBeds[i], GUIPageType::MENU);
+#endif
+    }
+    for (fast8_t i = 0; i < NUM_HEATED_CHAMBERS; i++) {
+#if NUM_HEATED_CHAMBERS > 1
+        GUI::menuLongP(action, PSTR("Chamber "), i + 1, menuTempControl, heatedChambers[i], GUIPageType::MENU);
+#else
+        GUI::menuSelectableP(action, PSTR("Chamber"), menuTempControl, heatedChambers[i], GUIPageType::MENU);
+#endif
+    }
     GUI::menuEnd(action);
 }
 
@@ -460,6 +524,25 @@ void __attribute__((weak)) menuConfig(GUIAction action, void* data) {
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_GUI_CONFIG
 #include "../io/redefine.h"
+    // Bed and chamber have no own entry so add it and point to temperature manager
+    for (fast8_t i = 0; i < NUM_HEATED_BEDS; i++) {
+        if (heatedBeds[i]->hasConfigMenu()) {
+#if NUM_HEATED_BEDS > 1
+            GUI::menuLongP(action, PSTR("Bed "), i + 1, menuTempConfig, heatedBeds[i], GUIPageType::MENU);
+#else
+            GUI::menuSelectableP(action, PSTR("Bed"), menuTempConfig, heatedBeds[i], GUIPageType::MENU);
+#endif
+        }
+    }
+    for (fast8_t i = 0; i < NUM_HEATED_CHAMBERS; i++) {
+        if (heatedChambers[i]->hasConfigMenu()) {
+#if NUM_HEATED_CHAMBERS > 1
+            GUI::menuLongP(action, PSTR("Chamber "), i + 1, menuTempConfig, heatedChambers[i], GUIPageType::MENU);
+#else
+            GUI::menuSelectableP(action, PSTR("Chamber"), menuTempConfig, heatedChambers[i], GUIPageType::MENU);
+#endif
+        }
+    }
     GUI::menuSelectableP(action, PSTR("Store Settings"), directAction, (void*)GUI_DIRECT_ACTION_STORE_EEPROM, GUIPageType::ACTION);
     GUI::menuSelectableP(action, PSTR("Factory Reset"), directAction, (void*)GUI_DIRECT_ACTION_FACTORY_RESET, GUIPageType::ACTION);
     GUI::menuEnd(action);

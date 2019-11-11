@@ -661,7 +661,7 @@ void directAction(GUIAction action, void* data) {
         Printer::toggleCommunication();
         break;
     case GUI_DIRECT_ACTION_TOGGLE_LIGHT:
-        // TODO: Toggle light
+        Printer::caseLightMode = Printer::caseLightMode ? 0 : 1;
         break;
     case GUI_DIRECT_ACTION_DISABLE_MOTORS:
         Motion1::waitForEndOfMoves();

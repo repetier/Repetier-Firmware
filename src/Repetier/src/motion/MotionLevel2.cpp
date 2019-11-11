@@ -194,7 +194,9 @@ void Motion2::timer() {
         // This step catches all nonlinear behaviour from
         // acceleration profile and printer geometry
         if (sFactor < lastL) {
-            Com::printFLN(PSTR("reversal:"), sFactor - lastL, 6);
+            if (sFactor < lastL + 0.0001) { // sometimes this happens with inprecision, so catch that case
+                Com::printFLN(PSTR("reversal:"), sFactor - lastL, 6);
+            }
         }
         lastL = sFactor;
         float pos[NUM_AXES];
@@ -524,9 +526,7 @@ void endstopTriggered(fast8_t axis, bool dir) {
 }
 
 void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis, bool dir) {
-    // DEBUG_MSG2_FAST("EH:", (int)axis);
     if (act == nullptr || act->checkEndstops == false) {
-        // DEBUG_MSG_FAST("EHX");
         return;
     }
     fast8_t bit = axisBits[axis];
@@ -559,7 +559,6 @@ void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis, bool dir) {
             Motion3::skipParentId = act->parentId;
         }
     }
-    // DEBUG_MSG_FAST("EHF");
 }
 
 void Motion2Buffer::nextState() {
