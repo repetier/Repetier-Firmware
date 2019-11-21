@@ -357,9 +357,7 @@ public:
     }
 #if AUTOMATIC_POWERUP
     static void enablePowerIfNeeded();
-#endif
-    /** Sets the pwm for the fan speed. Gets called by motion control or Commands::setFanSpeed. */
-    static void setFanSpeedDirectly(uint8_t speed, int fanId);
+#endif 
 
     /** For large machines, the nonlinear transformation can exceed integer 32bit range, so floating point math is needed. */
 
@@ -615,7 +613,8 @@ public:
     static void defaultLoopActions();
     static void setOrigin(float xOff, float yOff, float zOff);
     static int getFanSpeed(int fanId);
-    static void setFanSpeed(int speed, bool immediately, int fanId);
+    static void setFanSpeed(int speed, bool immediately, int fanId, int timeout = 0);
+    static void checkFanTimeouts();
 
 #if MAX_HARDWARE_ENDSTOP_Z || defined(DOXYGEN)
     static float runZMaxProbe();

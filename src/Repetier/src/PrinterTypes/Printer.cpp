@@ -33,7 +33,7 @@ long baudrate = BAUDRATE;   ///< Communication speed rate.
 volatile int waitRelax = 0; // Delay filament relax at the end of print, could be a simple timeout
 
 ServoInterface* servos[NUM_SERVOS] = SERVO_LIST;
-PWMHandler* fans[] = FAN_LIST;
+fanController fans[NUM_FANS];
 uint8_t Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
 //Stepper Movement Variables
 uint8_t Printer::relativeCoordinateMode = false;         ///< Determines absolute (false) or relative Coordinates (true).
@@ -169,27 +169,29 @@ int Printer::getFanSpeed(int fanId) {
     if (fanId < 0 || fanId >= NUM_FANS) {
         return 0;
     }
-    return (int)fans[fanId]->get();
+    return (int)fans[fanId].fan->get();
 }
 
-void Printer::setFanSpeedDirectly(uint8_t speed, int fanId) {
-    uint8_t trimmedSpeed = TRIM_FAN_PWM(speed);
-    if (fanId < 0 || fanId >= NUM_FANS) {
-        return;
-    }
-    fans[fanId]->set(trimmedSpeed);
-}
-
-void Printer::setFanSpeed(int speed, bool immediately, int fanId) {
+void Printer::setFanSpeed(int speed, bool immediately, int fanId, int timeout) {
     if (fanId < 0 || fanId >= NUM_FANS) {
         return;
     }
     speed = TRIM_FAN_PWM(constrain(speed, 0, 255));
     Tool* tool = nullptr;
     Tool* activeTool = Tool::getActiveTool();
+    if(timeout) {
+        fans[fanId].target = speed;
+        fans[fanId].time = HAL::timeInMilliseconds();
+        fans[fanId].timeout = (timeout * 1000);
+        return;
+    }
+
+    if(fans[fanId].timeout) {
+        fans[fanId] = (fanController) {fans[fanId].fan, 0, 0, 0};
+    }
     Com::printF(PSTR("Fanspeed"), fanId);
     Com::printFLN(Com::tColon, speed);
-    if (activeTool != nullptr && activeTool->usesSecondary(fans[fanId])) {
+    if (activeTool != nullptr && activeTool->usesSecondary(fans[fanId].fan)) {
         tool = activeTool;
         tool->setSecondaryFixed(speed);
         if (!immediately && Motion1::buffersUsed()) {
@@ -207,9 +209,18 @@ void Printer::setFanSpeed(int speed, bool immediately, int fanId) {
             }
         }
     }
-    Printer::setFanSpeedDirectly(speed, fanId);
+    fans[fanId].fan->set(speed); 
 }
 
+void Printer::checkFanTimeouts() {
+    for (int i = 0; i < NUM_FANS; i++) {
+        if(fans[i].timeout) {
+            if((HAL::timeInMilliseconds() - fans[i].time) > fans[i].timeout) { 
+                Printer::setFanSpeed(fans[i].target, 1, i); 
+            }
+        }
+    }
+}
 bool Printer::updateDoorOpen() {
 #if defined(DOOR_PIN) && DOOR_PIN > -1 //  && SUPPORT_LASER should always be respected
     bool isOpen = isDoorOpen();
@@ -501,6 +512,11 @@ void Printer::setup() {
 #define IO_TARGET IO_TARGET_INIT
 #include "io/redefine.h"
 
+    //Quickly initialize our fans array
+    PWMHandler* tempFans[] = FAN_LIST;
+    for(int i = 0; i < NUM_FANS; i++) {
+        fans[i] = {tempFans[i], 0, 0};
+    }
     HAL::analogStart();
 
     Motion1::init();

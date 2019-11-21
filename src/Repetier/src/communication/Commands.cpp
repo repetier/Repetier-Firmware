@@ -111,6 +111,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     HAL::pingWatchdog();
 #endif
 
+    Printer::checkFanTimeouts();
     // Report temperatures every second, so we do not need to send M105
     if (Printer::isAutoreportTemp()) {
         millis_t now = HAL::timeInMilliseconds();

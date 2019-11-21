@@ -418,13 +418,13 @@ void MCode_106(GCode* com) {
             p = static_cast<int>(com->P);
         } else if (Tool::getActiveTool()) {
             for (fast8_t i = 0; i < NUM_FANS; i++) {
-                if (Tool::getActiveTool()->usesSecondary(fans[i])) {
+                if (Tool::getActiveTool()->usesSecondary(fans[i].fan)) {
                     p = i;
                     break;
                 }
             }
         }
-        Printer::setFanSpeed(com->hasS() ? com->S : 255, false, p);
+        Printer::setFanSpeed(com->hasS() ? com->S : 255, false, p, com->hasO() ? static_cast<uint32_t>(com->O) : 0);
     }
 }
 
@@ -435,7 +435,7 @@ void MCode_107(GCode* com) {
             p = static_cast<int>(com->P);
         } else if (Tool::getActiveTool()) {
             for (fast8_t i = 0; i < NUM_FANS; i++) {
-                if (Tool::getActiveTool()->usesSecondary(fans[i])) {
+                if (Tool::getActiveTool()->usesSecondary(fans[i].fan)) {
                     p = i;
                     break;
                 }
