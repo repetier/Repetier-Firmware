@@ -82,7 +82,9 @@ void Commands::commandLoop() {
 
 void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     Printer::handleInterruptEvent();
+#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
     Printer::processToneQueue(); 
+#endif
     FirmwareEvent::handleEvents();
 #if EMERGENCY_PARSER
     GCodeSource::prefetchAll();

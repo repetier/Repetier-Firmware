@@ -90,11 +90,14 @@ bool Printer::failedMode = false;
 #endif
 fast8_t Printer::caseLightMode = CASE_LIGHT_DEFAULT_ON;
 
+
+#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
 Printer::tonePacket toneQueueBuf[Printer::toneBufSize];  
 millis_t Printer::lastToneTime;
 fast8_t Printer::curToneIndex = -1; 
 fast8_t Printer::seekToneIndex = -1; 
 uint8_t Printer::tonesEnabled = true;
+#endif
 FirmwareEvent FirmwareEvent::eventList[4];
 volatile fast8_t FirmwareEvent::start = 0;
 volatile fast8_t FirmwareEvent::length = 0;

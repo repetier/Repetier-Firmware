@@ -116,8 +116,12 @@ void EEPROM::callHandle() {
 #if NUM_TOOLS > 0
     handleFloat(EPR_PRINTING_DISTANCE, Com::tEPRFilamentPrinted, 3, Printer::filamentPrintedTotal);
 #endif
+
+#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
     handleByte(EPR_TONES_ENABLED, Com::tEPRTonesEnabled, Printer::tonesEnabled);
     Printer::setTonesEnabled(Printer::tonesEnabled);
+#endif
+
     Motion1::eepromHandle();
     ZProbeHandler::eepromHandle();
     LevelingCorrector::handleEeprom();
