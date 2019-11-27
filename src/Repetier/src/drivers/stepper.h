@@ -247,11 +247,11 @@ protected:
     int8_t debug;
     bool otpw;
     uint8_t otpwCount;
-    int8_t stallguardSensitivity;
+    int16_t stallguardSensitivity;
     uint16_t eprStart;
 
 public:
-    ProgrammableStepperBase(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallguardSensitivity)
+    ProgrammableStepperBase(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int16_t _stallguardSensitivity)
         : microsteps(_microsteps)
         , currentMillis(_current_millis)
         , hybridSpeed(_hybridThrs)
@@ -409,6 +409,52 @@ public:
     void timer500ms();
 };
 
+// New version of the 2208. Has stallguard 4 and addressable UART
+template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
+class TMCStepper2209Driver : public StepperDriverBase, public ProgrammableStepperBase {
+    TMC2209Stepper* driver;
+
+public:
+    TMCStepper2209Driver(EndstopDriver* minES, EndstopDriver* maxES,
+                         TMC2209Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int16_t _stallSensitivity)
+        : StepperDriverBase(minES, maxES)
+        , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
+        , driver(_driver) {}
+    virtual void init();
+    void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int16_t _stallSensitivity);
+    inline void step() final {
+        stepCls::on();
+    }
+    inline void unstep() final {
+        stepCls::off();
+    }
+    inline void dir(bool d) final {
+        dirCls::set(d);
+        direction = d;
+    }
+    inline void enable() final {
+        enableCls::on();
+    }
+    inline void disable() final {
+        enableCls::off();
+    }
+    virtual void eepromHandle() final;
+    void eepromReserve();
+    // Return true if setting microsteps is supported
+    virtual bool implementsSetMicrosteps() final { return true; }
+    // Return true if setting current in software is supported
+    virtual bool implementsSetMaxCurrent() final { return true; }
+    /// Set microsteps. Must be a power of 2.
+    virtual void setMicrosteps(int microsteps) final;
+    /// Set max current as range 0..255 or mA depedning on driver
+    virtual void setMaxCurrent(int max) final;
+    // Called before homing starts. Can be used e.g. to disable silent mode
+    // or otherwise prepare for endstop detection.
+    virtual void beforeHoming() final;
+    virtual void afterHoming() final;
+    virtual void handleMCode(GCode& com) final;
+    void timer500ms();
+};
 /// Plain stepper driver with optional endstops attached.
 class Mirror2StepperDriver : public StepperDriverBase {
 public:
