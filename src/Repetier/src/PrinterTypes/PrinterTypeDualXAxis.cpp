@@ -449,9 +449,18 @@ void PrinterType::setDittoMode(fast8_t count, bool mirror) {
     }
     GUI::setStatusP(PSTR("Homing ..."), GUIStatusLevel::BUSY);
     Printer::setHoming(true);
+    bool bcActive = Leveling::isDistortionEnabled();
+    Leveling::setDistortionEnabled(false);
+    Motion1::updatePositionsFromCurrent();
+    Motion2::setMotorPositionFromTransformed();
     Motion1::dittoMode = count;
     Motion1::dittoMirror = mirror;
+    Motion1::callBeforeHomingOnSteppers();
+    Motion1::g92Offsets[X_AXIS] = 0;
+    Motion1::toolOffset[X_AXIS] = 0;
     homeAxis(X_AXIS);
+    Motion1::callAfterHomingOnSteppers();
+    Leveling::setDistortionEnabled(bcActive);
     Printer::setHoming(false);
     GUI::popBusy();
 }
