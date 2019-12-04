@@ -1730,9 +1730,13 @@ void Motion1::eepromHandle() {
         motors[i]->eepromHandle();
     }
     EEPROM::removePrefix();
+#if PRINTER_TYPE != PRINTER_TYPE_DUAL_X
     EEPROM::handleFloat(eprStart + EPR_M1_PARK_X, PSTR("Park position X [mm]"), 2, parkPosition[X_AXIS]);
+#endif
     EEPROM::handleFloat(eprStart + EPR_M1_PARK_Y, PSTR("Park position Y [mm]"), 2, parkPosition[Y_AXIS]);
+#if PRINTER_TYPE != PRINTER_TYPE_DUAL_X
     EEPROM::handleFloat(eprStart + EPR_M1_PARK_Z, PSTR("Park position Z raise [mm]"), 2, parkPosition[Z_AXIS]);
+#endif
     EEPROM::handleByte(eprStart + EPR_M1_ALWAYS_CHECK_ENDSTOPS, PSTR("Always check endstops"), alwaysCheckEndstops);
     EEPROM::handleByte(eprStart + EPR_M1_VELOCITY_PROFILE, PSTR("Velocity Profile [0-2]"), Motion2::velocityProfileIndex);
 #if FEATURE_AXISCOMP

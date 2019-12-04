@@ -110,6 +110,7 @@ void PrinterType::park(GCode* com) {
         Motion1::tmpPosition[A_AXIS] = endPos[1] - x;
         rightParked = Motion1::tmpPosition[A_AXIS] == endPos[1] && lazyMode;
     }
+    Motion1::tmpPosition[Y_AXIS] = Motion1::parkPosition[Y_AXIS];
     dontChangeCoords = true;
     Motion1::moveByPrinter(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
     dontChangeCoords = false;
