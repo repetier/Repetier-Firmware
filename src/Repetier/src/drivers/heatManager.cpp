@@ -135,6 +135,7 @@ void HeatManager::update() {
                 Com::print(decouplePeriod);
                 Com::println();
                 setError(HeaterError::NO_HEATUP);
+                GCode::fatalError(PSTR("Heater decoupled during rising"));
                 return;
             }
             lastDecoupleTemp = currentTemperature;
@@ -147,6 +148,7 @@ void HeatManager::update() {
                 Com::printFloat(tempError, 2);
                 Com::println();
                 setError(HeaterError::LEAVING_RANGE);
+                GCode::fatalError(PSTR("Heater decoupled during hold"));
                 return;
             }
         }
