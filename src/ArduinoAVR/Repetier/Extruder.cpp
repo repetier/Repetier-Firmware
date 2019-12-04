@@ -207,6 +207,7 @@ void Extruder::manageTemperatures() {
                         Com::printF(PSTR(" after "), (int32_t)(time - act->lastDecoupleTest));
                         Com::printFLN(PSTR(" ms"));
                         EVENT_HEATER_DECOUPLED(controller);
+                        GCode::fatalError(PSTR("Heater decoupled during rising"));
                     }
                 } else {
                     act->stopDecouple();
@@ -229,6 +230,7 @@ void Extruder::manageTemperatures() {
                         Com::printF(PSTR(" measured "), act->currentTemperatureC);
                         Com::printFLN(PSTR(" deg. C"));
                         EVENT_HEATER_DECOUPLED(controller);
+                        GCode::fatalError(PSTR("Heater decoupled during hold"));
                     }
                 } else {
                     act->lastDecoupleTest = time - act->decoupleTestPeriod + 1000; // once running test every second
