@@ -147,6 +147,79 @@ void HAL::setupTimer() {
 #endif
 }
 
+struct TimerPWMPin {
+    TimerPWMPin(int _pin, Pio* _pio, uint32_t _pio_pin, byte _tc_channel, bool _peripheral_A) : 
+        pin(_pin), pio(_pio), pio_pin(_pio_pin), tc_global_chan(_tc_channel >> 1), tc_local_chan(_tc_channel / 6), peripheral_A(_peripheral_A), tio_line_AB(_tc_channel & 1) { 
+            if (tc_local_chan == 1) {
+                tc_base_address = TC1;
+            }
+            else if (tc_local_chan == 2) {
+                tc_base_address = TC2;
+            }
+            else {
+                tc_base_address = TC0;
+            } 
+        }
+    int pin;
+    Pio* pio;
+    uint32_t pio_pin;
+    byte tc_global_chan; // 0 .. 8 What's our overall timer channel number?
+    byte tc_local_chan; // 0 .. 3 Which timer are we in? 
+    bool peripheral_A; // Do we need to set the peripheral to A instead of B?
+    bool tio_line_AB; // 0 = A, 1 = B Is this the TIOA or TIOB output pin?
+    Tc* tc_base_address; // TC0 .. TC2 registers
+};
+
+// Each timer COUNTER has 3 timer channels.
+// Each timer CHANNEL has a TIOA* and TIOB* pin where * is the number of the timer channel.
+#define NUM_POSSIBLE_TIMER_PINS 18
+static TimerPWMPin timer_pins[NUM_POSSIBLE_TIMER_PINS] = {
+    { 2, PIOB, PIO_PB25B_TIOA0, TC0_CHA0, false },  
+    { 61, PIOA, PIO_PA2A_TIOA1, TC0_CHA1, true },           // TC0
+    { 92, PIOA, PIO_PA5A_TIOA2, TC0_CHA2, true },  
+
+    { 13, PIOB, PIO_PB27B_TIOB0, TC0_CHB0, false },  
+    { 60, PIOA, PIO_PA3A_TIOB1, TC0_CHB1, true },           // TC0 
+    { 58, PIOA, PIO_PA6A_TIOB2, TC0_CHB2, true },  
+
+
+    { 108, PIOB, PIO_PB0B_TIOA3, TC1_CHA3, false },  
+    { 110, PIOB, PIO_PB2B_TIOA4, TC1_CHA4, false },           // TC1 
+    { 101, PIOB, PIO_PB4B_TIOA5, TC1_CHA5, false },  
+
+    { 109, PIOB, PIO_PB1B_TIOB3, TC1_CHB3, false },  
+    { 111, PIOB, PIO_PB3B_TIOB4, TC1_CHB4, false },           // TC1 
+    { 102, PIOB, PIO_PB5B_TIOB5, TC1_CHB5, false },  
+
+
+    { 5, PIOC, PIO_PC25B_TIOA6, TC2_CHA6, false },  
+    { 3, PIOC, PIO_PC28B_TIOA7, TC2_CHA7, false },           // TC2 
+    { 11, PIOD, PIO_PD7B_TIOA8, TC2_CHA8, false },  
+
+    { 4, PIOC, PIO_PC26B_TIOB6, TC2_CHB6, false },  
+    { 10, PIOC, PIO_PC29B_TIOB7, TC2_CHB7, false },           // TC2
+    { 12, PIOD, PIO_PD8B_TIOB8, TC2_CHB8, false }
+};
+ 
+struct TimerPWMChannel {
+    byte used_io;
+    TimerPWMPin* timer_A; 
+    TimerPWMPin* timer_B;
+};
+
+static TimerPWMChannel timer_channel[9] = {
+    { false, nullptr, nullptr },
+    { false, nullptr, nullptr },      // TC0 
+    { false, nullptr, nullptr }, 
+
+    { false, nullptr, nullptr },
+    { false, nullptr, nullptr },      // TC1 
+    { false, nullptr, nullptr }, 
+
+    { false, nullptr, nullptr },
+    { false, nullptr, nullptr },      // TC2
+    { false, nullptr, nullptr }
+};
 struct PWMPin {
     int pin;
     Pio* pio;
@@ -235,8 +308,57 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
             break;
         }
     }
+    bool foundTimer = false; 
+    if (foundPin == -1) 
+    {
+        for (int i = 0; i < NUM_POSSIBLE_TIMER_PINS; i++) {
+            if (timer_pins[i].pin == pinNumber) {
+                 
+                if (!((timer_channel[timer_pins[i].tc_global_chan].used_io >> timer_pins[i].tio_line_AB) & 1)) {
+                    foundPin = i; 
+                    foundTimer = true; 
+                     
+                }
+                break;
+            } 
+        }
+    }
     if (foundPin == -1) {
         return -1;
+    }
+
+    if(foundTimer)
+    {  
+        TimerPWMPin& t = timer_pins[foundPin];
+        TimerPWMChannel& c = timer_channel[t.tc_global_chan]; 
+ 
+        c.used_io |= (1 << t.tio_line_AB); 
+
+        if (!t.tio_line_AB) {
+            c.timer_A = &t;
+        }
+        else { 
+            c.timer_B = &t; 
+        } 
+
+        t.pio->PIO_PDR |= t.pio_pin; 
+
+        if (!t.peripheral_A) {
+            t.pio->PIO_ABSR |= t.pio_pin;
+        }
+        else {
+            t.pio->PIO_ABSR &= ~t.pio_pin; 
+        }
+        
+        pmc_enable_periph_clk(ID_TC0 + t.tc_global_chan); 
+        TC_Configure(t.tc_base_address, t.tc_local_chan,
+                    TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1  | TC_CMR_EEVT_XC0);
+         
+        TC_SetRC(t.tc_base_address, t.tc_local_chan, (F_CPU_TRUE / 2) / frequency);
+        TC_Start(t.tc_base_address, t.tc_local_chan);
+        
+        // Avoid collisions with the pwm handler
+        return (1 << 7 | (t.tc_global_chan << 1)) | t.tio_line_AB; 
     }
 
     PWMPin& p = pwm_pins[foundPin];
@@ -289,7 +411,30 @@ void HAL::setHardwarePWM(int id, int value) {
         }
         return;
     }
-    // TODO: timers can also produce PWM
+
+    id &= ~0x80; 
+    TimerPWMChannel& c = timer_channel[(id >> 1)];  
+    TimerPWMPin t = *((id & 0x1) ? c.timer_B : c.timer_A);  
+
+    if(!value)
+    {
+        t.tc_base_address->TC_CHANNEL[t.tc_local_chan].TC_CMR &= 
+                t.tio_line_AB ? ~TC_CMR_BCPC_SET : ~TC_CMR_ACPC_SET;  
+    }
+    else
+    {
+        uint32_t freq = t.tc_base_address->TC_CHANNEL[t.tc_local_chan].TC_RC;
+        
+        t.tc_base_address->TC_CHANNEL[t.tc_local_chan].TC_CMR |= 
+                (t.tio_line_AB ? (TC_CMR_BCPB_CLEAR | TC_CMR_BCPC_SET) : (TC_CMR_ACPA_CLEAR | TC_CMR_ACPC_SET)); 
+
+        if (t.tio_line_AB) {
+            TC_SetRB(t.tc_base_address, t.tc_local_chan,  ((freq * value) / 255)); 
+        }
+        else {
+            TC_SetRA(t.tc_base_address, t.tc_local_chan,  ((freq * value) / 255)); 
+	}
+    }
 }
 
 void HAL::analogEnable(int channel) {
