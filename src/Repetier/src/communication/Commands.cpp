@@ -110,8 +110,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
 #if FEATURE_WATCHDOG
     HAL::pingWatchdog();
 #endif
-
-    Printer::checkFanTimeouts();
+ 
     // Report temperatures every second, so we do not need to send M105
     if (Printer::isAutoreportTemp()) {
         millis_t now = HAL::timeInMilliseconds();
@@ -129,6 +128,8 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
 #define IO_TARGET IO_TARGET_500MS
 #include "../io/redefine.h"
         EVENT_TIMER_500MS;
+        Printer::checkFanTimeouts();
+
     }
 #if DISPLAY_DRIVER != DRIVER_NONE
     GUI::update();

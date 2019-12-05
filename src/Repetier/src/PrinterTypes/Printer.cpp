@@ -179,15 +179,15 @@ void Printer::setFanSpeed(int speed, bool immediately, int fanId, int timeout) {
     speed = TRIM_FAN_PWM(constrain(speed, 0, 255));
     Tool* tool = nullptr;
     Tool* activeTool = Tool::getActiveTool();
-    if(timeout) {
+    if (timeout) {
         fans[fanId].target = speed;
         fans[fanId].time = HAL::timeInMilliseconds();
         fans[fanId].timeout = (timeout * 1000);
         return;
     }
 
-    if(fans[fanId].timeout) {
-        fans[fanId] = (fanController) {fans[fanId].fan, 0, 0, 0};
+    if (fans[fanId].timeout) {
+        fans[fanId] = (fanController){ fans[fanId].fan, 0, 0, 0 };
     }
     Com::printF(PSTR("Fanspeed"), fanId);
     Com::printFLN(Com::tColon, speed);
@@ -209,14 +209,15 @@ void Printer::setFanSpeed(int speed, bool immediately, int fanId, int timeout) {
             }
         }
     }
-    fans[fanId].fan->set(speed); 
+    fans[fanId].fan->set(speed);
 }
 
 void Printer::checkFanTimeouts() {
-    for (int i = 0; i < NUM_FANS; i++) {
-        if(fans[i].timeout) {
-            if((HAL::timeInMilliseconds() - fans[i].time) > fans[i].timeout) { 
-                Printer::setFanSpeed(fans[i].target, 1, i); 
+    for (fast8_t i = 0; i < NUM_FANS; i++) {
+        if (fans[i].timeout) {
+            if ((HAL::timeInMilliseconds() - fans[i].time) > fans[i].timeout) {
+                EVENT_FAN_TIMEOUT(i, fans[i].target); 
+                Printer::setFanSpeed(fans[i].target, true, i);
             }
         }
     }
@@ -514,8 +515,8 @@ void Printer::setup() {
 
     //Quickly initialize our fans array
     PWMHandler* tempFans[] = FAN_LIST;
-    for(int i = 0; i < NUM_FANS; i++) {
-        fans[i] = {tempFans[i], 0, 0};
+    for (fast8_t i = 0; i < NUM_FANS; i++) {
+        fans[i] = { tempFans[i], 0, 0 };
     }
     HAL::analogStart();
 

@@ -423,8 +423,8 @@ void MCode_106(GCode* com) {
                     break;
                 }
             }
-        }
-        Printer::setFanSpeed(com->hasS() ? com->S : 255, false, p, com->hasO() ? static_cast<uint32_t>(com->O) : 0);
+        } 
+        Printer::setFanSpeed(com->hasS() ? com->S : 255, false, p, com->hasD() ? static_cast<uint32_t>(com->D) : 0);
     }
 }
 
