@@ -158,4 +158,8 @@ Each of the following events describe the parameter and when it is called.
 #define EVENT_CUSTOM_TOOL_CHANGE_SETUP(tool) \
     {}
 
+// Called when a fan reaches it's M106 D<seconds> timeout
+#define EVENT_FAN_TIMEOUT(fanId, targetSpeed) \
+    {}
+ 
 #endif // EVENTS_H_INCLUDED

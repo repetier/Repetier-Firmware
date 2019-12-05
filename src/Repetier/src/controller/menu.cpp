@@ -359,7 +359,7 @@ void __attribute__((weak)) menuControls(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuFan(GUIAction action, void* data) {
     int id = reinterpret_cast<int>(data);
-    PWMHandler* pwm = fans[reinterpret_cast<int>(data)];
+    PWMHandler* pwm = fans[reinterpret_cast<int>(data)].fan;
     int32_t percent = (pwm->get() * 100) / 255;
     GUI::flashToStringLong(GUI::tmpString, PSTR("Fan @ Speed:"), id + 1);
     DRAW_LONG(GUI::tmpString, Com::tUnitPercent, percent);
@@ -373,7 +373,7 @@ void __attribute__((weak)) menuFans(GUIAction action, void* data) {
     GUI::menuTextP(action, PSTR("= Fans = "), true);
     GUI::menuBack(action);
     for (int i = 0; i < NUM_FANS; i++) {
-        PWMHandler* fan = fans[i];
+        PWMHandler* fan = fans[i].fan;
         int32_t percent = (fan->get() * 100) / 255;
         GUI::flashToStringLong(GUI::tmpString, PSTR("Fan @:"), i + 1);
         GUI::menuLong(action, GUI::tmpString, percent, menuFan, (void*)i, GUIPageType::FIXED_CONTENT);
