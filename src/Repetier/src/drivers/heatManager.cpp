@@ -110,6 +110,7 @@ void HeatManager::update() {
                 Com::printF(PSTR(" seems to be defect. Sensor reported unusual values. "));
                 Com::printFLN(PSTR("This can be a broken wire or a shorted contact of the sensor."));
                 setError(HeaterError::SENSOR_DEFECT);
+                GCode::fatalError(PSTR("Heater sensor defect"));
             }
         }
         return;

@@ -33,7 +33,7 @@ long baudrate = BAUDRATE;   ///< Communication speed rate.
 volatile int waitRelax = 0; // Delay filament relax at the end of print, could be a simple timeout
 
 ServoInterface* servos[NUM_SERVOS] = SERVO_LIST;
-fanController fans[NUM_FANS];
+FanController fans[NUM_FANS];
 uint8_t Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
 //Stepper Movement Variables
 uint8_t Printer::relativeCoordinateMode = false;         ///< Determines absolute (false) or relative Coordinates (true).
@@ -172,22 +172,22 @@ int Printer::getFanSpeed(int fanId) {
     return (int)fans[fanId].fan->get();
 }
 
-void Printer::setFanSpeed(int speed, bool immediately, int fanId, int timeout) {
+void Printer::setFanSpeed(int speed, bool immediately, int fanId, uint32_t timeoutMS) {
     if (fanId < 0 || fanId >= NUM_FANS) {
         return;
     }
     speed = TRIM_FAN_PWM(constrain(speed, 0, 255));
     Tool* tool = nullptr;
     Tool* activeTool = Tool::getActiveTool();
-    if (timeout) {
+    if (timeoutMS) {
         fans[fanId].target = speed;
         fans[fanId].time = HAL::timeInMilliseconds();
-        fans[fanId].timeout = (timeout * 1000);
+        fans[fanId].timeout = timeoutMS;
         return;
     }
 
     if (fans[fanId].timeout) {
-        fans[fanId] = (fanController){ fans[fanId].fan, 0, 0, 0 };
+        fans[fanId] = (FanController) { fans[fanId].fan, 0, 0, 0 };
     }
     Com::printF(PSTR("Fanspeed"), fanId);
     Com::printFLN(Com::tColon, speed);
@@ -216,7 +216,7 @@ void Printer::checkFanTimeouts() {
     for (fast8_t i = 0; i < NUM_FANS; i++) {
         if (fans[i].timeout) {
             if ((HAL::timeInMilliseconds() - fans[i].time) > fans[i].timeout) {
-                EVENT_FAN_TIMEOUT(i, fans[i].target); 
+                EVENT_FAN_TIMEOUT(i, fans[i].target);
                 Printer::setFanSpeed(fans[i].target, true, i);
             }
         }

@@ -483,15 +483,14 @@ extern ServoInterface* servos[NUM_SERVOS];
 #define TRIM_FAN_PWM(x) static_cast<uint8_t>(static_cast<unsigned int>(x) * MAX_FAN_PWM / 255)
 #endif
 
-struct fanController
-{
+struct FanController {
     PWMHandler* fan;
     millis_t time;
     fast8_t target;
     uint32_t timeout;
 };
 
-extern fanController fans[]; 
+extern FanController fans[];
 // extern const uint8 osAnalogInputChannels[] PROGMEM;
 //extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
 //extern uint osAnalogInputBuildup[ANALOG_INPUTS];
