@@ -426,7 +426,7 @@ void HAL::setHardwarePWM(int id, int value) {
         uint32_t freq = t.tc_base_address->TC_CHANNEL[t.tc_local_chan].TC_RC;
         
         t.tc_base_address->TC_CHANNEL[t.tc_local_chan].TC_CMR |= 
-                (t.tio_line_AB ? (TC_CMR_BCPB_CLEAR | TC_CMR_BCPC_SET) : (TC_CMR_ACPA_CLEAR | TC_CMR_ACPC_SET)); 
+                (t.tio_line_AB ? (TC_CMR_BCPB_CLEAR | TC_CMR_BCPC_SET | TC_CMR_EEVT_XC0) : (TC_CMR_ACPA_CLEAR | TC_CMR_ACPC_SET)); 
 
         if (t.tio_line_AB) {
             TC_SetRB(t.tc_base_address, t.tc_local_chan,  ((freq * value) / 255)); 
