@@ -340,6 +340,7 @@ void HeatManagerPID::eepromHandleLocal(int pos) {
     EEPROM::handleFloat(pos + 8, PSTR("D [-]"), 2, D);
     EEPROM::handleFloat(pos + 12, PSTR("Min. I Part [-]"), 2, driveMin);
     EEPROM::handleFloat(pos + 16, PSTR("Max. I Part [-]"), 2, driveMax);
+    updateDerived(); 
 }
 
 int HeatManagerPID::eepromSizeLocal() {
