@@ -18,7 +18,7 @@
 
 #include "Repetier.h"
 
-#if PRINTER_TYPE == PRINTER_TYPE_CARESIAN
+#if PRINTER_TYPE == PRINTER_TYPE_CARTESIAN
 
 float PrinterType::bedRectangle[2][2];
 uint16_t PrinterType::eprStart;

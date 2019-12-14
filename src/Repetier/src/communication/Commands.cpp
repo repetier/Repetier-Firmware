@@ -110,7 +110,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
 #if FEATURE_WATCHDOG
     HAL::pingWatchdog();
 #endif
- 
+
     // Report temperatures every second, so we do not need to send M105
     if (Printer::isAutoreportTemp()) {
         millis_t now = HAL::timeInMilliseconds();
@@ -129,7 +129,6 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
 #include "../io/redefine.h"
         EVENT_TIMER_500MS;
         Printer::checkFanTimeouts();
-
     }
 #if DISPLAY_DRIVER != DRIVER_NONE
     GUI::update();
@@ -568,10 +567,10 @@ void Commands::processMCode(GCode* com) {
     case 204: // M204
         MCode_204(com);
         break;
-    case 205: // M205 Show EEPROM settings 
-    #if EMERGENCY_PARSER == 0
+    case 205: // M205 Show EEPROM settings
+#if EMERGENCY_PARSER == 0
         MCode_205(com);
-    #endif
+#endif
         break;
     case 206: // M206 T[type] P[pos] [Sint(long] [Xfloat]  Set eeprom value
         MCode_206(com);
@@ -767,6 +766,14 @@ void Commands::processMCode(GCode* com) {
     case 999: // Stop fatal error take down
         MCode_999(com);
         break;
+    /* case 888: {
+        Motion1::waitForEndOfMoves();
+        Com::printF(PSTR("XSteps:"), XMotor.position);
+        Com::printF(PSTR(" YSteps:"), YMotor.position);
+        int32_t* lp = Motion2::lastMotorPos[Motion2::lastMotorIdx];
+        Com::printF(PSTR(" XPosSteps:"), lp[0]);
+        Com::printFLN(PSTR(" YPosSteps:"), lp[1]);
+    } break; */
     default:
         if (Printer::debugErrors()) {
             Com::writeToAll = false;

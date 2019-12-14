@@ -54,7 +54,7 @@ public:
     virtual bool implementsSetMaxCurrent() { return false; }
     /// Set microsteps. Must be a power of 2.
     virtual void setMicrosteps(int microsteps) {}
-    /// Set max current as range 0..255 or mA depedning on driver
+    /// Set max current as range 0..255 or mA depending on driver
     virtual void setMaxCurrent(int max) {}
     // Called before homing starts. Can be used e.g. to disable silent mode
     // or otherwise prepare for endstop detection.
@@ -69,6 +69,57 @@ public:
     virtual void eepromHandle() {}
     int motorIndex();
     void printMotorName();
+};
+
+struct MixingStepperState {
+    int mixingW;  ///< Weight for this extruder when mixing steps
+    int mixingWB; ///< Weight after balancing extruder steps per mm
+    int mixingE;  ///< Cumulated error for this step.
+    float stepsPerMM;
+    StepperDriverBase* stepper;
+};
+
+class MixingStepperDriver : public StepperDriverBase {
+    ufast8_t nStepper;
+    MixingStepperState* state;
+    float stepsPerMM; ///< Biggest resolution of all substepper to always get enough steps
+    void rebuildWeights();
+
+public:
+    MixingStepperDriver()
+        : MixingStepperDriver(0, nullptr, nullptr, nullptr) {}
+    MixingStepperDriver(fast8_t n, MixingStepperState* state, EndstopDriver* minES, EndstopDriver* maxES);
+    inline ufast8_t numMotors() { return nStepper; } ///< Number of motors that get mixed
+    void setWeight(ufast8_t motorId, int weight);
+    /// Always executes the step
+    virtual void step();
+    /// Set step signal low
+    virtual void unstep();
+    /// Set direction, true = max direction
+    virtual void dir(bool d);
+    /// Enable motor driver
+    virtual void enable();
+    /// Disable motor driver
+    virtual void disable();
+    // Return true if setting microsteps is supported
+    virtual bool implementsSetMicrosteps();
+    // Return true if setting current in software is supported
+    virtual bool implementsSetMaxCurrent();
+    /// Set microsteps. Must be a power of 2.
+    virtual void setMicrosteps(int microsteps);
+    /// Set max current as range 0..255 or mA depending on driver
+    virtual void setMaxCurrent(int max);
+    // Called before homing starts. Can be used e.g. to disable silent mode
+    // or otherwise prepare for endstop detection.
+    virtual void beforeHoming();
+    virtual void afterHoming();
+    virtual void handleMCode(GCode& com);
+    // If true the stepper usage will not offer resolution modification in GUI
+    virtual bool overridesResolution() { return true; }
+    // Configuration in GUI
+    virtual void menuConfig(GUIAction action, void* data);
+    // Allow having own settings e.g. current, microsteps
+    virtual void eepromHandle();
 };
 
 /** Holds a position counter that can be observed, otherwise sends
@@ -226,7 +277,6 @@ public:
         stepCls::off();
     }
     inline void dir(bool d) final {
-        // Com::printFLN(PSTR("SD:"), (int)d);
         dirCls::set(d);
         direction = d;
     }

@@ -1082,6 +1082,9 @@ void MCode_302(GCode* com) {
 
 void MCode_303(GCode* com) {
     int t = 0;
+    if (com->hasP()) {
+        t = com->P;
+    }
     if (com->hasT()) {
         t = com->T;
     }

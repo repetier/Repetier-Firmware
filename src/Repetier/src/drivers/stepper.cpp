@@ -131,8 +131,7 @@ void ProgrammableStepperBase::processEEPROM(uint8_t flags) {
 #if STORE_MOTOR_STALL_SENSITIVITY
     //Note, flag 32 is stallguard 4, we don't use that flag for anything else yet, other than a small change in eeprom text.
     if (flags & 16 && stallguardSensitivity != -128) {
-        EEPROM::handleInt(eprStart + PSB_STALL_SENSITIVITY_POS, (flags & 32) ? 
-                PSTR("Stall Sensitivity [0..255]") : PSTR("Stall Sensitivity [-64..63]"), stallguardSensitivity);
+        EEPROM::handleInt(eprStart + PSB_STALL_SENSITIVITY_POS, (flags & 32) ? PSTR("Stall Sensitivity [0..255]") : PSTR("Stall Sensitivity [-64..63]"), stallguardSensitivity);
     }
 #endif
 }
@@ -945,8 +944,7 @@ void reportTMC2209(TMC2209Stepper* driver, ProgrammableStepperBase* b, int level
         Com::printFLN(PSTR("seup: "), (int)driver->seup());
         Com::printFLN(PSTR("semax: "), (int)driver->semax());
         Com::printFLN(PSTR("sedn: "), (int)driver->sedn());
-        Com::printFLN(PSTR("seimin: "), (int)driver->seimin()); 
-        
+        Com::printFLN(PSTR("seimin: "), (int)driver->seimin());
     }
 }
 
@@ -956,9 +954,9 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::init() {
     driver->begin();
 
     // The TMC2209_n namespace doesn't recreate all the register structs for the 2209 specifically
-    // We're meant to use the 2208's. 
+    // We're meant to use the 2208's.
     // However, it does have it's own IOIN_t, COOLCONF_t, SG_RESULT_t, and SGTHRS_t tables!
-    
+
     TMC2208_n::GCONF_t gconf { 0 };
     gconf.pdn_disable = true;      // Use UART
     gconf.mstep_reg_select = true; // Select microsteps with UART
@@ -982,8 +980,6 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::init() {
     driver->iholddelay(10);
     driver->TPOWERDOWN(128); // ~2s until driver lowers to hold current
 
-    
-    
     TMC2208_n::PWMCONF_t pwmconf { 0 };
     pwmconf.pwm_lim = 12;
     pwmconf.pwm_reg = 8;
@@ -992,10 +988,9 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::init() {
     pwmconf.pwm_freq = 0b01;
     pwmconf.pwm_grad = 14;
     pwmconf.pwm_ofs = 36;
-    driver->PWMCONF(pwmconf.sr); 
+    driver->PWMCONF(pwmconf.sr);
 
-    
-    //TMC2209_n::COOLCONF_t coolconf { 0 };  
+    //TMC2209_n::COOLCONF_t coolconf { 0 };
 
     if (hybridSpeed >= 0) {
         driver->TPWMTHRS(fclk * microsteps / static_cast<uint32_t>(256 * hybridSpeed * Motion1::resolution[getAxis()])); // need computed
@@ -1144,7 +1139,7 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
         printMotorNumberAndName(false);
         Com::printFLN(PSTR(" hybrid treshold: "), hybridSpeed, 1);
         break;
-        
+
     case 914: // sensorless homing sensitivity
         if (hasStallguard()) {
             if (com.hasS() && com.S >= 0 && com.S <= 255) {
@@ -1155,6 +1150,145 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
         }
         break;
     }
+}
+
+MixingStepperDriver::MixingStepperDriver(fast8_t n, MixingStepperState* _state, EndstopDriver* minES, EndstopDriver* maxES)
+    : StepperDriverBase(minES, maxES) {
+    nStepper = n;
+    state = _state;
+    for (ufast8_t i = 0; i < nStepper; i++) {
+        state[i].mixingW = 0;
+        state[i].mixingE = 0;
+    }
+    state[0].mixingW = 100;
+    rebuildWeights();
+}
+
+void MixingStepperDriver::rebuildWeights() {
+    int32_t sum_w = 0;
+    float sum = 0;
+    stepsPerMM = 0;
+    MixingStepperState* act = state;
+    for (ufast8_t i = 0; i < nStepper; i++, act++) {
+        sum_w += act->mixingW;
+        sum += act->stepsPerMM * act->mixingW;
+        stepsPerMM = RMath::max(stepsPerMM, act->stepsPerMM);
+    }
+    sum /= sum_w;
+    /* Printer::currentPositionSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] * sum / Printer::axisStepsPerMM[E_AXIS]; // reposition according resolution change
+    Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS];
+    Printer::axisStepsPerMM[E_AXIS] = sum;
+    Printer::invAxisStepsPerMM[E_AXIS] = 1.0f / Printer::axisStepsPerMM[E_AXIS]; */
+}
+
+void MixingStepperDriver::setWeight(ufast8_t motorId, int weight) {
+    state[motorId].mixingW = weight;
+    rebuildWeights();
+}
+
+/// Always executes the step
+void MixingStepperDriver::step() {
+}
+/// Set step signal low
+void MixingStepperDriver::unstep() {
+    MixingStepperState* act = state;
+    for (ufast8_t i = 0; i < nStepper; i++) {
+        act->stepper->unstep();
+        act++;
+    }
+}
+/// Set direction, true = max direction
+void MixingStepperDriver::dir(bool d) {
+    MixingStepperState* act = state;
+    for (ufast8_t i = 0; i < nStepper; i++) {
+        act->stepper->dir(d);
+        act++;
+    }
+}
+/// Enable motor driver
+void MixingStepperDriver::enable() {
+    MixingStepperState* act = state;
+    for (ufast8_t i = 0; i < nStepper; i++) {
+        act->stepper->enable();
+        act++;
+    }
+}
+/// Disable motor driver
+void MixingStepperDriver::disable() {
+    MixingStepperState* act = state;
+    for (ufast8_t i = 0; i < nStepper; i++) {
+        act->stepper->disable();
+        act++;
+    }
+}
+// Return true if setting microsteps is supported
+bool MixingStepperDriver::implementsSetMicrosteps() {
+    bool ret = false;
+    MixingStepperState* act = state;
+    for (ufast8_t i = 0; i < nStepper; i++) {
+        ret |= act->stepper->implementsSetMicrosteps();
+        act++;
+    }
+    return ret;
+}
+// Return true if setting current in software is supported
+bool MixingStepperDriver::implementsSetMaxCurrent() {
+    bool ret = false;
+    MixingStepperState* act = state;
+    for (ufast8_t i = 0; i < nStepper; i++) {
+        ret |= act->stepper->implementsSetMaxCurrent();
+        act++;
+    }
+    return ret;
+}
+/// Set microsteps. Must be a power of 2.
+void MixingStepperDriver::setMicrosteps(int microsteps) {
+    MixingStepperState* act = state;
+    for (ufast8_t i = 0; i < nStepper; i++) {
+        act->stepper->setMicrosteps(microsteps);
+        act++;
+    }
+}
+/// Set max current as range 0..255 or mA depending on driver
+void MixingStepperDriver::setMaxCurrent(int max) {
+    MixingStepperState* act = state;
+    for (ufast8_t i = 0; i < nStepper; i++) {
+        act->stepper->setMaxCurrent(max);
+        act++;
+    }
+}
+// Called before homing starts. Can be used e.g. to disable silent mode
+// or otherwise prepare for endstop detection.
+void MixingStepperDriver::beforeHoming() {
+    MixingStepperState* act = state;
+    for (ufast8_t i = 0; i < nStepper; i++) {
+        act->stepper->beforeHoming();
+        act++;
+    }
+}
+void MixingStepperDriver::afterHoming() {
+    MixingStepperState* act = state;
+    for (ufast8_t i = 0; i < nStepper; i++) {
+        act->stepper->afterHoming();
+        act++;
+    }
+}
+void MixingStepperDriver::handleMCode(GCode& com) {
+    switch (com.M) {
+    default: {
+        MixingStepperState* act = state;
+        for (ufast8_t i = 0; i < nStepper; i++) {
+            act->stepper->handleMCode(com);
+            act++;
+        }
+    }
+    }
+}
+// Configuration in GUI
+void MixingStepperDriver::menuConfig(GUIAction action, void* data) {
+}
+// Allow having own settings e.g. current, microsteps
+void MixingStepperDriver::eepromHandle() {
 }
 
 #undef IO_TARGET

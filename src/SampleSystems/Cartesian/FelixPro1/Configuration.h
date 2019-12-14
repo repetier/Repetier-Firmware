@@ -54,10 +54,12 @@
 #define FEATURE_WATCHDOG 1
 #define FEATURE_RETRACTION 1
 #define NUM_AXES 4                   // X,Y,Z and E for extruder A,B,C would be 5,6,7
-#define STEPPER_FREQUENCY 153000     // Maximum stepper frequency.
-#define PREPARE_FREQUENCY 1000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
-#define BLOCK_FREQUENCY 500          // Number of blocks with constant stepper rate per second.
+#define STEPPER_FREQUENCY 154000     // Maximum stepper frequency.
+#define PREPARE_FREQUENCY 2000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
+#define BLOCK_FREQUENCY 1000         // Number of blocks with constant stepper rate per second.
 #define VELOCITY_PROFILE 2           // 0 = linear, 1 = cubic, 2 = quintic velocity shape
+#define SLOW_DIRECTION_CHANGE 1      // can be reason for lost steps on slow drivers
+#define SMALL_SEGMENT_SIZE 0.4       // Smaller segments reduce join speed to prevent vibrations causing lost steps
 #define Z_SPEED 10                   // Z positioning speed
 #define XY_SPEED 150                 // XY positioning speed for normal operations
 #define E_SPEED 2                    // Extrusion speed

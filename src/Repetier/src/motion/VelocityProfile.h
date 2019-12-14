@@ -34,12 +34,17 @@ public:
     fast updating following steps.
     Returns true if it was the last segment in planned time series
     */
-    virtual bool start(float vstart, float vend, float time) = 0;
+    virtual bool start(float s0, float vstart, float vend, float time) = 0;
     /**
      Called for every update after start. Returns true if the
      last segment is reached.
     */
     virtual bool next() = 0;
+
+    /** like start for constant speed to use faster math */
+    bool startConstSpeed(float s0, float speed, float time);
+    /** like next for constant speed to use faster math */
+    bool nextConstSpeed();
 };
 
 /*
@@ -56,7 +61,7 @@ public:
     fast updating following steps.
     Returns true if it was the last segment in planned time series
     */
-    virtual bool start(float vstart, float vend, float time);
+    virtual bool start(float s0, float vstart, float vend, float time);
     /**
      Called for every update after start. Returns true if the
      last segment is reached.
@@ -79,7 +84,7 @@ public:
     fast updating following steps.
     Returns true if it was the last segment in planned time series
     */
-    virtual bool start(float vstart, float vend, float time);
+    virtual bool start(float s0, float vstart, float vend, float time);
     /**
      Called for every update after start. Returns true if the
      last segment is reached.
@@ -98,7 +103,7 @@ public:
     fast updating following steps.
     Returns true if it was the last segment in planned time series
     */
-    virtual bool start(float vstart, float vend, float time);
+    virtual bool start(float s0, float vstart, float vend, float time);
     /**
      Called for every update after start. Returns true if the
      last segment is reached.

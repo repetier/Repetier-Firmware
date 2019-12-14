@@ -750,7 +750,7 @@ void Printer::showConfiguration() {
     Com::config(PSTR("XHomeDir:"), Motion1::homeDir[X_AXIS]);
     Com::config(PSTR("YHomeDir:"), Motion1::homeDir[Y_AXIS]);
     Com::config(PSTR("ZHomeDir:"), Motion1::homeDir[Z_AXIS]);
-#if PRINTER_TYPE == 2
+#if PRINTER_TYPE == PRINTER_TYPE_DELTA
 #if FIXED_Z_HOME_POSITION
     Com::config(PSTR("XHomePos:"), (float)ZHOME_X_POS, 2);
     Com::config(PSTR("YHomePos:"), (float)ZHOME_Y_POS, 2);
@@ -777,7 +777,7 @@ void Printer::showConfiguration() {
     Com::config(PSTR("PrintlineCache:"), PRINTLINE_CACHE_SIZE);
     Com::config(PSTR("JerkXY:"), Motion1::maxYank[X_AXIS]);
     Com::config(PSTR("KeepAliveInterval:"), KEEP_ALIVE_INTERVAL);
-#if PRINTER_TYPE != 2
+#if PRINTER_TYPE != PRINTER_TYPE_DELTA
     Com::config(PSTR("JerkZ:"), Motion1::maxYank[Z_AXIS]);
 #endif
 #if FEATURE_RETRACTION

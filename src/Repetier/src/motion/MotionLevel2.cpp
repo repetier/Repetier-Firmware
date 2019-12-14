@@ -50,8 +50,10 @@ void Motion2::init() {
 // is for a 2000 / PREPARE_FREQUENCY long period of constant speed. We try to
 // precompute up to 16 such tiny buffers and with the double frequency We
 // should be on the safe side of never getting an underflow.
-void Motion2::timer() {
+__attribute__((optimize("unroll-loops"))) void Motion2::timer() {
+#ifdef DEBUG_REVERSAL
     static float lastL = 0;
+#endif
     // First check if can push anything into next level
     Motion3Buffer* m3 = Motion3::tryReserve();
     if (m3 == nullptr) { // no free space, do nothing until free
@@ -122,7 +124,9 @@ void Motion2::timer() {
                 lp++;
             }
         }
+#ifdef DEBUG_REVERSAL
         lastL = 0;
+#endif
         // DEBUG_MSG2_FAST("new ", (int)actM1->action);
         InterruptProtectedBlock ip;
         length++;
@@ -132,42 +136,41 @@ void Motion2::timer() {
             act->nextState();
             lastMotorPos[lastMotorIdx][E_AXIS] = lroundf(actM1->start[E_AXIS] * Motion1::resolution[E_AXIS]);
         }
-        float sFactor = 1.0;
         if (act->state == Motion2State::ACCELERATE_INIT) {
             act->state = Motion2State::ACCELERATING;
-            if (velocityProfile->start(actM1->startSpeed, actM1->feedrate, act->t1)) {
+            if (velocityProfile->start(0, actM1->startSpeed, actM1->feedrate, act->t1)) {
                 act->nextState();
             }
             // DEBUG_MSG2_FAST("se:", VelocityProfile::segments);
-            sFactor = velocityProfile->s;
+            // sFactor = velocityProfile->s;
         } else if (act->state == Motion2State::ACCELERATING) {
             if (velocityProfile->next()) {
                 act->nextState();
             }
-            sFactor = velocityProfile->s;
+            // sFactor = velocityProfile->s;
         } else if (act->state == Motion2State::PLATEAU_INIT) {
-            act->state = Motion2State::PLATEU;
-            if (velocityProfile->start(actM1->feedrate, actM1->feedrate, act->t2)) {
+            act->state = Motion2State::PLATEAU;
+            if (velocityProfile->start(act->s1, actM1->feedrate, actM1->feedrate, act->t2)) {
                 act->nextState();
             }
-            sFactor = velocityProfile->s + act->s1;
-        } else if (act->state == Motion2State::PLATEU) {
+            // sFactor = velocityProfile->s + act->s1;
+        } else if (act->state == Motion2State::PLATEAU) {
             if (velocityProfile->next()) {
                 act->nextState();
             }
-            sFactor = velocityProfile->s + act->s1;
+            // sFactor = velocityProfile->s + act->s1;
         } else if (act->state == Motion2State::DECCELERATE_INIT) {
             act->state = Motion2State::DECELERATING;
-            act->soff = act->s1 + act->s2;
-            if (velocityProfile->start(actM1->feedrate, actM1->endSpeed, act->t3)) {
+            // act->soff = act->s1 + act->s2;
+            if (velocityProfile->start(act->s1 + act->s2, actM1->feedrate, actM1->endSpeed, act->t3)) {
                 act->nextState();
             }
-            sFactor = velocityProfile->s + act->soff;
+            // sFactor = velocityProfile->s + act->soff;
         } else if (act->state == Motion2State::DECELERATING) {
             if (velocityProfile->next()) {
                 act->nextState();
             }
-            sFactor = velocityProfile->s + act->soff;
+            // sFactor = velocityProfile->s + act->soff;
         } else if (act->state == Motion2State::FINISHED) {
             // DEBUG_MSG("finished")
             m3->directions = 0;
@@ -178,6 +181,7 @@ void Motion2::timer() {
             Motion3::pushReserved();
             return;
         }
+        float sFactor = velocityProfile->s;
         m3->last = Motion3::skipParentId == act->id;
         if (act->state == Motion2State::FINISHED) {
             // prevent rounding errors
@@ -193,12 +197,18 @@ void Motion2::timer() {
         // Convert float position to integer motor position
         // This step catches all nonlinear behaviour from
         // acceleration profile and printer geometry
+#ifdef DEBUG_REVERSAL
         if (sFactor < lastL) {
-            if (sFactor < lastL + 0.0001) { // sometimes this happens with inprecision, so catch that case
-                Com::printFLN(PSTR("reversal:"), sFactor - lastL, 6);
+            if (sFactor < lastL - 0.0001) { // sometimes this happens with inprecision, so catch that case
+                Com::printF(PSTR("reversal:"), sFactor, 6);
+                Com::printF(Com::tColon, lastL, 6);
+                Com::printF(Com::tColon, act->s1, 6);
+                Com::printF(Com::tColon, act->s2, 6);
+                Com::printFLN(Com::tColon, act->s3, 6);
             }
         }
         lastL = sFactor;
+#endif
         float pos[NUM_AXES];
         FOR_ALL_AXES(i) {
             if (actM1->axisUsed & axisBits[i]) {
@@ -211,7 +221,7 @@ void Motion2::timer() {
         fast8_t nextMotorIdx = 1 - lastMotorIdx;
         int32_t* np = lastMotorPos[nextMotorIdx];
         int32_t* lp = lastMotorPos[lastMotorIdx];
-        PrinterType::transform(pos, np);
+        PrinterType::transform(pos, np); // where we want to be in motor pos incl. bump corrections
         // Com::printFLN(PSTR("DS x="), np[0]); // TEST
         /* Com::printF(PSTR(" y="), np[1]);
         Com::printFLN(PSTR(" z="), np[2]);*/
@@ -280,10 +290,18 @@ void Motion2::timer() {
 
                 *delta += advDiff;
                 if (*delta > 0) { // extruding
+                    if (*delta > static_cast<int>(m3->stepsRemaining)) {
+                        advTarget += m3->stepsRemaining - *delta;
+                        *delta = m3->stepsRemaining;
+                    }
                     *delta <<= 1;
                     m3->directions |= *bits;
                     m3->usedAxes |= *bits;
                 } else { // retracting, advDiff is always negative
+                    if (*delta < -static_cast<int>(m3->stepsRemaining)) {
+                        advTarget += m3->stepsRemaining + *delta;
+                        *delta = -m3->stepsRemaining;
+                    }
                     *delta = (-*delta) << 1;
                     m3->usedAxes |= *bits;
                 }
@@ -297,6 +315,11 @@ void Motion2::timer() {
                     m3->usedAxes |= *bits;
                 }
             }
+#ifdef DEBUG_MOTION_ERRORS
+            if (*delta > m3->errorUpdate) { // test if more steps wanted then possible, should never happen!
+                Com::printFLN(PSTR("StepError"), (int)i);
+            }
+#endif
             m3->error[i] = -m3->stepsRemaining;
             delta++;
             np++;
@@ -322,42 +345,41 @@ void Motion2::timer() {
         if (act->state == Motion2State::NOT_INITIALIZED) {
             act->nextState();
         }
-        float sFactor = 1.0;
         if (act->state == Motion2State::ACCELERATE_INIT) {
             act->state = Motion2State::ACCELERATING;
-            if (velocityProfile->start(actM1->startSpeed, actM1->feedrate, act->t1)) {
+            if (velocityProfile->start(0, actM1->startSpeed, actM1->feedrate, act->t1)) {
                 act->nextState();
             }
             // DEBUG_MSG2_FAST("se:", VelocityProfile::segments);
-            sFactor = velocityProfile->s;
+            // sFactor = velocityProfile->s;
         } else if (act->state == Motion2State::ACCELERATING) {
             if (velocityProfile->next()) {
                 act->nextState();
             }
-            sFactor = velocityProfile->s;
+            // sFactor = velocityProfile->s;
         } else if (act->state == Motion2State::PLATEAU_INIT) {
-            act->state = Motion2State::PLATEU;
-            if (velocityProfile->start(actM1->feedrate, actM1->feedrate, act->t2)) {
+            act->state = Motion2State::PLATEAU;
+            if (velocityProfile->startConstSpeed(act->s1, actM1->feedrate, act->t2)) {
                 act->nextState();
             }
-            sFactor = velocityProfile->s + act->s1;
-        } else if (act->state == Motion2State::PLATEU) {
-            if (velocityProfile->next()) {
+            // sFactor = velocityProfile->s + act->s1;
+        } else if (act->state == Motion2State::PLATEAU) {
+            if (velocityProfile->nextConstSpeed()) {
                 act->nextState();
             }
-            sFactor = velocityProfile->s + act->s1;
+            // sFactor = velocityProfile->s + act->s1;
         } else if (act->state == Motion2State::DECCELERATE_INIT) {
             act->state = Motion2State::DECELERATING;
-            act->soff = act->s1 + act->s2;
-            if (velocityProfile->start(actM1->feedrate, actM1->endSpeed, act->t3)) {
+            // act->soff = act->s1 + act->s2;
+            if (velocityProfile->start(act->s1 + act->s2, actM1->feedrate, actM1->endSpeed, act->t3)) {
                 act->nextState();
             }
-            sFactor = velocityProfile->s + act->soff;
+            // sFactor = velocityProfile->s + act->soff;
         } else if (act->state == Motion2State::DECELERATING) {
             if (velocityProfile->next()) {
                 act->nextState();
             }
-            sFactor = velocityProfile->s + act->soff;
+            // sFactor = velocityProfile->s + act->soff;
         } else if (act->state == Motion2State::FINISHED) {
             m3->directions = 0;
             m3->usedAxes = 0;
@@ -366,6 +388,7 @@ void Motion2::timer() {
             Motion3::pushReserved();
             return;
         }
+        float sFactor = velocityProfile->s;
         m3->last = Motion3::skipParentId == act->id;
         if (act->state == Motion2State::FINISHED) {
             // prevent rounding errors
@@ -409,6 +432,11 @@ void Motion2::timer() {
                 m3->directions |= axisBits[i];
                 m3->usedAxes |= axisBits[i];
             }
+#ifdef DEBUG_MOTION_ERRORS
+            if (m3->delta[i] > m3->errorUpdate) { // test if more steps wanted then possible, should never happen!
+                Com::printFLN(PSTR("StepError"));
+            }
+#endif
             m3->error[i] = -(m3->stepsRemaining);
         }
         lastMotorIdx = nextMotorIdx;
@@ -586,7 +614,7 @@ void Motion2Buffer::nextState() {
             return;
         }
     }
-    if (state == Motion2State::PLATEU) {
+    if (state == Motion2State::PLATEAU) {
         if (t3 > 0) {
             state = Motion2State::DECCELERATE_INIT;
             return;

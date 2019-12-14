@@ -249,7 +249,7 @@ extern void updateEndstops();
 #define CONTROLLER_REPRAPWORLD_GLCD 27
 #define CONTROLLER_AZSMZ_12864_OLED 28
 
-#define PRINTER_TYPE_CARESIAN 0
+#define PRINTER_TYPE_CARTESIAN 0
 #define PRINTER_TYPE_CORE_XYZ 1
 #define PRINTER_TYPE_DELTA 2
 #define PRINTER_TYPE_DUAL_X 3
@@ -320,6 +320,10 @@ public:
 #define WAITING_IDENTIFIER "wait"
 #endif
 
+#ifndef SMALL_SEGMENT_SIZE
+#define SMALL_SEGMENT_SIZE 0.7
+#endif
+
 #ifndef HOST_RESCUE
 #define HOST_RESCUE 1
 #endif
@@ -331,6 +335,10 @@ public:
 
 #ifndef E_SPEED
 #define E_SPEED 2
+#endif
+
+#ifndef SLOW_DIRECTION_CHANGE
+#define SLOW_DIRECTION_CHANGE 1
 #endif
 
 extern ServoInterface* servos[NUM_SERVOS];
@@ -516,13 +524,13 @@ extern void microstepInit();
 #include "motion/MotionLevel1.h"
 #include "motion/MotionLevel2.h"
 #include "motion/MotionLevel3.h"
-#if PRINTER_TYPE == 0
+#if PRINTER_TYPE == PRINTER_TYPE_CARTESIAN
 #include "PrinterTypes/PrinterTypeCartesian.h"
-#elif PRINTER_TYPE == 1
+#elif PRINTER_TYPE == PRINTER_TYPE_CORE_XYZ
 #include "PrinterTypes/PrinterTypeCoreXYZ.h"
-#elif PRINTER_TYPE == 2
+#elif PRINTER_TYPE == PRINTER_TYPE_DELTA
 #include "PrinterTypes/PrinterTypeDelta.h"
-#elif PRINTER_TYPE == 3
+#elif PRINTER_TYPE == PRINTER_TYPE_DUAL_X
 #include "PrinterTypes/PrinterTypeDualXAxis.h"
 #endif
 #include "motion/VelocityProfile.h"

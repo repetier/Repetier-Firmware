@@ -44,6 +44,7 @@ public:
     static fast8_t nextActId;       // used only inside interrupt
     static fast8_t skipParentId;    // Skip blocks from this id - endstop was triggered
     static fast8_t lastParentId;
+    static fast8_t lastDirection; // Last direction for faster switches
     static Motion3Buffer* act;
     static Motion2Buffer* actM2;
     static Motion1Buffer* actM1;
@@ -69,7 +70,7 @@ public:
         InterruptProtectedBlock noInts;
         length++;
     }
-    static void activateNext();
+    static bool activateNext(); // select next block, returns true if directions were changed
     static INLINE void unstepMotors() {
 #ifdef XMOTOR_SWITCHABLE
         Motion1::motors[X_AXIS]->unstep();

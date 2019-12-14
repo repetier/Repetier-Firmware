@@ -37,7 +37,30 @@ float VelocityProfile::ds1, VelocityProfile::ds2, VelocityProfile::ds3, Velocity
 #error VELOCITY_PROFILE must be 0 = linear, 1 = cubic, 2 = quintic
 #endif
 
-bool VelocityProfileLinear::start(float vstart, float vend, float time) {
+/** like start for constant speed to use faster math */
+bool VelocityProfile::startConstSpeed(float s0, float speed, float time) {
+    float fsegments = ceil(time * static_cast<float>(BLOCK_FREQUENCY));
+    float h = 1.0 / fsegments;
+    segments = static_cast<int>(fsegments);
+    stepsPerSegment = static_cast<int>(ceil(time * h * static_cast<float>(STEPPER_FREQUENCY)));
+    // tTotal = segments * invStepperFrequency;
+    segmentsLeft = segments - 1;
+    f = speed;
+    h *= time;
+    ds1 = h * speed;
+    s = ds1 + s0;
+    return segmentsLeft <= 0;
+}
+/** like next for constant speed to use faster math */
+bool VelocityProfile::nextConstSpeed() {
+    if (segments <= 0) {
+        return true; // invalid, start with next segment
+    }
+    s += ds1;
+    return --segmentsLeft <= 0;
+}
+
+bool VelocityProfileLinear::start(float s0, float vstart, float vend, float time) {
     float fsegments = ceil(time * static_cast<float>(BLOCK_FREQUENCY));
     float h = 1.0 / fsegments;
     segments = static_cast<int>(fsegments);
@@ -51,14 +74,14 @@ bool VelocityProfileLinear::start(float vstart, float vend, float time) {
     f = vstart + 0.5 * d1;
     h *= time;
     ds2 *= time;
-    s = h * vstart + 0.5 * ds2;
-    ds1 = vstart * h + 0.5 * ds2;
+    ds1 = h * vstart + 0.5 * ds2;
+    s = ds1 + s0;
     return segmentsLeft <= 0;
 }
 
 bool VelocityProfileLinear::next() {
     if (segments <= 0) {
-        return false;
+        return true; // invalid, start with next segment
     }
     f += d1;
     s += ds1;
@@ -66,7 +89,7 @@ bool VelocityProfileLinear::next() {
     return --segmentsLeft <= 0;
 }
 
-bool VelocityProfileCubic::start(float vstart, float vend, float time) {
+bool VelocityProfileCubic::start(float s0, float vstart, float vend, float time) {
     /*
     Divisions: 1
     Multiplication: 30
@@ -100,7 +123,7 @@ bool VelocityProfileCubic::start(float vstart, float vend, float time) {
     float c2dt3 = c2 * h3 * time;
     float c3dt4 = c3 * h4 * time;
 
-    s = c3dt4 * 0.25 + c2dt3 * 0.3333333333333 + c0dt;
+    s = c3dt4 * 0.25 + c2dt3 * 0.3333333333333 + c0dt + s0;
     ds1 = 3.75 * c3dt4 + 2.3333333333 * c2dt3 + c0dt;
     ds2 = 12.5 * c3dt4 + 4.0 * c2dt3;
     ds3 = 15 * c3dt4 + 2.0 * c2dt3;
@@ -113,7 +136,7 @@ bool VelocityProfileCubic::next() {
     // 7 float additions
 
     if (segments <= 0) {
-        return false;
+        return true; // invalid, start with next segment
     }
     f += d1;
     d1 += d2;
@@ -127,7 +150,7 @@ bool VelocityProfileCubic::next() {
     return --segmentsLeft <= 0;
 }
 
-bool VelocityProfileQuintic::start(float vstart, float vend, float time) {
+bool VelocityProfileQuintic::start(float s0, float vstart, float vend, float time) {
     /*
     Divisions: 1
     Multiplication: 46
@@ -159,7 +182,7 @@ bool VelocityProfileQuintic::start(float vstart, float vend, float time) {
     h5v10 *= time;
     h4v10 *= time;
     hv0 *= time;
-    s = h6v10 - 3.0f * h5v10 + 2.5f * h4v10 + hv0;
+    s = h6v10 - 3.0f * h5v10 + 2.5f * h4v10 + hv0 + s0;
     ds1 = 63.0f * h6v10 - 93.0f * h5v10 + 37.5f * h4v10 + hv0;
     ds2 = 602.0f * h6v10 - 540.0f * h5v10 + 125.0f * h4v10;
     ds3 = 2100.0f * h6v10 - 1170.0f * h5v10 + 150.0f * h4v10;
@@ -174,7 +197,7 @@ bool VelocityProfileQuintic::next() {
     // 7 float additions
 
     if (segments <= 0) {
-        return false;
+        return true; // invalid, start with next segment
     }
     f += d1;
     d1 += d2;

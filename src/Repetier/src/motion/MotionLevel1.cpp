@@ -1098,8 +1098,8 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
                     f2 = nullptr;
                 }
             }
-            float maxEndSpeed = sqrt(f->startSpeed * f->startSpeed + f->sa2);
-            if (f->endSpeed > maxEndSpeed) {
+            float maxEndSpeed = sqrt(f->startSpeed * f->startSpeed + f->sa2); // reachable end speed
+            if (f->endSpeed > maxEndSpeed) {                                  // allowed to accelerate so far, copy value
                 f->endSpeed = maxEndSpeed;
                 if (f2 != nullptr) {
                     f2->startSpeed = f->endSpeed;
@@ -1128,7 +1128,7 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
                 m2->t3 = (f->feedrate - f->endSpeed) * invAcceleration;
                 m2->s3 = m2->t3 * (f->endSpeed + 0.5 * f->acceleration * m2->t3);
             }
-            if (m2->s1 + m2->s3 > f->length) {
+            if (m2->s1 + m2->s3 > f->length) {                         // not enough space to do both
                 if ((f->axisUsed & 3) != 0 && f->startSpeed >= 9.99) { // reduce acceleration to minimum for smooth curves
                     if (f->startSpeed > f->endSpeed) {                 // decelerate at end
                         m2->t1 = 0;
@@ -1136,12 +1136,20 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
                         f->feedrate = f->startSpeed;
                         m2->s1 = 0;
                         m2->s3 = m2->t3 * (f->endSpeed + 0.5 * f->acceleration * m2->t3);
+                        if (m2->s3 > f->length) {            // rounding error can cause reversals, fix it
+                            m2->t3 *= m2->s3 * f->invLength; // more time
+                            m2->s3 = f->length;
+                        }
                     } else { // accelerate only at start
                         m2->t1 = (f->endSpeed - f->startSpeed) * invAcceleration;
                         m2->t3 = 0;
                         f->feedrate = f->endSpeed;
                         m2->s3 = 0;
                         m2->s1 = (0.5 * f->acceleration * m2->t1 + f->startSpeed) * m2->t1;
+                        if (m2->s1 > f->length) {            // rounding error can cause reversals, fix it
+                            m2->t1 *= m2->s1 * f->invLength; // increase time to relax for reduced distance
+                            m2->s1 = f->length;
+                        }
                     }
                     m2->s2 = f->length - m2->s1 - m2->s3;
                     m2->t2 = m2->s2 / f->feedrate;
@@ -1150,14 +1158,27 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
                     float sq = f->startSpeed * f->startSpeed + f->endSpeed * f->endSpeed;
                     float vmax = RMath::max(f->startSpeed, f->endSpeed);
                     float fmin = (2.0f * vmax * vmax - sq) / f->sa2;
-                    float fmid = (2.0 + fmin) * 0.3333333333333f;
-                    float sterm = sqrtf(sq + f->sa2 * fmid) * 1.414213562f;
-                    m2->t1 = RMath::max(0.0f, (sterm - 2.0f * f->startSpeed) * div);
-                    m2->t3 = RMath::max(0.0f, (sterm - 2.0f * f->endSpeed) * div);
+                    float fmid = (2.0f + fmin) * 0.3333333333333f;
+                    float sTerm = sqrtf(sq + f->sa2 * fmid) * 1.414213562f;
+                    m2->t1 = RMath::max(0.0f, (sTerm - 2.0f * f->startSpeed) * div);
+                    m2->t3 = RMath::max(0.0f, (sTerm - 2.0f * f->endSpeed) * div);
                     f->feedrate = f->startSpeed + m2->t1 * f->acceleration;
-                    m2->s2 = f->length * (1.0 - fmid);
-                    m2->t2 = m2->s2 / f->feedrate;
                     m2->s1 = (0.5 * f->acceleration * m2->t1 + f->startSpeed) * m2->t1;
+                    m2->s3 = (f->endSpeed + 0.5 * f->acceleration * m2->t3) * m2->t3;
+                    m2->s2 = f->length - m2->s1 - m2->s3; // * (1.0 - fmid);
+                    if (m2->s2 < 0) {                     // no negative distances!
+                        if (m2->s1 > m2->s3) {
+                            m2->t1 -= m2->s2 / fmid;
+                            m2->s1 = f->length - m2->s3;
+                        } else {
+                            m2->t3 -= m2->s2 / fmid;
+                            m2->s3 = f->length - m2->s1;
+                        }
+                        m2->s2 = 0;
+                        m2->t2 = 0;
+                    } else {
+                        m2->t2 = m2->s2 / f->feedrate;
+                    }
                 }
                 // Acceleration stops at feedrate so make sure it is set to right limit
                 /* Com::printF(" f:", f->feedrate, 0);
@@ -1258,22 +1279,19 @@ void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next) {
     }
     state = Motion1State::JUNCTION_COMPUTED;
     float vStart, vEnd, factor = 1.0, corrFactor, yank;
-    bool limited = false, prevSmaller;
+    bool limited = false;
+    bool isSpeedReduced = false;
+    float yankFactor = 1.0f;
+    if (length < SMALL_SEGMENT_SIZE) {
+        isSpeedReduced = true;
+        yankFactor = (SMALL_SEGMENT_SIZE * SMALL_SEGMENT_SIZE) / length * length;
+    }
     // Smallest of joining target feed rates is maximum limit
     if (next.feedrate < feedrate) {
-        prevSmaller = true;
         corrFactor = next.feedrate / feedrate;
         maxJoinSpeed = next.feedrate;
-    } else {
-        prevSmaller = false;
-        corrFactor = feedrate / next.feedrate;
-        maxJoinSpeed = feedrate;
-    }
-    // Com::printF("j:", maxJoinSpeed, 1);
-    // Check per axis for violation of yank contraint
-    FOR_ALL_AXES(i) {
-        if ((axisUsed & axisBits[i]) || (next.axisUsed & axisBits[i])) {
-            if (prevSmaller) {
+        FOR_ALL_AXES(i) {
+            if ((axisUsed & axisBits[i]) || (next.axisUsed & axisBits[i])) {
                 if (limited) {
                     vEnd = next.speed[i] * factor;
                     vStart = speed[i] * corrFactor * factor;
@@ -1281,7 +1299,18 @@ void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next) {
                     vEnd = next.speed[i];
                     vStart = speed[i] * corrFactor;
                 }
-            } else {
+                yank = fabs(vStart - vEnd) * yankFactor;
+                if (yank > Motion1::maxYank[i]) {
+                    factor *= Motion1::maxYank[i] / yank;
+                    limited = true;
+                }
+            }
+        }
+    } else {
+        corrFactor = feedrate / next.feedrate;
+        maxJoinSpeed = feedrate;
+        FOR_ALL_AXES(i) {
+            if ((axisUsed & axisBits[i]) || (next.axisUsed & axisBits[i])) {
                 if (limited) {
                     vEnd = next.speed[i] * corrFactor * factor;
                     vStart = speed[i] * factor;
@@ -1289,22 +1318,23 @@ void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next) {
                     vEnd = next.speed[i] * corrFactor;
                     vStart = speed[i];
                 }
-            }
-            yank = fabs(vStart - vEnd);
-            if (yank > Motion1::maxYank[i]) {
-                factor *= Motion1::maxYank[i] / yank;
-                // Com::printF(" a:", (int)i);
-                // Com::printF(" y:", yank, 2);
-                // Com::printF(" m:", Motion1::maxYank[i], 2);
-                limited = true;
+                yank = fabs(vStart - vEnd) * yankFactor;
+                if (yank > Motion1::maxYank[i]) {
+                    factor *= Motion1::maxYank[i] / yank;
+                    limited = true;
+                }
             }
         }
     }
+
+    // Com::printF("j:", maxJoinSpeed, 1);
+    // Check per axis for violation of yank contraint
+
     if (limited) {
         maxJoinSpeed *= factor;
     }
     // check if safe speeds are higher, e.g. because we switch x with z move
-    if (next.startSpeed > maxJoinSpeed || endSpeed > maxJoinSpeed) {
+    if (!isSpeedReduced && (next.startSpeed > maxJoinSpeed || endSpeed > maxJoinSpeed)) {
         maxJoinSpeed = endSpeed;
         state = Motion1State::BACKWARD_FINISHED;
     }

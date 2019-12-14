@@ -23,6 +23,7 @@
 #endif
 
 Motion3Buffer Motion3::buffers[NUM_MOTION3_BUFFER];
+fast8_t Motion3::lastDirection = 128; // force update
 fast8_t volatile Motion3::length;
 fast8_t Motion3::last, Motion3::nextActId;
 Motion3Buffer* Motion3::act;
@@ -52,44 +53,47 @@ void Motion3::init() {
  Select next prepared element, update next pointer
  and set fan/laser intensity. Also set directions.
 */
-void Motion3::activateNext() {
+bool Motion3::activateNext() {
     act = &buffers[nextActId++];
-
-    // Set direction first to give driver some time
-#ifdef XMOTOR_SWITCHABLE
-    Motion1::motors[X_AXIS]->dir(act->directions & 1);
-#else
-    XMotor.dir(act->directions & 1);
-#endif
-    YMotor.dir(act->directions & 2);
-    ZMotor.dir(act->directions & 4);
-#if NUM_AXES > A_AXIS
-    AMotor.dir(act->directions & 16);
-#endif
-#if NUM_AXES > B_AXIS
-    BMotor.dir(act->directions & 32);
-#endif
-#if NUM_AXES > C_AXIS
-    CMotor.dir(act->directions & 64);
-#endif
-    if (Motion1::dittoMode) {
-        for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
-            Tool::tools[i]->directionMotor(act->directions & 8);
-        }
-    } else {
-        if (Motion1::motors[E_AXIS]) {
-            Motion1::motors[E_AXIS]->dir(act->directions & 8);
-        }
-    }
+    bool newDir = lastDirection != act->directions;
     // on new line reset triggered axes
     if (act->parentId != lastParentId) {
-        // Com::printFLN("rst", act->parentId);
         actM2 = &Motion2::buffers[act->parentId];
         actM1 = actM2->motion1;
         Motion1::axesTriggered = 0;
         Motion1::motorTriggered = 0;
         Motion3::skipParentId = 255;
+        newDir = true; // might have changed or motors might have changed
     }
+    if (newDir) {
+        // Set direction first to give driver some time
+#ifdef XMOTOR_SWITCHABLE
+        Motion1::motors[X_AXIS]->dir(act->directions & 1);
+#else
+        XMotor.dir(act->directions & 1);
+#endif
+        YMotor.dir(act->directions & 2);
+        ZMotor.dir(act->directions & 4);
+#if NUM_AXES > A_AXIS
+        AMotor.dir(act->directions & 16);
+#endif
+#if NUM_AXES > B_AXIS
+        BMotor.dir(act->directions & 32);
+#endif
+#if NUM_AXES > C_AXIS
+        CMotor.dir(act->directions & 64);
+#endif
+        if (Motion1::dittoMode) {
+            for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
+                Tool::tools[i]->directionMotor(act->directions & 8);
+            }
+        } else {
+            if (Motion1::motors[E_AXIS]) {
+                Motion1::motors[E_AXIS]->dir(act->directions & 8);
+            }
+        }
+    }
+
     lastParentId = act->parentId;
 
     if (nextActId == NUM_MOTION3_BUFFER) {
@@ -100,6 +104,7 @@ void Motion3::activateNext() {
     if (tool != nullptr) {
         tool->sendSecondary(act->secondSpeed);
     }
+    return newDir;
 }
 
 void Motion3::timer() {
@@ -115,10 +120,12 @@ void Motion3::timer() {
         if (length == 0) { // nothing prepared
             return;
         }
+#if SLOW_DIRECTION_CHANGE
+        if (activateNext()) {
+            return; // give time to motor to switch direction
+        }
+#else
         activateNext();
-#ifdef SLOW_DIRECTION_CHANGE
-        // Give timer one stepper count to settle direction
-        return;
 #endif
     }
     // Run bresenham algorithm for stepping forward

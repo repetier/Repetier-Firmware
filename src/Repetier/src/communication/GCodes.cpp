@@ -633,7 +633,7 @@ void GCode_100(GCode* com) {
 }
 
 void GCode_131(GCode* com) {
-#if false && PRINTER_TYPE == 2
+#if false && PRINTER_TYPE == PRINTER_TYPE_DELTA
     float cx, cy, cz;
     Printer::realPosition(cx, cy, cz);
     float oldfeedrate = Printer::feedrate;
@@ -645,7 +645,7 @@ void GCode_131(GCode* com) {
 }
 
 void GCode_132(GCode* com) {
-#if false && PRINTER_TYPE == 2
+#if false && PRINTER_TYPE == PRINTER_TYPE_DELTA
 // TODO: G132 not working
     // G132 Calibrate endstop offsets
     // This has the probably unintended side effect of turning off leveling.
@@ -680,7 +680,7 @@ void GCode_132(GCode* com) {
 }
 
 void GCode_133(GCode* com) {
-#if false && PRINTER_TYPE == 2
+#if false && PRINTER_TYPE == PRINTER_TYPE_DELTA
     // G133 Measure steps to top
     bool oldAuto = Motion1::isAutolevelActive();
     Motion1::setAutolevelActive(false); // don't let transformations change result!

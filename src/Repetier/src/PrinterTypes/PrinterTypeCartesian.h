@@ -16,7 +16,7 @@
 
 */
 
-#if PRINTER_TYPE == PRINTER_TYPE_CARESIAN
+#if PRINTER_TYPE == PRINTER_TYPE_CARTESIAN
 
 class PrinterType {
     static float bedRectangle[2][2];

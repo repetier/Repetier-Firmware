@@ -31,7 +31,7 @@ enum Motion2State {
     ACCELERATE_INIT = 1,
     ACCELERATING = 2,
     PLATEAU_INIT = 3,
-    PLATEU = 4,
+    PLATEAU = 4,
     DECCELERATE_INIT = 5,
     DECELERATING = 6,
     FINISHED = 7
@@ -43,7 +43,7 @@ public:
     Motion2State state;
     Motion1Buffer* motion1;
     float t1, t2, t3;
-    float s1, s2, s3, soff;
+    float s1, s2, s3; // , soff;
     // float sScale1,sScale2,sScale3;
     // float sOffset2, sOffset3;
     int32_t stepsRemaining[NUM_AXES]; // Steps remaining when testing endstops

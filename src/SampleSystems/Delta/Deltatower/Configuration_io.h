@@ -58,7 +58,6 @@ IO_INPUT_INVERTED(IOEndstopXMax, ORIG_X_MAX_PIN)
 IO_INPUT_INVERTED(IOEndstopYMax, ORIG_Y_MAX_PIN)
 IO_INPUT_INVERTED(IOEndstopZMax, ORIG_Z_MAX_PIN)
 
-
 // Controller input pins
 
 #if defined(UI_ENCODER_CLICK) && UI_ENCODER_CLICK >= 0
@@ -163,9 +162,9 @@ STEPPER_SIMPLE(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, endstopNone, endstopNone)
 // control temperature. Higher level classes take these as input
 // and simple heater like a heated bed use it directly.
 
-HEAT_MANAGER_PID('B', HeatedBed1, TempBed1, PWMBed1, 70, 255, 1000, 20, 60000, 196, 33, 290, 80, 255)
-HEAT_MANAGER_PID('E', HeaterExtruder1, TempExt1, PWMExtruder1, 260, 255, 1000, 20, 20000, 4, 2, 40, 40, 255)
-HEAT_MANAGER_PID('E', HeaterExtruder2, TempExt2, PWMExtruder2, 260, 255, 1000, 20, 20000, 4, 2, 40, 40, 255)
+HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 70, 255, 1000, 20, 60000, 196, 33, 290, 80, 255, false)
+HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255, 1000, 20, 20000, 4, 2, 40, 40, 255, false)
+HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 1000, 20, 20000, 4, 2, 40, 40, 255, false)
 
 // Coolers are stand alone functions that allow it to control
 // a fan with external sensors. Many extruders require a cooling
