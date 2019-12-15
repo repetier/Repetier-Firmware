@@ -824,11 +824,11 @@ public:
     RVector3(float _x = 0, float _y = 0, float _z = 0)
         : x(_x)
         , y(_y)
-        , z(_z){};
+        , z(_z) {};
     RVector3(const RVector3& a)
         : x(a.x)
         , y(a.y)
-        , z(a.z){};
+        , z(a.z) {};
 
     /*    const float &operator[](std::size_t idx) const
       {
@@ -1222,5 +1222,9 @@ public:
 
 // must be after CustomEvents as it might include definitions from there
 #include "DisplayList.h"
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 #endif

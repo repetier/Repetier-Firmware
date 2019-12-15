@@ -3005,7 +3005,7 @@ void Commands::processMCode(GCode* com) {
 #endif
 #if defined(BEEPER_PIN) && BEEPER_PIN >= 0
     case 300: { // M300
-        int beepS = 1;
+        int beepS = 500;
         int beepP = 1000;
         if (com->hasS())
             beepS = com->S;

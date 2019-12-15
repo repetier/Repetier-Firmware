@@ -372,7 +372,7 @@ void HAL::syncEEPROM() { // store to disk if changed
         if (!eepromFile.seekSet(0))
             failed = true;
 
-        if (!failed && !eepromFile.write(virtualEeprom, EEPROM_BYTES) == EEPROM_BYTES)
+        if (!failed && eepromFile.write(virtualEeprom, EEPROM_BYTES) != EEPROM_BYTES)
             failed = true;
 
         if (failed) {
@@ -1465,11 +1465,11 @@ void EXTRUDER_TIMER_VECTOR() {
 
 // IRQ handler for tone generator
 void BEEPER_TIMER_VECTOR() {
-    static bool toggle;
+    static bool toggle = true;
 
     TC_GetStatus(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
-
-    WRITE_VAR(tone_pin, toggle);
+    WRITE(BEEPER_PIN, toggle);
+    // WRITE_VAR(tone_pin, toggle);
     toggle = !toggle;
 }
 

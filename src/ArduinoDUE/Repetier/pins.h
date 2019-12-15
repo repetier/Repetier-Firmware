@@ -643,7 +643,7 @@ STEPPER_CURRENT_CONTROL
 #endif
 #endif
 
-// Ultratronics Board  (experimental, use with care probably even not working!)
+// Ultratronics Board
 // http://www.reprapworld.com
 #if MOTHERBOARD == 409
 #ifndef __SAM3X8E__
