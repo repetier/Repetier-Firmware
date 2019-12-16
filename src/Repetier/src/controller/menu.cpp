@@ -330,6 +330,9 @@ void __attribute__((weak)) menuControls(GUIAction action, void* data) {
 #ifndef NO_LIGHT_CONTROL
     GUI::menuSelectableP(action, PSTR("Toggle lights"), directAction, (void*)GUI_DIRECT_ACTION_TOGGLE_LIGHT, GUIPageType::ACTION);
 #endif
+#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
+    GUI::menuSelectableP(action, PSTR("Toggle sounds"), directAction, (void*)GUI_DIRECT_ACTION_TOGGLE_SOUNDS, GUIPageType::ACTION);
+#endif
     GUI::menuSelectableP(action, PSTR("Home"), menuHome, nullptr, GUIPageType::MENU);
     GUI::menuSelectableP(action, PSTR("Move"), menuMove, nullptr, GUIPageType::MENU);
 #if NUM_FANS > 0

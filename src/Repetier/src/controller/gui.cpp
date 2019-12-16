@@ -663,6 +663,11 @@ void directAction(GUIAction action, void* data) {
     case GUI_DIRECT_ACTION_TOGGLE_LIGHT:
         Printer::caseLightMode = Printer::caseLightMode ? 0 : 1;
         break;
+#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
+    case GUI_DIRECT_ACTION_TOGGLE_SOUNDS:
+        Printer::tonesEnabled = Printer::tonesEnabled ? 0 : 1;
+        break;
+#endif
     case GUI_DIRECT_ACTION_DISABLE_MOTORS:
         Motion1::waitForEndOfMoves();
         Printer::kill(true);
