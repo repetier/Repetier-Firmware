@@ -398,6 +398,9 @@ FSTRINGVALUE(Com::tEPRAdvanceL, "advance L [0=off]")
 FSTRINGVALUE(Com::tEPRPreheatTemp, "Preheat temp. [�C]")
 FSTRINGVALUE(Com::tEPRPreheatBedTemp, "Bed Preheat temp. [�C]")
 
+#if defined(BEEPER_PIN) && BEEPER_PIN >= 0 
+FSTRINGVALUE(Com::tEPRTonesEnabled, "Tones enabled [0/1]")
+#endif
 #if SDSUPPORT
 //FSTRINGVALUE(Com::tSDRemoved,UI_TEXT_SD_REMOVED)
 //FSTRINGVALUE(Com::tSDInserted,UI_TEXT_SD_INSERTED)

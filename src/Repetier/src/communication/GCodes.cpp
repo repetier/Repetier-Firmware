@@ -285,7 +285,15 @@ void GCode_4(GCode* com) {
     if (com->hasP())
         codenum = com->P; // milliseconds to wait
     if (com->hasS())
-        codenum = com->S * 1000;          // seconds to wait
+        codenum = com->S * 1000;          // seconds to wait 
+    // Add a tone delay just in case the user runs their own tones that rely on delays.
+    
+#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
+    if (Printer::areTonesPlaying()) {
+        Printer::addToToneQueue({0, static_cast<uint16_t>(codenum)}); 
+    }
+#endif
+
     codenum += HAL::timeInMilliseconds(); // keep track of when we started waiting
     while ((uint32_t)(codenum - HAL::timeInMilliseconds()) < 2000000000) {
         GCode::keepAlive(Processing, 2);

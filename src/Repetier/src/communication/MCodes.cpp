@@ -1064,15 +1064,16 @@ void MCode_281(GCode* com) {
 
 void MCode_300(GCode* com) {
 #if defined(BEEPER_PIN) && BEEPER_PIN >= 0
-    int beepS = 1;
-    int beepP = 1000;
+    if (!Printer::tonesEnabled) {
+        return;
+    }
+    u_int16_t beepS = 1;
+    u_int16_t beepP = 1000;
     if (com->hasS())
         beepS = com->S;
     if (com->hasP())
         beepP = com->P;
-    HAL::tone(beepS);
-    HAL::delayMilliseconds(beepP);
-    HAL::noTone();
+    Printer::addToToneQueue({beepS, beepP}); 
 #endif
 }
 

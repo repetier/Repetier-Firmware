@@ -291,6 +291,35 @@ public:
 
     static void handleInterruptEvent();
 
+    struct TonePacket {
+        //If the frequency is 0, it'll behave as putting a G4 P(duration) command inbetween M300's.
+        uint16_t frequency;
+        uint16_t duration;
+    };
+    
+    static void addToToneQueue(TonePacket packet);
+
+#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
+    static void processToneQueue();
+    static void killTones();
+
+    static INLINE bool areTonesPlaying() {
+        return seekToneIndex == -1 ? false : true;
+    }
+
+    static INLINE void setTonesEnabled(bool set) {
+        killTones();
+        tonesEnabled = set;
+    }
+    static INLINE void tonesKillNext() {
+        seekToneIndex = (curToneIndex != -1 ? (curToneIndex + 1) : -1);
+    }
+    static uint8_t tonesEnabled;
+    static fast8_t curToneIndex;
+    static fast8_t seekToneIndex;
+    static millis_t lastToneTime;
+    const static fast8_t toneBufSize = 32;
+#endif
     static INLINE void setInterruptEvent(uint8_t evt, bool highPriority) {
         if (highPriority || interruptEvent == 0)
             interruptEvent = evt;

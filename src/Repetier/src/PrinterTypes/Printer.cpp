@@ -90,6 +90,14 @@ bool Printer::failedMode = false;
 #endif
 fast8_t Printer::caseLightMode = CASE_LIGHT_DEFAULT_ON;
 
+
+#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
+Printer::TonePacket toneQueueBuf[Printer::toneBufSize];
+millis_t Printer::lastToneTime;
+fast8_t Printer::curToneIndex = -1;
+fast8_t Printer::seekToneIndex = -1;
+uint8_t Printer::tonesEnabled = true;
+#endif
 FirmwareEvent FirmwareEvent::eventList[4];
 volatile fast8_t FirmwareEvent::start = 0;
 volatile fast8_t FirmwareEvent::length = 0;
@@ -1469,3 +1477,55 @@ void Printer::enableFailedMode(char* msg) {
     Com::println();
     Com::printErrorFLN(Com::tM999);
 }
+void Printer::addToToneQueue(TonePacket packet) {
+#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
+    if (!tonesEnabled) {
+        return;
+    }
+    if (!areTonesPlaying()) {
+        curToneIndex = 0;
+        HAL::tone(packet.frequency);
+        lastToneTime = HAL::timeInMilliseconds();
+    }
+    if (++seekToneIndex > toneBufSize) {
+        seekToneIndex = 0;
+    }
+    toneQueueBuf[seekToneIndex] = packet;
+#endif
+}
+#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
+void Printer::killTones() {
+    HAL::noTone();
+    seekToneIndex = curToneIndex = -1;
+}
+void Printer::processToneQueue() {
+    if (!tonesEnabled) {
+        return;
+    }
+    if (seekToneIndex != -1) {
+        millis_t curTime = HAL::timeInMilliseconds();
+
+        if ((curTime - lastToneTime) >= toneQueueBuf[curToneIndex].duration) {
+            HAL::noTone();
+
+            if (++curToneIndex > toneBufSize) {
+                curToneIndex = 0;
+            }
+
+            if (curToneIndex != (seekToneIndex + 1)) {
+                TonePacket* nextTone = &toneQueueBuf[curToneIndex];
+                if (!nextTone->duration) {
+                    seekToneIndex = curToneIndex = -1;
+                } else {
+                    lastToneTime = curTime;
+                    if (nextTone->frequency) {
+                        HAL::tone(nextTone->frequency);
+                    }
+                }
+            } else {
+                killTones();
+            }
+        }
+    }
+}
+#endif
