@@ -60,6 +60,10 @@
 // M0/SAMD21 based boards
 #define MOTHERBOARD_MINITRONICS_2_0 2000
 
+#define PELTIER_COOLER 0
+#define PELTIER_HEATER 1
+#define PELTIER_SWITCH 2
+
 // Some helper macros
 
 #define _CAT(a, ...) a##__VA_ARGS__
@@ -670,4 +674,9 @@ extern int debugWaitLoop;
 // #include "controller/DisplayList.h"
 
 #include "controller/gui.h"
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #endif

@@ -153,6 +153,12 @@ public:
 
 extern bool runBedLeveling(int save); // save = S parameter in gcode
 
+struct TonePacket {
+    //If the frequency is 0, it'll behave as putting a G4 P(duration) command inbetween M300's.
+    uint16_t frequency;
+    uint16_t duration;
+};
+
 /**
 The Printer class is the main class for the control of the 3d printer. Here all
 movement related key variables are stored like positions, accelerations.
@@ -291,12 +297,6 @@ public:
 
     static void handleInterruptEvent();
 
-    struct TonePacket {
-        //If the frequency is 0, it'll behave as putting a G4 P(duration) command inbetween M300's.
-        uint16_t frequency;
-        uint16_t duration;
-    };
-    
     static void addToToneQueue(TonePacket packet);
 
 #if defined(BEEPER_PIN) && BEEPER_PIN >= 0

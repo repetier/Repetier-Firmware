@@ -19,12 +19,15 @@
 #undef HEAT_MANAGER_BANG_BANG
 #undef HEAT_MANAGER_PID
 #undef HEAT_MANAGER_DYN_DEAD_TIME
+#undef HEAT_MANAGER_PELTIER_PID
 
 #if IO_TARGET == IO_TARGET_PERIODICAL_ACTIONS // periodical action
 
 #define HEAT_MANAGER_BANG_BANG(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, hotPlugable) \
     name.update();
 #define HEAT_MANAGER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable) \
+    name.update();
+#define HEAT_MANAGER_PELTIER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable, pType, flowPin, minTemp) \
     name.update();
 #define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
     name.update();
@@ -37,6 +40,9 @@
 #define HEAT_MANAGER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable) \
     name.init();
 
+#define HEAT_MANAGER_PELTIER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable, pType, flowPin, minTemp) \
+    name.init();
+
 #define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
     name.init();
 
@@ -46,6 +52,8 @@
     extern HeatManagerBangBang name;
 #define HEAT_MANAGER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable) \
     extern HeatManagerPID name;
+#define HEAT_MANAGER_PELTIER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable, pType, flowPin, minTemp) \
+    extern HeatManagerPeltierPID<flowPin, pType, minTemp> name;
 #define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
     extern HeatManagerDynDeadTime name;
 
@@ -57,6 +65,9 @@
 #define HEAT_MANAGER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable) \
     HeatManagerPID name(tp, index, &input, &output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable);
 
+#define HEAT_MANAGER_PELTIER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable, pType, flowPin, minTemp) \
+    HeatManagerPeltierPID<flowPin, pType, minTemp> name(tp, index, &input, &output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable);
+
 #define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
     HeatManagerDynDeadTime name(tp, index, &input, &output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable);
 
@@ -66,13 +77,27 @@
     name.resetFromConfig(maxPwm, decVariance, decPeriod);
 #define HEAT_MANAGER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable) \
     name.resetFromConfig(maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax);
+#define HEAT_MANAGER_PELTIER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable, pType, flowPin, minTemp) \
+    name.resetFromConfig(maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax);
 #define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
     name.resetFromConfig(maxPwm, decVariance, decPeriod, time1, up1, down1, time2, up2, down2);
 
-#else
+#elif IO_TARGET == IO_TARGET_TOOLS_TEMPLATES // template definitions in tools.cpp
 
+#define HEAT_MANAGER_PELTIER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable, pType, flowPin, minTemp) \
+    template class HeatManagerPeltierPID<flowPin, pType, minTemp>;
+
+#endif
+
+#ifndef HEAT_MANAGER_BANG_BANG
 #define HEAT_MANAGER_BANG_BANG(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, hotPlugable)
+#endif
+#ifndef HEAT_MANAGER_PID
 #define HEAT_MANAGER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable)
+#endif
+#ifndef HEAT_MANAGER_PELTIER_PID
+#define HEAT_MANAGER_PELTIER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable, pType, flowPin, minTemp)
+#endif
+#ifndef HEAT_MANAGER_DYN_DEAD_TIME
 #define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, sampleTime, maxPwm, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable)
-
 #endif

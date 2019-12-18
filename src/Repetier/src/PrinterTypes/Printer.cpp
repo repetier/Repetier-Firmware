@@ -90,7 +90,6 @@ bool Printer::failedMode = false;
 #endif
 fast8_t Printer::caseLightMode = CASE_LIGHT_DEFAULT_ON;
 
-
 #if defined(BEEPER_PIN) && BEEPER_PIN >= 0
 Printer::TonePacket toneQueueBuf[Printer::toneBufSize];
 millis_t Printer::lastToneTime;
@@ -287,10 +286,12 @@ void Printer::enablePowerIfNeeded() {
 */
 void Printer::kill(uint8_t onlySteppers) {
     EVENT_KILL(onlySteppers);
-    if (areAllSteppersDisabled() && onlySteppers)
+    if (areAllSteppersDisabled() && onlySteppers) {
         return;
-    if (Printer::isAllKilled())
+    }
+    if (Printer::isAllKilled()) {
         return;
+    }
 #if defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS > 0
     disableAllMotorDrivers();
 #endif // defined

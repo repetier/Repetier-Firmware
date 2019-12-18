@@ -42,6 +42,7 @@ IO_TARGET with following meanings:
 20: Wizard menu
 21: Store recover data
 22: Restore recover data
+23: init late
 */
 
 // #pragma message(VAR_NAME_VALUE(IO_TARGET))

@@ -39,6 +39,9 @@ extern void menuPreheatHeatManager(GUIAction action, void* data);
 extern void menuSetPreheatTemperatureList(GUIAction action, void* data);
 extern void menuSetPreheatTemperatureList(GUIAction action, void* data);
 
+#define FLAG_HEATMANAGER_FREEZER 1                                     // Controls temperatures below room temperture. off is then <= -200°C
+#define FLAG_HEATMANAGER_CONTROL_FULLTEMPERATURE_CONTROL_RANGE_RANGE 2 // If set the specialized manager also controls temperature outside TEMPERATURE_CONTROL_RANGE
+
 class GCode;
 class HeatManager {
 protected:
@@ -58,13 +61,15 @@ protected:
     bool hotPluggable;   // If true will not panic when sensor is defect, will only disable this heater
     millis_t sampleTime; // Sample time for updates in ms
 
-    millis_t lastDecoupleTest; ///< Last time of decoupling sensor-heater test
-    float lastDecoupleTemp;    ///< Temperature on last test
-    millis_t preheatStartTime; ///< Time (in milliseconds) when heat up was started
-    int16_t preheatTemperature;
-    fast8_t wasOutsideRange; // 1 = if was above range, 2 = was below range
-    uint16_t eepromPos;      // Start position in eeprom
-    millis_t lastUpdate;     // Time of last sampling
+    millis_t lastDecoupleTest;  ///< Last time of decoupling sensor-heater test
+    float lastDecoupleTemp;     ///< Temperature on last test
+    millis_t preheatStartTime;  ///< Time (in milliseconds) when heat up was started
+    int16_t preheatTemperature; ///< Temperture for preheat
+    fast8_t wasOutsideRange;    // 1 = if was above range, 2 = was below range
+    uint16_t eepromPos;         // Start position in eeprom
+    millis_t lastUpdate;        // Time of last sampling
+    fast8_t flags;
+
 public:
     HeatManager(char htType, fast8_t _index, IOTemperature* i, PWMHandler* o, float maxTemp, fast8_t maxPwm, millis_t _sampleTime, float decVariance, millis_t decPeriod, bool _hotPluggable);
     void init();
@@ -75,7 +80,7 @@ public:
             Com::println();
             return;
         }
-        if (temp <= 0) {
+        if (temp <= ((flags & FLAG_HEATMANAGER_FREEZER) == 0 ? 0 : -200)) {
             decoupleMode = DecoupleMode::NO_HEATING;
         } else if (temp < currentTemperature) {
             decoupleMode = DecoupleMode::COOLING;
@@ -149,6 +154,8 @@ public:
     bool isOtherHeater() const { return heaterType == 'O'; }
     void printName();
     fast8_t getIndex() const { return index; }
+    virtual int getMinTemperature() const { return 0; }
+    bool isOff() const { return targetTemperature <= ((flags & FLAG_HEATMANAGER_FREEZER) == 0 ? MAX_ROOM_TEMPERATURE : getMinTemperature()); }
     static bool reportTempsensorError();
     static void disableAllHeaters();
     static void resetAllErrorStates();
@@ -176,6 +183,7 @@ public:
 };
 
 class HeatManagerPID : public HeatManager {
+protected:
     float P, I, D;
     float IState;
     float driveMin, driveMax;
@@ -183,9 +191,9 @@ class HeatManagerPID : public HeatManager {
     float ki, kd;
 
 public:
-    HeatManagerPID(char htType, fast8_t _index, IOTemperature* input, PWMHandler* output, float maxTemp, fast8_t maxPwm, millis_t _sampleTime, float decVariance, millis_t decPeriod,
+    HeatManagerPID(char htType, fast8_t _index, IOTemperature* _input, PWMHandler* output, float maxTemp, fast8_t maxPwm, millis_t _sampleTime, float decVariance, millis_t decPeriod,
                    float p, float i, float d, float _driveMin, float _driveMax, bool _hotPluggable)
-        : HeatManager(htType, _index, input,
+        : HeatManager(htType, _index, _input,
                       output, maxTemp, maxPwm, _sampleTime, decVariance, decPeriod, _hotPluggable)
         , P(p)
         , I(i)
@@ -220,6 +228,24 @@ public:
     // void showControlMenu(GUIAction action);
     void showConfigMenu(GUIAction action);
     virtual bool hasConfigMenu();
+};
+
+// peltierType 0 = only cooling, 1 = only heating, 2 = switch for direction
+template <class flowPin, int peltierType, int minTemp>
+class HeatManagerPeltierPID : public HeatManagerPID {
+
+public:
+    HeatManagerPeltierPID(char htType, fast8_t _index, IOTemperature* _input, PWMHandler* output, float maxTemp, fast8_t maxPwm, millis_t _sampleTime, float decVariance, millis_t decPeriod,
+                          float p, float i, float d, float _driveMin, float _driveMax, bool _hotPluggable)
+        : HeatManagerPID(htType, _index, _input,
+                         output, maxTemp, maxPwm, _sampleTime, decVariance, decPeriod, p, i, d, _driveMin, _driveMax, _hotPluggable) {
+        flags = FLAG_HEATMANAGER_FREEZER + FLAG_HEATMANAGER_CONTROL_FULLTEMPERATURE_CONTROL_RANGE_RANGE;
+        targetTemperature = minTemp; // different off value!
+        updateDerived();
+    }
+    virtual int getMinTemperature() const { return minTemp; }
+    void updateLocal(float tempError);
+    void autocalibrate(GCode* g);
 };
 
 /**

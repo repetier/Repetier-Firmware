@@ -8,9 +8,16 @@ void menuSetTemperature(GUIAction action, void* data) {
     HeatManager* hm = reinterpret_cast<HeatManager*>(data);
     float value = hm->getTargetTemperature();
     DRAW_FLOAT_P(PSTR("Target Temperature:"), Com::tUnitDegCelsius, value, 0);
-    if (GUI::handleFloatValueAction(action, value, 0, hm->getMaxTemperature(), 1)) {
+    if (GUI::handleFloatValueAction(action, value, hm->getMinTemperature(), hm->getMaxTemperature(), 1)) {
         hm->setTargetTemperature(value);
     }
+#endif
+}
+
+void menuDisableTemperature(GUIAction action, void* data) {
+#if FEATURE_CONTROLLER != NO_CONTROLLER
+    HeatManager* hm = reinterpret_cast<HeatManager*>(data);
+    hm->setTargetTemperature(hm->getMinTemperature());
 #endif
 }
 
@@ -40,7 +47,8 @@ HeatManager::HeatManager(char htType, fast8_t _index, IOTemperature* i, PWMHandl
     , heaterType(htType)
     , index(_index)
     , hotPluggable(_hotPluggable)
-    , sampleTime(_sampleTime) {
+    , sampleTime(_sampleTime)
+    , flags(0) {
     lastUpdate = 0;
 }
 
@@ -117,7 +125,7 @@ void HeatManager::update() {
     } else {
         setCurrentTemperature(input->get());
     }
-    if (targetTemperature <= MAX_ROOM_TEMPERATURE) { // heater disabled
+    if (targetTemperature <= ((flags & FLAG_HEATMANAGER_FREEZER) == 0 ? MAX_ROOM_TEMPERATURE : getMinTemperature())) { // heater disabled
         output->set(0);
         decoupleMode = DecoupleMode::NO_HEATING;
         return;
@@ -162,23 +170,25 @@ void HeatManager::update() {
 
     // Control heater
 
-    if (tempError > TEMPERATURE_CONTROL_RANGE) { // too cold
-        output->set(maxPWM);
-        wasOutsideRange = 2;
-        if (decoupleMode == DecoupleMode::FAST_RISING) {
+    if ((flags & FLAG_HEATMANAGER_CONTROL_FULLTEMPERATURE_CONTROL_RANGE_RANGE) == 0) {
+        if (tempError > TEMPERATURE_CONTROL_RANGE) { // too cold
+            output->set(maxPWM);
+            wasOutsideRange = 2;
+            if (decoupleMode == DecoupleMode::FAST_RISING) {
 
-        } else {
-            decoupleMode = DecoupleMode::FAST_RISING;
-            lastDecoupleTest = HAL::timeInMilliseconds();
-            lastDecoupleTemp = currentTemperature;
+            } else {
+                decoupleMode = DecoupleMode::FAST_RISING;
+                lastDecoupleTest = HAL::timeInMilliseconds();
+                lastDecoupleTemp = currentTemperature;
+            }
+            return;
         }
-        return;
-    }
-    if (tempError < -TEMPERATURE_CONTROL_RANGE) { // too hot
-        output->set(0);
-        decoupleMode = DecoupleMode::COOLING;
-        wasOutsideRange = 1;
-        return;
+        if (tempError < -TEMPERATURE_CONTROL_RANGE) { // too hot
+            output->set(0);
+            decoupleMode = DecoupleMode::COOLING;
+            wasOutsideRange = 1;
+            return;
+        }
     }
     updateLocal(tempError); // In control range
 }
@@ -193,15 +203,14 @@ void HeatManager::eepromHandle() {
 
 void HeatManager::disableAllHeaters() {
     for (fast8_t i = 0; i < NUM_HEATERS; i++) {
-        heaters[i]->setTargetTemperature(0);
+        heaters[i]->setTargetTemperature(heaters[i]->getMinTemperature());
     }
 }
 
 void HeatManager::waitForTargetTemperature() {
-    if (targetTemperature < MAX_ROOM_TEMPERATURE)
+    if (isOff() || Printer::debugDryrun()) {
         return;
-    if (Printer::debugDryrun())
-        return;
+    }
     bool oldReport = Printer::isAutoreportTemp();
     Printer::setAutoreportTemp(true);
     while (true) {
@@ -281,8 +290,13 @@ bool HeatManager::reportTempsensorError() {
 
 void HeatManager::showControlMenu(GUIAction action) {
 #if FEATURE_CONTROLLER != NO_CONTROLLER
-    GUI::flashToStringLong(GUI::tmpString, PSTR("Set Temp: @°C"), static_cast<int32_t>(lroundf(targetTemperature)));
-    GUI::menuSelectable(action, GUI::tmpString, menuSetTemperature, this, GUIPageType::FIXED_CONTENT);
+    if (isOff()) {
+        GUI::menuSelectableP(action, PSTR("Set Temp: Off"), menuSetTemperature, this, GUIPageType::FIXED_CONTENT);
+    } else {
+        GUI::flashToStringLong(GUI::tmpString, PSTR("Set Temp: @°C"), static_cast<int32_t>(lroundf(targetTemperature)));
+        GUI::menuSelectable(action, GUI::tmpString, menuSetTemperature, this, GUIPageType::FIXED_CONTENT);
+    }
+    GUI::menuSelectableP(action, PSTR("Disable"), menuDisableTemperature, this, GUIPageType::ACTION);
 #endif
 }
 
@@ -340,7 +354,7 @@ void HeatManagerPID::eepromHandleLocal(int pos) {
     EEPROM::handleFloat(pos + 8, PSTR("D [-]"), 2, D);
     EEPROM::handleFloat(pos + 12, PSTR("Min. I Part [-]"), 2, driveMin);
     EEPROM::handleFloat(pos + 16, PSTR("Max. I Part [-]"), 2, driveMax);
-    updateDerived(); 
+    updateDerived();
 }
 
 int HeatManagerPID::eepromSizeLocal() {
@@ -544,6 +558,267 @@ void HeatManagerPID::autocalibrate(GCode* g) {
             }
         }
         if (currentTemperature > (temp + 40)) {
+            Com::printErrorFLN(Com::tAPIDFailedHigh);
+            setTargetTemperature(0);
+            return;
+        }
+        if (time - temp_millis > 1000) {
+            temp_millis = time;
+            Commands::printTemperatures();
+        }
+        if (((time - t1) + (time - t2)) > (10L * 60L * 1000L * 2L)) { // 20 Minutes
+            Com::printErrorFLN(Com::tAPIDFailedTimeout);
+            setTargetTemperature(0);
+            return;
+        }
+        if (cycles > maxCycles) {
+            Com::printInfoFLN(Com::tAPIDFinished);
+            if (storeValues) {
+                P = Kp;
+                I = Ki;
+                D = Kd;
+                Com::printInfoFLN(PSTR("New values stored until next reset. Send M500 to store permanently."));
+            }
+            setTargetTemperature(0);
+            return;
+        }
+    } // loop
+    setTargetTemperature(0);
+}
+
+// HeatManagerPeltierPID
+
+template <class flowPin, int peltierType, int minTemp>
+void HeatManagerPeltierPID<flowPin, peltierType, minTemp>::updateLocal(float tempError) {
+    // pos tempError mean heating required
+    float pidTerm = P * tempError;
+    IState += ki * tempError;
+    IState = constrain(IState, driveMin, driveMax);
+    pidTerm += IState;
+    pidTerm += kd * (lastTemperature - currentTemperature);
+#if SCALE_PID_TO_MAX == 1
+    pidTerm = (pidTerm * maxPWM) * 0.0039215;
+#endif                      // SCALE_PID_TO_MAX
+    if (peltierType == 0) { // only cooling
+        if (pidTerm < 0) {
+            output->set(constrain((int)-pidTerm, 0, maxPWM));
+        } else {
+            output->set(0); // need to heat but we can't
+        }
+    }
+    if (peltierType == 1) { // only heating
+        if (pidTerm < 0) {
+            output->set(0); // need to heat but we can't
+        } else {
+            output->set(constrain((int)pidTerm, 0, maxPWM));
+        }
+    }
+    if (peltierType == 2) { // heating (flowPin = 1) and cooling (flowPin = 0)
+        if (pidTerm < 0) {
+            flowPin::off();
+            output->set(constrain((int)-pidTerm, 0, maxPWM));
+        } else {
+            flowPin::on();
+            output->set(constrain((int)pidTerm, 0, maxPWM));
+        }
+    }
+    lastTemperature = currentTemperature;
+}
+
+template <class flowPin, int peltierType, int minTemp>
+void HeatManagerPeltierPID<flowPin, peltierType, minTemp>::autocalibrate(GCode* g) {
+    ENSURE_POWER
+    bool cooling = peltierType != PELTIER_HEATER;
+    if (g->hasD()) {
+        cooling = g->D <= 0;
+    }
+    flowPin::set(!cooling);
+    float temp = g->hasS() ? g->S : 150;
+    int maxCycles = g->hasR() ? static_cast<int>(g->R) : 5;
+    bool storeValues = g->hasX();
+    int method = g->hasC() ? static_cast<int>(g->C) : 0;
+    decoupleMode = DecoupleMode::CALIBRATING;
+    if (method < 0)
+        method = 0;
+    if (method > 4)
+        method = 4;
+    float currentTemp;
+    int cycles = 0;
+    bool heating = true;
+
+    millis_t temp_millis = HAL::timeInMilliseconds();
+    millis_t t1 = temp_millis;
+    millis_t t2 = temp_millis;
+    int32_t tHigh = 0;
+    int32_t tLow;
+
+    int32_t bias = maxPWM >> 1;
+    int32_t d = bias;
+    float Ku, Tu;
+    float Kp = 0, Ki = 0, Kd = 0;
+    float maxTemp = 20, minTempR = 20;
+    maxCycles = constrain(maxCycles, 5, 20);
+    Com::printInfoFLN(Com::tPIDAutotuneStart);
+    targetTemperature = temp;
+    output->set(maxPWM);
+    while (!Printer::breakLongCommand) {
+#if FEATURE_WATCHDOG
+        HAL::pingWatchdog();
+#endif
+        Commands::checkForPeriodicalActions(true); // update heaters etc.
+        GCode::keepAlive(WaitHeater);
+        setCurrentTemperature(input->get());
+        millis_t time = HAL::timeInMilliseconds();
+        maxTemp = RMath::max(maxTemp, currentTemperature);
+        minTempR = RMath::min(minTempR, currentTemperature);
+        if (cooling) {
+            if (heating == true && currentTemperature < temp) { // switch heating -> off
+                if (time - t2 > 5000) {
+                    heating = false;
+                    output->set(constrain(bias - d, 0, maxPWM));
+                    t1 = time;
+                    tHigh = t1 - t2;
+                    maxTemp = temp;
+                }
+            }
+            if (heating == false && currentTemperature > temp) {
+                if (time - t1 > 5000) {
+                    heating = true;
+                    t2 = time;
+                    tLow = t2 - t1; // half wave length
+                    if (cycles > 0) {
+                        bias += (d * (tHigh - tLow)) / (tLow + tHigh);
+                        bias = constrain(bias, 20, maxPWM - 20);
+                        if (bias > maxPWM >> 1)
+                            d = maxPWM - 1 - bias;
+                        else
+                            d = bias;
+
+                        Com::printF(Com::tAPIDBias, bias);
+                        Com::printF(Com::tAPIDD, d);
+                        Com::printF(Com::tAPIDMin, minTempR);
+                        Com::printFLN(Com::tAPIDMax, maxTemp);
+                        if (cycles > 2) {
+                            // Parameter according Ziegler¡§CNichols method: http://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method
+                            Ku = (4.0 * d) / (3.14159 * (maxTemp - minTempR));
+                            Tu = static_cast<float>(tLow + tHigh) / 1000.0;
+                            Com::printF(Com::tAPIDKu, Ku);
+                            Com::printFLN(Com::tAPIDTu, Tu);
+                            if (method == 0) {
+                                Kp = 0.6 * Ku;
+                                Ki = Kp * 2.0 / Tu;
+                                Kd = Kp * Tu * 0.125;
+                                Com::printFLN(Com::tAPIDClassic);
+                            }
+                            if (method == 1) {
+                                Kp = 0.33 * Ku;
+                                Ki = Kp * 2.0 / Tu;
+                                Kd = Kp * Tu / 3.0;
+                                Com::printFLN(Com::tAPIDSome);
+                            }
+                            if (method == 2) {
+                                Kp = 0.2 * Ku;
+                                Ki = Kp * 2.0 / Tu;
+                                Kd = Kp * Tu / 3;
+                                Com::printFLN(Com::tAPIDNone);
+                            }
+                            if (method == 3) {
+                                Kp = 0.7 * Ku;
+                                Ki = Kp * 2.5 / Tu;
+                                Kd = Kp * Tu * 3.0 / 20.0;
+                                Com::printFLN(Com::tAPIDPessen);
+                            }
+                            if (method == 4) {       //Tyreus-Lyben
+                                Kp = 0.4545f * Ku;   //1/2.2 KRkrit
+                                Ki = Kp / Tu / 2.2f; //2.2 Tkrit
+                                Kd = Kp * Tu / 6.3f; //1/6.3 Tkrit[/code]
+                                Com::printFLN(Com::tAPIDTyreusLyben);
+                            }
+                            Com::printFLN(Com::tAPIDKp, Kp);
+                            Com::printFLN(Com::tAPIDKi, Ki);
+                            Com::printFLN(Com::tAPIDKd, Kd);
+                        }
+                    }
+                    output->set(constrain(bias + d, 0, maxPWM));
+                    cycles++;
+                    minTempR = temp;
+                }
+            }
+        } else {
+            if (heating == true && currentTemperature > temp) { // switch heating -> off
+                if (time - t2 > 5000) {
+                    heating = false;
+                    output->set(constrain(bias - d, 0, maxPWM));
+                    t1 = time;
+                    tHigh = t1 - t2;
+                    maxTemp = temp;
+                }
+            }
+            if (heating == false && currentTemperature < temp) {
+                if (time - t1 > 5000) {
+                    heating = true;
+                    t2 = time;
+                    tLow = t2 - t1; // half wave length
+                    if (cycles > 0) {
+                        bias += (d * (tHigh - tLow)) / (tLow + tHigh);
+                        bias = constrain(bias, 20, maxPWM - 20);
+                        if (bias > maxPWM >> 1)
+                            d = maxPWM - 1 - bias;
+                        else
+                            d = bias;
+
+                        Com::printF(Com::tAPIDBias, bias);
+                        Com::printF(Com::tAPIDD, d);
+                        Com::printF(Com::tAPIDMin, minTempR);
+                        Com::printFLN(Com::tAPIDMax, maxTemp);
+                        if (cycles > 2) {
+                            // Parameter according Ziegler¡§CNichols method: http://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method
+                            Ku = (4.0 * d) / (3.14159 * (maxTemp - minTempR));
+                            Tu = static_cast<float>(tLow + tHigh) / 1000.0;
+                            Com::printF(Com::tAPIDKu, Ku);
+                            Com::printFLN(Com::tAPIDTu, Tu);
+                            if (method == 0) {
+                                Kp = 0.6 * Ku;
+                                Ki = Kp * 2.0 / Tu;
+                                Kd = Kp * Tu * 0.125;
+                                Com::printFLN(Com::tAPIDClassic);
+                            }
+                            if (method == 1) {
+                                Kp = 0.33 * Ku;
+                                Ki = Kp * 2.0 / Tu;
+                                Kd = Kp * Tu / 3.0;
+                                Com::printFLN(Com::tAPIDSome);
+                            }
+                            if (method == 2) {
+                                Kp = 0.2 * Ku;
+                                Ki = Kp * 2.0 / Tu;
+                                Kd = Kp * Tu / 3;
+                                Com::printFLN(Com::tAPIDNone);
+                            }
+                            if (method == 3) {
+                                Kp = 0.7 * Ku;
+                                Ki = Kp * 2.5 / Tu;
+                                Kd = Kp * Tu * 3.0 / 20.0;
+                                Com::printFLN(Com::tAPIDPessen);
+                            }
+                            if (method == 4) {       //Tyreus-Lyben
+                                Kp = 0.4545f * Ku;   //1/2.2 KRkrit
+                                Ki = Kp / Tu / 2.2f; //2.2 Tkrit
+                                Kd = Kp * Tu / 6.3f; //1/6.3 Tkrit[/code]
+                                Com::printFLN(Com::tAPIDTyreusLyben);
+                            }
+                            Com::printFLN(Com::tAPIDKp, Kp);
+                            Com::printFLN(Com::tAPIDKi, Ki);
+                            Com::printFLN(Com::tAPIDKd, Kd);
+                        }
+                    }
+                    output->set(constrain(bias + d, 0, maxPWM));
+                    cycles++;
+                    minTempR = temp;
+                }
+            }
+        }
+        if ((!cooling && currentTemperature > (temp + 40)) || (!cooling && currentTemperature < (temp - 40))) {
             Com::printErrorFLN(Com::tAPIDFailedHigh);
             setTargetTemperature(0);
             return;
@@ -843,3 +1118,7 @@ void HeatManagerDynDeadTime::autocalibrate(GCode* g) {
     updateTimings();
     setTargetTemperature(0);
 }
+
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_TOOLS_TEMPLATES
+#include "../io/redefine.h"

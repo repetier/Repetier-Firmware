@@ -406,10 +406,16 @@ void GUI::bufAddHeaterTemp(HeatManager* hm, bool target) {
         } else {
             GUI::bufAddFloat(hm->getCurrentTemperature(), 3, 0);
             if (target) {
-                GUI::bufAddChar('/');
-                GUI::bufAddFloat(hm->getTargetTemperature(), 3, 0);
+                if (hm->isOff()) {
+                    GUI::bufAddStringP(PSTR("°C/Off"));
+                } else {
+                    GUI::bufAddChar('/');
+                    GUI::bufAddFloat(hm->getTargetTemperature(), 3, 0);
+                    GUI::bufAddStringP(PSTR("°C"));
+                }
+            } else {
+                GUI::bufAddStringP(PSTR("°C"));
             }
-            GUI::bufAddStringP(PSTR("°C"));
         }
     } else {
         GUI::bufAddStringP(PSTR("Defect"));
