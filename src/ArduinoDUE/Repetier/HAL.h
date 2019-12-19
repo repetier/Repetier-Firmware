@@ -446,34 +446,7 @@ public:
 #endif
         }
     }
-    /*
-    		const uint32_t rc = VARIANT_MCK / 256 / frequency;
-		tone_pin = ulPin;
-		toggle_count = 0;  // strange  wipe out previous duration
-		if (duration > 0 ) toggle_count = 2 * frequency * duration / 1000;
-		 else toggle_count = -1;
 
-		if (!TCChanEnabled) {
-			pmc_set_writeprotect(false);
-			pmc_enable_periph_clk((uint32_t)TONE_IRQ);
-			TC_Configure(chTC, chNo,
-				TC_CMR_TCCLKS_TIMER_CLOCK4 |
-				TC_CMR_WAVE |         // Waveform mode
-				TC_CMR_WAVSEL_UP_RC ); // Counter running up and reset when equals to RC
-	
-			chTC->TC_CHANNEL[chNo].TC_IER=TC_IER_CPCS;  // RC compare interrupt
-			chTC->TC_CHANNEL[chNo].TC_IDR=~TC_IER_CPCS;
-			 NVIC_EnableIRQ(TONE_IRQ);
-                         TCChanEnabled = 1;
-		}
-		if (!pinEnabled[ulPin]) {
-			pinMode(ulPin, OUTPUT);
-			pinEnabled[ulPin] = 1;
-		}
-		TC_Stop(chTC, chNo);
-                TC_SetRC(chTC, chNo, rc);    // set frequency
-		TC_Start(chTC, chNo);
-    */
     static inline void tone(uint8_t pin, int frequency) {
         // set up timer counter 1 channel 0 to generate interrupts for
         // toggling output pin.

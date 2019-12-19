@@ -1249,6 +1249,9 @@ void Printer::setup() {
     WRITE(RED_STATUS_LED, LOW);
 #endif // RED_BLUE_STATUS_LEDS
 #if defined(DRV_TMC2130)
+    SET_OUTPUT(MOSI_PIN);
+    SET_OUTPUT(SCK_PIN);
+    SET_INPUT(MISO_PIN);
     // TMC2130 motor drivers
 #if TMC2130_ON_X
     Printer::tmc_driver_x = new TMC2130Stepper(X_ENABLE_PIN, X_DIR_PIN, X_STEP_PIN, TMC2130_X_CS_PIN);
