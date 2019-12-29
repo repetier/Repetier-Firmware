@@ -56,7 +56,7 @@ union EEPROMVar {
     uint8_t c;
 };
 
-enum EEPROMType {
+enum class EEPROMType {
     FLOAT = 1,
     LONG = 2,
     INT = 3,

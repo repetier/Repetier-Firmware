@@ -99,6 +99,11 @@ inline void memcopy4(void* dest, void* source) {
 #define M0_BOARD
 #include "M0/pins.h"
 
+#elif MOTHERBOARD >= 3000 && MOTHERBOARD < 3500
+
+#define STM32F4_BOARD
+#include "STM32F4/pins.h"
+
 #else
 
 #error Motherboard with set ID is not available!
@@ -116,6 +121,9 @@ inline void memcopy4(void* dest, void* source) {
 #endif
 #ifdef M0_BOARD
 #include "M0/HAL.h"
+#endif
+#ifdef STM32F4_BOARD
+#include "STM32F4/HAL.h"
 #endif
 
 #ifndef BEEPER_PIN

@@ -31,7 +31,7 @@
 
 // Adds output signals to pins below to measure interrupt timings
 // with a logic analyser. Set to 0 for production!
-#define DEBUG_TIMING 1
+#define DEBUG_TIMING 0
 #define DEBUG_ISR_STEPPER_PIN 37 // 39
 #define DEBUG_ISR_MOTION_PIN 51  // 35
 #define DEBUG_ISR_TEMP_PIN 49    // 33

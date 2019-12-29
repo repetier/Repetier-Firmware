@@ -60,6 +60,9 @@
 // M0/SAMD21 based boards
 #define MOTHERBOARD_MINITRONICS_2_0 2000
 
+// STM32F4 based boards (3000 - 3499)
+#define MOTHERBOARD_RUMBA32 3000
+
 #define PELTIER_COOLER 0
 #define PELTIER_HEATER 1
 #define PELTIER_SWITCH 2

@@ -398,10 +398,9 @@ FSTRINGVALUE(Com::tEPRAdvanceL, "advance L [0=off]")
 FSTRINGVALUE(Com::tEPRPreheatTemp, "Preheat temp. [�C]")
 FSTRINGVALUE(Com::tEPRPreheatBedTemp, "Bed Preheat temp. [�C]")
 
-#if defined(BEEPER_PIN) && BEEPER_PIN >= 0 
+#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
 FSTRINGVALUE(Com::tEPRTonesEnabled, "Tones enabled [0/1]")
 #endif
-#if SDSUPPORT
 //FSTRINGVALUE(Com::tSDRemoved,UI_TEXT_SD_REMOVED)
 //FSTRINGVALUE(Com::tSDInserted,UI_TEXT_SD_INSERTED)
 FSTRINGVALUE(Com::tSDInitFail, "SD init fail")
@@ -422,7 +421,6 @@ FSTRINGVALUE(Com::tDeletionFailed, "Deletion failed")
 FSTRINGVALUE(Com::tDirectoryCreated, "Directory created")
 FSTRINGVALUE(Com::tCreationFailed, "Creation failed")
 FSTRINGVALUE(Com::tSDErrorCode, "SD errorCode:")
-#endif // SDSUPPORT
 FSTRINGVALUE(Com::tHeaterDecoupled, "Heater decoupled")
 FSTRINGVALUE(Com::tHeaterDecoupledWarning, "One heater seems decoupled from thermistor - disabling all for safety!")
 #if FEATURE_RETRACTION

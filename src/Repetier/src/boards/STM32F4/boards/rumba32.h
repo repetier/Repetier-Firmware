@@ -17,6 +17,9 @@
 */
 
 // Additional informations: https://github.com/Aus3D/RUMBA32
+/*
+STM32F446 processor, 180MHz, 512kb flash, 128kb RAM
+*/
 #pragma once
 
 #ifndef STM32F4
@@ -24,6 +27,7 @@
 #endif
 
 #define CPU_ARCH ARCH_ARM
+#define MAX_RAM 131072 // Rumba32
 
 // Steppers
 #define ORIG_X_STEP_PIN PA0
@@ -104,15 +108,17 @@
 //
 #define LED_PIN PB14
 #define BTN_PIN PC10
-#define PS_ON_PIN PE11
+#define ORIG_PS_ON_PIN PE11
 #define KILL_PIN PC5
 
 #define SDSS PA2
+#define SDPOWER -1
 #define SD_DETECT_PIN PB0
 #define BEEPER_PIN PE8
 
 // LCD / Controller
 #ifndef CUSTOM_CONTROLLER_PINS
+
 #define UI_DISPLAY_RS_PIN PE10
 #define UI_DISPLAY_RW_PIN -1
 #define UI_DISPLAY_ENABLE_PIN PE9
@@ -124,4 +130,6 @@
 #define UI_ENCODER_B PB2
 #define UI_ENCODER_CLICK PE7
 #define UI_BACK_PIN -1
+#define UI_RESET_PIN -1
+
 #endif

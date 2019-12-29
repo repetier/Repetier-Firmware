@@ -433,9 +433,8 @@ public:
     FSTRINGVAR(tEPRPreheatTemp)
     FSTRINGVAR(tEPRPreheatBedTemp)
 #if defined(BEEPER_PIN) && BEEPER_PIN >= 0
-    FSTRINGVAR(tEPRTonesEnabled) 
+    FSTRINGVAR(tEPRTonesEnabled)
 #endif
-#if SDSUPPORT
     //FSTRINGVAR(tSDRemoved)
     //FSTRINGVAR(tSDInserted)
     FSTRINGVAR(tSDInitFail)
@@ -456,7 +455,6 @@ public:
     FSTRINGVAR(tDirectoryCreated)
     FSTRINGVAR(tCreationFailed)
     FSTRINGVAR(tSDErrorCode)
-#endif // SDSUPPORT
     FSTRINGVAR(tHeaterDecoupled)
     FSTRINGVAR(tHeaterDecoupledWarning)
 #if FEATURE_RETRACTION
