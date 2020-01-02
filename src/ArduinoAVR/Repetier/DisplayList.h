@@ -1963,6 +1963,7 @@ inline void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_STATUS_UPD_F(status) {uid.setStatusP(status);uid.refreshPage();}
 #define UI_STATUS_RAM(status) uid.setStatus(status);
 #define UI_STATUS_UPD_RAM(status) {uid.setStatus(status);uid.refreshPage();}
+#define UI_PROGRESS_UPD(percent, eta) uid.setProgress(percent, eta);
 #define UI_ERROR(status) uid.setStatusP(PSTR(status),true);
 #define UI_ERROR_P(status) uid.setStatusP(status,true);
 #define UI_ERROR_UPD(status) {uid.setStatusP(PSTR(status),true);uid.refreshPage();}
@@ -1984,6 +1985,7 @@ inline void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_STATUS_UPD(status) {}
 #define UI_STATUS_UPD_F(status) {}
 #define UI_STATUS_UPD_RAM(status) {}
+#define UI_PROGRESS_UPD(percent, eta) {}
 #define UI_CLEAR_STATUS {}
 #define UI_ERROR(msg) {}
 #define UI_ERROR_P(status) {}
