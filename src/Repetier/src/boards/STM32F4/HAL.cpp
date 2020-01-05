@@ -22,7 +22,6 @@
 
     Main author: repetier
 
-    Initial port of hardware abstraction layer to Arduino Due: John Silvia
 */
 
 #include "Repetier.h"
@@ -30,25 +29,61 @@
 #include <stm32f4xx_hal.h>
 #include <malloc.h>
 
+#if MOTHERBOARD == MOTHERBOARD_RUMBA32
+const PinMap PinMap_PWM[] = {
+    { PA_0, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM2, 1, 0) },    // TIM2_CH1
+    { PA_1, TIM5, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM5, 2, 0) },    // TIM5_CH2
+    { PA_5, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM2, 1, 0) },    // TIM2_CH1
+    { PA_6, TIM13, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF9_TIM13, 1, 0) },  // TIM13_CH1
+    { PA_7, TIM14, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF9_TIM14, 1, 0) },  // TIM14_CH1
+    { PA_8, TIM1, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM1, 1, 0) },    // TIM1_CH1
+    { PA_9, TIM1, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM1, 2, 0) },    // TIM1_CH2
+    { PA_10, TIM1, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM1, 3, 0) },   // TIM1_CH3
+    { PA_11, TIM1, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM1, 4, 0) },   // TIM1_CH4
+    { PA_15, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM2, 1, 0) },   // TIM2_CH1
+    { PB_0, TIM8, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_TIM8, 2, 1) },    // TIM8_CH2N
+    { PB_1, TIM8, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_TIM8, 3, 1) },    // TIM8_CH3N
+    { PB_2, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM2, 4, 0) },    // TIM2_CH4
+    { PB_3, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM2, 2, 0) },    // TIM2_CH2
+    { PB_4, TIM3, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM3, 1, 0) },    // TIM3_CH1
+    { PB_5, TIM3, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM3, 2, 0) },    // TIM3_CH2
+    { PB_6, TIM4, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM4, 1, 0) },    // TIM4_CH1
+    { PB_7, TIM4, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM4, 2, 0) },    // TIM4_CH2
+    { PB_8, TIM4, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM4, 3, 0) },    // TIM4_CH3
+    { PB_9, TIM11, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_TIM11, 1, 0) },  // TIM11_CH1
+    { PB_10, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM2, 3, 0) },   // TIM2_CH3
+    { PB_13, TIM1, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF1_TIM1, 1, 1) },   // TIM1_CH1N
+    { PB_14, TIM12, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF9_TIM12, 1, 0) }, // TIM12_CH1
+    { PB_15, TIM12, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF9_TIM12, 2, 0) }, // TIM12_CH2
+    { PC_6, TIM3, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM3, 1, 0) },    // TIM3_CH1
+    { PC_7, TIM8, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_TIM8, 2, 0) },    // TIM8_CH2
+    { PC_8, TIM3, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM3, 3, 0) },    // TIM3_CH3
+    { PC_9, TIM8, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_TIM8, 4, 0) },    // TIM8_CH4
+    { PD_14, TIM4, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM4, 3, 0) },   // TIM4_CH3
+    { PD_15, TIM4, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM4, 4, 0) },   // TIM4_CH4
+    { NC, NP, 0 }
+};
+
+#endif
+
 // Create timer names from TIMER_NUM macro
 
 #define _TIMER(num) TIM##num
-#define _TIMER_CLK_ENABLE(num) __HAL_RCC_TIM##num##_CLK_ENABLE
 #define _TIMER_IRQ(num) TIM##num##_IRQn
-// #define _TIMER_VECTOR(num) TC##num##_Handler(stm32_timer_t* htim)
-#define _TIMER_VECTOR(num) TC##num##_Handler()
+#define _TIMER_VECTOR(num) RF_TC##num##_Handler(HardwareTimer*)
+#define _TIMER_VECTOR_NAME(num) RF_TC##num##_Handler
 
 #define TIMER(num) _TIMER(num)
-#define TIMER_CLK_ENABLE(num) _TIMER_CLK_ENABLE(num)
 #define TIMER_IRQ(num) _TIMER_IRQ(num)
 #define TIMER_VECTOR(num) _TIMER_VECTOR(num)
+#define TIMER_VECTOR_NAME(num) _TIMER_VECTOR_NAME(num)
 
 // Adds output signals to pins below to measure interrupt timings
 // with a logic analyser. Set to 0 for production!
-#define DEBUG_TIMING 1
+#define DEBUG_TIMING 0
 #define DEBUG_ISR_STEPPER_PIN 60 // PD12
 #define DEBUG_ISR_MOTION_PIN 61  // PD13
-#define DEBUG_ISR_TEMP_PIN 62    // PD14/PWM1
+#define DEBUG_ISR_TEMP_PIN 10    // PD14/PWM1
 #define DEBUG_ISR_ANALOG_PIN 63  // PD15/PWM2
 
 //extern "C" void __cxa_pure_virtual() { }
@@ -56,7 +91,6 @@ extern "C" char* sbrk(int i);
 
 char HAL::virtualEeprom[EEPROM_BYTES] = { 0 };
 bool HAL::wdPinged = true;
-volatile uint8_t HAL::insideTimer1 = 0;
 
 enum class TimerUsage {
     UNUSED,
@@ -70,7 +104,7 @@ struct TimerFunction {
     TimerUsage usage;
     uint32_t frequency;
     uint32_t reserved;
-    TIM_HandleTypeDef def;
+    HardwareTimer* timer;
 };
 
 struct PWMEntry {
@@ -84,140 +118,140 @@ static int numPWMEntries = 0;
 TimerFunction timerList[] = {
 #ifdef TIM1
 #define TIM1_COUNT 1
-    { TIM1, 1, TimerUsage::UNUSED, 0, 0 }
+    { TIM1, 1, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM1_COUNT 2
 #endif
 #ifdef TIM2
 #define TIM2_COUNT 1
     ,
-    { TIM2, 2, TimerUsage::UNUSED, 0, 0 }
+    { TIM2, 2, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM2_COUNT 0
 #endif
 #ifdef TIM3
 #define TIM3_COUNT 1
     ,
-    { TIM3, 3, TimerUsage::UNUSED, 0, 0 }
+    { TIM3, 3, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM3_COUNT 0
 #endif
 #ifdef TIM4
 #define TIM4_COUNT 1
     ,
-    { TIM4, 4, TimerUsage::UNUSED, 0, 0 }
+    { TIM4, 4, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM4_COUNT 0
 #endif
 #ifdef TIM5
 #define TIM5_COUNT 1
     ,
-    { TIM5, 5, TimerUsage::UNUSED, 0, 0 }
+    { TIM5, 5, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM5_COUNT 0
 #endif
 #ifdef TIM6
 #define TIM6_COUNT 1
     ,
-    { TIM6, 6, TimerUsage::UNUSED, 0, 0 }
+    { TIM6, 6, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM6_COUNT 0
 #endif
 #ifdef TIM7
 #define TIM7_COUNT 1
     ,
-    { TIM7, 7, TimerUsage::UNUSED, 0, 0 }
+    { TIM7, 7, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM7_COUNT 0
 #endif
 #ifdef TIM8
 #define TIM8_COUNT 1
     ,
-    { TIM8, 8, TimerUsage::UNUSED, 0, 0 }
+    { TIM8, 8, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM8_COUNT 0
 #endif
 #ifdef TIM9
 #define TIM9_COUNT 1
     ,
-    { TIM9, 9, TimerUsage::UNUSED, 0, 0 }
+    { TIM9, 9, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM9_COUNT 0
 #endif
 #ifdef TIM10
 #define TIM10_COUNT 1
     ,
-    { TIM2, 10, TimerUsage::UNUSED, 0, 0 }
+    { TIM2, 10, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM10_COUNT 0
 #endif
 #ifdef TIM11
 #define TIM11_COUNT 1
     ,
-    { TIM11, 11, TimerUsage::UNUSED, 0, 0 }
+    { TIM11, 11, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM11_COUNT 0
 #endif
 #ifdef TIM12
 #define TIM12_COUNT 1
     ,
-    { TIM12, 12, TimerUsage::UNUSED, 0, 0 }
+    { TIM12, 12, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM12_COUNT 0
 #endif
 #ifdef TIM13
 #define TIM13_COUNT 1
     ,
-    { TIM13, 13, TimerUsage::UNUSED, 0, 0 }
+    { TIM13, 13, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM13_COUNT 0
 #endif
 #ifdef TIM14
 #define TIM14_COUNT 1
     ,
-    { TIM14, 14, TimerUsage::UNUSED, 0, 0 }
+    { TIM14, 14, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM14_COUNT 0
 #endif
 #ifdef TIM15
 #define TIM15_COUNT 1
     ,
-    { TIM15, 15, TimerUsage::UNUSED, 0, 0 }
+    { TIM15, 15, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM15_COUNT 0
 #endif
 #ifdef TIM16
 #define TIM16_COUNT 1
     ,
-    { TIM16, 16, TimerUsage::UNUSED, 0, 0 }
+    { TIM16, 16, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM16_COUNT 0
 #endif
 #ifdef TIM17
 #define TIM17_COUNT 1
     ,
-    { TIM17, 17, TimerUsage::UNUSED, 0, 0 }
+    { TIM17, 17, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM17_COUNT 0
 #endif
 #ifdef TIM18
 #define TIM18_COUNT 1
     ,
-    { TIM18, 18, TimerUsage::UNUSED, 0, 0 }
+    { TIM18, 18, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM18_COUNT 0
 #endif
 #ifdef TIM19
 #define TIM19_COUNT 1
     ,
-    { TIM19, 19, TimerUsage::UNUSED, 0, 0 }
+    { TIM19, 19, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM19_COUNT 0
 #endif
 #ifdef TIM20
 #define TIM20_COUNT 1
     ,
-    { TIM20, 20, TimerUsage::UNUSED, 0, 0 }
+    { TIM20, 20, TimerUsage::UNUSED, 0, 0, nullptr }
 #else
 #define TIM20_COUNT 0
 #endif
@@ -234,6 +268,7 @@ TimerFunction* reserveTimerInterrupt(int num) {
     }
     return nullptr;
 }
+
 HAL::HAL() {
     //ctor
 }
@@ -241,113 +276,100 @@ HAL::HAL() {
 HAL::~HAL() {
     //dtor
 }
+TimerFunction* motion2;
+TimerFunction* motion3;
+TimerFunction* pwm;
+TimerFunction* servo;
+TimerFunction* toneTimer;
+extern void TIMER_VECTOR(MOTION2_TIMER_NUM);
+extern void TIMER_VECTOR(MOTION3_TIMER_NUM);
+extern void TIMER_VECTOR(PWM_TIMER_NUM);
+extern void TIMER_VECTOR(TONE_TIMER_NUM);
 
-/*
-Get best prescaler to fit into 16 bit timer with 16bit prescaler
-*/
+#if NUM_SERVOS > 0
+extern void servoOffTimer(HardwareTimer*);
+extern void TIMER_VECTOR(SERVO_TIMER_NUM);
+static uint32_t ServoPrescalerfactor = 20000;
+static uint32_t Servo2500 = 2500;
+#endif
 
-void getPrescaleFreq(uint32_t ticks, uint32_t& prescale, uint32_t& freq) {
-    prescale = 1;
-    freq = ticks;
-    while (freq > 65535ul) {
-        freq >>= 1;
-        prescale <<= 1;
-    }
-}
-// Set up all timer interrupts
-void HAL::setupTimer() {
+void HAL::hwSetup(void) {
 #if DEBUG_TIMING
     SET_OUTPUT(DEBUG_ISR_STEPPER_PIN);
     SET_OUTPUT(DEBUG_ISR_MOTION_PIN);
     SET_OUTPUT(DEBUG_ISR_TEMP_PIN);
     SET_OUTPUT(DEBUG_ISR_ANALOG_PIN);
 #endif
-    uint32_t prescale, freq;
-
-    TimerFunction* motion2 = reserveTimerInterrupt(MOTION2_TIMER_NUM); // prevent pwm usage
-    getPrescaleFreq(F_CPU_TRUE / PREPARE_FREQUENCY, prescale, freq);
-    motion2->def.Instance = TIMER(MOTION2_TIMER_NUM);
-    motion2->def.Init.Prescaler = prescale;
-    motion2->def.Init.Period = freq;
-    motion2->def.Init.RepetitionCounter = 0;
-    motion2->def.Init.CounterMode = TIM_COUNTERMODE_UP;
-    motion2->def.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    if (HAL_TIM_Base_Init(&motion2->def) == HAL_OK) {
-        HAL_TIM_Base_Start_IT(&motion2->def);
-    }
-    HAL_NVIC_SetPriority(TIMER_IRQ(MOTION2_TIMER_NUM), 2, 0);
-    HAL_NVIC_EnableIRQ(TIMER_IRQ(MOTION2_TIMER_NUM)); // 1 = highest, 3 = lowest priority
-
-    // Regular interrupts for heater control etc
-
-    TimerFunction* pwm = reserveTimerInterrupt(PWM_TIMER_NUM); // prevent pwm usage
-    getPrescaleFreq(F_CPU_TRUE / PWM_CLOCK_FREQ, prescale, freq);
-    pwm->def.Instance = TIMER(PWM_TIMER_NUM);
-    pwm->def.Init.Prescaler = prescale;
-    pwm->def.Init.Period = freq;
-    pwm->def.Init.RepetitionCounter = 0;
-    pwm->def.Init.CounterMode = TIM_COUNTERMODE_UP;
-    pwm->def.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    if (HAL_TIM_Base_Init(&pwm->def) == HAL_OK) {
-        HAL_TIM_Base_Start_IT(&pwm->def);
-    }
-    HAL_NVIC_SetPriority(TIMER_IRQ(PWM_TIMER_NUM), 2, 0);
-    HAL_NVIC_EnableIRQ(TIMER_IRQ(PWM_TIMER_NUM)); // 1 = highest, 3 = lowest priority
-
-    // Timer for stepper motor control
-
-    TimerFunction* motion3 = reserveTimerInterrupt(MOTION3_TIMER_NUM); // prevent pwm usage
-    getPrescaleFreq(F_CPU_TRUE / STEPPER_FREQUENCY, prescale, freq);
-    motion3->def.Instance = TIMER(MOTION3_TIMER_NUM);
-    motion3->def.Init.Prescaler = prescale;
-    motion3->def.Init.Period = freq;
-    motion3->def.Init.RepetitionCounter = 0;
-    motion3->def.Init.CounterMode = TIM_COUNTERMODE_UP;
-    motion3->def.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    if (HAL_TIM_Base_Init(&motion2->def) == HAL_OK) {
-        HAL_TIM_Base_Start_IT(&motion2->def);
-    }
-    HAL_NVIC_SetPriority(TIMER_IRQ(MOTION3_TIMER_NUM), 0, 0); // 1 = highest, 3 = lowest priority
-    HAL_NVIC_EnableIRQ(TIMER_IRQ(MOTION3_TIMER_NUM));
 
     // Servo control
 #if NUM_SERVOS > 0
 
-    TimerFunction* servo = reserveTimerInterrupt(SERVO_TIMER_NUM); // prevent pwm usage
-    // getPrescaleFreq(F_CPU_TRUE / 50, prescale, freq);
-    servo->def.Instance = TIMER(SERVO_TIMER_NUM);
-    servo->def.Init.Prescaler = SERVO_PRESCALE;
-    servo->def.Init.Period = SERVO5000US;
-    servo->def.Init.RepetitionCounter = 0;
-    servo->def.Init.CounterMode = TIM_COUNTERMODE_UP;
-    servo->def.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    if (HAL_TIM_Base_Init(&motion2->def) == HAL_OK) {
-        HAL_TIM_Base_Start_IT(&motion2->def);
+    servo = reserveTimerInterrupt(SERVO_TIMER_NUM); // prevent pwm usage
+    servo->timer = new HardwareTimer(TIMER(SERVO_TIMER_NUM));
+    servo->timer->setPWM(1, NC, 200, 50, TIMER_VECTOR_NAME(SERVO_TIMER_NUM), servoOffTimer);
+    ServoPrescalerfactor = servo->tim->PSC + 1;
+    Servo2500 = ((2500 * (servo->timer->getTimerClkFreq() / 1000000)) / ServoPrescalerfactor) - 1;
+    HAL_NVIC_SetPriority(TIMER_IRQ(SERVO_TIMER_NUM), 1, 0);
+#endif
+
+#if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
+    HAL::i2cInit(TWI_CLOCK_FREQ);
+#endif
+    // make debugging startup easier
+    //Serial.begin(115200);
+
+#if EEPROM_AVAILABLE && EEPROM_MODE != EEPROM_NONE && EEPROM_AVAILABLE != EEPROM_SDCARD && EEPROM_AVAILABLE != EEPROM_FLASH
+    // Copy eeprom to ram for faster access
+    int i;
+    for (i = 0; i < EEPROM_BYTES; i += 4) {
+        eeval_t v = eprGetValue(i, 4);
+        memcopy4(&virtualEeprom[i], &v.i);
     }
-    HAL_NVIC_SetPriority(TIMER_IRQ(SERVO_TIMER_NUM), 1, 0); // 1 = highest, 3 = lowest priority
-    HAL_NVIC_EnableIRQ(TIMER_IRQ(SERVO_TIMER_NUM));
+#else
+    memset(virtualEeprom, 0, EEPROM_BYTES);
+#endif
+#if EEPROM_AVAILABLE == EEPROM_FLASH && EEPROM_MODE != EEPROM_NONE
+    FEInit();
 #endif
 }
 
-/* static void computePWMDivider(uint32_t frequency, uint32_t& div, uint32_t& scale, int bits) {
-    uint32_t factor = 1;
-    div = 0;
-    uint32_t max_scale = 256;
-    if (bits == 16)
-        max_scale = 65536;
-    else if (bits == 24)
-        max_scale = 16777216;
-    do {
-        scale = VARIANT_MCK / (frequency * factor) - 1;
-        if (factor != 32 && factor != 128 && factor != 512) {
-            if (scale < max_scale) {
-                return;
-            }
-            div++;
-        }
-        factor <<= 1;
-    } while (factor <= 1024);
-} */
+// Set up all timer interrupts
+void HAL::setupTimer() {
+    motion2 = reserveTimerInterrupt(MOTION2_TIMER_NUM); // prevent pwm usage
+    motion2->timer = new HardwareTimer(TIMER(MOTION2_TIMER_NUM));
+    motion2->timer->setMode(2, TIMER_OUTPUT_COMPARE);
+    motion2->timer->setOverflow(PREPARE_FREQUENCY, HERTZ_FORMAT);
+    motion2->timer->attachInterrupt(TIMER_VECTOR_NAME(MOTION2_TIMER_NUM));
+    motion2->timer->resume();
+    HAL_NVIC_SetPriority(TIMER_IRQ(MOTION2_TIMER_NUM), 2, 0);
+
+    // Regular interrupts for heater control etc
+
+    pwm = reserveTimerInterrupt(PWM_TIMER_NUM); // prevent pwm usage
+    pwm->timer = new HardwareTimer(TIMER(PWM_TIMER_NUM));
+    pwm->timer->setMode(2, TIMER_OUTPUT_COMPARE);
+    pwm->timer->setOverflow(PWM_CLOCK_FREQ, HERTZ_FORMAT);
+    pwm->timer->attachInterrupt(TIMER_VECTOR_NAME(PWM_TIMER_NUM));
+    pwm->timer->resume();
+    HAL_NVIC_SetPriority(TIMER_IRQ(PWM_TIMER_NUM), 2, 0);
+
+    // Timer for stepper motor control
+
+    motion3 = reserveTimerInterrupt(MOTION3_TIMER_NUM); // prevent pwm usage
+    motion3->timer = new HardwareTimer(TIMER(MOTION3_TIMER_NUM));
+    motion3->timer->setMode(2, TIMER_OUTPUT_COMPARE);
+    motion3->timer->setOverflow(STEPPER_FREQUENCY, HERTZ_FORMAT);
+    motion3->timer->attachInterrupt(TIMER_VECTOR_NAME(MOTION3_TIMER_NUM));
+    motion3->timer->resume();
+    HAL_NVIC_SetPriority(TIMER_IRQ(MOTION3_TIMER_NUM), 0, 0);
+#if BEEPER_PIN > -1
+    toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
+    toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
+    toneTimer->timer->setMode(2, TIMER_OUTPUT_COMPARE);
+    toneTimer->timer->setOverflow(0, HERTZ_FORMAT);
+    toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
+#endif
+}
 
 // Try to initialize pinNumber as hardware PWM. Returns internal
 // id if it succeeds or -1 if it fails. Typical reasons to fail
@@ -355,7 +377,7 @@ void HAL::setupTimer() {
 // channel.
 int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
     if (pinNumber < 0) {
-        return 255;
+        return -1;
     }
     PinName p = digitalPinToPinName(pinNumber);
     if (p != NC) {
@@ -398,11 +420,7 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
             HT = (HardwareTimer*)(HardwareTimer_Handle[index]->__this);
             pwmEntries[numPWMEntries].ht = HT;
             uint32_t channel = STM_PIN_CHANNEL(map->function);
-
-            HT->setMode(channel, TIMER_OUTPUT_COMPARE_PWM1, p);
-            HT->setOverflow(tf->frequency, HERTZ_FORMAT);
-            HT->setCaptureCompare(channel, 0, RESOLUTION_12B_COMPARE_FORMAT); // set pwm 0
-            HT->resume();
+            HT->setPWM(channel, p, frequency, 0);
             return numPWMEntries++;
         }
     }
@@ -415,7 +433,9 @@ void HAL::setHardwarePWM(int id, int value) {
     }
     PWMEntry& entry = pwmEntries[id];
     uint32_t channel = STM_PIN_CHANNEL(entry.map->function);
-    entry.ht->setCaptureCompare(channel, value, RESOLUTION_12B_COMPARE_FORMAT); // set pwm 0
+    entry.ht->pause();
+    entry.ht->setCaptureCompare(channel, value, RESOLUTION_8B_COMPARE_FORMAT); // set pwm 0
+    entry.ht->resume();
 }
 
 ADC_HandleTypeDef AdcHandle = {};
@@ -424,40 +444,64 @@ struct AnalogFunction {
     int32_t channel;
     int32_t lastValue;
     ADC_TypeDef* def;
+    int32_t pin;
 };
 
 // Initialize ADC channels
-static AnalogFunction analogValues[MAX_ANALOG_INPUTS] = { false, -1, 0, nullptr };
-static AnalogFunction* analogMap[256]; // Map pin number to entry in analogValues
+static AnalogFunction analogValues[MAX_ANALOG_INPUTS] = { false, -1, 0, nullptr, -1 };
+static AnalogFunction* analogMap[256] = { nullptr }; // Map pin number to entry in analogValues
 int numAnalogInputs = 0;
-uint16_t adcData[16]; // Target for DMA adc transfer
+uint16_t adcData[16] = { 0 }; // Target for DMA adc transfer
 
 void reportAnalog() {
     for (int i = 0; i < 256; i++) {
         if (analogMap[i]) {
             Com::printF("Analog ", i);
-            Com::printFLN(" = ", static_cast<int32_t>(adcData[i]));
+            Com::printFLN(" = ", static_cast<int32_t>(analogMap[i]->lastValue));
         }
+    }
+    for (int i = 0; i < 3; i++) {
+        Com::printF("adc ", i);
+        Com::printF(" channel ", analogValues[i].channel);
+        Com::printF(" pin ", analogValues[i].pin);
+        Com::printFLN(", val = ", static_cast<int32_t>(adcData[i]));
     }
 }
 
-static int analogConvertPos = -1;
+static DMA_HandleTypeDef hdma_adc;
+int dmaInitState, dmaInitError;
+int adcerror = 0, dmaerror = 0;
+
+void HAL::reportHALDebug() {
+    reportAnalog();
+    Com::printFLN("AdcHandle state:", AdcHandle.State);
+    Com::printFLN("AdcHandle ErrorCode:", AdcHandle.ErrorCode);
+    Com::printFLN("hdma_adc state:", hdma_adc.State);
+    Com::printFLN("hdma_adc ErrorCode:", hdma_adc.ErrorCode);
+    Com::printFLN("dmaInitState state:", dmaInitState);
+    Com::printFLN("dmaInitError ErrorCode:", dmaInitError);
+    Com::printFLN("numAnalogInputs:", numAnalogInputs);
+    Com::printFLN("numPWMEntries:", numPWMEntries);
+    Com::printFLN("adcerror:", adcerror);
+    Com::printFLN("dmaerror:", dmaerror);
+}
+
 void HAL::analogStart(void) {
     // Analog channels being used are already enabled. Start conversion
     // only if we have any analog sources.
     if (numAnalogInputs == 0) {
         return;
     }
-    analogConvertPos = 0;
     ADC_ChannelConfTypeDef sConfig = { 0 };
-    __HAL_RCC_ADC1_CLK_ENABLE();
-    __HAL_RCC_DMA2_CLK_ENABLE(); // Enable DMA2 clock
+
     AdcHandle.Instance = ADC1;
+    AdcHandle.State = 0;
     AdcHandle.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
     AdcHandle.Init.Resolution = ADC_RESOLUTION_12B;
     AdcHandle.Init.ScanConvMode = ENABLE;
     AdcHandle.Init.ContinuousConvMode = ENABLE;
     AdcHandle.Init.DiscontinuousConvMode = DISABLE;
+    AdcHandle.Init.NbrOfDiscConversion = 0;
     AdcHandle.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
     AdcHandle.Init.ExternalTrigConv = ADC_SOFTWARE_START;
     AdcHandle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
@@ -465,37 +509,59 @@ void HAL::analogStart(void) {
     AdcHandle.Init.DMAContinuousRequests = ENABLE;
     AdcHandle.Init.EOCSelection = DISABLE;
     if (HAL_ADC_Init(&AdcHandle) != HAL_OK) {
+        adcerror++;
         return;
     }
+    sConfig.SamplingTime = numAnalogInputs <= 6 ? ADC_SAMPLETIME_480CYCLES : ADC_SAMPLETIME_144CYCLES;
     for (int i = 0; i < numAnalogInputs; i++) {
-        /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time. 
-  */
         sConfig.Channel = analogValues[i].channel;
         sConfig.Rank = i + 1;
-        sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
         if (HAL_ADC_ConfigChannel(&AdcHandle, &sConfig) != HAL_OK) {
-            Error_Handler();
+            adcerror++;
+            // Error_Handler();
         }
     }
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_ADC1_CLK_ENABLE();
+    __HAL_RCC_DMA2_CLK_ENABLE(); // Enable DMA2 clock
 
-    // HAL_ADC_Start_IT(&AdcHandle); // start samling over interrupt
-    HAL_ADC_Start_DMA(&AdcHandle, (uint32_t*)&adcData, numAnalogInputs);
+    hdma_adc.Instance = DMA2_Stream0;
+    hdma_adc.Init.Channel = DMA_CHANNEL_0;
+    hdma_adc.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_adc.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_adc.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_adc.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+    hdma_adc.Init.MemDataAlignment = DMA_PDATAALIGN_HALFWORD;
+    hdma_adc.Init.Mode = DMA_CIRCULAR;
+    hdma_adc.Init.Priority = DMA_PRIORITY_HIGH;
+    hdma_adc.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    hdma_adc.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
+    hdma_adc.Init.MemBurst = DMA_MBURST_SINGLE;
+    hdma_adc.Init.PeriphBurst = DMA_PBURST_SINGLE;
+    dmaerror
+        += HAL_DMA_Init(&hdma_adc);
+    dmaInitState = hdma_adc.State;
+    dmaInitError = hdma_adc.ErrorCode;
+    __HAL_LINKDMA(&AdcHandle, DMA_Handle, hdma_adc);
+    HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 3, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+    dmaerror += HAL_ADC_Start_DMA(&AdcHandle, (uint32_t*)&adcData, numAnalogInputs);
 }
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle) {
+
+extern "C" void DMA2_Stream0_IRQHandler(void) {
+    HAL_DMA_IRQHandler(&hdma_adc);
+}
+
+extern "C" void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle) {
 #ifdef DEBUG_TIMING
     WRITE(DEBUG_ISR_ANALOG_PIN, 1);
 #endif
-    __HAL_ADC_DISABLE(AdcHandle);
     for (int i = 0; i < numAnalogInputs; i++) {
         analogValues[i].lastValue = adcData[i];
     }
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_ANALOG_INPUT_LOOP
 #include "io/redefine.h"
-    analogConvertPos = 0;
-    __HAL_ADC_ENABLE(AdcHandle);
-
-    // start new conversion
 #ifdef DEBUG_TIMING
     WRITE(DEBUG_ISR_ANALOG_PIN, 0);
 #endif
@@ -510,122 +576,17 @@ void HAL::analogEnable(int pinId) {
         --numAnalogInputs;
         return;
     }
+    analogMap[pinId] = af;
     af->enabled = true;
     uint32_t function = pinmap_function(pin, PinMap_ADC);
-    af->channel = 0;
-    switch (STM_PIN_CHANNEL(function)) {
-#ifdef ADC_CHANNEL_0
-    case 0:
-        af->channel = ADC_CHANNEL_0;
-        break;
-#endif
-    case 1:
-        af->channel = ADC_CHANNEL_1;
-        break;
-    case 2:
-        af->channel = ADC_CHANNEL_2;
-        break;
-    case 3:
-        af->channel = ADC_CHANNEL_3;
-        break;
-    case 4:
-        af->channel = ADC_CHANNEL_4;
-        break;
-    case 5:
-        af->channel = ADC_CHANNEL_5;
-        break;
-    case 6:
-        af->channel = ADC_CHANNEL_6;
-        break;
-    case 7:
-        af->channel = ADC_CHANNEL_7;
-        break;
-    case 8:
-        af->channel = ADC_CHANNEL_8;
-        break;
-    case 9:
-        af->channel = ADC_CHANNEL_9;
-        break;
-    case 10:
-        af->channel = ADC_CHANNEL_10;
-        break;
-    case 11:
-        af->channel = ADC_CHANNEL_11;
-        break;
-    case 12:
-        af->channel = ADC_CHANNEL_12;
-        break;
-    case 13:
-        af->channel = ADC_CHANNEL_13;
-        break;
-    case 14:
-        af->channel = ADC_CHANNEL_14;
-        break;
-    case 15:
-        af->channel = ADC_CHANNEL_15;
-        break;
-#ifdef ADC_CHANNEL_16
-    case 16:
-        af->channel = ADC_CHANNEL_16;
-        break;
-#endif
-    case 17:
-        af->channel = ADC_CHANNEL_17;
-        break;
-#ifdef ADC_CHANNEL_18
-    case 18:
-        af->channel = ADC_CHANNEL_18;
-        break;
-#endif
-#ifdef ADC_CHANNEL_19
-    case 19:
-        af->channel = ADC_CHANNEL_19;
-        break;
-#endif
-#ifdef ADC_CHANNEL_20
-    case 20:
-        af->channel = ADC_CHANNEL_20;
-        break;
-    case 21:
-        af->channel = ADC_CHANNEL_21;
-        break;
-    case 22:
-        af->channel = ADC_CHANNEL_22;
-        break;
-    case 23:
-        af->channel = ADC_CHANNEL_23;
-        break;
-    case 24:
-        af->channel = ADC_CHANNEL_24;
-        break;
-    case 25:
-        af->channel = ADC_CHANNEL_25;
-        break;
-    case 26:
-        af->channel = ADC_CHANNEL_26;
-        break;
-#ifdef ADC_CHANNEL_27
-    case 27:
-        af->channel = ADC_CHANNEL_27;
-        break;
-    case 28:
-        af->channel = ADC_CHANNEL_28;
-        break;
-    case 29:
-        af->channel = ADC_CHANNEL_29;
-        break;
-    case 30:
-        af->channel = ADC_CHANNEL_30;
-        break;
-    case 31:
-        af->channel = ADC_CHANNEL_31;
-        break;
-#endif
-#endif
-    default:
-        af->channel = 0;
-        break;
-    }
+    // Set pin as analog input
+    GPIO_InitTypeDef GPIO_InitStruct;
+    GPIO_InitStruct.Pin = STM_LL_GPIO_PIN(pin);
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(get_GPIO_Port(STM_PORT(pin)), &GPIO_InitStruct);
+    af->pin = pinId;
+    af->channel = STM_PIN_CHANNEL(function);
 }
 
 int HAL::analogRead(int pin) {
@@ -635,7 +596,46 @@ int HAL::analogRead(int pin) {
     }
     return af->lastValue;
 }
+// Write any data type to EEPROM
+void HAL::eprBurnValue(unsigned int pos, int size, union eeval_t newvalue) {
+#if EEPROM_AVAILABLE == EEPROM_I2C
+    i2cStartAddr(EEPROM_SERIAL_ADDR, pos, 0);
+    i2cWrite(newvalue.b[0]); // write first byte
+    for (int i = 1; i < size; i++) {
+        pos++;
+        // writes can not cross page boundary
+        if ((pos % EEPROM_PAGE_SIZE) == 0) {
+            // burn current page then address next one
+            i2cStop();
+            delayMilliseconds(EEPROM_PAGE_WRITE_TIME);
+            i2cStartAddr(EEPROM_SERIAL_ADDR, pos, 0);
+        }
+        i2cWrite(newvalue.b[i]);
+    }
+    i2cStop();                                 // signal end of transaction
+    delayMilliseconds(EEPROM_PAGE_WRITE_TIME); // wait for page write to complete
+#elif EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH
+    if (pos >= EEPROM::reservedEnd) {
+        eprSyncTime = 1UL; // enforce fast write to finish before power is lost
+    } else {
+        eprSyncTime = HAL::timeInMilliseconds() | 1UL;
+    }
+#endif
+}
 
+#if EEPROM_AVAILABLE == EEPROM_FLASH
+millis_t eprSyncTime = 0; // in sync
+void HAL::syncEEPROM() {  // store to disk if changed
+    millis_t time = millis();
+    if (eprSyncTime && (time - eprSyncTime > 2000)) { // Buffer writes only every 2 seconds to pool writes
+        eprSyncTime = 0;
+        FEUpdateChanges();
+        Com::printFLN("EEPROM data updated");
+    }
+}
+void HAL::importEEPROM() {
+}
+#endif
 #if EEPROM_AVAILABLE == EEPROM_SDCARD
 
 #if !SDSUPPORT
@@ -722,172 +722,6 @@ void HAL::resetHardware() {
     NVIC_SystemReset();
 }
 
-#ifdef OLD_SPI
-#ifndef DUE_SOFTWARE_SPI
-// hardware SPI
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD == 502)
-bool spiInitMaded = false;
-#endif
-void HAL::spiBegin(uint8_t ssPin) {
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD == 502)
-    if (spiInitMaded == false) {
-#endif // Configre SPI pins
-        PIO_Configure(
-            g_APinDescription[SCK_PIN].pPort,
-            g_APinDescription[SCK_PIN].ulPinType,
-            g_APinDescription[SCK_PIN].ulPin,
-            g_APinDescription[SCK_PIN].ulPinConfiguration);
-        PIO_Configure(
-            g_APinDescription[MOSI_PIN].pPort,
-            g_APinDescription[MOSI_PIN].ulPinType,
-            g_APinDescription[MOSI_PIN].ulPin,
-            g_APinDescription[MOSI_PIN].ulPinConfiguration);
-        PIO_Configure(
-            g_APinDescription[MISO_PIN].pPort,
-            g_APinDescription[MISO_PIN].ulPinType,
-            g_APinDescription[MISO_PIN].ulPin,
-            g_APinDescription[MISO_PIN].ulPinConfiguration);
-
-        // set master mode, peripheral select, fault detection
-        SPI_Configure(SPI0, ID_SPI0, SPI_MR_MSTR | SPI_MR_MODFDIS | SPI_MR_PS);
-        SPI_Enable(SPI0);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD == 502)
-        SET_OUTPUT(DAC0_SYNC);
-#if NUM_TOOLS > 1
-        SET_OUTPUT(DAC1_SYNC);
-        WRITE(DAC1_SYNC, HIGH);
-#endif
-        SET_OUTPUT(SPI_EEPROM1_CS);
-        SET_OUTPUT(SPI_EEPROM2_CS);
-        SET_OUTPUT(SPI_FLASH_CS);
-        WRITE(DAC0_SYNC, HIGH);
-        WRITE(SPI_EEPROM1_CS, HIGH);
-        WRITE(SPI_EEPROM2_CS, HIGH);
-        WRITE(SPI_FLASH_CS, HIGH);
-        if (ssPin) {
-            HAL::digitalWrite(ssPin, 0);
-        } else {
-            WRITE(SDSS, HIGH);
-        }
-#endif // MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD==502)
-        PIO_Configure(
-            g_APinDescription[SPI_PIN].pPort,
-            g_APinDescription[SPI_PIN].ulPinType,
-            g_APinDescription[SPI_PIN].ulPin,
-            g_APinDescription[SPI_PIN].ulPinConfiguration);
-        spiInit(1);
-#if (MOTHERBOARD == 500) || (MOTHERBOARD == 501) || (MOTHERBOARD == 502)
-        spiInitMaded = true;
-    }
-#endif
-}
-// spiClock is 0 to 6, relecting AVR clock dividers 2,4,8,16,32,64,128
-// Due can only go as slow as AVR divider 32 -- slowest Due clock is 329,412 Hz
-void HAL::spiInit(uint8_t spiClock) {
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD == 502)
-    if (spiInitMaded == false) {
-#endif
-        if (spiClock > 4)
-            spiClock = 1;
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD == 502)
-        // Set SPI mode 1, clock, select not active after transfer, with delay between transfers
-        SPI_ConfigureNPCS(SPI0, SPI_CHAN_DAC,
-                          SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) | SPI_CSR_DLYBCT(1));
-        // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
-        SPI_ConfigureNPCS(SPI0, SPI_CHAN_EEPROM1, SPI_CSR_NCPHA | SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) | SPI_CSR_DLYBCT(1));
-#endif // MOTHERBOARD==500 || MOTHERBOARD==501 || (MOTHERBOARD==502)
-
-        // Set SPI mode 0, clock, select not active after transfer, with delay between transfers
-        SPI_ConfigureNPCS(SPI0, SPI_CHAN, SPI_CSR_NCPHA | SPI_CSR_CSAAT | SPI_CSR_SCBR(spiDueDividors[spiClock]) | SPI_CSR_DLYBCT(1));
-        SPI_Enable(SPI0);
-#if MOTHERBOARD == 500 || MOTHERBOARD == 501 || (MOTHERBOARD == 502)
-        spiInitMaded = true;
-    }
-#endif
-}
-// Write single byte to SPI
-void HAL::spiSend(byte b) {
-    // write byte with address and end transmission flag
-    SPI0->SPI_TDR = (uint32_t)b | SPI_PCS(SPI_CHAN) | SPI_TDR_LASTXFER;
-    // wait for transmit register empty
-    while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0)
-        ;
-    // wait for receive register
-    while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0)
-        ;
-    // clear status
-    SPI0->SPI_RDR;
-    //delayMicroseconds(1);
-}
-void HAL::spiSend(const uint8_t* buf, size_t n) {
-    if (n == 0)
-        return;
-    for (size_t i = 0; i < n - 1; i++) {
-        SPI0->SPI_TDR = (uint32_t)buf[i] | SPI_PCS(SPI_CHAN);
-        while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0)
-            ;
-        while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0)
-            ;
-        SPI0->SPI_RDR;
-        //        delayMicroseconds(1);
-    }
-    spiSend(buf[n - 1]);
-}
-
-// Read single byte from SPI
-uint8_t HAL::spiReceive() {
-    // write dummy byte with address and end transmission flag
-    SPI0->SPI_TDR = 0x000000FF | SPI_PCS(SPI_CHAN) | SPI_TDR_LASTXFER;
-    // wait for transmit register empty
-    while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0)
-        ;
-
-    // wait for receive register
-    while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0)
-        ;
-    // get byte from receive register
-    //delayMicroseconds(1);
-    return SPI0->SPI_RDR;
-}
-
-// Read from SPI into buffer
-void HAL::spiReadBlock(uint8_t* buf, uint16_t nbyte) {
-    if (nbyte-- == 0)
-        return;
-
-    for (int i = 0; i < nbyte; i++) {
-        //while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0);
-        SPI0->SPI_TDR = 0x000000FF | SPI_PCS(SPI_CHAN);
-        while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0)
-            ;
-        buf[i] = SPI0->SPI_RDR;
-        // delayMicroseconds(1);
-    }
-    buf[nbyte] = spiReceive();
-}
-
-// Write from buffer to SPI
-
-void HAL::spiSendBlock(uint8_t token, const uint8_t* buf) {
-    SPI0->SPI_TDR = (uint32_t)token | SPI_PCS(SPI_CHAN);
-    while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0)
-        ;
-    //while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0);
-    //SPI0->SPI_RDR;
-    for (int i = 0; i < 511; i++) {
-        SPI0->SPI_TDR = (uint32_t)buf[i] | SPI_PCS(SPI_CHAN);
-        while ((SPI0->SPI_SR & SPI_SR_TDRE) == 0)
-            ;
-        while ((SPI0->SPI_SR & SPI_SR_RDRF) == 0)
-            ;
-        SPI0->SPI_RDR;
-        //        delayMicroseconds(1);
-    }
-    spiSend(buf[511]);
-}
-#endif
-#endif
-
 /****************************************************************************************
  Setting for I2C Clock speed. needed to change  clock speed for different peripherals
 ****************************************************************************************/
@@ -961,63 +795,56 @@ int HAL::i2cRead(void) {
 
 #if NUM_SERVOS > 0
 unsigned int HAL::servoTimings[4] = { 0, 0, 0, 0 };
-unsigned int servoAutoOff[4] = { 0, 0, 0, 0 };
-static uint8_t servoIndex = 0;
+static unsigned int servoAutoOff[4] = { 0, 0, 0, 0 };
+static uint8_t servoId = 0;
+static ServoInterface* actServo = nullptr;
 
-void HAL::servoMicroseconds(uint8_t servo, int microsec, uint16_t autoOff) {
-    servoTimings[servo] = (uint32_t)((((F_CPU_TRUE / SERVO_PRESCALE) / 1000) * microsec) / 1000);
-    servoAutoOff[servo] = (microsec) ? (autoOff / 20) : 0;
+void HAL::servoMicroseconds(uint8_t servoId, int microsec, uint16_t autoOff) {
+    servoTimings[servoId] = microsec ? ((microsec * (servo->timer->getTimerClkFreq() / 1000000)) / ServoPrescalerfactor) - 1 : 0;
+    servoAutoOff[servoId] = (microsec) ? (autoOff / 20) : 0;
 }
 
 // ================== Interrupt handling ======================
 
 ServoInterface* analogServoSlots[4] = { nullptr, nullptr, nullptr, nullptr };
-// Servo timer Interrupt handler
-extern "C" void TIMER_VECTOR(SERVO_TIMER_NUM) {
-    if (SERVO_TIMER->COUNT16.INTFLAG.bit.MC0 == 1) {
-        SERVO_TIMER->COUNT16.INTFLAG.bit.MC0 = 1;
-        static uint32_t interval;
-
-        fast8_t servoId = servoIndex >> 1;
-        ServoInterface* act = analogServoSlots[servoId];
-        if (act == nullptr) {
-            SERVO_TIMER->COUNT16.CC[0].reg = SERVO2500US;
-            SYNC_TIMER(SERVO_TIMER);
-        } else {
-            if (servoIndex & 1) { // disable
-                act->disable();
-                SERVO_TIMER->COUNT16.CC[0].reg = SERVO5000US - interval;
-                SYNC_TIMER(SERVO_TIMER);
-                if (servoAutoOff[servoId]) {
-                    servoAutoOff[servoId]--;
-                    if (servoAutoOff[servoId] == 0)
-                        HAL::servoTimings[servoId] = 0;
-                }
-            } else { // enable
-                InterruptProtectedBlock noInt;
-                if (HAL::servoTimings[servoId]) {
-                    act->enable();
-                    interval = HAL::servoTimings[servoId];
-                    SERVO_TIMER->COUNT16.CC[0].reg = interval;
-                    SYNC_TIMER(SERVO_TIMER);
-                } else {
-                    interval = SERVO2500US;
-                    SERVO_TIMER->COUNT16.CC[0].reg = interval;
-                    SYNC_TIMER(SERVO_TIMER);
-                }
+void servoOffTimer(HardwareTimer* timer) {
+    if (actServo) {
+        actServo->disable();
+        if (servoAutoOff[servoId]) {
+            servoAutoOff[servoId]--;
+            if (servoAutoOff[servoId] == 0) {
+                HAL::servoTimings[servoId] = 0;
             }
         }
-        servoIndex++;
-        if (servoIndex > 7) {
-            servoIndex = 0;
+    }
+    if (++servoId >= 4) {
+        servoId = 0;
+    }
+    actServo = analogServoSlots[servoId];
+    if (actServo == nullptr) {
+        servo->tim->CCR1 = Servo2500;
+    } else {
+        // InterruptProtectedBlock noInt;
+        unsigned int ms = HAL::servoTimings[servoId];
+        if (ms) {
+            servo->tim->CCR1 = ms;
+        } else {
+            servo->tim->CCR1 = Servo2500;
         }
+    }
+}
+
+// Servo timer Interrupt handler
+void TIMER_VECTOR(SERVO_TIMER_NUM) {
+    if (actServo) {
+        actServo->enable();
     }
 }
 #endif
 
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
-extern "C" void TIMER_VECTOR(MOTION3_TIMER_NUM) {
+void TIMER_VECTOR(MOTION3_TIMER_NUM) {
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_STEPPER_PIN, 1);
 #endif
@@ -1027,22 +854,15 @@ extern "C" void TIMER_VECTOR(MOTION3_TIMER_NUM) {
 #endif
 }
 
-fast8_t pwmSteps[] = { 1, 2, 4, 8, 16 };
-fast8_t pwmMasks[] = { 255, 254, 252, 248, 240 };
-
-#define pulseDensityModulate(pin, density, error, invert) \
-    { \
-        uint8_t carry; \
-        carry = error + (invert ? 255 - density : density); \
-        WRITE(pin, (carry < error)); \
-        error = carry; \
-    }
+ufast8_t pwmSteps[] = { 1, 2, 4, 8, 16 };
+ufast8_t pwmMasks[] = { 255, 254, 252, 248, 240 };
 
 /**
 This timer is called 5000 times per second. It is used to update
 pwm values for heater and some other frequent jobs.
 */
-extern "C" void TIMER_VECTOR(PWM_TIMER_NUM) {
+
+void TIMER_VECTOR(PWM_TIMER_NUM) {
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_TEMP_PIN, 1);
 #endif
@@ -1082,17 +902,11 @@ extern "C" void TIMER_VECTOR(PWM_TIMER_NUM) {
 }
 
 // MOTION2_TIMER IRQ handler
-extern "C" void TIMER_VECTOR(MOTION2_TIMER_NUM) {
-    // static bool inside = false; // prevent double call when not finished
+void TIMER_VECTOR(MOTION2_TIMER_NUM) {
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_MOTION_PIN, 1);
 #endif
-    /*      if (inside) {
-            return;
-        }
-        inside = true;*/
     Motion2::timer();
-    //        inside = false;
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_MOTION_PIN, 0);
 #endif
@@ -1102,7 +916,6 @@ void HAL::spiInit() {
     SPI.begin();
 }
 
-#ifdef USE_ARDUINO_SPI_LIB
 void HAL::spiBegin(uint32_t clock, uint8_t mode, uint8_t msbfirst) {
     SPI.beginTransaction(SPISettings(clock, msbfirst ? MSBFIRST : LSBFIRST, mode));
 }
@@ -1112,149 +925,28 @@ uint8_t HAL::spiTransfer(uint8_t data) {
 void HAL::spiEnd() {
     SPI.endTransaction();
 }
-#else
-static bool spiMsbfirst;
-static int spiMode = 0;
-void HAL::spiBegin(uint32_t clock, uint8_t mode, uint8_t msbfirst) {
-    spiMsbfirst = msbfirst;
-    uint8_t div;
-    if (clock < (F_CPU / 255)) {
-        div = 255;
-    } else if (clock >= (F_CPU / 2)) {
-        div = 2;
-    } else {
-        div = (F_CPU / (clock + 1)) + 1;
-    }
-    switch (mode) {
-    case 0:
-        spiMode = 2;
-        break;
-    case 1:
-        spiMode = 0;
-        break;
-    case 2:
-        spiMode = 3;
-        break;
-    case 3:
-        spiMode = 1;
-        break;
-    }
-    uint32_t config = (spiMode & 3) | SPI_CSR_CSAAT | SPI_CSR_SCBR(div) | SPI_CSR_DLYBCT(1);
-    SPI_ConfigureNPCS(SPI_INTERFACE, SPI_INTERFACE_ID, config);
-}
-uint8_t HAL::spiTransfer(uint8_t data) {
-    if (!spiMsbfirst)
-        data = __REV(__RBIT(data));
-    uint32_t d = data | SPI_PCS(SPI_INTERFACE_ID);
-    if (spiMode == SPI_LAST)
-        d |= SPI_TDR_LASTXFER;
-
-    // SPI_Write(spi, _channel, _data);
-    while ((SPI_INTERFACE->SPI_SR & SPI_SR_TDRE) == 0)
-        ;
-    SPI_INTERFACE->SPI_TDR = d;
-
-    // return SPI_Read(spi);
-    while ((SPI_INTERFACE->SPI_SR & SPI_SR_RDRF) == 0)
-        ;
-    d = SPI_INTERFACE->SPI_RDR;
-    // Reverse bit order
-    if (!spiMsbfirst)
-        d = __REV(__RBIT(d));
-    return d & 0xFF;
-}
-#endif
-
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-RFDoubleSerial::RFDoubleSerial() {
-}
-void RFDoubleSerial::begin(unsigned long baud) {
-    RFSERIAL.begin(baud);
-    BT_SERIAL.begin(BLUETOOTH_BAUD);
-}
-
-void RFDoubleSerial::end() {
-    RFSERIAL.end();
-    BT_SERIAL.end();
-}
-int RFDoubleSerial::available(void) {
-    int x = RFSERIAL.available();
-    if (x > 0)
-        return x;
-    return BT_SERIAL.available();
-}
-int RFDoubleSerial::peek(void) {
-    if (RFSERIAL.available())
-        return RFSERIAL.peek();
-    return BT_SERIAL.peek();
-}
-int RFDoubleSerial::read(void) {
-    if (RFSERIAL.available())
-        return RFSERIAL.read();
-    return BT_SERIAL.read();
-}
-void RFDoubleSerial::flush(void) {
-    RFSERIAL.flush();
-    BT_SERIAL.flush();
-}
-size_t RFDoubleSerial::write(uint8_t c) {
-    size_t r = RFSERIAL.write(c);
-    BT_SERIAL.write(c);
-    return r;
-}
-RFDoubleSerial BTAdapter;
-#endif
-
-// Dummy function to overload weak arduino function that always disables
-// watchdog. We do not need that as we do this our self.
-void watchdogSetup(void) {
-}
 
 #if BEEPER_PIN > -1
-void TC3_Handler(void) {
-    static bool toggle;
-    WRITE(BEEPER_PIN, toggle);
-    toggle = !toggle;
+static bool toneToggle = false;
+void TIMER_VECTOR(TONE_TIMER_NUM) {
+    WRITE(BEEPER_PIN, toneToggle);
+    toneToggle = !toneToggle;
 }
 #endif
 
 void HAL::tone(int frequency) {
 #if BEEPER_PIN >= 0
-/*    SET_OUTPUT(BEEPER_PIN);
-    NVIC_SetPriority(TONE_TC_IRQn, 2); // don'r disturb stepper interrupt!
-    GCLK->PCHCTRL[TONE_TC_GCLK_ID].reg = GCLK_PCHCTRL_GEN_GCLK0_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
-    while (GCLK->SYNCBUSY.reg > 0) {}
-
-    TONE_TC->COUNT16.CTRLA.bit.ENABLE = 0; // can only change if disabled
-
-    // Use match mode so that the timer counter resets when the count matches the
-    // compare register
-    TONE_TC->COUNT16.WAVE.bit.WAVEGEN = TC_WAVE_WAVEGEN_MFRQ;
-    SYNC_TIMER(TONE_TC);
-    TONE_TC->COUNT16.INTENSET.reg = 0;
-    TONE_TC->COUNT16.INTENSET.bit.MC0 = 1;
-    uint32_t prescale, freq;
-    getPrescaleFreq(F_CPU_TRUE / (2 * frequency), prescale, freq);
-    TONE_TC->COUNT16.CTRLA.reg &= ~TC_CTRLA_PRESCALER_DIV1024;
-    TONE_TC->COUNT16.CTRLA.reg |= prescale;
-    NVIC_EnableIRQ(TONE_TC_IRQn); // Enable IRQ for function call
-    TONE_TC->COUNT16.COUNT.reg = map(TONE_TC->COUNT16.COUNT.reg, 0,
-                                     TONE_TC->COUNT16.CC[0].reg, 0, freq);
-    TONE_TC->COUNT16.CC[0].reg = freq;
-    SYNC_TIMER(TONE_TC);
-    TONE_TC->COUNT16.CTRLA.bit.ENABLE = 1; // enable timer
-    SYNC_TIMER(TONE_TC);*/
+    SET_OUTPUT(BEEPER_PIN);
+    toneToggle = false;
+    toneTimer->timer->pause();
+    toneTimer->timer->setOverflow(2 * frequency, HERTZ_FORMAT);
+    toneTimer->timer->resume();
 #endif
 }
 void HAL::noTone() {
 #if BEEPER_PIN >= 0
-    // Disable TCx
-    /*   TONE_TC->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;
-    while (TONE_TC->COUNT16.SYNCBUSY.bit.ENABLE) {}
-    TONE_TC->COUNT16.CTRLA.reg = TC_CTRLA_SWRST; // Reset timer
-    while (TONE_TC->COUNT16.SYNCBUSY.bit.ENABLE) {}
-    while (TONE_TC->COUNT16.CTRLA.bit.SWRST) {}
-    WRITE(BEEPER_PIN, 0);*/
+    toneTimer->timer->pause();
+    WRITE(BEEPER_PIN, 0);
 #endif
 }
 

@@ -607,6 +607,19 @@ int HAL::analogRead(int pin) {
     return analogValues[cNum];
 }
 
+#if EEPROM_AVAILABLE == EEPROM_FLASH
+millis_t eprSyncTime = 0; // in sync
+void HAL::syncEEPROM() {  // store to disk if changed
+    millis_t time = millis();
+    if (eprSyncTime && (time - eprSyncTime > 2000)) { // Buffer writes only every 2 seconds to pool writes
+        eprSyncTime = 0;
+        FEUpdateChanges();
+        Com::printFLN("EEPROM data updated");
+    }
+}
+void HAL::importEEPROM() {
+}
+#endif
 #if EEPROM_AVAILABLE == EEPROM_SDCARD
 
 #if !SDSUPPORT
@@ -998,14 +1011,6 @@ void MOTION3_TIMER_VECTOR() {
 
 fast8_t pwmSteps[] = { 1, 2, 4, 8, 16 };
 fast8_t pwmMasks[] = { 255, 254, 252, 248, 240 };
-
-#define pulseDensityModulate(pin, density, error, invert) \
-    { \
-        uint8_t carry; \
-        carry = error + (invert ? 255 - density : density); \
-        WRITE(pin, (carry < error)); \
-        error = carry; \
-    }
 
 /**
 This timer is called 5000 times per second. It is used to update

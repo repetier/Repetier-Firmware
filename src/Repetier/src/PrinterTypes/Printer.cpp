@@ -656,7 +656,7 @@ void Printer::defaultLoopActions() {
 #if SDCARDDETECT > -1 && SDSUPPORT
     sd.automount();
 #endif
-#if defined(EEPROM_AVAILABLE) && EEPROM_AVAILABLE == EEPROM_SDCARD
+#if defined(EEPROM_AVAILABLE) && (EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH)
     HAL::syncEEPROM();
 #endif
 

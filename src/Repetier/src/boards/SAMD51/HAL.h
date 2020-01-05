@@ -130,13 +130,10 @@ typedef char prog_char;
 // #define TWI_INTERFACE TWI1
 // #define TWI_ID ID_TWI1
 
-#define EXTRUDER_CLOCK_FREQ 60000 // extruder stepper interrupt frequency
 // #define PWM_CLOCK_FREQ          3906
 // #define PWM_COUNTER_100MS       390
 #define PWM_CLOCK_FREQ 5000
 #define PWM_COUNTER_100MS 500
-//#define MOTION3_CLOCK_FREQ       244
-//#define MOTION3_PRESCALE         2
 
 /*
 servo pulses repeat every 20ms, so each block of 4 servos has 5ms as maximum 
@@ -153,7 +150,6 @@ that means prescale factor 16 => 7.5*timeInUs ticks
 #define AD_TRACKING_CYCLES 4  // 0 - 15     + 1 adc clock cycles
 #define AD_TRANSFER_CYCLES 1  // 0 - 3      * 2 + 3 adc clock cycles
 
-#define ADC_ISR_EOC(channel) (0x1u << channel)
 #define MAX_ANALOG_INPUTS 16
 
 #define PULLUP(IO, v) \
@@ -337,8 +333,12 @@ union eeval_t {
     long l;
 } PACK;
 
-#if EEPROM_AVAILABLE == EEPROM_SDCARD
+#if EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH
 extern millis_t eprSyncTime;
+#endif
+#if EEPROM_AVAILABLE == EEPROM_FLASH
+extern void FEUpdateChanges(void);
+extern void FEInit(void);
 #endif
 
 class HAL {
@@ -375,7 +375,7 @@ public:
         // make debugging startup easier
         //Serial.begin(115200);
 
-#if EEPROM_AVAILABLE && EEPROM_MODE != EEPROM_NONE && EEPROM_AVAILABLE != EEPROM_SDCARD
+#if EEPROM_AVAILABLE && EEPROM_MODE != EEPROM_NONE && EEPROM_AVAILABLE != EEPROM_SDCARD && EEPROM_AVAILABLE != EEPROM_FLASH
         // Copy eeprom to ram for faster access
         int i;
         for (i = 0; i < EEPROM_BYTES; i += 4) {
@@ -388,6 +388,9 @@ public:
         for (i = 0; i < EEPROM_BYTES; i += 4) {
             memcopy4(&virtualEeprom[i], &n);
         }
+#endif
+#if EEPROM_AVAILABLE == EEPROM_FLASH && EEPROM_MODE != EEPROM_NONE
+        FEInit();
 #endif
     }
 
@@ -420,7 +423,7 @@ public:
     static void tone(int frequency);
     static void noTone();
 
-#if EEPROM_AVAILABLE == EEPROM_SDCARD
+#if EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH
     static void syncEEPROM(); // store to disk if changed
     static void importEEPROM();
 #endif
@@ -539,8 +542,12 @@ public:
         }
         i2cStop();                                 // signal end of transaction
         delayMilliseconds(EEPROM_PAGE_WRITE_TIME); // wait for page write to complete
-#elif EEPROM_AVAILABLE == EEPROM_SDCARD
-        eprSyncTime = HAL::timeInMilliseconds() | 1UL;
+#elif EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH
+        if (pos >= EEPROM::reservedEnd) {
+            eprSyncTime = 1UL; // enforce fast write to finish before power is lost
+        } else {
+            eprSyncTime = HAL::timeInMilliseconds() | 1UL;
+        }
 #endif
     }
 
@@ -687,6 +694,7 @@ public:
     static void analogStart(void);
     static int analogRead(int channel);
     static void analogEnable(int channel);
+    static void reportHALDebug() {}
     static volatile uint8_t insideTimer1;
 };
 

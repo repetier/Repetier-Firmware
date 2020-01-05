@@ -13,16 +13,6 @@
 #define CURRENT_CONTROL_ALLIGATOR 4 //Use External DAC like Alligator
 #define CURRENT_CONTROL_MCP4728 5   // Use an i2c DAC as a digipot like PrintrBoard Rev. F
 
-/*
-  arm does not have a eeprom build in. Therefore boards can add a
-  eeprom. Board definition must set the right type of eeprom
-*/
-
-#define EEPROM_NONE 0
-#define EEPROM_I2C 1
-#define EEPROM_SPI_ALLIGATOR 2
-#define EEPROM_SDCARD 3
-
 inline void memcopy2(void* dest, void* source) {
     *((int16_t*)dest) = *((int16_t*)source);
 }

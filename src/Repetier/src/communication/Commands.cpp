@@ -83,7 +83,7 @@ void Commands::commandLoop() {
 void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     Printer::handleInterruptEvent();
 #if defined(BEEPER_PIN) && BEEPER_PIN >= 0
-    Printer::processToneQueue(); 
+    Printer::processToneQueue();
 #endif
     FirmwareEvent::handleEvents();
 #if EMERGENCY_PARSER
@@ -381,7 +381,7 @@ void Commands::processGCode(GCode* com) {
 */
 extern void reportAnalog();
 void Commands::processMCode(GCode* com) {
-    if (Printer::failedMode && !(com->M == 110 || com->M == 999)) {
+    if (Printer::failedMode && !(com->M == 110 || com->M == 999 || com->M == 0)) {
         return;
     }
 
@@ -390,7 +390,7 @@ void Commands::processMCode(GCode* com) {
     }
     switch (com->M) {
     case 0:
-        // reportAnalog();
+        // HAL::reportHALDebug();
         break;
     case 3: // Spindle/laser
         MCode_3(com);
@@ -803,11 +803,11 @@ void Commands::executeGCode(GCode* com) {
             }
         }
     }
-    if (com->hasG())
+    if (com->hasG()) {
         processGCode(com);
-    else if (com->hasM())
+    } else if (com->hasM()) {
         processMCode(com);
-    else if (com->hasT()) { // Process T code
+    } else if (com->hasT()) { // Process T code
         if (!Printer::failedMode) {
             //com->printCommand(); // for testing if this the source of extruder switches
             Motion1::waitForEndOfMoves();

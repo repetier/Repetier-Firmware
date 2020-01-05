@@ -23,7 +23,7 @@ STM32F446 processor, 180MHz, 512kb flash, 128kb RAM
 #pragma once
 
 #ifndef STM32F4
-#error "Oops! Select STM32F4 in platformio.ini -> default_envs"
+#error "Oops! Select RUMBA32 in platformio.ini -> default_envs"
 #endif
 
 #define CPU_ARCH ARCH_ARM
@@ -67,20 +67,26 @@ STM32F446 processor, 180MHz, 512kb flash, 128kb RAM
 #define ORIG_E2_CS_PIN PD1
 
 // Temperature Sensors
-#define TEMP_0_PIN PC4
-#define TEMP_2_PIN PC3
-#define TEMP_3_PIN PC2
-#define TEMP_4_PIN PC1
-#define TEMP_1_PIN PC0 // bed
+#define TEMP_0_PIN PC4 // T0
+#define TEMP_2_PIN PC3 // T1
+#define TEMP_3_PIN PC2 // T2
+#define TEMP_4_PIN PC1 // T3
+#define TEMP_1_PIN PC0 // TB bed
+
+#define THERMOCOUPLE_0_PIN PA3 // A10 on EXP3
+#define THERMOCOUPLE_1_PIN PA4 // A9 on EXP3
 
 // Heaters / Fans
-#define HEATER_0_PIN PC6 // E0
-#define HEATER_2_PIN PC7 // E1
-#define HEATER_3_PIN PC8 // E2
-#define HEATER_1_PIN PA1 // bed
+#define HEATER_0_PIN PC6 // E0 Timer 3 Channel 1
+#define HEATER_2_PIN PC7 // E1 Timer 8 Channel 2
+#define HEATER_3_PIN PC8 // E2 Timer 3 Channel 3
+#define HEATER_1_PIN PA1 // bed Timer 5 Channel 2
 
-#define ORIG_FAN_PIN PC9
-#define ORIG_FAN2_PIN PA8
+// Note: In schematic fan0 goes to fan1 and fan1 to fan0. We use numbering printed on board.
+#define ORIG_FAN_PIN PC9  // Timer 8 Channel 4
+#define ORIG_FAN2_PIN PA8 // Timer 1 Channel 1
+#define PWM1_PIN PD14     // TIM4_CH3
+#define PWM2_PIN PD15     // TIM4_CH4
 
 #ifndef TWI_CLOCK_FREQ
 #define TWI_CLOCK_FREQ 400000
@@ -90,8 +96,14 @@ STM32F446 processor, 180MHz, 512kb flash, 128kb RAM
 #define EEPROM_SERIAL_ADDR 0x50  // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64      // page write buffer size
 #define EEPROM_PAGE_WRITE_TIME 7 // page write time in milliseconds (docs say 5ms but that is too short)
+#define FLASH_START 0x08000000ul
+#define FLASH_SIZE 0x0080000ul // flash size excluding bootloader
+#ifndef FLASH_EEPROM_SIZE
+#define FLASH_EEPROM_SIZE 0x20000ul // use 128kb flash to prevent early destruction of flash but leave room for firmware
+#define FLASH_SECTOR 7              // sector 7 is last 128kb
+#endif
 #ifndef EEPROM_AVAILABLE
-#define EEPROM_AVAILABLE EEPROM_I2C
+#define EEPROM_AVAILABLE EEPROM_FLASH
 #endif
 
 // I2C
@@ -111,10 +123,16 @@ STM32F446 processor, 180MHz, 512kb flash, 128kb RAM
 #define ORIG_PS_ON_PIN PE11
 #define KILL_PIN PC5
 
+#ifndef SDSS
 #define SDSS PA2
+#endif
 #define SDPOWER -1
+#ifndef SD_DETECT_PIN
 #define SD_DETECT_PIN PB0
+#endif
+#ifndef BEEPER_PIN
 #define BEEPER_PIN PE8
+#endif
 
 // LCD / Controller
 #ifndef CUSTOM_CONTROLLER_PINS
@@ -129,7 +147,11 @@ STM32F446 processor, 180MHz, 512kb flash, 128kb RAM
 #define UI_ENCODER_A PB1
 #define UI_ENCODER_B PB2
 #define UI_ENCODER_CLICK PE7
+#ifndef UI_BACK_PIN
 #define UI_BACK_PIN -1
+#endif
+#ifndef UI_RESET_PIN
 #define UI_RESET_PIN -1
+#endif
 
 #endif

@@ -482,6 +482,7 @@ public:
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);
 #endif
     static void analogStart();
+    static void reportHALDebug() {}
 
 protected:
 private:

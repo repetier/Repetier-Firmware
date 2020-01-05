@@ -31,13 +31,15 @@ extern ServoInterface* analogServoSlots[4];
 \
     public: \
         name##Class() { \
+        } \
+        void init() { \
             analogServoSlots[slot] = this; \
             position = neutral; \
             HAL::servoMicroseconds(slot, neutral, 1000); \
         } \
         virtual int getPosition() { return position; } \
         virtual void setPosition(int pos, int32_t timeout) { \
-            if (pos < minVal) { \
+            if (pos < minVal && pos != 0) { \
                 pos = minVal; \
             } \
             if (pos > maxVal) { \
@@ -55,6 +57,11 @@ extern ServoInterface* analogServoSlots[4];
 
 #define SERVO_ANALOG(name, slot, output, minVal, maxVal, neutral) \
     name##Class name;
+
+#elif IO_TARGET == IO_TARGET_INIT
+
+#define SERVO_ANALOG(name, slot, output, minVal, maxVal, neutral) \
+    name.init();
 
 #else
 

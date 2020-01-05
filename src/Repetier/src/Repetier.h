@@ -33,39 +33,7 @@
 #define EMERGENCY_PARSER 1
 #endif
 
-#define MOTHERBOARD_RADDS 402
-#define MOTHERBOARD_RAMPS_FD_INVERTED_HEATER 403
-#define MOTHERBOARD_RAMPS_FD 404
-#define MOTHERBOARD_FELIX 405
-#define MOTHERBOARD_BAM_AND_DICE 406
-#define MOTHERBOARD_ULTRATRONICS 409
-#define MOTHERBOARD_SMARTRAMPS_NO_EEPROM 408
-#define MOTHERBOARD_SMARTRAMPS_EEPROM 413
-#define MOTHERBOARD_STACKER_3D_SUPERBOARD 412
-#define MOTHERBOARD_RURAMPS4D 414
-#define MOTHERBOARD_SHASTA 416
-#define MOTHERBOARD_IKS3D 417
-#define MOTHERBOARD_ALLIGATOR_REV1 500
-#define MOTHERBOARD_ALLIGATOR_REV2 501
-#define MOTHERBOARD_ALLIGATOR_REV3 502
-#define MOTHERBOARD_USER_DEFINED_DUE 998
-#define MOTHERBOARD_USER_DEFINED_AVR 999
-
-// SAMD51 based boards
-#define MOTHERBOARD_AGC_SMARTRAMPS_NO_EEPROM 1000
-#define MOTHERBOARD_AGC_SMARTRAMPS_EEPROM 1001
-#define MOTHERBOARD_AGC_USER_DEFINED 1002
-#define MOTHERBOARD_AGC_RADDS 1003
-
-// M0/SAMD21 based boards
-#define MOTHERBOARD_MINITRONICS_2_0 2000
-
-// STM32F4 based boards (3000 - 3499)
-#define MOTHERBOARD_RUMBA32 3000
-
-#define PELTIER_COOLER 0
-#define PELTIER_HEATER 1
-#define PELTIER_SWITCH 2
+#include "utilities/constants.h"
 
 // Some helper macros
 
@@ -84,13 +52,13 @@
 // ##                                  Debug configuration                                 ##
 // ##########################################################################################
 // These are run time switchable debug flags
-enum debugFlags { DEB_ECHO = 0x1,
-                  DEB_INFO = 0x2,
-                  DEB_ERROR = 0x4,
-                  DEB_DRYRUN = 0x8,
-                  DEB_COMMUNICATION = 0x10,
-                  DEB_NOMOVES = 0x20,
-                  DEB_DEBUG = 0x40
+enum class debugFlags { DEB_ECHO = 0x1,
+                        DEB_INFO = 0x2,
+                        DEB_ERROR = 0x4,
+                        DEB_DRYRUN = 0x8,
+                        DEB_COMMUNICATION = 0x10,
+                        DEB_NOMOVES = 0x20,
+                        DEB_DEBUG = 0x40
 };
 
 /** Uncomment, to see detailed data for every move. Only for debugging purposes! */
@@ -196,25 +164,6 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #define ANALYZER_OFF(a)
 #endif
 
-#define X_AXIS 0
-#define Y_AXIS 1
-#define Z_AXIS 2
-#define E_AXIS 3
-#define A_AXIS 4
-#define B_AXIS 5
-#define C_AXIS 6
-#define VIRTUAL_AXIS 4
-// How big an array to hold X_AXIS..<MAX_AXIS>
-#define Z_AXIS_ARRAY 3
-#define E_AXIS_ARRAY 4
-#define VIRTUAL_AXIS_ARRAY 5
-
-#define A_TOWER 0
-#define B_TOWER 1
-#define C_TOWER 2
-#define TOWER_ARRAY 3
-#define E_TOWER_ARRAY 4
-
 #define ANALOG_REF_AREF 0
 #define ANALOG_REF_AVCC _BV(REFS0)
 #define ANALOG_REF_INT_1_1 _BV(REFS1)
@@ -225,79 +174,6 @@ usage or for searching for memory induced errors. Switch it off for production, 
 #include "utilities/RVector3.h"
 extern void updateEndstops();
 
-#define NO_CONTROLLER 0
-#define UICONFIG_CONTROLLER 1
-#define CONTROLLER_SMARTRAMPS 2
-#define CONTROLLER_ADAFRUIT 3
-#define CONTROLLER_FOLTYN 4
-#define CONTROLLER_VIKI 5
-#define CONTROLLER_MEGATRONIC 6
-#define CONTROLLER_RADDS 7
-#define CONTROLLER_PIBOT20X4 8
-#define CONTROLLER_PIBOT16X2 9
-#define CONTROLLER_GADGETS3D_SHIELD 10
-#define CONTROLLER_REPRAPDISCOUNT_GLCD 11
-#define CONTROLLER_FELIX 12
-#define CONTROLLER_RAMBO 13
-#define CONTROLLER_OPENHARDWARE_LCD2004 14
-#define CONTROLLER_SANGUINOLOLU_PANELOLU2 15
-#define CONTROLLER_GAMEDUINO2 16
-#define CONTROLLER_MIREGLI 17
-#define CONTROLLER_GATE_3NOVATICA 18
-#define CONTROLLER_SPARKLCD 19
-#define CONTROLLER_BAM_DICE_DUE 20
-#define CONTROLLER_VIKI2 21
-#define CONTROLLER_LCD_MP_PHARAOH_DUE 22
-#define CONTROLLER_SPARKLCD_ADAPTER 23
-#define CONTROLLER_ZONESTAR 24
-#define CONTROLLER_FELIX_DUE 405
-#define CONTROLLER_ORCABOTXXLPRO2 25
-#define CONTROLLER_AZSMZ_12864 26
-#define CONTROLLER_REPRAPWORLD_GLCD 27
-#define CONTROLLER_AZSMZ_12864_OLED 28
-
-#define PRINTER_TYPE_CARTESIAN 0
-#define PRINTER_TYPE_CORE_XYZ 1
-#define PRINTER_TYPE_DELTA 2
-#define PRINTER_TYPE_DUAL_X 3
-
-#define ILLEGAL_Z_PROBE -888
-
-#define IO_TARGET_INIT 1
-#define IO_TARGET_PWM 2
-#define IO_TARGET_100MS 3
-#define IO_TARGET_CLASS_DEFINITION 4
-#define IO_TARGET_ENDSTOP_UPDATE 5
-#define IO_TARGET_DEFINE_VARIABLES 6
-#define IO_TARGET_CONFIG_VISUALIZATION 7
-#define IO_TARGET_EEPROM 8
-#define IO_TARGET_UPDATE_DERIVED 9
-#define IO_TARGET_RESTORE_FROM_CONFIG 10
-#define IO_TARGET_ANALOG_INPUT_LOOP 11
-#define IO_TARGET_500MS 12
-#define IO_TARGET_TOOLS_TEMPLATES 13
-#define IO_TARGET_FIRMWARE_EVENTS 14
-#define IO_TARGET_PERIODICAL_ACTIONS 15
-#define IO_TARGET_GUI_CONTROLS 16
-#define IO_TARGET_GUI_CONFIG 17
-#define IO_TARGET_GUI_TUNE 18
-#define IO_TARGET_GUI_MAIN_MENU 19
-#define IO_TARGET_GUI_WIZARDS 20
-#define IO_TARGET_STORE_RECOVER_DATA 21
-#define IO_TARGET_RESTORE_RECOVER_DATA 22
-#define IO_TARGET_INIT_LATE 23
-
-#define CHOPPER_TIMING_DEFAULT_12V \
-    { 3, -1, 1 }
-#define CHOPPER_TIMING_DEFAULT_19V \
-    { 4, 1, 1 }
-#define CHOPPER_TIMING_DEFAULT_24V \
-    { 4, 2, 1 }
-#define CHOPPER_TIMING_DEFAULT_36V \
-    { 5, 2, 4 }
-#define CHOPPER_TIMING_PRUSAMK3_24V \
-    { 3, -2, 6 }
-
 // we can not prevent this as some configurations need a parameter and others not
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -307,6 +183,17 @@ extern void updateEndstops();
 #define CONFIG_VARIABLE(tp, name, values) extern tp name;
 #define CONFIG_VARIABLE_EQ(tp, name, values) extern tp name;
 #endif
+
+/*
+  arm does not have a eeprom build in. Therefore boards can add a
+  eeprom. Board definition must set the right type of eeprom
+*/
+
+#define EEPROM_NONE 0
+#define EEPROM_I2C 1
+#define EEPROM_SPI_ALLIGATOR 2
+#define EEPROM_SDCARD 3
+#define EEPROM_FLASH 4
 
 class ServoInterface {
 public:
@@ -328,7 +215,7 @@ public:
 #endif
 
 #ifndef SMALL_SEGMENT_SIZE
-#define SMALL_SEGMENT_SIZE 0.7
+#define SMALL_SEGMENT_SIZE 0.4
 #endif
 
 #ifndef HOST_RESCUE
@@ -434,17 +321,6 @@ extern ServoInterface* servos[NUM_SERVOS];
 #define DEBUG_MEMORY Commands::checkFreeMemory();
 #endif
 
-#define MENU_MODE_SD_MOUNTED 1
-#define MENU_MODE_SD_PRINTING 2
-#define MENU_MODE_PAUSED 4
-#define MENU_MODE_FAN_RUNNING 8
-#define MENU_MODE_PRINTING 16
-#define MENU_MODE_FULL_PID 32
-#define MENU_MODE_DEADTIME 64
-#define MENU_MODE_FDM 128
-#define MENU_MODE_LASER 256
-#define MENU_MODE_CNC 512
-
 #ifndef KEEP_ALIVE_INTERVAL
 #define KEEP_ALIVE_INTERVAL 2000
 #endif
@@ -481,12 +357,6 @@ extern ServoInterface* servos[NUM_SERVOS];
 
 #include "communication/gcode.h"
 
-#define uint uint16_t
-#define uint8 uint8_t
-#define int8 int8_t
-#define uint32 uint32_t
-#define int32 int32_t
-
 #undef min
 #undef max
 
@@ -513,10 +383,6 @@ extern FanController fans[];
 //#if ANALOG_INPUTS > 0
 //extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
 //#endif
-
-#ifndef FEATURE_DITTO_PRINTING
-#define FEATURE_DITTO_PRINTING false
-#endif
 
 extern millis_t previousMillisCmd;
 extern millis_t maxInactiveTime;
@@ -633,8 +499,6 @@ extern volatile int waitRelax; // Delay filament relax at the end of print, coul
 extern int debugWaitLoop;
 #endif
 
-#define STR(s) #s
-#define XSTR(s) STR(s)
 #include "communication/Commands.h"
 #include "communication/Eeprom.h"
 

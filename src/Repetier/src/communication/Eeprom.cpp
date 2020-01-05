@@ -569,7 +569,7 @@ void EEPROM::handleByte(uint pos, PGM_P text, int32_t& var) {
 #if EEPROM_MODE != 0
 void EEPROM::resetRecover() {
     Com::printFLN(PSTR("Resetting rescue data block"));
-    for (int i = 2; i < reservedRecoverEnd; i++) {
+    for (uint i = 2; i < reservedRecoverEnd; i++) {
         setRecoverByte(i, 0);
     }
     setRecoverByte(0, variationRecover1);

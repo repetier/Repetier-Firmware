@@ -273,7 +273,7 @@ void GCode::checkAndPushCommand() {
 		requestResend();
 		return;
 	}*/
-    if (GCode::hasFatalError() && !(hasM() && M == 999)) {
+    if (GCode::hasFatalError() && !(hasM() && (M == 999 || M == 0))) {
         GCode::reportFatalError();
     } else {
         pushCommand();
@@ -1041,7 +1041,7 @@ void GCode::resetFatalError() {
     Com::writeToAll = true;
     HeatManager::resetAllErrorStates();
     Printer::debugReset(8); // disable dry run
-    fatalErrorMsg = NULL;
+    fatalErrorMsg = nullptr;
     UI_ERROR_P(PSTR(""));
     Printer::setUIErrorMessage(false); // allow overwrite
     EVENT_CONTINUE_FROM_FATAL_ERROR
@@ -1267,9 +1267,9 @@ void SerialGCodeSource::testEmergency(GCode& gcode) {
             PrinterType::M290(&gcode);
         } else if (gcode.M == 416) {
             Printer::handlePowerLoss();
-        } else if (gcode.M == 205) { 
-            EEPROM::writeSettings(); 
-        } 
+        } else if (gcode.M == 205) {
+            EEPROM::writeSettings();
+        }
     }
 }
 

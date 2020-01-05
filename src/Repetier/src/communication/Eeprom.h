@@ -64,6 +64,7 @@ enum class EEPROMType {
 };
 
 class EEPROM {
+    friend class HAL;
     static fast8_t mode;  // 0 = output, 1 = set var, 2 = store to eeprom, 3 = read from eeprom
     static uint storePos; // where does M206 want to store
     static bool silent;

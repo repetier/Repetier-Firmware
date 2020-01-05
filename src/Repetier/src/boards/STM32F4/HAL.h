@@ -30,15 +30,8 @@
 
 // -------- STM32F4 HAL.h ---------------
 
-// You can set different sizes if you want, but with binary mode it does not get faster
-#ifndef SERIAL_RX_BUFFER_SIZE
-#define SERIAL_RX_BUFFER_SIZE 128
-#endif
-
 #ifndef HAL_H_STM32F4
 #define HAL_H_STM32F4
-
-#define USE_ARDUINO_SPI_LIB
 
 #include <inttypes.h>
 #include "pins.h"
@@ -81,13 +74,11 @@ typedef char prog_char;
 #undef pgm_read_float
 #define pgm_read_float(addr) (*(const float*)(addr))
 #undef pgm_read_word
-//#define pgm_read_word(addr) (*(const unsigned int *)(addr))
 #define pgm_read_word(addr) (*(addr))
 #undef pgm_read_word_near
 #define pgm_read_word_near(addr) pgm_read_word(addr)
 #undef pgm_read_dword
 #define pgm_read_dword(addr) (*(addr))
-//#define pgm_read_dword(addr) (*(const unsigned long *)(addr))
 #undef pgm_read_dword_near
 #define pgm_read_dword_near(addr) pgm_read_dword(addr)
 
@@ -99,56 +90,30 @@ typedef char prog_char;
 #define MOTION2_TIMER_NUM 6
 #endif
 #ifndef PWM_TIMER_NUM
-#define PWM_TIMER_NUM 2
+#define PWM_TIMER_NUM 10
 #endif
 #ifndef MOTION3_TIMER_NUM
 #define MOTION3_TIMER_NUM 7
 #endif
+// Timer 13 does crash firmware at least for rumba32!
 #ifndef SERVO_TIMER_NUM
-#define SERVO_TIMER_NUM 5
+#define SERVO_TIMER_NUM 9
 #endif
 #ifndef TONE_TIMER_NUM
 #define TONE_TIMER_NUM 11
 #endif
 
-#define SERIAL_BUFFER_SIZE 128
-//#define SERIAL_PORT             UART
-//#define SERIAL_IRQ              ID_UART
-//#define SERIAL_PORT_VECTOR      UART_Handler
+// for host autoconfiguration
+#define SERIAL_BUFFER_SIZE SERIAL_RX_BUFFER_SIZE
 
-// TWI1 if SDA pin = 20  TWI0 for pin = 70
-// #define TWI_INTERFACE TWI1
-// #define TWI_ID ID_TWI1
-
-#define EXTRUDER_CLOCK_FREQ 60000 // extruder stepper interrupt frequency
-// #define PWM_CLOCK_FREQ          3906
-// #define PWM_COUNTER_100MS       390
 #define PWM_CLOCK_FREQ 5000
 #define PWM_COUNTER_100MS 500
-//#define MOTION3_CLOCK_FREQ       244
-//#define MOTION3_PRESCALE         2
 
-/*
-servo pulses repeat every 20ms, so each block of 4 servos has 5ms as maximum 
-value to wait. So we need F_CPU * 0.005 ticks = 600000 ticks. With 16 bit timer
-that means prescale factor 16 => 7.5*timeInUs ticks
-*/
-#define SERVO_CLOCK_FREQ 1000
-#define SERVO_PRESCALE (FCPU / 20000) // Using TCLOCK1 therefore 2
-#define SERVO2500US ((F_CPU_TRUE / SERVO_PRESCALE) / 8)
-#define SERVO5000US ((F_CPU_TRUE / SERVO_PRESCALE) / 4)
-
-#define AD_PRESCALE_FACTOR 84 // 500 kHz ADC clock
-#define AD_TRACKING_CYCLES 4  // 0 - 15     + 1 adc clock cycles
-#define AD_TRANSFER_CYCLES 1  // 0 - 3      * 2 + 3 adc clock cycles
-
-#define ADC_ISR_EOC(channel) (0x1u << channel)
 // #define MAX_ANALOG_INPUTS 16 // gets already set in pins_arduino.h
 
 #define PULLUP(IO, v) \
     { ::pinMode(IO, (v != LOW ? INPUT_PULLUP : INPUT)); }
 
-// INTERVAL / (32Khz/128)  = seconds
 #define WATCHDOG_INTERVAL 8000000 // 8sec
 
 #include "Arduino.h"
@@ -168,7 +133,6 @@ that means prescale factor 16 => 7.5*timeInUs ticks
         }; \
     } while (0)
 #define WRITE(pin, v) _WRITE(pin, v)
-//   level = digital_io_read(get_GPIO_Port(STM_PORT(pn)), STM_LL_GPIO_PIN(pn));
 #define READ_VAR(pin) (LL_GPIO_IsInputPinSet(get_GPIO_Port(STM_PORT(pin)), STM_LL_GPIO_PIN(pin)) ? 1 : 0)
 #define READ(pin) _READ(pin)
 #define WRITE_VAR(pin, v) \
@@ -182,11 +146,7 @@ that means prescale factor 16 => 7.5*timeInUs ticks
 #define WRITE(pin, v) _WRITE(pin, v)
 
 #define SET_INPUT(pin) ::pinMode(pin, INPUT);
-// pmc_enable_periph_clk(g_APinDescription[pin].ulPeripheralId);
-//  PIO_Configure(g_APinDescription[pin].pPort, PIO_INPUT, g_APinDescription[pin].ulPin, 0)
 #define SET_OUTPUT(pin) ::pinMode(pin, OUTPUT);
-//PIO_Configure(g_APinDescription[pin].pPort, PIO_OUTPUT_1,
-//                                      g_APinDescription[pin].ulPin, g_APinDescription[pin].ulPinConfiguration)
 #define _TOGGLE(port) LL_GPIO_TogglePin(GPIO_##port, GPIO_##port##_mask);
 #define TOGGLE(pin) _TOGGLE(pin)
 #define TOGGLE_VAR(pin) HAL::digitalWrite(pin, !HAL::digitalRead(pin))
@@ -246,14 +206,7 @@ public:
 };
 #endif
 
-#define SECONDS_TO_TICKS(s) (unsigned long)(s * (float)F_CPU)
-#define ANALOG_INPUT_SAMPLE 6
-#define ANALOG_INPUT_MEDIAN 10
-
-// Bits of the ADC converter
-#define ANALOG_INPUT_BITS 12
-#define ANALOG_REDUCE_BITS 0
-#define ANALOG_REDUCE_FACTOR 1
+#define SECONDS_TO_TICKS(s) static_cast<uint32_t>(s * (float)F_CPU)
 
 // maximum available RAM
 #ifndef MAX_RAM
@@ -271,8 +224,7 @@ typedef int32_t fast8_t;
 typedef uint32_t ufast8_t;
 
 #ifndef RFSERIAL
-#define RFSERIAL Serial // Programming port of the due
-//#define RFSERIAL SerialUSB  // Native USB Port of the due
+#define RFSERIAL SerialUSB // USB Port
 #endif
 
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
@@ -288,21 +240,6 @@ typedef uint32_t ufast8_t;
 #define BT_SERIAL SerialUSB
 #endif
 #define RFSERIAL2 BT_SERIAL
-
-class RFDoubleSerial : public Print {
-public:
-    RFDoubleSerial();
-    void begin(unsigned long);
-    void end();
-    virtual int available(void);
-    virtual int peek(void);
-    virtual int read(void);
-    virtual void flush(void);
-    virtual size_t write(uint8_t);
-    using Print::write; // pull in write(str) and write(buf, size) from Print
-};
-extern RFDoubleSerial BTAdapter;
-
 #endif
 
 union eeval_t {
@@ -313,8 +250,12 @@ union eeval_t {
     long l;
 } PACK;
 
-#if EEPROM_AVAILABLE == EEPROM_SDCARD
+#if EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH
 extern millis_t eprSyncTime;
+#endif
+#if EEPROM_AVAILABLE == EEPROM_FLASH
+extern void FEUpdateChanges(void);
+extern void FEInit(void);
 #endif
 
 class HAL {
@@ -335,35 +276,7 @@ public:
     // Set pwm output to value. id is id from initHardwarePWM.
     static void setHardwarePWM(int id, int value);
     // do any hardware-specific initialization here
-    static inline void hwSetup(void) {
-#if !FEATURE_WATCHDOG
-        // Disable watchdog
-#endif
-
-#if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
-        HAL::i2cInit(TWI_CLOCK_FREQ);
-#endif
-#if defined(EEPROM_AVAILABLE) && defined(EEPROM_SPI_ALLIGATOR) && EEPROM_AVAILABLE == EEPROM_SPI_ALLIGATOR
-        HAL::spiBegin();
-#endif
-        // make debugging startup easier
-        //Serial.begin(115200);
-
-#if EEPROM_AVAILABLE && EEPROM_MODE != EEPROM_NONE && EEPROM_AVAILABLE != EEPROM_SDCARD
-        // Copy eeprom to ram for faster access
-        int i;
-        for (i = 0; i < EEPROM_BYTES; i += 4) {
-            eeval_t v = eprGetValue(i, 4);
-            memcopy4(&virtualEeprom[i], &v.i);
-        }
-#else
-        int i,
-            n = 0;
-        for (i = 0; i < EEPROM_BYTES; i += 4) {
-            memcopy4(&virtualEeprom[i], &n);
-        }
-#endif
-    }
+    static void hwSetup(void);
 
     static inline void digitalWrite(uint8_t pin, uint8_t value) {
         WRITE_VAR(pin, value);
@@ -395,7 +308,7 @@ public:
     static void tone(int frequency);
     static void noTone();
 
-#if EEPROM_AVAILABLE == EEPROM_SDCARD
+#if EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH
     static void syncEEPROM(); // store to disk if changed
     static void importEEPROM();
 #endif
@@ -455,36 +368,15 @@ public:
     }
 
     // Write any data type to EEPROM
-    static inline void eprBurnValue(unsigned int pos, int size, union eeval_t newvalue) {
-#if EEPROM_AVAILABLE == EEPROM_I2C
-        i2cStartAddr(EEPROM_SERIAL_ADDR, pos, 0);
-        i2cWrite(newvalue.b[0]); // write first byte
-        for (int i = 1; i < size; i++) {
-            pos++;
-            // writes can not cross page boundary
-            if ((pos % EEPROM_PAGE_SIZE) == 0) {
-                // burn current page then address next one
-                i2cStop();
-                delayMilliseconds(EEPROM_PAGE_WRITE_TIME);
-                i2cStartAddr(EEPROM_SERIAL_ADDR, pos, 0);
-            }
-            i2cWrite(newvalue.b[i]);
-        }
-        i2cStop();                                 // signal end of transaction
-        delayMilliseconds(EEPROM_PAGE_WRITE_TIME); // wait for page write to complete
-#elif EEPROM_AVAILABLE == EEPROM_SDCARD
-        eprSyncTime = HAL::timeInMilliseconds() | 1UL;
-#endif
-    }
+    static void eprBurnValue(unsigned int pos, int size, union eeval_t newvalue);
 
     // Read any data type from EEPROM that was previously written by eprBurnValue
     static inline union eeval_t eprGetValue(unsigned int pos, int size) {
 #if EEPROM_AVAILABLE == EEPROM_I2C
-        int i;
         eeval_t v;
         // set read location
         i2cStartAddr(EEPROM_SERIAL_ADDR, pos, size);
-        for (i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             // read an incomming byte
             v.b[i] = i2cRead();
         }
@@ -519,38 +411,15 @@ public:
     static inline void serialSetBaudrate(long baud) {
         // Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-        BTAdapter.begin(baud);
-#else
+        BTAdapter.begin(baud); // BLUETOOTH_BAUD
+#endif
         RFSERIAL.begin(baud);
-#endif
-    }
-    static inline bool serialByteAvailable() {
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-        return BTAdapter.available();
-#else
-        return RFSERIAL.available();
-#endif
-    }
-    static inline uint8_t serialReadByte() {
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-        return BTAdapter.read();
-#else
-        return RFSERIAL.read();
-#endif
-    }
-    static inline void serialWriteByte(char b) {
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-        BTAdapter.write(b);
-#else
-        RFSERIAL.write(b);
-#endif
     }
     static inline void serialFlush() {
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
         BTAdapter.flush();
-#else
-        RFSERIAL.flush();
 #endif
+        RFSERIAL.flush();
     }
     static void setupTimer();
     static void showStartReason();
@@ -560,11 +429,7 @@ public:
     static void spiInit(); // only called once to initialize for spi usage
     static void spiBegin(uint32_t clock, uint8_t mode, uint8_t msbfirst);
     static uint8_t spiTransfer(uint8_t);
-#ifndef USE_ARDUINO_SPI_LIB
-    static void spiEnd() {}
-#else
     static void spiEnd();
-#endif
 
     // I2C Support
     static void i2cSetClockspeed(uint32_t clockSpeedHz);
@@ -595,7 +460,8 @@ public:
     static void analogStart(void);
     static int analogRead(int channel);
     static void analogEnable(int channel);
-    static volatile uint8_t insideTimer1;
+
+    static void reportHALDebug();
 };
 
 #endif // HAL_H
