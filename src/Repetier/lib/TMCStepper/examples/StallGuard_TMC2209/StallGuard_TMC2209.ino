@@ -114,7 +114,7 @@ void loop() {
     Serial.print("0 ");
     Serial.print(driver.SG_RESULT(), DEC);
     Serial.print(" ");
-    Serial.println(driver.cs2rms(driver.SGTHRS()), DEC);
+    Serial.println(driver.cs2rms(driver.cs_actual()), DEC);
   }
 }
 

@@ -950,4 +950,10 @@ void HAL::noTone() {
 #endif
 }
 
+void HAL::switchToBootMode() {
+    enableBackupDomain();
+    setBackupRegister(LL_RTC_BKP_DR2, 0x515B);
+    NVIC_SystemReset();
+}
+
 #endif

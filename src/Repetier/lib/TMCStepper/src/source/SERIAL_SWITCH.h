@@ -3,14 +3,12 @@
 #include <Arduino.h>
 #include "TMC_platforms.h"
 
-class SSwitch
-{
+class SSwitch {
   public:
-    SSwitch(uint16_t pin1,uint16_t pin2,uint8_t address);
+    SSwitch(const uint16_t pin1, const uint16_t pin2, const uint8_t address);
     void active();
   private:
-    uint16_t p1;
-    uint16_t p2;
-    uint8_t addr;
+    const uint16_t p1;
+    const uint16_t p2;
+    const uint8_t addr;
 };
-

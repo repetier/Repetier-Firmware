@@ -84,6 +84,10 @@ void TMC2160Stepper::rms_current(uint16_t mA) {
     else if (scaler < 128) CS--;  // Try again with smaller CS
   } while(0 < scaler && scaler < 128);
 
+
+  if (CS > 31)
+    CS = 31;
+
   GLOBAL_SCALER(scaler);
   irun(CS);
   ihold(CS*holdMultiplier);

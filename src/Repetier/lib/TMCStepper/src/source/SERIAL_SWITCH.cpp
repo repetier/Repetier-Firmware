@@ -1,7 +1,6 @@
 #include "SERIAL_SWITCH.h"
 
-#ifdef TMC_SERIAL_SWITCH
-SSwitch::SSwitch(uint16_t pin1,uint16_t pin2,uint8_t address) :
+SSwitch::SSwitch( const uint16_t pin1, const uint16_t pin2, const uint8_t address) :
   p1(pin1),
   p2(pin2),
   addr(address)
@@ -11,32 +10,6 @@ SSwitch::SSwitch(uint16_t pin1,uint16_t pin2,uint8_t address) :
 	}
 
 void SSwitch::active() {
-  switch(addr) {
-    case 0:
-      writePIN_L(p1);
-      writePIN_L(p2);
-      break;
-
-    case 1:
-      writePIN_H(p1);
-      writePIN_L(p2);
-      break;
-
-    case 2:
-      writePIN_L(p1);
-      writePIN_H(p2);
-      break;
-
-    case 3:
-      writePIN_H(p1);
-      writePIN_H(p2);
-      break;
-
-    default:
-      writePIN_L(p1);
-      writePIN_L(p2);
-      break;
-  }
+  digitalWrite(p1, addr & 0b01 ? HIGH : LOW);
+  digitalWrite(p2, addr & 0b10 ? HIGH : LOW);
 }
-
-#endif

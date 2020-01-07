@@ -17,19 +17,17 @@
 #elif defined(TARGET_LPC1768) // LPC1769:2.4MHz
   //typedef volatile LPC_GPIO_TypeDef* fastio_reg;
   //typedef uint32_t fastio_bm;
-  #define writeMOSI_H gpio_set(mosi_pin)
-  #define writeMOSI_L gpio_clear(mosi_pin)
-  #define writeSCK_H gpio_set(sck_pin)
-  #define writeSCK_L gpio_clear(sck_pin)
-  #define readMISO gpio_get(miso_pin)
+  #define writeMOSI_H LPC176x::gpio_set(mosi_pin)
+  #define writeMOSI_L LPC176x::gpio_clear(mosi_pin)
+  #define writeSCK_H LPC176x::delay_ns(40); LPC176x::gpio_set(sck_pin)
+  #define writeSCK_L LPC176x::delay_ns(40); LPC176x::gpio_clear(sck_pin)
+  #define readMISO LPC176x::gpio_get(miso_pin)
 #elif defined(__STM32F1__) || defined(TARGET_STM32F1)
   #define writeMOSI_H digitalWrite(mosi_pin, HIGH)
   #define writeMOSI_L digitalWrite(mosi_pin, LOW)
   #define writeSCK_H digitalWrite(sck_pin, HIGH)
   #define writeSCK_L digitalWrite(sck_pin, LOW)
   #define readMISO digitalRead(miso_pin)
-  #define writePIN_H(pin) digitalWrite(pin, HIGH)
-  #define writePIN_L(pin) digitalWrite(pin, LOW)
 #else // DUE:116kHz
   #define writeMOSI_H digitalWrite(mosi_pin, HIGH)
   #define writeMOSI_L digitalWrite(mosi_pin, LOW)

@@ -639,33 +639,11 @@ public:
         RFSERIAL.begin(baud);
 #endif
     }
-    static inline bool serialByteAvailable() {
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-        return BTAdapter.available();
-#else
-        return RFSERIAL.available();
-#endif
-    }
-    static inline uint8_t serialReadByte() {
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-        return BTAdapter.read();
-#else
-        return RFSERIAL.read();
-#endif
-    }
-    static inline void serialWriteByte(char b) {
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-        BTAdapter.write(b);
-#else
-        RFSERIAL.write(b);
-#endif
-    }
     static inline void serialFlush() {
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
         BTAdapter.flush();
-#else
-        RFSERIAL.flush();
 #endif
+        RFSERIAL.flush();
     }
     static void setupTimer();
     static void showStartReason();
@@ -828,6 +806,10 @@ public:
     static int analogRead(int channel) { return ADC->ADC_CDR[channel]; }
     static void reportHALDebug() {}
     static volatile uint8_t insideTimer1;
+    static void switchToBootMode();
+    static void reset() {
+        NVIC_SystemReset();
+    }
 };
 
 #endif // HAL_H

@@ -1179,4 +1179,8 @@ RFDoubleSerial BTAdapter;
 // watchdog. We do not need that as we do this our self.
 void watchdogSetup(void) {
 }
+
+void HAL::switchToBootMode() {
+    Com::printFLN("Switching to bootmode code not supported for this chip.");
+}
 #endif

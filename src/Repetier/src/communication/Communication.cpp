@@ -276,14 +276,12 @@ FSTRINGVALUE(Com::tDBGDeltaVirtualAxisSteps, "Virtual axis steps:")
 #ifdef DEBUG_STEPCOUNT
 FSTRINGVALUE(Com::tDBGMissedSteps, "Missed steps:")
 #endif // DEBUG_STEPCOUNT
-#if Z_PROBE_TYPE
 FSTRINGVALUE(Com::tZProbe, "Z-probe:")
 FSTRINGVALUE(Com::tZProbeAverage, "Z-probe average height:")
 FSTRINGVALUE(Com::tZProbeZReset, "Reset Z height")
 FSTRINGVALUE(Com::tZProbeStartScript, Z_PROBE_START_SCRIPT)
 FSTRINGVALUE(Com::tZProbeEndScript, Z_PROBE_FINISHED_SCRIPT)
 FSTRINGVALUE(Com::tHitZProbe, "Hit z-probe")
-#endif
 FSTRINGVALUE(Com::tZProbeState, "Z-probe state:")
 FSTRINGVALUE(Com::tAutolevelReset, "Autolevel matrix reset")
 FSTRINGVALUE(Com::tAutolevelEnabled, "Autoleveling enabled")

@@ -189,11 +189,11 @@ extern void updateEndstops();
   eeprom. Board definition must set the right type of eeprom
 */
 
-#define EEPROM_NONE 0
-#define EEPROM_I2C 1
-#define EEPROM_SPI_ALLIGATOR 2
-#define EEPROM_SDCARD 3
-#define EEPROM_FLASH 4
+#define EEPROM_NONE 0          /** Don't use eeprom */
+#define EEPROM_I2C 1           /** Use external eeprom connected via I2C bus */
+#define EEPROM_SPI_ALLIGATOR 2 /** Use spi connected eeprom on alligator boards */
+#define EEPROM_SDCARD 3        /** Use mounted sd card as eeprom replacement */
+#define EEPROM_FLASH 4         /** Use flash memory as eeprom replacement */
 
 class ServoInterface {
 public:
@@ -533,6 +533,7 @@ extern int debugWaitLoop;
 
 #include "motion/Drivers.h"
 #include "utilities/PlaneBuilder.h"
+#include "drivers/zprobe.h"
 
 #include "Events.h"
 #include "custom/customEvents.h"

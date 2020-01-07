@@ -323,7 +323,6 @@ public:
 #ifdef DEBUG_STEPCOUNT
     FSTRINGVAR(tDBGMissedSteps)
 #endif
-#if Z_PROBE_TYPE
     FSTRINGVAR(tZProbe)
     FSTRINGVAR(tZProbeStartScript)
     FSTRINGVAR(tZProbeEndScript)
@@ -331,7 +330,6 @@ public:
     FSTRINGVAR(tZProbeAverage)
     FSTRINGVAR(tZProbeZReset)
     FSTRINGVAR(tZProbeBedDitance)
-#endif
     FSTRINGVAR(tZProbeState)
     FSTRINGVAR(tAutolevelReset)
     FSTRINGVAR(tAutolevelEnabled)

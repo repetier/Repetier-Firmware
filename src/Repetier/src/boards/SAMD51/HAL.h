@@ -309,20 +309,6 @@ typedef unsigned int ufast8_t;
 #endif
 #define RFSERIAL2 BT_SERIAL
 
-class RFDoubleSerial : public Print {
-public:
-    RFDoubleSerial();
-    void begin(unsigned long);
-    void end();
-    virtual int available(void);
-    virtual int peek(void);
-    virtual int read(void);
-    virtual void flush(void);
-    virtual size_t write(uint8_t);
-    using Print::write; // pull in write(str) and write(buf, size) from Print
-};
-extern RFDoubleSerial BTAdapter;
-
 #endif
 
 union eeval_t {
@@ -616,37 +602,14 @@ public:
         // Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
         BTAdapter.begin(baud);
-#else
+#endif
         RFSERIAL.begin(baud);
-#endif
-    }
-    static inline bool serialByteAvailable() {
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-        return BTAdapter.available();
-#else
-        return RFSERIAL.available();
-#endif
-    }
-    static inline uint8_t serialReadByte() {
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-        return BTAdapter.read();
-#else
-        return RFSERIAL.read();
-#endif
-    }
-    static inline void serialWriteByte(char b) {
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-        BTAdapter.write(b);
-#else
-        RFSERIAL.write(b);
-#endif
     }
     static inline void serialFlush() {
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
         BTAdapter.flush();
-#else
-        RFSERIAL.flush();
 #endif
+        RFSERIAL.flush();
     }
     static void setupTimer();
     static void showStartReason();
@@ -696,6 +659,10 @@ public:
     static void analogEnable(int channel);
     static void reportHALDebug() {}
     static volatile uint8_t insideTimer1;
+    static void switchToBootMode();
+    static void reset() {
+        NVIC_SystemReset();
+    }
 };
 
 #endif // HAL_H

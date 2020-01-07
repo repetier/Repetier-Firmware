@@ -56,7 +56,6 @@ void TMC2208Stepper::CHOPCONF(uint32_t input) {
 	write(CHOPCONF_register.address, CHOPCONF_register.sr);
 }
 uint32_t TMC2208Stepper::CHOPCONF() {
-	if (write_only) return CHOPCONF_register.sr;
 	return read(CHOPCONF_register.address);
 }
 void TMC2208Stepper::toff	( uint8_t  B )	{ SET_REG(toff); 	}

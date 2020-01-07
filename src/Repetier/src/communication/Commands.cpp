@@ -769,6 +769,9 @@ void Commands::processMCode(GCode* com) {
     case 999: // Stop fatal error take down
         MCode_999(com);
         break;
+    case 9999: // Switch to bootmode if possible
+        HAL::switchToBootMode();
+        break;
     /* case 888: {
         Motion1::waitForEndOfMoves();
         Com::printF(PSTR("XSteps:"), XMotor.position);

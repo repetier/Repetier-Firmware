@@ -123,6 +123,10 @@ void TMC2660Stepper::rms_current(uint16_t mA) {
   } else { // If CS >= 16, turn off high_sense_r
     vsense(false);
   }
+
+  if (CS > 31)
+    CS = 31;
+
   cs(CS);
   //val_mA = mA;
 }

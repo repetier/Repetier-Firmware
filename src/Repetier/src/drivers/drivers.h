@@ -35,19 +35,8 @@ public:
 extern void motorEndstopTriggered(fast8_t axis, bool dir);
 extern void endstopTriggered(fast8_t axis, bool dir);
 
-/*
-#include "../../Printer.h"
-#include "../motion/MotionLevel1.h"
-#include "../motion/MotionLevel2.h"
-#include "../motion/MotionLevel3.h"
-#include "../PrinterTypes/PrinterTypeCartesian.h"
-#include "../PrinterTypes/PrinterTypeCoreXYZ.h"
-#include "../motion/VelocityProfile.h"
-*/
-
 #include "endstops.h"
 #include "stepper.h"
-#include "zprobe.h"
 #include "heatManager.h"
 #include "coolerManager.h"
 #include "../tools/tools.h"

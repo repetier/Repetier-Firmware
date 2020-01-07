@@ -19,6 +19,29 @@
 // Additional informations: https://github.com/Aus3D/RUMBA32
 /*
 STM32F446 processor, 180MHz, 512kb flash, 128kb RAM
+
+EXP1 and EXP2 are rotated 180° compared to Smart Graphics Controller pins, so rotate cable accordingly
+
+Expansion ports with orientation board power connector lower right corner.
+
+EXP1:
+                      GND     PE14   PE12       PE7      PE8
+Header pins top:       9       7       5         3        1
+Header pins bottom:    10      8       6         4        2
+                      3.3V    PE15    PE13      PE10     PE7
+
+EXP2:
+                      GND     PB0     PB1       PB2      MISO
+Header pins top:       9       7       5         3        1
+Header pins bottom:    10      8       6         4        2
+                      Kill   Reset    MOSI      PA2      SCK
+
+EXP3:
+                     PD13   PA9(TX1) (SCL)    PA4   PD14(PWM1)  GND      12V
+Header pins top:      13      11       9       7       5         3        1
+Header pins bottom:   14      12       10      8       6         4        2
+                     PD12  PA10(RX1)  (SDA)   PA3   PD15(PWM2)  GND       5V
+
 */
 #pragma once
 

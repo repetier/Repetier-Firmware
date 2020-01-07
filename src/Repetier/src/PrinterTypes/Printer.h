@@ -650,7 +650,7 @@ public:
 #endif
     static void zBabystep();
 
-    static INLINE void resetWizardStack() {
+    /* static INLINE void resetWizardStack() {
         wizardStackPos = 0;
     }
     static INLINE void pushWizardVar(wizardVar v) {
@@ -658,7 +658,7 @@ public:
     }
     static INLINE wizardVar popWizardVar() {
         return wizardStack[--wizardStackPos];
-    }
+    } */
     static void showConfiguration();
     static void reportCaseLightStatus();
 #if JSON_OUTPUT || defined(DOXYGEN)
