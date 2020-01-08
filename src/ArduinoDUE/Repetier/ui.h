@@ -892,6 +892,7 @@ public:
   void adjustMenuPos();
   void setStatusP(PGM_P txt, bool error = false);
   void setStatus(const char *txt, bool error = false);
+  void setProgress(int percent, int eta);
   inline void setOutputMaskBits(unsigned int bits)
   {
     outputMask |= bits;

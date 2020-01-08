@@ -448,6 +448,7 @@ public:
     }
 
     static inline void tone(uint8_t pin, int frequency) {
+#if defined(BEEPER_PIN) && BEEPER_PIN > -1
         // set up timer counter 1 channel 0 to generate interrupts for
         // toggling output pin.
         SET_OUTPUT(BEEPER_PIN);
@@ -468,11 +469,14 @@ public:
         BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
         BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
         NVIC_EnableIRQ((IRQn_Type)BEEPER_TIMER_IRQ);
+#endif
     }
     static inline void noTone(uint8_t pin) {
+#if defined(BEEPER_PIN) && BEEPER_PIN > -1
         TC_Stop(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
         WRITE(BEEPER_PIN, 0);
         // WRITE_VAR(pin, LOW);
+#endif
     }
 
 #if EEPROM_AVAILABLE == EEPROM_SDCARD

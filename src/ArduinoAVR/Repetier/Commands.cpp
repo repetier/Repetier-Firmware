@@ -2269,8 +2269,12 @@ void Commands::processMCode(GCode* com) {
         }
         break;
     case 73: // M73 - Print status on display
-        UI_PROGRESS_UPD(com->hasP() ? com->P : -1,
-                        com->hasR() ? com->R : -1);
+#if SDSUPPORT
+        if (sd.sdmode == 1) {
+            UI_PROGRESS_UPD(com->hasP() ? com->P : -1,
+                            com->hasR() ? com->R : -1);
+        }
+#endif
         break;
     case 80: // M80 - ATX Power On
 #if PS_ON_PIN > -1

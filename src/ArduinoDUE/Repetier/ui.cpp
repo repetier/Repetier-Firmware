@@ -2202,6 +2202,47 @@ void UIDisplay::setStatus(const char *txt, bool error)
         Printer::setUIErrorMessage(true);
 }
 
+void UIDisplay::setProgress(int percent, int eta) {
+    static const char done_P[12][10] PROGMEM = {
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {'.', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {'.', '.', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {'.', '.', '.', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {'.', '.', '.', '.', ' ', ' ', ' ', ' ', ' ', ' '},
+        {'.', '.', '.', '.', '.', ' ', ' ', ' ', ' ', ' '},
+        {'.', '.', '.', '.', '.', '.', ' ', ' ', ' ', ' '},
+        {'.', '.', '.', '.', '.', '.', '.', ' ', ' ', ' '},
+        {'.', '.', '.', '.', '.', '.', '.', '.', ' ', ' '},
+        {'.', '.', '.', '.', '.', '.', '.', '.', '.', ' '},
+        {'.', '.', '.', '.', '.', '.', '.', '.', '.', '.'},
+        {'.', '.', '.', '1', '0', '0', '.', '.', '.', '.'}
+    };
+    char status[21] = "[    --    ] Rm--:--";
+    
+    if (0 <= percent) {
+        if (percent >= 100) {
+            memcpy_P(status + 1, done_P[11], sizeof(done_P[0]));
+        } else {
+            memcpy_P(status + 1, done_P[(percent + 5) / 10], sizeof(done_P[0]));
+            status[5] = (percent < 10) ? ' ' : (percent / 10) | '0';
+            status[6] =                        (percent % 10) | '0';
+        }
+    }
+    
+    if (0 <= eta) {
+        unsigned h = eta / 60;
+        unsigned m = eta % 60;
+        
+        status[15] = (h < 10) ? ' ' : (h / 10) | '0';
+        status[16] =                  (h % 10) | '0';
+        status[18] =                  (m / 10) | '0';
+        status[19] =                  (m % 10) | '0';
+    }
+    
+    setStatus(status);
+    refreshPage();
+}
+
 const UIMenu *const ui_pages[UI_NUM_PAGES] PROGMEM = UI_PAGES;
 uint16_t nFilesOnCard;
 void UIDisplay::updateSDFileCount()
