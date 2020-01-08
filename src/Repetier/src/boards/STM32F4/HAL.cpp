@@ -280,7 +280,7 @@ TimerFunction* motion2;
 TimerFunction* motion3;
 TimerFunction* pwm;
 TimerFunction* servo;
-TimerFunction* toneTimer;
+TimerFunction* toneTimer = nullptr;
 extern void TIMER_VECTOR(MOTION2_TIMER_NUM);
 extern void TIMER_VECTOR(MOTION3_TIMER_NUM);
 extern void TIMER_VECTOR(PWM_TIMER_NUM);
@@ -945,15 +945,28 @@ void HAL::tone(int frequency) {
 }
 void HAL::noTone() {
 #if BEEPER_PIN >= 0
-    toneTimer->timer->pause();
-    WRITE(BEEPER_PIN, 0);
+    if (toneTimer != nullptr) { // could be called before timer are initialized!
+        toneTimer->timer->pause();
+        WRITE(BEEPER_PIN, 0);
+    }
 #endif
 }
 
 void HAL::switchToBootMode() {
-    enableBackupDomain();
+    auto SysMemBootJump = (void (*)(void))(*((uint32_t*)0x1fff0004));
+    Printer::kill(false); // safety shut down hardware
+    HAL_RCC_DeInit();
+    SysTick->CTRL = 0; // reset systick timer
+    SysTick->LOAD = 0;
+    SysTick->VAL = 0;
+    __set_PRIMASK(1);
+    __set_MSP(0x20001000);
+    SysMemBootJump();
+    while (1)
+        ;
+    /*enableBackupDomain();
     setBackupRegister(LL_RTC_BKP_DR2, 0x515B);
-    NVIC_SystemReset();
+    NVIC_SystemReset(); */
 }
 
 #endif

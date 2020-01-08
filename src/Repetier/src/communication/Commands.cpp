@@ -49,7 +49,6 @@ void Commands::commandLoop() {
 #endif
         GCode::readFromSerial();
         GCode* code = GCode::peekCurrentCommand();
-        //UI_SLOW; // do longer timed user interface action
         if (code) {
 #if SDSUPPORT
             if (sd.savetosd) {

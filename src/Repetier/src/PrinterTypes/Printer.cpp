@@ -613,9 +613,7 @@ void Printer::setup() {
     updateDerivedParameter();
     Commands::checkFreeMemory();
     Commands::writeLowestFreeRAM();
-    HAL::delayMilliseconds(20);
     HAL::setupTimer();
-    HAL::delayMilliseconds(20);
 
 #if SDSUPPORT
     sd.mount();
@@ -623,7 +621,6 @@ void Printer::setup() {
 #if FEATURE_WATCHDOG
     HAL::startWatchdog();
 #endif
-    HAL::delayMilliseconds(20);
 
     Tool::selectTool(rescueStartTool());
     // Extruder::selectExtruderById(0);
@@ -633,7 +630,6 @@ void Printer::setup() {
 #ifdef STARTUP_GCODE
     GCode::executeFString(Com::tStartupGCode);
 #endif
-    HAL::delayMilliseconds(20);
     rescueSetup();
 }
 
@@ -659,7 +655,6 @@ void Printer::defaultLoopActions() {
 #if defined(EEPROM_AVAILABLE) && (EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH)
     HAL::syncEEPROM();
 #endif
-
     DEBUG_MEMORY;
 }
 

@@ -153,12 +153,10 @@ Header pins bottom:   14      12       10      8       6         4        2
 #ifndef SD_DETECT_PIN
 #define SD_DETECT_PIN PB0
 #endif
-#ifndef BEEPER_PIN
-#define BEEPER_PIN PE8
-#endif
 
 // LCD / Controller
 #ifndef CUSTOM_CONTROLLER_PINS
+#if FEATURE_CONTROLLER != CONTROLLER_NONE
 
 #define UI_DISPLAY_RS_PIN PE10
 #define UI_DISPLAY_RW_PIN -1
@@ -170,11 +168,10 @@ Header pins bottom:   14      12       10      8       6         4        2
 #define UI_ENCODER_A PB1
 #define UI_ENCODER_B PB2
 #define UI_ENCODER_CLICK PE7
-#ifndef UI_BACK_PIN
-#define UI_BACK_PIN -1
-#endif
-#ifndef UI_RESET_PIN
-#define UI_RESET_PIN -1
+#ifndef BEEPER_PIN
+#undef BEEPER_PIN
+#define BEEPER_PIN PE8
 #endif
 
+#endif
 #endif

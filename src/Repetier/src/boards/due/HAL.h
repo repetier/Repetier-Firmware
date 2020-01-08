@@ -294,20 +294,6 @@ typedef unsigned int ufast8_t;
 #endif
 #define RFSERIAL2 BT_SERIAL
 
-class RFDoubleSerial : public Print {
-public:
-    RFDoubleSerial();
-    void begin(unsigned long);
-    void end();
-    virtual int available(void);
-    virtual int peek(void);
-    virtual int read(void);
-    virtual void flush(void);
-    virtual size_t write(uint8_t);
-    using Print::write; // pull in write(str) and write(buf, size) from Print
-};
-extern RFDoubleSerial BTAdapter;
-
 #endif
 
 union eeval_t {
@@ -634,14 +620,14 @@ public:
     static inline void serialSetBaudrate(long baud) {
         Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-        BTAdapter.begin(baud);
+        RFSERIAL2.begin(baud);
 #else
         RFSERIAL.begin(baud);
 #endif
     }
     static inline void serialFlush() {
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-        BTAdapter.flush();
+        RFSERIAL2.flush();
 #endif
         RFSERIAL.flush();
     }

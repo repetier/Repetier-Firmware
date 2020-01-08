@@ -1140,7 +1140,7 @@ RFDoubleSerial::RFDoubleSerial() {
 }
 void RFDoubleSerial::begin(unsigned long baud) {
     RFSERIAL.begin(baud);
-    BT_SERIAL.begin(BLUETOOTH_BAUD);
+    BT_SERIAL.begin(baud);
 }
 
 void RFDoubleSerial::end() {
@@ -1172,7 +1172,6 @@ size_t RFDoubleSerial::write(uint8_t c) {
     BT_SERIAL.write(c);
     return r;
 }
-RFDoubleSerial BTAdapter;
 #endif
 
 // Dummy function to overload weak arduino function that always disables

@@ -285,12 +285,12 @@ void GCode_4(GCode* com) {
     if (com->hasP())
         codenum = com->P; // milliseconds to wait
     if (com->hasS())
-        codenum = com->S * 1000;          // seconds to wait 
-    // Add a tone delay just in case the user runs their own tones that rely on delays.
-    
+        codenum = com->S * 1000; // seconds to wait
+        // Add a tone delay just in case the user runs their own tones that rely on delays.
+
 #if defined(BEEPER_PIN) && BEEPER_PIN >= 0
     if (Printer::areTonesPlaying()) {
-        Printer::addToToneQueue({0, static_cast<uint16_t>(codenum)}); 
+        Printer::addToToneQueue({ 0, static_cast<uint16_t>(codenum) });
     }
 #endif
 
@@ -717,6 +717,7 @@ void GCode_133(GCode* com) {
 }
 
 void GCode_134(GCode* com) {
+    /*
 #if FEATURE_Z_PROBE && NUM_TOOLS > 1
     // - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
     float z = com->hasZ() ? com->Z : 0;
@@ -816,6 +817,7 @@ void GCode_134(GCode* com) {
 #endif
 #endif
 #endif
+*/
 }
 
 void GCode_135(GCode* com) {

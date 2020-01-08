@@ -1073,7 +1073,7 @@ void MCode_300(GCode* com) {
         beepS = com->S;
     if (com->hasP())
         beepP = com->P;
-    Printer::addToToneQueue({beepS, beepP}); 
+    Printer::addToToneQueue({ beepS, beepP });
 #endif
 }
 
@@ -1371,6 +1371,7 @@ void MCode_669(GCode* com) {
 }
 
 void MCode_890(GCode* com) {
+    /*
 #if LEVELING_METHOD > 0 && FEATURE_Z_PROBE
     if (com->hasX() && com->hasY()) {
         float c = Printer::bendingCorrectionAt(com->X, com->Y);
@@ -1379,6 +1380,7 @@ void MCode_890(GCode* com) {
         Com::printFLN(PSTR(") = "), c);
     }
 #endif
+*/
 }
 
 void MCode_900(GCode* com) {

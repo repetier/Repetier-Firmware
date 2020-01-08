@@ -120,6 +120,22 @@ inline void memcopy4(void* dest, void* source) {
 #define BEEPER_PIN -1
 #endif
 
+#ifndef UI_BACK_PIN
+#define UI_BACK_PIN -1
+#endif
+#ifndef UI_RESET_PIN
+#define UI_RESET_PIN -1
+#endif
+#ifndef UI_ENCODER_CLICK
+#define UI_ENCODER_CLICK -1
+#endif
+#ifndef UI_ENCODER_A
+#define UI_ENCODER_A -1
+#endif
+#ifndef UI_ENCODER_B
+#define UI_ENCODER_B -1
+#endif
+
 #include "communication/Communication.h"
 
 #endif
