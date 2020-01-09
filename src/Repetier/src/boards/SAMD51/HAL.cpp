@@ -47,9 +47,6 @@ volatile uint8_t HAL::insideTimer1 = 0;
 int spiDueDividors[] = { 10, 21, 42, 84, 168, 255, 255 };
 #endif
 
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-#define BT_SERIAL Serial1
-#if BLUETOOTH_SERIAL == 2
 Uart Serial2(&sercom4, PIN_SERIAL2_RX, PIN_SERIAL2_TX, PAD_SERIAL2_RX, PAD_SERIAL2_TX);
 
 void SERCOM4_0_Handler() {
@@ -64,7 +61,7 @@ void SERCOM4_2_Handler() {
 void SERCOM4_3_Handler() {
     Serial2.IrqHandler();
 }
-#elif BLUETOOTH_SERIAL == 3
+
 Uart Serial3(&sercom1, PIN_SERIAL3_RX, PIN_SERIAL3_TX, PAD_SERIAL3_RX, PAD_SERIAL3_TX);
 
 void SERCOM1_0_Handler() {
@@ -79,8 +76,7 @@ void SERCOM1_2_Handler() {
 void SERCOM1_3_Handler() {
     Serial3.IrqHandler();
 }
-#define BT_SERIAL Serial3
-#elif BLUETOOTH_SERIAL == 4
+
 Uart Serial4(&sercom5, PIN_SERIAL4_RX, PIN_SERIAL4_TX, PAD_SERIAL4_RX, PAD_SERIAL4_TX);
 
 void SERCOM5_0_Handler() {
@@ -95,6 +91,16 @@ void SERCOM5_2_Handler() {
 void SERCOM5_3_Handler() {
     Serial4.IrqHandler();
 }
+
+#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
+#if BLUETOOTH_SERIAL == 1
+ #define BT_SERIAL Serial1
+#elif BLUETOOTH_SERIAL == 2
+ #define BT_SERIAL Serial2
+#elif BLUETOOTH_SERIAL == 3
+ #define BT_SERIAL Serial3
+#elif BLUETOOTH_SERIAL == 4
+ #define BT_SERIAL Serial4
 #endif
 #endif
 

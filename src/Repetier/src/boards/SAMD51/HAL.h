@@ -290,6 +290,10 @@ typedef int32_t flag8_t;
 typedef int32_t fast8_t;
 typedef unsigned int ufast8_t;
 
+extern Uart Serial2;
+extern Uart Serial3;
+extern Uart Serial4;
+
 #ifndef RFSERIAL
 #define RFSERIAL Serial // Programming port of the due
 //#define RFSERIAL SerialUSB  // Native USB Port of the due
@@ -299,13 +303,10 @@ typedef unsigned int ufast8_t;
 #if BLUETOOTH_SERIAL == 1
 #define BT_SERIAL Serial1
 #elif BLUETOOTH_SERIAL == 2
-extern Uart Serial2;
 #define BT_SERIAL Serial2
 #elif BLUETOOTH_SERIAL == 3
-extern Uart Serial3;
 #define BT_SERIAL Serial3
 #elif BLUETOOTH_SERIAL == 4
-extern Uart Serial4;
 #define BT_SERIAL Serial4
 #elif BLUETOOTH_SERIAL == 100
 #define BT_SERIAL Serial
