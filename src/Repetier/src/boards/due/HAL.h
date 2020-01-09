@@ -418,7 +418,7 @@ public:
     }
     static inline void noTone() {
 #if BEEPER_PIN > -1
-        TC_Stop(TC1, 0);
+        TC_Stop(BEEPER_TIMER, 0);
         WRITE_VAR(BEEPER_PIN, LOW);
 #endif
     }
@@ -793,9 +793,6 @@ public:
     static void reportHALDebug() {}
     static volatile uint8_t insideTimer1;
     static void switchToBootMode();
-    static void reset() {
-        NVIC_SystemReset();
-    }
 };
 
 #endif // HAL_H

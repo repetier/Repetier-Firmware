@@ -463,9 +463,6 @@ public:
 
     static void reportHALDebug();
     static void switchToBootMode();
-    static void reset() {
-        NVIC_SystemReset();
-    }
 };
 
 #endif // HAL_H

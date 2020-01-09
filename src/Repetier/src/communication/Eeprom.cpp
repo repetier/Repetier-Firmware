@@ -119,7 +119,7 @@ void EEPROM::callHandle() {
 
 #if defined(BEEPER_PIN) && BEEPER_PIN >= 0
     handleByte(EPR_TONES_ENABLED, Com::tEPRTonesEnabled, Printer::tonesEnabled);
-    Printer::setTonesEnabled(Printer::tonesEnabled);
+    Printer::setTonesEnabled(Printer::tonesEnabled, false);
 #endif
 
     Motion1::eepromHandle();

@@ -150,9 +150,7 @@ Header pins bottom:   14      12       10      8       6         4        2
 #define SDSS PA2
 #endif
 #define SDPOWER -1
-#ifndef SD_DETECT_PIN
-#define SD_DETECT_PIN PB0
-#endif
+#define ORIG_SDCARDDETECT PB0
 
 // LCD / Controller
 #ifndef CUSTOM_CONTROLLER_PINS
@@ -169,8 +167,10 @@ Header pins bottom:   14      12       10      8       6         4        2
 #define UI_ENCODER_B PB2
 #define UI_ENCODER_CLICK PE7
 #ifndef BEEPER_PIN
-#undef BEEPER_PIN
 #define BEEPER_PIN PE8
+#endif
+#ifndef SDCARDDETECT
+#define SDCARDDETECT PB0
 #endif
 
 #endif

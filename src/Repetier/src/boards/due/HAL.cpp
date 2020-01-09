@@ -1057,7 +1057,7 @@ void MOTION2_TIMER_VECTOR() {
 }
 
 // IRQ handler for tone generator
-#if BEEPER_PIN > -1
+#if defined(BEEPER_PIN) && BEEPER_PIN > -1
 void BEEPER_TIMER_VECTOR() {
     static bool toggle;
 

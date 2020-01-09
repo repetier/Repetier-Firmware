@@ -95,6 +95,9 @@ class ZProbeHandler {
     static float speed;
     static bool activated;
 
+    static bool isAlarmOn();
+    static void disableAlarmIfOn();
+
 public:
     static float getZProbeHeight();
     static void setZProbeHeight(float height);

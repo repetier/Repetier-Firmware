@@ -299,13 +299,20 @@ typedef unsigned int ufast8_t;
 #if BLUETOOTH_SERIAL == 1
 #define BT_SERIAL Serial1
 #elif BLUETOOTH_SERIAL == 2
+extern Uart Serial2;
 #define BT_SERIAL Serial2
 #elif BLUETOOTH_SERIAL == 3
+extern Uart Serial3;
 #define BT_SERIAL Serial3
+#elif BLUETOOTH_SERIAL == 4
+extern Uart Serial4;
+#define BT_SERIAL Serial4
 #elif BLUETOOTH_SERIAL == 100
 #define BT_SERIAL Serial
 #elif BLUETOOTH_SERIAL == 101
 #define BT_SERIAL SerialUSB
+#else
+#error Unsupported value for BLUETOOTH_SERIAL
 #endif
 #define RFSERIAL2 BT_SERIAL
 
@@ -660,9 +667,6 @@ public:
     static void reportHALDebug() {}
     static volatile uint8_t insideTimer1;
     static void switchToBootMode();
-    static void reset() {
-        NVIC_SystemReset();
-    }
 };
 
 #endif // HAL_H

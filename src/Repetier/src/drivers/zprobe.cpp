@@ -609,6 +609,7 @@ void ZProbeHandler::activate() {
     if (activated) {
         return;
     }
+    disableAlarmIfOn();
     // Ensure x and y positions are valid
     if (!Motion1::isAxisHomed(X_AXIS) || !Motion1::isAxisHomed(Y_AXIS)) {
         Motion1::homeAxes((Motion1::isAxisHomed(X_AXIS) ? 0 : 1) + (Motion1::isAxisHomed(Y_AXIS) ? 0 : 2));
@@ -859,6 +860,22 @@ void ZProbeHandler::eepromHandle() {
 
 float ZProbeHandler::optimumProbingHeight() {
     return bedDistance + (height > 0 ? 0 : -height);
+}
+
+bool ZProbeHandler::isAlarmOn() {
+    bool on = ZProbe->triggered();
+    if (!on) {
+        return false;
+    }
+    HAL::delayMilliseconds(20); // Normal high stays only 10ms so double test time for safety
+    return ZProbe->triggered();
+}
+
+void ZProbeHandler::disableAlarmIfOn() {
+    while (isAlarmOn()) {
+        ZProbeServo.setPosition(2194, 0); // reset Alarm
+    }
+    ZProbeServo.setPosition(1473, 0); // pin up
 }
 
 #endif

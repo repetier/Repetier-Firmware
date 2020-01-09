@@ -58,7 +58,8 @@ const PinMap PinMap_PWM[] = {
     { PC_6, TIM3, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM3, 1, 0) },    // TIM3_CH1
     { PC_7, TIM8, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_TIM8, 2, 0) },    // TIM8_CH2
     { PC_8, TIM3, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM3, 3, 0) },    // TIM3_CH3
-    { PC_9, TIM8, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_TIM8, 4, 0) },    // TIM8_CH4
+                                                                                           //    { PC_9, TIM8, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF3_TIM8, 4, 0) },    // TIM8_CH4
+    { PC_9, TIM3, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM3, 4, 0) },    // TIM3_CH4
     { PD_14, TIM4, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM4, 3, 0) },   // TIM4_CH3
     { PD_15, TIM4, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, GPIO_AF2_TIM4, 4, 0) },   // TIM4_CH4
     { NC, NP, 0 }
@@ -300,7 +301,6 @@ void HAL::hwSetup(void) {
     SET_OUTPUT(DEBUG_ISR_TEMP_PIN);
     SET_OUTPUT(DEBUG_ISR_ANALOG_PIN);
 #endif
-
     // Servo control
 #if NUM_SERVOS > 0
 
@@ -420,6 +420,8 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
             HT = (HardwareTimer*)(HardwareTimer_Handle[index]->__this);
             pwmEntries[numPWMEntries].ht = HT;
             uint32_t channel = STM_PIN_CHANNEL(map->function);
+            pinMode(pinNumber, OUTPUT);
+            digitalWrite(pinNumber, LOW);
             HT->setPWM(channel, p, frequency, 0);
             return numPWMEntries++;
         }
@@ -959,8 +961,10 @@ void HAL::switchToBootMode() {
     SysTick->CTRL = 0; // reset systick timer
     SysTick->LOAD = 0;
     SysTick->VAL = 0;
-    __set_PRIMASK(1);
-    __set_MSP(0x20001000);
+    __disable_irq();
+    __HAL_SYSCFG_REMAPMEMORY_SYSTEMFLASH();
+    // __set_PRIMASK(1);
+    __set_MSP(0x1FFF0000);
     SysMemBootJump();
     while (1)
         ;

@@ -307,8 +307,10 @@ public:
         return seekToneIndex == -1 ? false : true;
     }
 
-    static INLINE void setTonesEnabled(bool set) {
-        killTones();
+    static INLINE void setTonesEnabled(bool set, bool notEeprom) {
+        if (notEeprom) { // can crash if timer is not initialized
+            killTones();
+        }
         tonesEnabled = set;
     }
     static INLINE void tonesKillNext() {
