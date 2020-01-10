@@ -100,7 +100,9 @@
 #ifndef ORIG_SDCARDDETECT
 #define ORIG_SDCARDDETECT -1
 #endif
+#ifndef SDCARDDETECT
 #define SDCARDDETECT ORIG_SDCARDDETECT
+#endif
 
 #define SENSITIVE_PINS \
     { \

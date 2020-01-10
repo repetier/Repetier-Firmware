@@ -237,12 +237,12 @@ bool Printer::updateDoorOpen() {
         UI_STATUS_F(Com::tSpace);
         bool all = Com::writeToAll;
         Com::writeToAll = true;
-        Com::printFLN("DoorOpened");
+        Com::printFLN(PSTR("DoorOpened"));
         Com::writeToAll = all;
     } else if (b && !isOpen) {
         bool all = Com::writeToAll;
         Com::writeToAll = true;
-        Com::printFLN("DoorClosed");
+        Com::printFLN(PSTR("DoorClosed"));
         Com::writeToAll = all;
         UI_STATUS_F(Com::tDoorOpen);
     }

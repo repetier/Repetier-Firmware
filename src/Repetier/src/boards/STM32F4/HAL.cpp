@@ -954,23 +954,34 @@ void HAL::noTone() {
 #endif
 }
 
+typedef void (*pFunction)(void);
+void init(void) {
+    if (getBackupRegister(LL_RTC_BKP_DR2) == 0xDEADB00Dul) { // marker set - jump to boot mode
+        enableBackupDomain();
+        setBackupRegister(LL_RTC_BKP_DR2, 0); // clear marker, want just one time to call bootloader
+        pFunction SysMemBootJump;
+        HAL_RCC_DeInit();
+        SysTick->CTRL = 0; // reset systick timer
+        SysTick->LOAD = 0;
+        SysTick->VAL = 0;
+        // __disable_irq(); // disable all interrupts
+        __DSB();
+        // __HAL_SYSCFG_REMAPMEMORY_SYSTEMFLASH();
+        __DSB();
+        __ISB();
+        // __set_PRIMASK(1);
+        SysMemBootJump = (void (*)(void))(*((uint32_t*)(0x1FFF0000 + 4)));
+        __set_MSP(*(__IO uint32_t*)0x1FFF0000);
+        SysMemBootJump();
+    }
+    hw_config_init();
+}
+
 void HAL::switchToBootMode() {
-    auto SysMemBootJump = (void (*)(void))(*((uint32_t*)0x1fff0004));
     Printer::kill(false); // safety shut down hardware
-    HAL_RCC_DeInit();
-    SysTick->CTRL = 0; // reset systick timer
-    SysTick->LOAD = 0;
-    SysTick->VAL = 0;
-    __disable_irq();
-    __HAL_SYSCFG_REMAPMEMORY_SYSTEMFLASH();
-    // __set_PRIMASK(1);
-    __set_MSP(0x1FFF0000);
-    SysMemBootJump();
-    while (1)
-        ;
-    /*enableBackupDomain();
-    setBackupRegister(LL_RTC_BKP_DR2, 0x515B);
-    NVIC_SystemReset(); */
+    enableBackupDomain();
+    setBackupRegister(LL_RTC_BKP_DR2, 0xDEADB00Dul);
+    NVIC_SystemReset();
 }
 
 #endif
