@@ -66,7 +66,7 @@ try to update from time to time.
 
 Done:
 - New motion system and planner for better flexibility.
-- Due boards support new motion system.
+- Supported hardware: Due based boards (SAM3x8E), SAMD51 (Adafruig Grand Central Metro) and STM32F4xxx (RUMBA32)
 - First tests of the new modular configuration scheme.
 - Pure cartesian printer system.
 - Core XYZ printer system.
@@ -76,21 +76,21 @@ Done:
 - No minimum speed required any more.
 - Homing.
 - new analog value reading.
-- Hardware PWM for due.
+- Hardware PWM.
+- Endstop detection via interrupts.
 - Tools instead of extruders.
 - Linear advance
-- Upgraded to SdFat 1.0.5 for better name handling.
+- Upgraded to SdFat 1.0.14 for better name handling.
 - Ditto printing/ ditto mirror
 - Mirror motors (2 - 4).
+- Display support for 20x4 char and 128x64 pixel displays.
+- New light system.
+- Buffered tones.
 
 ToDo:
-- Core printer type
-- Convert PWM handling
-- Convert temperature handling
-- Add JAM detection
-- Make lcd work
-- Switch to u8g 2 library
+- Add more preconfigured boards and displays
 - Port AVR HAL to new system
+- Add SAMD21 HAL
 - recheck event system
 - New config tool
 

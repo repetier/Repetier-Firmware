@@ -49,6 +49,10 @@ Header pins bottom:   14      12       10      8       6         4        2
 #error "Oops! Select RUMBA32 in platformio.ini -> default_envs"
 #endif
 
+// Users expect Serial to be usb port!
+#undef Serial
+#define Serial SerialUSB
+
 #define CPU_ARCH ARCH_ARM
 #define MAX_RAM 131072 // Rumba32
 

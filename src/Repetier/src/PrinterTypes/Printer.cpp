@@ -72,10 +72,6 @@ float Printer::backlashY;
 float Printer::backlashZ;
 uint8_t Printer::backlashDir;
 #endif
-#if FAN_THERMO_PIN > -1
-float Printer::thermoMinTemp = FAN_THERMO_MIN_TEMP;
-float Printer::thermoMaxTemp = FAN_THERMO_MAX_TEMP;
-#endif
 #ifdef DEBUG_PRINT
 int debugWaitLoop = 0;
 #endif

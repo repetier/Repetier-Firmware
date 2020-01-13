@@ -102,6 +102,16 @@ void FEClear(void) {
 
 /** Erase flash content with 0xff */
 void FEReset(void) {
+    bool cleared = true;
+    for (uint32_t i = 0; i < FLASH_MAX_WRITE_POS; i++) {
+        if (flashArray[i].data != 0xfffffffful) {
+            cleared = false;
+            break;
+        }
+    }
+    if (cleared) { // was cleared from upload, no need to torture flash twice
+        return;
+    }
     UNLOCK_FLASH();
     FLASH_EraseInitTypeDef EraseInitStruct;
     uint32_t SectorError = 0;

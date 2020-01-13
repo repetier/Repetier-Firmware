@@ -1206,12 +1206,7 @@ void MCode_416(GCode* com) {
 }
 
 void MCode_460(GCode* com) {
-#if FAN_THERMO_PIN > -1
-    if (com->hasX())
-        Printer::thermoMinTemp = com->X;
-    if (com->hasY())
-        Printer::thermoMaxTemp = com->Y;
-#endif
+    // set thermo fan min/max temp - unimplemented
 }
 
 void MCode_500(GCode* com) {

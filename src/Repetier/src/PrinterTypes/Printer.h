@@ -253,24 +253,20 @@ public:
     static uint8_t relativeCoordinateMode;         ///< Determines absolute (false) or relative Coordinates (true).
     static uint8_t relativeExtruderCoordinateMode; ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
-    static bool failedMode;            // In failed mode only M110 and M999 is working
-    static uint8_t unitIsInches;       ///< true if we compute in inces and not mm
-    static uint8_t rescueOn;           // 1 is rescue is enabled
-    static uint8_t flag0, flag1;       // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
-    static uint8_t flag2, flag3;       // Some more flags
-    static uint32_t interval;          ///< Last step duration in ticks.
-    static uint32_t timer;             ///< used for acceleration/deceleration timing
-    static uint32_t stepNumber;        ///< Step number in current move.
-    static millis_t lastTempReport;    ///< Time o flast temperature report for autoreport temperatures
-    static int32_t printingTime;       ///< Printing time in seconds
-    static float extrudeMultiplyError; ///< Accumulated error during extrusion
-    static float extrusionFactor;      ///< Extrusion multiply factor
-    static uint16_t rescuePos;         // EEPROM address for rescue
-    static fast8_t safetyParked;       /// True if moved to a safety position to protect print
-#if FAN_THERMO_PIN > -1 || defined(DOXYGEN)
-    static float thermoMinTemp;
-    static float thermoMaxTemp;
-#endif
+    static bool failedMode;              // In failed mode only M110 and M999 is working
+    static uint8_t unitIsInches;         ///< true if we compute in inces and not mm
+    static uint8_t rescueOn;             // 1 is rescue is enabled
+    static uint8_t flag0, flag1;         // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
+    static uint8_t flag2, flag3;         // Some more flags
+    static uint32_t interval;            ///< Last step duration in ticks.
+    static uint32_t timer;               ///< used for acceleration/deceleration timing
+    static uint32_t stepNumber;          ///< Step number in current move.
+    static millis_t lastTempReport;      ///< Time o flast temperature report for autoreport temperatures
+    static int32_t printingTime;         ///< Printing time in seconds
+    static float extrudeMultiplyError;   ///< Accumulated error during extrusion
+    static float extrusionFactor;        ///< Extrusion multiply factor
+    static uint16_t rescuePos;           // EEPROM address for rescue
+    static fast8_t safetyParked;         /// True if moved to a safety position to protect print
     static float feedrate;               ///< Last requested feedrate.
     static int feedrateMultiply;         ///< Multiplier for feedrate in percent (factor 1 = 100)
     static unsigned int extrudeMultiply; ///< Flow multiplier in percent (factor 1 = 100)

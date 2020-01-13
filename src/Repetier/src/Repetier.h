@@ -251,10 +251,6 @@ extern ServoInterface* servos[NUM_SERVOS];
 #define MOVE_Z_WHEN_HOMED 0
 #endif
 
-#ifndef BOARD_FAN_SPEED
-#define BOARD_FAN_SPEED
-#endif
-
 #ifndef MAX_JERK_DISTANCE
 #define MAX_JERK_DISTANCE 0.6
 #endif
