@@ -111,7 +111,8 @@ SERVO_ANALOG(ZProbeServo, 0, Servo1Pin, 500, 2500, 1473)
 // Define fans
 
 IO_PWM_HARDWARE(CoolerFan, ORIG_FAN2_PIN, 5000)
-IO_PWM_HARDWARE(Fan1PWM, ORIG_FAN_PIN, 5000)
+IO_PWM_HARDWARE(Fan1PWMnoKS, ORIG_FAN_PIN, 5000)
+IO_PWM_KICKSTART(Fan1PWM, Fan1PWMnoKS, 10)
 
 // Define temperature sensors
 
@@ -135,17 +136,19 @@ IO_HOTTEST_OF_2(TempHottestExtruder, TempExt1, TempExt2)
 // that the selected pin can be used as hardware pwm otherwise
 // select a software pwm model whcih works on all pins.
 
-IO_PWM_HARDWARE(PWMExtruder1, HEATER_0_PIN, 1000)
-IO_PWM_HARDWARE(PWMExtruder2, HEATER_2_PIN, 1000)
+IO_PWM_HARDWARE(PWMExtruder1_12V, HEATER_0_PIN, 1000)
+IO_PWM_HARDWARE(PWMExtruder2_12V, HEATER_2_PIN, 1000)
+IO_PWM_SCALEDOWN(PWMExtruder1, PWMExtruder1_12V, 63)
+IO_PWM_SCALEDOWN(PWMExtruder2, PWMExtruder2_12V, 63)
 IO_PWM_HARDWARE(PWMBed1, HEATER_1_PIN, 1000)
 
 // Define all stepper motors used
 // For deltas the top is the minumum position in motor coordinates
 // therefore the max endstops of a delta need to be entered as
 // minimum endstop here!
-STEPPER_TMC2130_HW_SPI(XMotor, IOX1Step, IOX1Dir, IOX1Enable, ORIG_X_CS_PIN, 0.11, 1, 32, 900, true, 100, 8, 12500000, endstopNone, endstopMotorXMax)
-STEPPER_TMC2130_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN, 0.11, 1, 32, 900, true, 100, 8, 12500000, endstopNone, endstopMotorYMax)
-STEPPER_TMC2130_HW_SPI(ZMotor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN, 0.11, 1, 32, 900, true, 100, 8, 12500000, endstopNone, endstopMotorZMax)
+STEPPER_TMC2130_HW_SPI(XMotor, IOX1Step, IOX1Dir, IOX1Enable, ORIG_X_CS_PIN, 0.11, 1, 64, 900, true, 100, 8, 12500000, endstopNone, endstopMotorXMax)
+STEPPER_TMC2130_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN, 0.11, 1, 64, 900, true, 100, 8, 12500000, endstopNone, endstopMotorYMax)
+STEPPER_TMC2130_HW_SPI(ZMotor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN, 0.11, 1, 64, 900, true, 100, 8, 12500000, endstopNone, endstopMotorZMax)
 STEPPER_TMC2130_HW_SPI(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, ORIG_E0_CS_PIN, 0.11, 1, 32, 900, true, 100, 8, 12500000, endstopNone, endstopNone)
 STEPPER_TMC2130_HW_SPI(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, ORIG_E1_CS_PIN, 0.11, 1, 32, 900, true, 100, 8, 12500000, endstopNone, endstopNone)
 

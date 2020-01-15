@@ -64,15 +64,14 @@ Early stage version for Stacke X2 printer - use with care
 #define USE_ADVANCE 1
 #define NUM_AXES 4                   // X,Y,Z and E for extruder A,B,C would be 5,6,7
 #define PRINTLINE_CACHE_SIZE 32      // Number of moves we can cache
-#define STEPPER_FREQUENCY 150000     // Maximum stepper frequency.
+#define STEPPER_FREQUENCY 192000     // Maximum stepper frequency.
 #define PREPARE_FREQUENCY 2000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
 #define BLOCK_FREQUENCY 1000         // Number of blocks with constant stepper rate per second.
 #define VELOCITY_PROFILE 2           // 0 = linear, 1 = cubic, 2 = quintic velocity shape
 #define SMALL_SEGMENT_SIZE 0.4       // Smaller segments reduce join speed to prevent vibrations causing lost steps
-#define Z_SPEED 8                    // Z positioning speed
-#define XY_SPEED 150                 // XY positioning speed for normal operations
+#define Z_SPEED 100                  // Z positioning speed
+#define XY_SPEED 200                 // XY positioning speed for normal operations
 #define G0_FEEDRATE 0                // Speed for G0 moves. Independent from set F value! Set 0 to use F value.
-#define A_SPEED 150                  // Second X axis
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
 #define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
 
@@ -84,7 +83,7 @@ Early stage version for Stacke X2 printer - use with care
 // If all axis end stops are hardware based we can skip the time consuming tests each step
 #define NO_SOFTWARE_AXIS_ENDSTOPS
 // Normally only a delta has motor end stops required. Normally you trigger using axis endstops.
-#define NO_MOTOR_ENDSTOPS
+// #define NO_MOTOR_ENDSTOPS
 
 #define FEATURE_CONTROLLER CONTROLLER_REPRAPDISCOUNT_GLCD
 // Use more memory to speedup display updates
@@ -279,7 +278,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 // Park position used when pausing from firmware side
 #if PRINTER_TYPE == PRINTER_TYPE_DELTA
 #define PARK_POSITION_X (0)
-#define PARK_POSITION_Y (70)
+#define PARK_POSITION_Y (-BED_RADIUS + 1)
 #else
 #define PARK_POSITION_X (X_MIN_POS)
 #define PARK_POSITION_Y (Y_MIN_POS + Y_MAX_LENGTH)
@@ -288,45 +287,22 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1000
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1000
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 20
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_A 1000
-#ifdef RAPS128_XY
-#define XAXIS_STEPS_PER_MM 146.1 * 4.0
-#define AAXIS_STEPS_PER_MM 146.1 * 4.0
-#define YAXIS_STEPS_PER_MM 146.1 * 4.0
-#else
-#define XAXIS_STEPS_PER_MM 146.1
-#define AAXIS_STEPS_PER_MM 146.1
-#define YAXIS_STEPS_PER_MM 146.1
-#endif
-#define ZAXIS_STEPS_PER_MM 404.18
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 1000
+#define XAXIS_STEPS_PER_MM 320
+#define YAXIS_STEPS_PER_MM 320
+#define ZAXIS_STEPS_PER_MM 320
 #define MAX_FEEDRATE_X 200
 #define MAX_FEEDRATE_Y 200
 #define MAX_FEEDRATE_Z 10
-#define MAX_FEEDRATE_A 200
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 // ################ END MANUAL SETTINGS ##########################
-
-#undef FAN_BOARD_PIN
-#define FAN_BOARD_PIN -1
-#define BOARD_FAN_SPEED 255
-#define BOARD_FAN_MIN_SPEED 0
-#define FAN_THERMO_PIN -1
-#define FAN_THERMO_MIN_PWM 128
-#define FAN_THERMO_MAX_PWM 255
-#define FAN_THERMO_MIN_TEMP 45
-#define FAN_THERMO_MAX_TEMP 60
-#define FAN_THERMO_THERMISTOR_PIN -1
-#define FAN_THERMO_THERMISTOR_TYPE 1
 
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
 // Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
 // If it is incompatible you will get compiler errors about write functions not being compatible!
 //#define COMPAT_PRE1
 
-#define DRIVE_SYSTEM 0
-#define EXTRUDER_FAN_COOL_TEMP 50
 #define KILL_IF_SENSOR_DEFECT 0
 #define RETRACT_ON_PAUSE 2
 #define PAUSE_START_COMMANDS ""
@@ -381,34 +357,28 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define ENDSTOP_X_BACK_MOVE 2
 #define ENDSTOP_Y_BACK_MOVE 2
 #define ENDSTOP_Z_BACK_MOVE 2
-#define ENDSTOP_A_BACK_MOVE 2
 #define ENDSTOP_X_RETEST_REDUCTION_FACTOR 3
 #define ENDSTOP_Y_RETEST_REDUCTION_FACTOR 3
 #define ENDSTOP_Z_RETEST_REDUCTION_FACTOR 3
-#define ENDSTOP_A_RETEST_REDUCTION_FACTOR 3
 #define ENDSTOP_X_BACK_ON_HOME 0.5
-#define ENDSTOP_Y_BACK_ON_HOME 1
-#define ENDSTOP_Z_BACK_ON_HOME 0
-#define ENDSTOP_A_BACK_ON_HOME 0.5
+#define ENDSTOP_Y_BACK_ON_HOME 0.5
+#define ENDSTOP_Z_BACK_ON_HOME 20
 #define ALWAYS_CHECK_ENDSTOPS 0
-#define X_HOME_DIR -1
-#define Y_HOME_DIR -1
-#define Z_HOME_DIR -1
-#define A_HOME_DIR 1
+#define X_HOME_DIR 0
+#define Y_HOME_DIR 0
+#define Z_HOME_DIR 1
 #define MOVE_X_WHEN_HOMED 0
 #define MOVE_Y_WHEN_HOMED 0
 #define MOVE_Z_WHEN_HOMED 0
-#define MOVE_A_WHEN_HOMED 0
 #define HOMING_FEEDRATE_X 50
 #define HOMING_FEEDRATE_Y 50
 #define HOMING_FEEDRATE_Z 8
-#define HOMING_FEEDRATE_A 50
-#define ZHOME_PRE_RAISE 2
-#define ZHOME_PRE_RAISE_DISTANCE 0
+#define ZHOME_PRE_RAISE 0
+#define ZHOME_PRE_RAISE_DISTANCE 10
 #define RAISE_Z_ON_TOOLCHANGE 0
 #define ZHOME_MIN_TEMPERATURE 0
 #define ZHOME_HEAT_ALL 0
-#define ZHOME_HEIGHT 0
+#define ZHOME_HEIGHT 590
 #define FIXED_Z_HOME_POSITION 0
 #define ZHOME_X_POS 0
 #define ZHOME_Y_POS 0
@@ -421,13 +391,11 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 // ##                           Movement settings                                          ##
 // ##########################################################################################
 
-#define FEATURE_BABYSTEPPING 1
-
 // Delta settings
 #define DELTA_HOME_ON_POWER 0
 
-#define STEPPER_INACTIVE_TIME 360L
-#define MAX_INACTIVE_TIME 1200L
+#define STEPPER_INACTIVE_TIME 0L
+#define MAX_INACTIVE_TIME 0L
 
 #define ENABLE_BACKLASH_COMPENSATION 0
 #define X_BACKLASH 0
@@ -435,7 +403,6 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define Z_BACKLASH 0
 #define MAX_JERK 10
 #define MAX_ZJERK 0
-#define MAX_AJERK 10
 #define MOVE_CACHE_LOW 10
 
 // ################# Misc. settings ##################
@@ -466,22 +433,14 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define SD_STOP_HEATER_AND_MOTORS_ON_STOP 1
 #define ARC_SUPPORT 1
 #define FEATURE_CHECKSUM_FORCED 0
-#define UI_PRINTER_NAME "DeltaTower"
-#define UI_PRINTER_COMPANY "DeltaTower"
-#define UI_PAGES_DURATION 4000
+#define UI_PRINTER_NAME "Deltatower"
+#define UI_PRINTER_COMPANY "Deltatower"
 #define UI_DISABLE_AUTO_PAGESWITCH 1
 #define UI_AUTORETURN_TO_MENU_AFTER 30000
-#define FEATURE_UI_KEYS 0
-#define UI_ENCODER_SPEED 2
-#define UI_REVERSE_ENCODER 0
-#define UI_KEY_FIRST_REPEAT 500
-#define UI_KEY_REDUCE_REPEAT 50
-#define UI_KEY_MIN_REPEAT 50
 
 #define CASE_LIGHT_DEFAULT_ON 0
 #define UI_START_SCREEN_DELAY 2000
 
-#define REDUCE_ON_SMALL_SEGMENTS
 //#define CUSTOM_EVENTS
 //#define CUSTOM_MENU
 //#define CUSTOM_TRANSLATIONS

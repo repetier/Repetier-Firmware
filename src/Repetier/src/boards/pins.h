@@ -136,6 +136,4 @@ inline void memcopy4(void* dest, void* source) {
 #define UI_ENCODER_B -1
 #endif
 
-#include "communication/Communication.h"
-
 #endif

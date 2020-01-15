@@ -163,7 +163,6 @@ public:
     FSTRINGVAR(tUnitMilliWatt)
     FSTRINGVAR(tUnitPWM)
     FSTRINGVAR(tUnitRPM)
-#if JSON_OUTPUT
     FSTRINGVAR(tJSONDir)
     FSTRINGVAR(tJSONFiles)
     FSTRINGVAR(tJSONArrayEnd)
@@ -175,7 +174,6 @@ public:
     FSTRINGVAR(tJSONFileInfoFilament)
     FSTRINGVAR(tJSONFileInfoGeneratedBy)
     FSTRINGVAR(tJSONFileInfoName)
-#endif
     FSTRINGVAR(tSpaceXColon)
     FSTRINGVAR(tSpaceYColon)
     FSTRINGVAR(tSpaceZColon)
@@ -343,11 +341,9 @@ public:
 
     FSTRINGVAR(tNoEEPROMSupport)
     FSTRINGVAR(tZProbeOffsetZ)
-#if FEATURE_AXISCOMP
     FSTRINGVAR(tAxisCompTanXY)
     FSTRINGVAR(tAxisCompTanYZ)
     FSTRINGVAR(tAxisCompTanXZ)
-#endif
     FSTRINGVAR(tConfigStoredEEPROM)
     FSTRINGVAR(tConfigLoadedEEPROM)
     FSTRINGVAR(tEPRConfigResetDefaults)

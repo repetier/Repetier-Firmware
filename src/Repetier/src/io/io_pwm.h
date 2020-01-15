@@ -53,7 +53,8 @@
 #if IO_TARGET == IO_TARGET_INIT // init
 
 #define IO_PWM_HARDWARE(name, pinid, frequency) \
-    name.id = HAL::initHardwarePWM(pinid, frequency);
+    name.id = HAL::initHardwarePWM(pinid, frequency); \
+    HAL::setHardwarePWM(name.id, name.pwm);
 
 #elif IO_TARGET == IO_TARGET_PWM // PWM interrupt
 
@@ -144,7 +145,8 @@
     public: \
         fast8_t pwm, id; \
         name##Class() \
-            : pwm(0) {} \
+            : pwm(0) \
+            , id(-1) {} \
         void set(fast8_t _pwm) final { \
             if (pwm == _pwm) { \
                 return; \

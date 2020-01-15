@@ -35,6 +35,7 @@ public:
 extern void motorEndstopTriggered(fast8_t axis, bool dir);
 extern void endstopTriggered(fast8_t axis, bool dir);
 
+#include "communication/Communication.h"
 #include "endstops.h"
 #include "stepper.h"
 #include "heatManager.h"

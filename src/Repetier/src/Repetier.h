@@ -214,8 +214,36 @@ public:
 #define WAITING_IDENTIFIER "wait"
 #endif
 
+#ifndef ACK_WITH_LINENUMBER
+#define ACK_WITH_LINENUMBER 1
+#endif
+
+#ifndef ECHO_ON_EXECUTE
+#define ECHO_ON_EXECUTE 1
+#endif
+
+#ifndef KILL_METHOD
+#define KILL_METHOD 1 // reset on emergency stop
+#endif
+
+#ifndef FEATURE_WATCHDOG
+#define FEATURE_WATCHDOG 1
+#endif
+
+#ifndef JSON_OUTPUT
+#define JSON_OUTPUT 1
+#endif
+
 #ifndef SMALL_SEGMENT_SIZE
 #define SMALL_SEGMENT_SIZE 0.4
+#endif
+
+#ifndef Z_PROBE_START_SCRIPT
+#define Z_PROBE_START_SCRIPT ""
+#endif
+
+#ifndef Z_PROBE_FINISHED_SCRIPT
+#define Z_PROBE_FINISHED_SCRIPT ""
 #endif
 
 #ifndef HOST_RESCUE

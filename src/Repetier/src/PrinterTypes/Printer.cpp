@@ -962,9 +962,9 @@ void Printer::showJSONStatus(int type) {
     Com::printF(PSTR(",\"homed\":["));
     Com::print((int)Motion1::isAxisHomed(X_AXIS));
     Com::print(',');
-    Com::print(Motion1::isAxisHomed(Y_AXIS));
+    Com::print((int)Motion1::isAxisHomed(Y_AXIS));
     Com::print(',');
-    Com::print(Motion1::isAxisHomed(Z_AXIS));
+    Com::print((int)Motion1::isAxisHomed(Z_AXIS));
     Com::printF(PSTR("]"));
     if (type == 1) {
         Com::printF(PSTR(",\"geometry\":\""));

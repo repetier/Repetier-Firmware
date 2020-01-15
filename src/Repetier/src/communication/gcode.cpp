@@ -424,7 +424,7 @@ void GCode::readFromSerial() {
                 requestResend(); // Something is wrong, a started line was not continued in the last second
                 GCodeSource::activeSource->timeOfLastDataPacket = time;
             }
-#ifdef WAITING_IDENTIFIER
+#ifndef NO_WAIT_MESSAGES
             else if (bufferLength == 0 && time - GCodeSource::activeSource->timeOfLastDataPacket > 1000) // Don't do it if buffer is not empty. It may be a slow executing command.
             {
                 Com::printFLN(Com::tWait); // Unblock communication in case the last ok was not received correct.
