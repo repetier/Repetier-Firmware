@@ -37,6 +37,7 @@ void ToolExtruder::activate() {
     Motion1::maxYank[E_AXIS] = yank;
     Motion1::resolution[E_AXIS] = stepsPerMM;
     Motion1::currentPosition[E_AXIS] = Motion1::currentPositionTransformed[E_AXIS] = 0.0f;
+    Motion1::maxFeedrate[E_AXIS] = maxSpeed;
     Motion1::advanceK = advance;
     GCode::executeFString(startScript);
     Motion1::waitForEndOfMoves();
