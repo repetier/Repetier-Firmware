@@ -768,6 +768,7 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::reset(uint16_t _mic
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
+#ifndef IGNORE_TMC2208_FEEDBACK
     if (debug != -1) {
         reportTMC2208(driver, this, debug);
     }
@@ -802,6 +803,7 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
     } else {
         otpwCount = 0;
     }
+#endif
 }
 
 /// Set microsteps. Must be a power of 2.
@@ -1030,6 +1032,7 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::reset(uint16_t _mic
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
+#ifndef IGNORE_TMC2209_FEEDBACK
     if (debug != -1) {
         reportTMC2209(driver, this, debug);
     }
@@ -1064,6 +1067,7 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
     } else {
         otpwCount = 0;
     }
+#endif
 }
 
 /// Set microsteps. Must be a power of 2.
