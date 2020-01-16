@@ -146,13 +146,6 @@ Pin 71 is on sd port as UI_BACK_PIN for RADDS 20x4 display, pin 70 is unused.
 #define SERVO2 6
 #define SERVO3 39
 
-#define E0_PINS ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN,
-#define E1_PINS ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN,
-#define E2_PINS ORIG_E2_STEP_PIN, ORIG_E2_DIR_PIN, ORIG_E2_ENABLE_PIN,
-#define E3_PINS ORIG_E3_STEP_PIN, ORIG_E3_DIR_PIN, ORIG_E3_ENABLE_PIN,
-#define E4_PINS ORIG_E4_STEP_PIN, ORIG_E4_DIR_PIN, ORIG_E4_ENABLE_PIN,
-#define E5_PINS ORIG_E5_STEP_PIN, ORIG_E5_DIR_PIN, ORIG_E5_ENABLE_PIN,
-
 #define NO_SPI // spi uses pins on display and E2 extruder and not where required, so it prevents correct usage and must be disabled
 
 #ifndef TWI_CLOCK_FREQ

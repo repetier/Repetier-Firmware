@@ -43,9 +43,6 @@ extern "C" char* sbrk(int i);
 char HAL::virtualEeprom[EEPROM_BYTES] = { 0, 0, 0, 0, 0, 0, 0 };
 bool HAL::wdPinged = true;
 volatile uint8_t HAL::insideTimer1 = 0;
-#ifndef DUE_SOFTWARE_SPI
-int spiDueDividors[] = { 10, 21, 42, 84, 168, 255, 255 };
-#endif
 
 Uart Serial2(&sercom4, PIN_SERIAL2_RX, PIN_SERIAL2_TX, PAD_SERIAL2_RX, PAD_SERIAL2_TX);
 
@@ -91,18 +88,6 @@ void SERCOM5_2_Handler() {
 void SERCOM5_3_Handler() {
     Serial4.IrqHandler();
 }
-
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-#if BLUETOOTH_SERIAL == 1
- #define BT_SERIAL Serial1
-#elif BLUETOOTH_SERIAL == 2
- #define BT_SERIAL Serial2
-#elif BLUETOOTH_SERIAL == 3
- #define BT_SERIAL Serial3
-#elif BLUETOOTH_SERIAL == 4
- #define BT_SERIAL Serial4
-#endif
-#endif
 
 HAL::HAL() {
     //ctor

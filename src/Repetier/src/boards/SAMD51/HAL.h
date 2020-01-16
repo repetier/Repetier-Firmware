@@ -279,10 +279,6 @@ public:
 #define bit_clear(x, y) x &= ~(1 << y) //cbi(x,y)
 #define bit_set(x, y) x |= (1 << y)    //sbi(x,y)
 
-#ifndef DUE_SOFTWARE_SPI
-extern int spiDueDividors[];
-#endif
-
 typedef unsigned int speed_t;
 typedef unsigned long ticks_t;
 typedef unsigned long millis_t;

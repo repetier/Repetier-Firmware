@@ -110,9 +110,6 @@
 #define KILL_PIN -1
 #define SUICIDE_PIN -1 // Pin that has to be turned right after the start, to keep the power flowing.
 
-#define E0_PINS ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN,
-#define E1_PINS ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN,
-
 #define SERVO1 11
 #define SERVO2 6
 #define SERVO3 5
