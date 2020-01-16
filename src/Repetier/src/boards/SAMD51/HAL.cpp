@@ -44,6 +44,7 @@ char HAL::virtualEeprom[EEPROM_BYTES] = { 0, 0, 0, 0, 0, 0, 0 };
 bool HAL::wdPinged = true;
 volatile uint8_t HAL::insideTimer1 = 0;
 
+#if defined(PIN_SERIAL2_RX) && defined(PIN_SERIAL2_TX) && defined(PAD_SERIAL2_TX)
 Uart Serial2(&sercom4, PIN_SERIAL2_RX, PIN_SERIAL2_TX, PAD_SERIAL2_RX, PAD_SERIAL2_TX);
 
 void SERCOM4_0_Handler() {
@@ -58,7 +59,9 @@ void SERCOM4_2_Handler() {
 void SERCOM4_3_Handler() {
     Serial2.IrqHandler();
 }
+#endif
 
+#if defined(PIN_SERIAL3_RX) && defined(PIN_SERIAL3_TX) && defined(PAD_SERIAL3_TX)
 Uart Serial3(&sercom1, PIN_SERIAL3_RX, PIN_SERIAL3_TX, PAD_SERIAL3_RX, PAD_SERIAL3_TX);
 
 void SERCOM1_0_Handler() {
@@ -73,7 +76,9 @@ void SERCOM1_2_Handler() {
 void SERCOM1_3_Handler() {
     Serial3.IrqHandler();
 }
+#endif
 
+#if defined(PIN_SERIAL4_RX) && defined(PIN_SERIAL4_TX) && defined(PAD_SERIAL4_TX)
 Uart Serial4(&sercom5, PIN_SERIAL4_RX, PIN_SERIAL4_TX, PAD_SERIAL4_RX, PAD_SERIAL4_TX);
 
 void SERCOM5_0_Handler() {
@@ -88,6 +93,7 @@ void SERCOM5_2_Handler() {
 void SERCOM5_3_Handler() {
     Serial4.IrqHandler();
 }
+#endif
 
 HAL::HAL() {
     //ctor
