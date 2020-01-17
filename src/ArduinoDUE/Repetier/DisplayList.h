@@ -319,6 +319,29 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_RESET_PIN -1
 #define UI_INVERT_MENU_DIRECTION 1
 
+#elif MOTHERBOARD == 402 // RADDS
+
+#undef BEEPER_PIN
+#define BEEPER_PIN             41
+#define UI_DISPLAY_RS_PIN      42
+#define UI_DISPLAY_RW_PIN      -1
+#define UI_DISPLAY_ENABLE_PIN  43
+#define UI_DISPLAY_D0_PIN      44
+#define UI_DISPLAY_D1_PIN      -1
+#define UI_DISPLAY_D2_PIN      -1
+#define UI_DISPLAY_D3_PIN      -1
+#define UI_DISPLAY_D4_PIN      47
+#define UI_DISPLAY_D5_PIN      -1
+#define UI_DISPLAY_D6_PIN      -1
+#define UI_DISPLAY_D7_PIN      -1
+#define UI_ENCODER_A           50
+#define UI_ENCODER_B           52
+#define UI_ENCODER_CLICK       48
+#define UI_RESET_PIN           -1
+#define UI_DELAYPERCHAR 50
+#define UI_INVERT_MENU_DIRECTION 0
+#define UI_BUTTON_BACK         -1
+
 #else  // RAMPS
 
 #undef BEEPER_PIN
