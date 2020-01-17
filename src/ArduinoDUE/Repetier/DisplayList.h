@@ -326,11 +326,11 @@ void uiCheckSlowKeys(uint16_t &action) {}
 #define UI_DISPLAY_RS_PIN      42
 #define UI_DISPLAY_RW_PIN      -1
 #define UI_DISPLAY_ENABLE_PIN  43
-#define UI_DISPLAY_D0_PIN      44
+#define UI_DISPLAY_D0_PIN      -1
 #define UI_DISPLAY_D1_PIN      -1
 #define UI_DISPLAY_D2_PIN      -1
 #define UI_DISPLAY_D3_PIN      -1
-#define UI_DISPLAY_D4_PIN      47
+#define UI_DISPLAY_D4_PIN      44
 #define UI_DISPLAY_D5_PIN      -1
 #define UI_DISPLAY_D6_PIN      -1
 #define UI_DISPLAY_D7_PIN      -1
