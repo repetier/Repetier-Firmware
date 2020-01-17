@@ -264,8 +264,8 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
 // x axis extruders are 62mm width, distance after homing 503mm
 
-#define X_MAX_LENGTH 210
-#define Y_MAX_LENGTH 210
+#define X_MAX_LENGTH 420
+#define Y_MAX_LENGTH 420
 #define Z_MAX_LENGTH 595.596
 #define X_MIN_POS -210
 #define Y_MIN_POS -210
@@ -293,7 +293,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define ZAXIS_STEPS_PER_MM 320
 #define MAX_FEEDRATE_X 200
 #define MAX_FEEDRATE_Y 200
-#define MAX_FEEDRATE_Z 10
+#define MAX_FEEDRATE_Z 200
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 // ################ END MANUAL SETTINGS ##########################
@@ -372,7 +372,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define MOVE_Z_WHEN_HOMED 0
 #define HOMING_FEEDRATE_X 50
 #define HOMING_FEEDRATE_Y 50
-#define HOMING_FEEDRATE_Z 8
+#define HOMING_FEEDRATE_Z 50
 #define ZHOME_PRE_RAISE 0
 #define ZHOME_PRE_RAISE_DISTANCE 10
 #define RAISE_Z_ON_TOOLCHANGE 0

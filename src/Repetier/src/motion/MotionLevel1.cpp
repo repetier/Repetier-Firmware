@@ -1747,11 +1747,23 @@ void Motion1::eepromHandle() {
 #endif
             EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_FEEDRATE, PSTR("max. feedrate [mm/s]"), 3, maxFeedrate[i]);
             EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_ACCELERATION, PSTR("max. acceleration [mm/s^2]"), 3, maxAcceleration[i]);
-            EEPROM::handleFloat(eprStart + p + EPR_M1_HOMING_FEEDRATE, PSTR("homing feedrate [mm/s]"), 3, homingFeedrate[i]);
+#if PRINTER_TYPE == PRINTER_TYPE_DELTA
+            if (i != X_AXIS && i != Y_AXIS) {
+#endif
+                EEPROM::handleFloat(eprStart + p + EPR_M1_HOMING_FEEDRATE, PSTR("homing feedrate [mm/s]"), 3, homingFeedrate[i]);
+#if PRINTER_TYPE == PRINTER_TYPE_DELTA
+            }
+#endif
             EEPROM::handleFloat(eprStart + p + EPR_M1_MOVE_FEEDRATE, PSTR("move feedrate [mm/s]"), 3, moveFeedrate[i]);
             EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_YANK, PSTR("max. yank(jerk) [mm/s]"), 3, maxYank[i]);
-            EEPROM::handleFloat(eprStart + p + EPR_M1_MIN_POS, PSTR("min. position [mm]"), 3, minPos[i]);
-            EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_POS, PSTR("max. position [mm]"), 3, maxPos[i]);
+#if PRINTER_TYPE == PRINTER_TYPE_DELTA
+            if (i != X_AXIS && i != Y_AXIS) {
+#endif
+                EEPROM::handleFloat(eprStart + p + EPR_M1_MIN_POS, PSTR("min. position [mm]"), 3, minPos[i]);
+                EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_POS, PSTR("max. position [mm]"), 3, maxPos[i]);
+#if PRINTER_TYPE == PRINTER_TYPE_DELTA
+            }
+#endif
 #if PRINTER_TYPE == PRINTER_TYPE_DUAL_X
         }
 #endif

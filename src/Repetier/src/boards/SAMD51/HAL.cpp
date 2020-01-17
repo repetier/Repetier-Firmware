@@ -528,22 +528,22 @@ void reportAnalog() {
     }
 }
 Adc* analogAdcMap[16] = {
-    ADC1,
+    ADC1, // D54
     ADC1,
     ADC1,
     ADC1,
     ADC1,
     ADC0,
     ADC0,
-    ADC0,
-    ADC0,
+    ADC0, // D61
+    ADC0, // D67
     ADC0,
     ADC0,
     ADC1,
     ADC1,
     ADC1,
     ADC1,
-    ADC1
+    ADC1 // D74
 };
 static int analogConvertPos = -1;
 void HAL::analogStart(void) {

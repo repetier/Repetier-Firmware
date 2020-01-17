@@ -149,7 +149,7 @@
 #define STEPPER_ADJUST_RESOLUTION(name, driver, from, to) \
     name.init();
 
-#elif IO_TRAGET == IO_TARGET_RESTORE_FROM_CONFIG
+#elif IO_TARGET == IO_TARGET_RESTORE_FROM_CONFIG
 
 #define STEPPER_ADJUST_RESOLUTION(name, driver, from, to) \
     name.restoreFromConfiguration(to);
@@ -166,6 +166,7 @@
 
 #define STEPPER_TMC2209_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, slaveAddr, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.reset(microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity);
+
 #elif IO_TARGET == IO_TARGET_TOOLS_TEMPLATES
 
 #define STEPPER_ADJUST_RESOLUTION(name, driver, from, to) \
@@ -181,7 +182,7 @@
 #define STEPPER_TMC2208_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, fclk, minEndstop, maxEndstop) \
     template class TMCStepper2208Driver<stepPin, dirPin, enablePin, fclk>;
 #define STEPPER_TMC2209_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, slaveAddr, stallSensitivity, fclk, minEndstop, maxEndstop) \
-    template class TMCStepper2209Driver<stepPin, dirPin, enablePin, fclk>;   
+    template class TMCStepper2209Driver<stepPin, dirPin, enablePin, fclk>;
 
 #elif IO_TARGET == IO_TARGET_UPDATE_DERIVED // call updatedDerived to activate new settings
 
@@ -234,7 +235,7 @@
 #define STEPPER_TMC2208_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, fclk, minEndstop, maxEndstop)
 #endif
 #ifndef STEPPER_TMC2209_HW_UART
-#define STEPPER_TMC2209_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, slaveAddr, stallSensitivity, fclk, minEndstop, maxEndstop) 
+#define STEPPER_TMC2209_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, slaveAddr, stallSensitivity, fclk, minEndstop, maxEndstop)
 #endif
 #ifndef STEPPER_MIRROR2
 #define STEPPER_MIRROR2(name, motor1, motor2, minEndstop, maxEndstop)

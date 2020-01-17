@@ -78,7 +78,6 @@ bool PrinterType::untriggerEndstops() {
 
 void PrinterType::homeZ() {
     Motion1::toolOffset[X_AXIS] = Motion1::toolOffset[Y_AXIS] = 0;
-    Com::printFLN(PSTR("Untrigger endstops"));
     if (untriggerEndstops()) {
         Com::printErrorF(PSTR("Unable to untrigger endstops - giving up!"));
         return;
@@ -88,12 +87,10 @@ void PrinterType::homeZ() {
     Motion1::currentPosition[Z_AXIS] = Motion1::maxPos[Z_AXIS];
     Motion1::updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
-    Com::printFLN(PSTR("simpleHome"));
     Motion1::simpleHome(Z_AXIS);
 
     // Correct end position
     Motion1::waitForEndOfMoves();
-    Com::printFLN(PSTR("Offsets"));
     float oldPosition[NUM_AXES];
     FOR_ALL_AXES(i) {
         oldPosition[i] = Motion1::currentPosition[i];
@@ -120,7 +117,7 @@ void PrinterType::homeZ() {
 
 void PrinterType::homeAxis(fast8_t axis) {
     if (axis < Z_AXIS) {
-        return; // Deltals can not home x or y
+        return; // Deltas can not home x or y
     } else if (axis > Z_AXIS) {
         Motion1::simpleHome(axis); // Non delta axis, default homing
     } else {                       // XYZ homing
@@ -306,6 +303,8 @@ void PrinterType::updateDerived() {
     diagonalSquaredB = RMath::sqr(diagonal + correctionA);
     diagonalSquaredC = RMath::sqr(diagonal + correctionA);
     printRadiusSquared = printRadius * printRadius;
+    Motion1::minPos[X_AXIS] = Motion1::minPos[Y_AXIS] = -printRadius;
+    Motion1::maxPos[X_AXIS] = Motion1::maxPos[Y_AXIS] = -printRadius;
 }
 void PrinterType::enableMotors(fast8_t axes) {
     if (axes & 7) { // enable x,y,z as a group!

@@ -138,10 +138,6 @@ Header pins bottom:   14      12       10      8       6         4        2
 #define MISO_PIN PA6
 #define MOSI_PIN PA7
 
-#define E0_PINS ORIG_E0_STEP_PIN, ORIG_E0_DIR_PIN, ORIG_E0_ENABLE_PIN,
-#define E1_PINS ORIG_E1_STEP_PIN, ORIG_E1_DIR_PIN, ORIG_E1_ENABLE_PIN,
-#define E2_PINS ORIG_E2_STEP_PIN, ORIG_E2_DIR_PIN, ORIG_E2_ENABLE_PIN,
-
 //
 // Misc. Functions
 //

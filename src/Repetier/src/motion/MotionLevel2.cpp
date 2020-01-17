@@ -529,7 +529,7 @@ void Motion2::motorEndstopTriggered(fast8_t axis, bool dir) {
     } else {
         Motion1::motorDirTriggered &= ~axisBits[axis];
     }
-    Com::printFLN(PSTR("MotorTrigger:"), (int)Motion1::motorTriggered); // TEST
+    // Com::printFLN(PSTR("MotorTrigger:"), (int)Motion1::motorTriggered); // TEST
     /*Motion1::setAxisHomed(axis, false);
     Motion2Buffer& m2 = Motion2::buffers[act->parentId];
     if (Motion1::endstopMode == EndstopMode::STOP_AT_ANY_HIT || Motion1::endstopMode == EndstopMode::PROBING) {

@@ -85,7 +85,7 @@ IO_INPUT_INVERTED(IOEndstopXMax, ORIG_X_MAX_PIN)
 IO_INPUT_INVERTED(IOEndstopYMax, ORIG_Y_MAX_PIN)
 IO_INPUT_INVERTED(IOEndstopZMax, ORIG_Z_MAX_PIN)
 IO_INPUT_INVERTED_PULLUP(IOEndstopYMin, ORIG_Y_MIN_PIN)
-IO_INPUT_PULLUP(IOEndstopZMin, ORIG_Z_MIN_PIN)
+IO_INPUT_PULLUP(IOEndstopZProbe, ORIG_Z_MIN_PIN)
 
 // Define our endstops solutions
 // You need to define all min and max endstops for all
@@ -100,19 +100,21 @@ ENDSTOP_NONE(endstopZMin)
 ENDSTOP_NONE(endstopXMax)
 ENDSTOP_NONE(endstopYMax)
 ENDSTOP_MERGE3(endstopZMax, endstopMotorXMax, endstopMotorYMax, endstopMotorZMax, Z_AXIS, true)
+ENDSTOP_SWITCH_HW(endstopZProbe, IOEndstopZProbe, -1, true)
 
 // Servo for z-probe
 IO_OUTPUT(Servo1Pin, 4)
 SERVO_ANALOG(ZProbeServo, 0, Servo1Pin, 500, 2500, 1473)
 // Set to nullptr for no zprobe or &endstopName for a switch
 #undef ZPROBE_ADDRESS
-#define ZPROBE_ADDRESS &endstopZMin
+#define ZPROBE_ADDRESS &endstopZProbe
 
 // Define fans
 
 IO_PWM_HARDWARE(CoolerFan, ORIG_FAN2_PIN, 5000)
-IO_PWM_HARDWARE(Fan1PWMnoKS, ORIG_FAN_PIN, 5000)
-IO_PWM_KICKSTART(Fan1PWM, Fan1PWMnoKS, 10)
+//IO_PWM_HARDWARE(Fan1PWMnoKS, ORIG_FAN_PIN, 5000)
+//IO_PWM_KICKSTART(Fan1PWM, Fan1PWMnoKS, 10)
+IO_PWM_HARDWARE(Fan1PWM, ORIG_FAN_PIN, 50)
 
 // Define temperature sensors
 

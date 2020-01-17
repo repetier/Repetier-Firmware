@@ -11,7 +11,7 @@ void __attribute__((weak)) menuMoveAxisFine(GUIAction action, void* data) {
     if (!Tool::getActiveTool()->showMachineCoordinates()) {
         v -= Motion1::g92Offsets[axis];
     }
-    if (GUI::handleFloatValueAction(action, v, Motion1::minPos[X_AXIS], Motion1::maxPos[X_AXIS], 0.01)) {
+    if (GUI::handleFloatValueAction(action, v, Motion1::minPos[axis], Motion1::maxPos[axis], 0.01)) {
         Motion1::copyCurrentOfficial(Motion1::tmpPosition);
         Motion1::tmpPosition[axis] = v;
         Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[axis], false);
@@ -29,7 +29,7 @@ void __attribute__((weak)) menuMoveAxis(GUIAction action, void* data) {
         GUI::replace(menuMoveAxisFine, data, GUIPageType::FIXED_CONTENT);
         return;
     }
-    if (GUI::handleFloatValueAction(action, v, Motion1::minPos[X_AXIS], Motion1::maxPos[X_AXIS], 1.0)) {
+    if (GUI::handleFloatValueAction(action, v, Motion1::minPos[axis], Motion1::maxPos[axis], 1.0)) {
         Motion1::copyCurrentOfficial(Motion1::tmpPosition);
         Motion1::tmpPosition[axis] = v;
         Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[axis], false);

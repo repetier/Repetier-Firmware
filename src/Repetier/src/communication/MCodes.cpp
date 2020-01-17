@@ -148,7 +148,12 @@ void MCode_20(GCode* com) {
 #if JSON_OUTPUT
     if (com->hasString() && com->text[1] == '2') { // " S2 P/folder"
         if (com->text[3] == 'P') {
-            sd.lsJSON(com->text + 4);
+            char* slashPos = strchr(com->text, '/');
+            if (*slashPos) {
+                sd.lsJSON(slashPos);
+            } else {
+                sd.lsJSON(com->text + 4);
+            }
         }
     } else
         sd.ls();

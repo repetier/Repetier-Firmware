@@ -293,7 +293,6 @@ typedef unsigned int ufast8_t;
 #define BT_SERIAL SerialUSB
 #endif
 #define RFSERIAL2 BT_SERIAL
-
 #endif
 
 union eeval_t {
@@ -619,17 +618,16 @@ public:
 
     static inline void serialSetBaudrate(long baud) {
         Serial.setInterruptPriority(1);
+        RFSERIAL.begin(baud);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
         RFSERIAL2.begin(baud);
-#else
-        RFSERIAL.begin(baud);
 #endif
     }
     static inline void serialFlush() {
+        RFSERIAL.flush();
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
         RFSERIAL2.flush();
 #endif
-        RFSERIAL.flush();
     }
     static void setupTimer();
     static void showStartReason();
