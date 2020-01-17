@@ -1464,6 +1464,7 @@ void EXTRUDER_TIMER_VECTOR() {
 #endif
 
 // IRQ handler for tone generator
+#if defined(BEEPER_PIN) && BEEPER_PIN > -1
 void BEEPER_TIMER_VECTOR() {
     static bool toggle = true;
 
@@ -1472,6 +1473,7 @@ void BEEPER_TIMER_VECTOR() {
     // WRITE_VAR(tone_pin, toggle);
     toggle = !toggle;
 }
+#endif
 
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
 RFDoubleSerial::RFDoubleSerial() {}

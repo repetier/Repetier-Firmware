@@ -2609,6 +2609,9 @@ void Commands::processMCode(GCode* com) {
 #endif
         Com::cap(PSTR("PAUSESTOP:1"));
         Com::cap(PSTR("PREHEAT:1"));
+#if defined(DOOR_PIN) && DOOR_PIN > -1
+        Com::cap(PSTR("DOOR:1"));
+#endif
 #if EMERGENCY_PARSER
         Com::cap(PSTR("EMERGENCY_PARSER:1"));
 #else

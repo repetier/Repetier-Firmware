@@ -1270,6 +1270,10 @@ void GCode::fatalError(FSTRINGPARAM(message)) {
     EVENT_FATAL_ERROR_OCCURED
     Commands::waitUntilEndOfAllMoves();
     Printer::kill(false);
+#if defined(PS_ON_PIN) && PS_ON_PIN > -1
+    WRITE(PS_ON_PIN, (POWER_INVERTING ? LOW : HIGH));
+    Printer::setPowerOn(false);
+#endif
     reportFatalError();
 }
 
