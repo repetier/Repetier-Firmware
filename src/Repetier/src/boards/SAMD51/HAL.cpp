@@ -516,7 +516,7 @@ void HAL::setHardwarePWM(int id, int value) {
 }
 
 // Initialize ADC channels
-#define ANALOG_PIN_TO_CHANNEL(p) (p < 62 ? p - 54 : p - 67)
+#define ANALOG_PIN_TO_CHANNEL(p) (p < 62 ? p - 46 : p - 67)
 int32_t analogValues[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 const PinDescription* analogEnabled[16] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 void reportAnalog() {
@@ -528,14 +528,6 @@ void reportAnalog() {
     }
 }
 Adc* analogAdcMap[16] = {
-    ADC1, // D54
-    ADC1,
-    ADC1,
-    ADC1,
-    ADC1,
-    ADC0,
-    ADC0,
-    ADC0, // D61
     ADC0, // D67
     ADC0,
     ADC0,
@@ -543,7 +535,15 @@ Adc* analogAdcMap[16] = {
     ADC1,
     ADC1,
     ADC1,
-    ADC1 // D74
+    ADC1, // D74
+    ADC1, // D54
+    ADC1,
+    ADC1,
+    ADC1,
+    ADC1,
+    ADC0,
+    ADC0,
+    ADC0 // D61
 };
 static int analogConvertPos = -1;
 void HAL::analogStart(void) {
