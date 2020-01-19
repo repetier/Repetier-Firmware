@@ -47,6 +47,7 @@ bool PrinterType::dontChangeCoords = false; // if true queueMove will not adjust
 float PrinterType::bedRectangle[2][2];
 uint16_t PrinterType::eeprom; // start position eeprom
 fast8_t PrinterType::activeAxis = 0;
+bool PrinterType::xMoved = false;
 
 void PrinterType::homeAxis(fast8_t axis) {
     if (axis == X_AXIS) {
@@ -274,6 +275,13 @@ void PrinterType::activatedTool(fast8_t id) {
     Motion1::updatePositionsFromCurrentTransformed();
 }
 
+void PrinterType::toolchangeFinished() {
+    if (lazyMode) {
+        rightParked = leftParked = true;
+        xMoved = false;
+    }
+}
+
 void PrinterType::eepromHandle() {
     EEPROM::handlePrefix(PSTR("Dual X"));
     EEPROM::handleFloat(eeprom + 9, PSTR("Bed X Min [mm]"), 2, bedRectangle[X_AXIS][0]);
@@ -353,9 +361,16 @@ void PrinterType::enableMotors(fast8_t axes) {
 }
 
 bool PrinterType::queueMove(float feedrate, bool secondaryMove) {
+    /* Start condition:
+    currentPosition is already set to target position.
+    destinationPositionTransformed is set.
+    currentPositionTransformed is last destinationPositionTransformed.
+    */
     if (dontChangeCoords) { // don't think about coordinates wanted!
         return Motion1::queueMove(feedrate, secondaryMove);
     }
+    xMoved |= targetReal != Motion1::destinationPositionTransformed[X_AXIS]
+        || Motion1::destinationPositionTransformed[Y_AXIS] != Motion1::destinationPositionTransformed[Y_AXIS];
     targetReal = Motion1::destinationPositionTransformed[X_AXIS];
     // Set current to real position if parked
     if (leftParked || (Motion1::dittoMode == 0 && activeAxis == 1)) {
@@ -368,7 +383,7 @@ bool PrinterType::queueMove(float feedrate, bool secondaryMove) {
     if (lazyMode && leftParked && rightParked) { // unpark used extruders if needed
         // DEBUG_MSG_FAST("Q2");
         // Seems we are in lazy mode with both tools parked, so test if we need to move one
-        if (Motion1::currentPositionTransformed[E_AXIS] < Motion1::destinationPositionTransformed[E_AXIS]) {
+        if (xMoved && Motion1::currentPositionTransformed[E_AXIS] < Motion1::destinationPositionTransformed[E_AXIS]) {
             // DEBUG_MSG_FAST("Q4a");
             // Disable wrong X position now that we have something to do
             float backup[NUM_AXES]; // Backup old planned move
@@ -442,8 +457,8 @@ bool PrinterType::queueMove(float feedrate, bool secondaryMove) {
 void PrinterType::setDittoMode(fast8_t count, bool mirror) {
     // Test if all tools have z offset 0
     for (int i = 0; i < NUM_TOOLS; i++) {
-        if (Tool::getTool(i)->getOffsetZ() != 0) {
-            Com::printWarningFLN(PSTR("Ditto mode requires all tool z offsets to be zero."));
+        if (fabs(Tool::getTool(i)->getOffsetZ()) > 0.05) {
+            Com::printWarningFLN(PSTR("Ditto mode requires all tool z offsets to less or equal 0.05 mm."));
             GUI::setStatusP(PSTR("Tool Z-Offsets not 0"), GUIStatusLevel::ERROR);
             return;
         }

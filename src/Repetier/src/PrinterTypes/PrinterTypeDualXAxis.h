@@ -36,6 +36,7 @@ class PrinterType {
     static float bedCenter;
     static uint16_t eeprom; // start position eeprom
     static fast8_t activeAxis;
+    static bool xMoved;
 
 public:
     // Are subdivisions required due to nonlinear kinematics
@@ -58,6 +59,7 @@ public:
     static float feedrateForMoveSteps(fast8_t axes);
     static void deactivatedTool(fast8_t id);
     static void activatedTool(fast8_t id);
+    static void toolchangeFinished();
     static void eepromHandle();
     static void restoreFromConfiguration();
     static void init();

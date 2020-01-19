@@ -195,6 +195,7 @@ void Tool::selectTool(fast8_t id, bool force) {
         Motion1::waitForEndOfMoves();
     }
 #endif
+    PrinterType::toolchangeFinished();
 }
 
 void Tool::resetBase(float offX, float offY, float offZ) {

@@ -43,6 +43,7 @@ public:
     static float feedrateForMoveSteps(fast8_t axes);
     static void deactivatedTool(fast8_t id);
     static void activatedTool(fast8_t id);
+    static void toolchangeFinished() {}
     static void eepromHandle();
     static void restoreFromConfiguration();
     static void init();

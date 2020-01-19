@@ -270,6 +270,9 @@ public:
     inline bool hasC() {
         return ((params2 & 16) != 0);
     }
+    inline void unsetC() {
+        params2 &= ~16;
+    }
     inline void setC(float val) {
         C = val;
         params |= 4096;
@@ -286,6 +289,9 @@ public:
     inline bool hasA() {
         return ((params2 & 64) != 0);
     }
+    inline void unsetA() {
+        params2 &= ~64;
+    }
     inline void setA(float val) {
         A = val;
         params |= 4096;
@@ -293,6 +299,9 @@ public:
     }
     inline bool hasB() {
         return ((params2 & 128) != 0);
+    }
+    inline void unsetB() {
+        params2 &= ~128;
     }
     inline void setB(float val) {
         B = val;

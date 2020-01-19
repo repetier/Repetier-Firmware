@@ -77,7 +77,7 @@ void GCode_2_3(GCode* com) {
     Motion1::copyCurrentOfficial(target);
     bool secondaryMove = false;
 #if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
-    if (!isNoDestinationCheck()) {
+    if (!Printer::isNoDestinationCheck()) {
 #if MOVE_X_WHEN_HOMED
         if (!Motion1::isAxisHomed(X_AXIS))
             com->unsetX();
@@ -286,7 +286,7 @@ void GCode_4(GCode* com) {
         codenum = com->P; // milliseconds to wait
     if (com->hasS())
         codenum = com->S * 1000; // seconds to wait
-        // Add a tone delay just in case the user runs their own tones that rely on delays.
+                                 // Add a tone delay just in case the user runs their own tones that rely on delays.
 
 #if defined(BEEPER_PIN) && BEEPER_PIN >= 0
     if (Printer::areTonesPlaying()) {
