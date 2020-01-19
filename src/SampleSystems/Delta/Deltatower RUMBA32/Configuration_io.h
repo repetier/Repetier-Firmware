@@ -100,7 +100,7 @@ ENDSTOP_NONE(endstopZMin)
 ENDSTOP_NONE(endstopXMax)
 ENDSTOP_NONE(endstopYMax)
 ENDSTOP_MERGE3(endstopZMax, endstopMotorXMax, endstopMotorYMax, endstopMotorZMax, Z_AXIS, true)
-ENDSTOP_SWITCH_HW(endstopZProbe, IOEndstopZProbe, -1, true)
+ENDSTOP_SWITCH_HW(endstopZProbe, IOEndstopZProbe, Z_AXIS, false)
 
 // Servo for z-probe
 IO_OUTPUT(Servo1Pin, 4)
@@ -111,10 +111,10 @@ SERVO_ANALOG(ZProbeServo, 0, Servo1Pin, 500, 2500, 1473)
 
 // Define fans
 
-IO_PWM_HARDWARE(CoolerFan, ORIG_FAN2_PIN, 5000)
+IO_PWM_HARDWARE(CoolerFan, ORIG_FAN2_PIN, 1000)
 //IO_PWM_HARDWARE(Fan1PWMnoKS, ORIG_FAN_PIN, 5000)
 //IO_PWM_KICKSTART(Fan1PWM, Fan1PWMnoKS, 10)
-IO_PWM_HARDWARE(Fan1PWM, ORIG_FAN_PIN, 50)
+IO_PWM_HARDWARE(Fan1PWM, ORIG_FAN_PIN, 1000)
 
 // Define temperature sensors
 

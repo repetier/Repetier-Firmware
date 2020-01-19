@@ -482,73 +482,7 @@ public:
     }
 
     // Write any data type to EEPROM
-    static inline void eprBurnValue(unsigned int pos, int size, union eeval_t newvalue) {
-#if EEPROM_AVAILABLE == EEPROM_SPI_ALLIGATOR
-        uint8_t eeprom_temp[3];
-
-        /*write enable*/
-        eeprom_temp[0] = 6; //WREN
-        WRITE(SPI_EEPROM1_CS, LOW);
-        spiSend(SPI_CHAN_EEPROM1, eeprom_temp, 1);
-        WRITE(SPI_EEPROM1_CS, HIGH);
-        delayMilliseconds(1);
-
-        /*write addr*/
-        eeprom_temp[0] = 2;                   //WRITE
-        eeprom_temp[1] = ((pos >> 8) & 0xFF); //addrH
-        eeprom_temp[2] = (pos & 0xFF);        //addrL
-        WRITE(SPI_EEPROM1_CS, LOW);
-        spiSend(SPI_CHAN_EEPROM1, eeprom_temp, 3);
-
-        spiSend(SPI_CHAN_EEPROM1, &(newvalue.b[0]), 1);
-        for (int i = 1; i < size; i++) {
-            pos++;
-            // writes cannot cross page boundary
-            if ((pos % EEPROM_PAGE_SIZE) == 0) {
-                // burn current page then address next one
-                WRITE(SPI_EEPROM1_CS, HIGH);
-                delayMilliseconds(EEPROM_PAGE_WRITE_TIME);
-
-                /*write enable*/
-                eeprom_temp[0] = 6; //WREN
-                WRITE(SPI_EEPROM1_CS, LOW);
-                spiSend(SPI_CHAN_EEPROM1, eeprom_temp, 1);
-                WRITE(SPI_EEPROM1_CS, HIGH);
-
-                eeprom_temp[0] = 2;                   //WRITE
-                eeprom_temp[1] = ((pos >> 8) & 0xFF); //addrH
-                eeprom_temp[2] = (pos & 0xFF);        //addrL
-                WRITE(SPI_EEPROM1_CS, LOW);
-                spiSend(SPI_CHAN_EEPROM1, eeprom_temp, 3);
-            }
-            spiSend(SPI_CHAN_EEPROM1, &(newvalue.b[i]), 1);
-        }
-        WRITE(SPI_EEPROM1_CS, HIGH);
-        delayMilliseconds(EEPROM_PAGE_WRITE_TIME); // wait for page write to complete
-#elif EEPROM_AVAILABLE == EEPROM_I2C
-        i2cStartAddr(EEPROM_SERIAL_ADDR, pos, 0);
-        i2cWrite(newvalue.b[0]); // write first byte
-        for (int i = 1; i < size; i++) {
-            pos++;
-            // writes can not cross page boundary
-            if ((pos % EEPROM_PAGE_SIZE) == 0) {
-                // burn current page then address next one
-                i2cStop();
-                delayMilliseconds(EEPROM_PAGE_WRITE_TIME);
-                i2cStartAddr(EEPROM_SERIAL_ADDR, pos, 0);
-            }
-            i2cWrite(newvalue.b[i]);
-        }
-        i2cStop();                                 // signal end of transaction
-        delayMilliseconds(EEPROM_PAGE_WRITE_TIME); // wait for page write to complete
-#elif EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH
-        if (pos >= EEPROM::reservedEnd) {
-            eprSyncTime = 1UL; // enforce fast write to finish before power is lost
-        } else {
-            eprSyncTime = HAL::timeInMilliseconds() | 1UL;
-        }
-#endif
-    }
+    static void eprBurnValue(unsigned int pos, int size, union eeval_t newvalue);
 
     // Read any data type from EEPROM that was previously written by eprBurnValue
     static inline union eeval_t eprGetValue(unsigned int pos, int size) {

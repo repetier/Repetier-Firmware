@@ -323,9 +323,6 @@ void HeatManagerPID::updateLocal(float tempError) {
     IState = constrain(IState, driveMin, driveMax);
     pidTerm += IState;
     pidTerm += kd * (lastTemperature - currentTemperature);
-#if SCALE_PID_TO_MAX == 1
-    pidTerm = (pidTerm * maxPWM) * 0.0039215;
-#endif // SCALE_PID_TO_MAX
     output->set(constrain((int)pidTerm, 0, maxPWM));
     lastTemperature = currentTemperature;
 }
@@ -596,9 +593,6 @@ void HeatManagerPeltierPID<flowPin, peltierType, minTemp>::updateLocal(float tem
     IState = constrain(IState, driveMin, driveMax);
     pidTerm += IState;
     pidTerm += kd * (lastTemperature - currentTemperature);
-#if SCALE_PID_TO_MAX == 1
-    pidTerm = (pidTerm * maxPWM) * 0.0039215;
-#endif                      // SCALE_PID_TO_MAX
     if (peltierType == 0) { // only cooling
         if (pidTerm < 0) {
             output->set(constrain((int)-pidTerm, 0, maxPWM));

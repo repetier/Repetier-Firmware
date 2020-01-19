@@ -200,7 +200,6 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define X_HOME_PRIORITY 0
 #define Y_HOME_PRIORITY 1
 #define Z_HOME_PRIORITY 2
-#define A_HOME_PRIORITY 0
 
 // All fans in this list list become controllable with M106/M107
 // by selecteing the fan number with P0..P<NUM_FANS-1>

@@ -229,13 +229,13 @@ bool Printer::updateDoorOpen() {
 #if defined(DOOR_PIN) && DOOR_PIN > -1 //  && SUPPORT_LASER should always be respected
     bool isOpen = isDoorOpen();
     uint8_t b = READ(DOOR_PIN) != DOOR_INVERTING;
-    if (!b && isOpen) {
+    if (b && !isOpen) {
         UI_STATUS_F(Com::tSpace);
         bool all = Com::writeToAll;
         Com::writeToAll = true;
         Com::printFLN(PSTR("DoorOpened"));
         Com::writeToAll = all;
-    } else if (b && !isOpen) {
+    } else if (!b && isOpen) {
         bool all = Com::writeToAll;
         Com::writeToAll = true;
         Com::printFLN(PSTR("DoorClosed"));

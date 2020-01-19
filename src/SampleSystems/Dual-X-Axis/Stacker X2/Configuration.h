@@ -46,7 +46,7 @@ Early stage version for Stacke X2 printer - use with care
 
 // The follwing variables are required early to decide on the right modules.
 
-// #define RAPS128_XY // define for usage of RAPS128 on xy axis
+//#define RAPS128_XY // define for usage of RAPS128 on xy axis
 // #define DEBUG_POS
 
 #define NUM_SERVOS 0
@@ -54,8 +54,7 @@ Early stage version for Stacke X2 printer - use with care
 #define MOTHERBOARD 412 // Stacker 3d Superboard
 #define EEPROM_MODE 2
 #define RFSERIAL Serial
-#define BLUETOOTH_SERIAL -1
-#define BLUETOOTH_BAUD 250000
+#define BLUETOOTH_SERIAL 101
 #define JSON_OUTPUT 1
 #define FEATURE_SERVO 0
 #define FEATURE_WATCHDOG 1
@@ -151,7 +150,7 @@ to the position. 0 = no contribution. */
 
 // Extra parameter in case you have a dual x axis
 #define DUAL_X_LEFT_OFFSET -64
-#define DUAL_X_RIGHT_OFFSET 450
+#define DUAL_X_RIGHT_OFFSET 448.25
 // Minimum distance between both heads
 #define DUAL_X_MIN_DISTANCE 64
 #define LAZY_DUAL_X_AXIS 0
@@ -252,7 +251,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
 // x axis extruders are 62mm width, distance after homing 503mm
 
-#define X_MAX_LENGTH 379
+#define X_MAX_LENGTH 376
 #define Y_MAX_LENGTH 385
 #if STACKER_SHORT
 #define Z_MAX_LENGTH 300
@@ -260,7 +259,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 define Z_MAX_LENGTH 610
 #endif
 
-#define A_MAX_LENGTH 452
+#define A_MAX_LENGTH 450
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
@@ -298,33 +297,15 @@ define Z_MAX_LENGTH 610
 #define MAX_FEEDRATE_Z 10
 #define MAX_FEEDRATE_A 400
 
-// ################## EDIT THESE SETTINGS MANUALLY ################
-// ################ END MANUAL SETTINGS ##########################
-
-#undef FAN_BOARD_PIN
-#define FAN_BOARD_PIN -1
-#define BOARD_FAN_SPEED 255
-#define BOARD_FAN_MIN_SPEED 0
-#define FAN_THERMO_PIN -1
-#define FAN_THERMO_MIN_PWM 128
-#define FAN_THERMO_MAX_PWM 255
-#define FAN_THERMO_MIN_TEMP 45
-#define FAN_THERMO_MAX_TEMP 60
-#define FAN_THERMO_THERMISTOR_PIN -1
-#define FAN_THERMO_THERMISTOR_TYPE 1
-
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
 // Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
 // If it is incompatible you will get compiler errors about write functions not being compatible!
 //#define COMPAT_PRE1
 
-#define DRIVE_SYSTEM 0
-#define EXTRUDER_FAN_COOL_TEMP 50
 #define KILL_IF_SENSOR_DEFECT 0
 #define RETRACT_ON_PAUSE 2
 #define PAUSE_START_COMMANDS ""
 #define PAUSE_END_COMMANDS ""
-#define SHARED_EXTRUDER_HEATER 0
 
 #define AUTORETRACT_ENABLED 0
 #define RETRACTION_LENGTH 3
@@ -348,10 +329,8 @@ define Z_MAX_LENGTH 610
 #define JAM_MIN_STEPS 10
 #define JAM_ACTION 1
 
-#define RETRACT_DURING_HEATUP true
 #define PID_CONTROL_RANGE 20
 #define SKIP_M109_IF_WITHIN 5
-#define SCALE_PID_TO_MAX 0
 #define TEMP_HYSTERESIS 0
 #define EXTRUDE_MAXLENGTH 1000
 
@@ -430,17 +409,12 @@ define Z_MAX_LENGTH 610
 #define MAX_ZJERK 0
 #define MAX_AJERK 10
 #define PRINTLINE_CACHE_SIZE 32
-#define MOVE_CACHE_LOW 10
 
 // ################# Misc. settings ##################
 
 #define BAUDRATE 115200
 #define ENABLE_POWER_ON_STARTUP 1
 #define POWER_INVERTING 0
-#define KILL_METHOD 1
-#define ACK_WITH_LINENUMBER 1
-#define KEEP_ALIVE_INTERVAL 2000
-#define ECHO_ON_EXECUTE 1
 #undef PS_ON_PIN
 #define PS_ON_PIN -1
 
@@ -458,31 +432,16 @@ define Z_MAX_LENGTH 610
 #define SD_EXTENDED_DIR 1 /** Show extended directory including file length. Don't use this with Pronterface! */
 #define SD_RUN_ON_STOP ""
 #define SD_STOP_HEATER_AND_MOTORS_ON_STOP 1
-#define ARC_SUPPORT 1
-#define FEATURE_CHECKSUM_FORCED 0
-#define ADC_KEYPAD_PIN -1
-#define UI_PRINTER_NAME "Orcabot XXL Pro 2"
-#define UI_PRINTER_COMPANY "Prodim"
-#define UI_PAGES_DURATION 4000
+#define UI_PRINTER_NAME "Stacker X2"
+#define UI_PRINTER_COMPANY "Stacker"
 #define UI_SPEEDDEPENDENT_POSITIONING 0
-#define UI_DISABLE_AUTO_PAGESWITCH 1
 #define UI_AUTORETURN_TO_MENU_AFTER 30000
-#define FEATURE_UI_KEYS 0
-#define UI_ENCODER_SPEED 2
-#define UI_REVERSE_ENCODER 0
-#define UI_KEY_BOUNCETIME 10
-#define UI_KEY_FIRST_REPEAT 500
-#define UI_KEY_REDUCE_REPEAT 50
-#define UI_KEY_MIN_REPEAT 50
 
 #define CASE_LIGHT_DEFAULT_ON 0
 #define UI_START_SCREEN_DELAY 2000
 
 #define NUM_MOTOR_DRIVERS 0
-// #define MOTOR_DRIVER_1(var) StepperDriver<51, 53, 49, 0, 0> var(3382, 0.2)
-// #define MOTOR_DRIVER_2(var) StepperDriver<39, 13, 40, 0, 0> var(3382, 0.2)
 
-#define REDUCE_ON_SMALL_SEGMENTS
 //#define CUSTOM_EVENTS
 //#define CUSTOM_MENU
 //#define CUSTOM_TRANSLATIONS

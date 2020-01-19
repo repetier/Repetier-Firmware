@@ -211,8 +211,8 @@ COOLER_MANAGER_SENSOR(ExtruderCooler, TempHottestExtruder, CoolerFan, 70, 200, 1
 // Define tools. They get inserted into a tool array in configuration.h
 // Typical tools are:
 
-TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 500, 5, 30, 5000, 177, "M117 Extruder 1", "", &Fan1PWM)
-TOOL_EXTRUDER(ToolExtruder2, 0, 0.1, 0, HeaterExtruder2, E2Motor, 1.75, 500, 5, 30, 5000, 177, "M117 Extruder 2", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 500, 5, 60, 5000, 177, "M117 Extruder 1", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder2, 0, -0.06, 0, HeaterExtruder2, E2Motor, 1.75, 500, 5, 60, 5000, 177, "M117 Extruder 2", "", &Fan1PWM)
 
 // IO_INPUT_LOG(IOJam1Mon, IOJam1, true)
 // IO_INPUT_LOG(IOJam2Mon, IOJam2, true)

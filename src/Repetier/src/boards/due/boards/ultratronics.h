@@ -60,7 +60,7 @@
 // Due analog pin A2 = channel 5
 #define TEMP_2_PIN 5
 
-#define HEATER_3_PIN 6
+#define HEATER_3_PIN 7
 // Due analog pin A3 = channel 4
 #define TEMP_3_PIN 4
 

@@ -246,6 +246,10 @@ public:
 #define Z_PROBE_FINISHED_SCRIPT ""
 #endif
 
+#ifndef ARC_SUPPORT
+#define ARC_SUPPORT 1
+#endif
+
 #ifndef HOST_RESCUE
 #define HOST_RESCUE 1
 #endif
