@@ -100,7 +100,7 @@ ENDSTOP_NONE(endstopZMin)
 ENDSTOP_NONE(endstopXMax)
 ENDSTOP_NONE(endstopYMax)
 ENDSTOP_MERGE3(endstopZMax, endstopMotorXMax, endstopMotorYMax, endstopMotorZMax, Z_AXIS, true)
-ENDSTOP_SWITCH_HW(endstopZProbe, IOEndstopZProbe, Z_AXIS, false)
+ENDSTOP_SWITCH_HW(endstopZProbe, IOEndstopZProbe, ZPROBE_AXIS, false)
 
 // Servo for z-probe
 IO_OUTPUT(Servo1Pin, 4)

@@ -622,8 +622,9 @@ void ZProbeHandler::activate() {
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Motion1::setToolOffset(-offsetX, -offsetY, 0);
     ZProbeServo.setPosition(647, 0); // deploy pin
-    HAL::delayMilliseconds(100);     // give time to deploy
+    HAL::delayMilliseconds(1000);    // give time to deploy
     if (isAlarmOn()) {               // to close to bed, alarm triggered already from deploy, so raise 5mm
+        Com::printWarningFLN(PSTR("Z-Probe triggered before probing - raising z!"));
         cPos[Z_AXIS] += 5.0;
         Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[Z_AXIS], false);
         Motion1::waitForEndOfMoves();

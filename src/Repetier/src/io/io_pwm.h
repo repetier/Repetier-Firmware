@@ -161,10 +161,11 @@
 #define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow) \
     class name##Class : public PWMHandler { \
     public: \
-        name##Class() void set(fast8_t _pwm) final { \
+        name##Class() {}; \
+        void set(fast8_t _pwm) final { \
             if (_pwm > minValue) { \
                 pwmname.set(_pwm); \
-            } else if (offBelow) { \
+            } else if (offBelow || _pwm == 0) { \
                 pwmname.set(0); \
             } else { \
                 pwmname.set(minValue); \

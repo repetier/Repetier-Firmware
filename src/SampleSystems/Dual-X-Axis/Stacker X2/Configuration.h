@@ -46,7 +46,7 @@ Early stage version for Stacke X2 printer - use with care
 
 // The follwing variables are required early to decide on the right modules.
 
-//#define RAPS128_XY // define for usage of RAPS128 on xy axis
+// #define RAPS128_XY // define for usage of RAPS128 on xy axis
 // #define DEBUG_POS
 
 #define NUM_SERVOS 0
@@ -69,7 +69,7 @@ Early stage version for Stacke X2 printer - use with care
 #define SLOW_DIRECTION_CHANGE 1      // can be reason for lost steps on slow drivers
 #define SMALL_SEGMENT_SIZE 0.4       // Smaller segments reduce join speed to prevent vibrations causing lost steps
 #define Z_SPEED 8                    // Z positioning speed
-#define XY_SPEED 150                 // XY positioning speed for normal operations
+#define XY_SPEED 200                 // XY positioning speed for normal operations
 #define G0_FEEDRATE 0                // Speed for G0 moves. Independent from set F value! Set 0 to use F value.
 #define A_SPEED 150                  // Second X axis
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
@@ -367,10 +367,10 @@ define Z_MAX_LENGTH 610
 #define Y_HOME_DIR -1
 #define Z_HOME_DIR -1
 #define A_HOME_DIR 1
-#define MOVE_X_WHEN_HOMED 0
-#define MOVE_Y_WHEN_HOMED 0
-#define MOVE_Z_WHEN_HOMED 0
-#define MOVE_A_WHEN_HOMED 0
+#define MOVE_X_WHEN_HOMED 1
+#define MOVE_Y_WHEN_HOMED 1
+#define MOVE_Z_WHEN_HOMED 1
+#define MOVE_A_WHEN_HOMED 1
 #define HOMING_FEEDRATE_X 50
 #define HOMING_FEEDRATE_Y 50
 #define HOMING_FEEDRATE_Z 8

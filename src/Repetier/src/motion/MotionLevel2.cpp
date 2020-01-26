@@ -557,6 +557,12 @@ void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis, bool dir) {
     if (act == nullptr || act->checkEndstops == false) {
         return;
     }
+    if (axis == ZPROBE_AXIS) {                              // z probe can trigger before real z min, so ignore during regular print
+        if (Motion1::endstopMode != EndstopMode::PROBING) { // ignore if not probing
+            return;
+        }
+        axis = Z_AXIS; // Handle like z axis!
+    }
     fast8_t bit = axisBits[axis];
     Motion1::axesTriggered = bit;
     if (dir) {

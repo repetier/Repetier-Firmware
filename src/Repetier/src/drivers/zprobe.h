@@ -17,6 +17,7 @@ public:
     static void setCoating(float val) {}
     static float getBedDistance() { return 0; }
     static float optimumProbingHeight() { return 0; }
+    static bool isActive() { return false; }
 };
 
 #elif Z_PROBE_TYPE == Z_PROBE_TYPE_DEFAULT
@@ -48,6 +49,7 @@ public:
     static void setCoating(float val) { coating = val; }
     static float getBedDistance() { return bedDistance; }
     static float optimumProbingHeight();
+    static bool isActive() { return activated; }
 };
 
 #elif Z_PROBE_TYPE == Z_PROBE_TYPE_NOZZLE
@@ -80,6 +82,7 @@ public:
     static void setCoating(float val) {}
     static float getBedDistance() { return bedDistance; }
     static float optimumProbingHeight();
+    static bool isActive() { return activated; }
 };
 
 #elif Z_PROBE_TYPE == Z_PROBE_TYPE_BLTOUCH
@@ -114,6 +117,7 @@ public:
     static void setCoating(float val) { coating = val; }
     static float getBedDistance() { return bedDistance; }
     static float optimumProbingHeight();
+    static bool isActive() { return activated; }
 };
 
 #else

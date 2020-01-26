@@ -447,6 +447,10 @@ void GCode_30(GCode* com) {
     // G30 (the same as G30 P3) single probe set Z0
     // G30 S1 Z<real_z_pos> - measures probe height (P is ignored) assuming we are at real height Z
     // G30 H<height> R<offset> Make probe define new Z and z offset (R) at trigger point assuming z-probe measured an object of H height.
+    uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
+    if (p & 1) {
+        ZProbeHandler::activate();
+    }
     if (com->hasS()) {
         float curHeight = (com->hasZ() ? com->Z : Motion1::currentPosition[Z_AXIS]);
 
@@ -464,10 +468,6 @@ void GCode_30(GCode* com) {
         Com::printFLN(PSTR("Z-probe height [mm]:"), zProbeHeight);
 
     } else {
-        uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
-        if (p & 1) {
-            ZProbeHandler::activate();
-        }
         float z = ZProbeHandler::runProbe();
         if (z == ILLEGAL_Z_PROBE) {
             GCode::fatalError(PSTR("G30 probing failed!"));
@@ -487,9 +487,9 @@ void GCode_30(GCode* com) {
             Motion1::updatePositionsFromCurrent();
             Motion1::setAxisHomed(Z_AXIS, true);
         }
-        if (p & 2) {
-            ZProbeHandler::deactivate();
-        }
+    }
+    if (p & 2) {
+        ZProbeHandler::deactivate();
     }
 #endif
 }

@@ -529,7 +529,7 @@ void HAL::syncEEPROM() { // store to disk if changed
         if (!eepromFile.seekSet(0))
             failed = true;
 
-        if (!failed && !eepromFile.write(virtualEeprom, EEPROM_BYTES) == EEPROM_BYTES)
+        if (!failed && eepromFile.write(virtualEeprom, EEPROM_BYTES) != EEPROM_BYTES)
             failed = true;
 
         if (failed) {

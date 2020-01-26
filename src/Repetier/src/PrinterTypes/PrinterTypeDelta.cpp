@@ -141,17 +141,21 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
 void PrinterType::closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety) {
     float offsets[2] = { offX, offY };
     float tOffMin, tOffMax;
-    float tPos[2];
-    float dist = 0;
+    float tPos[2], t2Pos[2];
+    float dist = 0, dist2 = 0;
     for (fast8_t i = 0; i < 2; i++) {
         tPos[i] = pos[i] - offsets[i];
+        t2Pos[i] = pos[i] + Motion1::toolOffset[i];
         dist += tPos[i] * tPos[i];
+        dist2 += t2Pos[i] * t2Pos[i]; // current tool offset
     }
     dist = sqrtf(dist);
-    if (dist == 0) { // best position has no offset
+    dist2 = sqrtf(dist2);
+    dist = RMath::max(dist, dist2);
+    float fac = bedRadius / (dist + safety);
+    if (fac >= 1.0f) { // inside bed, nothing to do
         return;
     }
-    float fac = bedRadius / (dist + safety);
     if (fac < 0) {
         tPos[X_AXIS] *= fac;
         tPos[Y_AXIS] *= fac;

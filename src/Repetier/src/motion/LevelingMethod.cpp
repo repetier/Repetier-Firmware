@@ -620,6 +620,9 @@ void Leveling::measure() {
 
 void Leveling::execute_G32(GCode* com) {
     measure();
+    if (com->hasS() && com->S > 0) {
+        EEPROM::markChanged();
+    }
 }
 
 #endif
@@ -665,6 +668,9 @@ void Leveling::measure() {
 
 void Leveling::execute_G32(GCode* com) {
     measure();
+    if (com->hasS() && com->S > 0) {
+        EEPROM::markChanged();
+    }
 }
 
 #endif

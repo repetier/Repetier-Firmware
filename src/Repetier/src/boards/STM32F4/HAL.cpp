@@ -423,7 +423,7 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
             uint32_t channel = STM_PIN_CHANNEL(map->function);
             pinMode(pinNumber, OUTPUT);
             digitalWrite(pinNumber, LOW);
-            HT->setPWM(channel, p, frequency, 0);
+            HT->setPWM(channel, p, tf->frequency, 0);
             return numPWMEntries++;
         }
     }
@@ -664,7 +664,7 @@ void HAL::syncEEPROM() { // store to disk if changed
         if (!eepromFile.seekSet(0))
             failed = true;
 
-        if (!failed && !eepromFile.write(virtualEeprom, EEPROM_BYTES) == EEPROM_BYTES)
+        if (!failed && eepromFile.write(virtualEeprom, EEPROM_BYTES) != EEPROM_BYTES)
             failed = true;
 
         if (failed) {

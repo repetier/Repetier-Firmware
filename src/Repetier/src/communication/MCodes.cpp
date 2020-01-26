@@ -616,6 +616,7 @@ void MCode_118(GCode* com) {
 
 void reportEndstop(EndstopDriver& d, PGM_P text) {
     if (d.implemented()) {
+        Com::print(' ');
         Com::printF(text);
         d.report();
     }
@@ -625,7 +626,7 @@ void MCode_119(GCode* com) {
     Motion1::waitForEndOfMoves();
     updateEndstops();
     updateEndstops();
-    Com::printF(PSTR("endstops hit: "));
+    Com::printF(PSTR("endstops hit:"));
     reportEndstop(endstopXMin, Com::tXMinColon);
     reportEndstop(endstopXMax, Com::tXMaxColon);
     reportEndstop(endstopYMin, Com::tYMinColon);
@@ -1134,14 +1135,11 @@ void MCode_323(GCode* com) {
 
 void MCode_340(GCode* com) {
 #if NUM_SERVOS > 0
-    if (com->hasP() && com->P < NUM_SERVOS && com->P >= 0) {
+    uint8_t p = com->hasP() ? static_cast<uint8_t>(com->P) : 0;
+    if (p < NUM_SERVOS) {
         ENSURE_POWER
-        int s = 0;
-        if (com->hasS())
-            s = com->S;
-        uint16_t r = 0;
-        if (com->hasR()) // auto off time in ms
-            r = com->R;
+        int s = com->hasS() ? com->S : 0;
+        uint16_t r = com->hasR() ? com->R : 0; // auto off time in 100ms
         servos[com->P]->setPosition(s, r);
     }
 #endif
