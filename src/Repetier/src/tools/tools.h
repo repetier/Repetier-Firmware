@@ -116,6 +116,7 @@ public:
     virtual void activate() = 0;
     /// Gets called when the tool gets disabled.
     virtual void deactivate() = 0;
+    virtual void copySettingsToMotion1() = 0;
     /// Called on kill/emergency to disable the tool
     virtual void shutdown() = 0;
     /// Set temperature in case tool supports temperatures.

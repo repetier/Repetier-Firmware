@@ -99,6 +99,7 @@ void ToolLaser<enabledPin, activePin>::activate() {
     GCode::executeFString(startScript);
     Motion1::setMotorForAxis(nullptr, E_AXIS);
 }
+
 /// Gets called when the tool gets disabled.
 template <class enabledPin, class activePin>
 void ToolLaser<enabledPin, activePin>::deactivate() {
@@ -111,6 +112,11 @@ void ToolLaser<enabledPin, activePin>::deactivate() {
     GCode::executeFString(endScript);
     Motion1::setMotorForAxis(nullptr, E_AXIS);
 }
+
+template <class enabledPin, class activePin>
+void ToolLaser<enabledPin, activePin>::copySettingsToMotion1() {
+}
+
 /// Called on kill/emergency to disable the tool
 template <class enabledPin, class activePin>
 void ToolLaser<enabledPin, activePin>::shutdown() {

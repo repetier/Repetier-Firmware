@@ -70,11 +70,12 @@ public:
     void reset(float offx, float offy, float offz, float _milliwatt, int32_t _warmup, int16_t _warmupPower);
     void updateGammaMap(bool report);
     void extractNewGammaCorrection(GCode* com);
-    bool supportsTemperatures() final { return false; }
+    bool supportsTemperatures() final override { return false; }
     /// Called when the tool gets activated.
     void activate() final;
     /// Gets called when the tool gets disabled.
     void deactivate() final;
+    void copySettingsToMotion1() final override;
     /// Called on kill/emergency to disable the tool
     void shutdown() final;
     float getMaxSpeed() { return 200; }

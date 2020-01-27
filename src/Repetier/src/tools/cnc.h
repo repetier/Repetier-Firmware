@@ -56,6 +56,7 @@ public:
     void activate() final;
     /// Gets called when the tool gets disabled.
     void deactivate() final;
+    void copySettingsToMotion1() final override;
     /// Called on kill/emergency to disable the tool
     void shutdown() final;
     float getMaxSpeed() { return 200; }

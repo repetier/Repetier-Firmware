@@ -30,6 +30,7 @@ void __attribute__((weak)) menuToolOffsetXFine(GUIAction action, void* data) {
     DRAW_FLOAT_P(PSTR("Offset X (0.01mm):"), Com::tUnitStepsPerMM, ext->getOffsetX(), 2);
     if (GUI::handleFloatValueAction(action, v, 0, 100000, 0.01)) {
         ext->setOffsetForAxis(X_AXIS, v);
+        Tool::updateDerivedTools();
     }
 }
 
@@ -42,6 +43,7 @@ void __attribute__((weak)) menuToolOffsetX(GUIAction action, void* data) {
     }
     if (GUI::handleFloatValueAction(action, v, 0, 100000, 1)) {
         ext->setOffsetForAxis(X_AXIS, v);
+        Tool::updateDerivedTools();
     }
 }
 
@@ -50,6 +52,7 @@ void __attribute__((weak)) menuToolOffsetYFine(GUIAction action, void* data) {
     DRAW_FLOAT_P(PSTR("Offset Y (0.01mm):"), Com::tUnitStepsPerMM, ext->getOffsetY(), 2);
     if (GUI::handleFloatValueAction(action, v, 0, 100000, 0.01)) {
         ext->setOffsetForAxis(Y_AXIS, v);
+        Tool::updateDerivedTools();
     }
 }
 
@@ -62,6 +65,7 @@ void __attribute__((weak)) menuToolOffsetY(GUIAction action, void* data) {
     }
     if (GUI::handleFloatValueAction(action, v, 0, 100000, 1)) {
         ext->setOffsetForAxis(Y_AXIS, v);
+        Tool::updateDerivedTools();
     }
 }
 
@@ -70,6 +74,7 @@ void __attribute__((weak)) menuToolOffsetZFine(GUIAction action, void* data) {
     DRAW_FLOAT_P(PSTR("Offset Z (0.01mm):"), Com::tUnitStepsPerMM, ext->getOffsetZ(), 2);
     if (GUI::handleFloatValueAction(action, v, 0, 100000, 0.01)) {
         ext->setOffsetForAxis(Z_AXIS, v);
+        Tool::updateDerivedTools();
     }
 }
 
@@ -82,6 +87,7 @@ void __attribute__((weak)) menuToolOffsetZ(GUIAction action, void* data) {
     }
     if (GUI::handleFloatValueAction(action, v, 0, 100000, 1)) {
         ext->setOffsetForAxis(Z_AXIS, v);
+        Tool::updateDerivedTools();
     }
 }
 
@@ -90,6 +96,7 @@ void __attribute__((weak)) menuExtruderStepsPerMM(GUIAction action, void* data) 
     DRAW_FLOAT_P(PSTR("Resolution:"), Com::tUnitStepsPerMM, ext->getResolution(), 2);
     if (GUI::handleFloatValueAction(action, v, 0, 100000, 0.1)) {
         ext->setResolution(v);
+        Tool::updateDerivedTools();
     }
 }
 
@@ -98,6 +105,7 @@ void __attribute__((weak)) menuExtruderMaxSpeed(GUIAction action, void* data) {
     DRAW_FLOAT_P(PSTR("Max. Speed:"), Com::tUnitMMPS, ext->getMaxSpeed(), 0);
     if (GUI::handleFloatValueAction(action, v, 1, 1000, 1)) {
         ext->setMaxSpeed(v);
+        Tool::updateDerivedTools();
     }
 }
 
@@ -106,6 +114,7 @@ void __attribute__((weak)) menuExtruderMaxAcceleration(GUIAction action, void* d
     DRAW_FLOAT_P(PSTR("Max. Acceleration:"), Com::tUnitMMPS2, ext->getAcceleration(), 0);
     if (GUI::handleFloatValueAction(action, v, 50, 20000, 50)) {
         ext->setAcceleration(v);
+        Tool::updateDerivedTools();
     }
 }
 
@@ -114,6 +123,7 @@ void __attribute__((weak)) menuExtruderMaxYank(GUIAction action, void* data) {
     DRAW_FLOAT_P(PSTR("Max. Jerk"), Com::tUnitMMPS, ext->getMaxYank(), 0);
     if (GUI::handleFloatValueAction(action, v, 0.1, 100, 0.1)) {
         ext->setMaxYank(v);
+        Tool::updateDerivedTools();
     }
 }
 
@@ -122,6 +132,7 @@ void __attribute__((weak)) menuExtruderFilamentDiameter(GUIAction action, void* 
     DRAW_FLOAT_P(PSTR("Fil. Diameter"), Com::tUnitMM, ext->getDiameter(), 2);
     if (GUI::handleFloatValueAction(action, v, 0.1, 100, 0.01)) {
         ext->setDiameter(v);
+        Tool::updateDerivedTools();
     }
 }
 
@@ -275,6 +286,7 @@ void Tool::eepromHandle() {
 void Tool::updateDerivedTools() {
     if (activeTool != nullptr) {
         activeTool->updateDerived();
+        activeTool->copySettingsToMotion1();
     }
 }
 

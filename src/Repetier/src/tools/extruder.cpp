@@ -33,11 +33,13 @@ void ToolExtruder::reset(float offx, float offy, float offz, float diameter, flo
 
 /// Called when the tool gets activated.
 void ToolExtruder::activate() {
+    Motion1::waitForEndOfMoves();
     Motion1::setMotorForAxis(stepper, E_AXIS);
     Motion1::maxYank[E_AXIS] = yank;
     Motion1::resolution[E_AXIS] = stepsPerMM;
     Motion1::currentPosition[E_AXIS] = Motion1::currentPositionTransformed[E_AXIS] = 0.0f;
     Motion1::maxFeedrate[E_AXIS] = maxSpeed;
+    Motion1::maxAcceleration[E_AXIS] = acceleration;
     Motion1::advanceK = advance;
     GCode::executeFString(startScript);
     Motion1::waitForEndOfMoves();
@@ -49,6 +51,13 @@ void ToolExtruder::deactivate() {
     Motion1::setMotorForAxis(nullptr, E_AXIS);
 }
 
+void ToolExtruder::copySettingsToMotion1() {
+    Motion1::maxYank[E_AXIS] = yank;
+    Motion1::resolution[E_AXIS] = stepsPerMM;
+    Motion1::maxFeedrate[E_AXIS] = maxSpeed;
+    Motion1::maxAcceleration[E_AXIS] = acceleration;
+    Motion1::advanceK = advance;
+}
 /// Called on kill/emergency to disable the tool
 void ToolExtruder::shutdown() {
     heater->setTargetTemperature(0);

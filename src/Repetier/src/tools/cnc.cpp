@@ -66,6 +66,11 @@ void ToolCNC<dirPin, enabledPin, activePin>::deactivate() {
     GCode::executeFString(endScript);
     Motion1::setMotorForAxis(nullptr, E_AXIS);
 }
+
+template <class dirPin, class enabledPin, class activePin>
+void ToolCNC<dirPin, enabledPin, activePin>::copySettingsToMotion1() {
+}
+
 /// Called on kill/emergency to disable the tool
 template <class dirPin, class enabledPin, class activePin>
 void ToolCNC<dirPin, enabledPin, activePin>::shutdown() {

@@ -60,34 +60,35 @@ public:
         , advance(_advance)
         , diameter(dia) {}
     void reset(float offx, float offy, float offz, float diameter, float resolution, float yank, float maxSpeed, float acceleration, float advance);
-    bool supportsTemperatures() final { return true; }
+    virtual bool supportsTemperatures() final override { return true; }
     /// Called when the tool gets activated.
-    void activate() final;
+    virtual void activate() final override;
     /// Gets called when the tool gets disabled.
-    void deactivate() final;
+    virtual void deactivate() final override;
+    virtual void copySettingsToMotion1() override final;
     /// Called on kill/emergency to disable the tool
-    void shutdown() final;
+    virtual void shutdown() final override;
     /// Set temperature in case tool supports temperatures.
-    HeatManager* getHeater() final { return heater; }
-    float getMaxSpeed() { return maxSpeed; }
+    virtual HeatManager* getHeater() final override { return heater; }
+    virtual float getMaxSpeed() override { return maxSpeed; }
     void setMaxSpeed(float speed) { maxSpeed = speed; }
     float getAcceleration() { return acceleration; }
     void setAcceleration(float accel) { acceleration = accel; }
     float getMaxStartSpeed() { return 0.5 * yank; }
     float getMaxYank() { return yank; }
     void setMaxYank(float y) { yank = y; }
-    float getDiameter() { return diameter; }
+    virtual float getDiameter() override final { return diameter; }
     void setDiameter(float dia) { diameter = dia; }
-    float getMaxTemp() { return heater->getMaxTemperature(); }
-    void eepromHandle();
-    void init();
-    void setAdvance(float adv);
-    void updateDerived();
-    void disableMotor() final;
-    void enableMotor() final;
-    void stepMotor() final;
-    void unstepMotor() final;
-    bool updateMotor() final;
+    virtual float getMaxTemp() final override { return heater->getMaxTemperature(); }
+    virtual void eepromHandle() final override;
+    virtual void init() final override;
+    virtual void setAdvance(float adv) final override;
+    virtual void updateDerived() final override;
+    virtual void disableMotor() final override;
+    virtual void enableMotor() final override;
+    virtual void stepMotor() final override;
+    virtual void unstepMotor() final override;
+    virtual bool updateMotor() final override;
     void directionMotor(bool dir) final;
     void setResolution(float stepspermm) { stepsPerMM = stepspermm; }
     float getResolution() { return stepsPerMM; }
@@ -96,8 +97,8 @@ public:
     }
     /// Computes intensity based on speed
     virtual int computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) { return activeSecondaryValue; }
-    virtual bool secondaryIsFan() { return true; }
-    virtual ToolTypes getToolType() { return ToolTypes::EXTRUDER; }
+    virtual bool secondaryIsFan() final override { return true; }
+    virtual ToolTypes getToolType() override { return ToolTypes::EXTRUDER; }
 };
 
 template <class inputPin, class ObserverType>
