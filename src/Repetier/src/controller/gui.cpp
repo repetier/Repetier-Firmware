@@ -711,7 +711,3 @@ void selectToolAction(GUIAction action, void* data) {
         Tool::selectTool(id);
     }
 }
-
-#if defined(CUSTOM_EVENTS)
-#include "../custom/CustomEventsImpl.h"
-#endif

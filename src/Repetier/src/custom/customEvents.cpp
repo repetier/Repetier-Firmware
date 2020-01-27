@@ -7,4 +7,7 @@ to copy your files as replacement of these dummies and are done.
 
 #include "Repetier.h"
 
+#if defined(CUSTOM_EVENTS)
 // Add your functions/class implementations here
+
+#endif

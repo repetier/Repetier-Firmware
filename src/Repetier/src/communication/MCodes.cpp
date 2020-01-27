@@ -477,6 +477,7 @@ void MCode_109(GCode* com) {
     }
     if (Motion1::dittoMode) {
         for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
+            EVENT_WAITING_HEATER(i);
             tool = Tool::getTool(i);
             if (com->hasS()) {
                 tool->getHeater()->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
@@ -487,18 +488,22 @@ void MCode_109(GCode* com) {
         for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
             tool = Tool::getTool(i);
             tool->getHeater()->waitForTargetTemperature();
+            EVENT_HEATING_FINISHED(i);
         }
     } else {
+        EVENT_WAITING_HEATER(tool->getToolId());
         if (com->hasS()) {
             tool->getHeater()->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
         } else if (com->hasH()) {
             tool->getHeater()->setTargetTemperature(tool->getHeater()->getPreheatTemperature() + (com->hasO() ? com->O : 0));
         }
         tool->getHeater()->waitForTargetTemperature();
+        EVENT_HEATING_FINISHED(tool->getToolId());
     }
     previousMillisCmd = HAL::timeInMilliseconds();
 #endif
 }
+
 void MCode_111(GCode* com) {
     if (com->hasS())
         Printer::setDebugLevel(static_cast<uint8_t>(com->S));
@@ -814,20 +819,22 @@ void MCode_190(GCode* com) {
         }
         UI_STATUS_UPD("Heating Bed");
         Motion1::waitForEndOfMoves();
-        EVENT_WAITING_HEATER(-1);
         if (com->hasH()) { // one bed
             if (com->H < 0 || com->H >= NUM_HEATED_BEDS) {
                 return;
             }
             fast8_t i = static_cast<fast8_t>(com->H);
+            EVENT_WAITING_HEATER(1000 + i);
             if (com->hasS()) {
                 heatedBeds[i]->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
             } else if (com->hasP()) {
                 heatedBeds[i]->setTargetTemperature(heatedBeds[i]->getPreheatTemperature() + (com->hasO() ? com->O : 0));
             }
             heatedBeds[i]->waitForTargetTemperature();
+            EVENT_HEATING_FINISHED(1000 + i);
         } else { // all beds
             for (fast8_t i = 0; i < NUM_HEATED_BEDS; i++) {
+                EVENT_WAITING_HEATER(1000 + i);
                 if (com->hasS()) {
                     heatedBeds[i]->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
                 } else if (com->hasP()) {
@@ -836,9 +843,9 @@ void MCode_190(GCode* com) {
             }
             for (fast8_t i = 0; i < NUM_HEATED_BEDS; i++) {
                 heatedBeds[i]->waitForTargetTemperature();
+                EVENT_HEATING_FINISHED(1000 + i);
             }
         }
-        EVENT_HEATING_FINISHED(-1);
         UI_CLEAR_STATUS;
         previousMillisCmd = HAL::timeInMilliseconds();
     }
@@ -854,20 +861,22 @@ void MCode_191(GCode* com) {
         }
         UI_STATUS_UPD("Heating Chamber");
         Motion1::waitForEndOfMoves();
-        EVENT_WAITING_HEATER(-1);
         if (com->hasH()) { // one bed
             if (com->H < 0 || com->H >= NUM_HEATED_CHAMBERS) {
                 return;
             }
             fast8_t i = static_cast<fast8_t>(com->H);
+            EVENT_WAITING_HEATER(2000 + i);
             if (com->hasS()) {
                 heatedChambers[i]->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
             } else if (com->hasP()) {
                 heatedChambers[i]->setTargetTemperature(heatedChambers[i]->getPreheatTemperature() + (com->hasO() ? com->O : 0));
             }
             heatedChambers[i]->waitForTargetTemperature();
+            EVENT_HEATING_FINISHED(2000 + i);
         } else { // all beds
             for (fast8_t i = 0; i < NUM_HEATED_CHAMBERS; i++) {
+                EVENT_WAITING_HEATER(2000 + i);
                 if (com->hasS()) {
                     heatedChambers[i]->setTargetTemperature(com->S + (com->hasO() ? com->O : 0));
                 } else if (com->hasP()) {
@@ -876,9 +885,9 @@ void MCode_191(GCode* com) {
             }
             for (fast8_t i = 0; i < NUM_HEATED_CHAMBERS; i++) {
                 heatedChambers[i]->waitForTargetTemperature();
+                EVENT_HEATING_FINISHED(2000 + i);
             }
         }
-        EVENT_HEATING_FINISHED(-1);
         UI_CLEAR_STATUS;
         previousMillisCmd = HAL::timeInMilliseconds();
     }

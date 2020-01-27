@@ -25,7 +25,7 @@ How to use the system:
 Each of the following events describe the parameter and when it is called.
 */
 
-// Catch heating events. id is extruder id or -1 for heated bed.
+// Catch heating events. id is extruder id or 1000 + heated bed index or 2000 + heated chamber index.
 #define EVENT_WAITING_HEATER(id) \
     {}
 #define EVENT_HEATING_FINISHED(id) \
@@ -161,5 +161,5 @@ Each of the following events describe the parameter and when it is called.
 // Called when a fan reaches it's M106 D<seconds> timeout
 #define EVENT_FAN_TIMEOUT(fanId, targetSpeed) \
     {}
- 
+
 #endif // EVENTS_H_INCLUDED
