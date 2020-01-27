@@ -747,7 +747,8 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
         lcd.setFont(u8g2_font_6x10_mf);
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Progress:"));
-        GUI::bufAddFloat(Motion1::currentPosition[Y_AXIS], 4, 2);
+        GUI::bufAddFloat(Printer::progress, 3, 1);
+        GUI::bufAddStringP(PSTR(" %"));
         lcd.drawUTF8(0, 10, GUI::buf);
 
         lcd.setFont(u8g2_font_6x10_mf);
