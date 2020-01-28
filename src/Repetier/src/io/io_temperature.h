@@ -44,6 +44,7 @@ IO_TEMPERATURE_TABLE(name,analog,table)
 #undef IO_TEMPERATURE_TABLE
 #undef IO_TEMPERATURE_MAX31855
 #undef IO_TEMPERATURE_MAX6675
+#undef IO_TEMPERATURE_FAKE
 #undef IO_HOTTEST_OF_2
 #undef IO_COOLEST_OF_2
 
@@ -197,6 +198,15 @@ public:
         } \
     }; \
     extern name##Class name;
+#define IO_TEMPERATURE_FAKE(name, fakeTemp) \
+    class name##Class : public IOTemperature { \
+    public: \
+        float get() { \
+            return fakeTemp; \
+        } \
+        bool isDefect() { return false; } \
+    }; \
+    extern name##Class name;
 
 #define IO_HOTTEST_OF_2(name, temp1, temp2) \
     class name##Class : public IOTemperature { \
@@ -237,20 +247,38 @@ public:
 #define IO_TEMPERATURE_MAX6675(name, spiDriver) \
     name##Class name;
 
+#define IO_TEMPERATURE_FAKE(name, fakeTemp) \
+    name##Class name;
+
 #define IO_HOTTEST_OF_2(name, temp1, temp2) \
     name##Class name;
 
 #define IO_COOLEST_OF_2(name, temp1, temp2) \
     name##Class name;
 
-#else
+#endif
 
+#ifndef IO_TEMP_TABLE_NTC
 #define IO_TEMP_TABLE_NTC(name, dataname)
+#endif
+#ifndef IO_TEMP_TABLE_PTC
 #define IO_TEMP_TABLE_PTC(name, dataname)
+#endif
+#ifndef IO_TEMPERATURE_TABLE
 #define IO_TEMPERATURE_TABLE(name, analog, table)
+#endif
+#ifndef IO_TEMPERATURE_MAX31855
 #define IO_TEMPERATURE_MAX31855(name, spiDriver)
+#endif
+#ifndef IO_TEMPERATURE_MAX6675
 #define IO_TEMPERATURE_MAX6675(name, spiDriver)
+#endif
+#ifndef IO_TEMPERATURE_FAKE
+#define IO_TEMPERATURE_FAKE(name, fakeTemp)
+#endif
+#ifndef IO_HOTTEST_OF_2
 #define IO_HOTTEST_OF_2(name, temp1, temp2)
+#endif
+#ifndef IO_COOLEST_OF_2
 #define IO_COOLEST_OF_2(name, temp1, temp2)
-
 #endif
