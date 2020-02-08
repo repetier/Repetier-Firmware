@@ -33,12 +33,12 @@ at zMin. So if you have a 1mm indentation it contains -steps per mm.
 */
 class Distortion {
 public:
-  Distortion();
-  void init();
-  void enable(bool permanent = true);
-  void disable(bool permanent = true);
-  bool measure(void);
-  /** \brief Compute distortion correction at given position.
+    Distortion();
+    void init();
+    void enable(bool permanent = true, bool silent = false);
+    void disable(bool permanent = true, bool silent = false);
+    bool measure(void);
+    /** \brief Compute distortion correction at given position.
 
   The current tool offset is added to the CNC position to reference the right
   distortion point.
@@ -48,38 +48,38 @@ public:
   \param z coordinate in CMC steps.
   \return Correction required in z steps.
   */
-  int32_t correct(int32_t x, int32_t y, int32_t z) const;
-  void updateDerived();
-  void reportStatus();
-  bool isEnabled() { return enabled; }
-  int32_t zMaxSteps() { return zEnd; }
-  void set(float x, float y, float z);
-  void showMatrix();
-  void resetCorrection();
+    int32_t correct(int32_t x, int32_t y, int32_t z) const;
+    void updateDerived();
+    void reportStatus();
+    bool isEnabled() { return enabled; }
+    int32_t zMaxSteps() { return zEnd; }
+    void set(float x, float y, float z);
+    void showMatrix();
+    void resetCorrection();
 
 private:
-  int matrixIndex(fast8_t x, fast8_t y) const;
-  int32_t getMatrix(int index) const;
-  void setMatrix(int32_t val, int index);
-  bool isCorner(fast8_t i, fast8_t j) const;
-  INLINE int32_t extrapolatePoint(fast8_t x1, fast8_t y1, fast8_t x2,
-                                  fast8_t y2) const;
-  void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
-  void extrapolateCorners();
+    int matrixIndex(fast8_t x, fast8_t y) const;
+    int32_t getMatrix(int index) const;
+    void setMatrix(int32_t val, int index);
+    bool isCorner(fast8_t i, fast8_t j) const;
+    INLINE int32_t extrapolatePoint(fast8_t x1, fast8_t y1, fast8_t x2,
+                                    fast8_t y2) const;
+    void extrapolateCorner(fast8_t x, fast8_t y, fast8_t dx, fast8_t dy);
+    void extrapolateCorners();
 
-  // attributes
+    // attributes
 #if DRIVE_SYSTEM == DELTA
-  int32_t step;
-  int32_t radiusCorrectionSteps;
+    int32_t step;
+    int32_t radiusCorrectionSteps;
 #else
-  int32_t xCorrectionSteps, xOffsetSteps;
-  int32_t yCorrectionSteps, yOffsetSteps;
+    int32_t xCorrectionSteps, xOffsetSteps;
+    int32_t yCorrectionSteps, yOffsetSteps;
 #endif
-  int32_t zStart, zEnd;
+    int32_t zStart, zEnd;
 #if !DISTORTION_PERMANENT
-  int32_t matrix[DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS];
+    int32_t matrix[DISTORTION_CORRECTION_POINTS * DISTORTION_CORRECTION_POINTS];
 #endif
-  bool enabled;
+    bool enabled;
 };
 #endif // DISTORTION_CORRECTION
 

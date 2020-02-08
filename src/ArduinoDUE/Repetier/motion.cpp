@@ -230,39 +230,48 @@ void PrintLine::queueCartesianSegmentTo(uint8_t check_endstops, uint8_t pathOpti
         p->setEndSpeedFixed(true);
     p->dir = 0;
     //Find direction
-    //Printer::zCorrectionStepsIncluded = 0;
-    for (uint8_t axis = 0; axis < E_AXIS_ARRAY; axis++) {
+    p->secondSpeed = Printer::fanSpeed;
+    for (fast8_t axis = 0; axis < E_AXIS; axis++) {
         p->delta[axis] = Printer::destinationSteps[axis] - Printer::currentPositionSteps[axis];
-        p->secondSpeed = Printer::fanSpeed;
-        // axisDistanceMM[axis] = p->delta[axis] * Printer::invAxisStepsPerMM[axis];
-        if (axis == E_AXIS) {
-            axisDistanceMM[axis] = (Printer::destinationPositionTransformed[axis] - Printer::currentPositionTransformed[axis]) * Printer::extrusionFactor;
-            if (Printer::mode == PRINTER_MODE_FFF) {
-                Printer::extrudeMultiplyError += axisDistanceMM[axis] * Printer::axisStepsPerMM[E_AXIS];
-                p->delta[E_AXIS] = lroundf(Printer::extrudeMultiplyError);
-                Printer::extrudeMultiplyError -= p->delta[E_AXIS];
-                Printer::filamentPrinted += p->delta[E_AXIS] * Printer::invAxisStepsPerMM[axis];
-            }
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-            else if (Printer::mode == PRINTER_MODE_LASER) {
-                p->secondSpeed = ((p->delta[X_AXIS] != 0 || p->delta[Y_AXIS] != 0) && (LaserDriver::laserOn || p->delta[E_AXIS] != 0) ? LaserDriver::intensity : 0);
-                p->delta[E_AXIS] = 0;
-            }
-#endif
-        } else {
-            axisDistanceMM[axis] = Printer::destinationPositionTransformed[axis] - Printer::currentPositionTransformed[axis];
-        }
-        if (axisDistanceMM[axis] >= 0) {
+        axisDistanceMM[axis] = fabs(Printer::destinationPositionTransformed[axis] - Printer::currentPositionTransformed[axis]);
+        if (p->delta[axis] >= 0) {
             p->setPositiveDirectionForAxis(axis);
         } else {
             p->delta[axis] = -p->delta[axis];
-            axisDistanceMM[axis] = -axisDistanceMM[axis];
         }
-        if (axisDistanceMM[axis] != 0)
+        if (p->delta[axis] != 0) {
             p->setMoveOfAxis(axis);
+        }
         Printer::currentPositionSteps[axis] = Printer::destinationSteps[axis];
         Printer::currentPositionTransformed[axis] = Printer::destinationPositionTransformed[axis];
     }
+    // special case E-Axis
+    p->delta[E_AXIS] = Printer::destinationSteps[E_AXIS] - Printer::currentPositionSteps[E_AXIS];
+    axisDistanceMM[E_AXIS] = (Printer::destinationPositionTransformed[E_AXIS] - Printer::currentPositionTransformed[E_AXIS]) * Printer::extrusionFactor;
+    if (Printer::mode == PRINTER_MODE_FFF) {
+        Printer::extrudeMultiplyError += axisDistanceMM[E_AXIS] * Printer::axisStepsPerMM[E_AXIS];
+        p->delta[E_AXIS] = lroundf(Printer::extrudeMultiplyError);
+        Printer::extrudeMultiplyError -= p->delta[E_AXIS];
+        Printer::filamentPrinted += p->delta[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS];
+    }
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+    else if (Printer::mode == PRINTER_MODE_LASER) {
+        p->secondSpeed = ((p->delta[X_AXIS] != 0 || p->delta[Y_AXIS] != 0) && (LaserDriver::laserOn || p->delta[E_AXIS] != 0) ? LaserDriver::intensity : 0);
+        p->delta[E_AXIS] = 0;
+    }
+#endif
+    axisDistanceMM[E_AXIS] = fabs(axisDistanceMM[E_AXIS]);
+    if (p->delta[E_AXIS] >= 0) {
+        p->setPositiveDirectionForAxis(E_AXIS);
+    } else {
+        p->delta[E_AXIS] = -p->delta[E_AXIS];
+    }
+    if (axisDistanceMM[E_AXIS] != 0) {
+        p->setMoveOfAxis(E_AXIS);
+    }
+    Printer::currentPositionSteps[E_AXIS] = Printer::destinationSteps[E_AXIS];
+    Printer::currentPositionTransformed[E_AXIS] = Printer::destinationPositionTransformed[E_AXIS];
+
     if (p->isNoMove()) {
         if (newPath) { // need to delete dummy elements, otherwise commands can get locked.
             PrintLine::resetPathPlanner();
@@ -361,8 +370,11 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
             fdeltas[i] = Printer::destinationPositionTransformed[i] - Printer::currentPositionTransformed[i];
             fstart[i] = Printer::currentPositionTransformed[i];
         }
-        deltas[Z_AXIS] += Printer::zCorrectionStepsIncluded;
-        start[Z_AXIS] -= Printer::zCorrectionStepsIncluded;
+        deltas[Z_AXIS] += Printer::zCorrectionStepsIncluded; // to steps without distorion
+        start[Z_AXIS] -= Printer::zCorrectionStepsIncluded;  // to steps without distorion
+        // currentPositionSteps includes distortion while
+        // destinationSteps and deltas do not contain it.
+        // Correction for target gets added in queueCartesianSegmentTo.
         float dx = fdeltas[X_AXIS];
         float dy = fdeltas[Y_AXIS];
         float len = dx * dx + dy * dy;
@@ -404,35 +416,45 @@ void PrintLine::queueCartesianMove(uint8_t check_endstops, uint8_t pathOptimize)
     p->dir = 0;
     //Find direction
     Printer::zCorrectionStepsIncluded = 0;
-    for (uint8_t axis = 0; axis < 4; axis++) {
+    p->secondSpeed = Printer::fanSpeed;
+    for (fast8_t axis = 0; axis < E_AXIS; axis++) {
         p->delta[axis] = Printer::destinationSteps[axis] - Printer::currentPositionSteps[axis];
-        p->secondSpeed = Printer::fanSpeed;
-        if (axis == E_AXIS) {
-            axisDistanceMM[E_AXIS] = (Printer::destinationPositionTransformed[E_AXIS] - Printer::currentPositionTransformed[E_AXIS]) * Printer::extrusionFactor;
-            if (Printer::mode == PRINTER_MODE_FFF) {
-                Printer::extrudeMultiplyError += axisDistanceMM[axis] * Printer::axisStepsPerMM[E_AXIS];
-                p->delta[E_AXIS] = lroundf(Printer::extrudeMultiplyError);
-                Printer::extrudeMultiplyError -= p->delta[E_AXIS];
-                Printer::filamentPrinted += p->delta[E_AXIS] * Printer::invAxisStepsPerMM[axis];
-            }
-#if defined(SUPPORT_LASER) && SUPPORT_LASER
-            else if (Printer::mode == PRINTER_MODE_LASER) {
-                p->secondSpeed = ((p->delta[X_AXIS] != 0 || p->delta[Y_AXIS] != 0) && (LaserDriver::laserOn || p->delta[E_AXIS] != 0) ? LaserDriver::intensity : 0);
-                p->delta[E_AXIS] = 0;
-            }
-#endif
-        } else {
-            axisDistanceMM[axis] = Printer::destinationPositionTransformed[axis] - Printer::currentPositionTransformed[axis];
-        }
-        if (axisDistanceMM[axis] >= 0) {
+        axisDistanceMM[axis] = fabs(Printer::destinationPositionTransformed[axis] - Printer::currentPositionTransformed[axis]);
+        if (p->delta[axis] >= 0) {
             p->setPositiveDirectionForAxis(axis);
         } else {
             p->delta[axis] = -p->delta[axis];
-            axisDistanceMM[axis] = -axisDistanceMM[axis];
         }
-        if (axisDistanceMM[axis] != 0)
+        // if (axisDistanceMM[axis] != 0) {
+        if (p->delta[axis] != 0) {
             p->setMoveOfAxis(axis);
+        }
     }
+    // special case E-Axis
+    p->delta[E_AXIS] = Printer::destinationSteps[E_AXIS] - Printer::currentPositionSteps[E_AXIS];
+    axisDistanceMM[E_AXIS] = (Printer::destinationPositionTransformed[E_AXIS] - Printer::currentPositionTransformed[E_AXIS]) * Printer::extrusionFactor;
+    if (Printer::mode == PRINTER_MODE_FFF) {
+        Printer::extrudeMultiplyError += axisDistanceMM[E_AXIS] * Printer::axisStepsPerMM[E_AXIS];
+        p->delta[E_AXIS] = lroundf(Printer::extrudeMultiplyError);
+        Printer::extrudeMultiplyError -= p->delta[E_AXIS];
+        Printer::filamentPrinted += p->delta[E_AXIS] * Printer::invAxisStepsPerMM[E_AXIS];
+    }
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+    else if (Printer::mode == PRINTER_MODE_LASER) {
+        p->secondSpeed = ((p->delta[X_AXIS] != 0 || p->delta[Y_AXIS] != 0) && (LaserDriver::laserOn || p->delta[E_AXIS] != 0) ? LaserDriver::intensity : 0);
+        p->delta[E_AXIS] = 0;
+    }
+#endif
+    axisDistanceMM[E_AXIS] = fabs(axisDistanceMM[E_AXIS]);
+    if (p->delta[E_AXIS] >= 0) {
+        p->setPositiveDirectionForAxis(E_AXIS);
+    } else {
+        p->delta[E_AXIS] = -p->delta[E_AXIS];
+    }
+    if (axisDistanceMM[E_AXIS] != 0) {
+        p->setMoveOfAxis(E_AXIS);
+    }
+
     if (p->isNoMove()) {
         if (newPath) { // need to delete dummy elements, otherwise commands can get locked.
             resetPathPlanner();

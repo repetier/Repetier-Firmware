@@ -330,11 +330,17 @@ Like s = 1 plus store results in EEPROM for next connection.
 */
 bool runBedLeveling(int s) {
     bool success = true;
+#if DISTORTION_CORRECTION
+    bool distEnabled = Printer::distortion.isEnabled();
+    Printer::distortion.disable(
+        false); // if level has changed, distortion is also invalid
+#endif
     Printer::prepareForProbing();
 #if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE && Z_PROBE_REQUIRES_HEATING
     float actTemp[NUM_EXTRUDER];
-    for (int i = 0; i < NUM_EXTRUDER; i++)
+    for (int i = 0; i < NUM_EXTRUDER; i++) {
         actTemp[i] = extruder[i].tempControl.targetTemperatureC;
+    }
     Printer::moveToReal(
         IGNORE_COORDINATE, IGNORE_COORDINATE,
         RMath::max(EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0),
@@ -363,11 +369,6 @@ bool runBedLeveling(int s) {
 #endif //  defined(Z_PROBE_MIN_TEMPERATURE) ...
 
     float h1, h2, h3, hc, oldFeedrate = Printer::feedrate;
-#if DISTORTION_CORRECTION
-    bool distEnabled = Printer::distortion.isEnabled();
-    Printer::distortion.disable(
-        false); // if level has changed, distortion is also invalid
-#endif
     Printer::setAutolevelActive(false); // iterate
     Printer::resetTransformationMatrix(
         true); // in case we switch from matrix to motorized!
@@ -489,13 +490,13 @@ bool runBedLeveling(int s) {
     if (s >= 2) {
         EEPROM::storeDataIntoEEPROM();
     }
-    Printer::updateCurrentPosition(true);
-    Commands::printCurrentPosition();
 #if DISTORTION_CORRECTION
     if (distEnabled)
         Printer::distortion.enable(
             false); // if level has changed, distortion is also invalid
 #endif
+    Printer::updateCurrentPosition(true);
+    Commands::printCurrentPosition();
 #if DRIVE_SYSTEM == DELTA
     Printer::homeAxis(
         true, true,
@@ -709,6 +710,7 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat,
             return ILLEGAL_Z_PROBE;
     }
     Commands::waitUntilEndOfAllMoves();
+    float zStart = currentPosition[Z_AXIS];
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
     int32_t measurements[Z_PROBE_REPETITIONS];
     repeat = RMath::min(repeat, Z_PROBE_REPETITIONS);
@@ -721,6 +723,14 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat,
     int32_t lastCorrection = currentPositionSteps[Z_AXIS];           // starting position
 #if NONLINEAR_SYSTEM
     realDeltaPositionSteps[Z_AXIS] = currentNonlinearPositionSteps[Z_AXIS]; // update real
+#endif
+#if DISTORTION_CORRECTION
+    bool distOn = Printer::distortion.isEnabled();
+#if DRIVE_SYSTEM != DELTA
+    int32_t zStepsIncluded = zCorrectionStepsIncluded;
+    zCorrectionStepsIncluded = 0; // prevent computing with this included distortion
+#endif
+    Printer::distortion.disable(false, true);
 #endif
     // int32_t updateZ = 0;
     waitForZProbeStart();
@@ -740,7 +750,7 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat,
     for (int8_t r = 0; r < repeat; r++) {
         probeDepth = 2 * (Printer::zMaxSteps - Printer::zMinSteps); // probe should always hit within this distance
         stepsRemainingAtZHit = -1;                                  // Marker that we did not hit z probe
-        setZProbingActive(true);
+        setZProbingActive(true);                                    // prevents also including distortion
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
         HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
@@ -769,6 +779,7 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat,
 #else
         sum += lastCorrection - currentPositionSteps[Z_AXIS];
 #endif
+
         // Com::printFLN(PSTR("ZHSteps:"),lastCorrection -
         // currentPositionSteps[Z_AXIS]);
         if (r + 1 < repeat) {
@@ -800,6 +811,7 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat,
     PrintLine::moveRelativeDistanceInSteps(
         0, 0, lastCorrection - currentPositionSteps[Z_AXIS], 0,
         Printer::homingFeedrate[Z_AXIS], true, false);
+
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
     HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
@@ -811,7 +823,6 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat,
         UI_MESSAGE(1);
         return ILLEGAL_Z_PROBE;
     }
-    updateCurrentPosition(false);
     // Com::printFLN(PSTR("after probe"));
     // Commands::printCurrentPosition();
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
@@ -832,6 +843,29 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat,
 #else
     float distance = static_cast<float>(sum) * invAxisStepsPerMM[Z_AXIS] / static_cast<float>(repeat) + EEPROM::zProbeHeight();
 #endif
+
+#if DISTORTION_CORRECTION
+#if DRIVE_SYSTEM != DELTA
+    zCorrectionStepsIncluded = zStepsIncluded;
+#endif
+    if (distOn) {
+        Printer::distortion.enable(false, true);
+    }
+    float zCorr = 0;
+    if (Printer::distortion.isEnabled()) {
+        zCorr = distortion.correct(
+                    currentPositionSteps[X_AXIS] /* + EEPROM::zProbeXOffset() *
+                                                axisStepsPerMM[X_AXIS]*/
+                    ,
+                    currentPositionSteps[Y_AXIS]
+                    /* + EEPROM::zProbeYOffset() * axisStepsPerMM[Y_AXIS]*/,
+                    zStart * axisStepsPerMM[Z_AXIS] /* currentPositionSteps[Z_AXIS] */ /* zMinSteps */)
+            * invAxisStepsPerMM[Z_AXIS];
+    }
+#endif
+
+    updateCurrentPosition(false);
+
 #if FEATURE_AUTOLEVEL
     // we must change z for the z change from moving in rotated coordinates away
     // from real position
@@ -848,21 +882,6 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat,
 #if Z_PROBE_Z_OFFSET_MODE == 1
     distance += EEPROM::zProbeZOffset(); // We measured including coating, so we
                                          // need to add coating thickness!
-#endif
-
-#if DISTORTION_CORRECTION
-    float zCorr = 0;
-    if (Printer::distortion.isEnabled()) {
-        zCorr = distortion.correct(
-                    currentPositionSteps[X_AXIS] /* + EEPROM::zProbeXOffset() *
-                                                axisStepsPerMM[X_AXIS]*/
-                    ,
-                    currentPositionSteps[Y_AXIS]
-                    /* + EEPROM::zProbeYOffset() * axisStepsPerMM[Y_AXIS]*/,
-                    zMinSteps)
-            * invAxisStepsPerMM[Z_AXIS];
-        distance += zCorr;
-    }
 #endif
 
     distance += bendingCorrectionAt(currentPosition[X_AXIS], currentPosition[Y_AXIS]);
@@ -890,8 +909,10 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat,
         UI_MESSAGE(1);
         return ILLEGAL_Z_PROBE;
     }
-    if (last)
+    if (last) {
         finishProbing();
+    }
+
     return distance;
 }
 

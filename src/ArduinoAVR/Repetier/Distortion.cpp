@@ -114,18 +114,20 @@ void Distortion::updateDerived() {
     zEnd = DISTORTION_END_HEIGHT * Printer::axisStepsPerMM[Z_AXIS] + Printer::zMinSteps;
 }
 
-void Distortion::enable(bool permanent) {
+void Distortion::enable(bool permanent, bool silent) {
     enabled = true;
 #if DISTORTION_PERMANENT && EEPROM_MODE != 0
     if (permanent)
         EEPROM::setZCorrectionEnabled(enabled);
 #endif
-    Com::printFLN(Com::tZCorrectionEnabled);
+    if (!silent) {
+        Com::printFLN(Com::tZCorrectionEnabled);
+    }
     // Problem is now we do not include the extra steps required
     Printer::updateCurrentPosition(false);
 }
 
-void Distortion::disable(bool permanent) {
+void Distortion::disable(bool permanent, bool silent) {
     enabled = false;
 #if DISTORTION_PERMANENT && EEPROM_MODE != 0
     if (permanent)
@@ -136,7 +138,9 @@ void Distortion::disable(bool permanent) {
 #endif
     Printer::updateCurrentPosition(
         false); // now we have a different z height ignoring extra steps included
-    Com::printFLN(Com::tZCorrectionDisabled);
+    if (!silent) {
+        Com::printFLN(Com::tZCorrectionDisabled);
+    }
 }
 
 void Distortion::reportStatus() {
