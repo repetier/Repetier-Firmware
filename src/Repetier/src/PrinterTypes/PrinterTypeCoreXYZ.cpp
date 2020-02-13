@@ -40,8 +40,8 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
     }
     for (fast8_t i = 0; i <= Z_AXIS; i++) {
         if (Motion1::axesHomed & axisBits[i]) {
-            if (pos[i] < Motion1::minPos[i] + Motion1::rotMin[i]
-                || pos[i] > Motion1::maxPos[i]) {
+            if (pos[i] < Motion1::minPosOff[i]
+                || pos[i] > Motion1::maxPosOff[i]) {
                 return false;
             }
         }

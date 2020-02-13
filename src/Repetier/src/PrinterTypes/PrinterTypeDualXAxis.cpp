@@ -146,10 +146,10 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
         //Com::printF(PSTR(" max:"), Motion1::maxPos[i]);
         if (Motion1::axesHomed & axisBits[i]) {
             if (axis == A_AXIS) {
-                if (pos[i] < Motion1::minPos[A_AXIS] - Motion1::rotMin[X_AXIS] || pos[A_AXIS] > Motion1::maxPos[i]) {
+                if (pos[i] < Motion1::minPos[A_AXIS] + Motion1::rotMin[X_AXIS] || pos[A_AXIS] > Motion1::maxPos[i] + Motion1::rotMax[X_AXIS]) {
                     return false;
                 }
-            } else if (pos[i] < Motion1::minPos[i] - motion1::rotMin[X_AXIS] || pos[i] > Motion1::maxPos[i]) {
+            } else if (pos[i] < Motion1::minPosOff[i] || pos[i] > Motion1::maxPosOff[i]) {
                 return false;
             }
             // Com::printFLN(PSTR(" hit"));
