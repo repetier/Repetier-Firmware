@@ -282,6 +282,7 @@ void Motion1::setFromConfig() {
         }
     }
     resetTransformationMatrix(true);
+    autolevelActive = false;
 }
 
 void Motion1::setAutolevelActive(bool state, bool silent) {
@@ -324,10 +325,6 @@ void Motion1::updateRotMinMax() {
             rotMin[i] = RMath::min(rotMin[i], posTransformed[i] - pos[i]);
         }
     }
-    // Special case z axis. z min can have no margin, only z max!
-    // rotMax[Z_AXIS] = RMath::max(rotMax[Z_AXIS], posBottomTransformed[Z_AXIS] - minPos[Z_AXIS]);
-    // rotMax[Z_AXIS] = RMath::max(rotMax[Z_AXIS], pos2BottomTransformed[Z_AXIS] - minPos[Z_AXIS]);
-    // rotMax[Z_AXIS] = RMath::max(rotMax[Z_AXIS], posTopTransformed[Z_AXIS] - maxPos[Z_AXIS]);
     // add some safety margin preventing triggering end stops.
     for (fast8_t i = 0; i <= Z_AXIS; i++) {
         rotMax[i] *= 1.001;
@@ -340,11 +337,11 @@ void Motion1::updateRotMinMax() {
         maxPosOff[i] = maxPos[i];
     }
     autolevelActive = old;
-    Com::printArrayFLN(PSTR("minPosOff:"), minPosOff, 3);
+    /* Com::printArrayFLN(PSTR("minPosOff:"), minPosOff, 3);
     Com::printArrayFLN(PSTR("maxPosOff:"), maxPosOff, 3);
     Com::printArrayFLN(PSTR("rotMin:"), rotMin, 3);
     Com::printArrayFLN(PSTR("rotMax:"), rotMax, 3);
-    Com::printArrayFLN(PSTR("transform:"), autolevelTransformation, 9);
+    Com::printArrayFLN(PSTR("transform:"), autolevelTransformation, 9); */
 }
 
 void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback) {
@@ -1612,21 +1609,16 @@ void Motion1::homeAxes(fast8_t axes) {
         }
     }
     Printer::setHomedAll(ok);
-    Com::printArrayFLN(PSTR("TargetPos:"), oldCoordinates, 3, 2); // TODO
     // Reactivate corrections
     setAutolevelActive(isAL);
     Leveling::setDistortionEnabled(bcActive);
-    Com::printFLN(PSTR("axes:"), (int32_t)axes); // TODO
 
     if (axes & axisBits[Z_AXIS]) {
-        Com::printFLN(PSTR("Extra Z correction")); // TODO
-        Motion1::correctBumpOffset();              // activate bump offset, needs distorion enabled to have an effect!
+        Motion1::correctBumpOffset(); // activate bump offset, needs distorion enabled to have an effect!
         // Add z probe correctons
         int32_t motorPos[NUM_AXES];
         float oldPos[NUM_AXES];
         copyCurrentPrinter(oldPos);
-        Com::printArrayFLN(PSTR("oldPos:"), oldPos, 3, 2);                   // TODO
-        Com::printArrayFLN(PSTR("currentPosition:"), currentPosition, 3, 2); // TODO
         waitForEndOfMoves();
         int32_t* lp = Motion2::lastMotorPos[Motion2::lastMotorIdx];
         FOR_ALL_AXES(i) {
@@ -1636,22 +1628,18 @@ void Motion1::homeAxes(fast8_t axes) {
         float zRot = 0;
         if (isAL) {
             zRot = currentPosition[X_AXIS] * autolevelTransformation[2] + currentPosition[Y_AXIS] * autolevelTransformation[5];
-            Com::printFLN(PSTR("zRot:"), zRot); // TODO
         }
         // undo safety move from rotMin/max plus correct for real bed rotation
         if (homeDir[Z_AXIS] < 0) { // z min homing
             zpCorr = zpCorr - zRot + rotMin[Z_AXIS] - rotMax[Z_AXIS];
-            Com::printFLN(PSTR("zp2:"), zpCorr); // TODO
-        } else {                                 // z max homing
+        } else { // z max homing
             zpCorr = zpCorr - zRot + rotMax[Z_AXIS] - rotMin[Z_AXIS];
         }
 
         if (homeDir[Z_AXIS] < 0 && ZProbe != nullptr) {
             zpCorr += ZProbeHandler::getCoating() - ZProbeHandler::getZProbeHeight();
-            Com::printFLN(PSTR("zp3:"), zpCorr); // TODO
         }
-        Com::printFLN(PSTR("zp4:"), zpCorr); // TODO
-        if (zpCorr != 0.0f) {                // anything to do?
+        if (zpCorr != 0.0f) { // anything to do?
             setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, zpCorr);
             bool isNoDest = Printer::isNoDestinationCheck();
             Printer::setNoDestinationCheck(true);
@@ -1664,7 +1652,6 @@ void Motion1::homeAxes(fast8_t axes) {
                 currentPositionTransformed[i] = oldPos[i];
             }
             updatePositionsFromCurrentTransformed();
-            Com::printArrayFLN(PSTR("newPos:"), currentPosition, 3, 2); // TODO
         }
     }
     /*
@@ -1843,9 +1830,6 @@ bool Motion1::simpleHome(fast8_t axis) {
             // coating, z probe height and tool offset get fixed in homeAxes
         }
     }
-    Com::printFLN(PSTR("dest:"), dest[axis], 2);       // TODO
-    Com::printFLN(PSTR("curPos:"), curPos);            // TODO
-    Com::printFLN(PSTR("tooloff:"), toolOffset[axis]); // TODO
     endstopMode = EndstopMode::DISABLED;
     moveRelativeByOfficial(dest, homingFeedrate[axis], false); // also adds toolOffset!
     waitForEndOfMoves();
@@ -1951,6 +1935,8 @@ void Motion1::eepromHandle() {
 #endif
     EEPROM::handleByte(eprStart + EPR_M1_ALWAYS_CHECK_ENDSTOPS, PSTR("Always check endstops"), alwaysCheckEndstops);
     EEPROM::handleByte(eprStart + EPR_M1_VELOCITY_PROFILE, PSTR("Velocity Profile [0-2]"), Motion2::velocityProfileIndex);
+    EEPROM::handleByte(eprStart + EPR_M1_AUTOLEVEL, PSTR("Auto level active [0-1]"), Motion1::autolevelActive);
+
 #if FEATURE_AXISCOMP
     EEPROM::handleFloat(eprStart + EPR_M1_AXIS_COMP_XY, Com::tAxisCompTanXY, 6, axisCompTanXY);
     EEPROM::handleFloat(eprStart + EPR_M1_AXIS_COMP_XZ, Com::tAxisCompTanYZ, 6, axisCompTanYZ);

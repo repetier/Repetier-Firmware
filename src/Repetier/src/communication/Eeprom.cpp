@@ -537,6 +537,36 @@ void EEPROM::handleByte(uint pos, PGM_P text, int8_t& var) {
 #endif
 }
 
+void EEPROM::handleByte(uint pos, PGM_P text, bool& var) {
+    if (mode == 0 && !silent && text != nullptr) {
+        Com::printF(Com::tEPR0, static_cast<int>(pos));
+        Com::print(' ');
+        Com::print((int)var);
+        Com::print(' ');
+        Com::print(prefix);
+        Com::printFLN(text);
+        HAL::delayMilliseconds(4); // reduces somehow transmission errors
+    } else if (mode == 1) {
+        if (pos == storePos) {
+            if (storeType != EEPROMType::BYTE) {
+                Com::printErrorFLN(PSTR("Storing variable called for wrong type byte"));
+            } else {
+                if (var != storeVar.c) {
+                    var = storeVar.c;
+                    markChanged();
+                }
+            }
+        }
+    }
+#if EEPROM_MODE != 0
+    else if (mode == 2) {
+        HAL::eprSetByte(pos, var);
+    } else if (mode == 3) {
+        var = HAL::eprGetByte(pos);
+    }
+#endif
+}
+
 void EEPROM::handleByte(uint pos, PGM_P text, int32_t& var) {
     if (mode == 0 && !silent && text != nullptr) {
         Com::printF(Com::tEPR0, static_cast<int>(pos));

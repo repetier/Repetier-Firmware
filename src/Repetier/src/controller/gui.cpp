@@ -708,7 +708,6 @@ void directAction(GUIAction action, void* data) {
 
 void selectToolAction(GUIAction action, void* data) {
     int id = reinterpret_cast<int>(data);
-    Com::printFLN(PSTR("selectToolAction:"), id); // TODO
     if (!Printer::failedMode) {
         Motion1::waitForEndOfMoves();
         Tool::selectTool(id);

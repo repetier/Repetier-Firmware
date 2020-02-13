@@ -111,6 +111,7 @@ public:
     static void handleByte(uint pos, PGM_P text, uint8_t& var);
     static void handleByte(uint pos, PGM_P text, int8_t& var);
     static void handleByte(uint pos, PGM_P text, int32_t& var);
+    static void handleByte(uint pos, PGM_P text, bool& var);
     static void handlePrefix(PGM_P text);
     static void handlePrefix(PGM_P text, int id);
     static void removePrefix();
