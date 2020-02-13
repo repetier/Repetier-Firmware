@@ -23,7 +23,7 @@
 
 #include "Repetier.h"
 
-#if LEVELING_CORRECTOR == 0 // software correction
+#if LEVELING_CORRECTOR == LEVELING_CORRECTOR_SOFTWARE // software correction
 
 void LevelingCorrector::correct(Plane* plane) {
     // adjust current z
@@ -37,7 +37,7 @@ void LevelingCorrector::correct(Plane* plane) {
     EEPROM::markChanged();
 }
 
-#elif LEVELING_CORRECTOR == 1 // Motorized correction, 3 motors
+#elif LEVELING_CORRECTOR == LEVELING_CORRECTOR_MOTOR // Motorized correction, 3 motors
 
 void LevelingCorrector::init() {}
 void LevelingCorrector::handleEeprom() {}
@@ -141,7 +141,7 @@ void LevelingCorrector::correct(Plane* plane) {
 
 #endif
 
-#if LEVELING_METHOD == 1 // Grid
+#if LEVELING_METHOD == LEVELING_METHOD_GRID // Grid
 
 float Leveling::grid[GRID_SIZE][GRID_SIZE];
 uint16_t Leveling::eprStart;
@@ -256,7 +256,7 @@ void Leveling::measure() {
             pos[X_AXIS] = px + ZProbeHandler::xOffset();
             pos[Y_AXIS] = py + ZProbeHandler::yOffset();
             pos[Z_AXIS] = ZProbeHandler::optimumProbingHeight();
-            if (PrinterType::positionAllowed(pos)) {
+            if (PrinterType::positionAllowed(pos, pos[Z_AXIS])) {
                 if (ok) {
                     Motion1::moveByPrinter(pos, Motion1::moveFeedrate[X_AXIS], false);
                     float h = ZProbeHandler::runProbe();
@@ -560,7 +560,7 @@ void Leveling::execute_G33(GCode* com) {
 }
 #endif
 
-#if LEVELING_METHOD == 2 // 4 points
+#if LEVELING_METHOD == LEVELING_METHOD_4_POINT_SYMMETRIC // 4 points
 
 void Leveling::measure() {
     Plane plane;
@@ -579,7 +579,7 @@ void Leveling::measure() {
     const float xy = L_P2_Y + t * aby;
     float x1Mirror = L_P1_X + 2.0 * (xx - L_P1_X);
     float y1Mirror = L_P1_Y + 2.0 * (xy - L_P1_Y);
-    Motion1::setAutolevelActive(false);
+    Motion1::setAutolevelActive(false, true);
     Motion1::homeAxes(7); // Home x, y and z
     Motion1::setTmpPositionXYZ(L_P1_X, L_P1_Y, ZProbeHandler::optimumProbingHeight());
     ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
@@ -627,7 +627,7 @@ void Leveling::execute_G32(GCode* com) {
 
 #endif
 
-#if LEVELING_METHOD == 3 // 3 points
+#if LEVELING_METHOD == LEVELING_METHOD_3_POINTS // 3 points
 
 void Leveling::measure() {
     Plane plane;

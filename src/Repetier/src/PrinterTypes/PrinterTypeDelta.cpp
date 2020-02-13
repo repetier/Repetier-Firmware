@@ -125,14 +125,18 @@ void PrinterType::homeAxis(fast8_t axis) {
     }
 }
 
-bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
+bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
     if (Printer::isNoDestinationCheck()) {
         return true;
     }
     if (Printer::isHoming() || Motion1::endstopMode == EndstopMode::PROBING) {
         return true;
     }
-    if (pos[Z_AXIS] < Motion1::minPos[Z_AXIS] || pos[Z_AXIS] > Motion1::maxPos[Z_AXIS]) {
+    // Extra contrain to protect Z conditionbased on official coordinate system
+    if (zOfficial < Motion1::minPos[Z_AXIS] || zOfficial > Motion1::maxPos[Z_AXIS]) {
+        return false;
+    }
+    if (pos[Z_AXIS] < Motion1::minPosOff[Z_AXIS] || pos[Z_AXIS] > Motion1::maxPosOff[Z_AXIS]) {
         return false;
     }
     return pos[X_AXIS] * pos[X_AXIS] + pos[Y_AXIS] * pos[Y_AXIS] <= printRadiusSquared;
@@ -225,9 +229,17 @@ void PrinterType::disableAllowedStepper() {
 
 float PrinterType::accelerationForMoveSteps(fast8_t axes) {
     float acceleration = 500.0f;
-    FOR_ALL_AXES(i) {
-        if (axes & axisBits[i]) {
-            acceleration = RMath::min(acceleration, Motion1::maxAcceleration[i]);
+    if (axes & 8) {
+        FOR_ALL_AXES(i) {
+            if (axes & axisBits[i]) {
+                acceleration = RMath::min(acceleration, Motion1::maxTravelAcceleration[i]);
+            }
+        }
+    } else {
+        FOR_ALL_AXES(i) {
+            if (axes & axisBits[i]) {
+                acceleration = RMath::min(acceleration, Motion1::maxAcceleration[i]);
+            }
         }
     }
     return acceleration;
@@ -337,7 +349,7 @@ void PrinterType::transformedToOfficial(float trans[NUM_AXES], float official[NU
     Motion1::transformFromPrinter(
         trans[X_AXIS],
         trans[Y_AXIS],
-        trans[Z_AXIS] - Motion1::zprobeZOffset,
+        trans[Z_AXIS],
         official[X_AXIS],
         official[Y_AXIS],
         official[Z_AXIS]);
@@ -356,7 +368,6 @@ void PrinterType::officialToTransformed(float official[NUM_AXES], float trans[NU
                                 trans[X_AXIS],
                                 trans[Y_AXIS],
                                 trans[Z_AXIS]);
-    trans[Z_AXIS] += Motion1::zprobeZOffset;
     for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
         trans[i] = official[i];
     }

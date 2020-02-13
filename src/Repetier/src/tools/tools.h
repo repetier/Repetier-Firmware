@@ -94,7 +94,7 @@ public:
     }
     ///< Sends speed directly to connected pwm device
     inline void sendSecondary(int speed) {
-        if (secondary != nullptr) {
+        if (secondary != nullptr && secondary->get() != speed) {
             secondary->set(speed);
         }
     }
@@ -173,7 +173,7 @@ public:
     virtual bool secondaryIsFan() { return false; }
     int secondaryPercent() { return secondary ? (static_cast<int>(secondary->get()) * 100) / 255 : 0; }
     virtual void extractG1(GCode* com) {}
-    virtual bool isSecondaryMove(bool isG0, bool isEMove) { return true; }
+    virtual bool isSecondaryMove(bool isG0, bool isEMove) { return false; }
     virtual ToolTypes getToolType() { return ToolTypes::EXTRUDER; }
     virtual bool showMachineCoordinates() { return true; }
 

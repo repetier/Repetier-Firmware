@@ -65,9 +65,8 @@ enum class EEPROMType {
 
 class EEPROM {
     friend class HAL;
-    static fast8_t mode;  // 0 = output, 1 = set var, 2 = store to eeprom, 3 = read from eeprom
     static uint storePos; // where does M206 want to store
-    static bool silent;
+    static bool silent;   // if true it will not write it out
     static EEPROMType storeType;
     static EEPROMVar storeVar;
     static void callHandle();
@@ -83,9 +82,8 @@ class EEPROM {
     static void updateChecksum();
 
 public:
-    /// Start a timer to store everything to eeprom
+    static fast8_t mode; // 0 = output, 1 = set var, 2 = store to eeprom, 3 = read from eeprom
 
-public:
     static void setSilent(bool s) { silent = s; }
     static void init();
     static void markChanged();

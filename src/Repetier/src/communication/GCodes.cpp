@@ -36,7 +36,8 @@ void GCode_0_1(GCode* com) {
     Tool::getActiveTool()->extractG1(com);
     Printer::setDestinationStepsFromGCode(com); // For X Y Z E F
 #if defined(G0_FEEDRATE) && G0_FEEDRATE > 0
-    if (!(com->hasF() && com->F > 0.1)) {
+    if (com->G == 0 && G0_FEEDRATE > 0) {
+        // if (!(com->hasF() && com->F > 0.1)) {
         Printer::feedrate = backupFeedrate;
     }
 #endif
@@ -505,6 +506,32 @@ void GCode_31(GCode* com) {
 
 void GCode_32(GCode* com) {
     Leveling::execute_G32(com);
+    if (Motion1::homeDir[Z_AXIS] > 0 && ZProbe != nullptr) {
+        // we need to measure top as well to get correct height after homing
+        // Solution is simple and robust. We just home Z go to middle and measure
+        // and measure z distance with probe. Difference between z and measured z is z max error.
+        Motion1::homeAxes(axisBits[Z_AXIS]);
+        float zTheroetical = ZProbeHandler::optimumProbingHeight(), zMeasured = 0;
+        Motion1::setTmpPositionXYZ((Motion1::minPos[X_AXIS] + Motion1::maxPos[X_AXIS]) * 0.5,
+                                   (Motion1::minPos[Y_AXIS] + Motion1::maxPos[Y_AXIS]) * 0.5, zTheroetical);
+        bool ok = Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
+        if (ok) {
+            ZProbeHandler::activate();
+            zMeasured = ZProbeHandler::runProbe();
+            ZProbeHandler::deactivate();
+            ok &= zMeasured != ILLEGAL_Z_PROBE;
+        }
+        if (ok) {
+            Motion1::maxPos[Z_AXIS] += zMeasured - zTheroetical;
+            EEPROM::markChanged();
+            Motion1::updateRotMinMax();
+            Motion1::currentPosition[Z_AXIS] = zMeasured;
+            Motion1::updatePositionsFromCurrent();
+            Motion2::setMotorPositionFromTransformed();
+        } else {
+            GCode::fatalError(PSTR("Leveling failed!"));
+        }
+    }
 }
 
 void GCode_33(GCode* com) {

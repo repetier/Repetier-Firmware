@@ -180,9 +180,11 @@ void GUI::menuEnd(GUIAction action) {
         }
     }
 }
+
 #define TEST_MENU_CLICK \
     if (guiLine == cursorRow[level]) { /* Actions for active line only!*/ \
         if (action == GUIAction::CLICK) { \
+            GUI::nextAction = GUIAction::CLICK_PROCESSED; \
             if (tp == GUIPageType::POP) { /* Leave menu */ \
                 pop(); \
             } else if (cb != nullptr && tp == GUIPageType::ACTION) { /* Execute a direct action */ \
@@ -190,7 +192,6 @@ void GUI::menuEnd(GUIAction action) {
             } else if (cb) { /* Push new display function on stack */ \
                 push(cb, cData, tp); \
             } \
-            action = GUIAction::CLICK_PROCESSED; \
         } \
     }
 
@@ -700,7 +701,7 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
                 }
             }
         }
-        if (NUM_TOOLS > 1 && tool->getToolType() == ToolTypes::EXTRUDER && tool->hasSecondary() && n < 6) {
+        if (NUM_TOOLS > 1 && tool->getToolType() == ToolTypes::EXTRUDER && tool->hasSecondary() && tool->secondaryIsFan() && n < 6) {
             GUI::bufClear();
             GUI::bufAddStringP("Fan:");
             GUI::bufAddInt(tool->secondaryPercent(), 3);

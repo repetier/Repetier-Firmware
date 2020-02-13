@@ -50,6 +50,13 @@ public:
     void setCoolantHandler(CoolantHandler* ch) final {
         coolantHandler = ch;
     }
+    virtual bool isSecondaryMove(bool isG0, bool isEMove) override final {
+        if (isG0 || !active) {
+            return false;
+        }
+        return true;
+    }
+
     void reset(float offx, float offy, float offz, float _rpm, int32_t _startStopDelay);
     bool supportsTemperatures() final { return false; }
     /// Called when the tool gets activated.

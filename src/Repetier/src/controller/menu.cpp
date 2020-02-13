@@ -139,10 +139,19 @@ void __attribute__((weak)) menuMaxSpeed(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuMaxAcceleration(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max @ Acceleration:"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max @ Print Accel.:"), axisNames[axis]);
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS2, Motion1::maxAcceleration[axis], 0);
     if (GUI::handleFloatValueAction(action, v, 50, 20000, 50)) {
         Motion1::maxAcceleration[axis] = v;
+    }
+}
+
+void __attribute__((weak)) menuMaxTravelAcceleration(GUIAction action, void* data) {
+    int axis = reinterpret_cast<int>(data);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max @ Travel Accel.:"), axisNames[axis]);
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS2, Motion1::maxTravelAcceleration[axis], 0);
+    if (GUI::handleFloatValueAction(action, v, 50, 20000, 50)) {
+        Motion1::maxTravelAcceleration[axis] = v;
     }
 }
 
@@ -164,7 +173,8 @@ void __attribute__((weak)) menuConfigAxis(GUIAction action, void* data) {
     GUI::menuFloatP(action, PSTR("Homing Speed:"), Motion1::homingFeedrate[axis], 0, menuHomingSpeed, (void*)axis, GUIPageType::FIXED_CONTENT);
     GUI::menuFloatP(action, PSTR("Move Speed  :"), Motion1::moveFeedrate[axis], 0, menuMoveSpeed, (void*)axis, GUIPageType::FIXED_CONTENT);
     GUI::menuFloatP(action, PSTR("Max Speed   :"), Motion1::maxFeedrate[axis], 0, menuMaxSpeed, (void*)axis, GUIPageType::FIXED_CONTENT);
-    GUI::menuFloatP(action, PSTR("Max Accel.  :"), Motion1::maxAcceleration[axis], 0, menuMaxAcceleration, (void*)axis, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Print Accel.:"), Motion1::maxAcceleration[axis], 0, menuMaxAcceleration, (void*)axis, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Travel Accel:"), Motion1::maxTravelAcceleration[axis], 0, menuMaxTravelAcceleration, (void*)axis, GUIPageType::FIXED_CONTENT);
     GUI::menuFloatP(action, PSTR("Max Jerk    :"), Motion1::maxYank[axis], 1, menuMaxYank, (void*)axis, GUIPageType::FIXED_CONTENT);
     GUI::menuFloatP(action, PSTR("Min Pos     :"), Motion1::minPos[axis], 2, menuMinPos, (void*)axis, GUIPageType::FIXED_CONTENT);
     GUI::menuFloatP(action, PSTR("Max Pos     :"), Motion1::maxPos[axis], 2, menuMaxPos, (void*)axis, GUIPageType::FIXED_CONTENT);

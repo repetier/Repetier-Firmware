@@ -114,7 +114,10 @@ SERVO_ANALOG(ZProbeServo, 0, Servo1Pin, 500, 2500, 1473)
 IO_PWM_HARDWARE(CoolerFan, ORIG_FAN2_PIN, 1000)
 //IO_PWM_HARDWARE(Fan1PWMnoKS, ORIG_FAN_PIN, 5000)
 //IO_PWM_KICKSTART(Fan1PWM, Fan1PWMnoKS, 10)
-IO_PWM_HARDWARE(Fan1PWM, ORIG_FAN_PIN, 1000)
+// IO_PWM_HARDWARE(Fan1PWMNoMin, ORIG_FAN_PIN, 1000)
+IO_OUTPUT(IOFan1, ORIG_FAN_PIN)
+IO_PWM_SOFTWARE(Fan1PWMNoMin, IOFan1, 0)
+IO_PWM_MIN_SPEED(Fan1PWM, Fan1PWMNoMin, 128, false)
 
 // Define temperature sensors
 
@@ -129,7 +132,8 @@ IO_ANALOG_INPUT(IOAnalogBed1, TEMP_1_PIN, 5)
 IO_TEMP_TABLE_NTC(TempTableEpcos, Epcos_B57560G0107F000)
 // Now create the temperature inputs
 
-IO_TEMPERATURE_TABLE(TempBed1, IOAnalogBed1, TempTableEpcos)
+// IO_TEMPERATURE_TABLE(TempBed1, IOAnalogBed1, TempTableEpcos)
+IO_TEMPERATURE_FAKE(TempBed1, 24.5)
 IO_TEMPERATURE_TABLE(TempExt1, IOAnalogExt1, TempTableEpcos)
 IO_TEMPERATURE_TABLE(TempExt2, IOAnalogExt2, TempTableEpcos)
 IO_HOTTEST_OF_2(TempHottestExtruder, TempExt1, TempExt2)
@@ -138,8 +142,8 @@ IO_HOTTEST_OF_2(TempHottestExtruder, TempExt1, TempExt2)
 // that the selected pin can be used as hardware pwm otherwise
 // select a software pwm model whcih works on all pins.
 
-IO_PWM_HARDWARE(PWMExtruder1_12V, HEATER_0_PIN, 1000)
-IO_PWM_HARDWARE(PWMExtruder2_12V, HEATER_2_PIN, 1000)
+IO_PWM_HARDWARE(PWMExtruder1_12V, HEATER_2_PIN, 1000)
+IO_PWM_HARDWARE(PWMExtruder2_12V, HEATER_0_PIN, 1000)
 IO_PWM_SCALEDOWN(PWMExtruder1, PWMExtruder1_12V, 63)
 IO_PWM_SCALEDOWN(PWMExtruder2, PWMExtruder2_12V, 63)
 IO_PWM_HARDWARE(PWMBed1, HEATER_1_PIN, 1000)

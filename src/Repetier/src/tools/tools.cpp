@@ -317,7 +317,6 @@ void Tool::setOffsetForAxis(fast8_t axis, float offset) {
 }
 
 void Tool::minMaxOffsetForAxis(fast8_t axis, float& min, float& max) {
-    min = max = 0;
     for (fast8_t i = 0; i < NUM_TOOLS; i++) {
         float val = 0;
         switch (axis) {
@@ -331,8 +330,8 @@ void Tool::minMaxOffsetForAxis(fast8_t axis, float& min, float& max) {
             val = tools[i]->offsetZ;
             break;
         }
-        min = RMath::min(min, val);
-        max = RMath::max(max, val);
+        min = i ? RMath::min(min, val) : val;
+        max = i ? RMath::max(max, val) : val;
     }
 }
 

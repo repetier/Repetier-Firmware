@@ -68,7 +68,6 @@ void ZProbeHandler::deactivate() {
     GCode::executeFString(Com::tZProbeEndScript);
     Tool* tool = Tool::getActiveTool();
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
-    Motion1::zprobeZOffset = 0;
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     activated = false;
 }
@@ -94,7 +93,7 @@ float ZProbeHandler::runProbe() {
         activate();
     }
     bool alActive = Motion1::isAutolevelActive();
-    Motion1::setAutolevelActive(false);
+    Motion1::setAutolevelActive(false, true);
     EndstopMode oldMode = Motion1::endstopMode;
     Motion1::endstopMode = EndstopMode::PROBING;
     Motion1::waitForEndOfMoves(); // defined starting condition
@@ -228,7 +227,7 @@ float ZProbeHandler::runProbe() {
 #endif
 
     Motion1::endstopMode = oldMode;
-    Motion1::setAutolevelActive(alActive);
+    Motion1::setAutolevelActive(alActive, true);
     if (!wasActivated) {
         deactivate();
     }
@@ -267,7 +266,7 @@ float ZProbeHandler::yOffset() {
 
 void ZProbeHandler::init() {
     eepromReset();
-    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_Z_PROBE, 1, 20);
+    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_Z_PROBE, 1, 24);
     activated = false;
 }
 
@@ -283,6 +282,7 @@ void ZProbeHandler::eepromReset() {
 void ZProbeHandler::eepromHandle() {
     EEPROM::handlePrefix(PSTR("Z-probe"));
     EEPROM::handleFloat(eprStart + 0, PSTR("trigger height [mm]"), 3, height);
+    EEPROM::handleFloat(eprStart + 20, PSTR("Coating [mm]"), 3, coating);
     EEPROM::handleFloat(eprStart + 4, PSTR("min. nozzle distance [mm]"), 3, bedDistance);
     EEPROM::handleFloat(eprStart + 8, PSTR("Probing Speed [mm]"), 3, speed);
     EEPROM::handleFloat(eprStart + 12, PSTR("X offset [mm]"), 3, offsetX);
@@ -352,7 +352,6 @@ void ZProbeHandler::deactivate() {
     GCode::executeFString(Com::tZProbeEndScript);
     Tool* tool = Tool::getActiveTool();
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
-    Motion1::zprobeZOffset = 0;
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Tool* t = Tool::getActiveTool();
     HeatManager* hm = t->getHeater();
@@ -383,7 +382,7 @@ float ZProbeHandler::runProbe() {
         activate();
     }
     bool alActive = Motion1::isAutolevelActive();
-    Motion1::setAutolevelActive(false);
+    Motion1::setAutolevelActive(false, true);
     // bool bcActive = Leveling::isDistortionEnabled();
     EndstopMode oldMode = Motion1::endstopMode;
     Motion1::endstopMode = EndstopMode::PROBING;
@@ -517,7 +516,7 @@ float ZProbeHandler::runProbe() {
 #endif
 
     Motion1::endstopMode = oldMode;
-    Motion1::setAutolevelActive(alActive);
+    Motion1::setAutolevelActive(alActive, true);
     if (!wasActivated) {
         deactivate();
     }
@@ -643,7 +642,6 @@ void ZProbeHandler::deactivate() {
     GCode::executeFString(Com::tZProbeEndScript);
     Tool* tool = Tool::getActiveTool();
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
-    Motion1::zprobeZOffset = 0;
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     activated = false;
 }
@@ -669,7 +667,7 @@ float ZProbeHandler::runProbe() {
         activate();
     }
     bool alActive = Motion1::isAutolevelActive();
-    Motion1::setAutolevelActive(false);
+    Motion1::setAutolevelActive(false, true);
     EndstopMode oldMode = Motion1::endstopMode;
     Motion1::endstopMode = EndstopMode::PROBING;
     Motion1::waitForEndOfMoves(); // defined starting condition
@@ -803,7 +801,7 @@ float ZProbeHandler::runProbe() {
 #endif
 
     Motion1::endstopMode = oldMode;
-    Motion1::setAutolevelActive(alActive);
+    Motion1::setAutolevelActive(alActive, true);
     if (!wasActivated) {
         deactivate();
     }

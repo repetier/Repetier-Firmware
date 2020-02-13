@@ -118,7 +118,7 @@ void PrinterType::park(GCode* com) {
 }
 
 // Is called after normalizing position coordinates!
-bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
+bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
     /* Com::printF(PSTR("Test PA XT:"), pos[X_AXIS], 2);
     Com::printF(PSTR(" YT:"), pos[Y_AXIS], 2);
     Com::printF(PSTR(" ZT:"), pos[Z_AXIS], 2);
@@ -133,6 +133,10 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
     if (Printer::isHoming() || Motion1::endstopMode == EndstopMode::PROBING) {
         return true;
     }
+    // Extra contrain to protect Z conditionbased on official coordinate system
+    if (zOfficial < Motion1::minPos[Z_AXIS] || zOfficial > Motion1::maxPos[Z_AXIS]) {
+        return false;
+    }
     for (fast8_t i = 0; i <= A_AXIS; i++) {
         if (i == E_AXIS) {
             continue;
@@ -141,8 +145,11 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES]) {
         //Com::printF(PSTR(" min:"), Motion1::minPos[i]);
         //Com::printF(PSTR(" max:"), Motion1::maxPos[i]);
         if (Motion1::axesHomed & axisBits[i]) {
-            if (pos[i] < Motion1::minPos[i] || pos[i] > Motion1::maxPos[i]) {
-                // Com::printFLN(PSTR(" hit"));
+            if (axis == A_AXIS) {
+                if (pos[i] < Motion1::minPos[A_AXIS] - Motion1::rotMin[X_AXIS] || pos[A_AXIS] > Motion1::maxPos[i]) {
+                    return false;
+                }
+            } else if (pos[i] < Motion1::minPos[i] - motion1::rotMin[X_AXIS] || pos[i] > Motion1::maxPos[i]) {
                 return false;
             }
             // Com::printFLN(PSTR(" hit"));
@@ -200,9 +207,17 @@ void PrinterType::disableAllowedStepper() {
 
 float PrinterType::accelerationForMoveSteps(fast8_t axes) {
     float acceleration = 500.0f;
-    FOR_ALL_AXES(i) {
-        if (axes & axisBits[i]) {
-            acceleration = RMath::min(acceleration, Motion1::maxAcceleration[i]);
+    if (axes & 8) {
+        FOR_ALL_AXES(i) {
+            if (axes & axisBits[i]) {
+                acceleration = RMath::min(acceleration, Motion1::maxTravelAcceleration[i]);
+            }
+        }
+    } else {
+        FOR_ALL_AXES(i) {
+            if (axes & axisBits[i]) {
+                acceleration = RMath::min(acceleration, Motion1::maxAcceleration[i]);
+            }
         }
     }
     return acceleration;
@@ -496,7 +511,7 @@ void PrinterType::transformedToOfficial(float trans[NUM_AXES], float official[NU
     Motion1::transformFromPrinter(
         targetReal,
         trans[Y_AXIS],
-        trans[Z_AXIS] - Motion1::zprobeZOffset,
+        trans[Z_AXIS],
         official[X_AXIS],
         official[Y_AXIS],
         official[Z_AXIS]);
@@ -518,10 +533,9 @@ void PrinterType::officialToTransformed(float official[NUM_AXES], float trans[NU
                                 trans[X_AXIS],
                                 trans[Y_AXIS],
                                 trans[Z_AXIS]);
-    trans[Z_AXIS] += Motion1::zprobeZOffset;
-    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
-        trans[i] = official[i];
-    }
+
+    trans[i] = official[i];
+}
 }
 
 bool PrinterType::canSelectTool(fast8_t toolId) {

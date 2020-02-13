@@ -577,11 +577,7 @@ void MCode_115(GCode* com) {
 #else
     Com::cap(PSTR("SOFTWARE_POWER:0"));
 #endif
-#if CASE_LIGHTS_PIN > -1
     Com::cap(PSTR("TOGGLE_LIGHTS:1"));
-#else
-    Com::cap(PSTR("TOGGLE_LIGHTS:0"));
-#endif
     Com::cap(PSTR("PAUSESTOP:1"));
     Com::cap(PSTR("PREHEAT:1"));
 #if defined(DOOR_PIN) && DOOR_PIN > -1

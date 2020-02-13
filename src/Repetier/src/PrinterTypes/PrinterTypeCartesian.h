@@ -32,7 +32,7 @@ public:
 
     static void homeAxis(fast8_t axis);
 
-    static bool positionAllowed(float pos[NUM_AXES]);
+    static bool positionAllowed(float pos[NUM_AXES], float zOfficial);
     static void closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety);
     static bool positionOnBed(float pos[2]);
     static void getBedRectangle(float& xmin, float& xmax, float& ymin, float& ymax);

@@ -736,9 +736,11 @@ void GUI::menuEnd(GUIAction action) {
         }
     }
 }
+
 #define TEST_MENU_CLICK \
     if (guiLine == cursorRow[level]) { /* Actions for active line only!*/ \
         if (action == GUIAction::CLICK) { \
+            GUI::nextAction = GUIAction::CLICK_PROCESSED; \
             if (tp == GUIPageType::POP) { /* Leave menu */ \
                 pop(); \
             } else if (cb != nullptr && tp == GUIPageType::ACTION) { /* Execute a direct action */ \
@@ -746,7 +748,6 @@ void GUI::menuEnd(GUIAction action) {
             } else if (cb) { /* Push new display function on stack */ \
                 push(cb, cData, tp); \
             } \
-            action = GUIAction::CLICK_PROCESSED; \
         } \
     }
 
@@ -1200,7 +1201,9 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
 void __attribute__((weak)) printProgress(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         GUI::bufClear();
-        GUI::bufAddStringP(PSTR("Progress"));
+        GUI::bufAddStringP(PSTR("Progress:"));
+        GUI::bufAddFloat(Printer::progress, 3, 1);
+        GUI::bufAddStringP(PSTR(" %"));
         printRow(0, GUI::buf);
         GUI::bufClear();
         printRow(1, GUI::buf);

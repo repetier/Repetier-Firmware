@@ -1019,9 +1019,12 @@ void GCode::printCommand() {
 void GCode::fatalError(FSTRINGPARAM(message)) {
     fatalErrorMsg = message;
     Printer::stopPrint();
-    if (Motion1::currentPosition[Z_AXIS] < Motion1::maxPos[Z_AXIS] - 15) {
+    if (Motion1::isAxisHomed(Z_AXIS) && Motion1::currentPosition[Z_AXIS] < Motion1::maxPos[Z_AXIS] - 15) {
         Motion1::setTmpPositionXYZ(0, 0, 10);
+        EndstopMode oldMode = Motion1::endstopMode;
+        Motion1::endstopMode = EndstopMode::STOP_HIT_AXES;
         Motion1::moveRelativeByOfficial(Motion1::tmpPosition, Motion1::homingFeedrate[Z_AXIS], false);
+        Motion1::endstopMode = oldMode;
     }
     EVENT_FATAL_ERROR_OCCURED
     Commands::waitUntilEndOfAllMoves();

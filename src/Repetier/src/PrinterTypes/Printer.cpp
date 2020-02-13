@@ -189,7 +189,7 @@ void Printer::setFanSpeed(int speed, bool immediately, int fanId, uint32_t timeo
         return;
     }
 
-    if (fans[fanId].timeout) {
+    if (fans[fanId].timeout) { // remove existing timeout
         fans[fanId] = (FanController) { fans[fanId].fan, 0, 0, 0 };
     }
     Com::printF(PSTR("Fanspeed"), fanId);
@@ -201,14 +201,16 @@ void Printer::setFanSpeed(int speed, bool immediately, int fanId, uint32_t timeo
             return;
         }
     }
-    if (Printer::getFanSpeed(fanId) == speed)
-        return;
+    if (Printer::getFanSpeed(fanId) == speed) {
+        return; // nothing to do
+    }
     if (tool && immediately) {
         Printer::setMenuMode(MENU_MODE_FAN_RUNNING, speed != 0);
         if (Motion1::length == 0 || immediately) {
             if (Tool::getActiveTool() && Tool::getActiveTool()->secondaryIsFan()) {
-                for (fast8_t i = 0; i < PRINTLINE_CACHE_SIZE; i++)
+                for (fast8_t i = 0; i < PRINTLINE_CACHE_SIZE; i++) {
                     Motion1::buffers[i].secondSpeed = speed; // fill all printline buffers with new fan speed value
+                }
             }
         }
     }
@@ -225,6 +227,7 @@ void Printer::checkFanTimeouts() {
         }
     }
 }
+
 bool Printer::updateDoorOpen() {
 #if defined(DOOR_PIN) && DOOR_PIN > -1 //  && SUPPORT_LASER should always be respected
     bool isOpen = isDoorOpen();
@@ -453,7 +456,7 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
         HeatManager* heater = Tool::getActiveTool()->getHeater();
         if (relativeCoordinateMode || relativeExtruderCoordinateMode) {
             if (fabs(com->E) * extrusionFactor > EXTRUDE_MAXLENGTH) {
-                Com::printWarningF(PSTR("MAx. extrusion distance per move exceeded - ignoring move."));
+                Com::printWarningF(PSTR("Max. extrusion distance per move exceeded - ignoring move."));
                 p = 0;
             }
             coords[E_AXIS] = Motion1::currentPosition[E_AXIS] + p;
@@ -475,7 +478,7 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
             feedrate = com->F * (float)feedrateMultiply * 0.00016666666f; // Factor is 1/60/100
         }
     }
-    Motion1::moveByOfficial(coords, Printer::feedrate, secondaryMove);
+    Motion1::moveByOfficial(coords, feedrate, secondaryMove);
 }
 
 void Printer::setup() {
@@ -802,9 +805,9 @@ void Printer::showConfiguration() {
     Com::config(PSTR("XPrintAccel:"), Motion1::maxAcceleration[X_AXIS]);
     Com::config(PSTR("YPrintAccel:"), Motion1::maxAcceleration[Y_AXIS]);
     Com::config(PSTR("ZPrintAccel:"), Motion1::maxAcceleration[Z_AXIS]);
-    Com::config(PSTR("XTravelAccel:"), Motion1::maxAcceleration[X_AXIS]);
-    Com::config(PSTR("YTravelAccel:"), Motion1::maxAcceleration[Y_AXIS]);
-    Com::config(PSTR("ZTravelAccel:"), Motion1::maxAcceleration[Z_AXIS]);
+    Com::config(PSTR("XTravelAccel:"), Motion1::maxTravelAcceleration[X_AXIS]);
+    Com::config(PSTR("YTravelAccel:"), Motion1::maxTravelAcceleration[Y_AXIS]);
+    Com::config(PSTR("ZTravelAccel:"), Motion1::maxTravelAcceleration[Z_AXIS]);
     PrinterType::M360();
     if (NUM_HEATED_BEDS > 0) {
         Com::config(PSTR("MaxBedTemp:"), heatedBeds[0]->getMaxTemperature());

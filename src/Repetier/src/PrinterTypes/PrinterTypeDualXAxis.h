@@ -51,7 +51,7 @@ public:
     static bool positionOnBed(float pos[2]);
     static void getBedRectangle(float& xmin, float& xmax, float& ymin, float& ymax);
 
-    static bool positionAllowed(float pos[NUM_AXES]);
+    static bool positionAllowed(float pos[NUM_AXES], float zOfficial);
     static void disableAllowedStepper();
     /** During probing or homing a move in steps might be needed.
      * This returns the acceleration to use. */

@@ -358,7 +358,7 @@ void EEPROM::removePrefix() {
 }
 
 void EEPROM::handleFloat(uint pos, PGM_P text, uint8_t digits, float& var) {
-    if (mode == 0 && !silent) {
+    if (mode == 0 && !silent && text != nullptr) {
         Com::printF(Com::tEPR3, static_cast<int>(pos));
         Com::print(' ');
         Com::printFloat(var, digits);
@@ -388,7 +388,7 @@ void EEPROM::handleFloat(uint pos, PGM_P text, uint8_t digits, float& var) {
 }
 
 void EEPROM::handleLong(uint pos, PGM_P text, int32_t& var) {
-    if (mode == 0 && !silent) {
+    if (mode == 0 && !silent && text != nullptr) {
         Com::printF(Com::tEPR2, static_cast<int>(pos));
         Com::print(' ');
         Com::print(var);
@@ -418,7 +418,7 @@ void EEPROM::handleLong(uint pos, PGM_P text, int32_t& var) {
 }
 
 void EEPROM::handleLong(uint pos, PGM_P text, uint32_t& var) {
-    if (mode == 0 && !silent) {
+    if (mode == 0 && !silent && text != nullptr) {
         Com::printF(Com::tEPR2, static_cast<int>(pos));
         Com::print(' ');
         Com::print(static_cast<int32_t>(var));
@@ -448,7 +448,7 @@ void EEPROM::handleLong(uint pos, PGM_P text, uint32_t& var) {
 }
 
 void EEPROM::handleInt(uint pos, PGM_P text, int16_t& var) {
-    if (mode == 0 && !silent) {
+    if (mode == 0 && !silent && text != nullptr) {
         Com::printF(Com::tEPR1, static_cast<int>(pos));
         Com::print(' ');
         Com::print(var);
@@ -478,7 +478,7 @@ void EEPROM::handleInt(uint pos, PGM_P text, int16_t& var) {
 }
 
 void EEPROM::handleByte(uint pos, PGM_P text, uint8_t& var) {
-    if (mode == 0 && !silent) {
+    if (mode == 0 && !silent && text != nullptr) {
         Com::printF(Com::tEPR0, static_cast<int>(pos));
         Com::print(' ');
         Com::print((int)var);
@@ -508,7 +508,7 @@ void EEPROM::handleByte(uint pos, PGM_P text, uint8_t& var) {
 }
 
 void EEPROM::handleByte(uint pos, PGM_P text, int8_t& var) {
-    if (mode == 0 && !silent) {
+    if (mode == 0 && !silent && text != nullptr) {
         Com::printF(Com::tEPR0, static_cast<int>(pos));
         Com::print(' ');
         Com::print((int)var);
@@ -538,7 +538,7 @@ void EEPROM::handleByte(uint pos, PGM_P text, int8_t& var) {
 }
 
 void EEPROM::handleByte(uint pos, PGM_P text, int32_t& var) {
-    if (mode == 0 && !silent) {
+    if (mode == 0 && !silent && text != nullptr) {
         Com::printF(Com::tEPR0, static_cast<int>(pos));
         Com::print(' ');
         Com::print((int)var);

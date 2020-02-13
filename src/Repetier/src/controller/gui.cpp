@@ -55,11 +55,11 @@ void GUI::update() {
 
     if (nextAction != GUIAction::NONE && nextAction != GUIAction::CLICK_PROCESSED && nextAction != GUIAction::BACK_PROCESSED) {
         // Com::printFLN(PSTR("Action:"), (int32_t)nextAction);
-        callbacks[level](nextAction, data[level]);
-        nextAction = nextAction == GUIAction::CLICK ? GUIAction::CLICK_PROCESSED : (nextAction == GUIAction::BACK ? GUIAction::BACK_PROCESSED : GUIAction::NONE);
+        lastAction = HAL::timeInMilliseconds();
+        callbacks[level](nextAction, data[level]); // Execute action
+        nextAction = nextAction == GUIAction::CLICK ? GUIAction::CLICK_PROCESSED : (nextAction == GUIAction::BACK ? GUIAction::BACK_PROCESSED : (nextAction == GUIAction::CLICK_PROCESSED ? GUIAction::CLICK_PROCESSED : GUIAction::NONE));
         nextActionRepeat = 0;
         contentChanged = true;
-        lastAction = HAL::timeInMilliseconds();
     }
 
     if (level > 0 && !isStickyPageType(pageType[level]) && (HAL::timeInMilliseconds() - lastAction) > UI_AUTORETURN_TO_MENU_AFTER) {
@@ -169,11 +169,13 @@ void GUI::okKey() {
     contentChanged = true;
 }
 
+/** Check for button and store result in nextAction. */
 void GUI::handleKeypress() {
     setEncoderA(ControllerEncA::get());
     setEncoderB(ControllerEncB::get());
+    // debounce clicks
     if (nextAction == GUIAction::CLICK_PROCESSED || nextAction == GUIAction::BACK_PROCESSED) {
-        millis_t timeDiff = HAL::timeInMilliseconds() - lastRefresh;
+        millis_t timeDiff = HAL::timeInMilliseconds() - lastAction;
         if (timeDiff < 200) {
             return;
         }
@@ -706,6 +708,7 @@ void directAction(GUIAction action, void* data) {
 
 void selectToolAction(GUIAction action, void* data) {
     int id = reinterpret_cast<int>(data);
+    Com::printFLN(PSTR("selectToolAction:"), id); // TODO
     if (!Printer::failedMode) {
         Motion1::waitForEndOfMoves();
         Tool::selectTool(id);

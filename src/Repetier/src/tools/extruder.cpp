@@ -39,7 +39,7 @@ void ToolExtruder::activate() {
     Motion1::resolution[E_AXIS] = stepsPerMM;
     Motion1::currentPosition[E_AXIS] = Motion1::currentPositionTransformed[E_AXIS] = 0.0f;
     Motion1::maxFeedrate[E_AXIS] = maxSpeed;
-    Motion1::maxAcceleration[E_AXIS] = acceleration;
+    Motion1::maxAcceleration[E_AXIS] = Motion1::maxTravelAcceleration[E_AXIS] = acceleration;
     Motion1::advanceK = advance;
     GCode::executeFString(startScript);
     Motion1::waitForEndOfMoves();
@@ -55,7 +55,7 @@ void ToolExtruder::copySettingsToMotion1() {
     Motion1::maxYank[E_AXIS] = yank;
     Motion1::resolution[E_AXIS] = stepsPerMM;
     Motion1::maxFeedrate[E_AXIS] = maxSpeed;
-    Motion1::maxAcceleration[E_AXIS] = acceleration;
+    Motion1::maxAcceleration[E_AXIS] = Motion1::maxTravelAcceleration[E_AXIS] = acceleration;
     Motion1::advanceK = advance;
 }
 /// Called on kill/emergency to disable the tool

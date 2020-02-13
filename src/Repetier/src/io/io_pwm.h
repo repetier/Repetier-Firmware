@@ -31,7 +31,7 @@
  // pwmname = name of a pwm output you want to add
  // kickstart functionality to.
  // time100ms = kickstart time in 100ms intervals.
- IO_PWM_KICKSTART(name,pwmname,time100ms)
+ IO_PWM_KICKSTART(name,pwmname,time100ms, treshold)
  
  */
 
@@ -79,7 +79,7 @@
 
 #elif IO_TARGET == IO_TARGET_100MS // 100ms
 
-#define IO_PWM_KICKSTART(name, pwmname, timems) \
+#define IO_PWM_KICKSTART(name, pwmname, timems, treshold) \
     if (name.kickcount > 0) { \
         if (--name.kickcount == 0) { \
             pwmname.set(name.pwm); \
@@ -194,7 +194,7 @@
     }; \
     extern name##Class name;
 
-#define IO_PWM_KICKSTART(name, pwmname, time100ms) \
+#define IO_PWM_KICKSTART(name, pwmname, time100ms, treshold) \
     class name##Class : public PWMHandler { \
     public: \
         fast8_t pwm, kickcount; \
@@ -202,7 +202,7 @@
             : pwm(0) \
             , kickcount(0) {} \
         void set(fast8_t _pwm) final { \
-            if (kickcount == 0 && _pwm < 85 && _pwm > pwm && time100ms > 0) { \
+            if (kickcount == 0 && _pwm < treshold && _pwm > 0 && time100ms > 0) { \
                 pwm = _pwm; \
                 kickcount = time100ms; \
                 pwmname.set(255); \
@@ -229,18 +229,15 @@
     extern name##Class name;
 #define IO_PWM_REPORT(name, pwmname) \
     class name##Class : public PWMHandler { \
-        fast8_t lastPwm; \
 \
     public: \
-        name##Class() { lastPwm = 0; } \
         void set(fast8_t _pwm) final { \
-            pwmname.set(_pwm); \
-            if (lastPwm != _pwm) { \
+            if (pwmname.get() != _pwm) { \
+                pwmname.set(_pwm); \
                 Com::printFLN(PSTR(#name) "=", (int)_pwm); \
-                lastPwm = _pwm; \
             } \
         } \
-        fast8_t get() final { return lastPwm; } \
+        fast8_t get() final { return pwmname.get(); } \
     }; \
     extern name##Class name;
 
@@ -264,7 +261,7 @@
 #define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow) \
     name##Class name;
 
-#define IO_PWM_KICKSTART(name, pwmname, timems) \
+#define IO_PWM_KICKSTART(name, pwmname, timems, treshold) \
     name##Class name;
 #define IO_PWM_INVERTED(name, pwmname) \
     name##Class name;
@@ -296,7 +293,7 @@
 #define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow)
 #endif
 #ifndef IO_PWM_KICKSTART
-#define IO_PWM_KICKSTART(name, pwmname, timems)
+#define IO_PWM_KICKSTART(name, pwmname, timems, treshold)
 #endif
 #ifndef IO_PWM_INVERTED
 #define IO_PWM_INVERTED(name, pwmname)

@@ -208,12 +208,10 @@ An additional transformation converts the CMC coordinates into NMC.
 Given:
 - Target position for tool: x_rwc, y_rwc, z_rwc
 - Tool offsets: offsetX, offsetY, offsetZ
-- Offset from bed leveling: Motion1::zprobeZOffset
 
 Step 1: Convert to ROTC
 
     transformToPrinter(x_rwc + Motion1::toolOffset[X_AXIS], y_rwc + Motion1::toolOffset[Y_AXIS], z_rwc +  Motion1::toolOffset[Z_AXIS], x_rotc, y_rotc, z_rotc);
-    z_rotc += Motion1::zprobeZOffset
 
 Step 2: Compute CMC
 
@@ -231,9 +229,9 @@ Step 1: Convert to ROTC
     x_rotc = static_cast<float>(x_cmc) * invAxisStepsPerMM[X_AXIS];
     y_rotc = static_cast<float>(y_cmc) * invAxisStepsPerMM[Y_AXIS];
     #if NONLINEAR_SYSTEM
-    z_rotc = static_cast<float>(z_cmc * invAxisStepsPerMM[Z_AXIS] - Motion1::zprobeZOffset;
+    z_rotc = static_cast<float>(z_cmc * invAxisStepsPerMM[Z_AXIS];
     #else
-    z_rotc = static_cast<float>(z_cmc - zCorrectionStepsIncluded) * invAxisStepsPerMM[Z_AXIS] - Motion1::zprobeZOffset;
+    z_rotc = static_cast<float>(z_cmc - zCorrectionStepsIncluded) * invAxisStepsPerMM[Z_AXIS];
     #endif
 
 Step 2: Convert to RWC

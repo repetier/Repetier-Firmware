@@ -169,7 +169,8 @@ public:
 #define EPR_M1_RESOLUTION 0
 #define EPR_M1_MAX_FEEDRATE 4 * (NUM_AXES - 1)
 #define EPR_M1_MAX_ACCELERATION EPR_M1_MAX_FEEDRATE + 4 * (NUM_AXES - 1)
-#define EPR_M1_HOMING_FEEDRATE EPR_M1_MAX_ACCELERATION + 4 * (NUM_AXES - 1)
+#define EPR_M1_MAX_TRAVEL_ACCELERATION EPR_M1_MAX_ACCELERATION + 4 * (NUM_AXES - 1)
+#define EPR_M1_HOMING_FEEDRATE EPR_M1_MAX_TRAVEL_ACCELERATION + 4 * (NUM_AXES - 1)
 #define EPR_M1_MAX_YANK EPR_M1_HOMING_FEEDRATE + 4 * (NUM_AXES - 1)
 #define EPR_M1_MIN_POS EPR_M1_MAX_YANK + 4 * (NUM_AXES - 1)
 #define EPR_M1_MAX_POS EPR_M1_MIN_POS + 4 * (NUM_AXES - 1)
@@ -211,13 +212,17 @@ public:
     static float homingFeedrate[NUM_AXES];
     static float moveFeedrate[NUM_AXES]; // Used for genral moves like coordinate changes
     static float maxAcceleration[NUM_AXES];
+    static float maxTravelAcceleration[NUM_AXES];
     static float resolution[NUM_AXES];
     static float minPos[NUM_AXES];
     static float maxPos[NUM_AXES];
+    static float minPosOff[NUM_AXES]; // positions including max. tool offset
+    static float maxPosOff[NUM_AXES];
+    static float rotMax[3]; // Max positive offset from rotation at z max
+    static float rotMin[3]; // Min negative offset from rotation at z max
     static float g92Offsets[NUM_AXES];
     static float maxYank[NUM_AXES];
     static float toolOffset[3];
-    static float zprobeZOffset; // bed coating to add to z
     static float homeRetestDistance[NUM_AXES];
     static float homeRetestReduction[NUM_AXES];
     static float homeEndstopDistance[NUM_AXES];
@@ -262,7 +267,7 @@ public:
     static void init();
     static INLINE bool isAutolevelActive() { return autolevelActive; }
     // Set autoleveling, changes current position according to printer position
-    static void setAutolevelActive(bool state);
+    static void setAutolevelActive(bool state, bool silent = false);
     // Copy values from Configuration.h
     static void setFromConfig();
     static void fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback);
@@ -311,8 +316,8 @@ public:
     static void correctBumpOffset(); // Adjust position to offset
     static PGM_P getAxisString(fast8_t axis);
     static EndstopDriver& endstopFoxAxisDir(fast8_t axis, bool maxDir);
-#if LEVELING_METHOD > 0 || defined(DOXYGEN)
     static void resetTransformationMatrix(bool silent);
+#if LEVELING_METHOD > 0 || defined(DOXYGEN)
     //static void buildTransformationMatrix(float h1,float h2,float h3);
     static void buildTransformationMatrix(Plane& plane);
 #endif
@@ -321,6 +326,7 @@ public:
     static void eepromReset();
     static void callBeforeHomingOnSteppers();
     static void callAfterHomingOnSteppers();
+    static void updateRotMinMax();
 
 private:
     // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on

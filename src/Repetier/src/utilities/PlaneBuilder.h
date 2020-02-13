@@ -28,6 +28,7 @@ public:
             Com::printF(PSTR("plane: a = "), plane.a, 4);
             Com::printF(PSTR(" b = "), plane.b, 4);
             Com::printFLN(PSTR(" c = "), plane.c, 4);
+            Com::printFLN(PSTR("z = a * x + y * b + c"));
         }
     }
     inline int numPoints() { return n; }

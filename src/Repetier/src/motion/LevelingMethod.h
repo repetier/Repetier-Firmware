@@ -2,21 +2,21 @@
 #define _LEVELING_METHOD_H
 
 #ifndef LEVELING_METHOD
-#define LEVELING_METHOD 0
+#define LEVELING_METHOD LEVELING_METHOD_NONE
 #endif
 
 #ifndef LEVELING_CORRECTOR
 #define LEVELING_CORRECTOR 0
 #endif
 
-#if ENABLE_BUMP_CORRECTION && LEVELING_METHOD != 1
+#if ENABLE_BUMP_CORRECTION && LEVELING_METHOD != LEVELING_METHOD_GRID
 #undef ENABLE_BUMP_CORRECTION
 #define ENABLE_BUMP_CORRECTION 0 // Disable if not supported
 #endif
 
 class Plane;
 
-#if LEVELING_CORRECTOR == 0 // software correction
+#if LEVELING_CORRECTOR == LEVELING_CORRECTOR_SOFTWARE // software correction
 
 class LevelingCorrector {
 public:
@@ -26,7 +26,7 @@ public:
     static void correct(Plane* plane);
 };
 
-#elif LEVELING_CORRECTOR == 1 // Motorized correction
+#elif LEVELING_CORRECTOR == LEVELING_CORRECTOR_MOTOR // Motorized correction
 
 class LevelingCorrector {
 public:
@@ -38,7 +38,7 @@ public:
 
 #endif
 
-#if LEVELING_METHOD == 0 // No leveling
+#if LEVELING_METHOD == LEVELING_METHOD_NONE // No leveling
 
 class Leveling {
 public:
@@ -56,7 +56,7 @@ public:
     inline static void execute_M323(GCode* com) {}
 };
 
-#elif LEVELING_METHOD == 1 // Grid leveling
+#elif LEVELING_METHOD == LEVELING_METHOD_GRID // Grid leveling
 
 #ifndef GRID_SIZE
 #define GRID_SIZE 3
@@ -111,7 +111,7 @@ public:
     static void execute_G33(GCode* com);
 };
 
-#elif LEVELING_METHOD == 2 // 4 point symmetric
+#elif LEVELING_METHOD == LEVELING_METHOD_4_POINT_SYMMETRIC // 4 point symmetric
 
 class Leveling {
 public:
@@ -129,7 +129,7 @@ public:
     inline static void execute_M323(GCode* com) {}
 };
 
-#elif LEVELING_METHOD == 3 // 3 points
+#elif LEVELING_METHOD == LEVELING_METHOD_3_POINTS // 3 points
 
 class Leveling {
 public:

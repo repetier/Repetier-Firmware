@@ -74,6 +74,12 @@ Early stage version for Stacke X2 printer - use with care
 #define G0_FEEDRATE 0                // Speed for G0 moves. Independent from set F value! Set 0 to use F value.
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
 #define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
+#define LEVELING_METHOD 1
+#define ENABLE_BUMP_CORRECTION 1
+#define GRID_SIZE 5
+#define BUMP_CORRECTION_START_DEGRADE 0.5
+#define BUMP_CORRECTION_END_HEIGHT 1.5
+#define BUMP_LIMIT_TO 0
 
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta, 3 = Dual X-Axis
 #define PRINTER_TYPE PRINTER_TYPE_DELTA

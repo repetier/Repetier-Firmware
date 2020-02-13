@@ -93,7 +93,7 @@ public:
     virtual int computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM);
     /// Gets called after each move is completed
     virtual void moveFinished();
-    virtual bool isSecondaryMove(bool isG0, bool isEMove) {
+    virtual bool isSecondaryMove(bool isG0, bool isEMove) override final {
         if (isG0 || !active) {
             return false;
         }

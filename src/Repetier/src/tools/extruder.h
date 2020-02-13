@@ -96,7 +96,7 @@ public:
         // TODO: Add retract handling
     }
     /// Computes intensity based on speed
-    virtual int computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) { return activeSecondaryValue; }
+    virtual int computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) { return intensity; }
     virtual bool secondaryIsFan() final override { return true; }
     virtual ToolTypes getToolType() override { return ToolTypes::EXTRUDER; }
 };
