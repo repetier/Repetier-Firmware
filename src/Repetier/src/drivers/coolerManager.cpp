@@ -24,7 +24,7 @@ void CoolerManagerHeater::update() {
         pwm->set(0);
         return;
     }
-    if (temp > maxPWM) {
+    if (temp > maxTemp) {
         pwm->set(maxPWM);
         return;
     }
@@ -37,7 +37,7 @@ void CoolerManagerSensor::update() {
         pwm->set(0);
         return;
     }
-    if (temp > maxPWM) {
+    if (temp > maxTemp) {
         pwm->set(maxPWM);
         return;
     }
