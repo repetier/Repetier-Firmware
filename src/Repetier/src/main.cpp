@@ -155,6 +155,7 @@ Custom M Codes
 - M340 P<servoId> S<pulseInUS> R<autoOffIn ms>: servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off. R allows automatic disabling after a while.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set micro stepping on RAMBO board
 - M355 S<0/1/2/3/4> - Turn case light on/off/burst/blink fast/blink slow , no S = report status
+- M355 P<0..255>   - Change case light brightness if it's configured as a pwm light source.
 - M360 - show configuration
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.
