@@ -85,6 +85,7 @@ bool Printer::failedMode = false;
 #define CASE_LIGHT_DEFAULT_ON 0
 #endif
 fast8_t Printer::caseLightMode = CASE_LIGHT_DEFAULT_ON;
+fast8_t Printer::caseLightBrightness = 255;
 
 #if defined(BEEPER_PIN) && BEEPER_PIN >= 0
 TonePacket toneQueueBuf[Printer::toneBufSize];
@@ -666,6 +667,9 @@ void Printer::reportCaseLightStatus() {
     }
     Com::printInfoF(PSTR("Case light mode:"));
     Com::print((int32_t)caseLightMode);
+    Com::println();
+    Com::printInfoF(PSTR("Case light brightness:"));
+    Com::print((int32_t)caseLightBrightness);
     Com::println();
 }
 

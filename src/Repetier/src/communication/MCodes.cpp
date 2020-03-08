@@ -1205,7 +1205,10 @@ void MCode_350(GCode* com) {
 
 void MCode_355(GCode* com) {
     if (com->hasS()) {
-        Printer::caseLightMode = static_cast<uint8_t>(com->S);
+        Printer::caseLightMode = static_cast<fast8_t>(com->S);
+    }
+    if (com->hasP()) {
+        Printer::caseLightBrightness = constrain(static_cast<uint16_t>(com->P), 0, 255);
     }
     Printer::reportCaseLightStatus();
 }

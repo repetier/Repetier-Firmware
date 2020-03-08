@@ -293,14 +293,23 @@ static PWMChannel pwm_channel[8] = {
 static void computePWMDivider(uint32_t frequency, uint32_t& div, uint32_t& scale) {
     uint32_t factor = 1;
     div = 0;
+    if (frequency < 1) {
+        frequency = 1;
+    }
     do {
         scale = VARIANT_MCK / (frequency * factor);
         if (scale <= 65535) {
             return;
         }
-        div = factor;
-        factor <<= 1;
-    } while (factor <= 1024);
+        div++;
+    } while ((factor <<= 1) <= 1024);
+
+    if (scale > 65535) {
+        scale = 65535;
+    } 
+    if (div > 10) {
+        div = 10;
+    }  
 }
 
 // Try to initialize pinNumber as hardware PWM. Returns internal

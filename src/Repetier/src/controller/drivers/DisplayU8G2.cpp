@@ -764,8 +764,8 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
             GUI::bufAddFloat(Printer::progress, 3, 1);
             GUI::bufAddStringP(PSTR(" %"));
             lcd.drawUTF8(0, y0 + 1, GUI::buf);
-            lcd.drawFrame(0, y0 + 5, 62, 8);
-            lcd.drawBox(0, y0 + 6, static_cast<u8g2_uint_t>(62.0 * Printer::progress * 0.01), 6);
+            lcd.drawFrame(0, y0 + 5, 62, 9);
+            lcd.drawBox(0, y0 + 6, static_cast<u8g2_uint_t>(62.0 * Printer::progress * 0.01), 7);
 
             if (Printer::maxLayer > 0) {
                 GUI::bufClear();
@@ -782,7 +782,7 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
 
             // Z-Position
             GUI::bufClear();
-            GUI::bufAddStringP(PSTR("Z:"));
+            GUI::bufAddStringP(PSTR("Z :"));
             GUI::bufAddFloat(Motion1::getShowPosition(Z_AXIS), 4, 2);
             lcd.drawUTF8(66, y0 + n * 7, GUI::buf);
             n++;
@@ -801,8 +801,7 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
                 }
 #if NUM_HEATED_BEDS
                 GUI::bufClear();
-                GUI::bufAddChar('B');
-                GUI::bufAddChar(':');
+                GUI::bufAddStringP(PSTR("B :"));
                 GUI::bufAddHeaterTemp(heatedBeds[0], true);
                 lcd.drawUTF8(66, y0 + n * 7, GUI::buf);
                 n++;
@@ -826,7 +825,7 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
             }
             if (n < 6) {
                 GUI::bufClear();
-                GUI::bufAddStringP(PSTR("FR:"));
+                GUI::bufAddStringP(PSTR("FR :"));
                 GUI::bufAddInt(Printer::feedrateMultiply, 3);
                 GUI::bufAddChar('%');
                 lcd.drawUTF8(66, y0 + n * 7, GUI::buf);

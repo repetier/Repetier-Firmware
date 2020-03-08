@@ -286,6 +286,7 @@ public:
     static fast8_t breakLongCommand; // Set by M108 to stop long tasks
     static fast8_t wizardStackPos;
     static fast8_t caseLightMode;
+    static fast8_t caseLightBrightness; 
     static float progress;
     static wizardVar wizardStack[WIZARD_STACK_SIZE];
 
