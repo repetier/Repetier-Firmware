@@ -118,7 +118,9 @@
 #define EEPROM_SERIAL_ADDR 0x50  // 7 bit i2c address (without R/W bit)
 #define EEPROM_PAGE_SIZE 64      // page write buffer size
 #define EEPROM_PAGE_WRITE_TIME 7 // page write time in milliseconds (docs say 5ms but that is too short)
-#define EEPROM_AVAILABLE 1
+#ifndef EEPROM_AVAILABLE         // User can override eeprom usage
+#define EEPROM_AVAILABLE EEPROM_I2C
+#endif
 
 #ifndef MAX_WIRE_INTERFACES
 #define MAX_WIRE_INTERFACES 1

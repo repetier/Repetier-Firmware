@@ -186,7 +186,6 @@ class InterruptProtectedBlock {
 public:
     inline void protect() {
         mask = __get_PRIMASK();
-        ;
         __disable_irq();
     }
 

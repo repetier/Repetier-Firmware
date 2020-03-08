@@ -281,6 +281,48 @@ void MCode_42(GCode* com) {
     }
 }
 
+// Test z probe accuracy
+void MCode_48(GCode* com) {
+    if (!Printer::isHomedAll()) {
+        Com::printWarningFLN(PSTR("Printer not homed!"));
+        return;
+    }
+    bool oldDist = Leveling::isDistortionEnabled();
+    Leveling::setDistortionEnabled(false);
+    Motion1::setTmpPositionXYZ(com->hasX() ? com->X : Motion1::currentPosition[X_AXIS],
+                               com->hasY() ? com->Y : Motion1::currentPosition[Y_AXIS], ZProbeHandler::optimumProbingHeight());
+    PrinterType::closestAllowedPositionWithNewXYOffset(Motion1::tmpPosition, ZProbeHandler::xOffset(), ZProbeHandler::yOffset(), Z_PROBE_BORDER);
+    Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
+    int n = com->hasP() ? com->P : 10;
+    ZProbeHandler::activate();
+    float sum = 0, minH = 1000, maxH = -1000, A = 0, Q = 0;
+    bool ok = true;
+    for (int i = 0; i < n; i++) {
+        float z = ZProbeHandler::runProbe();
+        if (z == ILLEGAL_Z_PROBE) {
+            ok = false;
+            break;
+        }
+        sum += z;
+        minH = RMath::min(z, minH);
+        maxH = RMath::max(z, maxH);
+        float lastA = A;
+        A = lastA + (z - lastA) / static_cast<float>(i + 1);
+        Q += (z - lastA) * (z - A);
+    }
+    ZProbeHandler::deactivate();
+    Leveling::setDistortionEnabled(oldDist);
+    if (ok) {
+        Q = sqrtf(Q / n);
+        Com::printFLN(PSTR("Average: "), A, 4);
+        Com::printFLN(PSTR("Min: "), minH, 4);
+        Com::printFLN(PSTR("Max: "), maxH, 4);
+        Com::printFLN(PSTR("Std. deviation: "), Q, 4);
+    } else {
+        Com::printFLN(PSTR("Aborted due to illegal measurement!"));
+    }
+}
+
 void MCode_80(GCode* com) {
 #if PS_ON_PIN > -1
     Motion1::waitForEndOfMoves();
@@ -1118,8 +1160,9 @@ void MCode_321(GCode* com) {
 #if LEVELING_METHOD > 0
     Motion1::setAutolevelActive(false);
     if (com->hasS() && com->S) {
-        if (com->S == 3)
+        if (com->S == 3) {
             Motion1::resetTransformationMatrix(false);
+        }
         EEPROM::markChanged();
     }
 #endif
@@ -1246,11 +1289,12 @@ void MCode_513(GCode* com) {
 }
 
 void MCode_530(GCode* com) {
-    if (com->hasL())
+    if (com->hasL()) {
         Printer::maxLayer = static_cast<int>(com->L);
-    if (com->hasS())
+    }
+    if (com->hasS()) {
         Printer::setPrinting(static_cast<uint8_t>(com->S));
-    else {
+    } else {
         Printer::setPrinting(0);
     }
     Printer::setMenuMode(MENU_MODE_PAUSED, false);

@@ -9,7 +9,7 @@ protected:
     EndstopDriver* minEndstop;
     EndstopDriver* maxEndstop;
     bool direction;
-    fast8_t axisBit;
+    ufast8_t axisBit;
     fast8_t axis;
 
 public:
@@ -33,7 +33,7 @@ public:
         axisBit = 1 << ax;
         axis = ax;
     }
-    inline fast8_t getAxisBit() { return axisBit; }
+    inline ufast8_t getAxisBit() { return axisBit; }
     inline fast8_t getAxis() { return axis; }
     void printMotorNumberAndName(bool newline = true);
     /// Allows initialization of driver e.g. current, microsteps

@@ -745,15 +745,105 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
 
 void __attribute__((weak)) printProgress(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
-        lcd.setFont(u8g2_font_6x10_mf);
-        GUI::bufClear();
-        GUI::bufAddStringP(PSTR("Progress:"));
-        GUI::bufAddFloat(Printer::progress, 3, 1);
-        GUI::bufAddStringP(PSTR(" %"));
-        lcd.drawUTF8(0, 10, GUI::buf);
+        if (Printer::isPrinting()) {
+#if SDSUPPORT
+            if (sd.sdactive && sd.sdmode) { // print from sd card
+                Printer::progress = (static_cast<float>(sd.sdpos) * 100.0) / static_cast<float>(sd.filesize);
+            }
+#endif
+            lcd.setFont(u8g2_font_6x10_mf);
+            int len = strlen(Printer::printName);
+            lcd.drawUTF8(64 - 3 * len, 8, Printer::printName); // Draw centered
+            lcd.drawHLine(0, 9, 128);
+            lcd.drawVLine(64, 9, 45);
+            lcd.setFont(u8g2_font_5x7_mf);
+            int y0 = 17;
 
-        lcd.setFont(u8g2_font_6x10_mf);
-        lcd.drawUTF8(0, 61, GUI::status);
+            GUI::bufClear();
+            GUI::bufAddStringP(PSTR("Prog:"));
+            GUI::bufAddFloat(Printer::progress, 3, 1);
+            GUI::bufAddStringP(PSTR(" %"));
+            lcd.drawUTF8(0, y0 + 1, GUI::buf);
+            lcd.drawFrame(0, y0 + 5, 62, 8);
+            lcd.drawBox(0, y0 + 6, static_cast<u8g2_uint_t>(62.0 * Printer::progress * 0.01), 6);
+
+            if (Printer::maxLayer > 0) {
+                GUI::bufClear();
+                GUI::bufAddStringP(PSTR("Layer:"));
+                lcd.drawUTF8(0, 42, GUI::buf);
+                GUI::bufClear();
+                GUI::bufAddInt(Printer::currentLayer, 5);
+                GUI::bufAddStringP(PSTR("/"));
+                GUI::bufAddInt(Printer::maxLayer, 5);
+                lcd.drawUTF8(0, 50, GUI::buf);
+            }
+            // Right side, try to show Z, E, B, Fan, Chamber, Multiplier
+            int n = 0;
+
+            // Z-Position
+            GUI::bufClear();
+            GUI::bufAddStringP(PSTR("Z:"));
+            GUI::bufAddFloat(Motion1::getShowPosition(Z_AXIS), 4, 2);
+            lcd.drawUTF8(66, y0 + n * 7, GUI::buf);
+            n++;
+
+            // Active extruder
+            Tool* tool = Tool::getActiveTool();
+            if (tool->getToolType() == ToolTypes::EXTRUDER) {
+                if (tool->getToolType() == ToolTypes::EXTRUDER && n < 6) {
+                    GUI::bufClear();
+                    GUI::bufAddChar('E');
+                    GUI::bufAddInt(tool->getToolId() + 1, 1);
+                    GUI::bufAddChar(':');
+                    GUI::bufAddHeaterTemp(tool->getHeater(), true);
+                    lcd.drawUTF8(66, y0 + n * 7, GUI::buf);
+                    n++;
+                }
+#if NUM_HEATED_BEDS
+                GUI::bufClear();
+                GUI::bufAddChar('B');
+                GUI::bufAddChar(':');
+                GUI::bufAddHeaterTemp(heatedBeds[0], true);
+                lcd.drawUTF8(66, y0 + n * 7, GUI::buf);
+                n++;
+#endif
+#if NUM_HEATED_CHAMBERS
+                GUI::bufClear();
+                GUI::bufAddChar('C');
+                GUI::bufAddChar(':');
+                GUI::bufAddHeaterTemp(heatedChambers[0], true);
+                lcd.drawUTF8(66, y0 + n * 7, GUI::buf);
+                n++;
+#endif
+            }
+            if (NUM_TOOLS > 1 && tool->getToolType() == ToolTypes::EXTRUDER && tool->hasSecondary() && tool->secondaryIsFan() && n < 6) {
+                GUI::bufClear();
+                GUI::bufAddStringP("Fan:");
+                GUI::bufAddInt(tool->secondaryPercent(), 3);
+                GUI::bufAddChar('%');
+                lcd.drawUTF8(66, y0 + n * 7, GUI::buf);
+                n++;
+            }
+            if (n < 6) {
+                GUI::bufClear();
+                GUI::bufAddStringP(PSTR("FR:"));
+                GUI::bufAddInt(Printer::feedrateMultiply, 3);
+                GUI::bufAddChar('%');
+                lcd.drawUTF8(66, y0 + n * 7, GUI::buf);
+                n++;
+            }
+            if (n < 6) {
+                GUI::bufClear();
+                GUI::bufAddStringP(PSTR("Buf:"));
+                GUI::bufAddInt(static_cast<int>(Motion1::length), 3);
+                lcd.drawUTF8(66, y0 + n * 7, GUI::buf);
+                n++;
+            }
+            lcd.setFont(u8g2_font_6x10_mf);
+            lcd.drawUTF8(0, 61, GUI::status);
+        } else {
+            startScreen(action, data); // print is finished!
+        }
     }
     GUI::replaceOn(GUIAction::NEXT, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
     GUI::replaceOn(GUIAction::PREVIOUS, startScreen, nullptr, GUIPageType::FIXED_CONTENT);

@@ -34,14 +34,14 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
     if (Printer::isHoming() || Motion1::endstopMode == EndstopMode::PROBING) {
         return true;
     }
-    // Extra contrain to protect Z conditionbased on official coordinate system
+    // Extra contrain to protect Z condition based on official coordinate system
     if (zOfficial < Motion1::minPos[Z_AXIS] || zOfficial > Motion1::maxPos[Z_AXIS]) {
         return false;
     }
     for (fast8_t i = 0; i <= Z_AXIS; i++) {
         if (Motion1::axesHomed & axisBits[i]) {
-            if (pos[i] < Motion1::minPosOff[i]
-                || pos[i] > Motion1::maxPosOff[i]) {
+            if (pos[i] < Motion1::minPos[i]
+                || pos[i] > Motion1::maxPos[i]) {
                 return false;
             }
         }

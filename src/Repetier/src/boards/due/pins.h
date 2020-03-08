@@ -148,7 +148,7 @@
 #include "boards/alligator.h"
 #endif
 
-#if MOTHERBOARD == MOTHERBOARD_USER_DEFINED
+#if MOTHERBOARD == MOTHERBOARD_USER_DEFINED_DUE
 #define KNOWN_BOARD
 #include "../extra/userpins.h"
 #endif

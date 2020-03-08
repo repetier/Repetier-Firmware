@@ -287,10 +287,11 @@ static void computePWMDivider(uint32_t frequency, uint32_t& div, uint32_t& scale
     uint32_t factor = 1;
     div = 0;
     uint32_t max_scale = 256;
-    if (bits == 16)
+    if (bits == 16) {
         max_scale = 65536;
-    else if (bits == 24)
+    } else if (bits == 24) {
         max_scale = 16777216;
+    }
     do {
         scale = VARIANT_MCK / (frequency * factor) - 1;
         if (factor != 32 && factor != 128 && factor != 512) {
@@ -301,6 +302,12 @@ static void computePWMDivider(uint32_t frequency, uint32_t& div, uint32_t& scale
         }
         factor <<= 1;
     } while (factor <= 1024);
+    if (scale > max_scale) {
+        scale = max_scale;
+    }
+    if (div > 7) {
+        div = 7;
+    }
 }
 static int pinPeripheral(uint32_t ulPin, EPioType ulPeripheral) {
     // Handle the case the pin isn't usable as PIO

@@ -149,7 +149,7 @@ void SDCard::startPrint() {
     Printer::setMenuMode(MENU_MODE_SD_PRINTING, true);
     Printer::setMenuMode(MENU_MODE_PAUSED, false);
     Printer::setPrinting(true);
-    Printer::maxLayer = 0;
+    Printer::maxLayer = -1;
     Printer::currentLayer = 0;
     UI_STATUS_F(PSTR(""));
     GCodeSource::registerSource(&sdSource);
@@ -576,6 +576,7 @@ bool SDCard::selectFile(const char* filename, bool silent) {
     // Filename for progress view
     strncpy(Printer::printName, filename, 20);
     Printer::printName[20] = 0;
+    Printer::maxLayer = -1;
     if (file.open(fat.vwd(), filename, O_READ)) {
         if ((oldP = strrchr(filename, '/')) != NULL)
             oldP++;

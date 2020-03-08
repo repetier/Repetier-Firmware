@@ -144,6 +144,7 @@
 #define A_AXIS 4
 #define B_AXIS 5
 #define C_AXIS 6
+#define NO_AXIS -1
 #define ZPROBE_AXIS 20 // marker that z probe was triggered not z min
 
 #define A_TOWER 0

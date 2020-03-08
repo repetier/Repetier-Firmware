@@ -363,6 +363,7 @@ void Printer::setPrinting(uint8_t b) {
         } else {
             GUI::callbacks[0] = startScreen;
         }
+        GUI::resetMenu();
 #endif
     }
     flag3 = (b ? flag3 | PRINTER_FLAG3_PRINTING : flag3 & ~PRINTER_FLAG3_PRINTING);

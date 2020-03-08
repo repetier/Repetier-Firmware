@@ -505,32 +505,37 @@ void GCode_31(GCode* com) {
 }
 
 void GCode_32(GCode* com) {
-    Leveling::execute_G32(com);
-    if (Motion1::homeDir[Z_AXIS] > 0 && ZProbe != nullptr) {
+    bool ok = Leveling::execute_G32(com);
+    if (ok && Motion1::homeDir[Z_AXIS] > 0 && ZProbe != nullptr) {
+        bool oldDistortion = Leveling::isDistortionEnabled();
+        Leveling::setDistortionEnabled(false);
+
         // we need to measure top as well to get correct height after homing
         // Solution is simple and robust. We just home Z go to middle and measure
         // and measure z distance with probe. Difference between z and measured z is z max error.
         Motion1::homeAxes(axisBits[Z_AXIS]);
         float zTheroetical = ZProbeHandler::optimumProbingHeight(), zMeasured = 0;
-        Motion1::setTmpPositionXYZ((Motion1::minPos[X_AXIS] + Motion1::maxPos[X_AXIS]) * 0.5,
-                                   (Motion1::minPos[Y_AXIS] + Motion1::maxPos[Y_AXIS]) * 0.5, zTheroetical);
-        bool ok = Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
+        Motion1::setTmpPositionXYZ((Motion1::minPosOff[X_AXIS] + Motion1::maxPosOff[X_AXIS]) * 0.5,
+                                   (Motion1::minPosOff[Y_AXIS] + Motion1::maxPosOff[Y_AXIS]) * 0.5, zTheroetical);
+        ok = Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
         if (ok) {
             ZProbeHandler::activate();
             zMeasured = ZProbeHandler::runProbe();
             ZProbeHandler::deactivate();
-            ok &= zMeasured != ILLEGAL_Z_PROBE;
+            ok = zMeasured != ILLEGAL_Z_PROBE;
         }
         if (ok) {
-            Motion1::maxPos[Z_AXIS] += zMeasured - zTheroetical;
+            Motion1::maxPos[Z_AXIS] += zMeasured - zTheroetical + Leveling::distortionAt(Motion1::currentPositionTransformed[X_AXIS], Motion1::currentPositionTransformed[Y_AXIS]);
             EEPROM::markChanged();
             Motion1::updateRotMinMax();
             Motion1::currentPosition[Z_AXIS] = zMeasured;
             Motion1::updatePositionsFromCurrent();
             Motion2::setMotorPositionFromTransformed();
-        } else {
-            GCode::fatalError(PSTR("Leveling failed!"));
         }
+        Leveling::setDistortionEnabled(oldDistortion);
+    }
+    if (!ok) {
+        GCode::fatalError(PSTR("Leveling failed!"));
     }
 }
 

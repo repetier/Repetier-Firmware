@@ -43,7 +43,7 @@ void __attribute__((weak)) errorScreen(GUIAction action, void* data) {}
 #if DISPLAY_DRIVER != DRIVER_NONE
 void GUI::resetMenu() { ///< Go to start page
     level = 0;
-    replace(startScreen, nullptr, GUIPageType::TOPLEVEL);
+    replace(Printer::isPrinting() ? printProgress : startScreen, nullptr, GUIPageType::TOPLEVEL);
 }
 #endif
 
@@ -702,6 +702,24 @@ void directAction(GUIAction action, void* data) {
         break;
     case GUI_DIRECT_ACTION_POWERLOSS:
         Printer::handlePowerLoss();
+        break;
+    case GUI_DIRECT_ACTION_DITTO_OFF:
+        PrinterType::setDittoMode(0, false);
+        GUI::pop();
+        break;
+    case GUI_DIRECT_ACTION_DITTO_MIRROR:
+        PrinterType::setDittoMode(1, true);
+        GUI::pop();
+        break;
+    case GUI_DIRECT_ACTION_DITTO_2:
+    case GUI_DIRECT_ACTION_DITTO_3:
+    case GUI_DIRECT_ACTION_DITTO_4:
+    case GUI_DIRECT_ACTION_DITTO_5:
+    case GUI_DIRECT_ACTION_DITTO_6:
+    case GUI_DIRECT_ACTION_DITTO_7:
+    case GUI_DIRECT_ACTION_DITTO_8:
+        PrinterType::setDittoMode(1 + opt - GUI_DIRECT_ACTION_DITTO_2, false);
+        GUI::pop();
         break;
     }
 }

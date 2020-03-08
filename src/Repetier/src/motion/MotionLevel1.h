@@ -246,11 +246,11 @@ public:
     static EndstopMode endstopMode;
     static int32_t stepsRemaining[NUM_AXES]; // Steps remaining when testing endstops
     static fast8_t alwaysCheckEndstops;
-    static fast8_t axesTriggered;
-    static fast8_t motorTriggered;
-    static fast8_t axesDirTriggered;
-    static fast8_t motorDirTriggered;
-    static fast8_t stopMask;    // stop move if these axes are triggered
+    static ufast8_t axesTriggered;
+    static ufast8_t motorTriggered;
+    static ufast8_t axesDirTriggered;
+    static ufast8_t motorDirTriggered;
+    static ufast8_t stopMask;   // stop move if these axes are triggered
     static fast8_t dittoMode;   // copy extrusion signals
     static fast8_t dittoMirror; // mirror for dual x printer
     /* Buffer is a bit special in the sense that end keeps

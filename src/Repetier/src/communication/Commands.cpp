@@ -451,8 +451,11 @@ void Commands::processMCode(GCode* com) {
     case 36: // M36 JSON File Info
         MCode_36(com);
         break;
-    case 42: //M42 -Change pin status via gcode
+    case 42: // M42 -Change pin status via gcode
         MCode_42(com);
+        break;
+    case 48: // M48 Xpos Ypos Ptests - Test z probe accuracy
+        MCode_48(com);
         break;
     case 80: // M80 - ATX Power On
         MCode_80(com);

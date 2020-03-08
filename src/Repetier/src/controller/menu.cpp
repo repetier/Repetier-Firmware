@@ -329,6 +329,34 @@ void __attribute__((weak)) menuTempConfig(GUIAction action, void* data) {
     GUI::menuEnd(action);
 }
 
+#if NUM_TOOLS > 1
+void dittoToTmpString(int32_t mode, bool mirror) {
+    if (mode == 0) {
+        GUI::flashToString(GUI::tmpString, PSTR("Ditto Mode: Off"));
+    } else if (mirror) {
+        GUI::flashToStringLong(GUI::tmpString, PSTR("Ditto Mode: Mirror"), static_cast<long>(Motion1::dittoMode));
+    } else {
+        GUI::flashToStringLong(GUI::tmpString, PSTR("Ditto Mode: @ Obj."), static_cast<long>(Motion1::dittoMode + 1));
+    }
+}
+void __attribute__((weak)) menuDitto(GUIAction action, void* data) {
+    GUI::menuStart(action);
+    GUI::menuTextP(action, PSTR("= Select Mode ="), true);
+    GUI::menuBack(action);
+    dittoToTmpString(0, false);
+    GUI::menuSelectableP(action, GUI::tmpString, directAction, (void*)GUI_DIRECT_ACTION_DITTO_OFF, GUIPageType::ACTION);
+#if PRINTER_TYPE == PRINTER_TYPE_DUAL_X
+    dittoToTmpString(1, true);
+    GUI::menuSelectableP(action, GUI::tmpString, directAction, (void*)GUI_DIRECT_ACTION_DITTO_MIRROR, GUIPageType::ACTION);
+#endif
+    for (int i = 1; i < NUM_TOOLS; i++) {
+        dittoToTmpString(1, false);
+        GUI::menuSelectableP(action, GUI::tmpString, directAction, (void*)(i - 1 + GUI_DIRECT_ACTION_DITTO_2), GUIPageType::ACTION);
+    }
+    GUI::menuEnd(action);
+}
+#endif
+
 void __attribute__((weak)) menuControls(GUIAction action, void* data) {
     GUI::menuStart(action);
     GUI::menuTextP(action, PSTR("= Controls = "), true);
@@ -367,6 +395,10 @@ void __attribute__((weak)) menuControls(GUIAction action, void* data) {
         GUI::menuSelectableP(action, PSTR("Chamber"), menuTempControl, heatedChambers[i], GUIPageType::MENU);
 #endif
     }
+#if NUM_TOOLS > 1
+    dittoToTmpString(Motion1::dittoMode, Motion1::dittoMirror);
+    GUI::menuSelectableP(action, GUI::tmpString, menuDitto, nullptr, GUIPageType::MENU);
+#endif
     GUI::menuEnd(action);
 }
 

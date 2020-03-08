@@ -46,12 +46,14 @@ void PrinterType::setMotionMode(MotionMode newMode) {
     mode = newMode;
     Motion2::setMotorPositionFromTransformed();
 }
+
 bool PrinterType::isAnyEndstopTriggered(bool& moveX, bool& moveY, bool& moveZ) {
     moveX = Motion1::motors[X_AXIS]->getMaxEndstop()->triggered();
     moveY = Motion1::motors[Y_AXIS]->getMaxEndstop()->triggered();
     moveZ = Motion1::motors[Z_AXIS]->getMaxEndstop()->triggered();
     return (moveX || moveY || moveZ);
 }
+
 // Moves axis 10 mm down if it is triggered to get a clean start for probing
 bool PrinterType::untriggerEndstops() {
     bool moveX, moveY, moveZ;
@@ -98,11 +100,14 @@ void PrinterType::homeZ() {
     setMotionMode(MotionMode::MOTION_PER_AXIS);
     Motion1::updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
-    Motion1::setTmpPositionXYZ(
-        -homeOffsetA,
-        -homeOffsetB,
-        -homeOffsetC);
-    Motion1::moveRelativeByOfficial(Motion1::tmpPosition, Motion1::homingFeedrate[Z_AXIS], false);
+    int32_t mShift[NUM_AXES];
+    mShift[X_AXIS] = -homeOffsetA * Motion1::resolution[X_AXIS];
+    mShift[Y_AXIS] = -homeOffsetB * Motion1::resolution[Y_AXIS];
+    mShift[Z_AXIS] = -homeOffsetC * Motion1::resolution[Z_AXIS];
+    for (int i = 3; i < NUM_AXES; i++) {
+        mShift[i] = 0;
+    }
+    Motion1::moveRelativeBySteps(mShift);
     Motion1::waitForEndOfMoves();
     setMotionMode(MotionMode::MOTION_DELTA);
     FOR_ALL_AXES(i) {
@@ -125,6 +130,7 @@ void PrinterType::homeAxis(fast8_t axis) {
     }
 }
 
+// called in transformed coordinates!
 bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
     if (Printer::isNoDestinationCheck()) {
         return true;
@@ -132,40 +138,53 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
     if (Printer::isHoming() || Motion1::endstopMode == EndstopMode::PROBING) {
         return true;
     }
-    // Extra contrain to protect Z conditionbased on official coordinate system
+    // Extra contraint to protect Z conditionbased on official coordinate system
     if (zOfficial < Motion1::minPos[Z_AXIS] || zOfficial > Motion1::maxPos[Z_AXIS]) {
         return false;
     }
     if (pos[Z_AXIS] < Motion1::minPosOff[Z_AXIS] || pos[Z_AXIS] > Motion1::maxPosOff[Z_AXIS]) {
         return false;
     }
-    return pos[X_AXIS] * pos[X_AXIS] + pos[Y_AXIS] * pos[Y_AXIS] <= printRadiusSquared;
+    float px = pos[X_AXIS]; // + Motion1::toolOffset[X_AXIS]; // need to consider tool offsets
+    float py = pos[Y_AXIS]; // + Motion1::toolOffset[Y_AXIS];
+    return px * px + py * py <= printRadiusSquared;
 }
 
 void PrinterType::closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety) {
+    // pos is in official coordinates!
     float offsets[2] = { offX, offY };
     float tOffMin, tOffMax;
     float tPos[2], t2Pos[2];
-    float dist = 0, dist2 = 0;
-    for (fast8_t i = 0; i < 2; i++) {
-        tPos[i] = pos[i] - offsets[i];
-        t2Pos[i] = pos[i] + Motion1::toolOffset[i];
-        dist += tPos[i] * tPos[i];
-        dist2 += t2Pos[i] * t2Pos[i]; // current tool offset
+    for (int loop = 0; loop < 2; loop++) { // can need 2 iterations to be valid!
+        float dist = 0, dist2 = 0;
+        for (fast8_t i = 0; i < 2; i++) {
+            tPos[i] = pos[i] - offsets[i];
+            t2Pos[i] = pos[i] + Motion1::toolOffset[i];
+            dist += tPos[i] * tPos[i];
+            dist2 += t2Pos[i] * t2Pos[i]; // current tool offset
+        }
+        if (dist > dist2) {
+            dist = sqrtf(dist);
+            float fac = (bedRadius - safety) / dist;
+            if (fac >= 1.0f) { // inside bed, nothing to do
+                return;
+            }
+            tPos[X_AXIS] *= fac;
+            tPos[Y_AXIS] *= fac;
+            pos[X_AXIS] = tPos[X_AXIS] + offX;
+            pos[Y_AXIS] = tPos[Y_AXIS] + offY;
+        } else {
+            dist2 = sqrtf(dist2);
+            float fac = (bedRadius - safety) / dist2;
+            if (fac >= 1.0f) { // inside bed, nothing to do
+                return;
+            }
+            t2Pos[X_AXIS] *= fac;
+            t2Pos[Y_AXIS] *= fac;
+            pos[X_AXIS] = t2Pos[X_AXIS] - Motion1::toolOffset[X_AXIS];
+            pos[Y_AXIS] = t2Pos[Y_AXIS] - Motion1::toolOffset[Y_AXIS];
+        }
     }
-    dist = sqrtf(dist);
-    dist2 = sqrtf(dist2);
-    dist = RMath::max(dist, dist2);
-    float fac = bedRadius / (dist + safety);
-    if (fac >= 1.0f) { // inside bed, nothing to do
-        return;
-    }
-    if (fac < 0) {
-        tPos[X_AXIS] *= fac;
-        tPos[Y_AXIS] *= fac;
-    }
-    pos[X_AXIS] = tPos[X_AXIS] + offX;
-    pos[Y_AXIS] = tPos[Y_AXIS] + offX;
 }
 
 bool PrinterType::positionOnBed(float pos[2]) {
@@ -320,8 +339,16 @@ void PrinterType::updateDerived() {
     diagonalSquaredC = RMath::sqr(diagonal + correctionA);
     printRadiusSquared = printRadius * printRadius;
     Motion1::minPos[X_AXIS] = Motion1::minPos[Y_AXIS] = -printRadius;
-    Motion1::maxPos[X_AXIS] = Motion1::maxPos[Y_AXIS] = -printRadius;
+    Motion1::maxPos[X_AXIS] = Motion1::maxPos[Y_AXIS] = printRadius;
+    Motion1::moveFeedrate[X_AXIS] = Motion1::moveFeedrate[Y_AXIS] = Motion1::moveFeedrate[Z_AXIS];
+    Motion1::maxFeedrate[X_AXIS] = Motion1::maxFeedrate[Y_AXIS] = Motion1::maxFeedrate[Z_AXIS];
+    Motion1::maxAcceleration[X_AXIS] = Motion1::maxAcceleration[Y_AXIS] = Motion1::maxAcceleration[Z_AXIS];
+    Motion1::maxTravelAcceleration[X_AXIS] = Motion1::maxTravelAcceleration[Y_AXIS] = Motion1::maxTravelAcceleration[Z_AXIS];
+    Motion1::homingFeedrate[X_AXIS] = Motion1::homingFeedrate[Y_AXIS] = Motion1::homingFeedrate[Z_AXIS];
+    Motion1::maxYank[X_AXIS] = Motion1::maxYank[Y_AXIS] = Motion1::maxYank[Z_AXIS];
+    Motion1::updateRotMinMax();
 }
+
 void PrinterType::enableMotors(fast8_t axes) {
     if (axes & 7) { // enable x,y,z as a group!
         Motion1::motors[X_AXIS]->enable();
@@ -340,6 +367,7 @@ void PrinterType::enableMotors(fast8_t axes) {
     }
     Printer::unsetAllSteppersDisabled();
 }
+
 void PrinterType::setDittoMode(fast8_t count, bool mirror) {
     Motion1::dittoMode = count;
     Motion1::dittoMirror = mirror;

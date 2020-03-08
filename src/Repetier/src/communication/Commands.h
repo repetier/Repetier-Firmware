@@ -101,6 +101,7 @@ void MCode_30(GCode* com);
 void MCode_32(GCode* com);
 void MCode_36(GCode* com);
 void MCode_42(GCode* com);
+void MCode_48(GCode* com);
 void MCode_80(GCode* com);
 void MCode_81(GCode* com);
 void MCode_82(GCode* com);

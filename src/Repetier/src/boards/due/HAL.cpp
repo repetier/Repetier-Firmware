@@ -120,7 +120,7 @@ void HAL::setupTimer() {
     // Timer for stepper motor control
     pmc_enable_periph_clk(MOTION3_TIMER_IRQ);
     //NVIC_SetPriority((IRQn_Type)MOTION3_TIMER_IRQ, NVIC_EncodePriority(4, 7, 1)); // highest priority - no surprises here wanted
-    NVIC_SetPriority((IRQn_Type)MOTION3_TIMER_IRQ, 2); // highest priority - no surprises here wanted
+    NVIC_SetPriority((IRQn_Type)MOTION3_TIMER_IRQ, 0); // highest priority - no surprises here wanted
     TC_Configure(MOTION3_TIMER, MOTION3_TIMER_CHANNEL,
                  TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1);
     TC_SetRC(MOTION3_TIMER, MOTION3_TIMER_CHANNEL, (F_CPU_TRUE / 2) / STEPPER_FREQUENCY);
@@ -130,6 +130,10 @@ void HAL::setupTimer() {
     MOTION3_TIMER->TC_CHANNEL[MOTION3_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
     NVIC_EnableIRQ((IRQn_Type)MOTION3_TIMER_IRQ);
 
+    NVIC_SetPriority(PIOA_IRQn, 1);
+    NVIC_SetPriority(PIOB_IRQn, 1);
+    NVIC_SetPriority(PIOC_IRQn, 1);
+    NVIC_SetPriority(PIOD_IRQn, 1);
     // Servo control
 #if NUM_SERVOS > 0
     pmc_enable_periph_clk(SERVO_TIMER_IRQ);

@@ -25,8 +25,8 @@ class Motion3Buffer { // 28 byte 4 axis 8 bit processor
 public:
     fast8_t id;
     fast8_t parentId;
-    fast8_t directions;
-    fast8_t usedAxes;
+    ufast8_t directions;
+    ufast8_t usedAxes;
     fast8_t last;
     bool checkEndstops;
     int delta[NUM_AXES];
@@ -37,6 +37,8 @@ public:
 };
 
 class Motion3 {
+    friend class Motion2;
+
 public:
     static Motion3Buffer buffers[NUM_MOTION3_BUFFER];
     static volatile fast8_t length; // shared between threads
@@ -44,7 +46,7 @@ public:
     static fast8_t nextActId;       // used only inside interrupt
     static fast8_t skipParentId;    // Skip blocks from this id - endstop was triggered
     static fast8_t lastParentId;
-    static fast8_t lastDirection; // Last direction for faster switches
+    static ufast8_t lastDirection; // Last direction for faster switches
     static Motion3Buffer* act;
     static Motion2Buffer* actM2;
     static Motion1Buffer* actM1;

@@ -315,11 +315,19 @@ __attribute__((optimize("unroll-loops"))) void Motion2::timer() {
                     m3->usedAxes |= *bits;
                 }
             }
-#ifdef DEBUG_MOTION_ERRORS
             if (*delta > m3->errorUpdate) { // test if more steps wanted then possible, should never happen!
+                // adjust *np by the number of steps we can not execute so physical step position does not get corrupted.
+                // That way next segment can correct remaining steps.
+                if (m3->directions & *bits) { // positive move, reduce *np
+                    *np -= (*delta - m3->errorUpdate) >> 1;
+                } else {
+                    *np += (*delta - m3->errorUpdate) >> 1;
+                }
+                *delta = m3->errorUpdate;
+#ifdef DEBUG_MOTION_ERRORS
                 Com::printFLN(PSTR("StepError"), (int)i);
-            }
 #endif
+            }
             m3->error[i] = -m3->stepsRemaining;
             delta++;
             np++;
@@ -400,7 +408,6 @@ __attribute__((optimize("unroll-loops"))) void Motion2::timer() {
                 m3->last = 1;
             }
         }
-        // Com::printFLN("sf:", sFactor, 4);
         // Convert float position to integer motor position
         // This step catches all nonlinear behaviour from
         // acceleration profile and printer geometry
@@ -411,6 +418,13 @@ __attribute__((optimize("unroll-loops"))) void Motion2::timer() {
         FOR_ALL_AXES(i) {
             np[i] = lroundf(actM1->start[i] + sFactor * actM1->unitDir[i]);
         }
+        /* Com::printF(PSTR("sf:"), sFactor, 4);
+        Com::printF(PSTR(" lpx:"), lp[0]);
+        Com::printF(PSTR(" lpy:"), lp[1]);
+        Com::printF(PSTR(" lpz:"), lp[2]);
+        Com::printF(PSTR(" npx:"), np[0]);
+        Com::printF(PSTR(" npy:"), np[1]);
+        Com::printFLN(PSTR(" npz:"), np[2]); */
         // Fill structures used to update bresenham
         m3->directions = 0;
         m3->usedAxes = 0;
@@ -432,11 +446,21 @@ __attribute__((optimize("unroll-loops"))) void Motion2::timer() {
                 m3->directions |= axisBits[i];
                 m3->usedAxes |= axisBits[i];
             }
-#ifdef DEBUG_MOTION_ERRORS
             if (m3->delta[i] > m3->errorUpdate) { // test if more steps wanted then possible, should never happen!
-                Com::printFLN(PSTR("StepError"));
-            }
+                                                  // adjust *np by the number of steps we can not execute so physical step position does not get corrupted.
+                                                  // That way next segment can correct remaining steps.
+#ifdef DEBUG_MOTION_ERRORS
+                Com::printF(PSTR("StepError_"), (int)i);
+                Com::printF(PSTR(":"), (int32_t)m3->stepsRemaining);
+                Com::printFLN(PSTR(","), m3->delta[i] >> 1);
 #endif
+                if (m3->directions & axisBits[i]) { // positive move, reduce *np
+                    np[i] -= (m3->delta[i] - m3->errorUpdate) >> 1;
+                } else {
+                    np[i] += (m3->delta[i] - m3->errorUpdate) >> 1;
+                }
+                m3->delta[i] = m3->errorUpdate;
+            }
             m3->error[i] = -(m3->stepsRemaining);
         }
         lastMotorIdx = nextMotorIdx;
@@ -515,19 +539,21 @@ __attribute__((optimize("unroll-loops"))) void Motion2::timer() {
 // Also note the remainig z steps.
 
 void motorEndstopTriggered(fast8_t axis, bool dir) {
-    Motion1::motorTriggered |= axisBits[axis];
+    ufast8_t mask = axisBits[axis];
+    Motion1::motorTriggered |= mask;
     if (dir) {
-        Motion1::motorDirTriggered |= axisBits[axis];
+        Motion1::motorDirTriggered |= mask;
     } else {
-        Motion1::motorDirTriggered &= ~axisBits[axis];
+        Motion1::motorDirTriggered &= ~mask;
     }
 }
 void Motion2::motorEndstopTriggered(fast8_t axis, bool dir) {
-    Motion1::motorTriggered |= axisBits[axis];
+    ufast8_t mask = axisBits[axis];
+    Motion1::motorTriggered |= mask;
     if (dir) {
-        Motion1::motorDirTriggered |= axisBits[axis];
+        Motion1::motorDirTriggered |= mask;
     } else {
-        Motion1::motorDirTriggered &= ~axisBits[axis];
+        Motion1::motorDirTriggered &= ~mask;
     }
     // Com::printFLN(PSTR("MotorTrigger:"), (int)Motion1::motorTriggered); // TEST
     /*Motion1::setAxisHomed(axis, false);
@@ -555,7 +581,17 @@ void endstopTriggered(fast8_t axis, bool dir) {
 
 void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis, bool dir) {
     if (act == nullptr || act->checkEndstops == false) {
-        return;
+        if (act == nullptr && Motion3::length > 0) {
+#if SHORT_STEP_PULSES == 0
+            Motion3::unstepMotors();
+#endif
+            Motion3::activateNext();
+            if (act->checkEndstops == false) {
+                return;
+            }
+        } else {
+            return;
+        }
     }
     if (axis == ZPROBE_AXIS) {                              // z probe can trigger before real z min, so ignore during regular print
         if (Motion1::endstopMode != EndstopMode::PROBING) { // ignore if not probing
@@ -563,19 +599,19 @@ void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis, bool dir) {
         }
         axis = Z_AXIS; // Handle like z axis!
     }
-    fast8_t bit = axisBits[axis];
-    Motion1::axesTriggered = bit;
+    ufast8_t bitMask = axisBits[axis];
+    Motion1::axesTriggered = bitMask;
     if (dir) {
-        Motion1::axesDirTriggered |= bit;
+        Motion1::axesDirTriggered |= bitMask;
     } else {
-        Motion1::axesDirTriggered &= ~bit;
+        Motion1::axesDirTriggered &= ~bitMask;
     }
     Motion2Buffer& m2 = Motion2::buffers[act->parentId];
     Motion1Buffer* m1 = m2.motion1;
-    if ((m1->axisUsed & bit) == 0) { // not motion directory
+    if ((m1->axisUsed & bitMask) == 0) { // not motion directory
         return;
     }
-    if ((m1->axisDir & bit) != (Motion1::axesDirTriggered & bit)) {
+    if ((m1->axisDir & bitMask) != (Motion1::axesDirTriggered & bitMask)) {
         return; // we move away so it is a stale signal from other direction
     }
     Motion1::setAxisHomed(axis, false);

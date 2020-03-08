@@ -362,7 +362,7 @@ void HAL::setupTimer() {
     motion3->timer->setOverflow(STEPPER_FREQUENCY, HERTZ_FORMAT);
     motion3->timer->attachInterrupt(TIMER_VECTOR_NAME(MOTION3_TIMER_NUM));
     motion3->timer->resume();
-    HAL_NVIC_SetPriority(TIMER_IRQ(MOTION3_TIMER_NUM), 0, 0);
+    HAL_NVIC_SetPriority(TIMER_IRQ(MOTION3_TIMER_NUM), 0, 0); // highest priority required!
 #if BEEPER_PIN > -1
     toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
     toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));

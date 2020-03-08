@@ -99,6 +99,7 @@ Custom M Codes
 - M30 <filename> - Delete file on sd card
 - M32 <dirname> create subdirectory
 - M42 P<pin number> S<value 0..255> - Change output of pin P to S. Does not work on most important pins.
+- M48 Xpos Ypos Ptests - Test z probe accuracy
 - M80  - Turn on power supply
 - M81  - Turn off power supply
 - M82  - Set E codes absolute (default)

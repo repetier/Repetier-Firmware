@@ -191,6 +191,9 @@ void Leveling::updateDerived() {
     dy = (yMax - yMin) / (GRID_SIZE - 1);
     invDx = 1.0 / dx;
     invDy = 1.0 / dy;
+    if (endDegrade <= startDegrade) { // fix logic order if wrong
+        endDegrade = startDegrade + 0.5;
+    }
     diffDegrade = -1.0f / (endDegrade - startDegrade);
 }
 
@@ -217,7 +220,7 @@ void Leveling::setDistortionEnabled(bool newState) {
     Motion1::correctBumpOffset();
 }
 
-void Leveling::measure() {
+bool Leveling::measure() {
     float pos[NUM_AXES];
     Plane plane;
     PlaneBuilder builder;
@@ -232,7 +235,10 @@ void Leveling::measure() {
     setDistortionEnabled(false);
     Motion1::setAutolevelActive(false);
     Motion1::homeAxes(7); // Home x, y and z
-    float px = xMin, py = yMin;
+    float px = Motion1::currentPosition[X_AXIS], py = Motion1::currentPosition[Y_AXIS];
+    // move first z axis, deltas don't like moving xy at top!
+    Motion1::setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, ZProbeHandler::optimumProbingHeight());
+    Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
     Motion1::setTmpPositionXYZ(px, py, ZProbeHandler::optimumProbingHeight());
     PrinterType::closestAllowedPositionWithNewXYOffset(Motion1::tmpPosition, ZProbeHandler::xOffset(), ZProbeHandler::yOffset(), Z_PROBE_BORDER);
     Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
@@ -245,7 +251,7 @@ void Leveling::measure() {
                 break;
             }
             int xx;
-            if (y & 1) { // zig zag pattern for faster measdurement
+            if (y & 1) { // zig zag pattern for faster measurement
                 px = xMax - x * dx;
                 xx = GRID_SIZE - x - 1;
             } else {
@@ -253,10 +259,11 @@ void Leveling::measure() {
                 xx = x;
             }
             py = yMin + y * dy;
-            pos[X_AXIS] = px + ZProbeHandler::xOffset();
-            pos[Y_AXIS] = py + ZProbeHandler::yOffset();
+            pos[X_AXIS] = px - ZProbeHandler::xOffset();
+            pos[Y_AXIS] = py - ZProbeHandler::yOffset();
             pos[Z_AXIS] = ZProbeHandler::optimumProbingHeight();
-            if (PrinterType::positionAllowed(pos, pos[Z_AXIS])) {
+            float bedPos[2] = { px, py };
+            if (PrinterType::positionOnBed(bedPos) && PrinterType::positionAllowed(pos, pos[Z_AXIS])) {
                 if (ok) {
                     Motion1::moveByPrinter(pos, Motion1::moveFeedrate[X_AXIS], false);
                     float h = ZProbeHandler::runProbe();
@@ -275,6 +282,11 @@ void Leveling::measure() {
         ok = false;
         Com::printFLN(PSTR("You need at least 3 valid points for correction!"));
     }
+#if PRINTER_TYPE == PRINTER_TYPE_DELTA
+    Motion1::setTmpPositionXYZ(0, 0, IGNORE_COORDINATE); // better to go to center for deltas!
+    Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
+#endif
+    ZProbeHandler::deactivate();
     if (ok) {
         builder.createPlane(plane, false);
         LevelingCorrector::correct(&plane);
@@ -282,27 +294,29 @@ void Leveling::measure() {
         for (int y = 0; y < GRID_SIZE; y++) {
             for (int x = 0; x < GRID_SIZE; x++) {
                 if (grid[x][y] != ILLEGAL_Z_PROBE) {
-                    grid[x][y] -= plane.z(xPosFor(x), yPosFor(y));
+                    grid[x][y] = plane.z(xPosFor(x), yPosFor(y)) - grid[x][y];
                 }
             }
         }
         extrapolateGrid();
 #if ENABLE_BUMP_CORRECTION
-        setDistortionEnabled(true);
+        setDistortionEnabled(true); // if we support it we should use it by default
         reportDistortionStatus();
 #endif
     } else {
-        GCode::fatalError(PSTR("Leveling failed!"));
         resetEeprom();
     }
     Motion1::printCurrentPosition();
+    return ok;
 }
 
 void Leveling::extrapolateGrid() {
     int illegalPoints = 0;
     int optX, optY, optNeighbours;
+    float grid2[GRID_SIZE][GRID_SIZE];
     for (int y = 0; y < GRID_SIZE; y++) {
         for (int x = 0; x < GRID_SIZE; x++) {
+            grid2[x][y] = grid[x][y];
             if (grid[x][y] == ILLEGAL_Z_PROBE) {
                 illegalPoints++;
             }
@@ -313,9 +327,16 @@ void Leveling::extrapolateGrid() {
         optNeighbours = -1;
         for (int y = 0; y < GRID_SIZE; y++) {
             for (int x = 0; x < GRID_SIZE; x++) {
+                if (grid[x][y] != ILLEGAL_Z_PROBE) {
+                    continue;
+                }
                 int n = extrapolateableNeighbours(x, y);
                 if (n > optNeighbours) {
                     optNeighbours = n;
+                }
+                if (n > 0) {
+                    grid2[x][y] = extrapolateNeighbours(x, y);
+                    illegalPoints--;
                 }
             }
         }
@@ -331,11 +352,7 @@ void Leveling::extrapolateGrid() {
         // Extrapolate all points with optNeigbours
         for (int y = 0; y < GRID_SIZE; y++) {
             for (int x = 0; x < GRID_SIZE; x++) {
-                int n = extrapolateableNeighbours(x, y);
-                if (n == optNeighbours) {
-                    grid[x][y] = extrapolateNeighbours(x, y);
-                    illegalPoints--;
-                }
+                grid[x][y] = grid2[x][y];
             }
         }
     }
@@ -518,11 +535,12 @@ void Leveling::reportDistortionStatus() {
 }
 #endif
 
-void Leveling::execute_G32(GCode* com) {
-    measure();
+bool Leveling::execute_G32(GCode* com) {
+    bool ok = measure();
     if (com->hasS() && com->S > 0) {
         EEPROM::markChanged();
     }
+    return ok;
 }
 void Leveling::execute_G33(GCode* com) {
 #if ENABLE_BUMP_CORRECTION
@@ -562,7 +580,7 @@ void Leveling::execute_G33(GCode* com) {
 
 #if LEVELING_METHOD == LEVELING_METHOD_4_POINT_SYMMETRIC // 4 points
 
-void Leveling::measure() {
+bool Leveling::measure() {
     Plane plane;
     PlaneBuilder builder;
     builder.reset();
@@ -604,6 +622,7 @@ void Leveling::measure() {
         h4 = ZProbeHandler::runProbe();
         ok &= h4 != ILLEGAL_Z_PROBE;
     }
+    ZProbeHandler::deactivate();
     if (ok) {
         const float t2 = h2 + (h3 - h2) * t; // theoretical height for crossing point for symmetric axis
         h1 = t2 - (h4 - h1) * 0.5;           // remove bending part
@@ -612,24 +631,24 @@ void Leveling::measure() {
         builder.addPoint(L_P3_X, L_P3_Y, h3);
         builder.createPlane(plane, false);
         LevelingCorrector::correct(&plane);
-    } else {
-        GCode::fatalError(PSTR("Leveling failed!"));
     }
     Motion1::printCurrentPosition();
+    return ok;
 }
 
-void Leveling::execute_G32(GCode* com) {
-    measure();
+bool Leveling::execute_G32(GCode* com) {
+    bool ok = measure();
     if (com->hasS() && com->S > 0) {
         EEPROM::markChanged();
     }
+    return ok;
 }
 
 #endif
 
 #if LEVELING_METHOD == LEVELING_METHOD_3_POINTS // 3 points
 
-void Leveling::measure() {
+bool Leveling::measure() {
     Plane plane;
     PlaneBuilder builder;
     builder.reset();
@@ -654,23 +673,24 @@ void Leveling::measure() {
         h3 = ZProbeHandler::runProbe();
         ok &= h3 != ILLEGAL_Z_PROBE;
     }
+    ZProbeHandler::deactivate();
     if (ok) {
         builder.addPoint(L_P1_X, L_P1_Y, h1);
         builder.addPoint(L_P2_X, L_P2_Y, h2);
         builder.addPoint(L_P3_X, L_P3_Y, h3);
         builder.createPlane(plane, false);
         LevelingCorrector::correct(&plane);
-    } else {
-        GCode::fatalError(PSTR("Leveling failed!"));
     }
     Motion1::printCurrentPosition();
+    return ok;
 }
 
-void Leveling::execute_G32(GCode* com) {
-    measure();
+bool Leveling::execute_G32(GCode* com) {
+    bool ok = measure();
     if (com->hasS() && com->S > 0) {
         EEPROM::markChanged();
     }
+    return ok;
 }
 
 #endif

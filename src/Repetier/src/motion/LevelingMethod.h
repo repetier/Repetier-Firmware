@@ -47,11 +47,11 @@ public:
     inline static void setDistortionEnabled(bool newState) {}
     inline static bool isDistortionEnabled() { return false; }
     inline static float distortionAt(float xp, float yp) { return 0; }
-    inline static void measure() {}
+    inline static bool measure() {}
     inline static void init() {}
     inline static void handleEeprom() {}
     inline static void resetEeprom() {}
-    inline static void execute_G32(GCode* com) {}
+    inline static bool execute_G32(GCode* com) {}
     inline static void execute_G33(GCode* com) {}
     inline static void execute_M323(GCode* com) {}
 };
@@ -102,12 +102,12 @@ public:
     inline static float distortionAt(float xp, float yp) { return 0; }
 #endif
     static void reportDistortionStatus();
-    static void measure();
+    static bool measure();
     static void init();
     static void handleEeprom();
     static void resetEeprom();
     static void updateDerived();
-    static void execute_G32(GCode* com);
+    static bool execute_G32(GCode* com);
     static void execute_G33(GCode* com);
 };
 
@@ -120,11 +120,11 @@ public:
     inline static void setDistortionEnabled(bool newState) {}
     inline static bool isDistortionEnabled() { return false; }
     inline static float distortionAt(float xp, float yp) { return 0; }
-    static void measure();
+    static bool measure();
     inline static void init() {}
     inline static void handleEeprom() {}
     inline static void resetEeprom() {}
-    static void execute_G32(GCode* com);
+    static bool execute_G32(GCode* com);
     inline static void execute_G33(GCode* com) {}
     inline static void execute_M323(GCode* com) {}
 };
@@ -138,11 +138,11 @@ public:
     inline static void setDistortionEnabled(bool newState) {}
     inline static bool isDistortionEnabled() { return false; }
     inline static float distortionAt(float xp, float yp) { return 0; }
-    static void measure();
+    static bool measure();
     inline static void init() {}
     inline static void handleEeprom() {}
     inline static void resetEeprom() {}
-    static void execute_G32(GCode* com);
+    static bool execute_G32(GCode* com);
     inline static void execute_G33(GCode* com) {}
     inline static void execute_M323(GCode* com) {}
 };

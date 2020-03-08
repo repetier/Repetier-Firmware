@@ -61,11 +61,11 @@ int8_t Motion1::homePriority[NUM_AXES];
 fast8_t Motion1::axesHomed;
 EndstopMode Motion1::endstopMode;
 int32_t Motion1::stepsRemaining[NUM_AXES]; // Steps remaining when testing endstops
-fast8_t Motion1::axesTriggered;
-fast8_t Motion1::motorTriggered;
-fast8_t Motion1::axesDirTriggered;
-fast8_t Motion1::motorDirTriggered;
-fast8_t Motion1::stopMask;
+ufast8_t Motion1::axesTriggered;
+ufast8_t Motion1::motorTriggered;
+ufast8_t Motion1::axesDirTriggered = 0;
+ufast8_t Motion1::motorDirTriggered;
+ufast8_t Motion1::stopMask;
 fast8_t Motion1::dittoMode = 0;   // copy extrusion signals
 fast8_t Motion1::dittoMirror = 0; // mirror for dual x printer
 fast8_t Motion1::alwaysCheckEndstops;
@@ -341,7 +341,7 @@ void Motion1::updateRotMinMax() {
     Com::printArrayFLN(PSTR("maxPosOff:"), maxPosOff, 3);
     Com::printArrayFLN(PSTR("rotMin:"), rotMin, 3);
     Com::printArrayFLN(PSTR("rotMax:"), rotMax, 3);
-    Com::printArrayFLN(PSTR("transform:"), autolevelTransformation, 9); */
+    Com::printArrayFLN(PSTR("transform:"), autolevelTransformation, 9, 5); */
 }
 
 void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback) {
@@ -832,9 +832,9 @@ void Motion1::moveRelativeBySteps(int32_t coords[NUM_AXES]) {
     Motion1Buffer& buf = reserve();
     buf.flags = 0;
     buf.action = Motion1Action::MOVE_STEPS;
-    buf.feedrate = 0.5 * PrinterType::feedrateForMoveSteps(axesUsed);
-    buf.acceleration = 0.5 * PrinterType::accelerationForMoveSteps(axesUsed);
-    buf.startSpeed = buf.endSpeed = 0;
+    buf.feedrate = 0.2 * PrinterType::feedrateForMoveSteps(axesUsed);
+    buf.acceleration = 0.2 * PrinterType::accelerationForMoveSteps(axesUsed);
+    buf.startSpeed = buf.endSpeed = buf.length = 0;
     FOR_ALL_AXES(i) {
         buf.start[i] = lpos[i];
         buf.length += RMath::sqr(static_cast<float>(coords[i]) / resolution[i]);
@@ -852,6 +852,9 @@ void Motion1::moveRelativeBySteps(int32_t coords[NUM_AXES]) {
 void Motion1::correctBumpOffset() {
     int32_t correct[NUM_AXES];
     float pos[NUM_AXES];
+    if (!Printer::isHomedAll()) {
+        return; // nonsense stored, can lead to problems
+    }
     waitForEndOfMoves();
     copyCurrentPrinter(pos);
     Leveling::addDistortion(pos);
@@ -861,6 +864,7 @@ void Motion1::correctBumpOffset() {
         correct[i] -= lp[i];
     }
     moveRelativeBySteps(correct);
+    waitForEndOfMoves(); // prevent anyone from changing start position
 }
 
 bool Motion1::queueMove(float feedrate, bool secondaryMove) {
@@ -1303,14 +1307,16 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
                 m2->t2 = m2->s2 / f->feedrate;
                 // Com::printFLN(" s2:", m2->s2,2);
             }
-            //Com::printF("ss:", f->startSpeed, 0);
-            //Com::printF(" es:", f->endSpeed, 0);
-            /* Com::printF(" f:", f->feedrate, 0);
+            /* Com::printF("ss:", f->startSpeed, 0);
+            Com::printF(" es:", f->endSpeed, 0);
+            Com::printF(" f:", f->feedrate, 0);
             Com::printF(" t1:", m2->t1, 4);
             Com::printF(" t2:", m2->t2, 4);
-            Com::printF(" t3:", m2->t3, 4); */
-            //Com::printFLN(" l:", f->length, 4);
-            //Com::printFLN(" a:", f->acceleration, 4);
+            Com::printF(" t3:", m2->t3, 4);
+            Com::printF(" s1:", m2->s1, 4);
+            Com::printF(" s2:", m2->s2, 4);
+            Com::printF(" l:", f->length, 4);
+            Com::printFLN(" a:", f->acceleration, 4); */
         }
         f->state = Motion1State::FORWARD_PLANNED;
         {
@@ -1898,21 +1904,15 @@ void Motion1::eepromHandle() {
 #if PRINTER_TYPE == PRINTER_TYPE_DUAL_X
         if (i != A_AXIS) {
 #endif
-            EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_FEEDRATE, PSTR("max. feedrate [mm/s]"), 3, maxFeedrate[i]);
-            EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_ACCELERATION, PSTR("max. print acceleration [mm/s^2]"), 3, maxAcceleration[i]);
-            EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_TRAVEL_ACCELERATION, PSTR("max. travel acceleration [mm/s^2]"), 3, maxTravelAcceleration[i]);
 #if PRINTER_TYPE == PRINTER_TYPE_DELTA
             if (i != X_AXIS && i != Y_AXIS) {
 #endif
+                EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_FEEDRATE, PSTR("max. feedrate [mm/s]"), 3, maxFeedrate[i]);
+                EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_ACCELERATION, PSTR("max. print acceleration [mm/s^2]"), 3, maxAcceleration[i]);
+                EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_TRAVEL_ACCELERATION, PSTR("max. travel acceleration [mm/s^2]"), 3, maxTravelAcceleration[i]);
                 EEPROM::handleFloat(eprStart + p + EPR_M1_HOMING_FEEDRATE, PSTR("homing feedrate [mm/s]"), 3, homingFeedrate[i]);
-#if PRINTER_TYPE == PRINTER_TYPE_DELTA
-            }
-#endif
-            EEPROM::handleFloat(eprStart + p + EPR_M1_MOVE_FEEDRATE, PSTR("move feedrate [mm/s]"), 3, moveFeedrate[i]);
-            EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_YANK, PSTR("max. yank(jerk) [mm/s]"), 3, maxYank[i]);
-#if PRINTER_TYPE == PRINTER_TYPE_DELTA
-            if (i != X_AXIS && i != Y_AXIS) {
-#endif
+                EEPROM::handleFloat(eprStart + p + EPR_M1_MOVE_FEEDRATE, PSTR("move feedrate [mm/s]"), 3, moveFeedrate[i]);
+                EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_YANK, PSTR("max. yank(jerk) [mm/s]"), 3, maxYank[i]);
                 EEPROM::handleFloat(eprStart + p + EPR_M1_MIN_POS, PSTR("min. position [mm]"), 3, minPos[i]);
                 EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_POS, PSTR("max. position [mm]"), 3, maxPos[i]);
 #if PRINTER_TYPE == PRINTER_TYPE_DELTA

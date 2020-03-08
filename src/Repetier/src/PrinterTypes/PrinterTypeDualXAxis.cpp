@@ -138,9 +138,10 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
         return false;
     }
     for (fast8_t i = 0; i <= A_AXIS; i++) {
-        if (i == E_AXIS) {
-            continue;
-        }
+        if (i == E_AXIS)
+            || i == Z_AXIS {
+                continue;
+            }
         //Com::printF(PSTR("Axis"), (int)i);
         //Com::printF(PSTR(" min:"), Motion1::minPos[i]);
         //Com::printF(PSTR(" max:"), Motion1::maxPos[i]);
@@ -149,7 +150,7 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
                 if (pos[i] < Motion1::minPos[A_AXIS] + Motion1::rotMin[X_AXIS] || pos[A_AXIS] > Motion1::maxPos[i] + Motion1::rotMax[X_AXIS]) {
                     return false;
                 }
-            } else if (pos[i] < Motion1::minPosOff[i] || pos[i] > Motion1::maxPosOff[i]) {
+            } else if (pos[i] < Motion1::minPos[i] || pos[i] > Motion1::maxPos[i]) {
                 return false;
             }
             // Com::printFLN(PSTR(" hit"));

@@ -64,9 +64,11 @@ void ZProbeHandler::deactivate() {
         return;
     }
     float cPos[NUM_AXES];
-    Motion1::copyCurrentOfficial(cPos);
-    GCode::executeFString(Com::tZProbeEndScript);
     Tool* tool = Tool::getActiveTool();
+    Motion1::copyCurrentOfficial(cPos);
+    PrinterType::closestAllowedPositionWithNewXYOffset(cPos, tool->getOffsetX(), tool->getOffsetY(), Z_PROBE_BORDER);
+    GCode::executeFString(Com::tZProbeEndScript);
+    Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     activated = false;
@@ -84,9 +86,10 @@ float ZProbeHandler::runProbe() {
         return ILLEGAL_Z_PROBE;
     }
     if (Leveling::isDistortionEnabled()) {
-        Com::printErrorFLN(PSTR("z-probe stopped because bump correction is active. This will influence the result."));
-        Motion1::callAfterHomingOnSteppers();
-        return ILLEGAL_Z_PROBE;
+        Com::printWarningFLN(PSTR("z-probe with distortion enabled can return unexpected results!"));
+        // Com::printErrorFLN(PSTR("z-probe stopped because bump correction is active. This will influence the result."));
+        // Motion1::callAfterHomingOnSteppers();
+        // return ILLEGAL_Z_PROBE;
     }
     bool wasActivated = activated;
     if (!activated) {
@@ -349,12 +352,14 @@ void ZProbeHandler::deactivate() {
     }
     float cPos[NUM_AXES];
     Motion1::copyCurrentOfficial(cPos);
-    GCode::executeFString(Com::tZProbeEndScript);
     Tool* tool = Tool::getActiveTool();
+    Motion1::copyCurrentOfficial(cPos);
+    PrinterType::closestAllowedPositionWithNewXYOffset(cPos, tool->getOffsetX(), tool->getOffsetY(), Z_PROBE_BORDER);
+    GCode::executeFString(Com::tZProbeEndScript);
+    Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
-    Tool* t = Tool::getActiveTool();
-    HeatManager* hm = t->getHeater();
+    HeatManager* hm = tool->getHeater();
     if (hm != nullptr) {
         hm->setTargetTemperature(activateTemperature);
     }
@@ -373,9 +378,10 @@ float ZProbeHandler::runProbe() {
         return ILLEGAL_Z_PROBE;
     }
     if (Leveling::isDistortionEnabled()) {
-        Com::printErrorFLN(PSTR("z-probe stopped because bump correction is active. This will influence the result."));
-        Motion1::callAfterHomingOnSteppers();
-        return ILLEGAL_Z_PROBE;
+        Com::printWarningFLN(PSTR("z-probe with distortion enabled can return unexpected results!"));
+        // Com::printErrorFLN(PSTR("z-probe stopped because bump correction is active. This will influence the result."));
+        // Motion1::callAfterHomingOnSteppers();
+        // return ILLEGAL_Z_PROBE;
     }
     bool wasActivated = activated;
     if (!activated) {
@@ -638,9 +644,11 @@ void ZProbeHandler::deactivate() {
     }
     ZProbeServo.setPosition(1473, 0); // stow pin
     float cPos[NUM_AXES];
-    Motion1::copyCurrentOfficial(cPos);
-    GCode::executeFString(Com::tZProbeEndScript);
     Tool* tool = Tool::getActiveTool();
+    Motion1::copyCurrentOfficial(cPos);
+    PrinterType::closestAllowedPositionWithNewXYOffset(cPos, tool->getOffsetX(), tool->getOffsetY(), Z_PROBE_BORDER);
+    GCode::executeFString(Com::tZProbeEndScript);
+    Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     activated = false;
@@ -658,9 +666,10 @@ float ZProbeHandler::runProbe() {
         return ILLEGAL_Z_PROBE;
     }
     if (Leveling::isDistortionEnabled()) {
-        Com::printErrorFLN(PSTR("z-probe stopped because bump correction is active. This will influence the result."));
-        Motion1::callAfterHomingOnSteppers();
-        return ILLEGAL_Z_PROBE;
+        Com::printWarningFLN(PSTR("z-probe with distortion enabled can return unexpected results!"));
+        // Com::printErrorFLN(PSTR("z-probe stopped because bump correction is active. This will influence the result."));
+        // Motion1::callAfterHomingOnSteppers();
+        // return ILLEGAL_Z_PROBE;
     }
     bool wasActivated = activated;
     if (!activated) {

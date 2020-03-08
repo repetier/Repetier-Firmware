@@ -23,7 +23,7 @@
 #endif
 
 Motion3Buffer Motion3::buffers[NUM_MOTION3_BUFFER];
-fast8_t Motion3::lastDirection = 128; // force update
+ufast8_t Motion3::lastDirection = 128; // force update
 fast8_t volatile Motion3::length;
 fast8_t Motion3::last, Motion3::nextActId;
 Motion3Buffer* Motion3::act;
@@ -108,6 +108,7 @@ bool Motion3::activateNext() {
 }
 
 void Motion3::timer() {
+    InterruptProtectedBlock noInts;
     // Test one motor endstop to simplify stepper logic
 #if !defined(NO_SOFTWARE_AXIS_ENDSTOPS) || !defined(NO_MOTOR_ENDSTOPS)
     static fast8_t testMotorId = 0;
@@ -146,7 +147,7 @@ void Motion3::timer() {
 
         // Test one motor endstop to simplify stepper logic
 #if !defined(NO_SOFTWARE_AXIS_ENDSTOPS) || !defined(NO_MOTOR_ENDSTOPS)
-        fast8_t axisBit = axisBits[testMotorId];
+        ufast8_t axisBit = axisBits[testMotorId];
 #endif
 
 #if !defined(NO_SOFTWARE_AXIS_ENDSTOPS)
@@ -163,16 +164,16 @@ void Motion3::timer() {
                 }
             }
         }
-        if (testMotorId == Z_AXIS && Motion1::endstopMode == PROBING) {
+        if (Motion1::endstopMode == PROBING) {
             if (ZProbe->update()) { // ignore z endstop here
-                Motion2::endstopTriggered(act, act->directions & axisBit, false);
+                Motion2::endstopTriggered(act, Z_AXIS, false);
             }
         }
 #endif
 
 #if !defined(NO_MOTOR_ENDSTOPS)
         StepperDriverBase* m = Motion1::motors[testMotorId];
-        if (m != nullptr && (act->usedAxes & axisBit)) {
+        if (m != nullptr && (act->usedAxes & axisBit) != 0) {
             if (testMotorId == E_AXIS && Motion1::dittoMode) {
                 for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
                     Tool* t = Tool::getTool(i);
@@ -180,8 +181,8 @@ void Motion3::timer() {
                         Motion2::motorEndstopTriggered(E_AXIS, act->directions & axisBit);
                     }
                 }
-            } else if ((Motion1::motorTriggered & m->getAxisBit()) == 0 && m->updateEndstop()) {
-                Motion2::motorEndstopTriggered(m->getAxis(), act->directions & axisBit);
+            } else if ((Motion1::motorTriggered & axisBit /* m->getAxisBit() */) == 0 && m->updateEndstop()) {
+                Motion2::motorEndstopTriggered(testMotorId /* m->getAxis() */, act->directions & axisBit);
             }
         }
 #endif
@@ -189,7 +190,7 @@ void Motion3::timer() {
 #if !defined(NO_SOFTWARE_AXIS_ENDSTOPS) || !defined(NO_MOTOR_ENDSTOPS)
         testMotorId++;
         if (testMotorId >= NUM_AXES) {
-            testMotorId = 0;
+            testMotorId = X_AXIS;
         }
 #endif
         if (/* (act->usedAxes & 1) && */ (Motion1::motorTriggered & 1) == 0) {
@@ -330,7 +331,7 @@ void Motion3::timer() {
         if (act->last) {
             Motion2::pop();
         }
-        InterruptProtectedBlock noInts;
+        // InterruptProtectedBlock noInts;
         --length;
         act = nullptr;
     }
