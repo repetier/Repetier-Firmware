@@ -204,7 +204,7 @@ float ZProbeHandler::runProbe() {
 #endif
 #if ENABLE_BUMP_CORRECTION
     // if (Leveling::isDistortionEnabled()) {
-    zCorr = Leveling::distortionAt(Motion1::currentPosition[X_AXIS], Motion1::currentPosition[Y_AXIS]);
+    // zCorr = Leveling::distortionAt(Motion1::currentPosition[X_AXIS], Motion1::currentPosition[Y_AXIS]);
     // }
 #endif
     z += height;
@@ -497,7 +497,7 @@ float ZProbeHandler::runProbe() {
 #endif
 #if ENABLE_BUMP_CORRECTION
     // if (Leveling::isDistortionEnabled()) {
-    zCorr = Leveling::distortionAt(Motion1::currentPosition[X_AXIS], Motion1::currentPosition[Y_AXIS]);
+    // zCorr = Leveling::distortionAt(Motion1::currentPosition[X_AXIS], Motion1::currentPosition[Y_AXIS]);
     // }
 #endif
     z += height;
@@ -784,7 +784,7 @@ float ZProbeHandler::runProbe() {
 #endif
 #if ENABLE_BUMP_CORRECTION
     // if (Leveling::isDistortionEnabled()) {
-    zCorr = Leveling::distortionAt(Motion1::currentPosition[X_AXIS], Motion1::currentPosition[Y_AXIS]);
+    // zCorr = Leveling::distortionAt(Motion1::currentPosition[X_AXIS], Motion1::currentPosition[Y_AXIS]);
     // }
 #endif
     z += height;

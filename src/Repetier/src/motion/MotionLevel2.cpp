@@ -586,6 +586,7 @@ void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis, bool dir) {
             Motion3::unstepMotors();
 #endif
             Motion3::activateNext();
+            act = Motion3::act;
             if (act->checkEndstops == false) {
                 return;
             }

@@ -525,7 +525,7 @@ void GCode_32(GCode* com) {
             ok = zMeasured != ILLEGAL_Z_PROBE;
         }
         if (ok) {
-            Motion1::maxPos[Z_AXIS] += zMeasured - zTheroetical + Leveling::distortionAt(Motion1::currentPositionTransformed[X_AXIS], Motion1::currentPositionTransformed[Y_AXIS]);
+            Motion1::maxPos[Z_AXIS] += zMeasured - zTheroetical + (Leveling::isDistortionEnabled() ? Leveling::distortionAt(Motion1::currentPositionTransformed[X_AXIS], Motion1::currentPositionTransformed[Y_AXIS]) : 0);
             EEPROM::markChanged();
             Motion1::updateRotMinMax();
             Motion1::currentPosition[Z_AXIS] = zMeasured;
