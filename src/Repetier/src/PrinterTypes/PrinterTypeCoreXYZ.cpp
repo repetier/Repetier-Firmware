@@ -90,7 +90,7 @@ void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]) {
     motor[Y_AXIS] = lroundl((COREXYZ_Y_X * pos[X_AXIS] + COREXYZ_Y_Y * pos[Y_AXIS] + COREXYZ_Y_Z * pos[Z_AXIS]) * Motion1::resolution[Y_AXIS]);
     motor[Z_AXIS] = lroundl((COREXYZ_Z_X * pos[X_AXIS] + COREXYZ_Z_Y * pos[Y_AXIS] + COREXYZ_Z_Z * pos[Z_AXIS]) * Motion1::resolution[Z_AXIS]);
 #if defined(COREXYZ_A_X) && defined(COREXYZ_A_Y) && defined(COREXYZ_A_Z) && NUM_AXES > A_AXIS
-    motor[Z_AXIS] = lroundl((COREXYZ_A_X * pos[X_AXIS] + COREXYZ_A_Y * pos[Y_AXIS] + COREXYZ_A_Z * pos[Z_AXIS]) * Motion1::resolution[Z_AXIS]);
+    motor[A_AXIS] = lroundl((COREXYZ_A_X * pos[X_AXIS] + COREXYZ_A_Y * pos[Y_AXIS] + COREXYZ_A_Z * pos[Z_AXIS]) * Motion1::resolution[Z_AXIS]);
     motor[E_AXIS] = lroundl(pos[E_AXIS] * Motion1::resolution[E_AXIS]);
     for (fast8_t i = B_AXIS; i < NUM_AXES; i++) {
         motor[i] = lroundl(pos[i] * Motion1::resolution[i]);
