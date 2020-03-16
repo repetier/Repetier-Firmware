@@ -89,7 +89,7 @@ void PrinterType::transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]) {
     motor[X_AXIS] = lroundl((COREXYZ_X_X * pos[X_AXIS] + COREXYZ_X_Y * pos[Y_AXIS] + COREXYZ_X_Z * pos[Z_AXIS]) * Motion1::resolution[X_AXIS]);
     motor[Y_AXIS] = lroundl((COREXYZ_Y_X * pos[X_AXIS] + COREXYZ_Y_Y * pos[Y_AXIS] + COREXYZ_Y_Z * pos[Z_AXIS]) * Motion1::resolution[Y_AXIS]);
     motor[Z_AXIS] = lroundl((COREXYZ_Z_X * pos[X_AXIS] + COREXYZ_Z_Y * pos[Y_AXIS] + COREXYZ_Z_Z * pos[Z_AXIS]) * Motion1::resolution[Z_AXIS]);
-#if defined(COREXYZ_Z_X) && defined(COREXYZ_Z_X) && defined(COREXYZ_Z_X) && NUM_AXES > A_AXIS
+#if defined(COREXYZ_A_X) && defined(COREXYZ_A_Y) && defined(COREXYZ_A_Z) && NUM_AXES > A_AXIS
     motor[Z_AXIS] = lroundl((COREXYZ_A_X * pos[X_AXIS] + COREXYZ_A_Y * pos[Y_AXIS] + COREXYZ_A_Z * pos[Z_AXIS]) * Motion1::resolution[Z_AXIS]);
     motor[E_AXIS] = lroundl(pos[E_AXIS] * Motion1::resolution[E_AXIS]);
     for (fast8_t i = B_AXIS; i < NUM_AXES; i++) {
@@ -221,7 +221,12 @@ void PrinterType::M290(GCode* com) {
     InterruptProtectedBlock lock;
     if (com->hasZ()) {
         float z = constrain(com->Z, -2, 2);
-        Motion2::openBabysteps[Z_AXIS] += z * Motion1::resolution[Z_AXIS];
+        Motion2::openBabysteps[X_AXIS] += z * COREXYZ_X_Z * Motion1::resolution[X_AXIS];
+        Motion2::openBabysteps[Y_AXIS] += z * COREXYZ_Y_Z * Motion1::resolution[Y_AXIS];
+        Motion2::openBabysteps[Z_AXIS] += z * COREXYZ_Z_Z * Motion1::resolution[Z_AXIS];
+#if defined(COREXYZ_A_X) && defined(COREXYZ_A_Y) && defined(COREXYZ_A_Z) && NUM_AXES > A_AXIS
+        Motion2::openBabysteps[A_AXIS] += z * COREXYZ_A_Z * Motion1::resolution[A_AXIS];
+#endif
     }
 }
 
