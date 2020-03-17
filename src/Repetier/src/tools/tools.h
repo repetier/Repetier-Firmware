@@ -29,7 +29,10 @@ class Tool;
 
 class ToolChangeHandler {
 public:
-    virtual void M6(GCode* com, Tool* tool) = 0;
+    virtual void M6(GCode* com, Tool* tool) {};
+    virtual void activate() {};
+    virtual void deactivate() {};
+    virtual int eepromSize() { return 0; }
 };
 
 class ToolChangeCustomEvent : ToolChangeHandler {

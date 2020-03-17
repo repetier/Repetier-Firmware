@@ -47,11 +47,11 @@ public:
     inline static void setDistortionEnabled(bool newState) {}
     inline static bool isDistortionEnabled() { return false; }
     inline static float distortionAt(float xp, float yp) { return 0; }
-    inline static bool measure() {}
+    inline static bool measure() { return true; }
     inline static void init() {}
     inline static void handleEeprom() {}
     inline static void resetEeprom() {}
-    inline static bool execute_G32(GCode* com) {}
+    inline static bool execute_G32(GCode* com) { return true; }
     inline static void execute_G33(GCode* com) {}
     inline static void execute_M323(GCode* com) {}
 };

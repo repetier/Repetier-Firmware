@@ -144,7 +144,7 @@ IO_PWM_SOFTWARE(Fan1NoKSPWM, IOFan1, 0)
 IO_PWM_SOFTWARE(CoolerFan, IOCoolerFan1, 0)
 // IO_PWM_HARDWARE(Fan1PWM, 37,5000)
 // IO_PDM_SOFTWARE(Fan1NoKSPWM, IOFan1) // alternative to PWM signals
-IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20)
+IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20, 85)
 IO_PWM_SOFTWARE(BoardFan, IOBoardFan, 4)
 COOLER_MANAGER_MOTORS(BoardFanController, BoardFan, 0, 192, 10) // reduced max power for more silent fan
 // Define temperature sensors
@@ -219,8 +219,9 @@ TOOL_EXTRUDER(ToolExtruder2, 0, -0.06, 0, HeaterExtruder2, E2Motor, 1.75, 500, 5
 FILAMENT_DETECTOR(JamDetector1, IOJam1, ToolExtruder1)
 FILAMENT_DETECTOR(JamDetector2, IOJam2, ToolExtruder2)
 
-IO_OUTPUT(caseLightPin, HEATER_6_PIN)
-LIGHT_STATE_MONOCHROME(caseLightState)
-LIGHT_COND(caseLightState, true, Printer::caseLightMode, 255, 255, 255)
-LIGHT_COND(caseLightState, GUI::statusLevel == GUIStatusLevel::ERROR, LIGHT_STATE_BLINK_SLOW, 255, 255, 255)
-LIGHT_SOURCE_MONOCHROME(caseLightDriver, caseLightPin, caseLightState)
+// IO_OUTPUT(caseLightPin, HEATER_6_PIN)
+IO_PWM_HARDWARE(caseLightPWM, HEATER_6_PIN, 500)
+LIGHT_STATE_PWM(caseLightState)
+LIGHT_COND(caseLightState, true, Printer::caseLightMode, 255, 255, 255, 255)
+LIGHT_COND(caseLightState, GUI::statusLevel == GUIStatusLevel::ERROR, LIGHT_STATE_BLINK_SLOW, 255, 255, 255, 255)
+LIGHT_SOURCE_PWM(caseLightDriver, caseLightPWM, caseLightState)

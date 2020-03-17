@@ -138,15 +138,14 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
         return false;
     }
     for (fast8_t i = 0; i <= A_AXIS; i++) {
-        if (i == E_AXIS)
-            || i == Z_AXIS {
-                continue;
-            }
+        if (i == E_AXIS || i == Z_AXIS) {
+            continue;
+        }
         //Com::printF(PSTR("Axis"), (int)i);
         //Com::printF(PSTR(" min:"), Motion1::minPos[i]);
         //Com::printF(PSTR(" max:"), Motion1::maxPos[i]);
         if (Motion1::axesHomed & axisBits[i]) {
-            if (axis == A_AXIS) {
+            if (i == A_AXIS) {
                 if (pos[i] < Motion1::minPos[A_AXIS] + Motion1::rotMin[X_AXIS] || pos[A_AXIS] > Motion1::maxPos[i] + Motion1::rotMax[X_AXIS]) {
                     return false;
                 }
@@ -534,9 +533,9 @@ void PrinterType::officialToTransformed(float official[NUM_AXES], float trans[NU
                                 trans[X_AXIS],
                                 trans[Y_AXIS],
                                 trans[Z_AXIS]);
-
-    trans[i] = official[i];
-}
+    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
+        trans[i] = official[i];
+    }
 }
 
 bool PrinterType::canSelectTool(fast8_t toolId) {

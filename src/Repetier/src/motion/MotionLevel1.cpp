@@ -1671,6 +1671,7 @@ void Motion1::homeAxes(fast8_t axes) {
     if (Tool::getActiveTool() != nullptr && ok) { // select only if all is homed or we get unwanted moves!
         Tool::selectTool(activeToolId, true);
     }
+    oldCoordinates[E_AXIS] = currentPosition[E_AXIS];
     moveByOfficial(oldCoordinates, moveFeedrate[X_AXIS], false); // make official pos = homing pos reagrdless of transformation
     Motion1::printCurrentPosition();
     GUI::popBusy();

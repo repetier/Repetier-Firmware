@@ -62,8 +62,9 @@ Early stage version for Stacke X2 printer - use with care
 #define FEATURE_WATCHDOG 1
 #define FEATURE_RETRACTION 1
 #define USE_ADVANCE 1
-#define NUM_AXES 4                   // X,Y,Z and E for extruder A,B,C would be 5,6,7
-#define PRINTLINE_CACHE_SIZE 32      // Number of moves we can cache
+#define NUM_AXES 4              // X,Y,Z and E for extruder A,B,C would be 5,6,7
+#define PRINTLINE_CACHE_SIZE 32 // Number of moves we can cache
+
 #define STEPPER_FREQUENCY 192000     // Maximum stepper frequency.
 #define PREPARE_FREQUENCY 2000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
 #define BLOCK_FREQUENCY 1000         // Number of blocks with constant stepper rate per second.
@@ -85,7 +86,7 @@ Early stage version for Stacke X2 printer - use with care
 #define PRINTER_TYPE PRINTER_TYPE_DELTA
 // steps to include as babysteps per 1/BLOCK_FREQUENCY seconds. Must be lower then STEPPER_FREQUENCY/BLOCK_FREQUENCY and be low enough to not loose steps.
 #define BABYSTEPS_PER_BLOCK \
-    { 1, 1, 1 }
+    { 1, 1, 1, 1 }
 // If all axis end stops are hardware based we can skip the time consuming tests each step
 #define NO_SOFTWARE_AXIS_ENDSTOPS
 // Normally only a delta has motor end stops required. Normally you trigger using axis endstops.
