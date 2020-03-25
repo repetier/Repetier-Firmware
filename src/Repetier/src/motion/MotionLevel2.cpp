@@ -335,6 +335,19 @@ __attribute__((optimize("unroll-loops"))) void Motion2::timer() {
             bits++;
             babysteps++;
         } // FOR_ALL_AXES
+        /* Com::printF(PSTR("sf:"), sFactor, 4);
+        Com::printF(PSTR(" s:"), (int)act->state);
+        Com::printF(PSTR(" da:"), m3->delta[A_AXIS]);
+        Com::printF(PSTR(" pa:"), pos[A_AXIS], 3);
+        // Com::printF(PSTR(" lpx:"), lastMotorPos[lastMotorIdx][0]);
+        Com::printF(PSTR(" lpa:"), lastMotorPos[lastMotorIdx][4]);
+        // Com::printF(PSTR(" lpy:"), lp[1]);
+        // Com::printF(PSTR(" lpz:"), lp[2]);
+        // Com::printF(PSTR(" npx:"), lastMotorPos[nextMotorIdx][0]);
+        Com::printFLN(PSTR(" npa:"), lastMotorPos[nextMotorIdx][4]);
+        // Com::printF(PSTR(" npy:"), np[1]);
+        // Com::printFLN(PSTR(" npz:"), np[2]);
+        */
         lastMotorIdx = nextMotorIdx;
         m3->parentId = act->id;
         m3->checkEndstops = actM1->isCheckEndstops();
@@ -419,12 +432,16 @@ __attribute__((optimize("unroll-loops"))) void Motion2::timer() {
             np[i] = lroundf(actM1->start[i] + sFactor * actM1->unitDir[i]);
         }
         /* Com::printF(PSTR("sf:"), sFactor, 4);
+        Com::printF(PSTR(" s:"), (int)act->state);
         Com::printF(PSTR(" lpx:"), lp[0]);
-        Com::printF(PSTR(" lpy:"), lp[1]);
-        Com::printF(PSTR(" lpz:"), lp[2]);
+        Com::printF(PSTR(" lpa:"), lp[4]);
+        // Com::printF(PSTR(" lpy:"), lp[1]);
+        // Com::printF(PSTR(" lpz:"), lp[2]);
         Com::printF(PSTR(" npx:"), np[0]);
-        Com::printF(PSTR(" npy:"), np[1]);
-        Com::printFLN(PSTR(" npz:"), np[2]); */
+        Com::printFLN(PSTR(" npa:"), np[4]);
+        // Com::printF(PSTR(" npy:"), np[1]);
+        // Com::printFLN(PSTR(" npz:"), np[2]);
+        */
         // Fill structures used to update bresenham
         m3->directions = 0;
         m3->usedAxes = 0;

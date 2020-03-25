@@ -57,7 +57,7 @@ Early stage version for Stacke X2 printer - use with care
 #define BLUETOOTH_SERIAL 101
 #define JSON_OUTPUT 1
 #define FEATURE_SERVO 0
-#define FEATURE_WATCHDOG 1
+#define FEATURE_WATCHDOG 0
 #define FEATURE_Z_PROBE 0
 #define FEATURE_RETRACTION 1
 #define USE_ADVANCE 1
@@ -299,7 +299,7 @@ define Z_MAX_LENGTH 610
 #define ZAXIS_STEPS_PER_MM 404.18
 #define MAX_FEEDRATE_X 400
 #define MAX_FEEDRATE_Y 250
-#define MAX_FEEDRATE_Z 10
+#define MAX_FEEDRATE_Z 8
 #define MAX_FEEDRATE_A 400
 
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
@@ -397,8 +397,6 @@ define Z_MAX_LENGTH 610
 // ##########################################################################################
 // ##                           Movement settings                                          ##
 // ##########################################################################################
-
-#define FEATURE_BABYSTEPPING 1
 
 // Delta settings
 #define DELTA_HOME_ON_POWER 0

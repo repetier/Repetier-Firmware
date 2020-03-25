@@ -942,6 +942,8 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
         Com::printF(" DE:", delta[E_AXIS]);
         Com::printF(" DY:", delta[Y_AXIS]);
         Com::printFLN(" DZ:", delta[Z_AXIS]);
+        // Com::printArrayFLN(PSTR("cpt4:"), Motion1::currentPositionTransformed, 5, 2);
+        // Com::printArrayFLN(PSTR("mp:"), Motion2::lastMotorPos[Motion2::lastMotorIdx], 5);
     } */
     buf.action = Motion1Action::MOVE;
     if (endstopMode != EndstopMode::DISABLED) {

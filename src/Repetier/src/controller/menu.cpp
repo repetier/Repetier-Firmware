@@ -334,9 +334,9 @@ void dittoToTmpString(int32_t mode, bool mirror) {
     if (mode == 0) {
         GUI::flashToString(GUI::tmpString, PSTR("Ditto Mode: Off"));
     } else if (mirror) {
-        GUI::flashToStringLong(GUI::tmpString, PSTR("Ditto Mode: Mirror"), static_cast<long>(Motion1::dittoMode));
+        GUI::flashToString(GUI::tmpString, PSTR("Ditto Mode: Mirror"));
     } else {
-        GUI::flashToStringLong(GUI::tmpString, PSTR("Ditto Mode: @ Obj."), static_cast<long>(Motion1::dittoMode + 1));
+        GUI::flashToStringLong(GUI::tmpString, PSTR("Ditto Mode: @ Obj."), static_cast<long>(mode + 1));
     }
 }
 void __attribute__((weak)) menuDitto(GUIAction action, void* data) {
@@ -350,7 +350,7 @@ void __attribute__((weak)) menuDitto(GUIAction action, void* data) {
     GUI::menuSelectableP(action, GUI::tmpString, directAction, (void*)GUI_DIRECT_ACTION_DITTO_MIRROR, GUIPageType::ACTION);
 #endif
     for (int i = 1; i < NUM_TOOLS; i++) {
-        dittoToTmpString(1, false);
+        dittoToTmpString(i, false);
         GUI::menuSelectableP(action, GUI::tmpString, directAction, (void*)(i - 1 + GUI_DIRECT_ACTION_DITTO_2), GUIPageType::ACTION);
     }
     GUI::menuEnd(action);

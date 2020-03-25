@@ -48,10 +48,9 @@ void LightStoreRGB::set(uint8_t _mode, uint8_t _red, uint8_t _green, uint8_t _bl
 
 LightStorePWM::LightStorePWM()
     : LightStoreBase() {}
- 
 
 void LightStorePWM::set(uint8_t _mode, uint8_t _red, uint8_t _green, uint8_t _blue, uint8_t brightness) {
-    static uint8_t lastBrightness = 0;
+    uint8_t lastBrightness = 0;
 
     if (mode != _mode || brightness != lastBrightness) {
         // new mode or change in brightness needs a step recalculation
@@ -77,7 +76,7 @@ void LightStorePWM::set(uint8_t _mode, uint8_t _red, uint8_t _green, uint8_t _bl
         targetPWM = brightness;
     } else if (mode == LIGHT_STATE_BURST) {
         if (curPWM == targetPWM) {
-            if (counter == 5 || counter == 11) { 
+            if (counter == 5 || counter == 11) {
                 targetPWM = brightness;
             } else {
                 targetPWM = 0;
@@ -103,12 +102,11 @@ void LightStorePWM::set(uint8_t _mode, uint8_t _red, uint8_t _green, uint8_t _bl
                 targetPWM = brightness;
             }
         }
-    } 
+    }
 }
 
 fast8_t LightStorePWM::updatePWM() {
     millis_t curTime = HAL::timeInMilliseconds();
-    static millis_t lastUpdate = 0;
 
     if ((curTime - lastUpdate) < refreshRateMS) {
         return curPWM;
@@ -121,4 +119,4 @@ fast8_t LightStorePWM::updatePWM() {
         curPWM = ((curPWM -= rolloverCheck(fadeStep, false)) < targetPWM) ? targetPWM : curPWM;
     }
     return curPWM;
-} 
+}

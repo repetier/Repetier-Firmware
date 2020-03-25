@@ -75,7 +75,7 @@ Definies the following macros:
 #undef LIGHT_SOURCE_PWM
 #undef LIGHT_COND
 
-#if IO_TARGET == IO_TARGET_PERIODICAL_ACTIONS 
+#if IO_TARGET == IO_TARGET_PERIODICAL_ACTIONS
 
 #define LIGHT_SOURCE_PWM(name, output, state) output.set(state.updatePWM());
 
@@ -105,6 +105,7 @@ public:
     virtual uint8_t green() = 0;
     virtual uint8_t blue() = 0;
     virtual uint8_t brightness() = 0;
+
 protected:
     fast8_t mode;
     fast8_t counter;
@@ -117,7 +118,8 @@ public:
     virtual uint8_t red() final { return 255; };
     virtual uint8_t green() final { return 255; };
     virtual uint8_t blue() final { return 255; };
-    virtual uint8_t brightness() final { return 255; };  
+    virtual uint8_t brightness() final { return 255; };
+
 private:
 };
 
@@ -129,7 +131,8 @@ public:
     virtual uint8_t red() final { return redVal; };
     virtual uint8_t green() final { return greenVal; };
     virtual uint8_t blue() final { return blueVal; };
-    virtual uint8_t brightness() final { return 255; };   
+    virtual uint8_t brightness() final { return 255; };
+
 private:
     uint8_t redVal;
     uint8_t greenVal;
@@ -162,13 +165,15 @@ public:
         return step;
     }
     inline virtual fast8_t computePWMStep(uint16_t durationMS, uint16_t condBrightness) final {
-        return constrain((refreshRateMS * condBrightness) / durationMS, 1, 255); 
-    }; 
+        return constrain((refreshRateMS * condBrightness) / durationMS, 1, 255);
+    };
 
-private: 
+private:
     const uint8_t refreshRateMS = 30;
-    fast8_t targetPWM = 255; 
-    fast8_t curPWM = 255; 
+    fast8_t targetPWM = 255;
+    fast8_t curPWM = 255;
+    millis_t lastUpdate = 0;
+    uint8_t lastBrightness = 0;
     fast8_t fadeStep;
 };
 #define LIGHT_STATE_MONOCHROME(name) \

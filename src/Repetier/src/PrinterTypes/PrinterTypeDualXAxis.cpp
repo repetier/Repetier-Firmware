@@ -69,6 +69,7 @@ void PrinterType::homeAxis(fast8_t axis) {
         Motion2::setMotorPositionFromTransformed();
         // Now both are in their park positions
         if (!lazyMode && Motion1::dittoMode) {
+            // Motion must happen in transformed to move X and A axis simultaneously
             FOR_ALL_AXES(i) {
                 Motion1::tmpPosition[i] = Motion1::currentPositionTransformed[i];
             }
@@ -81,6 +82,7 @@ void PrinterType::homeAxis(fast8_t axis) {
             targetReal = Motion1::tmpPosition[X_AXIS];
             leftParked = rightParked = false;
             Motion1::moveByPrinter(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
+            Motion1::waitForEndOfMoves();
             Motion1::updatePositionsFromCurrentTransformed();
             Motion2::setMotorPositionFromTransformed();
         }
