@@ -1614,9 +1614,10 @@ bool NonlinearSegment::checkEndstops(PrintLine* cur, bool checkall) {
             return true;
         }
     } else if (checkall) {
-        Endstops::update();      // do not test twice
-        if (!Endstops::anyXYZ()) // very quick check for the normal case
+        Endstops::update();        // do not test twice
+        if (!Endstops::anyXYZ()) { // very quick check for the normal case
             return false;
+        }
     }
     if (checkall) {
 #if GANTRY
@@ -1740,8 +1741,9 @@ bool NonlinearSegment::checkEndstops(PrintLine* cur, bool checkall) {
             r++;
         }
 #if DRIVE_SYSTEM == DELTA
-        if (Printer::isHoming())
+        if (Printer::isHoming()) {
             return r == 3;
+        }
 #endif
 #endif // Not gantry
     }
@@ -2110,24 +2112,19 @@ uint8_t PrintLine::queueNonlinearMove(uint8_t check_endstops, uint8_t pathOptimi
         // Downside a comparison per loop. Upside one less distance calculation and simpler code.
         if (numLines == 1) {
             // p->numDeltaSegments = segmentCount; // not neede, gets overwritten further down
-            p->dir = cartesianDir;
             for (fast8_t i = 0; i < E_AXIS_ARRAY; i++) {
                 p->delta[i] = cartesianDeltaSteps[i];
                 fractionalSteps[i] = difference[i];
             }
-            p->distance = cartesianDistance;
         } else {
             for (fast8_t i = 0; i < E_AXIS_ARRAY; i++) {
                 Printer::destinationSteps[i] = startPosition[i] + (difference[i] * lineNumber) / numLines;
                 fractionalSteps[i] = Printer::destinationSteps[i] - Printer::currentPositionSteps[i];
-                if ((cartesianDir & (16 << i)) == 0) {
-                    axisDistanceMM[i] = -axisDistanceMM[i]; // restore direction for calculateDirectionAndDelta
-                }
-                // axisDistanceMM[i] = fabs(fractionalSteps[i] * Printer::invAxisStepsPerMM[i]);
+                p->delta[i] = labs(fractionalSteps[i]);
             }
-            calculateDirectionAndDelta(axisDistanceMM, fractionalSteps, &p->dir, p->delta);
-            p->distance = cartesianDistance;
         }
+        p->dir = cartesianDir;
+        p->distance = cartesianDistance;
 
         p->joinFlags = 0;
         p->secondSpeed = secondSpeed;

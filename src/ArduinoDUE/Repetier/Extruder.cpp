@@ -727,8 +727,9 @@ void Extruder::selectExtruderById(uint8_t extruderId) {
     Com::printFLN(PSTR("SelectExtruder:"), static_cast<int>(extruderId));
     extruderId = 0;
 #endif
-    if (extruderId >= NUM_EXTRUDER)
+    if (extruderId >= NUM_EXTRUDER) {
         extruderId = 0;
+    }
     Extruder* current = extruder->current;
     Extruder* next = &extruder[extruderId];
     bool executeSelect = extruderId != current->id;
@@ -740,10 +741,12 @@ void Extruder::selectExtruderById(uint8_t extruderId) {
 
 #if DUAL_X_AXIS_MODE > 0 && LAZY_DUAL_X_AXIS == 0 && RAISE_Z_ON_TOOLCHANGE
     if (current->isLeftCarriage()) {
-        if (Printer::currentPositionSteps[X_AXIS] == Printer::xMinSteps)
+        if (Printer::currentPositionSteps[X_AXIS] == Printer::xMinSteps) {
             raiseZ = false;
-    } else if (Printer::currentPositionSteps[X_AXIS] == Printer::xMaxSteps)
+        }
+    } else if (Printer::currentPositionSteps[X_AXIS] == Printer::xMaxSteps) {
         raiseZ = false;
+    }
 #endif
 
 #if DUAL_X_AXIS
@@ -767,8 +770,9 @@ void Extruder::selectExtruderById(uint8_t extruderId) {
     current->extrudePosition = Printer::currentPositionSteps[E_AXIS];
 
 #if RAISE_Z_ON_TOOLCHANGE > 0 && !LAZY_DUAL_X_AXIS
-    if (executeSelect && Printer::isZHomed() && raiseZ)
+    if (executeSelect && Printer::isZHomed() && raiseZ) {
         PrintLine::moveRelativeDistanceInSteps(0, 0, static_cast<int32_t>(RAISE_Z_ON_TOOLCHANGE * Printer::axisStepsPerMM[Z_AXIS]), 0, Printer::homingFeedrate[Z_AXIS], true, false);
+    }
 #endif
 
 #if DUAL_X_AXIS
@@ -828,8 +832,9 @@ void Extruder::selectExtruderById(uint8_t extruderId) {
 #endif
 
 #if DUAL_X_RESOLUTION
-    Printer::updateDerivedParameter();                                                                  // adjust to new resolution
-    dualXPosSteps = Printer::lastCmdPos[X_AXIS] * Printer::axisStepsPerMM[X_AXIS] - Printer::xMinSteps; // correct to where we should be in new coordinates
+    Printer::updateDerivedParameter(); // adjust to new resolution
+    // dualXPosSteps = Printer::lastCmdPos[X_AXIS] * Printer::axisStepsPerMM[X_AXIS] - Printer::xMinSteps; // correct to where we should be in new coordinates
+    dualXPosSteps = cx * Printer::axisStepsPerMM[X_AXIS] - Printer::xMinSteps; // correct to where we should be in new coordinates
 #endif
 #ifdef SEPERATE_EXTRUDER_POSITIONS
     // Use separate extruder positions only if being told. Slic3r e.g. creates a continuous extruder position increment
