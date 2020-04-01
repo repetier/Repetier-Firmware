@@ -41,6 +41,7 @@
 
 #undef IO_PWM_SOFTWARE
 #undef IO_PWM_KICKSTART
+#undef IO_PWM_RAMP
 #undef IO_PDM_SOFTWARE
 #undef IO_PWM_FAKE
 #undef IO_PWM_SWITCH
@@ -86,6 +87,18 @@
         } \
     }
 
+#define IO_PWM_RAMP(name, pwmname, upDelay100ms, downDelay100ms, difThreshold) \
+    if (name.realPwm != name.targPwm) { \
+        if (!GCode::hasFatalError()) { \
+            name.realPwm = RMath::min(RMath::max((name.realPwm + (name.targPwm > name.realPwm ? name.steps : -name.steps)), 0), (255 << name.scale)); \
+            if (abs(name.realPwm - name.targPwm) <= name.steps) { \
+                name.realPwm = name.targPwm; \
+            } \
+            pwmname.set(name.realPwm >> name.scale); \
+        } else { \
+            pwmname.set((name.realPwm = name.targPwm) >> name.scale); \
+        } \
+    }
 #elif IO_TARGET == IO_TARGET_CLASS_DEFINITION // class
 
 #define IO_PWM_SOFTWARE(name, pinname, speed) \
@@ -217,6 +230,36 @@
     }; \
     extern name##Class name;
 
+#define IO_PWM_RAMP(name, pwmname, upDelay100ms, downDelay100ms, difThreshold) \
+    class name##Class : public PWMHandler { \
+    public: \
+        const int scale = 8; \
+        uint16_t steps, realPwm, targPwm; \
+        name##Class() \
+            : steps(0) \
+            , realPwm(0) \
+            , targPwm(0) {} \
+        void set(fast8_t _pwm) final { \
+            if (_pwm != (targPwm >> scale)) { \
+                targPwm = (static_cast<uint16_t>(_pwm) << scale); \
+                if (difThreshold && (abs(realPwm - targPwm) >> scale) <= difThreshold) { \
+                    realPwm = targPwm; \
+                    pwmname.set(_pwm); \
+                } else { \
+                    uint16_t timeDiv = targPwm > realPwm ? upDelay100ms : downDelay100ms; \
+                    if (timeDiv) { \
+                        steps = (abs(realPwm - targPwm) * (1 << scale)) / (timeDiv << scale); \
+                    } else { \
+                        realPwm = targPwm; \
+                        pwmname.set(_pwm); \
+                    } \
+                } \
+            } \
+        } \
+        fast8_t get() final { return pwmname.get(); } \
+    }; \
+    extern name##Class name;
+
 #define IO_PWM_INVERTED(name, pwmname) \
     class name##Class : public PWMHandler { \
     public: \
@@ -263,6 +306,10 @@
 
 #define IO_PWM_KICKSTART(name, pwmname, timems, treshold) \
     name##Class name;
+
+#define IO_PWM_RAMP(name, pwmname, upDelay100ms, downDelay100ms, difThreshold) \
+    name##Class name;
+
 #define IO_PWM_INVERTED(name, pwmname) \
     name##Class name;
 
@@ -294,6 +341,9 @@
 #endif
 #ifndef IO_PWM_KICKSTART
 #define IO_PWM_KICKSTART(name, pwmname, timems, treshold)
+#endif
+#ifndef IO_PWM_RAMP
+#define IO_PWM_RAMP(name, pwmname, upDelay100ms, downDelay100ms, difThreshold)
 #endif
 #ifndef IO_PWM_INVERTED
 #define IO_PWM_INVERTED(name, pwmname)
