@@ -85,6 +85,8 @@ Definies the following macros:
 
 #define LIGHT_STATE_MONOCHROME(name) name.reset();
 #define LIGHT_STATE_RGB(name) name.reset();
+#define LIGHT_STATE_PWM(name) name.reset();
+
 #define LIGHT_SOURCE_MONOCHROME(name, output, state) output::set(state.on());
 #define LIGHT_COND(state, cond, mode, red, green, blue, brightness) \
     if (cond) { \
@@ -142,7 +144,7 @@ private:
 class LightStorePWM : public LightStoreBase {
 public:
     LightStorePWM();
-    virtual void reset() final {};
+    virtual void reset() final;
     virtual void set(uint8_t mode, uint8_t red, uint8_t green, uint8_t blue, uint8_t brightness) final;
     virtual uint8_t red() final { return 255; };
     virtual uint8_t green() final { return 255; };
@@ -171,10 +173,13 @@ public:
 private:
     const uint8_t refreshRateMS = 30;
     fast8_t targetPWM = 255;
-    fast8_t curPWM = 255;
+    fast8_t curPWM = 0;
     millis_t lastUpdate = 0;
     uint8_t lastBrightness = 0;
     fast8_t fadeStep;
+
+    uint8_t finalSetBrightness = 0;
+    fast8_t finalSetMode = 0;
 };
 #define LIGHT_STATE_MONOCHROME(name) \
     extern LightStoreMonochrome name;

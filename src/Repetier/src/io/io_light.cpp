@@ -50,34 +50,37 @@ LightStorePWM::LightStorePWM()
     : LightStoreBase() {}
 
 void LightStorePWM::set(uint8_t _mode, uint8_t _red, uint8_t _green, uint8_t _blue, uint8_t brightness) {
-    uint8_t lastBrightness = 0;
+    finalSetBrightness = brightness;
+    finalSetMode = _mode;
+}
 
-    if (mode != _mode || brightness != lastBrightness) {
+void LightStorePWM::reset() {
+    if (mode != finalSetMode || finalSetBrightness != lastBrightness) {
         // new mode or change in brightness needs a step recalculation
-        switch (mode = _mode) {
+        switch (mode = finalSetMode) {
         case LIGHT_STATE_BLINK_SLOW:
             // Each fade takes 800ms..
-            fadeStep = computePWMStep(800, brightness);
+            fadeStep = computePWMStep(800, finalSetBrightness);
             break;
         case LIGHT_STATE_BURST:
             // Two fade pulses which take 100ms each, with ~600ms inbetween them.
-            fadeStep = computePWMStep(100, brightness);
+            fadeStep = computePWMStep(100, finalSetBrightness);
             break;
         default:
             // 400ms by default for light off/on/blink fast
-            fadeStep = computePWMStep(400, brightness);
+            fadeStep = computePWMStep(400, finalSetBrightness);
         }
-        lastBrightness = brightness;
+        lastBrightness = finalSetBrightness;
     }
 
     if (mode == LIGHT_STATE_OFF) {
         targetPWM = 0;
     } else if (mode == LIGHT_STATE_ON) {
-        targetPWM = brightness;
+        targetPWM = finalSetBrightness;
     } else if (mode == LIGHT_STATE_BURST) {
         if (curPWM == targetPWM) {
             if (counter == 5 || counter == 11) {
-                targetPWM = brightness;
+                targetPWM = finalSetBrightness;
             } else {
                 targetPWM = 0;
             }
@@ -91,7 +94,7 @@ void LightStorePWM::set(uint8_t _mode, uint8_t _red, uint8_t _green, uint8_t _bl
             if (targetPWM) {
                 targetPWM = 0;
             } else {
-                targetPWM = brightness;
+                targetPWM = finalSetBrightness;
             }
         }
     } else if (mode == LIGHT_STATE_BLINK_SLOW) {
@@ -99,7 +102,7 @@ void LightStorePWM::set(uint8_t _mode, uint8_t _red, uint8_t _green, uint8_t _bl
             if (targetPWM) {
                 targetPWM = 0;
             } else {
-                targetPWM = brightness;
+                targetPWM = finalSetBrightness;
             }
         }
     }
