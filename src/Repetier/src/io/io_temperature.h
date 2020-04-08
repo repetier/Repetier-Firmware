@@ -107,10 +107,10 @@ public:
     class name##Class : public IOTemperature { \
     public: \
         float get() { \
-            const float invBeta = 1.0f / beta; \
-            const float invRoom = (1.0f / (25.0f - (-273.15))); \
-            const float logR25 = logf(thermistorR25); \
-            const float alpha = invRoom - invBeta * logR25 - cCoefficient * logR25 * logR25 * logR25; \
+            constexpr float invBeta = 1.0f / beta; \
+            constexpr float invRoom = (1.0f / (25.0f - (-273.15))); \
+            constexpr float logR25 = logf(thermistorR25); \
+            constexpr float alpha = invRoom - invBeta * logR25 - cCoefficient * logR25 * logR25 * logR25; \
             int aRead = analog.get(); \
             aRead = aRead > 4094 ? 4094 : aRead < 1 ? 1 : aRead; \
             float logResis = logf(seriesResistance * aRead / (4095 - aRead)); \
