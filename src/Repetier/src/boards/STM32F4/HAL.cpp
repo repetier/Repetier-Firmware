@@ -442,6 +442,12 @@ void HAL::setHardwarePWM(int id, int value) {
     entry.ht->resume();
 }
 
+
+void HAL::setHardwareFrequency(int id, uint32_t frequency) {
+    // TODO: handle HAL pwm frequency change requests 
+    // 
+}
+
 ADC_HandleTypeDef AdcHandle = {};
 struct AnalogFunction {
     bool enabled;

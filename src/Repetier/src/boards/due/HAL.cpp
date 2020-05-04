@@ -161,7 +161,8 @@ struct TimerPWMPin {
         , tc_global_chan(_tc_channel >> 1)
         , tc_local_chan((_tc_channel >> 1) % 3)
         , peripheral_A(_peripheral_A)
-        , tio_line_AB(_tc_channel & 1) {
+        , tio_line_AB(_tc_channel & 1)
+        , lastSetDuty(0) {
         switch (_tc_channel / 6) {
         case 1:
             tc_base_address = TC1;
@@ -182,6 +183,7 @@ struct TimerPWMPin {
     bool peripheral_A;   // Do we need to set the peripheral to A instead of B?
     bool tio_line_AB;    // 0 = A, 1 = B Is this the TIOA or TIOB output pin?
     Tc* tc_base_address; // TC0 .. TC2 timer counter registers
+    ufast8_t lastSetDuty;     // Last duty cycle we were set to. (for frequency changes).
 };
 
 // Each timer COUNTER has 3 timer channels.
@@ -279,6 +281,7 @@ struct PWMChannel {
     bool used;
     PWMPin* pwm; // table index
     uint32_t scale;
+    ufast8_t lastSetDuty;
 };
 
 static PWMChannel pwm_channel[8] = {
@@ -419,6 +422,7 @@ void HAL::setHardwarePWM(int id, int value) {
     if (id < 8) { // PWM channel 0..7
         PWMChannel& c = pwm_channel[id];
         uint32_t duty = (c.scale * value) / 255;
+        c.lastSetDuty = value;
         if ((PWM_INTERFACE->PWM_SR & (1 << id)) == 0) { // disabled, set value
             PWM_INTERFACE->PWM_CH_NUM[id].PWM_CDTY = duty;
         } else { // just update
@@ -435,6 +439,7 @@ void HAL::setHardwarePWM(int id, int value) {
     TimerPWMChannel& c = timer_channel[(id >> 1)];
     TimerPWMPin& t = *((id & 0x1) ? c.timer_B : c.timer_A);
 
+    t.lastSetDuty = value;
     if (!value) {
         t.tc_base_address->TC_CHANNEL[t.tc_local_chan].TC_CMR &= t.tio_line_AB ? ~TC_CMR_BCPC_SET : ~TC_CMR_ACPC_SET;
     } else {
@@ -448,6 +453,40 @@ void HAL::setHardwarePWM(int id, int value) {
             TC_SetRA(t.tc_base_address, t.tc_local_chan, ((freq * value) / 255));
         }
     }
+}
+
+void HAL::setHardwareFrequency(int id, uint32_t frequency) {
+    if (id < 0) {
+        return;
+    }
+    if (id < 8) {
+        PWMChannel& c = pwm_channel[id];
+        uint32_t divisor = 0;
+
+        computePWMDivider(frequency, divisor, c.scale);
+
+        if (divisor != (PWM_INTERFACE->PWM_CH_NUM[id].PWM_CMR & PWM_CMR_CPRE_Msk)) {
+            // Only reconfigure the channel if we've got to redo the prescaler.
+            PWMC_ConfigureChannel(PWM_INTERFACE, id, divisor, 0, c.pwm->invert ? 0 : (1 << 9));
+            PWMC_EnableChannel(PWM_INTERFACE, id);
+        }
+
+        PWMC_SetPeriod(PWM_INTERFACE, id, c.scale);
+        HAL::setHardwarePWM(id, c.lastSetDuty);
+        return;
+    }
+    id &= ~0x80;
+    if ((id >> 1) > 8) {
+        return;
+    }
+
+    TimerPWMChannel& c = timer_channel[(id >> 1)];
+    TimerPWMPin t = *((id & 0x1) ? c.timer_B : c.timer_A);
+
+    TC_Stop(t.tc_base_address, t.tc_local_chan);
+    TC_SetRC(t.tc_base_address, t.tc_local_chan, (F_CPU_TRUE / 2) / frequency);
+    HAL::setHardwarePWM(id | 0x80, t.lastSetDuty);
+    TC_Start(t.tc_base_address, t.tc_local_chan);
 }
 
 void HAL::analogEnable(int channel) {

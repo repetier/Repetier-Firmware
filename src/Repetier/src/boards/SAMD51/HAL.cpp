@@ -524,6 +524,10 @@ void HAL::setHardwarePWM(int id, int value) {
     }
 }
 
+void HAL::setHardwareFrequency(int id, uint32_t frequency) {
+    // TODO: handle HAL pwm frequency change requests 
+    // 
+}
 // Initialize ADC channels
 #define ANALOG_PIN_TO_CHANNEL(p) (p < 62 ? p - 46 : p - 67)
 int32_t analogValues[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };

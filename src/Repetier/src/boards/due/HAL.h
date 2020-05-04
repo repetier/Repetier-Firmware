@@ -329,6 +329,8 @@ public:
     static int initHardwarePWM(int pinNumber, uint32_t frequency);
     // Set pwm output to value. id is id from initHardwarePWM.
     static void setHardwarePWM(int id, int value);
+    // Set pwm frequency to value. id is id from initHardwarePWM.
+    static void setHardwareFrequency(int id, uint32_t frequency);
     // do any hardware-specific initialization here
     static inline void hwSetup(void) {
 #if !FEATURE_WATCHDOG
