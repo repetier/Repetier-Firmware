@@ -308,9 +308,8 @@ void Printer::kill(uint8_t onlySteppers) {
         Motion1::motors[i]->disable();
     }
     Tool::disableMotors();
-#if defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT) && PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT == 0
-    setAllSteppersDiabled();
-#endif 
+    setAllSteppersDisabled();
+
     FOR_ALL_AXES(i) {
 #if defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT) && PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT == 1
         if (i == Z_AXIS) { 
