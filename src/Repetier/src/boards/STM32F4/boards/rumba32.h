@@ -18,6 +18,12 @@
 
 // Additional informations: https://github.com/Aus3D/RUMBA32
 /*
+
+The Current (may 2020) MKS-Rumba32 and Aus3d RUMBA32 boards have a defect making
+spi controlled TMC drivers not work properly. See
+https://github.com/makerbase-mks/MKS-RUMBA32/wiki/About-RUMBA32-TMC-SPI-%22CONNECTION-ERROR%22-FAQ
+for a solution.
+
 STM32F446 processor, 180MHz, 512kb flash, 128kb RAM
 
 EXP1 and EXP2 are rotated 180° compared to Smart Graphics Controller pins, so rotate cable accordingly

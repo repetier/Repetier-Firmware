@@ -663,17 +663,29 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
         // X position
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("X:"));
-        GUI::bufAddFloat(Motion1::getShowPosition(X_AXIS), 4, 2);
+        if (Motion1::isAxisHomed(X_AXIS) || (refresh_counter & 1) == 0) {
+            GUI::bufAddFloat(Motion1::getShowPosition(X_AXIS), 4, 2);
+        } else {
+            GUI::bufAddStringP(PSTR("????.??"));
+        }
         lcd.drawUTF8(66, 16, GUI::buf);
         // Y position
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Y:"));
-        GUI::bufAddFloat(Motion1::getShowPosition(Y_AXIS), 4, 2);
+        if (Motion1::isAxisHomed(Y_AXIS) || (refresh_counter & 1) == 0) {
+            GUI::bufAddFloat(Motion1::getShowPosition(Y_AXIS), 4, 2);
+        } else {
+            GUI::bufAddStringP(PSTR("????.??"));
+        }
         lcd.drawUTF8(66, 23, GUI::buf);
         // Z position
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Z:"));
-        GUI::bufAddFloat(Motion1::getShowPosition(Z_AXIS), 4, 2);
+        if (Motion1::isAxisHomed(Z_AXIS) || (refresh_counter & 1) == 0) {
+            GUI::bufAddFloat(Motion1::getShowPosition(Z_AXIS), 4, 2);
+        } else {
+            GUI::bufAddStringP(PSTR("????.??"));
+        }
         lcd.drawUTF8(66, 30, GUI::buf);
         // FeedRate multiplier
         GUI::bufClear();

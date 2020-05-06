@@ -201,10 +201,10 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
 #define NUM_HEATED_CHAMBERS 0
 #define HEATED_CHAMBER_LIST \
-    {}
+    { }
 
 #define SERVO_LIST \
-    {}
+    { }
 #define TOOLS \
     { &ToolExtruder1, &ToolExtruder2 }
 
@@ -411,7 +411,9 @@ define Z_MAX_LENGTH 610
 #define MAX_JERK 10
 #define MAX_ZJERK 0
 #define MAX_AJERK 10
-#define PRINTLINE_CACHE_SIZE 32
+#define PRINTLINE_CACHE_SIZE 32    // Max. number of buffered moves
+#define MIN_PRINTLINE_FILL 8       // Min. number of moves we want to buffer even if length is > MAX_BUFFERED_LENGTH_MM
+#define MAX_BUFFERED_LENGTH_MM 200 // Max. length of moves we want to buffer
 
 // ################# Misc. settings ##################
 

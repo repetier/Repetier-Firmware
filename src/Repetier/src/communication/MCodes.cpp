@@ -996,10 +996,12 @@ void MCode_204(GCode* com) {
     // Convert to new system
     HeatManager* pid = Tool::getActiveTool()->getHeater();
     if (com->hasS()) {
-        if (com->S < 0)
+        if (com->S < 0) {
             return;
-        if (com->S < NUM_HEATERS)
+        }
+        if (com->S < NUM_HEATERS) {
             pid = heaters[com->S];
+        }
     }
     if (pid == nullptr) {
         return;

@@ -65,7 +65,7 @@ protected:
     fast8_t errorFlags;
     static fast8_t activeToolId;
     static Tool* activeTool;
-    static Tool* const tools[NUM_TOOLS];
+    static Tool* const tools[];
 
 public:
     Tool(float offX, float offY, float offZ, PWMHandler* _secondary)

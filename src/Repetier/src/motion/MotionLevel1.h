@@ -131,6 +131,7 @@ public:
     float startSpeed;         ///< Starting speed in mm/s
     float endSpeed;           ///< End speed in mm/s
     float length;             ///< Length of move in mm
+    int32_t intLength;        ///< Length in 0,001mm = 1000 * length
     float invLength;          ///< 1/length for faster computations
     float eAdv;               ///< eAdv = veclocity * eAdv used for advance
 
@@ -229,8 +230,10 @@ public:
     static float homeEndstopDistance[NUM_AXES];
     static float parkPosition[3];
     static StepperDriverBase* drivers[NUM_MOTORS];
-    static float advanceK;       // advance spring constant
-    static float advanceEDRatio; // Ratio of extrusion
+    static float advanceK;               // advance spring constant
+    static float advanceEDRatio;         // Ratio of extrusion
+    static int32_t intLengthBuffered;    // buffered length except active block
+    static int32_t maxIntLengthBuffered; // maximum length to buffer more moves
 #if FEATURE_AXISCOMP
     static float axisCompTanXY, axisCompTanXZ, axisCompTanYZ;
 #endif
@@ -328,6 +331,7 @@ public:
     static void callBeforeHomingOnSteppers();
     static void callAfterHomingOnSteppers();
     static void updateRotMinMax();
+    static int32_t getBufferedLengthMM();
 
 private:
     // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on

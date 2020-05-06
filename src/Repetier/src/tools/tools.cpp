@@ -10,10 +10,14 @@
 
 HeatManager* heatedBeds[] = HEATED_BED_LIST;
 HeatManager* heatedChambers[] = HEATED_CHAMBER_LIST;
+constexpr int numHeatedBeds = std::extent<decltype(heatedBeds)>::value;
+static_assert(numHeatedBeds == NUM_HEATED_BEDS, "NUM_HEATED_BEDS not defined correctly");
+constexpr int numHeatedChambers = std::extent<decltype(heatedChambers)>::value;
+static_assert(numHeatedChambers == NUM_HEATED_CHAMBERS, "NUM_HEATED_CHAMBERS not defined correctly");
 
 fast8_t Tool::activeToolId = 255;
 Tool* Tool::activeTool = nullptr;
-Tool* const Tool::tools[NUM_TOOLS] = TOOLS;
+Tool* const Tool::tools[] = TOOLS;
 
 ToolChangeCustomEvent::ToolChangeCustomEvent(Tool* tool) {
     tool->setToolChangeHandler(this);
@@ -223,6 +227,9 @@ void Tool::resetBase(float offX, float offY, float offZ) {
 } */
 
 void Tool::initTools() {
+    constexpr int numTools = std::extent<decltype(Tool::tools)>::value;
+    static_assert(numTools == NUM_TOOLS, "NUM_TOOLS not defined correctly");
+
     for (fast8_t i = 0; i < NUM_TOOLS; i++) {
         tools[i]->setToolId(i);
         tools[i]->init();

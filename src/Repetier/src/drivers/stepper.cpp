@@ -12,6 +12,8 @@ static constexpr int8_t TMCStallguardMin = -64,
 static TMCChopperTiming tmcChopperTiming = TMC_CHOPPER_TIMING;
 
 static PGM_P const motorNames[NUM_MOTORS] PROGMEM = MOTOR_NAMES;
+constexpr int numMotorNames = std::extent<decltype(motorNames)>::value;
+static_assert(numMotorNames == NUM_MOTORS, "NUM_MOTORS not defined correctly");
 
 int StepperDriverBase::motorIndex() {
     for (fast8_t i = 0; i < NUM_MOTORS; i++) {

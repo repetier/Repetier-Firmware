@@ -32,7 +32,10 @@ millis_t stepperInactiveTime = STEPPER_INACTIVE_TIME * 1000L;
 long baudrate = BAUDRATE;   ///< Communication speed rate.
 volatile int waitRelax = 0; // Delay filament relax at the end of print, could be a simple timeout
 
-ServoInterface* servos[NUM_SERVOS] = SERVO_LIST;
+ServoInterface* servos[] = SERVO_LIST;
+constexpr int numServos = std::extent<decltype(servos)>::value;
+static_assert(numServos == NUM_SERVOS, "NUM_SERVOS not defined correctly");
+
 FanController fans[NUM_FANS];
 uint8_t Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
 //Stepper Movement Variables
@@ -532,6 +535,9 @@ void Printer::setup() {
 
     //Quickly initialize our fans array
     PWMHandler* tempFans[] = FAN_LIST;
+    constexpr int numFans = std::extent<decltype(tempFans)>::value;
+    static_assert(numFans == NUM_FANS, "NUM_FANS not defined correctly");
+
     for (fast8_t i = 0; i < NUM_FANS; i++) {
         fans[i] = { tempFans[i], 0, 0 };
     }

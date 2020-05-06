@@ -71,21 +71,21 @@ public:
 };
 
 #define IO_TEMP_TABLE_NTC(name, dataname) \
-    extern const short dataname##_table[NUM_##dataname][2] PROGMEM; \
+    extern const short name##_table[NUM_##dataname][2] PROGMEM; \
     class name##Class : public IOTemperatureTable { \
     public: \
         float interpolateFor(int value) final { \
-            return interpolateNTC(value, NUM_##dataname, (const short*)&dataname##_table[0][0]); \
+            return interpolateNTC(value, NUM_##dataname, (const short*)&name##_table[0][0]); \
         } \
     }; \
     extern name##Class name;
 
 #define IO_TEMP_TABLE_PTC(name, dataname) \
-    extern const short dataname##_table[NUM_##dataname][2] PROGMEM; \
+    extern const short name##_table[NUM_##dataname][2] PROGMEM; \
     class name##Class : public IOTemperatureTable { \
     public: \
         float interpolateFor(int value) final { \
-            return interpolatePTC(value, NUM_##dataname, (const short*)&dataname##_table[0][0]); \
+            return interpolatePTC(value, NUM_##dataname, (const short*)&name##_table[0][0]); \
         } \
     }; \
     extern name##Class name;
@@ -143,7 +143,7 @@ public:
     public: \
         name##Class() \
             : errors(0) \
-            , temp(0) {} \
+            , temp(0) { } \
         float get() { \
             if (errors >= 0) { \
                 isDefect(); \
@@ -194,7 +194,7 @@ public:
         name##Class() \
             : errors(0) \
             , lastRun(0) \
-            , temp(0) {} \
+            , temp(0) { } \
         float get() { \
             if (errors == 0) { \
                 isDefect(); \
@@ -257,11 +257,11 @@ public:
 #elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES // variable
 
 #define IO_TEMP_TABLE_NTC(name, dataname) \
-    const short dataname##_table[NUM_##dataname][2] PROGMEM = { dataname }; \
+    const short name##_table[NUM_##dataname][2] PROGMEM = { dataname }; \
     name##Class name;
 
 #define IO_TEMP_TABLE_PTC(name, dataname) \
-    const short dataname##_table[NUM_##dataname][2] PROGMEM = { dataname }; \
+    const short name##_table[NUM_##dataname][2] PROGMEM = { dataname }; \
     name##Class name;
 
 #define IO_TEMPERATURE_TABLE(name, analog, table) \

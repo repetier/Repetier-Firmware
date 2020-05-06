@@ -24,6 +24,7 @@
 
 #include <math.h>
 #include <stdint.h>
+#include <type_traits>
 
 #ifndef REPETIER_VERSION
 #define REPETIER_VERSION "2.0.0dev"
@@ -253,6 +254,19 @@ public:
 #ifndef HOST_RESCUE
 #define HOST_RESCUE 1
 #endif
+
+#ifndef MIN_PRINTLINE_FILL
+#define MIN_PRINTLINE_FILL 8
+#endif
+#if MIN_PRINTLINE_FILL > PRINTLINE_CACHE_SIZE
+#undef MIN_PRINTLINE_FILL
+#define MIN_PRINTLINE_FILL PRINTLINE_CACHE_SIZE
+#endif
+
+#ifndef MAX_BUFFERED_LENGTH_MM
+#define MAX_BUFFERED_LENGTH_MM 200
+#endif
+
 #if EEPROM_MODE == 0 && HOST_RESCUE
 #warning HOST_RESCUE requires eeprom support! Disabling feature.
 #undef HOST_RESCUE
@@ -319,7 +333,7 @@ public:
 #define STORE_MOTOR_STALL_SENSITIVITY 1
 #endif
 
-extern ServoInterface* servos[NUM_SERVOS];
+extern ServoInterface* servos[];
 
 #ifndef LAZY_DUAL_X_AXIS
 #define LAZY_DUAL_X_AXIS 0

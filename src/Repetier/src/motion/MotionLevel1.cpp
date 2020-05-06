@@ -51,7 +51,9 @@ float Motion1::autolevelTransformation[9]; ///< Transformation matrix
 float Motion1::advanceK = 0;               // advance spring constant
 float Motion1::advanceEDRatio = 0;         // Ratio of extrusion
 bool Motion1::wasLastSecondary = false;
-StepperDriverBase* Motion1::drivers[NUM_MOTORS] = MOTORS;
+int32_t Motion1::intLengthBuffered = 0;
+int32_t Motion1::maxIntLengthBuffered = static_cast<int32_t>(1000.0 * MAX_BUFFERED_LENGTH_MM);
+StepperDriverBase* Motion1::drivers[] = MOTORS;
 fast8_t Motion1::memoryPos;
 StepperDriverBase* Motion1::motors[NUM_AXES];
 EndstopDriver* Motion1::minAxisEndstops[NUM_AXES];
@@ -79,6 +81,9 @@ volatile fast8_t Motion1::first;   /// first entry
 volatile fast8_t Motion1::process; /// being processed
 volatile fast8_t Motion1::length;  /// number of entries
 volatile fast8_t Motion1::lengthUnprocessed;
+
+constexpr int numMotors = std::extent<decltype(Motion1::drivers)>::value;
+static_assert(numMotors == NUM_MOTORS, "NUM_MOTORS not defined correctly");
 
 void Motion1::init() {
 
@@ -455,6 +460,11 @@ fast8_t Motion1::buffersUsed() {
     return length;
 }
 
+int32_t Motion1::getBufferedLengthMM() {
+    InterruptProtectedBlock noInts;
+    return intLengthBuffered;
+}
+
 void Motion1::waitForEndOfMoves() {
     while (buffersUsed() > 0) {
         Commands::checkForPeriodicalActions(false);
@@ -464,6 +474,13 @@ void Motion1::waitForEndOfMoves() {
 
 void Motion1::waitForXFreeMoves(fast8_t n, bool allowMoves) {
     while (buffersUsed() >= PRINTLINE_CACHE_SIZE - n) {
+        GCode::keepAlive(Processing, 3);
+        Commands::checkForPeriodicalActions(allowMoves);
+    }
+    if (buffersUsed() < MIN_PRINTLINE_FILL) {
+        return;
+    }
+    while (getBufferedLengthMM() > maxIntLengthBuffered) { // wait for reduced length to limit buffer
         GCode::keepAlive(Processing, 3);
         Commands::checkForPeriodicalActions(allowMoves);
     }
@@ -840,12 +857,15 @@ void Motion1::moveRelativeBySteps(int32_t coords[NUM_AXES]) {
         buf.length += RMath::sqr(static_cast<float>(coords[i]) / resolution[i]);
     }
     buf.length = sqrtf(buf.length);
+    buf.intLength = static_cast<int32_t>(1000.0f * buf.length);
     buf.invLength = 1.0f / buf.length;
     FOR_ALL_AXES(i) {
         buf.unitDir[i] = coords[i] * buf.invLength;
     }
     buf.sa2 = 2.0f * buf.length * buf.acceleration;
     buf.state = Motion1State::BACKWARD_PLANNED;
+    InterruptProtectedBlock noInts;
+    intLengthBuffered += buf.intLength;
 }
 
 // Adjust position to offset
@@ -925,6 +945,7 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
     Motion1Buffer& buf = reserve(); // Buffer is blocked because state is set to FREE!
 
     buf.length = sqrtf(length2);
+    buf.intLength = static_cast<int32_t>(1000.0f * buf.length);
     buf.invLength = 1.0 / buf.length;
     /* if (Printer::debugEcho()) {
         Com::printF("Move CX:", currentPositionTransformed[X_AXIS]);
@@ -1040,6 +1061,10 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
     float timeForMove = length / feedrate;
     COPY_ALL_AXES(currentPositionTransformed, destinationPositionTransformed);
     buf.state = Motion1State::RESERVED; // make it accessible
+    {
+        InterruptProtectedBlock noInts;
+        intLengthBuffered += buf.intLength;
+    }
     backplan(buf.id);
     return true;
 }

@@ -110,6 +110,7 @@ __attribute__((optimize("unroll-loops"))) void Motion2::timer() {
             nextActId = 0;
         }
         act->motion1 = actM1;
+        Motion1::intLengthBuffered -= actM1->intLength;
         act->state = Motion2State::NOT_INITIALIZED;
         if (actM1->action == Motion1Action::MOVE && actM1->isCheckEndstops()) {
             // Compute number of steps required
