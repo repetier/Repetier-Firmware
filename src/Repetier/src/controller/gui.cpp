@@ -31,13 +31,13 @@ void GUI::init() { ///< Initialize display
 void GUI::refresh() {
 }
 
-void GUI::resetMenu() {} ///< Go to start page
+void GUI::resetMenu() { } ///< Go to start page
 
-void __attribute__((weak)) startScreen(GUIAction action, void* data) {}
-void __attribute__((weak)) waitScreen(GUIAction action, void* data) {}
-void __attribute__((weak)) infoScreen(GUIAction action, void* data) {}
-void __attribute__((weak)) warningScreen(GUIAction action, void* data) {}
-void __attribute__((weak)) errorScreen(GUIAction action, void* data) {}
+void __attribute__((weak)) startScreen(GUIAction action, void* data) { }
+void __attribute__((weak)) waitScreen(GUIAction action, void* data) { }
+void __attribute__((weak)) infoScreen(GUIAction action, void* data) { }
+void __attribute__((weak)) warningScreen(GUIAction action, void* data) { }
+void __attribute__((weak)) errorScreen(GUIAction action, void* data) { }
 #endif
 
 #if DISPLAY_DRIVER != DRIVER_NONE
@@ -53,11 +53,17 @@ void GUI::update() {
 
     handleKeypress(); // Test for new keys
 
-    if (nextAction != GUIAction::NONE && nextAction != GUIAction::CLICK_PROCESSED && nextAction != GUIAction::BACK_PROCESSED) {
+    if (nextAction == GUIAction::BACK) {
+        pop();
+        nextAction = GUIAction::BACK_PROCESSED;
+        lastAction = HAL::timeInMilliseconds();
+        nextActionRepeat = 0;
+        contentChanged = true;
+    } else if (nextAction != GUIAction::NONE && nextAction != GUIAction::CLICK_PROCESSED && nextAction != GUIAction::BACK_PROCESSED) {
         // Com::printFLN(PSTR("Action:"), (int32_t)nextAction);
         lastAction = HAL::timeInMilliseconds();
         callbacks[level](nextAction, data[level]); // Execute action
-        nextAction = nextAction == GUIAction::CLICK ? GUIAction::CLICK_PROCESSED : (nextAction == GUIAction::BACK ? GUIAction::BACK_PROCESSED : (nextAction == GUIAction::CLICK_PROCESSED ? GUIAction::CLICK_PROCESSED : GUIAction::NONE));
+        nextAction = nextAction == GUIAction::CLICK ? GUIAction::CLICK_PROCESSED : (nextAction == GUIAction::BACK ? GUIAction::BACK_PROCESSED : GUIAction::NONE);
         nextActionRepeat = 0;
         contentChanged = true;
     }
@@ -145,9 +151,10 @@ void GUI::pushOn(GUIAction a, GuiCallback cb, void* cData, GUIPageType tp) {
 
 // Run action for key press
 void GUI::backKey() {
-    pop();
+    nextAction = GUIAction::BACK;
     contentChanged = true;
 }
+
 void GUI::nextKey() {
     if (nextAction != GUIAction::NEXT) {
         nextActionRepeat = 0;
@@ -156,6 +163,7 @@ void GUI::nextKey() {
     nextActionRepeat++;
     contentChanged = true;
 }
+
 void GUI::previousKey() {
     if (nextAction != GUIAction::PREVIOUS) {
         nextActionRepeat = 0;
@@ -164,6 +172,7 @@ void GUI::previousKey() {
     nextActionRepeat++;
     contentChanged = true;
 }
+
 void GUI::okKey() {
     nextAction = GUIAction::CLICK;
     contentChanged = true;
@@ -176,10 +185,11 @@ void GUI::handleKeypress() {
     // debounce clicks
     if (nextAction == GUIAction::CLICK_PROCESSED || nextAction == GUIAction::BACK_PROCESSED) {
         millis_t timeDiff = HAL::timeInMilliseconds() - lastAction;
-        if (timeDiff < 200) {
+        if (timeDiff < 200) { // wait 200ms until next click counts
             return;
         }
     }
+    // action sequence: CLICK -> execute operation -> CLICK_PROCESSED -> ok key up -> NONE
     if (ControllerClick::get()) {
         if (nextAction != GUIAction::CLICK_PROCESSED) {
             okKey();
@@ -188,8 +198,11 @@ void GUI::handleKeypress() {
         nextAction = GUIAction::NONE;
     }
 #if ENABLED(UI_HAS_BACK_KEY)
+    // action sequence: BACK -> execute operation -> BACK_PROCESSED -> back key up -> NONE
     if (ControllerBack::get()) {
-        backKey();
+        if (nextAction != GUIAction::BACK_PROCESSED) {
+            backKey();
+        }
     } else if (nextAction == GUIAction::BACK_PROCESSED) {
         nextAction = GUIAction::NONE;
     }
@@ -225,8 +238,7 @@ void GUI::setEncoderA(fast8_t state) {
     int8_t mod = pgm_read_byte(&encoder_table[encoderLast]) * ENCODER_DIRECTION;
     if (mod > 0) {
         nextKey();
-    }
-    if (mod < 0) {
+    } else if (mod < 0) {
         previousKey();
     }
 }
@@ -246,8 +258,7 @@ void GUI::setEncoderB(fast8_t state) {
     int8_t mod = pgm_read_byte(&encoder_table[encoderLast]) * ENCODER_DIRECTION;
     if (mod > 0) {
         nextKey();
-    }
-    if (mod < 0) {
+    } else if (mod < 0) {
         previousKey();
     }
 }

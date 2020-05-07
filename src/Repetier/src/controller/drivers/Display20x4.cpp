@@ -740,7 +740,6 @@ void GUI::menuEnd(GUIAction action) {
 #define TEST_MENU_CLICK \
     if (guiLine == cursorRow[level]) { /* Actions for active line only!*/ \
         if (action == GUIAction::CLICK) { \
-            GUI::nextAction = GUIAction::CLICK_PROCESSED; \
             if (tp == GUIPageType::POP) { /* Leave menu */ \
                 pop(); \
             } else if (cb != nullptr && tp == GUIPageType::ACTION) { /* Execute a direct action */ \
@@ -803,8 +802,9 @@ void GUI::menuFloatP(GUIAction& action, PGM_P text, float val, int precision, Gu
             npActionFound = true;
             contentChanged = true;
         }
-    } else
+    } else {
         TEST_MENU_CLICK
+    }
     guiLine++;
 }
 
@@ -835,8 +835,9 @@ void GUI::menuLongP(GUIAction& action, PGM_P text, long val, GuiCallback cb, voi
             npActionFound = true;
             contentChanged = true;
         }
-    } else
+    } else {
         TEST_MENU_CLICK
+    }
     guiLine++;
 }
 
@@ -871,8 +872,9 @@ void GUI::menuOnOffP(GUIAction& action, PGM_P text, bool val, GuiCallback cb, vo
             npActionFound = true;
             contentChanged = true;
         }
-    } else
+    } else {
         TEST_MENU_CLICK
+    }
     guiLine++;
 }
 
@@ -906,8 +908,9 @@ void GUI::menuSelectableP(GUIAction& action, PGM_P text, GuiCallback cb, void* c
             npActionFound = true;
             contentChanged = true;
         }
-    } else
+    } else {
         TEST_MENU_CLICK
+    }
     guiLine++;
 }
 
@@ -971,8 +974,9 @@ void GUI::menuFloat(GUIAction& action, char* text, float val, int precision, Gui
             npActionFound = true;
             contentChanged = true;
         }
-    } else
+    } else {
         TEST_MENU_CLICK
+    }
     guiLine++;
 }
 
@@ -1003,8 +1007,9 @@ void GUI::menuLong(GUIAction& action, char* text, long val, GuiCallback cb, void
             npActionFound = true;
             contentChanged = true;
         }
-    } else
+    } else {
         TEST_MENU_CLICK
+    }
     guiLine++;
 }
 
@@ -1039,8 +1044,9 @@ void GUI::menuOnOff(GUIAction& action, char* text, bool val, GuiCallback cb, voi
             npActionFound = true;
             contentChanged = true;
         }
-    } else
+    } else {
         TEST_MENU_CLICK
+    }
     guiLine++;
 }
 
@@ -1074,8 +1080,9 @@ void GUI::menuSelectable(GUIAction& action, char* text, GuiCallback cb, void* cD
             npActionFound = true;
             contentChanged = true;
         }
-    } else
+    } else {
         TEST_MENU_CLICK
+    }
     guiLine++;
 }
 
