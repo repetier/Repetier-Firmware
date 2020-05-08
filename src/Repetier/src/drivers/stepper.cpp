@@ -393,12 +393,14 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
                  || (name[0] == 'Z' && com.hasZ())
                  || (name[0] == 'E' && com.hasE())) { 
                     stallguardSensitivity = static_cast<int8_t>(com.S);
-                    driver->sgt(stallguardSensitivity);
 
                 // If no axis is named, assume all are to be updated
                 } else if (!com.hasX() && !com.hasY() && !com.hasZ() && !com.hasE()) {
                     stallguardSensitivity = static_cast<int8_t>(com.S);
                 }
+
+                // Update the driver setting
+                driver->sgt(stallguardSensitivity);
 #if STORE_MOTOR_STALL_SENSITIVITY
                     EEPROM::markChanged();
 #endif
@@ -665,12 +667,14 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
                  || (name[0] == 'Z' && com.hasZ())
                  || (name[0] == 'E' && com.hasE())) { 
                     stallguardSensitivity = static_cast<int8_t>(com.S);
-                    driver->sgt(stallguardSensitivity);
 
                 // If no axis is named, assume all are to be updated
                 } else if (!com.hasX() && !com.hasY() && !com.hasZ() && !com.hasE()) {
                     stallguardSensitivity = static_cast<int8_t>(com.S);
                 }
+                
+                // Update the driver setting
+                driver->sgt(stallguardSensitivity);
 #if STORE_MOTOR_STALL_SENSITIVITY
                     EEPROM::markChanged();
 #endif
@@ -1202,13 +1206,14 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
                  || (name[0] == 'E' && com.hasE())) { 
                     stallguardSensitivity = static_cast<int8_t>(com.S);
 
-                    // Also update the driver setting
-                    driver->SGTHRS(stallguardSensitivity);
-
                 // If no axis is named, assume all are to be updated
                 } else if (!com.hasX() && !com.hasY() && !com.hasZ() && !com.hasE()) {
                     stallguardSensitivity = static_cast<int8_t>(com.S);
                 }
+                
+                // Update the driver setting
+                driver->SGTHRS(stallguardSensitivity);
+
 #if STORE_MOTOR_STALL_SENSITIVITY
                     EEPROM::markChanged();
 #endif
