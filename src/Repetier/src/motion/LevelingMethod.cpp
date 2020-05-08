@@ -543,6 +543,10 @@ void Leveling::execute_M323(GCode* com) {
                 root->rewind();
                 SdFile file;
 
+                char lowestTempFile[LONG_FILENAME_LENGTH + 1] {};
+                float maxDif = com->hasD() ? com->D : 10.0f;
+                float lowestTemp = 9999.0f;
+
                 while (file.openNext(root, O_READ)) {
                     if (!file.isDir()) {
                         file.getName(tempLongFilename, LONG_FILENAME_LENGTH);
@@ -559,25 +563,37 @@ void Leveling::execute_M323(GCode* com) {
                                 }
 
                                 float temp = 0.0f;
-                                // Get if bed temp within 1.0c
-                                if (csv.getField(PSTR("BedTemp"), temp, CSVDir::BELOW) && (temp > (heatedBeds[0]->getTargetTemperature() - 1.0) && temp < (heatedBeds[0]->getTargetTemperature() + 1.0))) {
-                                    file.close();
-
-                                    Leveling::importBumpMatrix(tempLongFilename);
-                                    if (com->hasP() && com->P != 0) {
-                                        EEPROM::markChanged();
+                                if (csv.getField(PSTR("BedTemp"), temp, CSVDir::BELOW)) {
+                                    float dif = fabs(heatedBeds[0]->getTargetTemperature() - temp);
+                                    if (dif < 0.5f) { // Found exact one, just use it.
+                                        file.close();
+                                        Leveling::importBumpMatrix(tempLongFilename);
+                                        if (com->hasP() && com->P != 0) {
+                                            EEPROM::markChanged();
+                                        }
+                                        return;
+                                    } else if (dif <= maxDif) {
+                                        if (dif < lowestTemp) {
+                                            lowestTemp = dif;
+                                            memcpy(lowestTempFile, tempLongFilename, LONG_FILENAME_LENGTH + 1);
+                                        }
                                     }
-                                    return;
                                 }
                             }
                         }
                     }
                     file.close();
+                } 
+                if (lowestTemp < 9999.0f) {
+                    Leveling::importBumpMatrix(lowestTempFile);
+                    if (com->hasP() && com->P != 0) {
+                        EEPROM::markChanged();
+                    }
+                    return;
                 }
                 Com::printF(Com::tErrorImportBump);
                 Com::printF(PSTR(" No valid matrix file for "), heatedBeds[0]->getTargetTemperature(), 1);
                 Com::printFLN(Com::tUnitDegCelsius);
-                file.close();
                 return;
             }
 #endif
