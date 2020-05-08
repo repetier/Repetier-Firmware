@@ -24,10 +24,14 @@ int StepperDriverBase::motorIndex() {
     return 0;
 }
 
-void StepperDriverBase::printMotorName() {
+const char* StepperDriverBase::motorName() {
     int idx = motorIndex();
     PGM_P* adr = (PGM_P*)pgm_read_word(&motorNames);
-    Com::printF((const char*)pgm_read_word(&adr[idx]));
+    return (const char*)pgm_read_word(&adr[idx]);
+}
+
+void StepperDriverBase::printMotorName() {
+    Com::printF(motorName());
 }
 
 void StepperDriverBase::printMotorNumberAndName(bool newline) {
@@ -376,11 +380,30 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
         printMotorNumberAndName(false);
         Com::printFLN(PSTR(" hybrid treshold: "), hybridSpeed, 1);
         break;
-    case 914: // sensorless homing sensitivity
+    case 914: // Stallguard Sensitivity threshold (per axis)
         if (hasStallguard()) {
+            // Update from eeprom; if this is not done, first attempt will not save
+            eepromHandle();
+
             if (com.hasS() && com.S >= -64 && com.S <= 63) {
-                stallguardSensitivity = static_cast<int8_t>(com.S);
+                const char* name = motorName();
+                // If the current motor is on the mentioned axis, update
+                if ((name[0] == 'X' && com.hasX())
+                 || (name[0] == 'Y' && com.hasY())
+                 || (name[0] == 'Z' && com.hasZ())
+                 || (name[0] == 'E' && com.hasE())) { 
+                    stallguardSensitivity = static_cast<int8_t>(com.S);
+                    driver->sgt(stallguardSensitivity);
+
+                // If no axis is named, assume all are to be updated
+                } else if (!com.hasX() && !com.hasY() && !com.hasZ() && !com.hasE()) {
+                    stallguardSensitivity = static_cast<int8_t>(com.S);
+                }
+#if STORE_MOTOR_STALL_SENSITIVITY
+                    EEPROM::markChanged();
+#endif
             }
+
             printMotorNumberAndName(false);
             Com::printFLN(PSTR(" stallguard sensitivity: "), stallguardSensitivity);
         }
@@ -629,11 +652,30 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
         printMotorNumberAndName(false);
         Com::printFLN(PSTR(" hybrid treshold: "), hybridSpeed, 1);
         break;
-    case 914: // sensorless homing sensitivity
+    case 914: // Stallguard Sensitivity threshold (per axis)
         if (hasStallguard()) {
+            // Update from eeprom; if this is not done, first attempt will not save
+            eepromHandle();
+
             if (com.hasS() && com.S >= -64 && com.S <= 63) {
-                stallguardSensitivity = static_cast<int8_t>(com.S);
+                const char* name = motorName();
+                // If the current motor is on the mentioned axis, update
+                if ((name[0] == 'X' && com.hasX())
+                 || (name[0] == 'Y' && com.hasY())
+                 || (name[0] == 'Z' && com.hasZ())
+                 || (name[0] == 'E' && com.hasE())) { 
+                    stallguardSensitivity = static_cast<int8_t>(com.S);
+                    driver->sgt(stallguardSensitivity);
+
+                // If no axis is named, assume all are to be updated
+                } else if (!com.hasX() && !com.hasY() && !com.hasZ() && !com.hasE()) {
+                    stallguardSensitivity = static_cast<int8_t>(com.S);
+                }
+#if STORE_MOTOR_STALL_SENSITIVITY
+                    EEPROM::markChanged();
+#endif
             }
+
             printMotorNumberAndName(false);
             Com::printFLN(PSTR(" stallguard sensitivity: "), stallguardSensitivity);
         }
@@ -1146,11 +1188,32 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
         Com::printFLN(PSTR(" hybrid treshold: "), hybridSpeed, 1);
         break;
 
-    case 914: // sensorless homing sensitivity
+    case 914: // Stallguard Sensitivity threshold (per axis)
         if (hasStallguard()) {
-            if (com.hasS() && com.S >= 0 && com.S <= 255) {
-                stallguardSensitivity = static_cast<int16_t>(com.S);
+            // Update from eeprom; if this is not done, first attempt will not save
+            eepromHandle();
+
+            if (com.hasS() && com.S >= -64 && com.S <= 63) {
+                const char* name = motorName();
+                // If the current motor is on the mentioned axis, update
+                if ((name[0] == 'X' && com.hasX())
+                 || (name[0] == 'Y' && com.hasY())
+                 || (name[0] == 'Z' && com.hasZ())
+                 || (name[0] == 'E' && com.hasE())) { 
+                    stallguardSensitivity = static_cast<int8_t>(com.S);
+
+                    // Also update the driver setting
+                    driver->SGTHRS(stallguardSensitivity);
+
+                // If no axis is named, assume all are to be updated
+                } else if (!com.hasX() && !com.hasY() && !com.hasZ() && !com.hasE()) {
+                    stallguardSensitivity = static_cast<int8_t>(com.S);
+                }
+#if STORE_MOTOR_STALL_SENSITIVITY
+                    EEPROM::markChanged();
+#endif
             }
+
             printMotorNumberAndName(false);
             Com::printFLN(PSTR(" stallguard sensitivity: "), stallguardSensitivity);
         }

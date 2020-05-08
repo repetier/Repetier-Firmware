@@ -68,6 +68,7 @@ public:
     // Allow having own settings e.g. current, microsteps
     virtual void eepromHandle() {}
     int motorIndex();
+    const char* motorName();
     void printMotorName();
 };
 

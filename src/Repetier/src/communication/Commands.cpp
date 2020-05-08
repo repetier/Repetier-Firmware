@@ -762,7 +762,7 @@ void Commands::processMCode(GCode* com) {
     case 913: // Hybrid treshold
         MCode_Stepper(com);
         break;
-    case 914: // sensorless homing sensitivity
+    case 914: // Stallguard Sensitivity threshold (per axis)
         MCode_Stepper(com);
         break;
     case 998:
