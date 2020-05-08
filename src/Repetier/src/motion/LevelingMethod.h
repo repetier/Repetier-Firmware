@@ -47,6 +47,8 @@ public:
     inline static void setDistortionEnabled(bool newState) {}
     inline static bool isDistortionEnabled() { return false; }
     inline static float distortionAt(float xp, float yp) { return 0; }
+    static void importBumpMatrix(char* filename) {}
+    static void exportBumpMatrix(char* filename) {}
     inline static bool measure() { return true; }
     inline static void init() {}
     inline static void handleEeprom() {}
@@ -64,6 +66,7 @@ public:
 
 class Leveling {
     static float grid[GRID_SIZE][GRID_SIZE]; // Bumps up have negative values!
+    static float gridTemp;
     static float xMin, xMax, yMin, yMax;
     static float dx, dy, invDx, invDy;
     static float startDegrade, endDegrade, diffDegrade;
@@ -93,13 +96,17 @@ public:
     static void subDistortion(float* pos); // printer coordinates
     inline static bool isDistortionEnabled() { return distortionEnabled; }
     static float distortionAt(float xp, float yp); // printer coordinates
+    static void importBumpMatrix(char* filename);
+    static void exportBumpMatrix(char* filename);
     static void execute_M323(GCode* com);
 #else
     inline static void addDistortion(float* pos) {}
     inline static void subDistortion(float* pos) {}
     inline static bool isDistortionEnabled() { return false; }
     inline static void execute_M323(GCode* com) {}
-    inline static float distortionAt(float xp, float yp) { return 0; }
+    inline static float distortionAt(float xp, float yp) { return 0.0f; }
+    static void importBumpMatrix(char* filename) {}
+    static void exportBumpMatrix(char* filename) {}
 #endif
     static void reportDistortionStatus();
     static bool measure();
@@ -121,6 +128,8 @@ public:
     inline static bool isDistortionEnabled() { return false; }
     inline static float distortionAt(float xp, float yp) { return 0; }
     static bool measure();
+    static void importBumpMatrix(char* filename) {}
+    static void exportBumpMatrix(char* filename) {}
     inline static void init() {}
     inline static void handleEeprom() {}
     inline static void resetEeprom() {}
@@ -139,6 +148,8 @@ public:
     inline static bool isDistortionEnabled() { return false; }
     inline static float distortionAt(float xp, float yp) { return 0; }
     static bool measure();
+    static void importBumpMatrix(char* filename) {}
+    static void exportBumpMatrix(char* filename) {}
     inline static void init() {}
     inline static void handleEeprom() {}
     inline static void resetEeprom() {}

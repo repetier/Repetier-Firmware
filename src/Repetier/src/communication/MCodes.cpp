@@ -1220,6 +1220,17 @@ void MCode_360(GCode* com) {
     Printer::showConfiguration();
 }
 
+void MCode_374(GCode* com) {
+    if (com->hasString()) {
+        Leveling::exportBumpMatrix(com->text);
+    }
+}
+
+void MCode_375(GCode* com) {
+    if (com->hasString()) {
+        Leveling::importBumpMatrix(com->text);
+    }
+}
 void MCode_400(GCode* com) {
     Motion1::waitForEndOfMoves();
 }
