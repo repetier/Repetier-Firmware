@@ -70,6 +70,7 @@ class Leveling {
     static float xMin, xMax, yMin, yMax;
     static float dx, dy, invDx, invDy;
     static float startDegrade, endDegrade, diffDegrade;
+    static char autoImportDir[LONG_FILENAME_LENGTH + 1];
     static uint16_t eprStart;
     static uint8_t distortionEnabled;
     inline static float xPosFor(fast8_t index) {

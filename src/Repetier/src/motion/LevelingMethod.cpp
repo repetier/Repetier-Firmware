@@ -145,6 +145,7 @@ void LevelingCorrector::correct(Plane* plane) {
 
 float Leveling::grid[GRID_SIZE][GRID_SIZE];
 float Leveling::gridTemp;
+char Leveling::autoImportDir[] = "/";
 uint16_t Leveling::eprStart;
 float Leveling::xMin, Leveling::xMax, Leveling::yMin, Leveling::yMax;
 uint8_t Leveling::distortionEnabled;
@@ -157,15 +158,15 @@ void Leveling::init() {
 }
 
 void Leveling::handleEeprom() {
-    EEPROM::handleByte(eprStart + 20, PSTR("Bump correction enabled"), distortionEnabled);
+    EEPROM::handleByte(eprStart + 20, PSTR("Bump Correction enabled"), distortionEnabled);
     EEPROM::handleFloat(eprStart + 21, PSTR("100% Bump Correction until [mm]"), 2, startDegrade);
-    EEPROM::handleFloat(eprStart + 25, PSTR("0% BumpCorrection from [mm]"), 2, endDegrade);
+    EEPROM::handleFloat(eprStart + 25, PSTR("0% Bump Correction from [mm]"), 2, endDegrade);
+    EEPROM::handleFloat(eprStart + 16, PSTR("Bump Correction temp. [deg C]"), 1, gridTemp);
     EEPROM::setSilent(true);
     EEPROM::handleFloat(eprStart + 0, Com::tEmpty, 2, xMin);
     EEPROM::handleFloat(eprStart + 4, Com::tEmpty, 2, xMax);
     EEPROM::handleFloat(eprStart + 8, Com::tEmpty, 2, yMin);
     EEPROM::handleFloat(eprStart + 12, Com::tEmpty, 2, yMax);
-    EEPROM::handleFloat(eprStart + 16, Com::tEmpty, 1, gridTemp);
     for (int y = 0; y < GRID_SIZE; y++) {
         for (int x = 0; x < GRID_SIZE; x++) {
             EEPROM::handleFloat(eprStart + 29 + 4 * (x + y * GRID_SIZE), Com::tEmpty, 2, grid[x][y]);
@@ -499,7 +500,7 @@ void Leveling::reportDistortionStatus() {
     Com::printF(PSTR(" X max:"), xMax);
     Com::printF(PSTR(" Y min:"), yMin);
     Com::printF(PSTR(" Y max:"), yMax);
-    Com::printFLN(PSTR(" Bed Temp: "), gridTemp, 1);
+    Com::printFLN(PSTR(" Bed Temp:"), gridTemp, 1);
 }
 
 void Leveling::showMatrix() {
@@ -513,6 +514,10 @@ void Leveling::showMatrix() {
 }
 
 void Leveling::set(float x, float y, float z) {
+    if (!xMin && !xMax && !yMin && !yMax) {
+        PrinterType::getBedRectangle(xMin, xMax, yMin, yMax);
+        updateDerived();
+    }
     int32_t ix = lroundf((x - xMin) * invDx);
     int32_t iy = lroundf((y - yMin) * invDy);
     if (validGridIndex(ix, iy)) {
@@ -533,49 +538,46 @@ void Leveling::execute_M323(GCode* com) {
 // Auto import bed mesh
 #if NUM_HEATED_BEDS > 0 && SDSUPPORT
             if (com->S == 2) {
-                if (!heatedBeds[0]->isEnabled()) {
-                    Com::printF(Com::tErrorImportBump);
-                    Com::printFLN(PSTR(" No target temperature set!"));
+                if (!com->hasX() || com->X < 1.0f) {
+                    Com::printFLN(PSTR("Matrix auto-import requires a valid X<temp> parameter!"));
                     return;
                 }
 
-                FatFile* root = sd.fat.vwd();
-                root->rewind();
-                SdFile file;
+                sd.fat.chdir(autoImportDir);
+                sd.fat.vwd()->rewind();
+
+                bool isRoot = (autoImportDir[0] == '/' && autoImportDir[1] == '\0');
+
+                Com::printF(PSTR("Scanning for matrixes in "), isRoot ? PSTR("root") : autoImportDir);
+                Com::printFLN(PSTR(" directory..."));
 
                 char lowestTempFile[LONG_FILENAME_LENGTH + 1] {};
                 float maxDif = com->hasD() ? com->D : 10.0f;
                 float lowestTemp = 9999.0f;
 
-                while (file.openNext(root, O_READ)) {
+                SdFile file;
+                while (file.openNext(sd.fat.vwd(), O_READ)) {
                     if (!file.isDir()) {
-                        file.getName(tempLongFilename, LONG_FILENAME_LENGTH);
+                        file.getName(tempLongFilename, LONG_FILENAME_LENGTH + 1);
                         if (strstr_P(tempLongFilename, PSTR(".csv")) != nullptr) {
                             CSVParser csv(&file);
                             float version = 0.0f;
                             if (csv.getField(Com::tBumpCSVHeader, version, CSVDir::NEXT)) {
 
                                 int gridSize = 0;
-                                if (!csv.getField(PSTR("GridSize"), gridSize, CSVDir::BELOW) || gridSize != GRID_SIZE) {
-                                    // Wrong grid size
-                                    file.close();
-                                    continue;
-                                }
-
-                                float temp = 0.0f;
-                                if (csv.getField(PSTR("BedTemp"), temp, CSVDir::BELOW)) {
-                                    float dif = fabs(heatedBeds[0]->getTargetTemperature() - temp);
-                                    if (dif < 0.5f) { // Found exact one, just use it.
-                                        file.close();
-                                        Leveling::importBumpMatrix(tempLongFilename);
-                                        if (com->hasP() && com->P != 0) {
-                                            EEPROM::markChanged();
-                                        }
-                                        return;
-                                    } else if (dif <= maxDif) {
-                                        if (dif < lowestTemp) {
-                                            lowestTemp = dif;
+                                if (csv.getField(PSTR("GridSize"), gridSize, CSVDir::BELOW) && gridSize == GRID_SIZE) {
+                                    float temp = 0.0f;
+                                    if (csv.getField(PSTR("BedTemp"), temp, CSVDir::BELOW)) {
+                                        float diff = fabs((com->X) - temp);
+                                        if (diff < 0.5f) { // Found exact one, just use it.
+                                            lowestTemp = 0.0f;
                                             memcpy(lowestTempFile, tempLongFilename, LONG_FILENAME_LENGTH + 1);
+                                            break;
+                                        } else if (diff <= maxDif) {
+                                            if (diff < lowestTemp) {
+                                                lowestTemp = diff;
+                                                memcpy(lowestTempFile, tempLongFilename, LONG_FILENAME_LENGTH + 1);
+                                            }
                                         }
                                     }
                                 }
@@ -583,17 +585,22 @@ void Leveling::execute_M323(GCode* com) {
                         }
                     }
                     file.close();
-                } 
+                }
                 if (lowestTemp < 9999.0f) {
-                    Leveling::importBumpMatrix(lowestTempFile);
+                    file.close();
+                    importBumpMatrix(lowestTempFile);
                     if (com->hasP() && com->P != 0) {
                         EEPROM::markChanged();
                     }
-                    return;
+                } else {
+                    Com::printF(Com::tErrorImportBump);
+                    Com::printF(PSTR(" No valid matrix file for "), com->X, 0);
+                    Com::printF(Com::tUnitDegCelsius);
+                    Com::printFLN(PSTR(" found in "), isRoot ? PSTR("root") : autoImportDir); 
                 }
-                Com::printF(Com::tErrorImportBump);
-                Com::printF(PSTR(" No valid matrix file for "), heatedBeds[0]->getTargetTemperature(), 1);
-                Com::printFLN(Com::tUnitDegCelsius);
+                if (!isRoot) {
+                    sd.fat.chdir();
+                }
                 return;
             }
 #endif
@@ -615,6 +622,19 @@ void Leveling::importBumpMatrix(char* filename) {
         Com::printFLN(PSTR(" No SD Card mounted."));
         return;
     }
+
+    // Handle auto import directory changes
+    if (filename[strlen(filename) - 1] == '/') {
+        SdFile dir(filename, O_READ);
+        if (dir.isDir()) {
+            memcpy(autoImportDir, dir.isRoot() ? "/" : filename, LONG_FILENAME_LENGTH + 1);
+            Com::printFLN(PSTR("Bump matrix auto-import directory set to "), dir.isRoot() ? PSTR("root") : filename);
+            dir.close();
+            return;
+        }
+        dir.close();
+    }
+    // end handle auto import
 
     if (!CSVParser::validCSVExt(filename)) {
         Com::printF(Com::tErrorImportBump);
@@ -662,7 +682,17 @@ void Leveling::importBumpMatrix(char* filename) {
         valid += csv.getField(PSTR("yMin"), yMin, CSVDir::BELOW);
         valid += csv.getField(PSTR("yMax"), yMax, CSVDir::BELOW);
         valid += csv.getField(PSTR("BedTemp"), gridTemp, CSVDir::BELOW);
-        if (valid != 5) {
+
+        float tempMaxZ = 0.0f;
+        valid += csv.getField(PSTR("MaxPosZ"), tempMaxZ, CSVDir::BELOW);
+        // Safety?
+        if (fabs(Motion1::maxPos[Z_AXIS] - tempMaxZ) < 10.0f) {
+            Motion1::maxPos[Z_AXIS] = tempMaxZ;
+        } else {
+            ok = false;
+        }
+
+        if (valid != 6) {
             ok = false;
         }
     }
@@ -703,13 +733,13 @@ void Leveling::importBumpMatrix(char* filename) {
 
     updateDerived();
 
-    Motion1::updatePositionsFromCurrentTransformed();
-    // enable rotation
-#if LEVELING_METHOD > 0
-    Motion1::updateRotMinMax();
+    if (Motion1::isAutolevelActive()) {
+        Motion1::updateRotMinMax();
+        Motion1::updatePositionsFromCurrentTransformed();
+    } else {
+        Motion1::setAutolevelActive(true);
+    }
     Com::printArrayFLN(Com::tTransformationMatrix, Motion1::autolevelTransformation, 9, 6);
-    Motion1::setAutolevelActive(true);
-#endif
 
     setDistortionEnabled(true);
     reportDistortionStatus();
@@ -717,7 +747,7 @@ void Leveling::importBumpMatrix(char* filename) {
     Com::printFLN(PSTR("Bump matrix succesfully imported."));
 #else
     Com::printF(Com::tErrorImportBump);
-    Com::printFLN(PSTR(" No SD Card support compiled!")); 
+    Com::printFLN(PSTR(" No SD Card support compiled!"));
 #endif
 }
 void Leveling::exportBumpMatrix(char* filename) {
@@ -755,7 +785,7 @@ void Leveling::exportBumpMatrix(char* filename) {
     // As of version 0.1,
     // Autolevel, TrigHeight fields are meta data exposed to the user, but unused on import.
 
-    constexpr char metaDataCols[] = PSTR("xMin,xMax,yMin,yMax,Autolevel,GridSize,BedTemp,TrigHeight");
+    constexpr char metaDataCols[] = PSTR("xMin,xMax,yMin,yMax,Autolevel,GridSize,BedTemp,TrigHeight,MaxPosZ");
     constexpr float bumpMatrixVers = 0.1f;
 
     tempFile.write(Com::tBumpCSVHeader);
@@ -773,7 +803,8 @@ void Leveling::exportBumpMatrix(char* filename) {
     tempFile.printField(static_cast<fast8_t>(Motion1::isAutolevelActive()), ',');
     tempFile.printField(static_cast<fast8_t>(GRID_SIZE), ',');
     tempFile.printField(roundf(gridTemp), ',', 1);
-    tempFile.printField(static_cast<float>(Z_PROBE_HEIGHT), '\n');
+    tempFile.printField(static_cast<float>(Z_PROBE_HEIGHT), ',');
+    tempFile.printField(Motion1::maxPos[Z_AXIS], '\n');
 
     for (size_t iy = 0; iy < GRID_SIZE; iy++) {
         for (size_t ix = 0; ix < GRID_SIZE; ix++) {
@@ -805,7 +836,7 @@ void Leveling::exportBumpMatrix(char* filename) {
     }
 #else
     Com::printF(Com::tErrorExportBump);
-    Com::printFLN(PSTR(" No SD Card support compiled!")); 
+    Com::printFLN(PSTR(" No SD Card support compiled!"));
 #endif
 }
 #else
