@@ -145,7 +145,7 @@ void LevelingCorrector::correct(Plane* plane) {
 
 float Leveling::grid[GRID_SIZE][GRID_SIZE];
 float Leveling::gridTemp;
-char Leveling::autoImportDir[] = "/";
+char Leveling::autoImportDir[] = BUMP_DEFAULT_AUTOIMPORT_DIR;
 uint16_t Leveling::eprStart;
 float Leveling::xMin, Leveling::xMax, Leveling::yMin, Leveling::yMax;
 uint8_t Leveling::distortionEnabled;
@@ -543,6 +543,12 @@ void Leveling::execute_M323(GCode* com) {
                     return;
                 }
 
+                if (!sd.fat.exists(autoImportDir)) {
+                    Com::printF(Com::tErrorImportBump);
+                    Com::printFLN(PSTR(" Auto-import directory not found!"));
+                    return;
+                }
+
                 sd.fat.chdir(autoImportDir);
                 sd.fat.vwd()->rewind();
 
@@ -596,7 +602,7 @@ void Leveling::execute_M323(GCode* com) {
                     Com::printF(Com::tErrorImportBump);
                     Com::printF(PSTR(" No valid matrix file for "), com->X, 0);
                     Com::printF(Com::tUnitDegCelsius);
-                    Com::printFLN(PSTR(" found in "), isRoot ? PSTR("root") : autoImportDir); 
+                    Com::printFLN(PSTR(" found in "), isRoot ? PSTR("root") : autoImportDir);
                 }
                 if (!isRoot) {
                     sd.fat.chdir();

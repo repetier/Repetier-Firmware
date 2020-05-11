@@ -60,6 +60,10 @@ public:
 
 #elif LEVELING_METHOD == LEVELING_METHOD_GRID // Grid leveling
 
+#ifndef BUMP_DEFAULT_AUTOIMPORT_DIR
+#define BUMP_DEFAULT_AUTOIMPORT_DIR "matrixes/"
+#endif
+
 #ifndef GRID_SIZE
 #define GRID_SIZE 3
 #endif
