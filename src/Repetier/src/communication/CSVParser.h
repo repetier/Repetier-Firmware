@@ -1,3 +1,21 @@
+/* 
+    CSV Parser Library for Repetier-Firmware V2.0/SdFat
+    Copyright (C) 2020 AbsoluteCatalyst (moses.github@outlook.com)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #ifndef _CSVParser_H
 #define _CSVParser_H
 
@@ -58,7 +76,7 @@ private:
      * \return true Found the field and neighboring cell. 
      * \return false Failed to find the field or neighboring cell.
      */
-    bool getFieldRaw(const char* key, CSVDir valDir) {
+    bool getFieldRaw(FSTRINGPARAM(key), CSVDir valDir) {
         fast8_t foundRow = -1, foundColumn = -1;
         resetReadPos();
         while (readCurCellPos()) {
@@ -393,7 +411,7 @@ public:
      * \return true Field exists.
      * \return false No field by key exists.
      */
-    inline bool getField(const char* key) {
+    inline bool getField(FSTRINGPARAM(key)) {
         return getFieldRaw(key, CSVDir::EXISTS);
     }
 
@@ -413,7 +431,7 @@ public:
      */
     template <typename T>
     typename std::enable_if<std::is_floating_point<T>::value, bool>::type
-    getField(const char* key, T& output, CSVDir dir) {
+    getField(FSTRINGPARAM(key), T& output, CSVDir dir) {
         if (!getFieldRaw(key, dir)) {
             return false;
         }
@@ -437,7 +455,7 @@ public:
      */
     template <typename T>
     typename std::enable_if<std::is_integral<T>::value, bool>::type
-    getField(const char* key, T& output, CSVDir dir) {
+    getField(FSTRINGPARAM(key), T& output, CSVDir dir) {
         if (!getFieldRaw(key, dir)) {
             return false;
         }
@@ -461,7 +479,7 @@ public:
      * Output unchanged.
      */
     template <size_t N>
-    bool getField(const char* key, char (&output)[N], CSVDir dir) {
+    bool getField(FSTRINGPARAM(key), char (&output)[N], CSVDir dir) {
         if (!getFieldRaw(key, dir)) {
             return false;
         }
