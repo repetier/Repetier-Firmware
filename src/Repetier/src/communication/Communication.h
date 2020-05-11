@@ -336,6 +336,7 @@ public:
     FSTRINGVAR(tBumpCSVHeader)
     FSTRINGVAR(tErrorImportBump)
     FSTRINGVAR(tErrorExportBump)
+    FSTRINGVAR(tNoGridLeveling)
     FSTRINGVAR(tTransformationMatrix)
     FSTRINGVAR(tZProbeFailed)
     FSTRINGVAR(tZProbeMax)
