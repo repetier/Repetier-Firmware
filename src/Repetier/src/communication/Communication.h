@@ -332,6 +332,11 @@ public:
     FSTRINGVAR(tAutolevelReset)
     FSTRINGVAR(tAutolevelEnabled)
     FSTRINGVAR(tAutolevelDisabled)
+    
+    FSTRINGVAR(tBumpCSVHeader)
+    FSTRINGVAR(tErrorImportBump)
+    FSTRINGVAR(tErrorExportBump)
+    FSTRINGVAR(tNoGridLeveling)
     FSTRINGVAR(tTransformationMatrix)
     FSTRINGVAR(tZProbeFailed)
     FSTRINGVAR(tZProbeMax)
