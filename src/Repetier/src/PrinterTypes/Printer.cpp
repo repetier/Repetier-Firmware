@@ -937,8 +937,9 @@ void Printer::showJSONStatus(int type) {
     //  "extr": [0.0, 0.0],
     Com::printF(PSTR("],\"extr\":["));
     for (int i = 0; i < NUM_TOOLS; i++) {
-        if (i)
+        if (i) {
             Com::print(',');
+        }
         if (Tool::getTool(i)->getHeater() != nullptr) {
             Com::print(Tool::getTool(i)->getHeater()->getCurrentTemperature());
         } else {
@@ -950,18 +951,20 @@ void Printer::showJSONStatus(int type) {
     //  "efactor": [100.00, 100.00],
     Com::printF(PSTR(",\"efactor\":["));
     for (int i = 0; i < NUM_TOOLS; i++) {
-        if (i)
+        if (i) {
             Com::print(',');
+        }
         Com::print((int)Printer::extrudeMultiply);
     }
     //  "tool": 0,
     Com::printF(PSTR("],\"tool\":"), Tool::getActiveToolId());
     //"probe": "4",
     Com::printF(PSTR(",\"probe\":"));
-    if (ZProbe->triggered())
+    if (ZProbe->triggered()) {
         Com::print((int)0);
-    else
+    } else {
         Com::print((int)1000);
+    }
     //  "fanPercent": [0.00, 100.00],
     Com::printF(PSTR(",\"fanPercent\":["));
     for (int i = 0; i < NUM_FANS; i++) {
@@ -990,14 +993,15 @@ void Printer::showJSONStatus(int type) {
     Com::printF(PSTR("\"axesHomed\":["));
     Com::print((int)Motion1::isAxisHomed(X_AXIS));
     Com::print(',');
-    Com::print(Motion1::isAxisHomed(Y_AXIS));
+    Com::print((int)Motion1::isAxisHomed(Y_AXIS));
     Com::print(',');
-    Com::print(Motion1::isAxisHomed(Z_AXIS));
+    Com::print((int)Motion1::isAxisHomed(Z_AXIS));
     Com::printF(PSTR("],\"extr\":["));
     firstOccurrence = true;
     for (int i = 0; i < NUM_TOOLS; i++) {
-        if (!firstOccurrence)
+        if (!firstOccurrence) {
             Com::print(',');
+        }
         Com::print(Motion1::currentPosition[Z_AXIS]);
         firstOccurrence = false;
     }
