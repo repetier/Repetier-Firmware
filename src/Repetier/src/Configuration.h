@@ -80,6 +80,8 @@ Early stage version for Stacke X2 printer - use with care
 #define BUMP_CORRECTION_START_DEGRADE 0.5
 #define BUMP_CORRECTION_END_HEIGHT 1.5
 #define BUMP_LIMIT_TO 0
+#define BUMP_DEFAULT_AUTOIMPORT_DIR "matrixes/" // Default auto import directory for M232 S2 matrix imports.
+
 
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta, 3 = Dual X-Axis
 #define PRINTER_TYPE PRINTER_TYPE_DELTA

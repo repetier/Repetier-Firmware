@@ -564,7 +564,7 @@ public:
     static INLINE bool areAllSteppersDisabled() {
         return flag0 & PRINTER_FLAG0_STEPPER_DISABLED;
     }
-    static INLINE void setAllSteppersDiabled() {
+    static INLINE void setAllSteppersDisabled() {
         flag0 |= PRINTER_FLAG0_STEPPER_DISABLED;
     }
     static INLINE void unsetAllSteppersDisabled() {

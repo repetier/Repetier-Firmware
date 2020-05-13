@@ -152,12 +152,19 @@ Custom M Codes
 - M320 S<0/1> - Activate auto level, S1 stores it in eeprom
 - M321 S<0/1> - Deactivate auto level, S1 stores it in eeprom
 - M322 - Reset auto level matrix
-- M323 S0/S1 enable disable distortion correction P0 = not permanent, P1 = permanent = default
+- M323 S<0/1> - Enable disable distortion correction P0 = not permanent, P1 = permanent (default)
+- M323 S2 D<range> X<target> - Scan the matrix auto-import directory for a bump map nearest to the target temp and automatically import it.
+        P0 = not permanent, P1 = permanent (default)
+        X<target> = Target bed temp to search for.
+        D<range> = Maximum temperature difference acceptable between target temp and the file's temp. Default 10c.
 - M340 P<servoId> S<pulseInUS> R<autoOffIn ms>: servoID = 0..3, Servos are controlled by a pulse with normally between 500 and 2500 with 1500ms in center position. 0 turns servo off. R allows automatic disabling after a while.
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set micro stepping on RAMBO board
 - M355 S<0/1/2/3/4> - Turn case light on/off/burst/blink fast/blink slow , no S = report status
 - M355 P<0..255>   - Change case light brightness if it's configured as a pwm light source.
 - M360 - show configuration
+- M374 <filename> - Saves the currently loaded bed bump/distortion map to the SD card in CSV format.
+- M375 <filename> - Imports a CSV bed bump/distortion map from the SD card and saves it to EEPROM. 
+        <directory/> - Sets the bump matrix auto-import directory to this directory. 
 - M400 - Wait until move buffers empty.
 - M401 - Store x, y and z position.
 - M402 - Go to stored position. If X, Y or Z is specified, only these coordinates are used. F changes feedrate for that move.
