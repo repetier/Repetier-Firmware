@@ -379,8 +379,9 @@ void GUI::bufAddFloat(float value, int8_t fixdigits, int8_t digits) {
 void GUI::bufAddString(char* value) {
     while (bufPos < MAX_COLS) {
         uint8_t c = *value;
-        if (c == 0)
+        if (c == 0) {
             break;
+        }
         buf[bufPos++] = c;
         value++;
     }
@@ -390,8 +391,9 @@ void GUI::bufAddString(char* value) {
 void GUI::bufAddStringP(FSTRINGPARAM(value)) {
     while (bufPos < MAX_COLS) {
         uint8_t c = HAL::readFlashByte(value++);
-        if (c == 0)
+        if (c == 0) {
             break;
+        }
         buf[bufPos++] = c;
     }
     buf[bufPos] = 0;

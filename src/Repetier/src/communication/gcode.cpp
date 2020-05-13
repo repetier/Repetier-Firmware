@@ -432,8 +432,9 @@ void GCode::readFromSerial() {
             }
 #endif
         }
-        if (commandsReceivingWritePosition == 0) // nothing read, we can rotate to next input source
+        if (commandsReceivingWritePosition == 0) { // nothing read, we can rotate to next input source
             GCodeSource::rotateSource();
+        }
     }
     while (GCodeSource::activeSource->dataAvailable() && commandsReceivingWritePosition < MAX_CMD_SIZE) // consume data until no data or buffer full
     {
@@ -512,10 +513,12 @@ void GCode::readFromSerial() {
                 Com::writeToAll = lastWTA;
                 return;
             } else {
-                if (ch == ';')
+                if (ch == ';') {
                     commentDetected = true; // ignore new data until line end
-                if (commentDetected)
+                }
+                if (commentDetected) {
                     commandsReceivingWritePosition--;
+                }
             }
         }
         if (commandsReceivingWritePosition == MAX_CMD_SIZE) {
@@ -567,10 +570,12 @@ bool GCode::parseBinary(uint8_t* buffer, fast8_t length, bool fromSerial) {
     if (isV2()) {
         params2 = *(uint16_t*)p;
         p += 2;
-        if (hasString())
+        if (hasString()) {
             textlen = *p++;
-    } else
+        }
+    } else {
         params2 = 0;
+    }
     if (params & 1) {
         actLineNumber = N = *(uint16_t*)p;
         p += 2;
@@ -690,8 +695,9 @@ bool GCode::parseAscii(char* line, bool fromSerial) {
     bool hasChecksum = false;
     char c;
     while ((c = *(pos++))) {
-        if (c == '(' || c == '%')
+        if (c == '(' || c == '%') {
             break; // alternative comment or program block
+        }
         switch (c) {
         case 'N':
         case 'n': {
@@ -731,13 +737,16 @@ bool GCode::parseAscii(char* line, bool fromSerial) {
                 }
                 text = pos;
                 while (*pos) {
-                    if ((M != 117 && M != 20 && M != 531 && *pos == ' ') || *pos == '*')
+                    if ((M != 117 && M != 20 && M != 531 && *pos == ' ') || *pos == '*') {
                         break;
+                    }
                     pos++; // find a space as file name end
                 }
                 *pos = 0;                             // truncate filename by erasing space with null, also skips checksum
                 waitUntilAllCommandsAreParsed = true; // don't risk string be deleted
-                params |= 32768;
+                if (text != pos) {
+                    params |= 32768;
+                }
             }
             break;
         }
@@ -916,12 +925,15 @@ bool GCode::parseAscii(char* line, bool fromSerial) {
     if (hasFormatError() /*|| (params & 518) == 0*/) // Must contain G, M or T command and parameter need to have variables!
     {
         formatErrors++;
-        if (Printer::debugErrors())
+        if (Printer::debugErrors()) {
             Com::printErrorFLN(Com::tFormatError);
-        if (formatErrors < 3)
+        }
+        if (formatErrors < 3) {
             return false;
-    } else
+        }
+    } else {
         formatErrors = 0;
+    }
     return true;
 }
 

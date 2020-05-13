@@ -155,8 +155,9 @@ void MCode_20(GCode* com) {
                 sd.lsJSON(com->text + 4);
             }
         }
-    } else
+    } else {
         sd.ls();
+    }
 #else
     sd.ls();
 #endif
