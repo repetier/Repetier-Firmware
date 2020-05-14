@@ -191,6 +191,7 @@ void GUI::menuEnd(GUIAction action) {
             } else if (cb) { /* Push new display function on stack */ \
                 push(cb, cData, tp); \
             } \
+            action = GUIAction::CLICK_PROCESSED; \
         } \
     }
 
