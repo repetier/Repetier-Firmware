@@ -62,7 +62,7 @@ public:
     int8_t waitingForResend; ///< Waiting for line to be resend. -1 = no wait.
 
     GCodeSource();
-    virtual ~GCodeSource() {}
+    virtual ~GCodeSource() { }
     virtual bool isOpen() = 0;
     virtual bool supportsWrite() = 0; ///< true if write is a non dummy function
     virtual bool closeOnError() = 0;  // return true if the channel can not interactively correct errors.
@@ -70,7 +70,7 @@ public:
     virtual int readByte() = 0;
     virtual void close() = 0;
     virtual void writeByte(uint8_t byte) = 0;
-    virtual void prefetchContent() {} // Used for emergency parsing to read ahaed
+    virtual void prefetchContent() { } // Used for emergency parsing to read ahaed
 };
 
 class Com {
@@ -332,7 +332,7 @@ public:
     FSTRINGVAR(tAutolevelReset)
     FSTRINGVAR(tAutolevelEnabled)
     FSTRINGVAR(tAutolevelDisabled)
-    
+
     FSTRINGVAR(tBumpCSVHeader)
     FSTRINGVAR(tErrorImportBump)
     FSTRINGVAR(tErrorExportBump)
@@ -479,6 +479,54 @@ public:
 #ifdef STARTUP_GCODE
     FSTRINGVAR(tStartupGCode)
 #endif
+    FSTRINGVAR(tColonSpace)
+    // motor diver strings
+    FSTRINGVAR(tMotorMotorSpace)
+    FSTRINGVAR(tMotorResolutionColon)
+    FSTRINGVAR(tMotorResolutionSteps)
+    FSTRINGVAR(tMotorMicrosteps)
+    FSTRINGVAR(tMotorRMSCurrentMA)
+    FSTRINGVAR(tMotorHybridTresholdMMS)
+    FSTRINGVAR(tMotorStealthOnOff)
+    FSTRINGVAR(tMotorStallSensitivity255)
+    FSTRINGVAR(tMotorStallSensitivity64)
+    FSTRINGVAR(tMotorStatusColon)
+    FSTRINGVAR(tMotorNoConnection)
+    FSTRINGVAR(tMotorNoPower)
+    FSTRINGVAR(tMotorEnabledColon)
+    FSTRINGVAR(tMotorSpaceSetColonSpace)
+    FSTRINGVAR(tMotorMaxCurrentMA)
+    FSTRINGVAR(tMotorMicrostepsColon)
+    FSTRINGVAR(tMotorSpaceMresColon)
+    FSTRINGVAR(tMotorStealthChopColon)
+    FSTRINGVAR(tMotorHybridTresholdMMSColon)
+    FSTRINGVAR(tMotorHybridModeDisabled)
+    FSTRINGVAR(tMotorStallguardSensitivityColon)
+    FSTRINGVAR(tMotorTStep)
+    FSTRINGVAR(tMax)
+    FSTRINGVAR(tMotorTPWMTHRS)
+    FSTRINGVAR(tMotorTPOWERDOWN)
+    FSTRINGVAR(tMotorIRUN)
+    FSTRINGVAR(tMotorSlash31)
+    FSTRINGVAR(tMotorIHOLD)
+    FSTRINGVAR(tMotorCSActual)
+    FSTRINGVAR(tMotorVSense)
+    FSTRINGVAR(tMotorTOff)
+    FSTRINGVAR(tMotorHStart)
+    FSTRINGVAR(tMotorHEnd)
+    FSTRINGVAR(tMotorBlankTime)
+    FSTRINGVAR(tMotorTBLColon)
+    FSTRINGVAR(tMotorIOIN)
+    FSTRINGVAR(tMotorGSTAT)
+    FSTRINGVAR(tMotorDriverOvertempCurrent)
+    FSTRINGVAR(tMotorDriverOvertempWarningCurrent)
+    FSTRINGVAR(tMotorCurrentDecreasedTo)
+    FSTRINGVAR(tMotorSpaceStealthChopColon)
+    FSTRINGVAR(tMotorTempPrewarnTriggered)
+    FSTRINGVAR(tMotorPrewarnFlagCleared)
+    FSTRINGVAR(tMotorSpaceHybridTresholdColor)
+    FSTRINGVAR(tMotorSpaceStallguardSensitivityColon)
+    FSTRINGVAR(tMotorStallguardResult)
 
     static void cap(FSTRINGPARAM(text));
     static void config(FSTRINGPARAM(text));

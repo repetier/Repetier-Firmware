@@ -31,8 +31,8 @@ void StepperDriverBase::printMotorName() {
 }
 
 void StepperDriverBase::printMotorNumberAndName(bool newline) {
-    Com::printF(PSTR("Motor "), motorIndex());
-    Com::printF(PSTR(": "));
+    Com::printF(Com::tMotorMotorSpace, motorIndex());
+    Com::printF(Com::tColonSpace);
     printMotorName();
     if (newline) {
         Com::println();
@@ -43,7 +43,7 @@ template <class driver>
 void __attribute__((weak)) AdjustResolutionStepperDriver<driver>::menuStepsPerMM(GUIAction action, void* data) {
 #if FEATURE_CONTROLLER != NO_CONTROLLER
     AdjustResolutionStepperDriver* stepper = reinterpret_cast<AdjustResolutionStepperDriver*>(data);
-    DRAW_LONG_P(PSTR("Resolution:"), Com::tUnitStepsPerMM, stepper->to);
+    DRAW_LONG_P(Com::tMotorResolutionColon, Com::tUnitStepsPerMM, stepper->to);
     if (GUI::handleLongValueAction(action, v, 0, stepper->from, 1)) {
         stepper->to = v;
     }
@@ -54,7 +54,7 @@ void __attribute__((weak)) AdjustResolutionStepperDriver<driver>::menuStepsPerMM
 template <class driver>
 void __attribute__((weak)) AdjustResolutionStepperDriver<driver>::menuConfig(GUIAction action, void* data) {
 #if FEATURE_CONTROLLER != NO_CONTROLLER
-    GUI::menuLongP(action, PSTR("Resolution:"), to, AdjustResolutionStepperDriver<driver>::menuStepsPerMM, this, GUIPageType::FIXED_CONTENT);
+    GUI::menuLongP(action, Com::tMotorResolutionColon, to, AdjustResolutionStepperDriver<driver>::menuStepsPerMM, this, GUIPageType::FIXED_CONTENT);
 #endif
 }
 
@@ -65,7 +65,7 @@ void AdjustResolutionStepperDriver<driver>::init() {
 
 template <class driver>
 void AdjustResolutionStepperDriver<driver>::eepromHandle() {
-    EEPROM::handleLong(eprStart, PSTR("Resolution [steps/mm]"), to);
+    EEPROM::handleLong(eprStart, Com::tMotorResolutionSteps, to);
 }
 
 #define PSB_MICROSTEP_POS 0
@@ -112,83 +112,84 @@ void ProgrammableStepperBase::reserveEEPROM(uint16_t extraBytes) {
 void ProgrammableStepperBase::processEEPROM(uint8_t flags) {
 #if STORE_MOTOR_MICROSTEPPING
     if (flags & 1) {
-        EEPROM::handleInt(eprStart + PSB_MICROSTEP_POS, PSTR("Microsteps"), microsteps);
+        EEPROM::handleInt(eprStart + PSB_MICROSTEP_POS, Com::tMotorMicrosteps, microsteps);
     }
 #endif
 #if STORE_MOTOR_CURRENT
     if (flags & 2) {
-        EEPROM::handleInt(eprStart + PSB_CURRENT_POS, PSTR("RMS Current [mA]"), currentMillis);
+        EEPROM::handleInt(eprStart + PSB_CURRENT_POS, Com::tMotorRMSCurrentMA, currentMillis);
     }
 #endif
 #if STORE_MOTOR_HYBRID_TRESHOLD
     if (flags & 4) {
-        EEPROM::handleFloat(eprStart + PSB_HYBRID_POS, PSTR("Hybrid Treshold [mm/s]"), 1, hybridSpeed);
+        EEPROM::handleFloat(eprStart + PSB_HYBRID_POS, Com::tMotorHybridTresholdMMS, 1, hybridSpeed);
     }
 #endif
 #if STORE_MOTOR_STEALTH
     if (flags & 8) {
-        EEPROM::handleByte(eprStart + PSB_STEALTH_POS, PSTR("Stealth [0/1]"), (uint8_t&)stealthChop);
+        EEPROM::handleByte(eprStart + PSB_STEALTH_POS, Com::tMotorStealthOnOff, (uint8_t&)stealthChop);
     }
 #endif
 #if STORE_MOTOR_STALL_SENSITIVITY
     //Note, flag 32 is stallguard 4, we don't use that flag for anything else yet, other than a small change in eeprom text.
     if (flags & 16 && stallguardSensitivity != -128) {
-        EEPROM::handleInt(eprStart + PSB_STALL_SENSITIVITY_POS, (flags & 32) ? PSTR("Stall Sensitivity [0..255]") : PSTR("Stall Sensitivity [-64..63]"), stallguardSensitivity);
+        EEPROM::handleInt(eprStart + PSB_STALL_SENSITIVITY_POS, (flags & 32) ? Com::tMotorStallSensitivity255 : Com::tMotorStallSensitivity64, stallguardSensitivity);
     }
 #endif
 }
 
 void reportTMC2130(TMC2130Stepper* driver, ProgrammableStepperBase* b, int level) {
     uint8_t constat = driver->test_connection();
-    Com::printF(PSTR("Status: "));
+    Com::printF(Com::tMotorStatusColon);
     switch (constat) {
     case 0:
-        Com::printFLN(PSTR("Ok"));
+        Com::printFLN(Com::tOk);
         break;
     case 1:
-        Com::printFLN(PSTR("No connection"));
+        Com::printFLN(Com::tMotorNoConnection);
         break;
     case 2:
-        Com::printFLN(PSTR("No Power"));
+        Com::printFLN(Com::tMotorNoPower);
         break;
     }
-    Com::printFLN(PSTR("Enabled: "), driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(PSTR("Current [mA]: "), driver->rms_current());
-    Com::printFLN(PSTR(" set: "), b->getCurrentMillis());
-    Com::printFLN(PSTR("Max. current [mA]: "), 1.4142 * driver->rms_current(), 0);
-    Com::printF(PSTR("Microsteps: "), driver->microsteps());
-    Com::printFLN(PSTR(" mres:"), (int)driver->mres());
-    Com::printFLN(PSTR("StealthChop: "), driver->en_pwm_mode(), BoolFormat::ONOFF);
+    Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
+    Com::printF(Com::tMotorRMSCurrentMA, driver->rms_current());
+    Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
+    Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142 * driver->rms_current(), 0);
+    Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
+    Com::printFLN(Com::tMotorSpaceMresColon, (int)driver->mres());
+    Com::printFLN(Com::tMotorStealthChopColon, driver->en_pwm_mode(), BoolFormat::ONOFF);
     if (b->getHybridSpeed() > 0) {
-        Com::printFLN(PSTR("Hybrid treshold [mm/s]: "), b->getHybridSpeed(), 2);
+        Com::printFLN(Com::tMotorHybridTresholdMMSColon, b->getHybridSpeed(), 2);
     } else {
-        Com::printFLN(PSTR("Hybrid mode disabled"));
+        Com::printFLN(Com::tMotorHybridModeDisabled);
     }
+    Com::printFLN(Com::tMotorStallguardSensitivityColon, static_cast<int32_t>(driver->sgt()));
     if (level > 0) {
         const uint32_t tstep = driver->TSTEP();
-        Com::printF(PSTR("TSTEP: "));
+        Com::printF(Com::tMotorTStep);
         if (tstep != 0xFFFFF) {
             Com::print(static_cast<int32_t>(tstep));
             Com::println();
         } else {
-            Com::printFLN("max");
+            Com::printFLN(Com::tMax);
         }
-        Com::printFLN(PSTR("TPWMTHRS: "), driver->TPWMTHRS());
-        Com::printFLN(PSTR("TPOWERDOWN: "), (int)driver->TPOWERDOWN());
-        Com::printF(PSTR("IRUN: "), driver->irun());
-        Com::printFLN(PSTR("/31"));
-        Com::printF(PSTR("IHOLD: "), driver->ihold());
-        Com::printFLN(PSTR("/31"));
-        Com::printF(PSTR("CS Actual: "), driver->cs_actual());
-        Com::printFLN(PSTR("/31"));
-        Com::printFLN(PSTR("vsense: "), driver->vsense());
-        Com::printFLN(PSTR("toff: "), (int)driver->toff());
-        Com::printFLN(PSTR("hstart: "), (int)driver->hysteresis_start());
-        Com::printFLN(PSTR("hend: "), (int)driver->hysteresis_end());
-        Com::printF(PSTR("Blank time: "), (int)driver->blank_time());
-        Com::printFLN(PSTR(" tbl: "), (int)driver->tbl());
-        Com::printFLN(PSTR("IOIN: "), driver->IOIN());
-        Com::printFLN(PSTR("GSTAT: "), (int)driver->GSTAT());
+        Com::printFLN(Com::tMotorTPWMTHRS);
+        Com::printFLN(Com::tMotorTPOWERDOWN, (int)driver->TPOWERDOWN());
+        Com::printF(Com::tMotorIRUN, driver->irun());
+        Com::printFLN(Com::tMotorSlash31);
+        Com::printF(Com::tMotorIHOLD, driver->ihold());
+        Com::printFLN(Com::tMotorSlash31);
+        Com::printF(Com::tMotorCSActual, driver->cs_actual());
+        Com::printFLN(Com::tMotorSlash31);
+        Com::printFLN(Com::tMotorVSense, driver->vsense());
+        Com::printFLN(Com::tMotorTOff, (int)driver->toff());
+        Com::printFLN(Com::tMotorHStart, (int)driver->hysteresis_start());
+        Com::printFLN(Com::tMotorHEnd, (int)driver->hysteresis_end());
+        Com::printF(Com::tMotorBlankTime, (int)driver->blank_time());
+        Com::printFLN(Com::tMotorTBLColon, (int)driver->tbl());
+        Com::printFLN(Com::tMotorIOIN, driver->IOIN());
+        Com::printFLN(Com::tMotorGSTAT, (int)driver->GSTAT());
     }
     if (level > 1) {
     }
@@ -272,7 +273,7 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
     }
     if (status.ot) { // over temperature
         printMotorNumberAndName(false);
-        Com::printFLN(" driver overtemperature! Current: ", currentMillis);
+        Com::printFLN(Com::tMotorDriverOvertempCurrent, currentMillis);
     }
     if (status.otpw) { // over temperature prewarn
         if (otpwCount < 255) {
@@ -280,7 +281,7 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
         }
         if (otpwCount == 1) {
             printMotorNumberAndName(false);
-            Com::printFLN(" driver overtemperature warning! Current: ", currentMillis);
+            Com::printFLN(Com::tMotorDriverOvertempWarningCurrent, currentMillis);
         }
 #if TMC_CURRENT_STEP_DOWN > 0
         if (otpwCount > 4 && driver->isEnabled()) {
@@ -288,7 +289,7 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
                 currentMillis -= TMC_CURRENT_STEP_DOWN;
                 driver->rms_current(currentMillis);
                 printMotorNumberAndName(false);
-                Com::printFLN(" current decreased to ", currentMillis);
+                Com::printFLN(Com::tMotorCurrentDecreasedTo, currentMillis);
             }
         }
 #endif
@@ -356,17 +357,17 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
             driver->en_pwm_mode(stealthChop);
         }
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" stealthChop: "), stealthChop, BoolFormat::ONOFF);
+        Com::printFLN(Com::tMotorSpaceStealthChopColon, stealthChop, BoolFormat::ONOFF);
         break;
     case 911: // Report TMC prewarn
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" temperature prewarn triggered: "), otpw, BoolFormat::TRUEFALSE);
+        Com::printFLN(Com::tMotorTempPrewarnTriggered, otpw, BoolFormat::TRUEFALSE);
         break;
     case 912: // Clear prewarn
         otpw = false;
         otpwCount = 0;
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" prewarn flag cleared"));
+        Com::printFLN(Com::tMotorPrewarnFlagCleared);
         break;
     case 913: // Hybrid treshold
         if (com.hasX()) {
@@ -374,15 +375,20 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
             init();
         }
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" hybrid treshold: "), hybridSpeed, 1);
+        Com::printFLN(Com::tMotorSpaceHybridTresholdColor, hybridSpeed, 1);
         break;
     case 914: // sensorless homing sensitivity
         if (hasStallguard()) {
-            if (com.hasS() && com.S >= -64 && com.S <= 63) {
-                stallguardSensitivity = static_cast<int8_t>(com.S);
+            if (com.hasS()) {
+                if (com.S >= -64 && com.S <= 63) {
+                    stallguardSensitivity = static_cast<int8_t>(com.S);
+                } else {
+                    stallguardSensitivity = -128;
+                }
+                init();
             }
             printMotorNumberAndName(false);
-            Com::printFLN(PSTR(" stallguard sensitivity: "), stallguardSensitivity);
+            Com::printFLN(Com::tMotorSpaceStallguardSensitivityColon, stallguardSensitivity);
         }
         break;
     }
@@ -391,55 +397,55 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
 // ---- TMC5160 -------------
 void reportTMC5160(TMC5160Stepper* driver, ProgrammableStepperBase* b, int level) {
     uint8_t constat = driver->test_connection();
-    Com::printF(PSTR("Status: "));
+    Com::printF(Com::tMotorStatusColon);
     switch (constat) {
     case 0:
-        Com::printFLN(PSTR("Ok"));
+        Com::printFLN(Com::tOk);
         break;
     case 1:
-        Com::printFLN(PSTR("No connection"));
+        Com::printFLN(Com::tMotorNoConnection);
         break;
     case 2:
-        Com::printFLN(PSTR("No power"));
+        Com::printFLN(Com::tMotorNoPower);
         break;
     }
-    Com::printFLN(PSTR("Enabled: "), driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(PSTR("Current [mA]: "), driver->rms_current());
-    Com::printFLN(PSTR(" set: "), b->getCurrentMillis());
-    Com::printFLN(PSTR("Max. current [mA]: "), 1.4142 * driver->rms_current(), 0);
-    Com::printF(PSTR("Microsteps: "), driver->microsteps());
-    Com::printFLN(PSTR(" mres:"), (int)driver->mres());
-    Com::printFLN(PSTR("StealthChop: "), driver->en_pwm_mode(), BoolFormat::ONOFF);
+    Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
+    Com::printF(Com::tMotorRMSCurrentMA, driver->rms_current());
+    Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
+    Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142 * driver->rms_current(), 0);
+    Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
+    Com::printFLN(Com::tMotorSpaceMresColon, (int)driver->mres());
+    Com::printFLN(Com::tMotorStealthChopColon, driver->en_pwm_mode(), BoolFormat::ONOFF);
     if (b->getHybridSpeed() > 0) {
-        Com::printFLN(PSTR("Hybrid treshold [mm/s]: "), b->getHybridSpeed(), 2);
+        Com::printFLN(Com::tMotorHybridTresholdMMSColon, b->getHybridSpeed(), 2);
     } else {
-        Com::printFLN(PSTR("Hybrid mode disabled"));
+        Com::printFLN(Com::tMotorHybridModeDisabled);
     }
     if (level > 0) {
         const uint32_t tstep = driver->TSTEP();
-        Com::printF(PSTR("TSTEP: "));
+        Com::printF(Com::tMotorTStep);
         if (tstep != 0xFFFFF) {
             Com::print(static_cast<int32_t>(tstep));
             Com::println();
         } else {
-            Com::printFLN("max");
+            Com::printFLN(Com::tMax);
         }
-        Com::printFLN(PSTR("TPWMTHRS: "), driver->TPWMTHRS());
-        Com::printFLN(PSTR("TPOWERDOWN: "), (int)driver->TPOWERDOWN());
-        Com::printF(PSTR("IRUN: "), driver->irun());
-        Com::printFLN(PSTR("/31"));
-        Com::printF(PSTR("IHOLD: "), driver->ihold());
-        Com::printFLN(PSTR("/31"));
-        Com::printF(PSTR("CS Actual: "), driver->cs_actual());
-        Com::printFLN(PSTR("/31"));
+        Com::printFLN(Com::tMotorTPWMTHRS, driver->TPWMTHRS());
+        Com::printFLN(Com::tMotorTPOWERDOWN, (int)driver->TPOWERDOWN());
+        Com::printF(Com::tMotorIRUN, driver->irun());
+        Com::printFLN(Com::tMotorSlash31);
+        Com::printF(Com::tMotorIHOLD, driver->ihold());
+        Com::printFLN(Com::tMotorSlash31);
+        Com::printF(Com::tMotorCSActual, driver->cs_actual());
+        Com::printFLN(Com::tMotorSlash31);
         // Com::printFLN(PSTR("vsense: "), driver->vsense());
-        Com::printFLN(PSTR("toff: "), (int)driver->toff());
-        Com::printFLN(PSTR("hstart: "), (int)driver->hysteresis_start());
-        Com::printFLN(PSTR("hend: "), (int)driver->hysteresis_end());
-        Com::printF(PSTR("Blank time: "), (int)driver->blank_time());
-        Com::printFLN(PSTR(" tbl: "), (int)driver->tbl());
-        Com::printFLN(PSTR("IOIN: "), driver->IOIN());
-        Com::printFLN(PSTR("GSTAT: "), (int)driver->GSTAT());
+        Com::printFLN(Com::tMotorTOff, (int)driver->toff());
+        Com::printFLN(Com::tMotorHStart, (int)driver->hysteresis_start());
+        Com::printFLN(Com::tMotorHEnd, (int)driver->hysteresis_end());
+        Com::printF(Com::tMotorBlankTime, (int)driver->blank_time());
+        Com::printFLN(Com::tMotorTBLColon, (int)driver->tbl());
+        Com::printFLN(Com::tMotorIOIN, driver->IOIN());
+        Com::printFLN(Com::tMotorGSTAT, (int)driver->GSTAT());
     }
     if (level > 1) {
     }
@@ -486,6 +492,7 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::init() {
 
     if (stallguardSensitivity != -128) {
         stallguardSensitivity = constrain(stallguardSensitivity, -64, 63);
+        driver->sgt(stallguardSensitivity);
     }
     driver->GSTAT(); // Clear GSTAT
 }
@@ -525,7 +532,7 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
     }
     if (status.ot) { // over temperature
         printMotorNumberAndName(false);
-        Com::printFLN(" driver overtemperature! Current: ", currentMillis);
+        Com::printFLN(Com::tMotorDriverOvertempCurrent, currentMillis);
     }
     if (status.otpw) { // over temperature prewarn
         if (otpwCount < 255) {
@@ -533,7 +540,7 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
         }
         if (otpwCount == 1) {
             printMotorNumberAndName(false);
-            Com::printFLN(" driver overtemperature warning! Current: ", currentMillis);
+            Com::printFLN(Com::tMotorDriverOvertempWarningCurrent, currentMillis);
         }
 #if TMC_CURRENT_STEP_DOWN > 0
         if (otpwCount > 4 && driver->isEnabled()) {
@@ -541,7 +548,7 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
                 currentMillis -= TMC_CURRENT_STEP_DOWN;
                 driver->rms_current(currentMillis);
                 printMotorNumberAndName(false);
-                Com::printFLN(" current decreased to ", currentMillis);
+                Com::printFLN(Com::tMotorCurrentDecreasedTo, currentMillis);
             }
         }
 #endif
@@ -609,17 +616,17 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
             driver->en_pwm_mode(stealthChop);
         }
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" stealthChop:"), stealthChop, BoolFormat::ONOFF);
+        Com::printFLN(Com::tMotorSpaceStealthChopColon, stealthChop, BoolFormat::ONOFF);
         break;
     case 911: // Report TMC prewarn
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" temperature prewarn triggered: "), otpw, BoolFormat::TRUEFALSE);
+        Com::printFLN(Com::tMotorTempPrewarnTriggered, otpw, BoolFormat::TRUEFALSE);
         break;
     case 912: // Clear prewarn
         otpw = false;
         otpwCount = 0;
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" prewarn flag cleared"));
+        Com::printFLN(Com::tMotorPrewarnFlagCleared);
         break;
     case 913: // Hybrid treshold
         if (com.hasX()) {
@@ -627,15 +634,20 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
             init();
         }
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" hybrid treshold: "), hybridSpeed, 1);
+        Com::printFLN(Com::tMotorSpaceHybridTresholdColor, hybridSpeed, 1);
         break;
     case 914: // sensorless homing sensitivity
         if (hasStallguard()) {
-            if (com.hasS() && com.S >= -64 && com.S <= 63) {
-                stallguardSensitivity = static_cast<int8_t>(com.S);
+            if (com.hasS()) {
+                if (com.S >= -64 && com.S <= 63) {
+                    stallguardSensitivity = static_cast<int8_t>(com.S);
+                } else {
+                    stallguardSensitivity = -128;
+                }
+                init();
             }
             printMotorNumberAndName(false);
-            Com::printFLN(PSTR(" stallguard sensitivity: "), stallguardSensitivity);
+            Com::printFLN(Com::tMotorSpaceStallguardSensitivityColon, stallguardSensitivity);
         }
         break;
     }
@@ -645,55 +657,55 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
 
 void reportTMC2208(TMC2208Stepper* driver, ProgrammableStepperBase* b, int level) {
     uint8_t constat = driver->test_connection();
-    Com::printF(PSTR("Status: "));
+    Com::printF(Com::tMotorStatusColon);
     switch (constat) {
     case 0:
-        Com::printFLN(PSTR("Ok"));
+        Com::printFLN(Com::tOk);
         break;
     case 1:
-        Com::printFLN(PSTR("No connection"));
+        Com::printFLN(Com::tMotorNoConnection);
         break;
     case 2:
-        Com::printFLN(PSTR("No power"));
+        Com::printFLN(Com::tMotorNoPower);
         break;
     }
-    Com::printFLN(PSTR("Enabled: "), driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(PSTR("Current [mA]: "), driver->rms_current());
-    Com::printFLN(PSTR(" set: "), b->getCurrentMillis());
-    Com::printFLN(PSTR("Max. current [mA]: "), 1.4142 * driver->rms_current(), 0);
-    Com::printF(PSTR("Microsteps: "), driver->microsteps());
-    Com::printFLN(PSTR(" mres:"), (int)driver->mres());
-    Com::printFLN(PSTR("StealthChop: "), b->getStealthChop(), BoolFormat::ONOFF);
+    Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
+    Com::printF(Com::tMotorRMSCurrentMA, driver->rms_current());
+    Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
+    Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142 * driver->rms_current(), 0);
+    Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
+    Com::printFLN(Com::tMotorSpaceMresColon, (int)driver->mres());
+    Com::printFLN(Com::tMotorStealthChopColon, b->getStealthChop(), BoolFormat::ONOFF);
     if (b->getHybridSpeed() > 0) {
-        Com::printFLN(PSTR("Hybrid treshold [mm/s]: "), b->getHybridSpeed(), 2);
+        Com::printFLN(Com::tMotorHybridTresholdMMSColon, b->getHybridSpeed(), 2);
     } else {
-        Com::printFLN(PSTR("Hybrid mode disabled"));
+        Com::printFLN(Com::tMotorHybridModeDisabled);
     }
     if (level > 0) {
         const uint32_t tstep = driver->TSTEP();
-        Com::printF(PSTR("TSTEP: "));
+        Com::printF(Com::tMotorTStep);
         if (tstep != 0xFFFFF) {
             Com::print(static_cast<int32_t>(tstep));
             Com::println();
         } else {
-            Com::printFLN("max");
+            Com::printFLN(Com::tMax);
         }
-        Com::printFLN(PSTR("TPWMTHRS: "), driver->TPWMTHRS());
-        Com::printFLN(PSTR("TPOWERDOWN: "), (int)driver->TPOWERDOWN());
-        Com::printF(PSTR("IRUN: "), driver->irun());
-        Com::printFLN(PSTR("/31"));
-        Com::printF(PSTR("IHOLD: "), driver->ihold());
-        Com::printFLN(PSTR("/31"));
-        Com::printF(PSTR("CS Actual: "), driver->cs_actual());
-        Com::printFLN(PSTR("/31"));
+        Com::printFLN(Com::tMotorTPWMTHRS, driver->TPWMTHRS());
+        Com::printFLN(Com::tMotorTPOWERDOWN, (int)driver->TPOWERDOWN());
+        Com::printF(Com::tMotorIRUN, driver->irun());
+        Com::printFLN(Com::tMotorSlash31);
+        Com::printF(Com::tMotorIHOLD, driver->ihold());
+        Com::printFLN(Com::tMotorSlash31);
+        Com::printF(Com::tMotorCSActual, driver->cs_actual());
+        Com::printFLN(Com::tMotorSlash31);
         // Com::printFLN(PSTR("vsense: "), driver->vsense());
-        Com::printFLN(PSTR("toff: "), (int)driver->toff());
-        Com::printFLN(PSTR("hstart: "), (int)driver->hysteresis_start());
-        Com::printFLN(PSTR("hend: "), (int)driver->hysteresis_end());
-        Com::printF(PSTR("Blank time: "), (int)driver->blank_time());
-        Com::printFLN(PSTR(" tbl: "), (int)driver->tbl());
-        Com::printFLN(PSTR("IOIN: "), driver->IOIN());
-        Com::printFLN(PSTR("GSTAT: "), (int)driver->GSTAT());
+        Com::printFLN(Com::tMotorTOff, (int)driver->toff());
+        Com::printFLN(Com::tMotorHStart, (int)driver->hysteresis_start());
+        Com::printFLN(Com::tMotorHEnd, (int)driver->hysteresis_end());
+        Com::printF(Com::tMotorBlankTime, (int)driver->blank_time());
+        Com::printFLN(Com::tMotorTBLColon, (int)driver->tbl());
+        Com::printFLN(Com::tMotorIOIN, driver->IOIN());
+        Com::printFLN(Com::tMotorGSTAT, (int)driver->GSTAT());
     }
 }
 
@@ -749,7 +761,7 @@ template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::eepromHandle() {
     PGM_P* adr = (PGM_P*)pgm_read_word(&motorNames);
     EEPROM::handlePrefix(adr[motorIndex()]);
-    processEEPROM(15);
+    processEEPROM(15); // has no stallguard
     EEPROM::removePrefix();
 }
 
@@ -781,7 +793,7 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
     }
     if (status.ot) { // over temperature
         printMotorNumberAndName(false);
-        Com::printFLN(" driver overtemperature! Current: ", currentMillis);
+        Com::printFLN(Com::tMotorDriverOvertempCurrent, currentMillis);
     }
     if (status.otpw) { // over temperature prewarn
         if (otpwCount < 255) {
@@ -789,7 +801,7 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
         }
         if (otpwCount == 1) {
             printMotorNumberAndName(false);
-            Com::printFLN(" driver overtemperature warning! Current: ", currentMillis);
+            Com::printFLN(Com::tMotorDriverOvertempWarningCurrent, currentMillis);
         }
 #if TMC_CURRENT_STEP_DOWN > 0
         if (otpwCount > 4 && driver->isEnabled()) {
@@ -797,7 +809,7 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
                 currentMillis -= TMC_CURRENT_STEP_DOWN;
                 driver->rms_current(currentMillis);
                 printMotorNumberAndName(false);
-                Com::printFLN(" current decreased to ", currentMillis);
+                Com::printFLN(Com::tMotorCurrentDecreasedTo, currentMillis);
             }
         }
 #endif
@@ -861,17 +873,17 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
             driver->GCONF(gconf.sr);
         }
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" stealthChop:"), stealthChop, BoolFormat::ONOFF);
+        Com::printFLN(Com::tMotorSpaceStealthChopColon, stealthChop, BoolFormat::ONOFF);
         break;
     case 911: // Report TMC prewarn
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" temperature prewarn triggered: "), otpw, BoolFormat::TRUEFALSE);
+        Com::printFLN(Com::tMotorTempPrewarnTriggered, otpw, BoolFormat::TRUEFALSE);
         break;
     case 912: // Clear prewarn
         otpw = false;
         otpwCount = 0;
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" prewarn flag cleared"));
+        Com::printFLN(Com::tMotorPrewarnFlagCleared);
         break;
     case 913: // Hybrid treshold
         if (com.hasX()) {
@@ -879,7 +891,7 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
             init();
         }
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" hybrid treshold: "), hybridSpeed, 1);
+        Com::printFLN(Com::tMotorSpaceHybridTresholdColor, hybridSpeed, 1);
         break;
     case 914: // sensorless homing sensitivity
         printMotorNumberAndName(false);
@@ -891,57 +903,57 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
 // ---- TMC2209 -------------
 void reportTMC2209(TMC2209Stepper* driver, ProgrammableStepperBase* b, int level) {
     uint8_t constat = driver->test_connection();
-    Com::printF(PSTR("Status: "));
+    Com::printF(Com::tMotorStatusColon);
     switch (constat) {
     case 0:
-        Com::printFLN(PSTR("Ok"));
+        Com::printFLN(Com::tOk);
         break;
     case 1:
-        Com::printFLN(PSTR("No connection"));
+        Com::printFLN(Com::tMotorNoConnection);
         break;
     case 2:
-        Com::printFLN(PSTR("No power"));
+        Com::printFLN(Com::tMotorNoPower);
         break;
     }
-    Com::printFLN(PSTR("Enabled: "), driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(PSTR("Current [mA]: "), driver->rms_current());
-    Com::printFLN(PSTR(" set: "), b->getCurrentMillis());
-    Com::printFLN(PSTR("Max. current [mA]: "), 1.4142 * driver->rms_current(), 0);
-    Com::printF(PSTR("Microsteps: "), driver->microsteps());
-    Com::printFLN(PSTR(" mres:"), (int)driver->mres());
-    Com::printFLN(PSTR("StealthChop: "), b->getStealthChop(), BoolFormat::ONOFF);
+    Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
+    Com::printF(Com::tMotorRMSCurrentMA, driver->rms_current());
+    Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
+    Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142 * driver->rms_current(), 0);
+    Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
+    Com::printFLN(Com::tMotorSpaceMresColon, (int)driver->mres());
+    Com::printFLN(Com::tMotorStealthChopColon, b->getStealthChop(), BoolFormat::ONOFF);
     if (b->getHybridSpeed() > 0) {
-        Com::printFLN(PSTR("Hybrid treshold [mm/s]: "), b->getHybridSpeed(), 2);
+        Com::printFLN(Com::tMotorHybridTresholdMMSColon, b->getHybridSpeed(), 2);
     } else {
-        Com::printFLN(PSTR("Hybrid mode disabled"));
+        Com::printFLN(Com::tMotorHybridModeDisabled);
     }
-    Com::printFLN(PSTR("StallGuard Result: "), driver->SG_RESULT());
+    Com::printFLN(Com::tMotorStallguardResult, driver->SG_RESULT());
 
     if (level > 0) {
         const uint32_t tstep = driver->TSTEP();
-        Com::printF(PSTR("TSTEP: "));
+        Com::printF(Com::tMotorTStep);
         if (tstep != 0xFFFFF) {
             Com::print(static_cast<int32_t>(tstep));
             Com::println();
         } else {
-            Com::printFLN("max");
+            Com::printFLN(Com::tMax);
         }
-        Com::printFLN(PSTR("TPWMTHRS: "), driver->TPWMTHRS());
-        Com::printFLN(PSTR("TPOWERDOWN: "), (int)driver->TPOWERDOWN());
-        Com::printF(PSTR("IRUN: "), driver->irun());
-        Com::printFLN(PSTR("/31"));
-        Com::printF(PSTR("IHOLD: "), driver->ihold());
-        Com::printFLN(PSTR("/31"));
-        Com::printF(PSTR("CS Actual: "), driver->cs_actual());
-        Com::printFLN(PSTR("/31"));
+        Com::printFLN(Com::tMotorTPWMTHRS, driver->TPWMTHRS());
+        Com::printFLN(Com::tMotorTPOWERDOWN, (int)driver->TPOWERDOWN());
+        Com::printF(Com::tMotorIRUN, driver->irun());
+        Com::printFLN(Com::tMotorSlash31);
+        Com::printF(Com::tMotorIHOLD, driver->ihold());
+        Com::printFLN(Com::tMotorSlash31);
+        Com::printF(Com::tMotorCSActual, driver->cs_actual());
+        Com::printFLN(Com::tMotorSlash31);
         // Com::printFLN(PSTR("vsense: "), driver->vsense());
-        Com::printFLN(PSTR("toff: "), (int)driver->toff());
-        Com::printFLN(PSTR("hstart: "), (int)driver->hysteresis_start());
-        Com::printFLN(PSTR("hend: "), (int)driver->hysteresis_end());
-        Com::printF(PSTR("Blank time: "), (int)driver->blank_time());
-        Com::printFLN(PSTR(" tbl: "), (int)driver->tbl());
-        Com::printFLN(PSTR("IOIN: "), driver->IOIN());
-        Com::printFLN(PSTR("GSTAT: "), (int)driver->GSTAT());
+        Com::printFLN(Com::tMotorTOff, (int)driver->toff());
+        Com::printFLN(Com::tMotorHStart, (int)driver->hysteresis_start());
+        Com::printFLN(Com::tMotorHEnd, (int)driver->hysteresis_end());
+        Com::printF(Com::tMotorBlankTime, (int)driver->blank_time());
+        Com::printFLN(Com::tMotorTBLColon, (int)driver->tbl());
+        Com::printFLN(Com::tMotorIOIN, driver->IOIN());
+        Com::printFLN(Com::tMotorGSTAT, (int)driver->GSTAT());
 
         Com::printFLN(PSTR("COOLCONF: "), (int)driver->COOLCONF());
         Com::printFLN(PSTR("semin: "), (int)driver->semin());
@@ -1045,7 +1057,7 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
     }
     if (status.ot) { // over temperature
         printMotorNumberAndName(false);
-        Com::printFLN(" driver overtemperature! Current: ", currentMillis);
+        Com::printFLN(Com::tMotorDriverOvertempCurrent, currentMillis);
     }
     if (status.otpw) { // over temperature prewarn
         if (otpwCount < 255) {
@@ -1053,7 +1065,7 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
         }
         if (otpwCount == 1) {
             printMotorNumberAndName(false);
-            Com::printFLN(" driver overtemperature warning! Current: ", currentMillis);
+            Com::printFLN(Com::tMotorDriverOvertempWarningCurrent, currentMillis);
         }
 #if TMC_CURRENT_STEP_DOWN > 0
         if (otpwCount > 4 && driver->isEnabled()) {
@@ -1061,7 +1073,7 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
                 currentMillis -= TMC_CURRENT_STEP_DOWN;
                 driver->rms_current(currentMillis);
                 printMotorNumberAndName(false);
-                Com::printFLN(" current decreased to ", currentMillis);
+                Com::printFLN(Com::tMotorCurrentDecreasedTo, currentMillis);
             }
         }
 #endif
@@ -1125,17 +1137,17 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
             driver->GCONF(gconf.sr);
         }
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" stealthChop:"), stealthChop, BoolFormat::ONOFF);
+        Com::printFLN(Com::tMotorSpaceStealthChopColon, stealthChop, BoolFormat::ONOFF);
         break;
     case 911: // Report TMC prewarn
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" temperature prewarn triggered: "), otpw, BoolFormat::TRUEFALSE);
+        Com::printFLN(Com::tMotorTempPrewarnTriggered, otpw, BoolFormat::TRUEFALSE);
         break;
     case 912: // Clear prewarn
         otpw = false;
         otpwCount = 0;
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" prewarn flag cleared"));
+        Com::printFLN(Com::tMotorPrewarnFlagCleared);
         break;
     case 913: // Hybrid treshold
         if (com.hasX()) {
@@ -1143,16 +1155,21 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
             init();
         }
         printMotorNumberAndName(false);
-        Com::printFLN(PSTR(" hybrid treshold: "), hybridSpeed, 1);
+        Com::printFLN(Com::tMotorSpaceHybridTresholdColor, hybridSpeed, 1);
         break;
 
     case 914: // sensorless homing sensitivity
         if (hasStallguard()) {
-            if (com.hasS() && com.S >= 0 && com.S <= 255) {
-                stallguardSensitivity = static_cast<int16_t>(com.S);
+            if (com.hasS()) {
+                if (com.S >= 0 && com.S <= 255) {
+                    stallguardSensitivity = static_cast<int16_t>(com.S);
+                } else {
+                    stallguardSensitivity = -128;
+                }
+                init();
             }
             printMotorNumberAndName(false);
-            Com::printFLN(PSTR(" stallguard sensitivity: "), stallguardSensitivity);
+            Com::printFLN(Com::tMotorSpaceStallguardSensitivityColon, stallguardSensitivity);
         }
         break;
     }
