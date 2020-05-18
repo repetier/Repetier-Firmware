@@ -100,11 +100,11 @@ Header pins bottom:   14      12       10      8       6         4        2
 #define ORIG_E2_CS_PIN PD1
 
 // Temperature Sensors
-#define TEMP_0_PIN PC4 // T0
-#define TEMP_2_PIN PC3 // T1
-#define TEMP_3_PIN PC2 // T2
-#define TEMP_4_PIN PC1 // T3
-#define TEMP_1_PIN PC0 // TB bed
+#define TEMP_0_PIN PC_4 // T0
+#define TEMP_2_PIN PC_3 // T1
+#define TEMP_3_PIN PC_2 // T2
+#define TEMP_4_PIN PC_1 // T3
+#define TEMP_1_PIN PC_0 // TB bed
 
 #define THERMOCOUPLE_0_PIN PA3 // A10 on EXP3
 #define THERMOCOUPLE_1_PIN PA4 // A9 on EXP3
