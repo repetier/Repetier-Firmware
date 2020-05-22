@@ -650,8 +650,8 @@ void Printer::setup() {
 void Printer::defaultLoopActions() {
     Commands::checkForPeriodicalActions(true); //check heater every n milliseconds
     if (HAL::i2cError && HAL::i2cError != 255) {
-        GCode::fatalError(Com::tI2CError);
         HAL::i2cError = 255; // Flag to show error message only once
+        GCode::fatalError(Com::tI2CError);
     }
     millis_t curtime = HAL::timeInMilliseconds();
     if (isRescueRequired() || Motion1::length != 0 || isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED))

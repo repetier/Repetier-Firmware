@@ -643,7 +643,7 @@ void HAL::importEEPROM() {
 #if EEPROM_AVAILABLE == EEPROM_SDCARD
 
 #if !SDSUPPORT
-#error EEPROM using sd card requires SDCARSUPPORT
+#error EEPROM using sd card requires SDCARDSUPPORT
 #endif
 
 millis_t eprSyncTime = 0; // in sync
