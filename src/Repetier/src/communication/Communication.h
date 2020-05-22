@@ -480,6 +480,7 @@ public:
     FSTRINGVAR(tStartupGCode)
 #endif
     FSTRINGVAR(tColonSpace)
+    FSTRINGVAR(tI2CError)
     // motor diver strings
     FSTRINGVAR(tMotorMotorSpace)
     FSTRINGVAR(tMotorResolutionColon)

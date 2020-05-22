@@ -448,6 +448,7 @@ FSTRINGVALUE(Com::tPrinterModeCNC, "PrinterMode:CNC")
 #ifdef STARTUP_GCODE
 FSTRINGVALUE(Com::tStartupGCode, STARTUP_GCODE)
 #endif
+FSTRINGVALUE(Com::tI2CError, "I2C communication error occured")
 FSTRINGVALUE(Com::tColonSpace, ": ")
 FSTRINGVALUE(Com::tMotorMotorSpace, "Motor ")
 FSTRINGVALUE(Com::tMotorResolutionColon, "Resolution:")

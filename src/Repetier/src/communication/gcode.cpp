@@ -1060,6 +1060,7 @@ void GCode::resetFatalError() {
     Com::writeToAll = true;
     HeatManager::resetAllErrorStates();
     Printer::debugReset(8); // disable dry run
+    HAL::i2cError = 0;
     fatalErrorMsg = nullptr;
     UI_ERROR_P(PSTR(""));
     Printer::setUIErrorMessage(false); // allow overwrite

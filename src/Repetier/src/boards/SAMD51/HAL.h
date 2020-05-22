@@ -337,6 +337,7 @@ public:
     // as long as hal eeprom functions are used.
     static char virtualEeprom[EEPROM_BYTES];
     static bool wdPinged;
+    static uint8_t i2cError;
 
     HAL();
     virtual ~HAL();
@@ -352,8 +353,8 @@ public:
     static inline void hwSetup(void) {
 #if !FEATURE_WATCHDOG
         // Disable watchdog
-        REG_WDT_CTRLA = 0;                  // Disable the WDT
-        while (WDT->SYNCBUSY.bit.ENABLE) {} // Wait for synchronization
+        REG_WDT_CTRLA = 0;                   // Disable the WDT
+        while (WDT->SYNCBUSY.bit.ENABLE) { } // Wait for synchronization
 #endif
 
 #if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
@@ -624,7 +625,7 @@ public:
     static void spiBegin(uint32_t clock, uint8_t mode, uint8_t msbfirst);
     static uint8_t spiTransfer(uint8_t);
 #ifndef USE_ARDUINO_SPI_LIB
-    static void spiEnd() {}
+    static void spiEnd() { }
 #else
     static void spiEnd();
 #endif
@@ -633,7 +634,7 @@ public:
     static void i2cSetClockspeed(uint32_t clockSpeedHz);
     static void i2cInit(uint32_t clockSpeedHz);
     static void i2cStartRead(uint8_t address7bit, uint8_t bytes);
-    static void i2cStart(uint8_t address7bit);
+    // static void i2cStart(uint8_t address7bit);
     static void i2cStartAddr(uint8_t address7bit, unsigned int pos, uint8_t readBytes);
     static void i2cStop(void);
     static void i2cWrite(uint8_t data);
@@ -646,7 +647,7 @@ public:
         while (WDT->SYNCBUSY.bit.ENABLE)
             ; // Wait for synchronization
     };
-    inline static void stopWatchdog() {}
+    inline static void stopWatchdog() { }
     inline static void pingWatchdog() {
 #if FEATURE_WATCHDOG
         wdPinged = true;
@@ -661,7 +662,7 @@ public:
     static void analogStart(void);
     static int analogRead(int channel);
     static void analogEnable(int channel);
-    static void reportHALDebug() {}
+    static void reportHALDebug() { }
     static volatile uint8_t insideTimer1;
     static void switchToBootMode();
 };

@@ -93,6 +93,7 @@ extern "C" char* sbrk(int i);
 
 char HAL::virtualEeprom[EEPROM_BYTES] = { 0 };
 bool HAL::wdPinged = true;
+uint8_t HAL::i2cError = 0;
 
 enum class TimerUsage {
     UNUSED,
@@ -746,12 +747,14 @@ void HAL::i2cInit(uint32_t clockSpeedHz) {
 /*************************************************************************
   Issues a start condition and sends address and transfer direction.
 *************************************************************************/
-void HAL::i2cStart(uint8_t address) {
+/* void HAL::i2cStart(uint8_t address) {
     WIRE_PORT.beginTransmission(address);
-}
+} */
 
 void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
-    WIRE_PORT.requestFrom(address, bytes);
+    if (!i2cError) {
+        i2cError |= (WIRE_PORT.requestFrom(address, bytes) != bytes);
+    }
 }
 /*************************************************************************
  Issues a start condition and sends address and transfer direction.
@@ -760,12 +763,14 @@ void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
  Input:   address and transfer direction of I2C device, internal address
 *************************************************************************/
 void HAL::i2cStartAddr(uint8_t address, unsigned int pos, uint8_t readBytes) {
-    WIRE_PORT.beginTransmission(address);
-    WIRE_PORT.write(pos >> 8);
-    WIRE_PORT.write(pos & 255);
-    if (readBytes) {
-        WIRE_PORT.endTransmission();
-        WIRE_PORT.requestFrom(address, readBytes);
+    if (!i2cError) {
+        WIRE_PORT.beginTransmission(address);
+        WIRE_PORT.write(pos >> 8);
+        WIRE_PORT.write(pos & 255);
+        if (readBytes) {
+            i2cError |= WIRE_PORT.endTransmission();
+            i2cError |= (WIRE_PORT.requestFrom(address, readBytes) != readBytes);
+        }
     }
 }
 
@@ -773,7 +778,7 @@ void HAL::i2cStartAddr(uint8_t address, unsigned int pos, uint8_t readBytes) {
  Terminates the data transfer and releases the I2C bus
 *************************************************************************/
 void HAL::i2cStop(void) {
-    WIRE_PORT.endTransmission();
+    i2cError |= WIRE_PORT.endTransmission();
 }
 
 /*************************************************************************
@@ -782,7 +787,9 @@ void HAL::i2cStop(void) {
   Input:    byte to be transfered
 *************************************************************************/
 void HAL::i2cWrite(uint8_t data) {
-    WIRE_PORT.write(data);
+    if (!i2cError) {
+        WIRE_PORT.write(data);
+    }
 }
 
 /*************************************************************************
@@ -790,7 +797,7 @@ void HAL::i2cWrite(uint8_t data) {
  Return:  byte read from I2C device
 *************************************************************************/
 int HAL::i2cRead(void) {
-    if (WIRE_PORT.available()) {
+    if (!i2cError && WIRE_PORT.available()) {
         return WIRE_PORT.read();
     }
     return -1; // should never happen, but better then blocking

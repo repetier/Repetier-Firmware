@@ -17,6 +17,7 @@ uint8 osAnalogInputPos = 0; // Current sampling position
 #if FEATURE_WATCHDOG
 bool HAL::wdPinged = false;
 #endif
+uint8_t HAL::i2cError = 0;
 //extern "C" void __cxa_pure_virtual() { }
 
 HAL::HAL() {
@@ -94,7 +95,7 @@ void HAL::analogStart() {
     }
     ADCSRA = _BV(ADEN) | _BV(ADSC) | ANALOG_PRESCALER;
     //ADCSRA |= _BV(ADSC);                  // start ADC-conversion
-    while (ADCSRA & _BV(ADSC)) {} // wait for conversion
+    while (ADCSRA & _BV(ADSC)) { } // wait for conversion
     /* ADCW must be read once, otherwise the next result is wrong. */
     //uint dummyADCResult;
     //dummyADCResult = ADCW;
@@ -111,14 +112,6 @@ void HAL::analogStart() {
 #endif
 }
 
-/*************************************************************************
-* Title:    I2C master library using hardware TWI interface
-* Author:   Peter Fleury <pfleury@gmx.ch>  http://jump.to/fleury
-* File:     $Id: twimaster.c,v 1.3 2005/07/02 11:14:21 Peter Exp $
-* Software: AVR-GCC 3.4.3 / avr-libc 1.2.3
-* Target:   any AVR device with hardware TWI
-* Usage:    API compatible with I2C Software Library i2cmaster.h
-**************************************************************************/
 #if (__GNUC__ * 100 + __GNUC_MINOR__) < 304
 #error "This library requires AVR-GCC 3.4 or later, update to newer AVR-GCC compiler !"
 #endif
@@ -146,12 +139,14 @@ void HAL::i2cInit(unsigned long clockSpeedHz) {
 /*************************************************************************
   Issues a start condition and sends address and transfer direction.
 *************************************************************************/
-void HAL::i2cStart(unsigned char address) {
+/* void HAL::i2cStart(unsigned char address) {
     WIRE_PORT.beginTransmission(address);
-}
+} */
 
 void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
-    WIRE_PORT.requestFrom(address, bytes);
+    if (!i2cError) {
+        i2cError |= (WIRE_PORT.requestFrom(address, bytes) != bytes);
+    }
 }
 /*************************************************************************
  Issues a start condition and sends address and transfer direction.
@@ -160,12 +155,14 @@ void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
  Input:   address and transfer direction of I2C device, internal address
 *************************************************************************/
 void HAL::i2cStartAddr(unsigned char address, unsigned int pos, unsigned int readBytes) {
-    WIRE_PORT.beginTransmission(address);
-    WIRE_PORT.write(pos >> 8);
-    WIRE_PORT.write(pos & 255);
-    if (readBytes) {
-        WIRE_PORT.endTransmission();
-        WIRE_PORT.requestFrom(address, readBytes);
+    if (!i2cError) {
+        WIRE_PORT.beginTransmission(address);
+        WIRE_PORT.write(pos >> 8);
+        WIRE_PORT.write(pos & 255);
+        if (readBytes) {
+            i2cError |= WIRE_PORT.endTransmission();
+            i2cError |= (WIRE_PORT.requestFrom(address, readBytes) != readBytes);
+        }
     }
 }
 
@@ -173,7 +170,7 @@ void HAL::i2cStartAddr(unsigned char address, unsigned int pos, unsigned int rea
  Terminates the data transfer and releases the I2C bus
 *************************************************************************/
 void HAL::i2cStop(void) {
-    WIRE_PORT.endTransmission();
+    i2cError |= WIRE_PORT.endTransmission();
 }
 
 /*************************************************************************
@@ -182,7 +179,9 @@ void HAL::i2cStop(void) {
   Input:    byte to be transfered
 *************************************************************************/
 void HAL::i2cWrite(uint8_t data) {
-    WIRE_PORT.write(data);
+    if (!i2cError) {
+        WIRE_PORT.write(data);
+    }
 }
 
 /*************************************************************************
@@ -190,12 +189,11 @@ void HAL::i2cWrite(uint8_t data) {
  Return:  byte read from I2C device
 *************************************************************************/
 int HAL::i2cRead(void) {
-    if (WIRE_PORT.available()) {
+    if (!i2cError && WIRE_PORT.available()) {
         return WIRE_PORT.read();
     }
     return -1; // should never happen, but better then blocking
 }
-
 
 #if NUM_SERVOS > 0
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__) || defined(__AVR_ATmega128__) || defined(__AVR_ATmega1281__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega2561__)
@@ -285,9 +283,9 @@ inline void setTimer(uint32_t delay) {
         "sts	%[ocr], r1 \n\t"
         "end%=: \n\t"
         //:[delay]"=&d"(delay),[stepperWait]"=&d"(stepperWait) // Output
-        : [delay] "=&d"(delay)                                                          // Output
-        : "0"(delay), [ocr] "i"(_SFR_MEM_ADDR(OCR1A)), [time] "i"(_SFR_MEM_ADDR(TCNT1)) // Input
-        : "r18"                                                                         // Clobber
+        : [ delay ] "=&d"(delay)                                                            // Output
+        : "0"(delay), [ ocr ] "i"(_SFR_MEM_ADDR(OCR1A)), [ time ] "i"(_SFR_MEM_ADDR(TCNT1)) // Input
+        : "r18"                                                                             // Clobber
     );
     /* // Assembler above replaced this code
       if(delay<65280) {
@@ -332,8 +330,8 @@ ISR(MOTION3_COMPA_vect) {
         "sts stepperWait+2,r23 \n\t"
         "end1%=: ldi %[ex],1 \n\t"
         "end%=: \n\t"
-        : [ex] "=&d"(doExit)
-        : [ocr] "i"(_SFR_MEM_ADDR(OCR1A))
+        : [ ex ] "=&d"(doExit)
+        : [ ocr ] "i"(_SFR_MEM_ADDR(OCR1A))
         : "r22", "r23");
     //        :[ex]"=&d"(doExit),[stepperWait]"=&d"(stepperWait):[ocr]"i" (_SFR_MEM_ADDR(OCR1A)):"r22","r23" );
     if (doExit)
@@ -773,7 +771,7 @@ inline void rf_store_char(unsigned char c, ring_buffer* buffer) {
 // do nothing - on the 32u4 the first USART is USART1
 #else
 void rfSerialEvent() __attribute__((weak));
-void rfSerialEvent() {}
+void rfSerialEvent() { }
 #define serialEvent_implemented
 #if defined(USART_RX_vect)
 SIGNAL(USART_RX_vect)
@@ -1050,9 +1048,9 @@ RFHardwareSerial::write(uint8_t c) {
 
     // If the output buffer is full, there's nothing for it other than to
     // wait for the interrupt handler to empty it a bit
-    while (i == _tx_buffer->tail) {}
+    while (i == _tx_buffer->tail) { }
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-    while (i == txx_buffer_tail) {}
+    while (i == txx_buffer_tail) { }
 #endif
     _tx_buffer->buffer[_tx_buffer->head] = c;
     _tx_buffer->head = i;

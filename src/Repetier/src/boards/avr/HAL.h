@@ -256,9 +256,11 @@ public:
 #if FEATURE_WATCHDOG
     static bool wdPinged;
 #endif
+    static uint8_t i2cError;
+
     HAL();
     virtual ~HAL();
-    static inline void hwSetup(void) {}
+    static inline void hwSetup(void) { }
 
     static inline void digitalWrite(uint8_t pin, uint8_t value) {
         ::digitalWrite(pin, value);
@@ -453,7 +455,7 @@ public:
     static void i2cSetClockspeed(uint32_t clockSpeedHz);
     static void i2cInit(uint32_t clockSpeedHz);
     static void i2cStartRead(uint8_t address7bit, uint8_t bytes);
-    static void i2cStart(uint8_t address7bit);
+    // static void i2cStart(uint8_t address7bit);
     static void i2cStartAddr(uint8_t address7bit, unsigned int pos, uint8_t readBytes);
     static void i2cStop(void);
     static void i2cWrite(uint8_t data);
@@ -482,7 +484,7 @@ public:
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);
 #endif
     static void analogStart();
-    static void reportHALDebug() {}
+    static void reportHALDebug() { }
 
 protected:
 private:

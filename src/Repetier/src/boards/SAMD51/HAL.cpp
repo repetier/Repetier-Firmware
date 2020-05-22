@@ -42,6 +42,8 @@ extern "C" char* sbrk(int i);
 
 char HAL::virtualEeprom[EEPROM_BYTES] = { 0, 0, 0, 0, 0, 0, 0 };
 bool HAL::wdPinged = true;
+uint8_t HAL::i2cError = 0;
+
 volatile uint8_t HAL::insideTimer1 = 0;
 
 #if defined(PIN_SERIAL2_RX) && defined(PIN_SERIAL2_TX) && defined(PAD_SERIAL2_TX)
@@ -107,7 +109,7 @@ HAL::~HAL() {
 maximum time for 120MHz is 0.55924 seconds with prescaler 1024!
 */
 #define SYNC_TIMER(timer) \
-    while (timer->COUNT16.SYNCBUSY.reg != 0) {}
+    while (timer->COUNT16.SYNCBUSY.reg != 0) { }
 
 void getPrescaleFreq(uint32_t ticks, uint32_t& prescale, uint32_t& freq) {
     if (ticks < 65536) {
@@ -150,7 +152,7 @@ void HAL::setupTimer() {
     uint32_t prescale, freq;
 
     GCLK->PCHCTRL[MOTION2_TIMER_ID].reg = GCLK_PCHCTRL_GEN_GCLK0_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
-    while (GCLK->SYNCBUSY.reg > 0) {}
+    while (GCLK->SYNCBUSY.reg > 0) { }
 
     MOTION2_TIMER->COUNT16.CTRLA.bit.ENABLE = 0; // can only change if disabled
 
@@ -177,7 +179,7 @@ void HAL::setupTimer() {
     // Regular interrupts for heater control etc
 
     GCLK->PCHCTRL[PWM_TIMER_ID].reg = GCLK_PCHCTRL_GEN_GCLK0_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
-    while (GCLK->SYNCBUSY.reg > 0) {}
+    while (GCLK->SYNCBUSY.reg > 0) { }
 
     PWM_TIMER->COUNT16.CTRLA.bit.ENABLE = 0; // can only change if disabled
 
@@ -202,7 +204,7 @@ void HAL::setupTimer() {
     // Timer for stepper motor control
 
     GCLK->PCHCTRL[MOTION3_TIMER_ID].reg = GCLK_PCHCTRL_GEN_GCLK0_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
-    while (GCLK->SYNCBUSY.reg > 0) {}
+    while (GCLK->SYNCBUSY.reg > 0) { }
 
     MOTION3_TIMER->COUNT16.CTRLA.bit.ENABLE = 0; // can only change if disabled
 
@@ -228,7 +230,7 @@ void HAL::setupTimer() {
 #if NUM_SERVOS > 0
 
     GCLK->PCHCTRL[SERVO_TIMER_ID].reg = GCLK_PCHCTRL_GEN_GCLK0_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
-    while (GCLK->SYNCBUSY.reg > 0) {}
+    while (GCLK->SYNCBUSY.reg > 0) { }
 
     SERVO_TIMER->COUNT16.CTRLA.bit.ENABLE = 0; // can only change if disabled
 
@@ -448,53 +450,53 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
 
         //reset
         TCx->COUNT8.CTRLA.bit.SWRST = 1;
-        while (TCx->COUNT8.SYNCBUSY.bit.SWRST) {}
+        while (TCx->COUNT8.SYNCBUSY.bit.SWRST) { }
 
         // Disable TCx
         TCx->COUNT8.CTRLA.bit.ENABLE = 0;
-        while (TCx->COUNT8.SYNCBUSY.bit.ENABLE) {}
+        while (TCx->COUNT8.SYNCBUSY.bit.ENABLE) { }
         // Set Timer counter Mode to 8 bits, normal PWM, prescaler dynamic
         TCx->COUNT8.CTRLA.reg = TC_CTRLA_MODE_COUNT8 | (div << TC_CTRLA_PRESCALER_Pos);
         TCx->COUNT8.WAVE.reg = TC_WAVE_WAVEGEN_NPWM;
 
-        while (TCx->COUNT8.SYNCBUSY.bit.CC0) {}
+        while (TCx->COUNT8.SYNCBUSY.bit.CC0) { }
         // Set the initial value
         TCx->COUNT8.CC[tcChannel].reg = (uint8_t)duty;
-        while (TCx->COUNT8.SYNCBUSY.bit.CC0) {}
+        while (TCx->COUNT8.SYNCBUSY.bit.CC0) { }
         // Set PER to maximum counter value (resolution : 0xFF)
         TCx->COUNT8.PER.reg = (uint8_t)0xff;
-        while (TCx->COUNT8.SYNCBUSY.bit.PER) {}
+        while (TCx->COUNT8.SYNCBUSY.bit.PER) { }
         // Enable TCx
         TCx->COUNT8.CTRLA.bit.ENABLE = 1;
-        while (TCx->COUNT8.SYNCBUSY.bit.ENABLE) {}
+        while (TCx->COUNT8.SYNCBUSY.bit.ENABLE) { }
     } else {
         c.divisor = div;
         // -- Configure TCC
         Tcc* TCCx = (Tcc*)GetTC(pd->ulPWMChannel);
 
         TCCx->CTRLA.bit.SWRST = 1;
-        while (TCCx->SYNCBUSY.bit.SWRST) {}
+        while (TCCx->SYNCBUSY.bit.SWRST) { }
 
         // Disable TCCx
         TCCx->CTRLA.bit.ENABLE = 0;
-        while (TCCx->SYNCBUSY.bit.ENABLE) {}
+        while (TCCx->SYNCBUSY.bit.ENABLE) { }
         // Set prescaler to 1/256
         TCCx->CTRLA.reg = (div << TCC_CTRLA_PRESCALER_Pos) | TCC_CTRLA_PRESCSYNC_GCLK;
         // TCCx->CTRLA.bit.PRESCALER = div;
         // Set TCx as normal PWM
         TCCx->WAVE.reg = TCC_WAVE_WAVEGEN_NPWM;
-        while (TCCx->SYNCBUSY.bit.WAVE) {}
+        while (TCCx->SYNCBUSY.bit.WAVE) { }
 
-        while (TCCx->SYNCBUSY.reg & (TCC_SYNCBUSY_CC0 | TCC_SYNCBUSY_CC1 | TCC_SYNCBUSY_CC2 | TCC_SYNCBUSY_CC3 | TCC_SYNCBUSY_CC4)) {}
+        while (TCCx->SYNCBUSY.reg & (TCC_SYNCBUSY_CC0 | TCC_SYNCBUSY_CC1 | TCC_SYNCBUSY_CC2 | TCC_SYNCBUSY_CC3 | TCC_SYNCBUSY_CC4)) { }
         // Set the initial value
         TCCx->CC[tcChannel].reg = (uint32_t)duty;
-        while (TCCx->SYNCBUSY.reg & (TCC_SYNCBUSY_CC0 | TCC_SYNCBUSY_CC1 | TCC_SYNCBUSY_CC2 | TCC_SYNCBUSY_CC3 | TCC_SYNCBUSY_CC4)) {}
+        while (TCCx->SYNCBUSY.reg & (TCC_SYNCBUSY_CC0 | TCC_SYNCBUSY_CC1 | TCC_SYNCBUSY_CC2 | TCC_SYNCBUSY_CC3 | TCC_SYNCBUSY_CC4)) { }
         // Set PER to maximum counter value (resolution : 0xFF)
         TCCx->PER.bit.PER = c.scale;
-        while (TCCx->SYNCBUSY.bit.PER) {}
+        while (TCCx->SYNCBUSY.bit.PER) { }
         // Enable TCCx
         TCCx->CTRLA.bit.ENABLE = 1;
-        while (TCCx->SYNCBUSY.bit.ENABLE) {}
+        while (TCCx->SYNCBUSY.bit.ENABLE) { }
     }
     return tcNum;
 }
@@ -515,10 +517,10 @@ void HAL::setHardwarePWM(int id, int value) {
         Tcc* TCCx = (Tcc*)GetTC(c.pwm->ulPWMChannel);
         // while (TCCx->SYNCBUSY.reg & (TCC_SYNCBUSY_CC0 | TCC_SYNCBUSY_CC1 | TCC_SYNCBUSY_CC2 | TCC_SYNCBUSY_CC3 | TCC_SYNCBUSY_CC4)) {}
         TCCx->CCBUF[tcChannel].reg = (uint32_t)duty;
-        while (TCCx->SYNCBUSY.reg & (TCC_SYNCBUSY_CC0 | TCC_SYNCBUSY_CC1 | TCC_SYNCBUSY_CC2 | TCC_SYNCBUSY_CC3 | TCC_SYNCBUSY_CC4)) {}
-        while (TCCx->SYNCBUSY.reg & TCC_SYNCBUSY_CTRLB) {}
+        while (TCCx->SYNCBUSY.reg & (TCC_SYNCBUSY_CC0 | TCC_SYNCBUSY_CC1 | TCC_SYNCBUSY_CC2 | TCC_SYNCBUSY_CC3 | TCC_SYNCBUSY_CC4)) { }
+        while (TCCx->SYNCBUSY.reg & TCC_SYNCBUSY_CTRLB) { }
         TCCx->CTRLBCLR.bit.LUPD = 1;
-        while (TCCx->SYNCBUSY.bit.CTRLB) {}
+        while (TCCx->SYNCBUSY.bit.CTRLB) { }
     }
 }
 
@@ -561,9 +563,9 @@ void HAL::analogStart(void) {
             analogConvertPos = i;
             // Set ADC clock to 48MHz clock
             GCLK->PCHCTRL[ADC0_GCLK_ID].reg = GCLK_PCHCTRL_GEN_GCLK1_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
-            while (GCLK->SYNCBUSY.reg > 0) {}
+            while (GCLK->SYNCBUSY.reg > 0) { }
             GCLK->PCHCTRL[ADC1_GCLK_ID].reg = GCLK_PCHCTRL_GEN_GCLK1_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
-            while (GCLK->SYNCBUSY.reg > 0) {}
+            while (GCLK->SYNCBUSY.reg > 0) { }
             ADC0->CTRLA.bit.PRESCALER = 7; // prescaler 256
             ADC1->CTRLA.bit.PRESCALER = 7; // prescaler 256
             ADC0->CTRLB.reg = ADC_CTRLB_RESSEL_12BIT;
@@ -581,10 +583,10 @@ void HAL::analogStart(void) {
             ADC0->INTENSET.bit.RESRDY = 1; // enable interrupt
             ADC1->INTENSET.bit.RESRDY = 1; // enable interrupt
             Adc* adc = analogAdcMap[analogConvertPos];
-            while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_INPUTCTRL) {}                            //wait for sync
+            while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_INPUTCTRL) { }                           //wait for sync
             adc->INPUTCTRL.bit.MUXPOS = analogEnabled[analogConvertPos]->ulADCChannelNumber; // Selection for the positive ADC input
             adc->CTRLA.bit.ENABLE = 0x01;                                                    // Enable ADC
-            while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE) {}                               //wait for sync
+            while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE) { }                              //wait for sync
             // Start conversion
             //adc->SWTRIG.bit.START = 1;
             adc->INTFLAG.reg = ADC_INTFLAG_RESRDY; // Clear the Data Ready flag
@@ -603,8 +605,8 @@ inline void analogISRFunction() {
     if (analogConvertPos >= 0) { // store result
         adc = analogAdcMap[analogConvertPos];
         analogValues[analogConvertPos] = adc->RESULT.reg;
-        adc->CTRLA.bit.ENABLE = 0x00;                      // Disable ADC
-        while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE) {} //wait for sync
+        adc->CTRLA.bit.ENABLE = 0x00;                       // Disable ADC
+        while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE) { } //wait for sync
     }
     // go to next active
     int count = 0;
@@ -622,10 +624,10 @@ inline void analogISRFunction() {
     // start new conversion
     if (analogEnabled[analogConvertPos] != nullptr) {
         adc = analogAdcMap[analogConvertPos];
-        while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_INPUTCTRL) {}                            //wait for sync
+        while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_INPUTCTRL) { }                           //wait for sync
         adc->INPUTCTRL.bit.MUXPOS = analogEnabled[analogConvertPos]->ulADCChannelNumber; // Selection for the positive ADC input
         adc->CTRLA.bit.ENABLE = 0x01;                                                    // Enable ADC
-        while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE) {}                               //wait for sync
+        while (adc->SYNCBUSY.reg & ADC_SYNCBUSY_ENABLE) { }                              //wait for sync
         // Start conversion
         //adc->SWTRIG.bit.START = 1;
         adc->INTFLAG.reg = ADC_INTFLAG_RESRDY; // Clear the Data Ready flag
@@ -782,7 +784,9 @@ void HAL::i2cStart(uint8_t address) {
 }
 
 void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
-    WIRE_PORT.requestFrom(address, bytes);
+    if (!i2cError) {
+        i2cError |= (WIRE_PORT.requestFrom(address, bytes) != bytes);
+    }
 }
 /*************************************************************************
  Issues a start condition and sends address and transfer direction.
@@ -791,12 +795,14 @@ void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
  Input:   address and transfer direction of I2C device, internal address
 *************************************************************************/
 void HAL::i2cStartAddr(uint8_t address, unsigned int pos, uint8_t readBytes) {
-    WIRE_PORT.beginTransmission(address);
-    WIRE_PORT.write(pos >> 8);
-    WIRE_PORT.write(pos & 255);
-    if (readBytes) {
-        WIRE_PORT.endTransmission();
-        WIRE_PORT.requestFrom(address, readBytes);
+    if (!i2cError) {
+        WIRE_PORT.beginTransmission(address);
+        WIRE_PORT.write(pos >> 8);
+        WIRE_PORT.write(pos & 255);
+        if (readBytes) {
+            i2cError |= WIRE_PORT.endTransmission();
+            i2cError |= (WIRE_PORT.requestFrom(address, readBytes) != readBytes);
+        }
     }
 }
 
@@ -804,7 +810,7 @@ void HAL::i2cStartAddr(uint8_t address, unsigned int pos, uint8_t readBytes) {
  Terminates the data transfer and releases the I2C bus
 *************************************************************************/
 void HAL::i2cStop(void) {
-    WIRE_PORT.endTransmission();
+    i2cError |= WIRE_PORT.endTransmission();
 }
 
 /*************************************************************************
@@ -813,7 +819,9 @@ void HAL::i2cStop(void) {
   Input:    byte to be transfered
 *************************************************************************/
 void HAL::i2cWrite(uint8_t data) {
-    WIRE_PORT.write(data);
+    if (!i2cError) {
+        WIRE_PORT.write(data);
+    }
 }
 
 /*************************************************************************
@@ -821,7 +829,7 @@ void HAL::i2cWrite(uint8_t data) {
  Return:  byte read from I2C device
 *************************************************************************/
 int HAL::i2cRead(void) {
-    if (WIRE_PORT.available()) {
+    if (!i2cError && WIRE_PORT.available()) {
         return WIRE_PORT.read();
     }
     return -1; // should never happen, but better then blocking
@@ -1056,7 +1064,7 @@ void HAL::tone(int frequency) {
     SET_OUTPUT(BEEPER_PIN);
     NVIC_SetPriority(TONE_TC_IRQn, 2); // don'r disturb stepper interrupt!
     GCLK->PCHCTRL[TONE_TC_GCLK_ID].reg = GCLK_PCHCTRL_GEN_GCLK0_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
-    while (GCLK->SYNCBUSY.reg > 0) {}
+    while (GCLK->SYNCBUSY.reg > 0) { }
 
     TONE_TC->COUNT16.CTRLA.bit.ENABLE = 0; // can only change if disabled
 
@@ -1083,10 +1091,10 @@ void HAL::noTone() {
 #if BEEPER_PIN >= 0
     // Disable TCx
     TONE_TC->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;
-    while (TONE_TC->COUNT16.SYNCBUSY.bit.ENABLE) {}
+    while (TONE_TC->COUNT16.SYNCBUSY.bit.ENABLE) { }
     TONE_TC->COUNT16.CTRLA.reg = TC_CTRLA_SWRST; // Reset timer
-    while (TONE_TC->COUNT16.SYNCBUSY.bit.ENABLE) {}
-    while (TONE_TC->COUNT16.CTRLA.bit.SWRST) {}
+    while (TONE_TC->COUNT16.SYNCBUSY.bit.ENABLE) { }
+    while (TONE_TC->COUNT16.CTRLA.bit.SWRST) { }
     WRITE(BEEPER_PIN, 0);
 #endif
 }
