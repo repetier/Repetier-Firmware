@@ -431,9 +431,7 @@ public:
     FSTRINGVAR(tEPRAdvanceL)
     FSTRINGVAR(tEPRPreheatTemp)
     FSTRINGVAR(tEPRPreheatBedTemp)
-#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
     FSTRINGVAR(tEPRTonesEnabled)
-#endif
     //FSTRINGVAR(tSDRemoved)
     //FSTRINGVAR(tSDInserted)
     FSTRINGVAR(tSDInitFail)

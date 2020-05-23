@@ -145,7 +145,7 @@ Custom M Codes
 - M280 S<mode> - Set ditto printing mode. mode: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
 - M281 Test if watchdog is running and working. Use M281 X0 to disable watchdog on AVR boards. Sometimes needed for boards with old bootloaders to allow reflashing.
 - M290 Z<babysteps> - Correct by adding baby steps for Z mm
-- M300 S<Frequency> P<DurationMillis> play frequency
+- M300 S<Frequency> P<DurationMillis> B<Beeper Index> play frequency
 - M302 S<0 or 1> - allow cold extrusion. Without S parameter it will allow. S1 will allow, S0 will disallow.
 - M303 P or T<extruder/bed> S<printTemerature> X0 R<Repetitions> C<method>- Auto detect pid values. Use P<NUM_EXTRUDER> for heated bed. X0 saves result in EEPROM. R is number of cycles.
 				method 0 = classic, 1 = some overshoot, 2 = no overshoot

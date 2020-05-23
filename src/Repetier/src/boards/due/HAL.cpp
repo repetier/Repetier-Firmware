@@ -151,6 +151,23 @@ void HAL::setupTimer() {
     SERVO_TIMER->TC_CHANNEL[SERVO_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
     NVIC_EnableIRQ((IRQn_Type)SERVO_TIMER_IRQ);
 #endif
+#if NUM_BEEPERS > 0
+    for (int i = 0; i < NUM_BEEPERS; i++) {
+        if (beepers[i]->getOutputType() == 1) {
+            // If we have any SW beepers, enable the beeper IRQ
+            pmc_set_writeprotect(false);
+            pmc_enable_periph_clk((uint32_t)BEEPER_TIMER_IRQ);
+            NVIC_SetPriority((IRQn_Type)BEEPER_TIMER_IRQ, 25);
+
+            TC_Configure(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC | TC_CMR_TCCLKS_TIMER_CLOCK1);
+
+            BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
+            BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
+            NVIC_EnableIRQ((IRQn_Type)BEEPER_TIMER_IRQ);
+            break;
+        }
+    }
+#endif
 }
 
 struct TimerPWMPin {
@@ -348,6 +365,10 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
     if (foundPin == -1) {
         return -1;
     }
+    
+    if(!frequency) {
+        frequency = 1;
+    }
 
     if (foundTimer) {
         TimerPWMPin& t = timer_pins[foundPin];
@@ -456,7 +477,7 @@ void HAL::setHardwarePWM(int id, int value) {
 }
 
 void HAL::setHardwareFrequency(int id, uint32_t frequency) {
-    if (id < 0) {
+    if (id < 0 || !frequency) {
         return;
     }
     if (id < 8) {
@@ -1116,17 +1137,84 @@ void MOTION2_TIMER_VECTOR() {
 #endif
 }
 
+#if NUM_BEEPERS > 0
 // IRQ handler for tone generator
-#if defined(BEEPER_PIN) && BEEPER_PIN > -1
 void BEEPER_TIMER_VECTOR() {
-    static bool toggle;
-
     TC_GetStatus(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
-
-    WRITE(BEEPER_PIN, toggle);
-    toggle = !toggle;
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_BEEPER_LOOP
+#include "io/redefine.h"
 }
 #endif
+
+void HAL::tone(uint32_t frequency) {
+#if NUM_BEEPERS > 0 
+#if NUM_BEEPERS > 1
+    ufast8_t curPlaying = 0;
+    BeeperSourceBase* playingBeepers[NUM_BEEPERS];
+    // Reduce freq to nearest 100hz, otherwise we can get some insane freq multiples (from eg primes).
+    // also clamp max freq.
+    constexpr ufast8_t reduce = 100;
+    constexpr uint32_t maxFreq = 100000;
+    uint32_t multiFreq = frequency - (frequency % reduce);
+    for (size_t i = 0; i < (NUM_BEEPERS + curPlaying); i++) {
+        uint16_t beeperCurFreq = 0;
+        if (i >= NUM_BEEPERS) {
+            if (multiFreq > maxFreq) {
+                multiFreq = maxFreq;
+            }
+            beeperCurFreq = playingBeepers[i - NUM_BEEPERS]->getCurFreq();
+            beeperCurFreq -= (beeperCurFreq % reduce);
+            playingBeepers[i - NUM_BEEPERS]->setFreqDiv((multiFreq / beeperCurFreq) - 1);
+        } else {
+            if (beepers[i]->getOutputType() == 1 && beepers[i]->isPlaying()) {
+                beeperCurFreq = beepers[i]->getCurFreq();
+                beeperCurFreq -= (beeperCurFreq % reduce);
+                if (!multiFreq) {
+                    multiFreq = beeperCurFreq;
+                }
+                multiFreq = RMath::LCM(multiFreq, beeperCurFreq);
+                playingBeepers[curPlaying++] = beepers[i];
+            }
+        }
+    }
+    frequency = multiFreq;
+#endif
+    frequency *= 2;
+    if (frequency < 1) {
+        return;
+    }
+    if (!(TC_GetStatus(BEEPER_TIMER, BEEPER_TIMER_CHANNEL) & TC_SR_CLKSTA)) {
+        TC_Start(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
+    }
+    uint32_t rc = (F_CPU_TRUE / 2) / frequency;
+    TC_SetRC(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, rc);
+    // If the counter is already beyond our desired RC, reset it. 
+    if (TC_ReadCV(BEEPER_TIMER, BEEPER_TIMER_CHANNEL) > rc) {
+        BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_CCR = TC_CCR_SWTRG;
+    }
+#endif
+}
+
+void HAL::noTone() {
+#if NUM_BEEPERS > 0
+#if NUM_BEEPERS > 1
+    // If any IO beeper is still playing, we can't stop the timer yet.
+    for (size_t i = 0; i < NUM_BEEPERS; i++) {
+        if (beepers[i]->getOutputType() == 1 && beepers[i]->isPlaying()) {
+            constexpr uint32_t maxFreq = (F_CPU_TRUE / 2) / 100000;
+            // if we're nearing/at our freq limit, refresh the divisors
+            if (maxFreq == BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_RC) {
+                HAL::tone(0);
+            }
+            return;
+        }
+    }
+#endif
+    TC_Stop(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
+#endif
+}
+
 
 void HAL::spiInit() {
     SPI.begin();

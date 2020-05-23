@@ -413,7 +413,7 @@ public:
 #endif
         }
     }
-    static void tone(int frequency);
+    static void tone(uint32_t frequency);
     static void noTone();
 
 #if EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH

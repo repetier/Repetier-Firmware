@@ -117,9 +117,11 @@ void EEPROM::callHandle() {
     handleFloat(EPR_PRINTING_DISTANCE, Com::tEPRFilamentPrinted, 3, Printer::filamentPrintedTotal);
 #endif
 
-#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
+#if NUM_BEEPERS > 0
     handleByte(EPR_TONES_ENABLED, Com::tEPRTonesEnabled, Printer::tonesEnabled);
-    Printer::setTonesEnabled(Printer::tonesEnabled, false);
+    for (size_t i = 0; i < NUM_BEEPERS; i++) {
+        beepers[i]->mute(!Printer::tonesEnabled);
+    }
 #endif
 
     Motion1::eepromHandle();

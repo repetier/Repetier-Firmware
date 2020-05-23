@@ -364,12 +364,19 @@ void HAL::setupTimer() {
     motion3->timer->attachInterrupt(TIMER_VECTOR_NAME(MOTION3_TIMER_NUM));
     motion3->timer->resume();
     HAL_NVIC_SetPriority(TIMER_IRQ(MOTION3_TIMER_NUM), 0, 0); // highest priority required!
-#if BEEPER_PIN > -1
-    toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
-    toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
-    toneTimer->timer->setMode(2, TIMER_OUTPUT_COMPARE);
-    toneTimer->timer->setOverflow(0, HERTZ_FORMAT);
-    toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
+    
+#if NUM_BEEPERS > 0
+    for (int i = 0; i < NUM_BEEPERS; i++) {
+        if (beepers[i]->getOutputType() == 1) { 
+            // If we have any SW beepers, enable the beeper IRQ
+            toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
+            toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
+            toneTimer->timer->setMode(2, TIMER_OUTPUT_COMPARE);
+            toneTimer->timer->setOverflow(0, HERTZ_FORMAT);
+            toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
+            return; 
+        }
+    }
 #endif
 }
 
@@ -942,28 +949,68 @@ void HAL::spiEnd() {
     SPI.endTransaction();
 }
 
-#if BEEPER_PIN > -1
-static bool toneToggle = false;
+#if NUM_BEEPERS > 0 
 void TIMER_VECTOR(TONE_TIMER_NUM) {
-    WRITE(BEEPER_PIN, toneToggle);
-    toneToggle = !toneToggle;
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_BEEPER_LOOP
+#include "io/redefine.h"
 }
 #endif
 
-void HAL::tone(int frequency) {
-#if BEEPER_PIN >= 0
-    SET_OUTPUT(BEEPER_PIN);
-    toneToggle = false;
+void HAL::tone(uint32_t frequency) {
+#if NUM_BEEPERS > 0 
+#if NUM_BEEPERS > 1
+    ufast8_t curPlaying = 0;
+    BeeperSourceBase* playingBeepers[NUM_BEEPERS];
+    // Reduce freq to nearest 100hz, otherwise we can get some insane freq multiples (from eg primes).
+    // also clamp max freq.
+    constexpr ufast8_t reduce = 100;
+    constexpr uint32_t maxFreq = 100000;
+    uint32_t multiFreq = frequency - (frequency % reduce);
+    for (size_t i = 0; i < (NUM_BEEPERS + curPlaying); i++) {
+        uint16_t beeperCurFreq = 0;
+        if (i >= NUM_BEEPERS) {
+            if (multiFreq > maxFreq) {
+                multiFreq = maxFreq;
+            }
+            beeperCurFreq = playingBeepers[i - NUM_BEEPERS]->getCurFreq();
+            beeperCurFreq -= (beeperCurFreq % reduce);
+            playingBeepers[i - NUM_BEEPERS]->setFreqDiv((multiFreq / beeperCurFreq) - 1);
+        } else {
+            if (beepers[i]->getOutputType() == 1 && beepers[i]->isPlaying()) {
+                beeperCurFreq = beepers[i]->getCurFreq();
+                beeperCurFreq -= (beeperCurFreq % reduce);
+                if (!multiFreq) {
+                    multiFreq = beeperCurFreq;
+                }
+                multiFreq = RMath::LCM(multiFreq, beeperCurFreq);
+                playingBeepers[curPlaying++] = beepers[i];
+            }
+        }
+    }
+    frequency = multiFreq;
+#endif
+    if (frequency < 1) {
+        return;
+    }
     toneTimer->timer->pause();
     toneTimer->timer->setOverflow(2 * frequency, HERTZ_FORMAT);
     toneTimer->timer->resume();
 #endif
 }
 void HAL::noTone() {
-#if BEEPER_PIN >= 0
+#if NUM_BEEPERS > 0
+#if NUM_BEEPERS > 1
+    // If any IO beeper is still playing, we can't stop the timer yet.
+    for (size_t i = 0; i < NUM_BEEPERS; i++) {
+        if (beepers[i]->getOutputType() == 1 && beepers[i]->isPlaying()) {
+            HAL::tone(0);
+            return;
+        }
+    }
+#endif
     if (toneTimer != nullptr) { // could be called before timer are initialized!
         toneTimer->timer->pause();
-        WRITE(BEEPER_PIN, 0);
     }
 #endif
 }
