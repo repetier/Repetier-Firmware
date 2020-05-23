@@ -801,23 +801,23 @@ void Leveling::exportBumpMatrix(char* filename) {
     tempFile.write(metaDataCols);
     tempFile.write('\n');
 
-    tempFile.printField(xMin, ',', 1);
-    tempFile.printField(xMax, ',', 1);
-    tempFile.printField(yMin, ',', 1);
-    tempFile.printField(yMax, ',', 1);
+    tempFile.printField(xMin, ',', 2);
+    tempFile.printField(xMax, ',', 2);
+    tempFile.printField(yMin, ',', 2);
+    tempFile.printField(yMax, ',', 2);
 
     tempFile.printField(static_cast<fast8_t>(Motion1::isAutolevelActive()), ',');
     tempFile.printField(static_cast<fast8_t>(GRID_SIZE), ',');
     tempFile.printField(roundf(gridTemp), ',', 1);
-    tempFile.printField(static_cast<float>(Z_PROBE_HEIGHT), ',');
-    tempFile.printField(Motion1::maxPos[Z_AXIS], '\n');
+    tempFile.printField(static_cast<float>(Z_PROBE_HEIGHT), ',', 4);
+    tempFile.printField(Motion1::maxPos[Z_AXIS], '\n', 5);
 
     for (size_t iy = 0; iy < GRID_SIZE; iy++) {
         for (size_t ix = 0; ix < GRID_SIZE; ix++) {
             if (ix == (GRID_SIZE - 1)) {
-                tempFile.printField(grid[ix][iy], '\n', 3);
+                tempFile.printField(grid[ix][iy], '\n', 6);
             } else {
-                tempFile.printField(grid[ix][iy], ',', 3);
+                tempFile.printField(grid[ix][iy], ',', 6);
             }
         }
     }
@@ -825,9 +825,9 @@ void Leveling::exportBumpMatrix(char* filename) {
     constexpr ufast8_t autoLevelSize = (sizeof(Motion1::autolevelTransformation) / sizeof(Motion1::autolevelTransformation[0]));
     for (size_t i = 0; i < autoLevelSize; i++) {
         if (i == (autoLevelSize - 1)) {
-            tempFile.printField(Motion1::autolevelTransformation[i], '\n', 3);
+            tempFile.printField(Motion1::autolevelTransformation[i], '\n', 6);
         } else {
-            tempFile.printField(Motion1::autolevelTransformation[i], ',', 3);
+            tempFile.printField(Motion1::autolevelTransformation[i], ',', 6);
         }
     }
 
