@@ -68,7 +68,7 @@ public:
     }
 
     template <typename T, typename X>
-    constexpr static T GCD(T a, X b) {
+    static T GCD(T a, X b) {
         while (b != 0) {
             T t = a % b;
             a = b;
@@ -76,6 +76,7 @@ public:
         }
         return a;
     }
+    
     template <typename T, typename X>
     constexpr static T LCM(T __m, X __n) {
         return (__m != 0 && __n != 0) ? (__m / GCD(__m, __n)) * __n : 0;
