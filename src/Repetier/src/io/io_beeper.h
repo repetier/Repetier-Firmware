@@ -16,7 +16,6 @@
 
 */
 
-
 #ifndef IO_TARGET
 #error You need to set IO_TARGET before calling this file!
 #endif
@@ -36,12 +35,13 @@ struct TonePacket {
     //If the frequency is 0, it'll behave as putting a G4 P(duration) command in between M300's.
     uint16_t frequency;
     uint16_t duration;
-}; 
+};
 
 class ToneTheme {
 private:
     const TonePacket* savedTheme;
     const fast8_t themeSize;
+
 public:
     template <fast8_t size>
     ToneTheme(const TonePacket (&theme)[size])
@@ -61,18 +61,19 @@ protected:
     virtual void refreshBeepFreq() = 0;
     volatile bool playing;
     volatile bool halted; // Special state between beeps/duration only beeps.
-    bool muted; // eeprom etc
+    bool muted;           // eeprom etc
     fast8_t blockNewFor;
     fast8_t toneHead;
     fast8_t toneTail;
     millis_t prevToneTime;
     uint16_t playingFreq;
     TonePacket beepBuf[beepBufSize] {};
+
 public:
     fast8_t condLastValidIndex;
     fast8_t condValidIndex;
     fast8_t condNumPlays;
-    
+
     BeeperSourceBase()
         : playing(false)
         , halted(false)
@@ -85,6 +86,9 @@ public:
         , condLastValidIndex(0)
         , condValidIndex(0)
         , condNumPlays(0) {}
+    virtual inline fast8_t getHeadDist() {
+        return !isPlaying() ? 0 : (toneHead >= toneTail ? (toneHead - toneTail) : (beepBufSize - toneTail + toneHead));
+    }
     virtual inline ufast8_t getOutputType() { return 0; };
     virtual inline uint16_t getCurFreq() { return playingFreq; }
     virtual inline volatile bool isPlaying() { return playing; }
@@ -102,11 +106,11 @@ public:
     virtual ufast8_t getFreqDiv() = 0;
 
     virtual bool pushTone(const TonePacket packet) {
-        if (isMuted() || isBlocking()) {
+        if (isMuted() || isBlocking() || !packet.duration) {
             return false;
         }
 
-        if (++toneHead > beepBufSize) {
+        if (++toneHead >= beepBufSize) {
             toneHead = 0;
         }
         beepBuf[toneHead] = packet;
@@ -126,13 +130,12 @@ public:
             if (isPlaying()) {
                 millis_t curTime = HAL::timeInMilliseconds();
                 if ((curTime - prevToneTime) >= beepBuf[toneTail].duration) {
-                    if (++toneTail > beepBufSize) {
-                        toneTail = 0;
-                    }
-                    TonePacket* nextBeep = &beepBuf[toneTail];
-                    if (toneTail != (toneHead + 1) && nextBeep->duration) {
+                    if (getHeadDist()) {
+                        if (++toneTail >= beepBufSize) {
+                            toneTail = 0;
+                        }
                         prevToneTime = curTime;
-                        playingFreq = nextBeep->frequency;
+                        playingFreq = beepBuf[toneTail].frequency;
                         --blockNewFor;
                         refreshBeepFreq();
                     } else {
@@ -156,7 +159,7 @@ public:
     }
     virtual bool playTheme(ToneTheme& theme, bool block) {
         if (!isMuted() && !isBlocking()) {
-            fast8_t headTailDif = (toneHead > -1 ? (toneHead - toneTail) : 0);
+            fast8_t headTailDif = getHeadDist();
             for (fast8_t i = 0; i < theme.getSize(); i++) {
                 pushTone(theme.getTone(i));
             }
@@ -174,6 +177,7 @@ class BeeperSourceIO : public BeeperSourceBase {
 private:
     volatile bool pinState;
     volatile ufast8_t freqDiv;
+
 public:
     volatile uint8_t freqCnt;
     BeeperSourceIO()
@@ -223,7 +227,9 @@ private:
 public:
     BeeperSourcePWM(PWMHandler* pwm)
         : BeeperSourceBase()
-        , pwmPin(pwm) {};
+        , pwmPin(pwm) {
+        pwmPin->set(0);
+    };
     virtual inline ufast8_t getOutputType() final { return 2; }
     virtual inline ufast8_t getFreqDiv() final { return 0; }
     virtual inline void setFreqDiv(ufast8_t div) final {}
