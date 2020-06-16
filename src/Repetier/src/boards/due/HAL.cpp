@@ -488,7 +488,7 @@ void HAL::setHardwareFrequency(int id, uint32_t frequency) {
 
         if (divisor != (PWM_INTERFACE->PWM_CH_NUM[id].PWM_CMR & PWM_CMR_CPRE_Msk)) {
             // Only reconfigure the channel if we've got to redo the prescaler.
-            PWMC_ConfigureChannel(PWM_INTERFACE, id, divisor, 0, c.pwm->invert ? 0 : (1 << 9));
+            PWMC_ConfigureChannelExt(PWM_INTERFACE, id, divisor, 0, c.pwm->invert ? 0 : (1 << 9), 0, 0, 0, 0);
             PWMC_EnableChannel(PWM_INTERFACE, id);
         }
 
