@@ -268,10 +268,12 @@ public:
     { __VA_ARGS__ }
 
 #define BEEPER_SOURCE_IO(name, IOPin) \
-    BeeperSourceIO<IOPin> name;
+    BeeperSourceIO<IOPin> name; \
+    static_assert(NUM_BEEPERS, "\"" #name "\" created in config_io but NUM_BEEPERS is zero!");
 
 #define BEEPER_SOURCE_PWM(name, PWMPin) \
-    BeeperSourcePWM name(&PWMPin);
+    BeeperSourcePWM name(&PWMPin); \
+    static_assert(NUM_BEEPERS, "\"" #name "\" created in config_io but NUM_BEEPERS is zero!");
 
 #define TONE_THEME(name, theme) \
     constexpr TonePacket name##_theme[] PROGMEM = theme; \
