@@ -105,71 +105,10 @@ public:
     virtual void setFreqDiv(ufast8_t div) = 0;
     virtual ufast8_t getFreqDiv() = 0;
 
-    virtual bool pushTone(const TonePacket packet) {
-        if (isMuted() || isBlocking() || !packet.duration) {
-            return false;
-        }
-
-        if (++toneHead >= beepBufSize) {
-            toneHead = 0;
-        }
-        beepBuf[toneHead] = packet;
-        if (!isPlaying()) {
-            InterruptProtectedBlock noInts;
-            prevToneTime = HAL::timeInMilliseconds();
-            toneTail = 0;
-            playingFreq = packet.frequency;
-            playing = true;
-            refreshBeepFreq();
-        }
-        return true;
-    }
-
-    virtual inline fast8_t process() {
-        if (!isMuted()) {
-            if (isPlaying()) {
-                millis_t curTime = HAL::timeInMilliseconds();
-                if ((curTime - prevToneTime) >= beepBuf[toneTail].duration) {
-                    if (getHeadDist()) {
-                        if (++toneTail >= beepBufSize) {
-                            toneTail = 0;
-                        }
-                        prevToneTime = curTime;
-                        playingFreq = beepBuf[toneTail].frequency;
-                        --blockNewFor;
-                        refreshBeepFreq();
-                    } else {
-                        finishPlaying();
-                    }
-                }
-            }
-            // handling for later macros
-            if (condLastValidIndex != condValidIndex) {
-                condNumPlays = 0;
-                condLastValidIndex = condValidIndex;
-            }
-            condValidIndex = 0;
-        }
-        return toneTail;
-    }
-    virtual inline void finishPlaying() {
-        playing = halted = false;
-        toneHead = toneTail = -1;
-        playingFreq = blockNewFor = 0;
-    }
-    virtual bool playTheme(ToneTheme& theme, bool block) {
-        if (!isMuted() && !isBlocking()) {
-            fast8_t headTailDif = getHeadDist();
-            for (fast8_t i = 0; i < theme.getSize(); i++) {
-                pushTone(theme.getTone(i));
-            }
-            if (block) {
-                blockNewFor = theme.getSize() + headTailDif;
-            }
-            return true;
-        }
-        return false;
-    }
+    virtual bool pushTone(const TonePacket packet);
+    virtual fast8_t process();
+    virtual void finishPlaying();
+    virtual bool playTheme(ToneTheme& theme, bool block);
 };
 
 template <class IOPin>
@@ -234,16 +173,7 @@ public:
     virtual inline ufast8_t getOutputType() final { return 2; }
     virtual inline ufast8_t getFreqDiv() final { return 0; }
     virtual inline void setFreqDiv(ufast8_t div) final {}
-    virtual inline void refreshBeepFreq() final {
-        if (playingFreq) {
-            pwmPin->set(255 / 2);
-            pwmPin->setFreq(playingFreq);
-            halted = false;
-        } else {
-            halted = true;
-            pwmPin->set(0);
-        }
-    }
+    virtual void refreshBeepFreq() final; 
     virtual inline void finishPlaying() final {
         pwmPin->set(0);
         BeeperSourceBase::finishPlaying();
