@@ -30,7 +30,6 @@
 
 constexpr fast8_t beepBufSize = 50;
 
-class ToneTheme;
 struct TonePacket {
     //If the frequency is 0, it'll behave as putting a G4 P(duration) command in between M300's.
     uint16_t frequency;
@@ -38,10 +37,6 @@ struct TonePacket {
 };
 
 class ToneTheme {
-private:
-    const TonePacket* savedTheme;
-    const fast8_t themeSize;
-
 public:
     template <fast8_t size>
     ToneTheme(const TonePacket (&theme)[size])
@@ -54,38 +49,26 @@ public:
         return beep;
     }
     const inline fast8_t getSize() { return themeSize; }
+
+private:
+    const TonePacket* savedTheme;
+    const fast8_t themeSize;
 };
 
 class BeeperSourceBase {
-protected:
-    virtual void refreshBeepFreq() = 0;
-    volatile bool playing;
-    volatile bool halted; // Special state between beeps/duration only beeps.
-    bool muted;           // eeprom etc
-    fast8_t blockNewFor;
-    fast8_t toneHead;
-    fast8_t toneTail;
-    millis_t prevToneTime;
-    uint16_t playingFreq;
-    TonePacket beepBuf[beepBufSize] {};
-
 public:
-    fast8_t condLastValidIndex;
-    fast8_t condValidIndex;
-    fast8_t condNumPlays;
-
     BeeperSourceBase()
-        : playing(false)
+        : condLastValidIndex(0)
+        , condValidIndex(0)
+        , condNumPlays(0)
+        , playing(false)
         , halted(false)
         , muted(false)
         , blockNewFor(0)
         , toneHead(-1)
         , toneTail(-1)
         , prevToneTime(0)
-        , playingFreq(0)
-        , condLastValidIndex(0)
-        , condValidIndex(0)
-        , condNumPlays(0) {}
+        , playingFreq(0) {}
     virtual inline fast8_t getHeadDist() {
         return !isPlaying() ? 0 : (toneHead >= toneTail ? (toneHead - toneTail) : (beepBufSize - toneTail + toneHead));
     }
@@ -101,29 +84,37 @@ public:
         }
         return (muted = set);
     }
-
-    virtual void setFreqDiv(ufast8_t div) = 0;
-    virtual ufast8_t getFreqDiv() = 0;
-
     virtual bool pushTone(const TonePacket packet);
-    virtual fast8_t process();
-    virtual void finishPlaying();
     virtual bool playTheme(ToneTheme& theme, bool block);
+    virtual fast8_t process();
+    virtual ufast8_t getFreqDiv() = 0;
+    virtual void setFreqDiv(ufast8_t div) = 0;
+    fast8_t condLastValidIndex;
+    fast8_t condValidIndex;
+    fast8_t condNumPlays;
+
+protected:
+    virtual void refreshBeepFreq() = 0;
+    virtual void finishPlaying();
+    volatile bool playing;
+    volatile bool halted; // Special state between beeps/duration only beeps.
+    bool muted;           // eeprom etc
+    fast8_t blockNewFor;
+    fast8_t toneHead;
+    fast8_t toneTail;
+    millis_t prevToneTime;
+    uint16_t playingFreq;
+    TonePacket beepBuf[beepBufSize] {};
 };
 
 template <class IOPin>
 class BeeperSourceIO : public BeeperSourceBase {
-private:
-    volatile bool pinState;
-    volatile ufast8_t freqDiv;
-
 public:
-    volatile uint8_t freqCnt;
     BeeperSourceIO()
         : BeeperSourceBase()
-        , pinState(false)
+        , freqCnt(0)
         , freqDiv(0)
-        , freqCnt(0) {
+        , pinState(false) {
         IOPin::off();
     };
     virtual inline ufast8_t getOutputType() final {
@@ -135,6 +126,13 @@ public:
     virtual inline void setFreqDiv(ufast8_t div) final {
         freqDiv = div;
     }
+    inline void toggle() {
+        freqCnt = 0;
+        IOPin::set(pinState = !pinState);
+    }
+    volatile uint8_t freqCnt;
+
+private:
     virtual void refreshBeepFreq() final {
         InterruptProtectedBlock noInts;
         if (playingFreq > 0) {
@@ -154,16 +152,11 @@ public:
         IOPin::off();
         freqDiv = freqCnt = 0;
     }
-    inline void toggle() {
-        freqCnt = 0;
-        IOPin::set(pinState = !pinState);
-    }
+    volatile ufast8_t freqDiv;
+    volatile bool pinState;
 };
 
 class BeeperSourcePWM : public BeeperSourceBase {
-private:
-    PWMHandler* pwmPin;
-
 public:
     BeeperSourcePWM(PWMHandler* pwm)
         : BeeperSourceBase()
@@ -173,11 +166,14 @@ public:
     virtual inline ufast8_t getOutputType() final { return 2; }
     virtual inline ufast8_t getFreqDiv() final { return 0; }
     virtual inline void setFreqDiv(ufast8_t div) final {}
-    virtual void refreshBeepFreq() final; 
+
+private:
+    virtual void refreshBeepFreq() final;
     virtual inline void finishPlaying() final {
         pwmPin->set(0);
         BeeperSourceBase::finishPlaying();
     }
+    PWMHandler* pwmPin;
 };
 
 #define PLAY_THEME(source, theme, blocking) \
