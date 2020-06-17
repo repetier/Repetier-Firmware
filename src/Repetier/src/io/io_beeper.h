@@ -198,13 +198,14 @@ public:
     }
     virtual void refreshBeepFreq() final {
         InterruptProtectedBlock noInts;
-        if (playingFreq) {
+        if (playingFreq > 0) {
             halted = false;
             freqDiv = 0;
             HAL::tone(playingFreq);
-        } else {
-            halted = true;
+        } else { // Turn off and just wait if we have no frequency.
+            HAL::noTone();
             IOPin::set(pinState = (freqCnt = 0));
+            halted = true;
         }
     }
     virtual void finishPlaying() final {
