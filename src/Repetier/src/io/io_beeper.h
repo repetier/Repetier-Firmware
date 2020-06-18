@@ -58,17 +58,17 @@ private:
 class BeeperSourceBase {
 public:
     BeeperSourceBase()
-        : condLastValidIndex(0)
-        , condValidIndex(0)
-        , condNumPlays(0)
-        , playing(false)
+        : playing(false)
         , halted(false)
         , muted(false)
-        , blockNewFor(0)
+        , blocking(false)
         , toneHead(-1)
         , toneTail(-1)
         , prevToneTime(0)
-        , playingFreq(0) {}
+        , playingFreq(0)
+        , finalCondPlays(-1)
+        , lastConditionStep(0)
+        , curConditionStep(0) {}
     virtual inline fast8_t getHeadDist() {
         return !isPlaying() ? 0 : (toneHead >= toneTail ? (toneHead - toneTail) : (beepBufSize - toneTail + toneHead));
     }
@@ -77,10 +77,10 @@ public:
     virtual inline volatile bool isPlaying() { return playing; }
     virtual inline volatile bool isHalted() { return halted; }
     virtual inline bool isMuted() { return muted; }
-    virtual inline bool isBlocking() { return (blockNewFor != 0); }
+    virtual inline bool isBlocking() { return blocking; }
     virtual inline bool mute(bool set) {
         if (set && isPlaying()) {
-            finishPlaying();
+            finishPlaying(); // Kill any timers/pwm only if we're playing.
         }
         return (muted = set);
     }
@@ -89,9 +89,8 @@ public:
     virtual fast8_t process();
     virtual ufast8_t getFreqDiv() = 0;
     virtual void setFreqDiv(ufast8_t div) = 0;
-    fast8_t condLastValidIndex;
-    fast8_t condValidIndex;
-    fast8_t condNumPlays;
+    virtual void setCondition(ToneTheme& theme, fast8_t playTimes);
+    virtual void runConditions();
 
 protected:
     virtual void refreshBeepFreq() = 0;
@@ -99,12 +98,17 @@ protected:
     volatile bool playing;
     volatile bool halted; // Special state between beeps/duration only beeps.
     bool muted;           // eeprom etc
-    fast8_t blockNewFor;
+    bool blocking;
     fast8_t toneHead;
     fast8_t toneTail;
     millis_t prevToneTime;
     uint16_t playingFreq;
     TonePacket beepBuf[beepBufSize] {};
+    ToneTheme* finalCondTheme;
+    ToneTheme* lastCondTheme;
+    fast8_t finalCondPlays;
+    fast8_t lastConditionStep;
+    fast8_t curConditionStep;
 };
 
 template <class IOPin>
@@ -213,17 +217,17 @@ private:
 #define BEEPER_SOURCE_PWM(name, PWMPin) \
     name.process();
 
+#elif IO_TARGET == IO_TARGET_100MS
+
+#define BEEPER_SOURCE_IO(name, IOPin) \
+    name.runConditions();
+
+#define BEEPER_SOURCE_PWM(name, PWMPin) \
+    name.runConditions();
+
 #define TONE_THEME_COND(source, cond, theme, playTimes) \
     if (cond && !source.isMuted()) { \
-        source.condValidIndex++; \
-        if (!source.isBlocking() && source.condValidIndex == source.condLastValidIndex) { \
-            if (!playTimes || source.condNumPlays < playTimes) { \
-                source.playTheme(theme, true); \
-                if (playTimes) { \
-                    source.condNumPlays++; \
-                } \
-            } \
-        } \
+        source.setCondition(theme, playTimes); \
     }
 
 #elif IO_TARGET == IO_TARGET_BEEPER_LOOP
