@@ -1263,10 +1263,12 @@ void SerialGCodeSource::prefetchContent() {
                 }
                 commandsReceivingWritePosition = 0;
             } else {
-                if (ch == ';')
+                if (ch == ';') {
                     commentDetected = true; // ignore new data until line end
-                if (commentDetected)
+                }
+                if (commentDetected) {
                     commandsReceivingWritePosition--;
+                }
             }
         }
         if (commandsReceivingWritePosition >= MAX_CMD_SIZE - 1) {

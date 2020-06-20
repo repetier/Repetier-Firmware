@@ -39,9 +39,9 @@ void LevelingCorrector::correct(Plane* plane) {
 
 #elif LEVELING_CORRECTOR == LEVELING_CORRECTOR_MOTOR // Motorized correction, 3 motors
 
-void LevelingCorrector::init() {}
-void LevelingCorrector::handleEeprom() {}
-void LevelingCorrector::resetEeprom() {}
+void LevelingCorrector::init() { }
+void LevelingCorrector::handleEeprom() { }
+void LevelingCorrector::resetEeprom() { }
 void LevelingCorrector::correct(Plane* plane) {
     float h1 = plane->z(LC_P1_X, LC_P1_Y);
     float h2 = plane->z(LC_P2_X, LC_P2_Y);
@@ -397,6 +397,9 @@ float Leveling::extrapolateNeighbours(int x, int y) {
             n++;
             correction += 2.0f * grid[x1][y1] - grid[x2][y2];
         }
+    }
+    if (n == 0) {
+        return 0;
     }
     return correction / static_cast<float>(n);
 }

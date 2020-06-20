@@ -25,7 +25,7 @@ Stepper drivers are TMC2130 with Rsense = 0.15 ohm
 */
 #if MOTHERBOARD == MOTHERBOARD_IKS3D
 #ifndef __SAM3X8E__
-#error Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu.
+#error "Oops!  Make sure you have 'Arduino Due' selected from the 'Tools -> Boards' menu."
 #endif
 
 #define KNOWN_BOARD

@@ -260,29 +260,57 @@ struct PWMChannel {
     uint32_t scale;
     int bits;
     int32_t divisor;
+    uint8_t tcc_ch;
 };
 
-static PWMChannel pwm_channel[13] = {
+static PWMChannel pwm_channel[33] = {
     // 5 Tcc channel
-    { false, nullptr, 0, TCC0_SIZE, -1 }, // Pins 2, 3, 4, 5, 24, 25
-    { false, nullptr, 0, TCC1_SIZE, -1 }, // Pins 6, 7, 8, 62, 63
-    { false, nullptr, 0, TCC2_SIZE, -1 }, // Pins 23,28
-    { false, nullptr, 0, TCC3_SIZE, -1 }, // Pins 18,19
-    { false, nullptr, 0, TCC4_SIZE, -1 }, // Pins 38,39
+    { false, nullptr, 0, TCC0_SIZE, -1, 0 }, // Pins 25
+    { false, nullptr, 0, TCC0_SIZE, -1, 1 }, // 24
+    { false, nullptr, 0, TCC0_SIZE, -1, 2 }, // 2
+    { false, nullptr, 0, TCC0_SIZE, -1, 3 }, // 3
+    { false, nullptr, 0, TCC0_SIZE, -1, 4 }, // 4
+    { false, nullptr, 0, TCC0_SIZE, -1, 5 }, // 5
+    { false, nullptr, 0, TCC1_SIZE, -1, 0 }, // Pins 6, 8
+    { false, nullptr, 0, TCC1_SIZE, -1, 1 }, // 7
+    { false, nullptr, 0, TCC1_SIZE, -1, 2 }, // 62
+    { false, nullptr, 0, TCC1_SIZE, -1, 3 }, // 63
+    { false, nullptr, 0, TCC2_SIZE, -1, 0 }, // Pins 28
+    { false, nullptr, 0, TCC2_SIZE, -1, 1 }, // 23
+    { false, nullptr, 0, TCC2_SIZE, -1, 2 },
+    { false, nullptr, 0, TCC3_SIZE, -1, 0 }, // Pins 18
+    { false, nullptr, 0, TCC3_SIZE, -1, 1 }, // 19
+    { false, nullptr, 0, TCC4_SIZE, -1, 0 }, // Pins 39
+    { false, nullptr, 0, TCC4_SIZE, -1, 1 }, // 38
     // 8 Tc channels, 0-4 pre used by timers!
     // 0 MOTION3
-    { true, nullptr, 0, 8, -1 }, // Pin 59
+    { true, nullptr, 0, 8, -1, 0 }, // Pin 59
+    { true, nullptr, 0, 8, -1, 1 },
     // 1 PWM_TIMER
-    { true, nullptr, 0, 8, -1 },  // Pins 60, 61
-    { false, nullptr, 0, 8, -1 }, // Pins 26, 27
+    { true, nullptr, 0, 8, -1, 0 }, // Pins 60
+    { true, nullptr, 0, 8, -1, 1 }, // 61
+    // 2
+    { false, nullptr, 0, 8, -1, 0 }, // Pins 26
+    { false, nullptr, 0, 8, -1, 1 }, // 27
     // 3 Tone
-    { true, nullptr, 0, 8, -1 }, // Pins 34, 35
+    { true, nullptr, 0, 8, -1, 0 }, // Pins 35
+    { true, nullptr, 0, 8, -1, 1 }, // 34
     // 4 servo timer can be used if no servos present
-    { NUM_SERVOS > 0, nullptr, 0, 8, -1 }, // Pins 30, 31
+    { NUM_SERVOS > 0, nullptr, 0, 8, -1, 0 }, // Pins 31
+    { NUM_SERVOS > 0, nullptr, 0, 8, -1, 1 }, // 30
     // 5 MOTION2
-    { true, nullptr, 0, 8, -1 },  // No Pins
-    { false, nullptr, 0, 8, -1 }, // Pins 9, 14, 69
-    { false, nullptr, 0, 8, -1 }  // Pins 10, 12, 13, 87
+    { true, nullptr, 0, 8, -1, 0 }, // No Pins
+    { true, nullptr, 0, 8, -1, 1 },
+    // 6
+    { false, nullptr, 0, 8, -1, 0 }, // Pins 9, 14
+    { false, nullptr, 0, 8, -1, 1 }, // 69
+    // 7
+    { false, nullptr, 0, 8, -1, 0 }, // Pins 10, 12
+    { false, nullptr, 0, 8, -1, 1 }  // 13, 87
+};
+
+static uint8_t tc_id[13] = {
+    0, 6, 10, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31
 };
 
 static void computePWMDivider(uint32_t frequency, uint32_t& div, uint32_t& scale, int bits) {
@@ -418,7 +446,7 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
     const PinDescription* pd = &g_APinDescription[pinNumber];
     uint32_t tcNum = GetTCNumber(pd->ulPWMChannel);
     uint8_t tcChannel = GetTCChannelNumber(pd->ulPWMChannel);
-    if (pd->ulPWMChannel == NOT_ON_PWM || pwm_channel[tcNum].used) { // pwm not possible
+    if (pd->ulPWMChannel == NOT_ON_PWM || pwm_channel[tc_id[tcNum] + tcChannel].used) { // pwm already in use
         return 255;
     }
     uint32_t attr = pd->ulPinAttribute;
@@ -429,10 +457,10 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
     } else if (attr & PIN_ATTR_PWM_G) {
         pinPeripheral(pinNumber, PIO_TCC_PDEC);
     }
-    PWMChannel& c = pwm_channel[tcNum];
-    if (c.pwm != nullptr) { // First come sets the frequency, next just reuses it!
-        setHardwarePWM(tcNum, 0);
-        return tcNum;
+    PWMChannel& c = pwm_channel[tc_id[tcNum] + tcChannel];
+    if (c.pwm != nullptr) { // First come sets the frequency, next just sets is again!
+        setHardwarePWM(tc_id[tcNum] + tcChannel, 0);
+        return tc_id[tcNum] + tcChannel;
     }
     c.used = true;
     c.pwm = pd;
@@ -498,12 +526,12 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
         TCCx->CTRLA.bit.ENABLE = 1;
         while (TCCx->SYNCBUSY.bit.ENABLE) { }
     }
-    return tcNum;
+    return tc_id[tcNum] + tcChannel;
 }
 
 // Set pwm output to value. id is id from initHardwarePWM.
 void HAL::setHardwarePWM(int id, int value) {
-    if (id < 0 || id >= 13) { // illegal id
+    if (id < 0 || id >= 33) { // illegal id
         return;
     }
     PWMChannel& c = pwm_channel[id];

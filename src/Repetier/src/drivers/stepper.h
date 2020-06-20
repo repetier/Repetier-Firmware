@@ -18,8 +18,8 @@ public:
         , maxEndstop(maxES)
         , direction(true)
         , axisBit(8)
-        , axis(E_AXIS) {}
-    virtual ~StepperDriverBase() {}
+        , axis(E_AXIS) { }
+    virtual ~StepperDriverBase() { }
     inline EndstopDriver* getMinEndstop() { return minEndstop; }
     inline EndstopDriver* getMaxEndstop() { return maxEndstop; }
     inline bool updateEndstop() {
@@ -37,7 +37,7 @@ public:
     inline fast8_t getAxis() { return axis; }
     void printMotorNumberAndName(bool newline = true);
     /// Allows initialization of driver e.g. current, microsteps
-    virtual void init() {}
+    virtual void init() { }
     /// Always executes the step
     virtual void step() = 0;
     /// Set step signal low
@@ -53,20 +53,20 @@ public:
     // Return true if setting current in software is supported
     virtual bool implementsSetMaxCurrent() { return false; }
     /// Set microsteps. Must be a power of 2.
-    virtual void setMicrosteps(int microsteps) {}
+    virtual void setMicrosteps(int microsteps) { }
     /// Set max current as range 0..255 or mA depending on driver
-    virtual void setMaxCurrent(int max) {}
+    virtual void setMaxCurrent(int max) { }
     // Called before homing starts. Can be used e.g. to disable silent mode
     // or otherwise prepare for endstop detection.
-    virtual void beforeHoming() {}
-    virtual void afterHoming() {}
-    virtual void handleMCode(GCode& com) {}
+    virtual void beforeHoming() { }
+    virtual void afterHoming() { }
+    virtual void handleMCode(GCode& com) { }
     // If true the stepper usage will not offer resolution modification in GUI
     virtual bool overridesResolution() { return false; }
     // Configuration in GUI
-    virtual void menuConfig(GUIAction action, void* data) {}
+    virtual void menuConfig(GUIAction action, void* data) { }
     // Allow having own settings e.g. current, microsteps
-    virtual void eepromHandle() {}
+    virtual void eepromHandle() { }
     int motorIndex();
     void printMotorName();
 };
@@ -87,7 +87,7 @@ class MixingStepperDriver : public StepperDriverBase {
 
 public:
     MixingStepperDriver()
-        : MixingStepperDriver(0, nullptr, nullptr, nullptr) {}
+        : MixingStepperDriver(0, nullptr, nullptr, nullptr) { }
     MixingStepperDriver(fast8_t n, MixingStepperState* state, EndstopDriver* minES, EndstopDriver* maxES);
     inline ufast8_t numMotors() { return nStepper; } ///< Number of motors that get mixed
     void setWeight(ufast8_t motorId, int weight);
@@ -136,11 +136,11 @@ public:
     ObservableStepperDriver(driver* _stepper)
         : StepperDriverBase(_stepper->getMinEndstop(), _stepper->getMaxEndstop())
         , stepper(_stepper) { position = 0; }
-    virtual ~ObservableStepperDriver() {}
+    virtual ~ObservableStepperDriver() { }
     inline EndstopDriver* getMinEndstop() { return minEndstop; }
     inline EndstopDriver* getMaxEndstop() { return maxEndstop; }
     /// Allows initialization of driver e.g. current, microsteps
-    virtual void init() final {}
+    virtual void init() final { }
     /// Always executes the step
     virtual void step() final {
         if (direction) {
@@ -191,9 +191,9 @@ public:
 template <class driver>
 class AdjustResolutionStepperDriver : public StepperDriverBase {
     driver* stepper;
-    uint32_t accumulator;
-    uint32_t from;
-    uint32_t to;
+    int32_t accumulator;
+    int32_t from;
+    int32_t to;
     uint16_t eprStart;
 
 public:
@@ -202,8 +202,8 @@ public:
         , stepper(_stepper)
         , accumulator(0)
         , from(_from)
-        , to(_to) {}
-    virtual ~AdjustResolutionStepperDriver() {}
+        , to(_to) { }
+    virtual ~AdjustResolutionStepperDriver() { }
     inline EndstopDriver* getMinEndstop() { return minEndstop; }
     inline EndstopDriver* getMaxEndstop() { return maxEndstop; }
     virtual void setAxis(fast8_t ax) {
@@ -268,7 +268,7 @@ template <class stepCls, class dirCls, class enableCls>
 class SimpleStepperDriver : public StepperDriverBase {
 public:
     SimpleStepperDriver(EndstopDriver* minES, EndstopDriver* maxES)
-        : StepperDriverBase(minES, maxES) {}
+        : StepperDriverBase(minES, maxES) { }
     virtual void init() { disable(); }
     inline void step() final {
         stepCls::on();
@@ -309,7 +309,7 @@ public:
         , debug(-1)
         , otpw(false)
         , otpwCount(0)
-        , stallguardSensitivity(_stallguardSensitivity) {}
+        , stallguardSensitivity(_stallguardSensitivity) { }
     int16_t getMicrosteps() { return microsteps; }
     int16_t getCurrentMillis() { return currentMillis; }
     bool getStealthChop() { return stealthChop; }
@@ -329,7 +329,7 @@ public:
                          TMC2130Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity)
         : StepperDriverBase(minES, maxES)
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
-        , driver(_driver) {}
+        , driver(_driver) { }
     virtual void init();
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity);
     inline void step() final {
@@ -375,7 +375,7 @@ public:
                          TMC5160Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity)
         : StepperDriverBase(minES, maxES)
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
-        , driver(_driver) {}
+        , driver(_driver) { }
     virtual void init();
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity);
     inline void step() final {
@@ -422,7 +422,7 @@ public:
                          TMC2208Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs)
         : StepperDriverBase(minES, maxES)
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, -128)
-        , driver(_driver) {}
+        , driver(_driver) { }
     virtual void init();
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs);
     inline void step() final {
@@ -469,7 +469,7 @@ public:
                          TMC2209Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int16_t _stallSensitivity)
         : StepperDriverBase(minES, maxES)
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
-        , driver(_driver) {}
+        , driver(_driver) { }
     virtual void init();
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int16_t _stallSensitivity);
     inline void step() final {
@@ -512,7 +512,7 @@ public:
     Mirror2StepperDriver(StepperDriverBase* m1, StepperDriverBase* m2, EndstopDriver* minES, EndstopDriver* maxES)
         : StepperDriverBase(minES, maxES)
         , motor1(m1)
-        , motor2(m2) {}
+        , motor2(m2) { }
     virtual void setAxis(fast8_t ax) {
         StepperDriverBase::setAxis(ax);
         motor1->setAxis(ax);
@@ -565,7 +565,7 @@ public:
         : StepperDriverBase(minES, maxES)
         , motor1(m1)
         , motor2(m2)
-        , motor3(m3) {}
+        , motor3(m3) { }
     virtual void setAxis(fast8_t ax) {
         StepperDriverBase::setAxis(ax);
         motor1->setAxis(ax);
@@ -628,7 +628,7 @@ public:
         , motor1(m1)
         , motor2(m2)
         , motor3(m3)
-        , motor4(m4) {}
+        , motor4(m4) { }
     virtual void setAxis(fast8_t ax) {
         StepperDriverBase::setAxis(ax);
         motor1->setAxis(ax);

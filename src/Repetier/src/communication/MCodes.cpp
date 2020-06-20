@@ -548,28 +548,26 @@ void MCode_109(GCode* com) {
 }
 
 void MCode_111(GCode* com) {
-    if (com->hasS())
+    if (com->hasS()) {
         Printer::setDebugLevel(static_cast<uint8_t>(com->S));
+    }
     if (com->hasP()) {
-        if (com->P > 0)
+        if (com->P > 0) {
             Printer::debugSet(static_cast<uint8_t>(com->P));
-        else
+        } else {
             Printer::debugReset(static_cast<uint8_t>(-com->P));
+        }
     }
     if (Printer::debugDryrun()) { // simulate movements without printing
-#if NUM_TOOLS > 0
-        for (uint8_t i = 0; i < NUM_TOOLS; i++) {
-            if (Tool::getTool(i)->getHeater()) {
-                Tool::getTool(i)->getHeater()->setTargetTemperature(0);
-            }
-        }
-#endif
-#if NUM_HEATED_BEDS != 0
-        for (uint8_t i = 0; i < NUM_HEATED_BEDS; i++) {
-            heatedBeds[i]->setTargetTemperature(0);
-        }
-#endif
+        HeatManager::disableAllHeaters();
     }
+    Com::printFLN(PSTR("debug:Echo:"), Printer::debugEcho(), BoolFormat::ONOFF);
+    Com::printFLN(PSTR("debug:Info:"), Printer::debugInfo(), BoolFormat::ONOFF);
+    Com::printFLN(PSTR("debug:Errors:"), Printer::debugErrors(), BoolFormat::ONOFF);
+    Com::printFLN(PSTR("debug:DryRun:"), Printer::debugDryrun(), BoolFormat::ONOFF);
+    Com::printFLN(PSTR("debug:Communication:"), Printer::debugCommunication(), BoolFormat::ONOFF);
+    Com::printFLN(PSTR("debug:NoMoves:"), Printer::debugNoMoves(), BoolFormat::ONOFF);
+    Com::printFLN(PSTR("debug:Endstops:"), Printer::debugEndStop(), BoolFormat::ONOFF);
 }
 
 void MCode_114(GCode* com) {
@@ -935,16 +933,21 @@ void MCode_191(GCode* com) {
 
 void MCode_200(GCode* com) {
     uint8_t extruderId = Tool::getActiveToolId();
-    if (com->hasT() && com->T < NUM_TOOLS)
+    if (com->hasT() && com->T < NUM_TOOLS) {
         extruderId = com->T;
+    }
     float d = 0;
-    if (com->hasR())
+    if (com->hasR()) {
         d = com->R;
-    if (com->hasD())
+    }
+    if (com->hasD()) {
         d = com->D;
+    }
     Tool::getTool(extruderId)->setDiameter(d);
-    if (extruderId == Tool::getActiveToolId())
+    if (extruderId == Tool::getActiveToolId()) {
         Commands::changeFlowrateMultiply(Printer::extrudeMultiply);
+    }
+    // deepcode ignore CppSameEvalBinaryExpressiontrue: wrong analysis
     if (d == 0) {
         Com::printFLN(PSTR("Disabled volumetric extrusion for extruder "), static_cast<int>(extruderId));
     } else {
@@ -1145,6 +1148,7 @@ void MCode_303(GCode* com) {
     if (com->hasT()) {
         t = com->T;
     }
+    // deepcode ignore CppSameEvalBinaryExpressiontrue: Wrong analysis
     if (t >= 0 && t < NUM_HEATERS) {
         heaters[t]->autocalibrate(com);
     } else {

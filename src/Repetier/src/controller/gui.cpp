@@ -270,11 +270,12 @@ void GUI::bufClear() {
     buf[0] = 0;
 }
 
-void GUI::bufAddInt(int value, uint8_t digits, char fillChar) {
+void GUI::bufAddInt(int value, int8_t digits, char fillChar) {
     uint8_t dig = 0, neg = 0;
     byte addspaces = digits > 0;
-    if (digits < 0)
+    if (digits < 0) {
         digits = -digits;
+    }
     if (value < 0) {
         neg = 1;
         value = -value;

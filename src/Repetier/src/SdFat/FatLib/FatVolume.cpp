@@ -188,7 +188,7 @@ bool FatVolume::allocContiguous(uint32_t count, uint32_t* firstCluster) {
         endCluster--;
     }
     // Maintain count of free clusters.
-    updateFreeClusterCount(-count);
+    updateFreeClusterCount(-static_cast<int>(count));
 
     // return first cluster number to caller
     *firstCluster = bgnCluster;

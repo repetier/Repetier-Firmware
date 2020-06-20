@@ -863,6 +863,7 @@ void HeatManagerDynDeadTime::setTargetTemperature(float temp) {
 
 void HeatManagerDynDeadTime::updateTimings() {
     float scale;
+    // file deepcode ignore FloatingPointEquals: <please specify a reason of ignoring this>
     if (temp1 == temp2) {
         deadUp = deadUp1;
         deadDown = deadDown1;

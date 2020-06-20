@@ -111,15 +111,15 @@ extern void selectToolAction(GUIAction action, void* data);
         GUI::contentChanged = true; \
     }
 #define UI_ERROR(status) \
-    {}
+    { }
 #define UI_ERROR_P(status) \
-    {}
+    { }
 #define UI_ERROR_UPD(status) \
-    {}
+    { }
 #define UI_ERROR_RAM(status) \
-    {}
+    { }
 #define UI_ERROR_UPD_RAM(status) \
-    {}
+    { }
 
 #define UI_CLEAR_STATUS \
     { \
@@ -152,7 +152,7 @@ public:
 #endif
 
     static void bufClear();
-    static void bufAddInt(int value, uint8_t digits, char fillChar = ' ');
+    static void bufAddInt(int value, int8_t digits, char fillChar = ' ');
     static void bufAddLong(long value, int8_t digits);
     static void bufAddFloat(float value, int8_t fixdigits, int8_t digits);
     static void bufAddString(char* value);

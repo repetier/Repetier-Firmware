@@ -1709,13 +1709,10 @@ EndstopDriver& Motion1::endstopFoxAxisDir(fast8_t axis, bool maxDir) {
         switch (axis) {
         case X_AXIS:
             return endstopXMax;
-            break;
         case Y_AXIS:
             return endstopYMax;
-            break;
         case Z_AXIS:
             return endstopZMax;
-            break;
         case E_AXIS:
             if (motors[E_AXIS] != nullptr) {
                 return *motors[E_AXIS]->getMaxEndstop();
@@ -1741,13 +1738,10 @@ EndstopDriver& Motion1::endstopFoxAxisDir(fast8_t axis, bool maxDir) {
         switch (axis) {
         case X_AXIS:
             return endstopXMin;
-            break;
         case Y_AXIS:
             return endstopYMin;
-            break;
         case Z_AXIS:
             return endstopZMin;
-            break;
         case E_AXIS:
             if (motors[E_AXIS] != nullptr) {
                 return *motors[E_AXIS]->getMinEndstop();
