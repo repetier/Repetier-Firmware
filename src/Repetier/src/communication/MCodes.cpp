@@ -694,10 +694,7 @@ void MCode_119(GCode* com) {
 }
 
 void MCode_120(GCode* com) {
-#if BEEPER_TYPE > 0
-    if (com->hasS() && com->hasP())
-        beep(com->S, com->P); // Beep test
-#endif
+    MCode_300(com); // Beep test
 }
 
 void MCode_140(GCode* com) {
@@ -1122,17 +1119,16 @@ void MCode_281(GCode* com) {
 }
 
 void MCode_300(GCode* com) {
-#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
+#if NUM_BEEPERS > 0
     if (!Printer::tonesEnabled) {
         return;
     }
-    u_int16_t beepS = 1;
-    u_int16_t beepP = 1000;
-    if (com->hasS())
-        beepS = com->S;
-    if (com->hasP())
-        beepP = com->P;
-    Printer::addToToneQueue({ beepS, beepP });
+    ufast8_t index = static_cast<ufast8_t>(com->hasB() ? com->B : 0);
+    if (index < NUM_BEEPERS) {
+        uint16_t freq = static_cast<uint16_t>(com->hasS() ? com->S : 1000);
+        uint16_t dur = static_cast<uint16_t>(com->hasP() ? com->P : 1000);
+        beepers[index]->pushTone({ freq, dur });
+    }
 #endif
 }
 

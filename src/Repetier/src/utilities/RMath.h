@@ -66,6 +66,21 @@ public:
     static inline float sqr(float a) {
         return a * a;
     }
+
+    template <typename T, typename X>
+    static T GCD(T a, X b) {
+        while (b != 0) {
+            T t = a % b;
+            a = b;
+            b = t;
+        }
+        return a;
+    }
+    
+    template <typename T, typename X>
+    constexpr static T LCM(T __m, X __n) {
+        return (__m != 0 && __n != 0) ? (__m / GCD(__m, __n)) * __n : 0;
+    }
 };
 
 class Quadratic1D {

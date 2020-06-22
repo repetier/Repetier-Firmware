@@ -552,6 +552,10 @@ void HAL::setHardwarePWM(int id, int value) {
     }
 }
 
+void HAL::setHardwareFrequency(int id, uint32_t frequency) {
+    // TODO: handle HAL pwm frequency change requests 
+    // 
+}
 // Initialize ADC channels
 #define ANALOG_PIN_TO_CHANNEL(p) (p < 62 ? p - 46 : p - 67)
 int32_t analogValues[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -1078,19 +1082,53 @@ uint8_t HAL::spiTransfer(uint8_t data) {
 void watchdogSetup(void) {
 }
 
-#if BEEPER_PIN > -1
+
+#if NUM_BEEPERS > 0
 void TC3_Handler(void) {
-    static bool toggle;
-    WRITE(BEEPER_PIN, toggle);
-    toggle = !toggle;
     TONE_TC->COUNT16.INTFLAG.bit.MC0 = 1; // Clear the interrupt
-}
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_BEEPER_LOOP
+#include "io/redefine.h"
+} 
 #endif
 
-void HAL::tone(int frequency) {
-#if BEEPER_PIN >= 0
-    SET_OUTPUT(BEEPER_PIN);
-    NVIC_SetPriority(TONE_TC_IRQn, 2); // don'r disturb stepper interrupt!
+void HAL::tone(uint32_t frequency) { 
+#if NUM_BEEPERS > 0 
+#if NUM_BEEPERS > 1
+    ufast8_t curPlaying = 0;
+    BeeperSourceBase* playingBeepers[NUM_BEEPERS];
+    // Reduce freq to nearest 100hz, otherwise we can get some insane freq multiples (from eg primes).
+    // also clamp max freq.
+    constexpr ufast8_t reduce = 100;
+    constexpr uint32_t maxFreq = 100000;
+    uint32_t multiFreq = frequency - (frequency % reduce);
+    for (size_t i = 0; i < (NUM_BEEPERS + curPlaying); i++) {
+        uint16_t beeperCurFreq = 0;
+        if (i >= NUM_BEEPERS) {
+            if (multiFreq > maxFreq) {
+                multiFreq = maxFreq;
+            }
+            beeperCurFreq = playingBeepers[i - NUM_BEEPERS]->getCurFreq();
+            beeperCurFreq -= (beeperCurFreq % reduce);
+            playingBeepers[i - NUM_BEEPERS]->setFreqDiv((multiFreq / beeperCurFreq) - 1);
+        } else {
+            if (beepers[i]->getOutputType() == 1 && beepers[i]->isPlaying()) {
+                beeperCurFreq = beepers[i]->getCurFreq();
+                beeperCurFreq -= (beeperCurFreq % reduce);
+                if (!multiFreq) {
+                    multiFreq = beeperCurFreq;
+                }
+                multiFreq = RMath::LCM(multiFreq, beeperCurFreq);
+                playingBeepers[curPlaying++] = beepers[i];
+            }
+        }
+    }
+    frequency = multiFreq;
+#endif
+    if (frequency < 1) {
+        return;
+    }
+    NVIC_SetPriority(TONE_TC_IRQn, 2); // don't disturb stepper interrupt!
     GCLK->PCHCTRL[TONE_TC_GCLK_ID].reg = GCLK_PCHCTRL_GEN_GCLK0_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
     while (GCLK->SYNCBUSY.reg > 0) { }
 
@@ -1112,20 +1150,28 @@ void HAL::tone(int frequency) {
     TONE_TC->COUNT16.CC[0].reg = freq;
     SYNC_TIMER(TONE_TC);
     TONE_TC->COUNT16.CTRLA.bit.ENABLE = 1; // enable timer
-    SYNC_TIMER(TONE_TC);
+    SYNC_TIMER(TONE_TC); 
 #endif
 }
 void HAL::noTone() {
-#if BEEPER_PIN >= 0
-    // Disable TCx
+#if NUM_BEEPERS > 0
+#if NUM_BEEPERS > 1
+    // If any IO beeper is still playing, we can't stop the timer yet.
+    for (size_t i = 0; i < NUM_BEEPERS; i++) {
+        if (beepers[i]->getOutputType() == 1 && beepers[i]->isPlaying()) {
+            HAL::tone(0);
+            return;
+        }
+    }
+#endif
     TONE_TC->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;
     while (TONE_TC->COUNT16.SYNCBUSY.bit.ENABLE) { }
     TONE_TC->COUNT16.CTRLA.reg = TC_CTRLA_SWRST; // Reset timer
-    while (TONE_TC->COUNT16.SYNCBUSY.bit.ENABLE) { }
-    while (TONE_TC->COUNT16.CTRLA.bit.SWRST) { }
-    WRITE(BEEPER_PIN, 0);
+    while (TONE_TC->COUNT16.SYNCBUSY.bit.ENABLE) {}
+    while (TONE_TC->COUNT16.CTRLA.bit.SWRST) {}
 #endif
 }
+ 
 
 void HAL::switchToBootMode() {
     Com::printFLN("Switching to bootmode code not supported for this chip.");

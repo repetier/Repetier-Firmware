@@ -151,6 +151,23 @@ void HAL::setupTimer() {
     SERVO_TIMER->TC_CHANNEL[SERVO_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
     NVIC_EnableIRQ((IRQn_Type)SERVO_TIMER_IRQ);
 #endif
+#if NUM_BEEPERS > 0
+    for (int i = 0; i < NUM_BEEPERS; i++) {
+        if (beepers[i]->getOutputType() == 1) {
+            // If we have any SW beepers, enable the beeper IRQ
+            pmc_set_writeprotect(false);
+            pmc_enable_periph_clk((uint32_t)BEEPER_TIMER_IRQ);
+            NVIC_SetPriority((IRQn_Type)BEEPER_TIMER_IRQ, 25);
+
+            TC_Configure(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC | TC_CMR_TCCLKS_TIMER_CLOCK1);
+
+            BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
+            BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
+            NVIC_EnableIRQ((IRQn_Type)BEEPER_TIMER_IRQ);
+            break;
+        }
+    }
+#endif
 }
 
 struct TimerPWMPin {
@@ -161,7 +178,8 @@ struct TimerPWMPin {
         , tc_global_chan(_tc_channel >> 1)
         , tc_local_chan((_tc_channel >> 1) % 3)
         , peripheral_A(_peripheral_A)
-        , tio_line_AB(_tc_channel & 1) {
+        , tio_line_AB(_tc_channel & 1)
+        , lastSetDuty(0) {
         switch (_tc_channel / 6) {
         case 1:
             tc_base_address = TC1;
@@ -182,6 +200,7 @@ struct TimerPWMPin {
     bool peripheral_A;   // Do we need to set the peripheral to A instead of B?
     bool tio_line_AB;    // 0 = A, 1 = B Is this the TIOA or TIOB output pin?
     Tc* tc_base_address; // TC0 .. TC2 timer counter registers
+    ufast8_t lastSetDuty;     // Last duty cycle we were set to. (for frequency changes).
 };
 
 // Each timer COUNTER has 3 timer channels.
@@ -279,6 +298,7 @@ struct PWMChannel {
     bool used;
     PWMPin* pwm; // table index
     uint32_t scale;
+    ufast8_t lastSetDuty;
 };
 
 static PWMChannel pwm_channel[8] = {
@@ -344,6 +364,10 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
     }
     if (foundPin == -1) {
         return -1;
+    }
+    
+    if(!frequency) {
+        frequency = 1;
     }
 
     if (foundTimer) {
@@ -419,6 +443,7 @@ void HAL::setHardwarePWM(int id, int value) {
     if (id < 8) { // PWM channel 0..7
         PWMChannel& c = pwm_channel[id];
         uint32_t duty = (c.scale * value) / 255;
+        c.lastSetDuty = value;
         if ((PWM_INTERFACE->PWM_SR & (1 << id)) == 0) { // disabled, set value
             PWM_INTERFACE->PWM_CH_NUM[id].PWM_CDTY = duty;
         } else { // just update
@@ -435,6 +460,7 @@ void HAL::setHardwarePWM(int id, int value) {
     TimerPWMChannel& c = timer_channel[(id >> 1)];
     TimerPWMPin& t = *((id & 0x1) ? c.timer_B : c.timer_A);
 
+    t.lastSetDuty = value;
     if (!value) {
         t.tc_base_address->TC_CHANNEL[t.tc_local_chan].TC_CMR &= t.tio_line_AB ? ~TC_CMR_BCPC_SET : ~TC_CMR_ACPC_SET;
     } else {
@@ -448,6 +474,40 @@ void HAL::setHardwarePWM(int id, int value) {
             TC_SetRA(t.tc_base_address, t.tc_local_chan, ((freq * value) / 255));
         }
     }
+}
+
+void HAL::setHardwareFrequency(int id, uint32_t frequency) {
+    if (id < 0 || !frequency) {
+        return;
+    }
+    if (id < 8) {
+        PWMChannel& c = pwm_channel[id];
+        uint32_t divisor = 0;
+
+        computePWMDivider(frequency, divisor, c.scale);
+
+        if (divisor != (PWM_INTERFACE->PWM_CH_NUM[id].PWM_CMR & PWM_CMR_CPRE_Msk)) {
+            // Only reconfigure the channel if we've got to redo the prescaler.
+            PWMC_ConfigureChannelExt(PWM_INTERFACE, id, divisor, 0, c.pwm->invert ? 0 : (1 << 9), 0, 0, 0, 0);
+            PWMC_EnableChannel(PWM_INTERFACE, id);
+        }
+
+        PWMC_SetPeriod(PWM_INTERFACE, id, c.scale);
+        HAL::setHardwarePWM(id, c.lastSetDuty);
+        return;
+    }
+    id &= ~0x80;
+    if ((id >> 1) > 8) {
+        return;
+    }
+
+    TimerPWMChannel& c = timer_channel[(id >> 1)];
+    TimerPWMPin t = *((id & 0x1) ? c.timer_B : c.timer_A);
+
+    TC_Stop(t.tc_base_address, t.tc_local_chan);
+    TC_SetRC(t.tc_base_address, t.tc_local_chan, (F_CPU_TRUE / 2) / frequency);
+    HAL::setHardwarePWM(id | 0x80, t.lastSetDuty);
+    TC_Start(t.tc_base_address, t.tc_local_chan);
 }
 
 void HAL::analogEnable(int channel) {
@@ -1077,17 +1137,84 @@ void MOTION2_TIMER_VECTOR() {
 #endif
 }
 
+#if NUM_BEEPERS > 0
 // IRQ handler for tone generator
-#if defined(BEEPER_PIN) && BEEPER_PIN > -1
 void BEEPER_TIMER_VECTOR() {
-    static bool toggle;
-
     TC_GetStatus(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
-
-    WRITE(BEEPER_PIN, toggle);
-    toggle = !toggle;
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_BEEPER_LOOP
+#include "io/redefine.h"
 }
 #endif
+
+void HAL::tone(uint32_t frequency) {
+#if NUM_BEEPERS > 0 
+#if NUM_BEEPERS > 1
+    ufast8_t curPlaying = 0;
+    BeeperSourceBase* playingBeepers[NUM_BEEPERS];
+    // Reduce freq to nearest 100hz, otherwise we can get some insane freq multiples (from eg primes).
+    // also clamp max freq.
+    constexpr ufast8_t reduce = 100;
+    constexpr uint32_t maxFreq = 100000;
+    uint32_t multiFreq = frequency - (frequency % reduce);
+    for (size_t i = 0; i < (NUM_BEEPERS + curPlaying); i++) {
+        uint16_t beeperCurFreq = 0;
+        if (i >= NUM_BEEPERS) {
+            if (multiFreq > maxFreq) {
+                multiFreq = maxFreq;
+            }
+            beeperCurFreq = playingBeepers[i - NUM_BEEPERS]->getCurFreq();
+            beeperCurFreq -= (beeperCurFreq % reduce);
+            playingBeepers[i - NUM_BEEPERS]->setFreqDiv((multiFreq / beeperCurFreq) - 1);
+        } else {
+            if (beepers[i]->getOutputType() == 1 && beepers[i]->isPlaying()) {
+                beeperCurFreq = beepers[i]->getCurFreq();
+                beeperCurFreq -= (beeperCurFreq % reduce);
+                if (!multiFreq) {
+                    multiFreq = beeperCurFreq;
+                }
+                multiFreq = RMath::LCM(multiFreq, beeperCurFreq);
+                playingBeepers[curPlaying++] = beepers[i];
+            }
+        }
+    }
+    frequency = multiFreq;
+#endif
+    frequency *= 2;
+    if (frequency < 1) {
+        return;
+    }
+    if (!(TC_GetStatus(BEEPER_TIMER, BEEPER_TIMER_CHANNEL) & TC_SR_CLKSTA)) {
+        TC_Start(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
+    }
+    uint32_t rc = (F_CPU_TRUE / 2) / frequency;
+    TC_SetRC(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, rc);
+    // If the counter is already beyond our desired RC, reset it. 
+    if (TC_ReadCV(BEEPER_TIMER, BEEPER_TIMER_CHANNEL) > rc) {
+        BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_CCR = TC_CCR_SWTRG;
+    }
+#endif
+}
+
+void HAL::noTone() {
+#if NUM_BEEPERS > 0
+#if NUM_BEEPERS > 1
+    // If any IO beeper is still playing, we can't stop the timer yet.
+    for (size_t i = 0; i < NUM_BEEPERS; i++) {
+        if (beepers[i]->getOutputType() == 1 && beepers[i]->isPlaying()) {
+            constexpr uint32_t maxFreq = (F_CPU_TRUE / 2) / 100000;
+            // if we're nearing/at our freq limit, refresh the divisors
+            if (maxFreq == BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_RC) {
+                HAL::tone(0);
+            }
+            return;
+        }
+    }
+#endif
+    TC_Stop(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
+#endif
+}
+
 
 void HAL::spiInit() {
     SPI.begin();

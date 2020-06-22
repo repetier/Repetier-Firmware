@@ -153,11 +153,6 @@ public:
 
 extern bool runBedLeveling(int save); // save = S parameter in gcode
 
-struct TonePacket {
-    //If the frequency is 0, it'll behave as putting a G4 P(duration) command inbetween M300's.
-    uint16_t frequency;
-    uint16_t duration;
-};
 
 /**
 The Printer class is the main class for the control of the 3d printer. Here all
@@ -291,32 +286,9 @@ public:
     static wizardVar wizardStack[WIZARD_STACK_SIZE];
 
     static void handleInterruptEvent();
-
-    static void addToToneQueue(TonePacket packet);
-
-#if defined(BEEPER_PIN) && BEEPER_PIN >= 0
-    static void processToneQueue();
-    static void killTones();
-
-    static INLINE bool areTonesPlaying() {
-        return seekToneIndex == -1 ? false : true;
-    }
-
-    static INLINE void setTonesEnabled(bool set, bool notEeprom) {
-        if (notEeprom) { // can crash if timer is not initialized
-            killTones();
-        }
-        tonesEnabled = set;
-    }
-    static INLINE void tonesKillNext() {
-        seekToneIndex = (curToneIndex != -1 ? (curToneIndex + 1) : -1);
-    }
+    
     static uint8_t tonesEnabled;
-    static fast8_t curToneIndex;
-    static fast8_t seekToneIndex;
-    static millis_t lastToneTime;
-    const static fast8_t toneBufSize = 32;
-#endif
+
     static INLINE void setInterruptEvent(uint8_t evt, bool highPriority) {
         if (highPriority || interruptEvent == 0)
             interruptEvent = evt;

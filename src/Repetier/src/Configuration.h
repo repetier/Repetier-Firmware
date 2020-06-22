@@ -228,6 +228,10 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define TOOLS \
     { &ToolExtruder1, &ToolExtruder2 }
 
+#define NUM_BEEPERS 0
+#define BEEPER_LIST \
+    {}
+    
 // Heaters enumerate all heaters, so we can loop over them
 // or call commands on a specific heater number.
 // Suggested order: extruder heaters, heated beds, heated chambers, additional heaters

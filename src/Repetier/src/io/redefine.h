@@ -61,6 +61,7 @@ enum class GUIAction;
 #include "io_heatManager.h"
 #include "io_coolerManager.h"
 #include "io_tools.h"
+#include "io_beeper.h"
 #include "io_light.h"
 #include "../custom/customMacros.h"
 

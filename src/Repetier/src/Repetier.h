@@ -478,6 +478,8 @@ extern FanController fans[];
 //extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
 //#endif
 
+extern BeeperSourceBase* beepers[];
+
 extern millis_t previousMillisCmd;
 extern millis_t maxInactiveTime;
 extern millis_t stepperInactiveTime;

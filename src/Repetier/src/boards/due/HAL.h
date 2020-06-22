@@ -329,6 +329,8 @@ public:
     static int initHardwarePWM(int pinNumber, uint32_t frequency);
     // Set pwm output to value. id is id from initHardwarePWM.
     static void setHardwarePWM(int id, int value);
+    // Set pwm frequency to value. id is id from initHardwarePWM.
+    static void setHardwareFrequency(int id, uint32_t frequency);
     // do any hardware-specific initialization here
     static inline void hwSetup(void) {
 #if !FEATURE_WATCHDOG
@@ -397,31 +399,8 @@ public:
 #endif
         }
     }
-    static inline void tone(int frequency) {
-#if BEEPER_PIN > -1
-        // set up timer counter 1 channel 0 to generate interrupts for
-        // toggling output pin.
-        SET_OUTPUT(BEEPER_PIN);
-        pmc_set_writeprotect(false);
-        pmc_enable_periph_clk((uint32_t)BEEPER_TIMER_IRQ);
-        // set interrupt to lowest possible priority
-        NVIC_SetPriority((IRQn_Type)BEEPER_TIMER_IRQ, NVIC_EncodePriority(4, 6, 3));
-        TC_Configure(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC | TC_CMR_TCCLKS_TIMER_CLOCK4); // TIMER_CLOCK4 -> 128 divisor
-        uint32_t rc = VARIANT_MCK / 128 / frequency;
-        TC_SetRA(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, rc / 2); // 50% duty cycle
-        TC_SetRC(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, rc);
-        TC_Start(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
-        BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
-        BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
-        NVIC_EnableIRQ((IRQn_Type)BEEPER_TIMER_IRQ);
-#endif
-    }
-    static inline void noTone() {
-#if BEEPER_PIN > -1
-        TC_Stop(BEEPER_TIMER, 0);
-        WRITE_VAR(BEEPER_PIN, LOW);
-#endif
-    }
+    static void tone(uint32_t frequency);
+    static void noTone();
 
 #if EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH
     static void syncEEPROM(); // store to disk if changed

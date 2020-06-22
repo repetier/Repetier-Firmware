@@ -111,6 +111,8 @@
             , val(0) {} \
         void set(fast8_t _pwm) final { pwm = _pwm; } \
         fast8_t get() final { return pwm; } \
+        void setFreq(uint32_t _freq) final {}; \
+        uint32_t getFreq() { return speed; } \
     }; \
     extern name##Class<pinname> name;
 
@@ -124,6 +126,8 @@
             , error(0) {} \
         void set(fast8_t _pwm) final { pwm = _pwm; } \
         fast8_t get() final { return pwm; } \
+        void setFreq(uint32_t _freq) final {}; \
+        uint32_t getFreq() final { return error; } \
     }; \
     extern name##Class<pinname> name;
 
@@ -131,10 +135,14 @@
     class name##Class : public PWMHandler { \
     public: \
         fast8_t pwm; \
+        uint32_t freq; \
         name##Class() \
-            : pwm(0) {} \
+            : pwm(0) \
+            , freq(0) {} \
         void set(fast8_t _pwm) final { pwm = _pwm; } \
         fast8_t get() final { return pwm; } \
+        void setFreq(uint32_t _freq) final { freq = _freq; } \
+        uint32_t getFreq() final { return freq; } \
     }; \
     extern name##Class name;
 
@@ -150,6 +158,8 @@
             pinname::set(_pwm >= onLevel); \
         } \
         fast8_t get() final { return pwm; } \
+        void setFreq(uint32_t _freq) final { pwmname.setFreq(_freq); } \
+        uint32_t getFreq() final { return pwmname.getFreq(); } \
     }; \
     extern name##Class<pinname> name;
 
@@ -157,17 +167,25 @@
     class name##Class : public PWMHandler { \
     public: \
         fast8_t pwm, id; \
+        uint32_t freq; \
         name##Class() \
             : pwm(0) \
-            , id(-1) {} \
+            , id(-1) \
+            , freq(frequency) {} \
         void set(fast8_t _pwm) final { \
-            if (pwm == _pwm) { \
-                return; \
+            if (_pwm != pwm) { \
+                pwm = _pwm; \
+                HAL::setHardwarePWM(id, pwm); \
             } \
-            pwm = _pwm; \
-            HAL::setHardwarePWM(id, pwm); \
         } \
         fast8_t get() final { return pwm; } \
+        void setFreq(uint32_t _freq) final { \
+            if (_freq != freq) { \
+                freq = _freq; \
+                HAL::setHardwareFrequency(id, freq); \
+            } \
+        } \
+        uint32_t getFreq() final { return freq; } \
     }; \
     extern name##Class name;
 
@@ -185,6 +203,8 @@
             } \
         } \
         fast8_t get() final { return pwmname.get(); } \
+        void setFreq(uint32_t _freq) final { pwmname.setFreq(_freq); } \
+        uint32_t getFreq() final { return pwmname.getFreq(); } \
     }; \
     extern name##Class name;
 
@@ -204,6 +224,8 @@
             } \
         } \
         fast8_t get() final { return pwm; } \
+        void setFreq(uint32_t _freq) final { pwmname.setFreq(_freq); } \
+        uint32_t getFreq() final { return pwmname.getFreq(); } \
     }; \
     extern name##Class name;
 
@@ -227,6 +249,8 @@
             } \
         } \
         fast8_t get() final { return pwm; } \
+        void setFreq(uint32_t _freq) final { pwmname.setFreq(_freq); } \
+        uint32_t getFreq() final { return pwmname.getFreq(); } \
     }; \
     extern name##Class name;
 
@@ -257,6 +281,8 @@
             } \
         } \
         fast8_t get() final { return pwmname.get(); } \
+        void setFreq(uint32_t _freq) final { pwmname.setFreq(_freq); } \
+        uint32_t getFreq() final { return pwmname.getFreq(); } \
     }; \
     extern name##Class name;
 
@@ -268,8 +294,11 @@
             pwmname.set(255 - _pwm); \
         } \
         fast8_t get() final { return 255 - pwmname.get(); } \
+        void setFreq(uint32_t _freq) final { pwmname.setFreq(_freq); } \
+        uint32_t getFreq() final { return pwmname.getFreq(); } \
     }; \
     extern name##Class name;
+
 #define IO_PWM_REPORT(name, pwmname) \
     class name##Class : public PWMHandler { \
 \
@@ -281,6 +310,13 @@
             } \
         } \
         fast8_t get() final { return pwmname.get(); } \
+        void setFreq(uint32_t _freq) final { \
+            if (getFreq() != _freq) { \
+                pwmname.setFreq(_freq); \
+                Com::printFLN(PSTR(#name) "=", (int)_freq); \
+            } \
+        } \
+        uint32_t getFreq() final { return pwmname.getFreq(); } \
     }; \
     extern name##Class name;
 
