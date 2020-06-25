@@ -49,8 +49,17 @@ Level 5: Nonlinear motor step position, only for nonlinear drive systems
 #undef AUTOMATIC_POWERUP
 #define AUTOMATIC_POWERUP 0
 #define ENSURE_POWER \
-    {}
+    { }
 #endif
+
+enum class DefaultSounds {
+    NEXT_PREV,
+    OK,
+    ERROR,
+    SUCCESS,
+    RESET,
+    WARNING
+};
 
 union wizardVar {
     float f;
@@ -62,21 +71,21 @@ union wizardVar {
     uint8_t uc;
 
     wizardVar()
-        : i(0) {}
+        : i(0) { }
     wizardVar(float _f)
-        : f(_f) {}
+        : f(_f) { }
     wizardVar(int32_t _f)
-        : l(_f) {}
+        : l(_f) { }
     wizardVar(uint32_t _f)
-        : ul(_f) {}
+        : ul(_f) { }
     wizardVar(int16_t _f)
-        : i(_f) {}
+        : i(_f) { }
     wizardVar(uint16_t _f)
-        : ui(_f) {}
+        : ui(_f) { }
     wizardVar(int8_t _f)
-        : c(_f) {}
+        : c(_f) { }
     wizardVar(uint8_t _f)
-        : uc(_f) {}
+        : uc(_f) { }
 };
 
 #define FIRMWARE_EVENT_JAM_DEBUG 1
@@ -152,7 +161,6 @@ public:
 };
 
 extern bool runBedLeveling(int save); // save = S parameter in gcode
-
 
 /**
 The Printer class is the main class for the control of the 3d printer. Here all
@@ -281,12 +289,12 @@ public:
     static fast8_t breakLongCommand; // Set by M108 to stop long tasks
     static fast8_t wizardStackPos;
     static fast8_t caseLightMode;
-    static fast8_t caseLightBrightness; 
+    static fast8_t caseLightBrightness;
     static float progress;
     static wizardVar wizardStack[WIZARD_STACK_SIZE];
 
     static void handleInterruptEvent();
-    
+
     static uint8_t tonesEnabled;
 
     static INLINE void setInterruptEvent(uint8_t evt, bool highPriority) {
@@ -652,6 +660,7 @@ public:
     static void unparkSafety();
     static void enableFailedModeP(PGM_P msg);
     static void enableFailedMode(char* msg);
+    static void playDefaultSound(DefaultSounds sound);
 };
 
 #endif // PRINTER_H_INCLUDED

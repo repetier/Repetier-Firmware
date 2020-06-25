@@ -179,3 +179,8 @@ HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 1000
 
 TOOL_EXTRUDER(ToolExtruder1, 0, -13, 0, HeaterExtruder1, E1Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
 TOOL_EXTRUDER(ToolExtruder2, 0, 13, 0, HeaterExtruder2, E2Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1950 R600\nG4 P300", "M340 P0 S1050 R600\nG4 P300", &Fan1PWM)
+// Define beeper output
+#if BEEPER_PIN > -1
+IO_OUTPUT(IOBeeperMain, BEEPER_PIN)
+BEEPER_SOURCE_IO(MainBeeper, IOBeeperMain)
+#endif

@@ -333,6 +333,12 @@ public:
 #define STORE_MOTOR_STALL_SENSITIVITY 1
 #endif
 
+#ifndef NUM_BEEPERS
+#define NUM_BEEPERS 0
+#define BEEPER_LIST \
+    { }
+#endif
+
 extern ServoInterface* servos[];
 
 #ifndef LAZY_DUAL_X_AXIS
@@ -516,9 +522,9 @@ extern char fullName[LONG_FILENAME_LENGTH * SD_MAX_FOLDER_DEPTH + SD_MAX_FOLDER_
 #if SDSUPPORT
 #define SHORT_FILENAME_LENGTH 14
 
-enum LsAction { LS_SerialPrint,
+/* enum LsAction { LS_SerialPrint,
                 LS_Count,
-                LS_GetFilename };
+                LS_GetFilename }; */
 class SDCard {
 public:
 #if ENABLE_SOFTWARE_SPI_CLASS

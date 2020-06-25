@@ -15,14 +15,14 @@
     along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-enum HeaterError {
+enum class HeaterError {
     NO_ERROR = 0,      // No error detected
     SENSOR_DEFECT = 1, // Sensor was reported defect
     NO_HEATUP = 2,     // Heating up does not change temperature
     LEAVING_RANGE = 3  // Loosing temperature
 };
 
-enum DecoupleMode {
+enum class DecoupleMode {
     NO_HEATING = 0,  // Heaters are off
     FAST_RISING = 1, // Full power until control range is reached
     SWING_IN = 2,    // Closing target temperature
@@ -95,7 +95,7 @@ public:
         return decoupleMode != DecoupleMode::PAUSED && targetTemperature > MAX_ROOM_TEMPERATURE;
     }
     inline void pause() {
-        if (decoupleMode != NO_HEATING) {
+        if (decoupleMode != DecoupleMode::NO_HEATING) {
             decoupleMode = DecoupleMode::PAUSED;
             output->set(0);
         }
@@ -103,8 +103,8 @@ public:
     inline void unpause() {
         setTargetTemperature(targetTemperature);
     }
-    inline bool isUnplugged() { return decoupleMode == UNPLUGGED; }
-    inline bool isPaused() { return decoupleMode == PAUSED; }
+    inline bool isUnplugged() { return decoupleMode == DecoupleMode::UNPLUGGED; }
+    inline bool isPaused() { return decoupleMode == DecoupleMode::PAUSED; }
     inline float getTargetTemperature() { return targetTemperature; }
     inline void setCurrentTemperature(float temp) {
         currentTemperature = temp;

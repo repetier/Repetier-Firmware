@@ -82,7 +82,6 @@ Early stage version for Stacke X2 printer - use with care
 #define BUMP_LIMIT_TO 0
 #define BUMP_DEFAULT_AUTOIMPORT_DIR "matrixes/" // Default auto import directory for M232 S2 matrix imports.
 
-
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta, 3 = Dual X-Axis
 #define PRINTER_TYPE PRINTER_TYPE_DELTA
 // steps to include as babysteps per 1/BLOCK_FREQUENCY seconds. Must be lower then STEPPER_FREQUENCY/BLOCK_FREQUENCY and be low enough to not loose steps.
@@ -103,6 +102,8 @@ Early stage version for Stacke X2 printer - use with care
 // Encoder speed 0 = fastest, 1 or 2 = slowest - set so 1 click is one menu move
 // Default is 2 if not set by controller. Us eonly to fix wrong setting
 // #define ENCODER_SPEED 2
+// Set 1 if you want to replace the default themes and define them in configuration_io.h
+#define CUSTOM_DEFAULT_THEMES 0
 
 /* Ratios for core xyz. First index denotes motor and second axis.
 For each motor you can set the ratio of x,y,z position that adds
@@ -221,17 +222,24 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
 #define NUM_HEATED_CHAMBERS 0
 #define HEATED_CHAMBER_LIST \
-    {}
+    { }
 
 #define SERVO_LIST \
     { &ZProbeServo }
 #define TOOLS \
     { &ToolExtruder1, &ToolExtruder2 }
 
+// Define beeper list
+#if BEEPER_PIN > -1
+#define NUM_BEEPERS 1
+#define BEEPER_LIST \
+    { &MainBeeper }
+#else
 #define NUM_BEEPERS 0
 #define BEEPER_LIST \
-    {}
-    
+    { }
+#endif
+
 // Heaters enumerate all heaters, so we can loop over them
 // or call commands on a specific heater number.
 // Suggested order: extruder heaters, heated beds, heated chambers, additional heaters

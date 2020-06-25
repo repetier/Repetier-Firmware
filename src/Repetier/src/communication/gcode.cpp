@@ -184,14 +184,14 @@ GCode::GCode() {
 void GCode::keepAlive(enum FirmwareState state, int id) {
     millis_t now = HAL::timeInMilliseconds();
 
-    if (state != NotBusy && keepAliveInterval != 0) {
+    if (state != FirmwareState::NotBusy && keepAliveInterval != 0) {
         if (now - lastBusySignal < keepAliveInterval)
             return;
-        if (state == Paused) {
+        if (state == FirmwareState::Paused) {
             GCodeSource::printAllFLN(PSTR("busy:paused for user interaction"));
-        } else if (state == WaitHeater) {
+        } else if (state == FirmwareState::WaitHeater) {
             GCodeSource::printAllFLN(PSTR("busy:heating"));
-        } else if (state == DoorOpen) {
+        } else if (state == FirmwareState::DoorOpen) {
             GCodeSource::printAllFLN(PSTR("busy:door open"));
             UI_STATUS_F(Com::tDoorOpen);
         } else { // processing and uncaught cases
@@ -288,7 +288,7 @@ void GCode::checkAndPushCommand() {
     Com::printFLN(Com::tOk);
 #endif
     GCodeSource::activeSource->wasLastCommandReceivedAsBinary = sendAsBinary;
-    keepAlive(NotBusy);
+    keepAlive(FirmwareState::NotBusy);
     GCodeSource::activeSource->waitingForResend = -1; // everything is ok.
 }
 
@@ -401,7 +401,7 @@ void GCode::readFromSerial() {
     GCodeSource::prefetchAll();
 #endif
     if (bufferLength >= GCODE_BUFFER_SIZE || (waitUntilAllCommandsAreParsed && bufferLength)) {
-        keepAlive(Processing, 1);
+        keepAlive(FirmwareState::Processing, 1);
         return; // all buffers full
     }
     waitUntilAllCommandsAreParsed = false;
@@ -1054,6 +1054,7 @@ void GCode::reportFatalError() {
     Com::printF(fatalErrorMsg);
     Com::printFLN(PSTR(" - Printer stopped and heaters disabled due to this error. Fix error and restart with M999."));
     UI_ERROR_P(fatalErrorMsg)
+    Printer::playDefaultSound(DefaultSounds::ERROR);
 }
 
 void GCode::resetFatalError() {

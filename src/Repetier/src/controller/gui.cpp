@@ -54,12 +54,18 @@ void GUI::update() {
     handleKeypress(); // Test for new keys
 
     if (nextAction == GUIAction::BACK) {
+        Printer::playDefaultSound(DefaultSounds::OK);
         pop();
         nextAction = GUIAction::BACK_PROCESSED;
         lastAction = HAL::timeInMilliseconds();
         nextActionRepeat = 0;
         contentChanged = true;
     } else if (nextAction != GUIAction::NONE && nextAction != GUIAction::CLICK_PROCESSED && nextAction != GUIAction::BACK_PROCESSED) {
+        if (nextAction == GUIAction::NEXT || nextAction == GUIAction::PREVIOUS) {
+            Printer::playDefaultSound(DefaultSounds::NEXT_PREV);
+        } else if (nextAction == GUIAction::CLICK) {
+            Printer::playDefaultSound(DefaultSounds::OK);
+        }
         // Com::printFLN(PSTR("Action:"), (int32_t)nextAction);
         lastAction = HAL::timeInMilliseconds();
         callbacks[level](nextAction, data[level]); // Execute action
@@ -552,9 +558,11 @@ void GUI::setStatusP(FSTRINGPARAM(text), GUIStatusLevel lvl) {
             push(infoScreen, status, GUIPageType::STATUS);
         }
         if (lvl == GUIStatusLevel::WARNING) {
+            Printer::playDefaultSound(DefaultSounds::WARNING);
             push(warningScreen, status, GUIPageType::STATUS);
         }
         if (lvl == GUIStatusLevel::ERROR) {
+            Printer::playDefaultSound(DefaultSounds::ERROR);
             push(errorScreen, status, GUIPageType::STATUS);
         }
     }

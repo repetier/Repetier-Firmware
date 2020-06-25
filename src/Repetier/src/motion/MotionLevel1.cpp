@@ -468,20 +468,20 @@ int32_t Motion1::getBufferedLengthMM() {
 void Motion1::waitForEndOfMoves() {
     while (buffersUsed() > 0) {
         Commands::checkForPeriodicalActions(false);
-        GCode::keepAlive(Processing, 3);
+        GCode::keepAlive(FirmwareState::Processing, 3);
     }
 }
 
 void Motion1::waitForXFreeMoves(fast8_t n, bool allowMoves) {
     while (buffersUsed() >= PRINTLINE_CACHE_SIZE - n) {
-        GCode::keepAlive(Processing, 3);
+        GCode::keepAlive(FirmwareState::Processing, 3);
         Commands::checkForPeriodicalActions(allowMoves);
     }
     if (buffersUsed() < MIN_PRINTLINE_FILL) {
         return;
     }
     while (getBufferedLengthMM() > maxIntLengthBuffered) { // wait for reduced length to limit buffer
-        GCode::keepAlive(Processing, 3);
+        GCode::keepAlive(FirmwareState::Processing, 3);
         Commands::checkForPeriodicalActions(allowMoves);
     }
 }
@@ -1167,7 +1167,7 @@ void Motion1::backplan(fast8_t actId) {
             return;
         }
         next->startSpeed = act->endSpeed = lastJunctionSpeed;
-        act->state = BACKWARD_PLANNED;
+        act->state = Motion1State::BACKWARD_PLANNED;
         maxLoops--;
     } while (maxLoops);
     if (next) {

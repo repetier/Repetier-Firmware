@@ -290,7 +290,7 @@ void GCode_4(GCode* com) {
 
     codenum += HAL::timeInMilliseconds(); // keep track of when we started waiting
     while ((uint32_t)(codenum - HAL::timeInMilliseconds()) < 2000000000) {
-        GCode::keepAlive(Processing, 2);
+        GCode::keepAlive(FirmwareState::Processing, 2);
         Commands::checkForPeriodicalActions(true);
     }
 }

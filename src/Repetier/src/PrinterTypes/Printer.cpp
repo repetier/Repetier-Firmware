@@ -645,6 +645,7 @@ void Printer::setup() {
     GCode::executeFString(Com::tStartupGCode);
 #endif
     rescueSetup();
+    playDefaultSound(DefaultSounds::RESET);
 }
 
 void Printer::defaultLoopActions() {
@@ -1497,4 +1498,30 @@ void Printer::enableFailedMode(char* msg) {
     Com::print(msg);
     Com::println();
     Com::printErrorFLN(Com::tM999);
+}
+
+void Printer::playDefaultSound(DefaultSounds sound) {
+#if NUM_BEEPERS > 0
+    BeeperSourceBase* beeper = beepers[0];
+    switch (sound) {
+    case DefaultSounds::NEXT_PREV:
+        beeper->playTheme(ThemeButtonNextPrev, false);
+        break;
+    case DefaultSounds::OK:
+        beeper->playTheme(ThemeButtonOk, false);
+        break;
+    case DefaultSounds::SUCCESS:
+        beeper->playTheme(ThemeNotifyConfirm, false);
+        break;
+    case DefaultSounds::WARNING:
+        beeper->playTheme(ThemeNotifyWarning, false);
+        break;
+    case DefaultSounds::ERROR:
+        beeper->playTheme(ThemeNotifyError, false);
+        break;
+    case DefaultSounds::RESET:
+        beeper->playTheme(ThemeButtonReset, false);
+        break;
+    }
+#endif
 }

@@ -137,7 +137,7 @@ void HAL::setupTimer() {
     NVIC_SetPriority(PIOC_IRQn, 1);
     NVIC_SetPriority(PIOD_IRQn, 1);
     // Servo control
-#if NUM_SERVOS > 0
+#if NUM_SERVOS > 0 || NUM_BEEPER > 0
     pmc_enable_periph_clk(SERVO_TIMER_IRQ);
     //NVIC_SetPriority((IRQn_Type)SERVO_TIMER_IRQ, NVIC_EncodePriority(4, 5, 0));
     NVIC_SetPriority((IRQn_Type)SERVO_TIMER_IRQ, 4);
@@ -195,12 +195,12 @@ struct TimerPWMPin {
     int pin;
     Pio* pio;
     uint32_t pio_pin;
-    byte tc_global_chan; // 0 .. 8 What's our overall timer channel number?
-    byte tc_local_chan;  // 0 .. 2 We're a timer channel inside a timer counter.
-    bool peripheral_A;   // Do we need to set the peripheral to A instead of B?
-    bool tio_line_AB;    // 0 = A, 1 = B Is this the TIOA or TIOB output pin?
-    Tc* tc_base_address; // TC0 .. TC2 timer counter registers
-    ufast8_t lastSetDuty;     // Last duty cycle we were set to. (for frequency changes).
+    byte tc_global_chan;  // 0 .. 8 What's our overall timer channel number?
+    byte tc_local_chan;   // 0 .. 2 We're a timer channel inside a timer counter.
+    bool peripheral_A;    // Do we need to set the peripheral to A instead of B?
+    bool tio_line_AB;     // 0 = A, 1 = B Is this the TIOA or TIOB output pin?
+    Tc* tc_base_address;  // TC0 .. TC2 timer counter registers
+    ufast8_t lastSetDuty; // Last duty cycle we were set to. (for frequency changes).
 };
 
 // Each timer COUNTER has 3 timer channels.
@@ -365,8 +365,8 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
     if (foundPin == -1) {
         return -1;
     }
-    
-    if(!frequency) {
+
+    if (!frequency) {
         frequency = 1;
     }
 
@@ -1003,6 +1003,10 @@ void SERVO_TIMER_VECTOR() {
     if (servoIndex > 7) {
         servoIndex = 0;
     }
+// Add all generated servo interrupt handlers
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_SERVO_INTERRUPT
+#include "io/redefine.h"
 }
 #endif
 
@@ -1148,7 +1152,7 @@ void BEEPER_TIMER_VECTOR() {
 #endif
 
 void HAL::tone(uint32_t frequency) {
-#if NUM_BEEPERS > 0 
+#if NUM_BEEPERS > 0
 #if NUM_BEEPERS > 1
     ufast8_t curPlaying = 0;
     BeeperSourceBase* playingBeepers[NUM_BEEPERS];
@@ -1189,7 +1193,7 @@ void HAL::tone(uint32_t frequency) {
     }
     uint32_t rc = (F_CPU_TRUE / 2) / frequency;
     TC_SetRC(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, rc);
-    // If the counter is already beyond our desired RC, reset it. 
+    // If the counter is already beyond our desired RC, reset it.
     if (TC_ReadCV(BEEPER_TIMER, BEEPER_TIMER_CHANNEL) > rc) {
         BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_CCR = TC_CCR_SWTRG;
     }
@@ -1214,7 +1218,6 @@ void HAL::noTone() {
     TC_Stop(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
 #endif
 }
-
 
 void HAL::spiInit() {
     SPI.begin();

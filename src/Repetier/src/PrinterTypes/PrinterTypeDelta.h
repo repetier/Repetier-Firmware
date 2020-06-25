@@ -19,7 +19,7 @@
 #if PRINTER_TYPE == PRINTER_TYPE_DELTA
 
 class PrinterType {
-    enum MotionMode {
+    enum class MotionMode {
         MOTION_DELTA = 0,
         MOTION_PER_AXIS = 1
     };

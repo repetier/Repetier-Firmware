@@ -76,7 +76,7 @@ public:
             HAL::pingWatchdog();
             if ((target & 127) == 0) {
                 Commands::checkForPeriodicalActions(false);
-                GCode::keepAlive(Processing);
+                GCode::keepAlive(FirmwareState::Processing);
             }
         }
     }
@@ -150,7 +150,7 @@ public:
             HAL::pingWatchdog();
             if ((target & 127) == 0) {
                 Commands::checkForPeriodicalActions(false);
-                GCode::keepAlive(Processing);
+                GCode::keepAlive(FirmwareState::Processing);
             }
             if (up != minEndstop) {
                 if (endstopHit()) {

@@ -70,13 +70,13 @@ void LevelingCorrector::correct(Plane* plane) {
 #if NUM_HEATED_BEDS > 0
     while (heatedBeds[0]->isUnplugged() == false) {
         Commands::checkForPeriodicalActions(false);
-        GCode::keepAlive(Processing, 4);
+        GCode::keepAlive(FirmwareState::Processing, 4);
     }
 #endif
     for (int i = 0; i < LC_WAIT_BED_REMOVE * 10; i++) {
         Commands::checkForPeriodicalActions(false);
         HAL::delayMilliseconds(100);
-        GCode::keepAlive(Processing, 4);
+        GCode::keepAlive(FirmwareState::Processing, 4);
     }
 #endif
     StepperDriverBase* oldE = Motion1::motors[E_AXIS];

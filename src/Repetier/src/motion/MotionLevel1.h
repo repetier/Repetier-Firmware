@@ -84,7 +84,7 @@ class Motion2Buffer;
 #define FLAG_ADVANCE 4
 #define FLAG_ACTIVE_SECONDARY 8 ///< Secondary tool should be active
 
-enum Motion1State {
+enum class Motion1State {
     FREE = 0,              // Not used currenty
     RESERVED = 1,          // Start to fill
     JUNCTION_COMPUTED = 2, // Max. junction speed is computed
@@ -95,7 +95,7 @@ enum Motion1State {
     RUNNUNG = 7            // Currently being executed
 };
 
-enum Motion1Action {
+enum class Motion1Action {
     WAIT = 0,          // Add a wait - in the hope a next move follows for bette roptimization
     WARMUP = 1,        // Preheat laser
     MOVE = 2,          // A plain move
@@ -103,7 +103,7 @@ enum Motion1Action {
     MOVE_BABYSTEPS = 4 // Babysteps outside of active moves
 };
 
-enum EndstopMode {
+enum class EndstopMode {
     DISABLED = 0,        // Endstop tests disabled
     STOP_AT_ANY_HIT = 1, // Stop move on any hit endstop
     STOP_HIT_AXES = 2,   // Continue until all endstops are hit

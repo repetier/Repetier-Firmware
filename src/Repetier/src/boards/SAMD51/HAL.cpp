@@ -227,7 +227,7 @@ void HAL::setupTimer() {
     SYNC_TIMER(MOTION3_TIMER);
 
     // Servo control
-#if NUM_SERVOS > 0
+#if NUM_SERVOS > 0 || NUM_BEEPERS > 0
 
     GCLK->PCHCTRL[SERVO_TIMER_ID].reg = GCLK_PCHCTRL_GEN_GCLK0_Val | (1 << GCLK_PCHCTRL_CHEN_Pos);
     while (GCLK->SYNCBUSY.reg > 0) { }
@@ -251,6 +251,9 @@ void HAL::setupTimer() {
     SERVO_TIMER->COUNT16.CTRLA.bit.ENABLE = 1; // enable timer
     SYNC_TIMER(SERVO_TIMER);
 
+#endif
+#if NUM_BEEPERS > 0
+    // Add interrupt for tone handling
 #endif
 }
 
@@ -296,8 +299,8 @@ static PWMChannel pwm_channel[33] = {
     { true, nullptr, 0, 8, -1, 0 }, // Pins 35
     { true, nullptr, 0, 8, -1, 1 }, // 34
     // 4 servo timer can be used if no servos present
-    { NUM_SERVOS > 0, nullptr, 0, 8, -1, 0 }, // Pins 31
-    { NUM_SERVOS > 0, nullptr, 0, 8, -1, 1 }, // 30
+    { NUM_SERVOS > 0 || NUM_BEEPERS > 0, nullptr, 0, 8, -1, 0 }, // Pins 31
+    { NUM_SERVOS > 0 || NUM_BEEPERS > 0, nullptr, 0, 8, -1, 1 }, // 30
     // 5 MOTION2
     { true, nullptr, 0, 8, -1, 0 }, // No Pins
     { true, nullptr, 0, 8, -1, 1 },
@@ -553,8 +556,8 @@ void HAL::setHardwarePWM(int id, int value) {
 }
 
 void HAL::setHardwareFrequency(int id, uint32_t frequency) {
-    // TODO: handle HAL pwm frequency change requests 
-    // 
+    // TODO: handle HAL pwm frequency change requests
+    //
 }
 // Initialize ADC channels
 #define ANALOG_PIN_TO_CHANNEL(p) (p < 62 ? p - 46 : p - 67)
@@ -919,6 +922,10 @@ void SERVO_TIMER_VECTOR() {
         if (servoIndex > 7) {
             servoIndex = 0;
         }
+        // Add all generated servo interrupt handlers
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_SERVO_INTERRUPT
+#include "io/redefine.h"
     }
 }
 #endif
@@ -1082,18 +1089,17 @@ uint8_t HAL::spiTransfer(uint8_t data) {
 void watchdogSetup(void) {
 }
 
-
 #if NUM_BEEPERS > 0
 void TC3_Handler(void) {
     TONE_TC->COUNT16.INTFLAG.bit.MC0 = 1; // Clear the interrupt
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_BEEPER_LOOP
 #include "io/redefine.h"
-} 
+}
 #endif
 
-void HAL::tone(uint32_t frequency) { 
-#if NUM_BEEPERS > 0 
+void HAL::tone(uint32_t frequency) {
+#if NUM_BEEPERS > 0
 #if NUM_BEEPERS > 1
     ufast8_t curPlaying = 0;
     BeeperSourceBase* playingBeepers[NUM_BEEPERS];
@@ -1150,7 +1156,7 @@ void HAL::tone(uint32_t frequency) {
     TONE_TC->COUNT16.CC[0].reg = freq;
     SYNC_TIMER(TONE_TC);
     TONE_TC->COUNT16.CTRLA.bit.ENABLE = 1; // enable timer
-    SYNC_TIMER(TONE_TC); 
+    SYNC_TIMER(TONE_TC);
 #endif
 }
 void HAL::noTone() {
@@ -1167,11 +1173,10 @@ void HAL::noTone() {
     TONE_TC->COUNT16.CTRLA.reg &= ~TC_CTRLA_ENABLE;
     while (TONE_TC->COUNT16.SYNCBUSY.bit.ENABLE) { }
     TONE_TC->COUNT16.CTRLA.reg = TC_CTRLA_SWRST; // Reset timer
-    while (TONE_TC->COUNT16.SYNCBUSY.bit.ENABLE) {}
-    while (TONE_TC->COUNT16.CTRLA.bit.SWRST) {}
+    while (TONE_TC->COUNT16.SYNCBUSY.bit.ENABLE) { }
+    while (TONE_TC->COUNT16.CTRLA.bit.SWRST) { }
 #endif
 }
- 
 
 void HAL::switchToBootMode() {
     Com::printFLN("Switching to bootmode code not supported for this chip.");

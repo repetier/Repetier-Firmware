@@ -102,6 +102,8 @@ Early stage version for Stacke X2 printer - use with care
 // Encoder speed 0 = fastest, 1 or 2 = slowest - set so 1 click is one menu move
 // Default is 2 if not set by controller. Us eonly to fix wrong setting
 // #define ENCODER_SPEED 2
+// Set 1 if you want to replace the default themes and define them in configuration_io.h
+#define CUSTOM_DEFAULT_THEMES 0
 
 /* Ratios for core xyz. First index denotes motor and second axis.
 For each motor you can set the ratio of x,y,z position that adds
@@ -241,6 +243,16 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
     { &XMotor, &YMotor, &ZMotor, &E1Motor, &E2Motor }
 #define MOTOR_NAMES \
     { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("E0"), PSTR("E1") }
+// Define beeper list
+#if BEEPER_PIN > -1
+#define NUM_BEEPERS 1
+#define BEEPER_LIST \
+    { &MainBeeper }
+#else
+#define NUM_BEEPERS 0
+#define BEEPER_LIST \
+    { }
+#endif
 
 // Some common settings for trinamic driver settings
 /**

@@ -185,3 +185,10 @@ LIGHT_STATE_PWM(caseLightState)
 LIGHT_COND(caseLightState, true, Printer::caseLightMode, 255, 255, 255, Printer::caseLightBrightness)
 LIGHT_COND(caseLightState, GUI::statusLevel == GUIStatusLevel::ERROR, LIGHT_STATE_BLINK_SLOW, 255, 255, 255, Printer::caseLightBrightness)
 LIGHT_SOURCE_PWM(caseLightDriver, caseLightPWM, caseLightState)
+
+// Define beeper output
+#if BEEPER_PIN > -1
+IO_OUTPUT(IOBeeperMain, BEEPER_PIN)
+BEEPER_SOURCE_IO(MainBeeper, IOBeeperMain)
+#endif
+

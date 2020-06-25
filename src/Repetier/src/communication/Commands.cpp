@@ -74,7 +74,7 @@ void Commands::commandLoop() {
             }
         }
     } else {
-        GCode::keepAlive(Paused);
+        GCode::keepAlive(FirmwareState::Paused);
     }
     Printer::defaultLoopActions();
 }
@@ -151,7 +151,7 @@ void Commands::waitUntilEndOfAllMoves() {
     while (Motion1::length) {
         //GCode::readFromSerial();
         checkForPeriodicalActions(false);
-        GCode::keepAlive(Processing, 3);
+        GCode::keepAlive(FirmwareState::Processing, 3);
     }
 }
 
@@ -160,7 +160,7 @@ void Commands::waitMS(uint32_t wait) {
     while (static_cast<int32_t>(end - HAL::timeInMilliseconds()) > 0) {
         //GCode::readFromSerial();
         checkForPeriodicalActions(false);
-        GCode::keepAlive(Processing, 3);
+        GCode::keepAlive(FirmwareState::Processing, 3);
     }
 }
 

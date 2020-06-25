@@ -1054,7 +1054,7 @@ void MCode_226(GCode* com) {
         }
         do {
             Commands::checkForPeriodicalActions(true);
-            GCode::keepAlive(WaitHeater);
+            GCode::keepAlive(FirmwareState::WaitHeater);
         } while (HAL::digitalRead(com->P) != comp);
     }
 }

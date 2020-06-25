@@ -84,19 +84,19 @@ void HeatManager::update() {
     if (errorCount > 0) {
         errorCount--;
     }
-    if (decoupleMode == CALIBRATING) {
+    if (decoupleMode == DecoupleMode::CALIBRATING) {
         setCurrentTemperature(input->get());
         return; // do not interfere with calibration
     }
-    if (decoupleMode == PAUSED) {
+    if (decoupleMode == DecoupleMode::PAUSED) {
         setCurrentTemperature(input->get());
         return; // do nothing in pause mode
     }
-    if (decoupleMode == UNPLUGGED) {
+    if (decoupleMode == DecoupleMode::UNPLUGGED) {
         if (input->isDefect()) {
             return;
         }
-        decoupleMode = NO_HEATING;
+        decoupleMode = DecoupleMode::NO_HEATING;
         Com::printF(PSTR("Heater "));
         printName();
         Com::printFLN(PSTR(" plugged."));
@@ -106,7 +106,7 @@ void HeatManager::update() {
             setCurrentTemperature(0);
             // setTargetTemperature(0); // unplugged mode will prevent errors
             output->set(0);
-            decoupleMode = UNPLUGGED;
+            decoupleMode = DecoupleMode::UNPLUGGED;
             Com::printF(PSTR("Heater "));
             printName();
             Com::printFLN(PSTR(" unplugged."));
@@ -217,7 +217,7 @@ void HeatManager::waitForTargetTemperature() {
     Printer::setAutoreportTemp(true);
     while (true) {
         Commands::checkForPeriodicalActions(true);
-        GCode::keepAlive(WaitHeater);
+        GCode::keepAlive(FirmwareState::WaitHeater);
         if (fabs(targetTemperature - currentTemperature) <= 1 || Printer::breakLongCommand) {
             Printer::setAutoreportTemp(oldReport);
             return;
@@ -479,7 +479,7 @@ void HeatManagerPID::autocalibrate(GCode* g) {
         HAL::pingWatchdog();
 #endif
         Commands::checkForPeriodicalActions(true); // update heaters etc.
-        GCode::keepAlive(WaitHeater);
+        GCode::keepAlive(FirmwareState::WaitHeater);
         setCurrentTemperature(input->get());
         millis_t time = HAL::timeInMilliseconds();
         maxTemp = RMath::max(maxTemp, currentTemperature);
@@ -662,7 +662,7 @@ void HeatManagerPeltierPID<flowPin, peltierType, minTemp>::autocalibrate(GCode* 
         HAL::pingWatchdog();
 #endif
         Commands::checkForPeriodicalActions(true); // update heaters etc.
-        GCode::keepAlive(WaitHeater);
+        GCode::keepAlive(FirmwareState::WaitHeater);
         setCurrentTemperature(input->get());
         millis_t time = HAL::timeInMilliseconds();
         maxTemp = RMath::max(maxTemp, currentTemperature);
@@ -1015,7 +1015,7 @@ bool HeatManagerDynDeadTime::detectTimings(float temp, float& up, float& down, f
         HAL::pingWatchdog();
 #endif
         Commands::checkForPeriodicalActions(true); // update heaters etc.
-        GCode::keepAlive(WaitHeater);
+        GCode::keepAlive(FirmwareState::WaitHeater);
         millis_t time = HAL::timeInMilliseconds();
         if (time - lastTime >= 25) { // store new
             setCurrentTemperature(input->get());

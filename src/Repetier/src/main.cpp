@@ -142,7 +142,7 @@ Custom M Codes
 - M232 - Read and reset max. advance values
 - M233 X<AdvanceK> Y<AdvanceL> - Set temporary advance K-value to X and linear term advanceL to Y
 - M251 Measure Z steps from homing stop (Delta printers). S0 - Reset, S1 - Print, S2 - Store to Z length (also EEPROM if enabled)
-- M280 S<mode> - Set ditto printing mode. mode: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders
+- M280 S<mode> R<0/1> - Set ditto printing mode. mode: 0 = off, 1 = 1 extra extruder, 2 = 2 extra extruder, 3 = 3 extra extruders, R1 activates mirror mode.
 - M281 Test if watchdog is running and working. Use M281 X0 to disable watchdog on AVR boards. Sometimes needed for boards with old bootloaders to allow reflashing.
 - M290 Z<babysteps> - Correct by adding baby steps for Z mm
 - M300 S<Frequency> P<DurationMillis> B<Beeper Index> play frequency

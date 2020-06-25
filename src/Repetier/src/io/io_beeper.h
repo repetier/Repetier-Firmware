@@ -68,7 +68,7 @@ public:
         , playingFreq(0)
         , finalCondPlays(-1)
         , lastConditionStep(0)
-        , curConditionStep(0) {}
+        , curConditionStep(0) { }
     virtual inline fast8_t getHeadDist() {
         return !isPlaying() ? 0 : (toneHead >= toneTail ? (toneHead - toneTail) : (beepBufSize - toneTail + toneHead));
     }
@@ -169,7 +169,7 @@ public:
     };
     virtual inline ufast8_t getOutputType() final { return 2; }
     virtual inline ufast8_t getFreqDiv() final { return 0; }
-    virtual inline void setFreqDiv(ufast8_t div) final {}
+    virtual inline void setFreqDiv(ufast8_t div) final { }
 
 private:
     virtual void refreshBeepFreq() final;
@@ -209,7 +209,7 @@ private:
     constexpr TonePacket name##_theme[] PROGMEM = theme; \
     ToneTheme name(name##_theme);
 
-#elif IO_TARGET == IO_TARGET_PERIODICAL_ACTIONS
+#elif IO_TARGET == IO_TARGET_SERVO_INTERRUPT // IO_TARGET_PERIODICAL_ACTIONS
 
 #define BEEPER_SOURCE_IO(name, IOPin) \
     name.process();
@@ -257,4 +257,13 @@ private:
 
 #ifndef BEEPER_SOURCE_PWM
 #define BEEPER_SOURCE_PWM(name, PWMPin)
+#endif
+
+#if !defined(CUSTOM_DEFAULT_THEMES) || CUSTOM_DEFAULT_THEMES == 0
+TONE_THEME(ThemeButtonNextPrev, TONES({ 3000, 1 }))
+TONE_THEME(ThemeButtonOk, TONES({ 3000, 10 }))
+TONE_THEME(ThemeButtonReset, TONES({ 6500, 50 }, { 7500, 80 }))
+TONE_THEME(ThemeNotifyWarning, TONES({ 1000, 300 }))
+TONE_THEME(ThemeNotifyError, TONES({ 3050, 150 }, { 7200, 100 }, { 3050, 150 }, { 2000, 100 }, { 3050, 150 }))
+TONE_THEME(ThemeNotifyConfirm, TONES({ 3050, 50 }, { 4000, 30 }))
 #endif

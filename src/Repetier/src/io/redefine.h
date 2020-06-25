@@ -43,6 +43,8 @@ IO_TARGET with following meanings:
 21: Store recover data
 22: Restore recover data
 23: init late
+24: beeper loop
+25: servo inerrupt
 */
 
 // #pragma message(VAR_NAME_VALUE(IO_TARGET))

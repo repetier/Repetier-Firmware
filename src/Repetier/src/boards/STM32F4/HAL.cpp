@@ -304,7 +304,7 @@ void HAL::hwSetup(void) {
     SET_OUTPUT(DEBUG_ISR_ANALOG_PIN);
 #endif
     // Servo control
-#if NUM_SERVOS > 0
+#if NUM_SERVOS > 0 || NUM_BEEPERS > 0
 
     servo = reserveTimerInterrupt(SERVO_TIMER_NUM); // prevent pwm usage
     servo->timer = new HardwareTimer(TIMER(SERVO_TIMER_NUM));
@@ -364,17 +364,17 @@ void HAL::setupTimer() {
     motion3->timer->attachInterrupt(TIMER_VECTOR_NAME(MOTION3_TIMER_NUM));
     motion3->timer->resume();
     HAL_NVIC_SetPriority(TIMER_IRQ(MOTION3_TIMER_NUM), 0, 0); // highest priority required!
-    
+
 #if NUM_BEEPERS > 0
     for (int i = 0; i < NUM_BEEPERS; i++) {
-        if (beepers[i]->getOutputType() == 1) { 
+        if (beepers[i]->getOutputType() == 1) {
             // If we have any SW beepers, enable the beeper IRQ
             toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
             toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
             toneTimer->timer->setMode(2, TIMER_OUTPUT_COMPARE);
             toneTimer->timer->setOverflow(0, HERTZ_FORMAT);
             toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
-            return; 
+            break;
         }
     }
 #endif
@@ -449,10 +449,9 @@ void HAL::setHardwarePWM(int id, int value) {
     entry.ht->resume();
 }
 
-
 void HAL::setHardwareFrequency(int id, uint32_t frequency) {
-    // TODO: handle HAL pwm frequency change requests 
-    // 
+    // TODO: handle HAL pwm frequency change requests
+    //
 }
 
 ADC_HandleTypeDef AdcHandle = {};
@@ -855,6 +854,10 @@ void servoOffTimer(HardwareTimer* timer) {
             servo->tim->CCR1 = Servo2500;
         }
     }
+// Add all generated servo interrupt handlers
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_SERVO_INTERRUPT
+#include "io/redefine.h"
 }
 
 // Servo timer Interrupt handler
@@ -949,7 +952,7 @@ void HAL::spiEnd() {
     SPI.endTransaction();
 }
 
-#if NUM_BEEPERS > 0 
+#if NUM_BEEPERS > 0
 void TIMER_VECTOR(TONE_TIMER_NUM) {
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_BEEPER_LOOP
@@ -958,7 +961,7 @@ void TIMER_VECTOR(TONE_TIMER_NUM) {
 #endif
 
 void HAL::tone(uint32_t frequency) {
-#if NUM_BEEPERS > 0 
+#if NUM_BEEPERS > 0
 #if NUM_BEEPERS > 1
     ufast8_t curPlaying = 0;
     BeeperSourceBase* playingBeepers[NUM_BEEPERS];

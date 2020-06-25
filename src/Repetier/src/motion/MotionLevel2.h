@@ -26,7 +26,7 @@ from 0, where 0 position depends on printer type.
 class Motion3Buffer;
 class VelocityProfile;
 
-enum Motion2State {
+enum class Motion2State {
     NOT_INITIALIZED = 0,
     ACCELERATE_INIT = 1,
     ACCELERATING = 2,

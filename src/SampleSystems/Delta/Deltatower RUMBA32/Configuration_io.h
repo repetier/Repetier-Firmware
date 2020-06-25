@@ -178,3 +178,9 @@ COOLER_MANAGER_SENSOR(ExtruderCooler, TempHottestExtruder, CoolerFan, 70, 200, 1
 
 TOOL_EXTRUDER(ToolExtruder1, 0, -13, 0, HeaterExtruder1, E1Motor, 1.75, 500, 5, 30, 5000, 177, "M117 Extruder 1", "", &Fan1PWM)
 TOOL_EXTRUDER(ToolExtruder2, 0, 13, 0, HeaterExtruder2, E2Motor, 1.75, 500, 5, 30, 5000, 177, "M117 Extruder 2", "", &Fan1PWM)
+// Define beeper output
+#if BEEPER_PIN > -1
+IO_OUTPUT(IOBeeperMain, BEEPER_PIN)
+BEEPER_SOURCE_IO(MainBeeper, IOBeeperMain)
+#endif
+
