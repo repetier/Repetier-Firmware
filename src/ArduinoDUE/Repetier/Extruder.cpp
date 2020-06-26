@@ -976,34 +976,40 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
 #endif        // MIXING_EXTRUDER
     bool alloffs = true;
     for (uint8_t i = 0; i < NUM_EXTRUDER; i++)
-        if (tempController[i]->targetTemperatureC > 15)
+        if (tempController[i]->targetTemperatureC > 15) {
             alloffs = false;
+        }
 #ifdef MAXTEMP
-    if (temperatureInCelsius > MAXTEMP)
+    if (temperatureInCelsius > MAXTEMP) {
         temperatureInCelsius = MAXTEMP;
+    }
 #endif
-    if (temperatureInCelsius < 0)
+    if (temperatureInCelsius < 0) {
         temperatureInCelsius = 0;
+    }
 #if SHARED_EXTRUDER_HEATER
     for (fast8_t eid = 0; eid < NUM_EXTRUDER; eid++) {
         TemperatureController* tc = tempController[eid];
 #else
     TemperatureController* tc = tempController[extr];
 #endif
-        if (tc->sensorType == 0)
+        if (tc->sensorType == 0) {
             temperatureInCelsius = 0;
+        }
         //if(temperatureInCelsius==tc->targetTemperatureC) return;
-        if (temperatureInCelsius < MAX_ROOM_TEMPERATURE)
+        if (temperatureInCelsius < MAX_ROOM_TEMPERATURE) {
             tc->resetPreheatTime();
-        else if (tc->targetTemperatureC == 0)
+        } else if (tc->targetTemperatureC == 0) {
             tc->startPreheatTime();
-
+        }
         tc->setTargetTemperature(temperatureInCelsius);
         tc->updateTempControlVars();
-        if (beep && temperatureInCelsius > MAX_ROOM_TEMPERATURE)
+        if (beep && temperatureInCelsius > MAX_ROOM_TEMPERATURE) {
             tc->setAlarm(true);
-        if (temperatureInCelsius >= EXTRUDER_FAN_COOL_TEMP)
+        }
+        if (temperatureInCelsius >= EXTRUDER_FAN_COOL_TEMP) {
             extruder[extr].coolerPWM = extruder[extr].coolerSpeed;
+        }
         Com::printF(Com::tTargetExtr, extr, 0);
         Com::printFLN(Com::tColon, temperatureInCelsius, 0);
 #if SHARED_EXTRUDER_HEATER

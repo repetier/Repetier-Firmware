@@ -662,9 +662,9 @@ void Printer::updateAdvanceFlags() {
 
 void Printer::moveToParkPosition(bool zOnly) {
     if (Printer::isHomedAll()) { // for safety move only when homed!
-    if(!zOnly) {
-        moveToReal(EEPROM::parkX(), EEPROM::parkY(), IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS], true);
-    }
+        if (!zOnly) {
+            moveToReal(EEPROM::parkX(), EEPROM::parkY(), IGNORE_COORDINATE, IGNORE_COORDINATE, Printer::maxFeedrate[X_AXIS], true);
+        }
         moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::min(zMin + zLength, currentPosition[Z_AXIS] + EEPROM::parkZ()), IGNORE_COORDINATE, Printer::maxFeedrate[Z_AXIS], true);
     }
 }
@@ -1293,12 +1293,12 @@ void Printer::setup() {
 #if TMC2130_ON_EXT3 > 0
     Printer::tmc_driver_e3 = new TMC2130Stepper(EXT3_ENABLE_PIN, EXT3_DIR_PIN, EXT3_STEP_PIN, TMC2130_EXT3_CS_PIN);
     configTMC2130(Printer::tmc_driver_e3, TMC2130_STEALTHCHOP_EXT3, TMC2130_STALLGUARD_EXT3,
-    TMC2130_PWM_AMPL_EXT3, TMC2130_PWM_GRAD_EXT3, TMC2130_PWM_AUTOSCALE_EXT3, TMC2130_PWM_FREQ_EXT3);
+                  TMC2130_PWM_AMPL_EXT3, TMC2130_PWM_GRAD_EXT3, TMC2130_PWM_AUTOSCALE_EXT3, TMC2130_PWM_FREQ_EXT3);
 #endif
 #if TMC2130_ON_EXT4 > 0
     Printer::tmc_driver_e4 = new TMC2130Stepper(EXT4_ENABLE_PIN, EXT4_DIR_PIN, EXT4_STEP_PIN, TMC2130_EXT4_CS_PIN);
     configTMC2130(Printer::tmc_driver_e4, TMC2130_STEALTHCHOP_EXT4, TMC2130_STALLGUARD_EXT4,
-    TMC2130_PWM_AMPL_EXT4, TMC2130_PWM_GRAD_EXT4, TMC2130_PWM_AUTOSCALE_EXT4, TMC2130_PWM_FREQ_EXT4);
+                  TMC2130_PWM_AMPL_EXT4, TMC2130_PWM_GRAD_EXT4, TMC2130_PWM_AUTOSCALE_EXT4, TMC2130_PWM_FREQ_EXT4);
 #endif
 #endif // DRV_TMC2130
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
@@ -1505,7 +1505,7 @@ void Printer::homeZAxis() { // Delta z homing
     Endstops::fillFromAccumulator();
     if (Endstops::xMax() && Endstops::yMax() && Endstops::zMax()) {
         // Back off for retest
-        PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true);
+        PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE, 0, Printer::homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR, true, true);
         //Endstops::report();
         // Check for proper release of all (XYZ) endstops
         if (!(Endstops::xMax() || Endstops::yMax() || Endstops::zMax())) {
@@ -3040,7 +3040,7 @@ void Printer::handlePowerLoss() {
         kill(false);
         enableFailedModeP(PSTR("Power Loss"));
         rescueReport(); // in case we do survive it tell server position
-        flag3 = old3; // restore homed state
+        flag3 = old3;   // restore homed state
     }
 }
 
