@@ -40,8 +40,8 @@ IO_INPUT_AND(name, input1, input2)
 #undef IO_INPUT_INVERTED_PULLUP
 #undef IO_INPUT_DUMMY
 #undef IO_INPUT_LOG
-#undef INPUT_OR
-#undef INPUT_AND
+#undef IO_INPUT_OR
+#undef IO_INPUT_AND
 
 #if IO_TARGET == IO_TARGET_INIT // Init pins
 
@@ -67,7 +67,7 @@ IO_INPUT_AND(name, input1, input2)
         inline static fast8_t get() { \
             return READ(_pin); \
         } \
-        inline static uint8_t pin() { return _pin; } \
+        constexpr inline static uint8_t pin() { return _pin; } \
     };
 
 #define IO_INPUT_INVERTED(name, _pin) \
@@ -76,7 +76,7 @@ IO_INPUT_AND(name, input1, input2)
         inline static fast8_t get() { \
             return !READ(_pin); \
         } \
-        inline static uint8_t pin() { return _pin; } \
+        constexpr inline static uint8_t pin() { return _pin; } \
     };
 
 #define IO_INPUT_PULLUP(name, _pin) \
@@ -85,7 +85,7 @@ IO_INPUT_AND(name, input1, input2)
         inline static fast8_t get() { \
             return READ(_pin); \
         } \
-        inline static uint8_t pin() { return _pin; } \
+        constexpr inline static uint8_t pin() { return _pin; } \
     };
 
 #define IO_INPUT_INVERTED_PULLUP(name, _pin) \
@@ -94,7 +94,7 @@ IO_INPUT_AND(name, input1, input2)
         inline static fast8_t get() { \
             return !READ(_pin); \
         } \
-        inline static uint8_t pin() { return _pin; } \
+        constexpr inline static uint8_t pin() { return _pin; } \
     };
 
 #define IO_INPUT_DUMMY(name, state) \
@@ -103,7 +103,7 @@ IO_INPUT_AND(name, input1, input2)
         inline static fast8_t get() { \
             return state; \
         } \
-        inline static uint8_t pin() { return 255; } \
+        constexpr inline static uint8_t pin() { return 255; } \
     };
 
 #define IO_INPUT_LOG(name, input, changeOnly) \
@@ -120,7 +120,7 @@ IO_INPUT_AND(name, input1, input2)
             state = val; \
             return state; \
         } \
-        inline static uint8_t pin() { return input::pin(); } \
+        constexpr inline static uint8_t pin() { return input::pin(); } \
     };
 
 #define IO_INPUT_OR(name, input1, input2) \
@@ -129,7 +129,7 @@ IO_INPUT_AND(name, input1, input2)
         inline static fast8_t get() { \
             return input1::get() || input2::get(); \
         } \
-        inline static uint8_t pin() { return 255; } \
+        constexpr inline static uint8_t pin() { return 255; } \
     };
 
 #define IO_INPUT_AND(name, input1, input2) \
@@ -138,7 +138,7 @@ IO_INPUT_AND(name, input1, input2)
         inline static fast8_t get() { \
             return input1::get() && input2::get(); \
         } \
-        inline static uint8_t pin() { return 255; } \
+        constexpr inline static uint8_t pin() { return 255; } \
     };
 
 #elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES
