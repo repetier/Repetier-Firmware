@@ -99,7 +99,7 @@ void HeatManager::update() {
         decoupleMode = DecoupleMode::NO_HEATING;
         Com::printF(PSTR("Heater "));
         printName();
-        Com::printFLN(PSTR(" plugged."));
+        Com::printFLN(PSTR(" plugged in."));
     }
     if (input->isDefect()) {
         if (hotPluggable) {
@@ -117,8 +117,8 @@ void HeatManager::update() {
             if (errorCount > 10) {
                 Com::printErrorF(PSTR("Heater "));
                 printName();
-                Com::printF(PSTR(" seems to be defect. Sensor reported unusual values. "));
-                Com::printFLN(PSTR("This can be a broken wire or a shorted contact of the sensor."));
+                Com::printF(PSTR(" may be defective. Sensor reported unusual values."));
+                Com::printFLN(PSTR(" This could mean a broken wire or a shorted contact on the sensor."));
                 setError(HeaterError::SENSOR_DEFECT);
                 GCode::fatalError(PSTR("Heater sensor defect"));
             }
@@ -140,8 +140,10 @@ void HeatManager::update() {
         if (decoupleMode == DecoupleMode::FAST_RISING) {
             if (currentTemperature - 1 < lastDecoupleTemp) {
                 // we waited and nothing happened, that is not ok
-                Com::printErrorFLN(PSTR("A heater did not rise while under full power, so we disabled the heater."));
-                Com::printErrorFLN(PSTR("If it is no hardware defect, the decoupling period might be set too low."));
+                Com::printErrorF(PSTR("Heater "));
+                printName();
+                Com::printFLN(PSTR(" failed to rise under full power. Heater disabled."));
+                Com::printErrorFLN(PSTR("If this wasn't due to a hardware defect, the decoupling period might be set too low."));
                 Com::printErrorF(PSTR("No temperaure rise after (ms):"));
                 Com::print(decouplePeriod);
                 Com::println();
@@ -153,7 +155,9 @@ void HeatManager::update() {
         } else if (decoupleMode == DecoupleMode::HOLDING) {
             if (fabs(tempError) > decoupleVariance) {
                 // Temperature left target range
-                Com::printErrorFLN(PSTR("The temperature for a heater left the reached target area."));
+                Com::printErrorF(PSTR("The temperature for heater "));
+                printName();
+                Com::printFLN(PSTR(" deviated too far from the target temperature. Heater disabled."));
                 Com::printErrorFLN(PSTR("This can happen on a hardware defect or if the decouple temperature variance is set too low."));
                 Com::printErrorF(PSTR("Deviation:"));
                 Com::printFloat(tempError, 2);
