@@ -62,39 +62,63 @@ bool BeeperSourceBase::playTheme(ToneTheme& theme, bool block) {
 
 void BeeperSourceBase::runConditions() {
     if (!isMuted()) {
-        if (lastCondTheme != finalCondTheme || (finalCondPlays == 0)) { // Different theme or looping
-            if (isPlaying() && (lastCondTheme != finalCondTheme)) {
+        if (curValidCondition != lastValidCondition
+            || (curValidCondition != nullptr && (curValidCondition->loop || curValidCondition->plays > 0))) {
+            if (lastValidCondition != nullptr) {
+                lastValidCondition->started = false;
+            }
+            if (isPlaying() && curValidCondition != lastValidCondition) {
                 if (isBlocking() || (curConditionStep > 0)) {
                     // If playing a blocking theme or about to play a new condition's theme, kill any beeps.
                     finishPlaying();
                 }
             }
-            if (finalCondTheme != nullptr) {
-                if ((lastConditionStep < curConditionStep) || (finalCondPlays == 0)) {
-                    // Unless looping, don't replay any lower hierarchy condition themes
-                    if (finalCondPlays == 0) {                    // Looping
-                        if (getHeadDist() <= (beepBufSize / 2)) { // don't overwrite ourselves if the buffer wraps.
-                            blocking = false;
-                            finalCondPlays = 1; // Keep adding theme
+            if (curValidCondition != nullptr) {
+                if (curConditionStep >= lastConditionStep || !curValidCondition->heard || curValidCondition->loop) {
+                    if (!curValidCondition->started) { // Just started
+                        curValidCondition->started = true;
+                        if (curValidCondition->loop) {
+                            if (getHeadDist() <= (beepBufSize / 2)) {
+                                curValidCondition->plays = 1;
+                            }
+                        } else if (curValidCondition->plays <= 0) { // Only reset to playcount if we're empty
+                            curValidCondition->plays = curValidCondition->playCount;
                         }
                     }
-                    while (finalCondPlays--) {
-                        playTheme(*finalCondTheme, (finalCondPlays == 0)); // set blocking once done
+                    if (curValidCondition->plays > 0) {
+                        blocking = false; // Unblock in case we're finishing filling the buffer
+                        while (curValidCondition->plays
+                               && getHeadDist() < (beepBufSize - curValidCondition->theme->getSize())) {
+                            playTheme(*(curValidCondition->theme), (curValidCondition->plays == 1)); // set blocking once done
+                            curValidCondition->plays--;
+                        }
                     }
                 }
+
+                if (curValidCondition->plays <= 0) { // Only mark as heard if the buffer is done filling
+                    curValidCondition->heard = true;
+                } else {
+                    blocking = true; // Block since we're still not done
+                    curValidCondition->heard = false;
+                }
             }
-            lastCondTheme = finalCondTheme;
         }
-        lastConditionStep = curConditionStep;
+        lastValidCondition = curValidCondition;
+        curValidCondition = nullptr;
+        lastConditionStep = curConditionStep > 0 ? curConditionStep : -1;
         curConditionStep = 0;
-        finalCondTheme = nullptr; // Forces finishPlaying check if no valid condition on next reset
     }
 }
 
-void BeeperSourceBase::setCondition(ToneTheme& theme, fast8_t playTimes) {
-    curConditionStep++;
-    finalCondPlays = playTimes; // If set 0, it's a loop
-    finalCondTheme = &theme;
+void BeeperSourceBase::setCondition(bool set, ToneCondition& condition) {
+    if (set) {
+        curValidCondition = &condition;
+        curConditionStep++;
+    } else {
+        // We can skip the hierarchy check if we've never been heard before
+        condition.heard = condition.started = false;
+        condition.plays = 0;
+    }
 }
 // BASE --
 

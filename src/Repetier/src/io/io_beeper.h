@@ -55,6 +55,15 @@ private:
     const fast8_t themeSize;
 };
 
+struct ToneCondition {
+    bool started;
+    const bool loop;
+    bool heard;
+    fast8_t plays;
+    const fast8_t playCount;
+    ToneTheme* theme;
+};
+
 class BeeperSourceBase {
 public:
     BeeperSourceBase()
@@ -66,7 +75,6 @@ public:
         , toneTail(-1)
         , prevToneTime(0)
         , playingFreq(0)
-        , finalCondPlays(-1)
         , lastConditionStep(0)
         , curConditionStep(0) { }
     virtual inline fast8_t getHeadDist() {
@@ -89,7 +97,7 @@ public:
     virtual fast8_t process();
     virtual ufast8_t getFreqDiv() = 0;
     virtual void setFreqDiv(ufast8_t div) = 0;
-    virtual void setCondition(ToneTheme& theme, fast8_t playTimes);
+    virtual void setCondition(bool set, ToneCondition& cond);
     virtual void runConditions();
 
 protected:
@@ -104,11 +112,10 @@ protected:
     millis_t prevToneTime;
     uint16_t playingFreq;
     TonePacket beepBuf[beepBufSize] {};
-    ToneTheme* finalCondTheme;
-    ToneTheme* lastCondTheme;
-    fast8_t finalCondPlays;
     fast8_t lastConditionStep;
     fast8_t curConditionStep;
+    ToneCondition* curValidCondition;
+    ToneCondition* lastValidCondition;
 };
 
 template <class IOPin>
@@ -192,6 +199,9 @@ private:
 #define TONE_THEME(name, theme) \
     extern ToneTheme name;
 
+#define TONE_THEME_COND(name, source, cond, theme, playTimes) \
+    extern ToneCondition name##_cond;
+
 #elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES
 
 #define TONES(...) \
@@ -207,7 +217,11 @@ private:
 
 #define TONE_THEME(name, theme) \
     constexpr TonePacket name##_theme[] PROGMEM = theme; \
-    ToneTheme name(name##_theme);
+    ToneTheme name(name##_theme); \
+    static_assert(!((sizeof(name##_theme) / sizeof(TonePacket)) > beepBufSize), "Length of \"" #name "\" is larger than beeper buffer size!");
+
+#define TONE_THEME_COND(name, source, cond, theme, playTimes) \
+    ToneCondition name##_cond = { false, (playTimes == 0), false, 0, playTimes, &theme };
 
 #elif IO_TARGET == IO_TARGET_SERVO_INTERRUPT // IO_TARGET_PERIODICAL_ACTIONS
 
@@ -225,9 +239,9 @@ private:
 #define BEEPER_SOURCE_PWM(name, PWMPin) \
     name.runConditions();
 
-#define TONE_THEME_COND(source, cond, theme, playTimes) \
-    if (cond && !source.isMuted()) { \
-        source.setCondition(theme, playTimes); \
+#define TONE_THEME_COND(name, source, cond, theme, playTimes) \
+    if (!source.isMuted()) { \
+        source.setCondition(cond, name##_cond); \
     }
 
 #elif IO_TARGET == IO_TARGET_BEEPER_LOOP
@@ -244,7 +258,7 @@ private:
 #endif
 
 #ifndef TONE_THEME_COND
-#define TONE_THEME_COND(source, cond, theme, playTimes)
+#define TONE_THEME_COND(name, source, cond, theme, playTimes)
 #endif
 
 #ifndef TONE_THEME
