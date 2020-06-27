@@ -1034,11 +1034,11 @@ void MCode_209(GCode* com) {
 }
 
 void MCode_220(GCode* com) {
-    Commands::changeFeedrateMultiply(com->getS(100));
+    Commands::changeFeedrateMultiply(com->getS(Printer::feedrateMultiply));
 }
 
 void MCode_221(GCode* com) {
-    Commands::changeFlowrateMultiply(com->getS(100));
+    Commands::changeFlowrateMultiply(com->getS(Printer::extrudeMultiply));
 }
 
 void MCode_226(GCode* com) {
