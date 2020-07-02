@@ -355,6 +355,10 @@ extern ServoInterface* servos[];
 #define MOVE_Z_WHEN_HOMED 0
 #endif
 
+#ifndef PARK_POSITION_Z_UP_FIRST
+#define PARK_POSITION_Z_UP_FIRST 0
+#endif
+
 #ifndef MAX_JERK_DISTANCE
 #define MAX_JERK_DISTANCE 0.6
 #endif

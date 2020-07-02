@@ -303,6 +303,8 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define PARK_POSITION_Y (Y_MIN_POS + Y_MAX_LENGTH)
 #endif
 #define PARK_POSITION_Z_RAISE 0
+// 0 = move first xy and then z, 1 = first z up and then move xy
+#define PARK_POSITION_Z_UP_FIRST 0
 
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1000
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1000

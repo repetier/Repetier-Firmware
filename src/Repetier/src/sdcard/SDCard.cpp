@@ -143,8 +143,9 @@ void SDCard::unmount() {
 }
 
 void SDCard::startPrint() {
-    if (!sdactive)
+    if (!sdactive) {
         return;
+    }
     sdmode = 1;
     Printer::setMenuMode(MENU_MODE_SD_PRINTING, true);
     Printer::setMenuMode(MENU_MODE_PAUSED, false);
@@ -156,8 +157,9 @@ void SDCard::startPrint() {
 }
 
 void SDCard::pausePrint(bool intern) {
-    if (!sdactive)
+    if (!sdactive) {
         return;
+    }
     sdmode = 2; // finish running line
     Printer::setMenuMode(MENU_MODE_PAUSED, true);
 #if !defined(DISABLE_PRINTMODE_ON_PAUSE) || DISABLE_PRINTMODE_ON_PAUSE == 1
@@ -447,21 +449,24 @@ char* SDCard::createFilename(char* buffer, const dir_t& p) {
 }
 
 bool SDCard::showFilename(const uint8_t* name) {
-    if (*name == DIR_NAME_DELETED || *name == '.')
+    if (*name == DIR_NAME_DELETED || *name == '.') {
         return false;
+    }
     return true;
 }
 
 int8_t RFstricmp(const char* s1, const char* s2) {
-    while (*s1 && (tolower(*s1) == tolower(*s2)))
+    while (*s1 && (tolower(*s1) == tolower(*s2))) {
         s1++, s2++;
+    }
     return (const uint8_t)tolower(*s1) - (const uint8_t)tolower(*s2);
 }
 
 int8_t RFstrnicmp(const char* s1, const char* s2, size_t n) {
     while (n--) {
-        if (tolower(*s1) != tolower(*s2))
+        if (tolower(*s1) != tolower(*s2)) {
             return (uint8_t)tolower(*s1) - (uint8_t)tolower(*s2);
+        }
         s1++;
         s2++;
     }
@@ -568,8 +573,9 @@ void SDCard::JSONFileInfo(const char* filename) {
 bool SDCard::selectFile(const char* filename, bool silent) {
     const char* oldP = filename;
 
-    if (!sdactive)
+    if (!sdactive) {
         return false;
+    }
     sdmode = 0;
 
     file.close();
@@ -578,11 +584,11 @@ bool SDCard::selectFile(const char* filename, bool silent) {
     Printer::printName[20] = 0;
     Printer::maxLayer = -1;
     if (file.open(fat.vwd(), filename, O_READ)) {
-        if ((oldP = strrchr(filename, '/')) != NULL)
+        if ((oldP = strrchr(filename, '/')) != nullptr) {
             oldP++;
-        else
+        } else {
             oldP = filename;
-
+        }
         if (!silent) {
             Com::printF(Com::tFileOpened, oldP);
             Com::printFLN(Com::tSpaceSizeColon, file.fileSize());
@@ -595,8 +601,9 @@ bool SDCard::selectFile(const char* filename, bool silent) {
         Com::printFLN(Com::tFileSelected);
         return true;
     } else {
-        if (!silent)
+        if (!silent) {
             Com::printFLN(Com::tFileOpenFailed);
+        }
         return false;
     }
 }
@@ -611,8 +618,9 @@ void SDCard::printStatus() {
 }
 
 void SDCard::startWrite(char* filename) {
-    if (!sdactive)
+    if (!sdactive) {
         return;
+    }
     file.close();
     sdmode = 0;
     fat.chdir();
@@ -626,8 +634,9 @@ void SDCard::startWrite(char* filename) {
 }
 
 void SDCard::finishWrite() {
-    if (!savetosd)
+    if (!savetosd) {
         return; // already closed or never opened
+    }
     file.sync();
     file.close();
     savetosd = false;
@@ -636,8 +645,9 @@ void SDCard::finishWrite() {
 }
 
 void SDCard::deleteFile(char* filename) {
-    if (!sdactive)
+    if (!sdactive) {
         return;
+    }
     sdmode = 0;
     file.close();
     if (fat.remove(filename)) {
@@ -651,8 +661,9 @@ void SDCard::deleteFile(char* filename) {
 }
 
 void SDCard::makeDirectory(char* filename) {
-    if (!sdactive)
+    if (!sdactive) {
         return;
+    }
     sdmode = 0;
     file.close();
     if (fat.mkdir(filename)) {
@@ -693,8 +704,9 @@ void GCodeFileInfo::init(SdFile& file) {
     this->filamentNeeded = 0.0;
     this->objectHeight = 0.0;
     this->layerHeight = 0.0;
-    if (!file.isOpen())
+    if (!file.isOpen()) {
         return;
+    }
     bool genByFound = false, layerHeightFound = false, filamentNeedFound = false;
 #if CPU_ARCH == ARCH_AVR
 #define GCI_BUF_SIZE 120
@@ -707,39 +719,50 @@ void GCodeFileInfo::init(SdFile& file) {
         if (!file.seekSet(i))
             break;
         file.read(buf, GCI_BUF_SIZE);
-        if (!genByFound && findGeneratedBy(buf, this->generatedBy))
+        if (!genByFound && findGeneratedBy(buf, this->generatedBy)) {
             genByFound = true;
-        if (!layerHeightFound && findLayerHeight(buf, this->layerHeight))
+        }
+        if (!layerHeightFound && findLayerHeight(buf, this->layerHeight)) {
             layerHeightFound = true;
-        if (!filamentNeedFound && findFilamentNeed(buf, this->filamentNeeded))
+        }
+        if (!filamentNeedFound && findFilamentNeed(buf, this->filamentNeeded)) {
             filamentNeedFound = true;
-        if (genByFound && layerHeightFound && filamentNeedFound)
+        }
+        if (genByFound && layerHeightFound && filamentNeedFound) {
             goto get_objectHeight;
+        }
     }
 
     // READ 4KB FROM END
     for (int i = 0; i < 4096; i += GCI_BUF_SIZE - 50) {
-        if (!file.seekEnd(-4096 + i))
+        if (!file.seekEnd(-4096 + i)) {
             break;
+        }
         file.read(buf, GCI_BUF_SIZE);
-        if (!genByFound && findGeneratedBy(buf, this->generatedBy))
+        if (!genByFound && findGeneratedBy(buf, this->generatedBy)) {
             genByFound = true;
-        if (!layerHeightFound && findLayerHeight(buf, this->layerHeight))
+        }
+        if (!layerHeightFound && findLayerHeight(buf, this->layerHeight)) {
             layerHeightFound = true;
-        if (!filamentNeedFound && findFilamentNeed(buf, this->filamentNeeded))
+        }
+        if (!filamentNeedFound && findFilamentNeed(buf, this->filamentNeeded)) {
             filamentNeedFound = true;
-        if (genByFound && layerHeightFound && filamentNeedFound)
+        }
+        if (genByFound && layerHeightFound && filamentNeedFound) {
             goto get_objectHeight;
+        }
     }
 
 get_objectHeight:
     // MOVE FROM END UP IN 1KB BLOCKS UP TO 30KB
     for (int i = GCI_BUF_SIZE; i < 30000; i += GCI_BUF_SIZE - 50) {
-        if (!file.seekEnd(-i))
+        if (!file.seekEnd(-i)) {
             break;
+        }
         file.read(buf, GCI_BUF_SIZE);
-        if (findTotalHeight(buf, this->objectHeight))
+        if (findTotalHeight(buf, this->objectHeight)) {
             break;
+        }
     }
     file.seekSet(0);
 }
