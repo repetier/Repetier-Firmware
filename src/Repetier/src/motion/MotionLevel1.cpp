@@ -342,11 +342,11 @@ void Motion1::updateRotMinMax() {
         maxPosOff[i] = maxPos[i];
     }
     autolevelActive = old;
-    /* Com::printArrayFLN(PSTR("minPosOff:"), minPosOff, 3);
+    Com::printArrayFLN(PSTR("minPosOff:"), minPosOff, 3);
     Com::printArrayFLN(PSTR("maxPosOff:"), maxPosOff, 3);
     Com::printArrayFLN(PSTR("rotMin:"), rotMin, 3);
     Com::printArrayFLN(PSTR("rotMax:"), rotMax, 3);
-    Com::printArrayFLN(PSTR("transform:"), autolevelTransformation, 9, 5); */
+    Com::printArrayFLN(PSTR("transform:"), autolevelTransformation, 9, 5);
 }
 
 void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback) {
@@ -1824,7 +1824,7 @@ bool Motion1::simpleHome(fast8_t axis) {
         waitForEndOfMoves();
     } else {
         Com::printWarningF(PSTR("Endstop for axis "));
-        Com::print((int16_t)axis);
+        Com::print(axisNames[axis]);
         Com::printFLN(PSTR(" did not untrigger for retest!"));
         ok = false;
     }

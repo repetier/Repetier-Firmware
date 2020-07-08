@@ -655,9 +655,9 @@ void Printer::defaultLoopActions() {
         GCode::fatalError(Com::tI2CError);
     }
     millis_t curtime = HAL::timeInMilliseconds();
-    if (isRescueRequired() || Motion1::length != 0 || isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED))
+    if (isRescueRequired() || Motion1::length != 0 || isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED)) {
         previousMillisCmd = curtime;
-    else {
+    } else {
         curtime -= previousMillisCmd;
         if (maxInactiveTime != 0 && curtime > maxInactiveTime) {
             Printer::kill(false);

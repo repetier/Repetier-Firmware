@@ -184,6 +184,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 
 #define SERVO_LIST \
     { &Servo1 }
+    
 #define TOOLS \
     { &ToolExtruder1, &ToolExtruder2, &Laser3, &CNC4 }
 
