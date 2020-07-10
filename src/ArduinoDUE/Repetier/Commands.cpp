@@ -2875,7 +2875,7 @@ void Commands::processMCode(GCode* com) {
         changeFeedrateMultiply(com->getS(Printer::feedrateMultiply));
         break;
     case 221: // M221 S<Extrusion flow multiplier in percent>
-        changeFlowrateMultiply(com->getS(Printer::extrudeMultiplycd..));
+        changeFlowrateMultiply(com->getS(Printer::extrudeMultiply));
         break;
     case 226: // M226 P<pin> S<state 0/1> - Wait for pin getting state S
         if (!com->hasS() || !com->hasP())
