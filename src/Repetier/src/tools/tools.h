@@ -153,7 +153,7 @@ public:
     }
     virtual void init() {}
     virtual void setAdvance(float adv) {}
-    virtual void updateDerived();
+    virtual void updateDerived() = 0;
     virtual void setResolution(float stepspermm) {}
     virtual void autocalibrate(GCode* g) {
         Com::printWarningFLN(PSTR("Autocalibration for this tool not supported!"));
