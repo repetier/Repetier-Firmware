@@ -834,6 +834,7 @@ void Commands::executeGCode(GCode* com) {
 
 void Commands::emergencyStop() {
 #if defined(KILL_METHOD) && KILL_METHOD == 1
+    HAL::serialFlush();
     HAL::resetHardware();
 #else
     //HAL::forbidInterrupts(); // Don't allow interrupts to do their work
