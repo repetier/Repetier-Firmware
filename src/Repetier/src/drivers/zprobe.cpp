@@ -21,6 +21,7 @@
 
 #include "Repetier.h"
 
+#define Z_CRASH_THRESHOLD_STEPS 50
 #if Z_PROBE_TYPE == Z_PROBE_TYPE_DEFAULT
 
 uint16_t ZProbeHandler::eprStart;
@@ -106,16 +107,24 @@ float ZProbeHandler::runProbe() {
     Motion1::copyCurrentPrinter(cPos);
     PrinterType::transform(cPos, cPosSteps);
     Motion1::copyCurrentPrinter(tPos);
-    float secureDistance = (Motion1::maxPos[Z_AXIS] - Motion1::minPos[Z_AXIS]) * 1.5f;
+
+    float secureDistance = getBedDistance() * 1.5f;
     tPos[Z_AXIS] -= secureDistance;
     PrinterType::transform(tPos, tPosSteps);
     int32_t secureSteps = lround(secureDistance * Motion1::resolution[Z_AXIS]);
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
     HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
+    Motion1::stepsRemaining[Z_AXIS] = 0;
     Motion1::moveByPrinter(tPos, speed, false);
     Motion1::waitForEndOfMoves();
     Motion1::endstopMode = EndstopMode::DISABLED;
+
+    if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+        Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+        Motion1::callAfterHomingOnSteppers();
+        return ILLEGAL_Z_PROBE;
+    }
     float z = secureDistance * ((fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]));
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
     measurements[0] = z;
@@ -158,10 +167,18 @@ float ZProbeHandler::runProbe() {
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
         HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
+        Motion1::stepsRemaining[Z_AXIS] = 0;
         Motion1::endstopMode = EndstopMode::PROBING;
         Motion1::moveByPrinter(tPos3, speed, false);
         Motion1::waitForEndOfMoves();
         Motion1::endstopMode = EndstopMode::DISABLED;
+
+        if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+            Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+            Motion1::callAfterHomingOnSteppers();
+            return ILLEGAL_Z_PROBE;
+        }
+
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
         measurements[r] = z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
 #else
@@ -399,16 +416,25 @@ float ZProbeHandler::runProbe() {
     Motion1::copyCurrentPrinter(cPos);
     PrinterType::transform(cPos, cPosSteps);
     Motion1::copyCurrentPrinter(tPos);
-    float secureDistance = (Motion1::maxPos[Z_AXIS] - Motion1::minPos[Z_AXIS]) * 1.5f;
+
+    float secureDistance = getBedDistance() * 1.5f;
     tPos[Z_AXIS] -= secureDistance;
     PrinterType::transform(tPos, tPosSteps);
     int32_t secureSteps = lround(secureDistance * Motion1::resolution[Z_AXIS]);
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
     HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
+    Motion1::stepsRemaining[Z_AXIS] = 0;
     Motion1::moveByPrinter(tPos, speed, false);
     Motion1::waitForEndOfMoves();
     Motion1::endstopMode = EndstopMode::DISABLED;
+
+    if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+        Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+        Motion1::callAfterHomingOnSteppers();
+        return ILLEGAL_Z_PROBE;
+    }
+
     float z = secureDistance * ((fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]));
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN && Z_PROBE_REPETITIONS > 1
     measurements[0] = z;
@@ -451,10 +477,18 @@ float ZProbeHandler::runProbe() {
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
         HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
+        Motion1::stepsRemaining[Z_AXIS] = 0;
         Motion1::endstopMode = EndstopMode::PROBING;
         Motion1::moveByPrinter(tPos3, speed, false);
         Motion1::waitForEndOfMoves();
         Motion1::endstopMode = EndstopMode::DISABLED;
+
+        if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+            Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+            Motion1::callAfterHomingOnSteppers();
+            return ILLEGAL_Z_PROBE;
+        }
+
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
         measurements[r] = z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
 #else
@@ -686,16 +720,25 @@ float ZProbeHandler::runProbe() {
     Motion1::copyCurrentPrinter(cPos);
     PrinterType::transform(cPos, cPosSteps);
     Motion1::copyCurrentPrinter(tPos);
-    float secureDistance = (Motion1::maxPos[Z_AXIS] - Motion1::minPos[Z_AXIS]) * 1.5f;
+
+    float secureDistance = getBedDistance() * 1.5f;
     tPos[Z_AXIS] -= secureDistance;
     PrinterType::transform(tPos, tPosSteps);
     int32_t secureSteps = lround(secureDistance * Motion1::resolution[Z_AXIS]);
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
     HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
+    Motion1::stepsRemaining[Z_AXIS] = 0;
     Motion1::moveByPrinter(tPos, speed, false);
     Motion1::waitForEndOfMoves();
     Motion1::endstopMode = EndstopMode::DISABLED;
+
+    if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+        Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+        Motion1::callAfterHomingOnSteppers();
+        return ILLEGAL_Z_PROBE;
+    }
+
     float z = secureDistance * ((fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]));
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN && Z_PROBE_REPETITIONS > 1
     measurements[0] = z;
@@ -738,10 +781,18 @@ float ZProbeHandler::runProbe() {
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
         HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
+        Motion1::stepsRemaining[Z_AXIS] = 0;
         Motion1::endstopMode = EndstopMode::PROBING;
         Motion1::moveByPrinter(tPos3, speed, false);
         Motion1::waitForEndOfMoves();
         Motion1::endstopMode = EndstopMode::DISABLED;
+
+        if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+            Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+            Motion1::callAfterHomingOnSteppers();
+            return ILLEGAL_Z_PROBE;
+        }
+
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
         measurements[r] = z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
 #else
