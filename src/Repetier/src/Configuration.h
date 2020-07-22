@@ -199,6 +199,7 @@ to the position. 0 = no contribution. */
 #define Z_PROBE_USE_MEDIAN 1         // 0 = use average, 1 = use middle value after ordering z
 #define Z_PROBE_SWITCHING_DISTANCE 2 // Minimum distance required to safely untrigger probe - used for faster repeated measurement
 #define Z_PROBE_BORDER 2             // Safety border to ensure position is allowed
+#define Z_PROBE_PAUSE_HEATERS 0      // Pause all heaters when probing to reduce EMI artifacts
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
 #define Z_PROBE_RUN_AFTER_EVERY_PROBE ""

@@ -32,7 +32,8 @@ class ZProbeHandler {
     static float offsetY;
     static float speed;
     static bool activated;
-
+    static uint16_t userPausedHeaters;
+    static bool pauseHeaters;
 public:
     static float getZProbeHeight();
     static void setZProbeHeight(float height);
@@ -66,6 +67,8 @@ class ZProbeHandler {
     static bool activated;
     static int16_t activateTemperature;
 
+    static uint16_t userPausedHeaters;
+    static bool pauseHeaters;
 public:
     static float getZProbeHeight();
     static void setZProbeHeight(float height);
@@ -97,6 +100,8 @@ class ZProbeHandler {
     static float offsetY;
     static float speed;
     static bool activated;
+    static uint16_t userPausedHeaters;
+    static bool pauseHeaters;
 
     static bool isAlarmOn();
     static void disableAlarmIfOn();
