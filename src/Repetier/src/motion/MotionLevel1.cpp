@@ -1578,6 +1578,7 @@ void Motion1::homeAxes(fast8_t axes) {
         if (!isAxisHomed(Z_AXIS) || currentPosition[Z_AXIS] + ZHOME_PRE_RAISE_DISTANCE < maxPos[Z_AXIS]) {
             setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_PRE_RAISE_DISTANCE);
             moveRelativeByOfficial(tmpPosition, homingFeedrate[Z_AXIS], false);
+            waitForEndOfMoves();
             // zAmountRaised = ZHOME_PRE_RAISE_DISTANCE;
         }
     }
