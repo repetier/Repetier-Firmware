@@ -746,6 +746,9 @@ void directAction(GUIAction action, void* data) {
         PrinterType::setDittoMode(1 + opt - GUI_DIRECT_ACTION_DITTO_2, false);
         GUI::pop();
         break;
+    case GUI_DIRECT_ACTION_TOGGLE_PROBE_PAUSE:
+        ZProbeHandler::setHeaterPause(!ZProbeHandler::getHeaterPause());
+        break;
     }
 }
 
