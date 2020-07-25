@@ -644,6 +644,14 @@ bool GUI::handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, 
 void GUI::menuBack(GUIAction& action) {
 #if DISABLED(UI_HAS_BACK_KEY)
     GUI::menuSelectableP(action, PSTR("Back"), nullptr, nullptr, GUIPageType::POP);
+#else
+    if (action == GUIAction::ANALYSE) {
+        if (cursorRow[level] < 0) {
+            cursorRow[level] = length[level];
+        }
+        maxCursorRow[level] = length[level];
+        length[level]++;
+    }
 #endif
 }
 
