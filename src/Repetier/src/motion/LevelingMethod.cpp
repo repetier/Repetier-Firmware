@@ -259,7 +259,7 @@ bool Leveling::measure() {
     bool ok = true;
     for (int y = 0; y < GRID_SIZE; y++) {
         for (int x = 0; x < GRID_SIZE; x++) {
-            if (!ok) {
+            if (!ok || Printer::breakLongCommand) {
                 break;
             }
             int xx;
@@ -290,7 +290,7 @@ bool Leveling::measure() {
             }
         }
     }
-    if (builder.numPoints() < 3) {
+    if (builder.numPoints() < 3 && !Printer::breakLongCommand) {
         ok = false;
         Com::printFLN(PSTR("You need at least 3 valid points for correction!"));
     }
@@ -299,7 +299,7 @@ bool Leveling::measure() {
     Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
 #endif
     ZProbeHandler::deactivate();
-    if (ok) {
+    if (ok && !Printer::breakLongCommand) {
 #if NUM_HEATED_BEDS
         gridTemp = heatedBeds[0]->getTargetTemperature();
 #endif
