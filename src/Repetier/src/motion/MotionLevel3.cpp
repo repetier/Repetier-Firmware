@@ -164,7 +164,7 @@ void Motion3::timer() {
                 }
             }
         }
-        if (Motion1::endstopMode == PROBING) {
+        if (Motion1::endstopMode == EndstopMode::PROBING) {
             if (ZProbe->update()) { // ignore z endstop here
                 Motion2::endstopTriggered(act, Z_AXIS, false);
             }

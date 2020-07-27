@@ -16,16 +16,8 @@
 
 */
 
-/*
-Early stage version for Stacke X2 printer - use with care
-
-*/
-
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
-
-// Short version has z max 300, long version 610 mm
-#define STACKER_SHORT 1
 
 /**************** READ FIRST ************************
 
@@ -45,65 +37,61 @@ Early stage version for Stacke X2 printer - use with care
 */
 
 // The follwing variables are required early to decide on the right modules.
-
-#define DEBUG_MOTION_ERRORS     // extra loads but shows message on motion errors detected from wrong math
-#define SLOW_DIRECTION_CHANGE 1 // maybe reason for lost steps
-#define HOST_RESCUE 1
-
-// #define DEBUG_POS
-
-#define NUM_SERVOS 1
-#define NUM_TOOLS 2
-#define MOTHERBOARD MOTHERBOARD_RUMBA32 // 412 // Stacker 3d Superboard
+#define NUM_TOOLS 4
+#define NUM_EXTRUDER 2
+#define NUM_SERVOS 1                  // Number of servos available
+#define MOTHERBOARD MOTHERBOARD_FELIX // 405
 #define EEPROM_MODE 1
-#define RFSERIAL SerialUSB
+#define RFSERIAL Serial
+//#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
+// Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
+// If it is incompatible you will get compiler errors about write functions not being compatible!
+//#define COMPAT_PRE1
 #define BLUETOOTH_SERIAL -1
+#define BLUETOOTH_BAUD 115200
+#define WAITING_IDENTIFIER "wait"
 #define JSON_OUTPUT 1
 #define FEATURE_WATCHDOG 1
 #define FEATURE_RETRACTION 1
-#define USE_ADVANCE 1
 #define NUM_AXES 4                   // X,Y,Z and E for extruder A,B,C would be 5,6,7
-#define PRINTLINE_CACHE_SIZE 32      // Number of moves we can cache
-#define STEPPER_FREQUENCY 192000     // Maximum stepper frequency.
+#define STEPPER_FREQUENCY 154000     // Maximum stepper frequency.
 #define PREPARE_FREQUENCY 2000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
 #define BLOCK_FREQUENCY 1000         // Number of blocks with constant stepper rate per second.
 #define VELOCITY_PROFILE 2           // 0 = linear, 1 = cubic, 2 = quintic velocity shape
+#define SLOW_DIRECTION_CHANGE 1      // can be reason for lost steps on slow drivers
 #define SMALL_SEGMENT_SIZE 0.4       // Smaller segments reduce join speed to prevent vibrations causing lost steps
-#define Z_SPEED 100                  // Z positioning speed
-#define XY_SPEED 200                 // XY positioning speed for normal operations
+#define Z_SPEED 10                   // Z positioning speed
+#define XY_SPEED 150                 // XY positioning speed for normal operations
+#define E_SPEED 2                    // Extrusion speed
 #define G0_FEEDRATE 0                // Speed for G0 moves. Independent from set F value! Set 0 to use F value.
 #define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
 #define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
-#define LEVELING_METHOD 1
-#define ENABLE_BUMP_CORRECTION 1
-#define GRID_SIZE 5
-#define BUMP_CORRECTION_START_DEGRADE 0.5
-#define BUMP_CORRECTION_END_HEIGHT 1.5
-#define BUMP_LIMIT_TO 0
-#define BUMP_DEFAULT_AUTOIMPORT_DIR "matrixes/" // Default auto import directory for M232 S2 matrix imports.
+#define HOST_RESCUE 1                // Enable host rescue help system
+#define DEBUG_RESCUE                 // Uncomment to add power loss entry in debug menu while printing
+#define POWERLOSS_LEVEL 2            // How much time do we have on powerloss, 0 = no move, 1 = short just raise Z, 2 = long full park move
+#define POWERLOSS_UP 5               // How much to move up if mode 1 is active
+#define Z_PROBE_TYPE 2               // 0 = no z probe, 1 = default z probe, 2 = Nozzle as probe
+#define Z_PROBE_BORDER 2             // Safety border to ensure position is allowed
+#define Z_PROBE_TEMPERATURE 0        // Temperature for type 2
 
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta, 3 = Dual X-Axis
-#define PRINTER_TYPE PRINTER_TYPE_DELTA
+#define PRINTER_TYPE 0
 // steps to include as babysteps per 1/BLOCK_FREQUENCY seconds. Must be lower then STEPPER_FREQUENCY/BLOCK_FREQUENCY and be low enough to not loose steps.
 #define BABYSTEPS_PER_BLOCK \
-    { 1, 1, 1 }
+    { 10, 10, 10 }
 // If all axis end stops are hardware based we can skip the time consuming tests each step
 #define NO_SOFTWARE_AXIS_ENDSTOPS
 // Normally only a delta has motor end stops required. Normally you trigger using axis endstops.
-// #define NO_MOTOR_ENDSTOPS
+#define NO_MOTOR_ENDSTOPS
 
-#define FEATURE_CONTROLLER CONTROLLER_REPRAPDISCOUNT_GLCD
+#define FEATURE_CONTROLLER CONTROLLER_FELIX_DUE
 // Use more memory to speedup display updates
 #define DISPLAY_FULL_BUFFER 1
 // Direction 1 or -1
 #define ENCODER_DIRECTION -1
-// Uncomment to hide toogle light menu entry in controls
-// #define NO_LIGHT_CONTROL
 // Encoder speed 0 = fastest, 1 or 2 = slowest - set so 1 click is one menu move
 // Default is 2 if not set by controller. Us eonly to fix wrong setting
 // #define ENCODER_SPEED 2
-// Set 1 if you want to replace the default themes and define them in configuration_io.h
-#define CUSTOM_DEFAULT_THEMES 0
 
 /* Ratios for core xyz. First index denotes motor and second axis.
 For each motor you can set the ratio of x,y,z position that adds
@@ -138,72 +126,42 @@ to the position. 0 = no contribution. */
     Column angles are measured from X-axis counterclockwise
     "Standard" positions: alpha_A = 210, alpha_B = 330, alpha_C = 90
 */
-#define DELTA_DIAGONAL 444.800f
-#define DELTA_HORIZONTAL_RADIUS 209.900f
-#define DELTA_PRINT_RADIUS 209.0f
-#define BED_RADIUS 200.0f
+#define DELTA_DIAGONAL 350.0f
+#define DELTA_HORIZONTAL_RADIUS 210.0f
+#define DELTA_PRINT_RADIUS 200.0f
 #define DELTA_ANGLE_A 210.0f
 #define DELTA_ANGLE_B 330.0f
-#define DELTA_ANGLE_C 90.123f
+#define DELTA_ANGLE_C 90.0f
 #define DELTA_CORRECTION_A 0.0f
 #define DELTA_CORRECTION_B 0.0f
 #define DELTA_CORRECTION_C 0.0f
 #define DELTA_RADIUS_CORRECTION_A 0.0f
 #define DELTA_RADIUS_CORRECTION_B 0.0f
-#define DELTA_RADIUS_CORRECTION_C -0.05f
-#define DELTA_HOME_OFFSET_A 2.9f
+#define DELTA_RADIUS_CORRECTION_C 0.0f
+#define DELTA_HOME_OFFSET_A 0.0f
 #define DELTA_HOME_OFFSET_B 0.0f
-#define DELTA_HOME_OFFSET_C 0.85f
-
-// Extra parameter in case you have a dual x axis
-#define DUAL_X_LEFT_OFFSET -64
-#define DUAL_X_RIGHT_OFFSET 450
-// Minimum distance between both heads
-#define DUAL_X_MIN_DISTANCE 64
-#define LAZY_DUAL_X_AXIS 0
-
-// Set all directions where no explicit test is required.
-// This is for dummy endstops and for hardware endstops.
-// Not disabling them is just a speed penalty
-#define NO_XMIN_ENDSTOP_TEST
-#define NO_XMAX_ENDSTOP_TEST
-#define NO_YMIN_ENDSTOP_TEST
-#define NO_YMAX_ENDSTOP_TEST
-#define NO_ZMIN_ENDSTOP_TEST
-#define NO_ZMAX_ENDSTOP_TEST
-#define NO_AMIN_ENDSTOP_TEST
-// #define NO_AMAX_ENDSTOP_TEST
+#define DELTA_HOME_OFFSET_C 0.0f
 
 #define DISABLE_X 0
 #define DISABLE_Y 0
 #define DISABLE_Z 0
 
+#define FEATURE_AXISCOMP 1
+#define AXISCOMP_TANXY 0
+#define AXISCOMP_TANYZ 0
+#define AXISCOMP_TANXZ 0
+
 // Next 7 lines are required to make the following work, do not change!
 #include "boards/pins.h"
 #undef IO_TARGET
-#define IO_TARGET IO_TARGET_CLASS_DEFINITION
+#define IO_TARGET 4
 #undef CONFIG_EXTERN
 #define CONFIG_EXTERN extern
 #include "drivers/drivers.h"
 #include "io/redefine.h"
 
-#define Z_PROBE_TYPE Z_PROBE_TYPE_BLTOUCH
-#define Z_PROBE_HEIGHT 3             // Distance bed-nozzle when trigger switches
-#define Z_PROBE_BED_DISTANCE 10      // Optimal starting distance
-#define Z_PROBE_SPEED 5              // Speed fo z testing
-#define Z_PROBE_X_OFFSET 0           // x offset relative to extruder 0,0 offset
-#define Z_PROBE_Y_OFFSET 26          // y offset relative to extruder 0,0 offset
-#define Z_PROBE_COATING 0            // Coating thickness if not detected by probe
-#define Z_PROBE_DELAY 0              // Extra delay before starting again. Only needed on electronic probes keeping state for a while
-#define Z_PROBE_REPETITIONS 1        // How often should we probe, 1 is minimum
-#define Z_PROBE_USE_MEDIAN 1         // 0 = use average, 1 = use middle value after ordering z
-#define Z_PROBE_SWITCHING_DISTANCE 2 // Minimum distance required to safely untrigger probe - used for faster repeated measurement
-#define Z_PROBE_BORDER 2             // Safety border to ensure position is allowed
-#define Z_PROBE_START_SCRIPT ""
-#define Z_PROBE_FINISHED_SCRIPT ""
-#define Z_PROBE_RUN_AFTER_EVERY_PROBE ""
 // Define ZProbe by referencing a endstop defined
-CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
+CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 
 /** Axes are homed in order of priority (0..10) if homing direction is not 0. */
 #define X_HOME_PRIORITY 0
@@ -222,23 +180,13 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
 #define NUM_HEATED_CHAMBERS 0
 #define HEATED_CHAMBER_LIST \
-    { }
+    {}
 
 #define SERVO_LIST \
-    { &ZProbeServo }
+    { &Servo1 }
+    
 #define TOOLS \
-    { &ToolExtruder1, &ToolExtruder2 }
-
-// Define beeper list
-#if BEEPER_PIN > -1
-#define NUM_BEEPERS 1
-#define BEEPER_LIST \
-    { &MainBeeper }
-#else
-#define NUM_BEEPERS 0
-#define BEEPER_LIST \
-    { }
-#endif
+    { &ToolExtruder1, &ToolExtruder2, &Laser3, &CNC4 }
 
 // Heaters enumerate all heaters, so we can loop over them
 // or call commands on a specific heater number.
@@ -251,9 +199,9 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 // Id's start at 0 and depend on position in this array.
 #define NUM_MOTORS 5
 #define MOTORS \
-    { &XMotor, &YMotor, &ZMotor, &E1Motor, &E2Motor }
+    { &XMotor, &YMotor, &ZMotor, &AL1Motor, &AL2Motor }
 #define MOTOR_NAMES \
-    { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("E0"), PSTR("E1") }
+    { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("Adj. 1"), PSTR("Adj. 2") }
 
 // Some common settings for trinamic driver settings
 /**
@@ -281,49 +229,67 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define STORE_MOTOR_STEALTH 1
 #define STORE_MOTOR_STALL_SENSITIVITY 1
 
-// x axis extruders are 62mm width, distance after homing 503mm
-
-#define X_MAX_LENGTH 420
-#define Y_MAX_LENGTH 420
-#define Z_MAX_LENGTH 595.596
-#define X_MIN_POS -210
-#define Y_MIN_POS -210
+#define X_HOME_DIR -1
+#define Y_HOME_DIR 1
+#define Z_HOME_DIR -1
+#define X_MAX_LENGTH 235
+#define Y_MAX_LENGTH 240
+#define Z_MAX_LENGTH 225
+#define X_MIN_POS 0
+#define Y_MIN_POS 0
 #define Z_MIN_POS 0
-
-#define BED_X_MIN 0
-#define BED_X_MAX DUAL_X_RIGHT_OFFSET - DUAL_X_MIN_DISTANCE
+#define BED_X_MIN X_MIN_POS
+#define BED_X_MAX (X_MIN_POS + X_MAX_LENGTH)
 #define BED_Y_MIN Y_MIN_POS
 #define BED_Y_MAX (Y_MIN_POS + Y_MAX_LENGTH)
+
 // Park position used when pausing from firmware side
-#if PRINTER_TYPE == PRINTER_TYPE_DELTA
+#if PRINTER_TYPE == 2
 #define PARK_POSITION_X (0)
-#define PARK_POSITION_Y (-BED_RADIUS + 1)
+#define PARK_POSITION_Y (70)
 #else
 #define PARK_POSITION_X (X_MIN_POS)
 #define PARK_POSITION_Y (Y_MIN_POS + Y_MAX_LENGTH)
 #endif
-#define PARK_POSITION_Z_RAISE 0
-// 0 = move first xy and then z, 1 = first z up and then move xy
-#define PARK_POSITION_Z_UP_FIRST 0
+#define PARK_POSITION_Z_RAISE 10
 
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1000
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1000
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 1000
-#define XAXIS_STEPS_PER_MM 320
-#define YAXIS_STEPS_PER_MM 320
-#define ZAXIS_STEPS_PER_MM 320
-#define MAX_FEEDRATE_X 200
-#define MAX_FEEDRATE_Y 200
-#define MAX_FEEDRATE_Z 200
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 1100
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1100
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 1100
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1100
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
+#define XAXIS_STEPS_PER_MM 610
+#define YAXIS_STEPS_PER_MM 610
+#define ZAXIS_STEPS_PER_MM 6400
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 // ################ END MANUAL SETTINGS ##########################
 
-//#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
-// Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
-// If it is incompatible you will get compiler errors about write functions not being compatible!
-//#define COMPAT_PRE1
+#undef FAN_BOARD_PIN
+#define FAN_BOARD_PIN -1
+#define BOARD_FAN_SPEED 255
+#define BOARD_FAN_MIN_SPEED 0
+#define FAN_THERMO_PIN -1
+#define FAN_THERMO_MIN_PWM 128
+#define FAN_THERMO_MAX_PWM 255
+#define FAN_THERMO_MIN_TEMP 45
+#define FAN_THERMO_MAX_TEMP 60
+#define FAN_THERMO_THERMISTOR_PIN -1
+#define FAN_THERMO_THERMISTOR_TYPE 1
+#undef Y_MIN_PIN
+#define Y_MIN_PIN -1
+#undef X_MAX_PIN
+#define X_MAX_PIN -1
+#undef Y_MAX_PIN
+#define Y_MAX_PIN ORIG_Y_MIN_PIN
+#undef Z_MAX_PIN
+#define Z_MAX_PIN -1
 
+#define MIXING_EXTRUDER 0
+
+#define DRIVE_SYSTEM 0
+#define EXTRUDER_FAN_COOL_TEMP 50
 #define KILL_IF_SENSOR_DEFECT 0
 #define RETRACT_ON_PAUSE 2
 #define PAUSE_START_COMMANDS ""
@@ -357,7 +323,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define SKIP_M109_IF_WITHIN 5
 #define SCALE_PID_TO_MAX 0
 #define TEMP_HYSTERESIS 0
-#define EXTRUDE_MAXLENGTH 1000
+#define EXTRUDE_MAXLENGTH 160
 
 #define GENERIC_THERM_VREF 5
 #define GENERIC_THERM_NUM_ENTRIES 33
@@ -370,61 +336,74 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define MIN_EXTRUDER_TEMP 150
 #define MILLISECONDS_PREHEAT_TIME 30000
 
-// ################ Endstop/homing configuration #####################
+// ################ Endstop configuration #####################
 
 #define DOOR_PIN -1
 #define DOOR_PULLUP 1
 #define DOOR_INVERTING 1
-#define ENDSTOP_X_BACK_MOVE 2
-#define ENDSTOP_Y_BACK_MOVE 2
-#define ENDSTOP_Z_BACK_MOVE 2
-#define ENDSTOP_X_RETEST_REDUCTION_FACTOR 3
-#define ENDSTOP_Y_RETEST_REDUCTION_FACTOR 3
-#define ENDSTOP_Z_RETEST_REDUCTION_FACTOR 3
+#define ENDSTOP_X_BACK_MOVE 3
+#define ENDSTOP_Y_BACK_MOVE 3
+#define ENDSTOP_Z_BACK_MOVE 1
+#define ENDSTOP_X_RETEST_REDUCTION_FACTOR 2
+#define ENDSTOP_Y_RETEST_REDUCTION_FACTOR 2
+#define ENDSTOP_Z_RETEST_REDUCTION_FACTOR 2
 #define ENDSTOP_X_BACK_ON_HOME 0.5
 #define ENDSTOP_Y_BACK_ON_HOME 0.5
-#define ENDSTOP_Z_BACK_ON_HOME 20
-#define ALWAYS_CHECK_ENDSTOPS 0
-#define X_HOME_DIR 0
-#define Y_HOME_DIR 0
-#define Z_HOME_DIR 1
+#define ENDSTOP_Z_BACK_ON_HOME 0
+#define ALWAYS_CHECK_ENDSTOPS 1
 #define MOVE_X_WHEN_HOMED 0
 #define MOVE_Y_WHEN_HOMED 0
 #define MOVE_Z_WHEN_HOMED 0
-#define HOMING_FEEDRATE_X 50
-#define HOMING_FEEDRATE_Y 50
-#define HOMING_FEEDRATE_Z 50
-#define ZHOME_PRE_RAISE 0
-#define ZHOME_PRE_RAISE_DISTANCE 10
-#define RAISE_Z_ON_TOOLCHANGE 0
-#define ZHOME_MIN_TEMPERATURE 0
-#define ZHOME_HEAT_ALL 0
-#define ZHOME_HEIGHT 590
-#define FIXED_Z_HOME_POSITION 0
-#define ZHOME_X_POS 0
-#define ZHOME_Y_POS 0
 
 // ################# XYZ movements ###################
 
-#define PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT 0
+#define PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT 1
 
 // ##########################################################################################
 // ##                           Movement settings                                          ##
 // ##########################################################################################
 
+#define FEATURE_BABYSTEPPING 1
+#define BABYSTEP_MULTIPLICATOR 64
+
 // Delta settings
 #define DELTA_HOME_ON_POWER 0
 
-#define STEPPER_INACTIVE_TIME 0L
-#define MAX_INACTIVE_TIME 0L
+#define STEPPER_INACTIVE_TIME 360L
+#define MAX_INACTIVE_TIME 1200L
+#define MAX_FEEDRATE_X 250
+#define MAX_FEEDRATE_Y 250
+#define MAX_FEEDRATE_Z 20
+#define HOMING_FEEDRATE_X 80
+#define HOMING_FEEDRATE_Y 80
+#define HOMING_FEEDRATE_Z 10
+// Raise z before homing (1)
+#define ZHOME_PRE_RAISE 1
+// How much mm should z raise before homing
+#define ZHOME_PRE_RAISE_DISTANCE 2
+#define ZHOME_MIN_TEMPERATURE 0
+#define ZHOME_HEAT_ALL 0
+// Height in mm after homing.
+#define ZHOME_HEIGHT 10
+// Home Z at a fixed xy position (1)
+#define FIXED_Z_HOME_POSITION 1
+#define ZHOME_X_POS 140
+#define ZHOME_Y_POS 45
+// Raise extruders before switching tools. Used to prevent touching objects while switching.
+#define RAISE_Z_ON_TOOLCHANGE 2
 
 #define ENABLE_BACKLASH_COMPENSATION 0
 #define X_BACKLASH 0
 #define Y_BACKLASH 0
 #define Z_BACKLASH 0
-#define MAX_JERK 10
-#define MAX_ZJERK 0
+#define DIRECTION_DELAY 0
+#define MAX_JERK 5
+#define MAX_ZJERK 0.3
+#define PRINTLINE_CACHE_SIZE 32
 #define MOVE_CACHE_LOW 10
+#define LOW_TICKS_PER_MOVE 250000
+#define EXTRUDER_SWITCH_XY_SPEED 100
+#define FEATURE_DITTO_PRINTING 0
 
 // ################# Misc. settings ##################
 
@@ -438,10 +417,66 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #undef PS_ON_PIN
 #define PS_ON_PIN -1
 
-#define FEATURE_AXISCOMP 0
-#define AXISCOMP_TANXY 0
-#define AXISCOMP_TANYZ 0
-#define AXISCOMP_TANXZ 0
+// #################### Z-Probing #####################
+
+#define Z_PROBE_COATING 0
+#define Z_PROBE_Z_OFFSET_MODE 1
+#define UI_BED_COATING 1
+#define EXTRUDER_IS_Z_PROBE 1
+#define Z_PROBE_DISABLE_HEATERS 1
+#define Z_PROBE_BED_DISTANCE 3
+#define Z_PROBE_X_OFFSET 0
+#define Z_PROBE_Y_OFFSET 0
+#define Z_PROBE_SPEED 2
+#define Z_PROBE_SWITCHING_DISTANCE 1
+// How often should we test a position 1 .. x. Averages result over all tests.
+#define Z_PROBE_REPETITIONS 1
+// 0 = use average, 1 = use middle value after ordering z
+#define Z_PROBE_USE_MEDIAN 1
+// Nozzle distance to bed when z probe triggers
+#define Z_PROBE_HEIGHT -0.15
+// Delay in ms before we go down again. For BLTouch so signal can disable
+#define Z_PROBE_DELAY 0
+#define Z_PROBE_START_SCRIPT ""
+#define Z_PROBE_FINISHED_SCRIPT ""
+#define Z_PROBE_RUN_AFTER_EVERY_PROBE ""
+#define Z_PROBE_REQUIRES_HEATING 1
+#define Z_PROBE_MIN_TEMPERATURE 150
+
+// How to correct rotated beds
+// 0 = Software side by rotating coordinates
+// 1 = Move bed physically using 2 motors
+#define LEVELING_CORRECTOR 0
+// Bed fixture coordinates for motor leveling
+#define LC_P1_X 55
+#define LC_P1_Y 130
+#define LC_P2_X 137
+#define LC_P2_Y 45
+#define LC_P3_X 137
+#define LC_P3_Y 210
+#define LC_P2_MOTOR AL1Motor
+#define LC_P3_MOTOR AL2Motor
+#define LC_STEPS_PER_MM 3382
+#define LC_Z_SPEED 0.2
+// > 0 will move bed down and wait for removal (heater removed) and will pause another LC_WAIT_BED_REMOVE seconds
+#define LC_WAIT_BED_REMOVE 2
+// Uncomment to limit correction per autoleveling iteration. Value is the max. correction in mm
+// #define LIMIT_MOTORIZED_CORRECTION 0.5
+
+// Leveling method
+// 0 = none, 3 = 3 points, 1 = grid, 2 = 4 point symmetric
+#define LEVELING_METHOD 2
+#define L_P1_X 60
+#define L_P1_Y 130
+#define L_P2_X 137
+#define L_P2_Y 45
+#define L_P3_X 137
+#define L_P3_Y 210
+#define GRID_SIZE 5
+#define ENABLE_BUMP_CORRECTION 1          // CPU intensive, so only activate if required
+#define BUMP_CORRECTION_START_DEGRADE 0.5 // Until this height we correct 100%
+#define BUMP_CORRECTION_END_HEIGHT 2      // From this height on we do no correction
+#define BUMP_LIMIT_TO 0                   // Maximum allowed correction up/down, <= 0 off.
 
 #ifndef SDSUPPORT // Some boards have sd support on board. These define the values already in pins.h
 #define SDSUPPORT 1
@@ -452,18 +487,62 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define SD_EXTENDED_DIR 1 /** Show extended directory including file length. Don't use this with Pronterface! */
 #define SD_RUN_ON_STOP ""
 #define SD_STOP_HEATER_AND_MOTORS_ON_STOP 1
-#define ARC_SUPPORT 1
+#define ARC_SUPPORT 0
+#define FEATURE_MEMORY_POSITION 1
 #define FEATURE_CHECKSUM_FORCED 0
-#define UI_PRINTER_NAME "Deltatower"
-#define UI_PRINTER_COMPANY "Deltatower"
+#define FEATURE_FAN_CONTROL 1
+#define FEATURE_FAN2_CONTROL 0
+#define ADC_KEYPAD_PIN -1
+#define LANGUAGE_EN_ACTIVE 1
+#define LANGUAGE_DE_ACTIVE 1
+#define LANGUAGE_NL_ACTIVE 1
+#define LANGUAGE_PT_ACTIVE 1
+#define LANGUAGE_IT_ACTIVE 1
+#define LANGUAGE_ES_ACTIVE 1
+#define LANGUAGE_FI_ACTIVE 1
+#define LANGUAGE_SE_ACTIVE 1
+#define LANGUAGE_FR_ACTIVE 1
+#define LANGUAGE_CZ_ACTIVE 1
+#define LANGUAGE_PL_ACTIVE 1
+#define LANGUAGE_TR_ACTIVE 1
+#define UI_PRINTER_NAME "FELIX Pro 1"
+#define UI_PRINTER_COMPANY "FELIXprinters"
 #define UI_DISABLE_AUTO_PAGESWITCH 1
 #define UI_AUTORETURN_TO_MENU_AFTER 30000
-
-#define CASE_LIGHT_DEFAULT_ON 0
+#define FEATURE_UI_KEYS 0
+#define UI_ENCODER_SPEED 2
+#define UI_REVERSE_ENCODER 0
+#define UI_KEY_BOUNCETIME 10
+#define UI_KEY_FIRST_REPEAT 500
+#define UI_KEY_REDUCE_REPEAT 50
+#define UI_KEY_MIN_REPEAT 50
+#define FEATURE_BEEPER 0
+#define CASE_LIGHTS_PIN 25
+#define CASE_LIGHT_DEFAULT_ON 1
 #define UI_START_SCREEN_DELAY 2000
+#define UI_HEAD "E1:%e0\002C E2:%e1\002C B:%eb\002C"
+/**
+Beeper sound definitions for short beeps during key actions
+and longer beeps for important actions.
+Parameter is delay in microseconds and the secons is the number of repetitions.
+Values must be in range 1..255
+*/
+#define BEEPER_SHORT_SEQUENCE 2, 2
+#define BEEPER_LONG_SEQUENCE 8, 8
+#define UI_SET_MIN_HEATED_BED_TEMP 30
+#define UI_SET_MAX_HEATED_BED_TEMP 120
+#define UI_SET_MIN_EXTRUDER_TEMP 80
+#define UI_SET_MAX_EXTRUDER_TEMP 275
+#define UI_SET_EXTRUDER_FEEDRATE 5
+#define UI_SET_EXTRUDER_RETRACT_DISTANCE 3
 
 //#define CUSTOM_EVENTS
 //#define CUSTOM_MENU
 //#define CUSTOM_TRANSLATIONS
+#define HALFAUTOMATIC_LEVELING 1
+// add z probe height routine
+#define ZPROBE_HEIGHT_ROUTINE
+#define ZPROBE_REF_HEIGHT 5.97
+#define Z_UP_AFTER_HOME 10
 
 #endif

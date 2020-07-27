@@ -144,7 +144,7 @@ void HeatManager::update() {
                 printName();
                 Com::printFLN(PSTR(" failed to rise under full power. Heater disabled."));
                 Com::printErrorFLN(PSTR("If this wasn't due to a hardware defect, the decoupling period might be set too low."));
-                Com::printErrorF(PSTR("No temperaure rise after (ms):"));
+                Com::printErrorF(PSTR("No temperature rise after (ms):"));
                 Com::print(decouplePeriod);
                 Com::println();
                 setError(HeaterError::NO_HEATUP);
