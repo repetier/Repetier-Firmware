@@ -187,14 +187,16 @@ void Printer::setFanSpeed(int speed, bool immediately, int fanId, uint32_t timeo
     Tool* tool = nullptr;
     Tool* activeTool = Tool::getActiveTool();
     if (timeoutMS) {
+        fans[fanId].timeout = timeoutMS;
         fans[fanId].target = speed;
         fans[fanId].time = HAL::timeInMilliseconds();
-        fans[fanId].timeout = timeoutMS;
         return;
     }
 
     if (fans[fanId].timeout) { // remove existing timeout
-        fans[fanId] = (FanController) { fans[fanId].fan, 0, 0, 0 };
+        fans[fanId].timeout = 0;
+        fans[fanId].target = 0;
+        fans[fanId].time = 0;
     }
     Com::printF(PSTR("Fanspeed"), fanId);
     Com::printFLN(Com::tColon, speed);
@@ -540,13 +542,12 @@ void Printer::setup() {
 #define IO_TARGET IO_TARGET_INIT
 #include "io/redefine.h"
 
-    //Quickly initialize our fans array
     PWMHandler* tempFans[] = FAN_LIST;
     constexpr int numFans = std::extent<decltype(tempFans)>::value;
     static_assert(numFans == NUM_FANS, "NUM_FANS not defined correctly");
 
     for (fast8_t i = 0; i < NUM_FANS; i++) {
-        fans[i] = { tempFans[i], 0, 0 };
+        fans[i].fan = tempFans[i];
     }
     HAL::analogStart();
 

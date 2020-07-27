@@ -461,7 +461,7 @@ uint32_t nextRune(char** ptr) {
     }
     unsigned char p2 = **ptr;
     (*ptr)++;
-    if ((p1 && 240) == 240) { // 4 byte value
+    if ((p1 & 240) == 240) { // 4 byte value
         unsigned char p3 = **ptr;
         (*ptr)++;
         unsigned char p4 = **ptr;
@@ -485,7 +485,7 @@ int32_t nextRuneSize(char** ptr, size_t& sz) {
     }
     unsigned char p2 = **ptr;
     (*ptr)++;
-    if ((p1 && 240) == 240) { // 4 byte value
+    if ((p1 & 240) == 240) { // 4 byte value
         unsigned char p3 = **ptr;
         (*ptr)++;
         unsigned char p4 = **ptr;

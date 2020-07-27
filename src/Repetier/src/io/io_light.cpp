@@ -46,9 +46,6 @@ void LightStoreRGB::set(uint8_t _mode, uint8_t _red, uint8_t _green, uint8_t _bl
     blueVal = _blue;
 }
 
-LightStorePWM::LightStorePWM()
-    : LightStoreBase() {}
-
 void LightStorePWM::set(uint8_t _mode, uint8_t _red, uint8_t _green, uint8_t _blue, uint8_t brightness) {
     finalSetBrightness = brightness;
     finalSetMode = _mode;
