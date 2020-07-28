@@ -38,7 +38,6 @@ float ZProbeHandler::getZProbeHeight() {
 
 void ZProbeHandler::setZProbeHeight(float _height) {
     height = _height;
-    EEPROM::markChanged();
 }
 
 void ZProbeHandler::activate() {
@@ -297,6 +296,31 @@ float ZProbeHandler::optimumProbingHeight() {
     return bedDistance + (height > 0 ? 0 : -height);
 }
 
+void __attribute__((weak)) menuProbeCoating(GUIAction action, void* data) {
+    GUI::flashToString(GUI::tmpString, PSTR("Coating Height:"));
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, ZProbeHandler::getCoating(), 2);
+    if (GUI::handleFloatValueAction(action, v, 0.0f, 5.0f, 0.01f)) {
+        ZProbeHandler::setCoating(v);
+    }
+}
+void __attribute__((weak)) menuProbeOffset(GUIAction action, void* data) {
+    int axis = reinterpret_cast<int>(data); // 0 = x, 1 = y
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("@ Offset:"), axis ? axisNames[Y_AXIS] : axisNames[X_AXIS]);
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM,
+               axis ? ZProbeHandler::yOffset() : ZProbeHandler::xOffset(), 1);
+    if (GUI::handleFloatValueAction(action, v, -100.0f, 100.0f, 0.5f)) {
+        if (axis) {
+            ZProbeHandler::setYOffset(v);
+        } else {
+            ZProbeHandler::setXOffset(v);
+        }
+    }
+}
+void ZProbeHandler::showConfigMenu(GUIAction action) {
+    GUI::menuFloatP(action, PSTR("Coat. Height:"), ZProbeHandler::getCoating(), 2, menuProbeCoating, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("X Offset    :"), ZProbeHandler::xOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(0), GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Y Offset    :"), ZProbeHandler::yOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(1), GUIPageType::FIXED_CONTENT);
+}
 #endif
 
 #if Z_PROBE_TYPE == Z_PROBE_TYPE_NOZZLE
@@ -315,7 +339,6 @@ float ZProbeHandler::getZProbeHeight() {
 
 void ZProbeHandler::setZProbeHeight(float _height) {
     height = _height;
-    EEPROM::markChanged();
 }
 
 void ZProbeHandler::activate() {
@@ -588,6 +611,22 @@ float ZProbeHandler::optimumProbingHeight() {
     return bedDistance + (height > 0 ? 0 : -height);
 }
 
+void __attribute__((weak)) menuProbeTemperature(GUIAction action, void* data) {
+    int maxTemp = reinterpret_cast<int>(data);
+    GUI::flashToString(GUI::tmpString, PSTR("Min. Nozzle Temp :"));
+    DRAW_LONG(GUI::tmpString, Com::tUnitDegCelsius, ZProbeHandler::getProbingTemp());
+    if (GUI::handleLongValueAction(action, v, 0, maxTemp, 5)) {
+        ZProbeHandler::setProbingTemp(v);
+    }
+}
+void ZProbeHandler::showConfigMenu(GUIAction action) {
+    Tool* t = Tool::getActiveTool();
+    HeatManager* hm = t->getHeater();
+    if (hm != nullptr) {
+        int maxTemp = hm->getMaxTemperature();
+        GUI::menuLongP(action, PSTR("Nozzle Temp:"), ZProbeHandler::getProbingTemp(), menuProbeTemperature, reinterpret_cast<void*>(maxTemp), GUIPageType::FIXED_CONTENT);
+    }
+}
 #endif
 
 #if Z_PROBE_TYPE == Z_PROBE_TYPE_BLTOUCH
@@ -607,7 +646,6 @@ float ZProbeHandler::getZProbeHeight() {
 
 void ZProbeHandler::setZProbeHeight(float _height) {
     height = _height;
-    EEPROM::markChanged();
 }
 
 void ZProbeHandler::activate() {
@@ -892,4 +930,29 @@ void ZProbeHandler::disableAlarmIfOn() {
     ZProbeServo.setPosition(1473, 0); // pin up
 }
 
+void __attribute__((weak)) menuProbeCoating(GUIAction action, void* data) {
+    GUI::flashToString(GUI::tmpString, PSTR("Coating Height:"));
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, ZProbeHandler::getCoating(), 2);
+    if (GUI::handleFloatValueAction(action, v, 0.0f, 5.0f, 0.01f)) {
+        ZProbeHandler::setCoating(v);
+    }
+}
+void __attribute__((weak)) menuProbeOffset(GUIAction action, void* data) {
+    int axis = reinterpret_cast<int>(data); // 0 = x, 1 = y
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("@ Offset:"), axis ? axisNames[Y_AXIS] : axisNames[X_AXIS]);
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM,
+               axis ? ZProbeHandler::yOffset() : ZProbeHandler::xOffset(), 1);
+    if (GUI::handleFloatValueAction(action, v, -100.0f, 100.0f, 0.5f)) {
+        if (axis) {
+            ZProbeHandler::setYOffset(v);
+        } else {
+            ZProbeHandler::setXOffset(v);
+        }
+    }
+}
+void ZProbeHandler::showConfigMenu(GUIAction action) {
+    GUI::menuFloatP(action, PSTR("Coat. Height:"), ZProbeHandler::getCoating(), 2, menuProbeCoating, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("X Offset    :"), ZProbeHandler::xOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(0), GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Y Offset    :"), ZProbeHandler::yOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(1), GUIPageType::FIXED_CONTENT);
+}
 #endif

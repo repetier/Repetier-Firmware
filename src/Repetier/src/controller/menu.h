@@ -14,4 +14,5 @@ extern void menuConfig(GUIAction action, void* data);
 extern void menuMoveE(GUIAction action, void* data);
 extern void menuFans(GUIAction action, void* data);
 extern void menuConfigAxis(GUIAction action, void* data);
+extern void menuConfigProbe(GUIAction action, void* data);
 #endif

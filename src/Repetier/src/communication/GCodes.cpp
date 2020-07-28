@@ -459,6 +459,7 @@ void GCode_30(GCode* com) {
         float zProbeHeight = ZProbeHandler::getZProbeHeight() + startHeight - zheight;
 
         ZProbeHandler::setZProbeHeight(zProbeHeight); // will also report on output
+        EEPROM::markChanged();
         Com::printFLN(PSTR("Z-probe height [mm]:"), zProbeHeight);
 
     } else {
