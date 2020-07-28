@@ -8,17 +8,17 @@ public:
     static bool probingPossible() { return false; }
     static float xOffset() { return 0; }
     static float yOffset() { return 0; }
-    static void init() {}
+    static void init() { }
     static void eepromHandle() { }
     static void eepromReset() { }
     static float optimumProbingHeight() { return 0; }
     static bool isActive() { return false; }
 
     static float getZProbeHeight() { return 0; };
-    static void setZProbeHeight(float height) { };
+    static void setZProbeHeight(float height) {};
 
     static float getCoating() { return 0; }
-    static void setCoating(float val) {}
+    static void setCoating(float val) { }
 
     static float getBedDistance() { return 0; }
     static void setBedDistance(float val) { }
@@ -134,7 +134,7 @@ class ZProbeHandler {
     static uint16_t eprStart;
     static float height;
     static float bedDistance;
-    static float coating;
+    // static float coating;
     static float offsetX;
     static float offsetY;
     static float speed;
@@ -163,8 +163,8 @@ public:
     static float getZProbeHeight();
     static void setZProbeHeight(float height);
 
-    static float getCoating() { return coating; }
-    static void setCoating(float val) { coating = val; }
+    static float getCoating() { return 0; }
+    static void setCoating(float val) { }
 
     static float getBedDistance() { return bedDistance; }
     static void setBedDistance(float val) { bedDistance = val; }

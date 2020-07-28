@@ -150,7 +150,6 @@ public:
     FSTRINGVAR(tTestM999)
     // Units
     FSTRINGVAR(tUnitMM)
-    FSTRINGVAR(tUnitMMS)
     FSTRINGVAR(tUnitMMPS)
     FSTRINGVAR(tUnitMMPS2)
     FSTRINGVAR(tUnitMMPS3)

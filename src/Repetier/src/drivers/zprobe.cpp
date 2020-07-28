@@ -107,7 +107,10 @@ float ZProbeHandler::runProbe() {
     PrinterType::transform(cPos, cPosSteps);
     Motion1::copyCurrentPrinter(tPos);
 
-    float secureDistance = getBedDistance() * 1.5f;
+    float secureDistance = (Motion1::maxPos[Z_AXIS] - Motion1::minPos[Z_AXIS]) * 1.5f;
+    if (Motion1::currentPosition[Z_AXIS] > 0.5 * ZProbeHandler::optimumProbingHeight() + 0.1 && fabsf(Motion1::currentPosition[Z_AXIS] - ZProbeHandler::optimumProbingHeight()) < 1.0f) {
+        secureDistance = getBedDistance() * 1.5f;
+    }
     tPos[Z_AXIS] -= secureDistance;
     PrinterType::transform(tPos, tPosSteps);
     int32_t secureSteps = lround(secureDistance * Motion1::resolution[Z_AXIS]);
@@ -440,7 +443,10 @@ float ZProbeHandler::runProbe() {
     PrinterType::transform(cPos, cPosSteps);
     Motion1::copyCurrentPrinter(tPos);
 
-    float secureDistance = getBedDistance() * 1.5f;
+    float secureDistance = (Motion1::maxPos[Z_AXIS] - Motion1::minPos[Z_AXIS]) * 1.5f;
+    if (Motion1::currentPosition[Z_AXIS] > 0.5 * ZProbeHandler::optimumProbingHeight() + 0.1 && fabsf(Motion1::currentPosition[Z_AXIS] - ZProbeHandler::optimumProbingHeight()) < 1.0f) {
+        secureDistance = getBedDistance() * 1.5f;
+    }
     tPos[Z_AXIS] -= secureDistance;
     PrinterType::transform(tPos, tPosSteps);
     int32_t secureSteps = lround(secureDistance * Motion1::resolution[Z_AXIS]);
@@ -759,7 +765,10 @@ float ZProbeHandler::runProbe() {
     PrinterType::transform(cPos, cPosSteps);
     Motion1::copyCurrentPrinter(tPos);
 
-    float secureDistance = getBedDistance() * 1.5f;
+    float secureDistance = (Motion1::maxPos[Z_AXIS] - Motion1::minPos[Z_AXIS]) * 1.5f;
+    if (Motion1::currentPosition[Z_AXIS] > 0.5 * ZProbeHandler::optimumProbingHeight() + 0.1 && fabsf(Motion1::currentPosition[Z_AXIS] - ZProbeHandler::optimumProbingHeight()) < 1.0f) {
+        secureDistance = getBedDistance() * 1.5f;
+    }
     tPos[Z_AXIS] -= secureDistance;
     PrinterType::transform(tPos, tPosSteps);
     int32_t secureSteps = lround(secureDistance * Motion1::resolution[Z_AXIS]);
@@ -981,13 +990,6 @@ void ZProbeHandler::disableAlarmIfOn() {
     ZProbeServo.setPosition(1473, 0); // pin up
 }
 
-void __attribute__((weak)) menuProbeCoating(GUIAction action, void* data) {
-    GUI::flashToString(GUI::tmpString, PSTR("Coating Height:"));
-    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, ZProbeHandler::getCoating(), 2);
-    if (GUI::handleFloatValueAction(action, v, 0.0f, 5.0f, 0.01f)) {
-        ZProbeHandler::setCoating(v);
-    }
-}
 void __attribute__((weak)) menuProbeOffset(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data); // 0 = x, 1 = y
     GUI::flashToStringFlash(GUI::tmpString, PSTR("@ Offset:"), axis ? axisNames[Y_AXIS] : axisNames[X_AXIS]);
@@ -1002,7 +1004,6 @@ void __attribute__((weak)) menuProbeOffset(GUIAction action, void* data) {
     }
 }
 void ZProbeHandler::showConfigMenu(GUIAction action) {
-    GUI::menuFloatP(action, PSTR("Coat. Height:"), ZProbeHandler::getCoating(), 2, menuProbeCoating, nullptr, GUIPageType::FIXED_CONTENT);
     GUI::menuFloatP(action, PSTR("X Offset    :"), ZProbeHandler::xOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(0), GUIPageType::FIXED_CONTENT);
     GUI::menuFloatP(action, PSTR("Y Offset    :"), ZProbeHandler::yOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(1), GUIPageType::FIXED_CONTENT);
 }
