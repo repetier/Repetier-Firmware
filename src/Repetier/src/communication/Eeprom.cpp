@@ -109,7 +109,9 @@ void EEPROM::callHandle() {
 #if FEATURE_CONTROLLER != NO_CONTROLLER
     handleByte(EPR_SELECTED_LANGUAGE, Com::tLanguage, Com::selectedLanguage);
 #endif
-    handleLong(EPR_BAUDRATE, Com::tEPRBaudrate, baudrate);
+    if (strcmp_P(PSTR(VALUE(RFSERIAL)), PSTR("SerialUSB")) != 0) {
+        handleLong(EPR_BAUDRATE, Com::tEPRBaudrate, baudrate);
+    }
     handleLong(EPR_PRINTING_TIME, Com::tEPRPrinterActive, Printer::printingTime);
     handleLong(EPR_MAX_INACTIVE_TIME, Com::tEPRMaxInactiveTime, maxInactiveTime);
     handleLong(EPR_STEPPER_INACTIVE_TIME, Com::tEPRStopAfterInactivty, stepperInactiveTime);
