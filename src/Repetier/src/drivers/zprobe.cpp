@@ -254,9 +254,16 @@ float ZProbeHandler::runProbe() {
         deactivate();
     }
     if (ZProbe->update()) {
-        Com::printErrorFLN(PSTR("z-probe did not untrigger after going back to start position."));
-        Motion1::callAfterHomingOnSteppers();
-        return ILLEGAL_Z_PROBE;
+        millis_t startTime = HAL::timeInMilliseconds();
+        while (ZProbe->update() && ((HAL::timeInMilliseconds() - startTime) < 200)) {
+            Commands::checkForPeriodicalActions(false);
+        }
+
+        if (ZProbe->update()) {
+            Com::printErrorFLN(PSTR("z-probe did not untrigger after moving back to start position."));
+            Motion1::callAfterHomingOnSteppers();
+            return ILLEGAL_Z_PROBE;
+        }
     }
     Com::printF(Com::tZProbe, z, 3);
     Com::printF(Com::tSpaceXColon, Motion1::currentPosition[X_AXIS]);
@@ -590,9 +597,16 @@ float ZProbeHandler::runProbe() {
         deactivate();
     }
     if (ZProbe->update()) {
-        Com::printErrorFLN(PSTR("z-probe did not untrigger after going back to start position."));
-        Motion1::callAfterHomingOnSteppers();
-        return ILLEGAL_Z_PROBE;
+        millis_t startTime = HAL::timeInMilliseconds();
+        while (ZProbe->update() && ((HAL::timeInMilliseconds() - startTime) < 200)) {
+            Commands::checkForPeriodicalActions(false);
+        }
+
+        if (ZProbe->update()) {
+            Com::printErrorFLN(PSTR("z-probe did not untrigger after moving back to start position."));
+            Motion1::callAfterHomingOnSteppers();
+            return ILLEGAL_Z_PROBE;
+        }
     }
     Com::printF(Com::tZProbe, z, 3);
     Com::printF(Com::tSpaceXColon, Motion1::currentPosition[X_AXIS]);
@@ -913,9 +927,16 @@ float ZProbeHandler::runProbe() {
         deactivate();
     }
     if (ZProbe->update()) {
-        Com::printErrorFLN(PSTR("z-probe did not untrigger after going back to start position."));
-        Motion1::callAfterHomingOnSteppers();
-        return ILLEGAL_Z_PROBE;
+        millis_t startTime = HAL::timeInMilliseconds();
+        while (ZProbe->update() && ((HAL::timeInMilliseconds() - startTime) < 200)) {
+            Commands::checkForPeriodicalActions(false);
+        }
+
+        if (ZProbe->update()) {
+            Com::printErrorFLN(PSTR("z-probe did not untrigger after moving back to start position."));
+            Motion1::callAfterHomingOnSteppers();
+            return ILLEGAL_Z_PROBE;
+        }
     }
     Com::printF(Com::tZProbe, z, 3);
     Com::printF(Com::tSpaceXColon, Motion1::currentPosition[X_AXIS]);
