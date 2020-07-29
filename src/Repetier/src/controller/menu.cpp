@@ -183,7 +183,7 @@ void __attribute__((weak)) menuConfigAxis(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuProbeSpeed(GUIAction action, void* data) {
     GUI::flashToString(GUI::tmpString, PSTR("Probing Speed:"));
-    DRAW_FLOAT(GUI::tmpString, Com::PtUnitMMS, ZProbeHandler::getSpeed(), 1);
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS, ZProbeHandler::getSpeed(), 1);
     if (GUI::handleFloatValueAction(action, v, 0.20f, Motion1::homingFeedrate[Z_AXIS], 0.10f)) {
         ZProbeHandler::setSpeed(v);
     }

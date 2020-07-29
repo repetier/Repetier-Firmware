@@ -367,8 +367,8 @@ extern ServoInterface* servos[];
 #define JSON_OUTPUT 0
 #endif
 
-#if !defined(ZPROBE_MIN_TEMPERATURE) && defined(ZHOME_MIN_TEMPERATURE)
-#define ZPROBE_MIN_TEMPERATURE ZHOME_MIN_TEMPERATURE
+#ifndef Z_PROBE_PAUSE_HEATERS
+#define Z_PROBE_PAUSE_HEATERS 0
 #endif
 
 #ifndef MAX_ROOM_TEMPERATURE

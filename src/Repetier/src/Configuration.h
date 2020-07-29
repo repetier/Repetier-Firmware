@@ -179,11 +179,11 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 
 #define NUM_HEATED_CHAMBERS 0
 #define HEATED_CHAMBER_LIST \
-    {}
+    { }
 
 #define SERVO_LIST \
     { &Servo1 }
-    
+
 #define TOOLS \
     { &ToolExtruder1, &ToolExtruder2, &Laser3, &CNC4 }
 
