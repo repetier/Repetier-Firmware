@@ -70,7 +70,6 @@
 #define DEBUG_RESCUE                 // Uncomment to add power loss entry in debug menu while printing
 #define POWERLOSS_LEVEL 2            // How much time do we have on powerloss, 0 = no move, 1 = short just raise Z, 2 = long full park move
 #define POWERLOSS_UP 5               // How much to move up if mode 1 is active
-#define Z_PROBE_TYPE 2               // 0 = no z probe, 1 = default z probe, 2 = Nozzle as probe
 #define Z_PROBE_BORDER 2             // Safety border to ensure position is allowed
 #define Z_PROBE_TEMPERATURE 0        // Temperature for type 2
 
@@ -419,29 +418,27 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 
 // #################### Z-Probing #####################
 
-#define Z_PROBE_COATING 0
-#define Z_PROBE_Z_OFFSET_MODE 1
-#define UI_BED_COATING 1
-#define EXTRUDER_IS_Z_PROBE 1
-#define Z_PROBE_DISABLE_HEATERS 1
-#define Z_PROBE_BED_DISTANCE 3
-#define Z_PROBE_X_OFFSET 0
-#define Z_PROBE_Y_OFFSET 0
-#define Z_PROBE_SPEED 2
-#define Z_PROBE_SWITCHING_DISTANCE 1
-// How often should we test a position 1 .. x. Averages result over all tests.
-#define Z_PROBE_REPETITIONS 1
-// 0 = use average, 1 = use middle value after ordering z
-#define Z_PROBE_USE_MEDIAN 1
-// Nozzle distance to bed when z probe triggers
-#define Z_PROBE_HEIGHT -0.15
-// Delay in ms before we go down again. For BLTouch so signal can disable
-#define Z_PROBE_DELAY 0
+// Depending on the here selected z probe type some options may be ignored.
+// Z_PROBE_TYPE_NONE - No z probe available
+// Z_PROBE_TYPE_DEFAULT - Default z probe triggers on a pin change
+// Z_PROBE_TYPE_NOZZLE - Nozzle is z probe. Supports heating before probing.
+// Z_PROBE_TYPE_BLTOUCH - BLtouch/3DTouch z probe. Contains logic for pin.
+#define Z_PROBE_TYPE Z_PROBE_TYPE_NONE
+#define Z_PROBE_HEIGHT 3             // Distance bed-nozzle when trigger switches
+#define Z_PROBE_BED_DISTANCE 10      // Optimal starting distance
+#define Z_PROBE_SPEED 5              // Speed fo z testing
+#define Z_PROBE_X_OFFSET 0           // x offset relative to extruder 0,0 offset
+#define Z_PROBE_Y_OFFSET 26          // y offset relative to extruder 0,0 offset
+#define Z_PROBE_COATING 0            // Coating thickness if not detected by probe
+#define Z_PROBE_DELAY 0              // Extra delay before starting again. Only needed on electronic probes keeping state for a while
+#define Z_PROBE_REPETITIONS 1        // How often should we probe, 1 is minimum
+#define Z_PROBE_USE_MEDIAN 1         // 0 = use average, 1 = use middle value after ordering z
+#define Z_PROBE_SWITCHING_DISTANCE 2 // Minimum distance required to safely untrigger probe - used for faster repeated measurement
+#define Z_PROBE_BORDER 2             // Safety border to ensure position is allowed
+#define Z_PROBE_PAUSE_HEATERS 0      // Pause all heaters when probing to reduce EMI artifacts
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
 #define Z_PROBE_RUN_AFTER_EVERY_PROBE ""
-#define Z_PROBE_REQUIRES_HEATING 1
-#define Z_PROBE_MIN_TEMPERATURE 150
 
 // How to correct rotated beds
 // 0 = Software side by rotating coordinates

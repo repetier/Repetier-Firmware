@@ -32,6 +32,8 @@ float ZProbeHandler::offsetX;
 float ZProbeHandler::offsetY;
 float ZProbeHandler::speed;
 bool ZProbeHandler::activated;
+uint16_t ZProbeHandler::userPausedHeaters;
+bool ZProbeHandler::pauseHeaters;
 
 float ZProbeHandler::getZProbeHeight() {
     return height;
@@ -57,6 +59,21 @@ void ZProbeHandler::activate() {
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Motion1::setToolOffset(-offsetX, -offsetY, 0);
     activated = true;
+    if (pauseHeaters) {
+        bool set = false;
+        for (size_t i = 0; i < NUM_HEATERS; i++) {
+            if (heaters[i]->isPaused() || heaters[i]->isOff()) {
+                userPausedHeaters |= (1 << i);
+            } else {
+                userPausedHeaters &= ~(1 << i);
+                heaters[i]->pause();
+                set = true;
+            }
+        }
+        if (set) {
+            HAL::delayMilliseconds(150);
+        }
+    }
 }
 
 void ZProbeHandler::deactivate() {
@@ -72,6 +89,15 @@ void ZProbeHandler::deactivate() {
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     activated = false;
+    if (pauseHeaters) {
+        for (size_t i = 0; i < NUM_HEATERS; i++) {
+            if (heaters[i]->isPaused()) {
+                if (!((userPausedHeaters >> i) & 1)) {
+                    heaters[i]->unpause();
+                }
+            }
+        }
+    }
 }
 
 float ZProbeHandler::runProbe() {
@@ -295,7 +321,7 @@ float ZProbeHandler::yOffset() {
 
 void ZProbeHandler::init() {
     eepromReset();
-    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_Z_PROBE, 1, 24);
+    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_Z_PROBE, 1, 25);
     activated = false;
 }
 
@@ -306,16 +332,18 @@ void ZProbeHandler::eepromReset() {
     offsetX = Z_PROBE_X_OFFSET;
     offsetY = Z_PROBE_Y_OFFSET;
     coating = Z_PROBE_COATING;
+    pauseHeaters = Z_PROBE_PAUSE_HEATERS;
 }
 
 void ZProbeHandler::eepromHandle() {
     EEPROM::handlePrefix(PSTR("Z-probe"));
     EEPROM::handleFloat(eprStart + 0, PSTR("trigger height [mm]"), 3, height);
-    EEPROM::handleFloat(eprStart + 20, PSTR("Coating [mm]"), 3, coating);
+    EEPROM::handleFloat(eprStart + 20, PSTR("coating [mm]"), 3, coating);
     EEPROM::handleFloat(eprStart + 4, PSTR("min. nozzle distance [mm]"), 3, bedDistance);
-    EEPROM::handleFloat(eprStart + 8, PSTR("Probing Speed [mm]"), 3, speed);
+    EEPROM::handleFloat(eprStart + 8, PSTR("probing speed [mm/s]"), 3, speed);
     EEPROM::handleFloat(eprStart + 12, PSTR("X offset [mm]"), 3, offsetX);
     EEPROM::handleFloat(eprStart + 16, PSTR("Y offset [mm]"), 3, offsetY);
+    EEPROM::handleByte(eprStart + 24, PSTR("pause heaters [0/1]"), pauseHeaters);
     EEPROM::removePrefix();
 }
 
@@ -359,6 +387,8 @@ float ZProbeHandler::speed;
 bool ZProbeHandler::activated;
 int16_t ZProbeHandler::probeTemperature;
 int16_t ZProbeHandler::activateTemperature;
+uint16_t ZProbeHandler::userPausedHeaters;
+bool ZProbeHandler::pauseHeaters;
 
 float ZProbeHandler::getZProbeHeight() {
     return height;
@@ -394,6 +424,21 @@ void ZProbeHandler::activate() {
         }
     }
     activated = true;
+    if (pauseHeaters) {
+        bool set = false;
+        for (size_t i = 0; i < NUM_HEATERS; i++) {
+            if (heaters[i]->isPaused() || heaters[i]->isOff()) {
+                userPausedHeaters |= (1 << i);
+            } else {
+                userPausedHeaters &= ~(1 << i);
+                heaters[i]->pause();
+                set = true;
+            }
+        }
+        if (set) {
+            HAL::delayMilliseconds(150);
+        }
+    }
 }
 
 void ZProbeHandler::deactivate() {
@@ -414,6 +459,15 @@ void ZProbeHandler::deactivate() {
         hm->setTargetTemperature(activateTemperature);
     }
     activated = false;
+    if (pauseHeaters) {
+        for (size_t i = 0; i < NUM_HEATERS; i++) {
+            if (heaters[i]->isPaused()) {
+                if (!((userPausedHeaters >> i) & 1)) {
+                    heaters[i]->unpause();
+                }
+            }
+        }
+    }
 }
 
 float ZProbeHandler::runProbe() {
@@ -640,7 +694,7 @@ float ZProbeHandler::yOffset() {
 
 void ZProbeHandler::init() {
     eepromReset();
-    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_Z_PROBE, 2, 14);
+    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_Z_PROBE, 2, 15);
     activated = false;
     activateTemperature = 0;
 }
@@ -650,14 +704,16 @@ void ZProbeHandler::eepromReset() {
     bedDistance = Z_PROBE_BED_DISTANCE;
     speed = Z_PROBE_SPEED;
     probeTemperature = Z_PROBE_TEMPERATURE;
+    pauseHeaters = Z_PROBE_PAUSE_HEATERS;
 }
 
 void ZProbeHandler::eepromHandle() {
     EEPROM::handlePrefix(PSTR("Z-probe"));
     EEPROM::handleFloat(eprStart + 0, PSTR("trigger height [mm]"), 3, height);
     EEPROM::handleFloat(eprStart + 4, PSTR("min. nozzle distance [mm]"), 3, bedDistance);
-    EEPROM::handleFloat(eprStart + 8, PSTR("Probing Speed [mm]"), 3, speed);
-    EEPROM::handleInt(eprStart + 12, PSTR("Minimum nozzle temperature"), probeTemperature);
+    EEPROM::handleFloat(eprStart + 8, PSTR("probing speed [mm/s]"), 3, speed);
+    EEPROM::handleInt(eprStart + 12, PSTR("min. nozzle temp [deg C]"), probeTemperature);
+    EEPROM::handleByte(eprStart + 14, PSTR("pause heaters [0/1]"), pauseHeaters);
     EEPROM::removePrefix();
 }
 
@@ -694,6 +750,8 @@ float ZProbeHandler::offsetY;
 float ZProbeHandler::speed;
 bool ZProbeHandler::activated;
 
+uint16_t ZProbeHandler::userPausedHeaters;
+bool ZProbeHandler::pauseHeaters;
 float ZProbeHandler::getZProbeHeight() {
     return height;
 }
@@ -721,13 +779,28 @@ void ZProbeHandler::activate() {
     ZProbeServo.setPosition(647, 0); // deploy pin
     HAL::delayMilliseconds(1000);    // give time to deploy
     if (isAlarmOn()) {               // to close to bed, alarm triggered already from deploy, so raise 5mm
-        Com::printWarningFLN(PSTR("Z-Probe triggered before probing - raising z!"));
+        Com::printWarningFLN(PSTR("Z-probe triggered before probing - raising z!"));
         cPos[Z_AXIS] += 5.0;
         Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[Z_AXIS], false);
         Motion1::waitForEndOfMoves();
         disableAlarmIfOn();
     }
     activated = true;
+    if (pauseHeaters) {
+        bool set = false;
+        for (size_t i = 0; i < NUM_HEATERS; i++) {
+            if (heaters[i]->isPaused() || heaters[i]->isOff()) {
+                userPausedHeaters |= (1 << i);
+            } else {
+                userPausedHeaters &= ~(1 << i);
+                heaters[i]->pause();
+                set = true;
+            }
+        }
+        if (set) {
+            HAL::delayMilliseconds(150);
+        }
+    }
 }
 
 void ZProbeHandler::deactivate() {
@@ -744,6 +817,15 @@ void ZProbeHandler::deactivate() {
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     activated = false;
+    if (pauseHeaters) {
+        for (size_t i = 0; i < NUM_HEATERS; i++) {
+            if (heaters[i]->isPaused()) {
+                if (!((userPausedHeaters >> i) & 1)) {
+                    heaters[i]->unpause();
+                }
+            }
+        }
+    }
 }
 
 float ZProbeHandler::runProbe() {
@@ -968,7 +1050,7 @@ float ZProbeHandler::yOffset() {
 
 void ZProbeHandler::init() {
     eepromReset();
-    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_Z_PROBE, 1, 20);
+    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_Z_PROBE, 1, 21);
     activated = false;
 }
 
@@ -979,15 +1061,17 @@ void ZProbeHandler::eepromReset() {
     offsetX = Z_PROBE_X_OFFSET;
     offsetY = Z_PROBE_Y_OFFSET;
     coating = Z_PROBE_COATING;
+    pauseHeaters = Z_PROBE_PAUSE_HEATERS;
 }
 
 void ZProbeHandler::eepromHandle() {
     EEPROM::handlePrefix(PSTR("Z-probe"));
     EEPROM::handleFloat(eprStart + 0, PSTR("trigger height [mm]"), 3, height);
     EEPROM::handleFloat(eprStart + 4, PSTR("min. nozzle distance [mm]"), 3, bedDistance);
-    EEPROM::handleFloat(eprStart + 8, PSTR("Probing Speed [mm]"), 3, speed);
+    EEPROM::handleFloat(eprStart + 8, PSTR("probing speed [mm/s]"), 3, speed);
     EEPROM::handleFloat(eprStart + 12, PSTR("X offset [mm]"), 3, offsetX);
     EEPROM::handleFloat(eprStart + 16, PSTR("Y offset [mm]"), 3, offsetY);
+    EEPROM::handleByte(eprStart + 20, PSTR("pause heaters [0/1]"), pauseHeaters);
     EEPROM::removePrefix();
 }
 
