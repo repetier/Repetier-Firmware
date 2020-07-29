@@ -33,7 +33,7 @@ void __attribute__((weak)) GCode_0_1(GCode* com) {
     if (com->hasP()) {
         Printer::setNoDestinationCheck(com->P == 0);
         if (com->hasNoXYZ()) {
-            Com::printFLN("Destination checking ", com->P != 0, BoolFormat::ONOFF);
+            Com::printFLN(PSTR("Destination checking "), com->P != 0, BoolFormat::ONOFF);
         }
     }
     Tool::getActiveTool()->extractG1(com);
