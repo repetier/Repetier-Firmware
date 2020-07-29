@@ -181,6 +181,47 @@ void __attribute__((weak)) menuConfigAxis(GUIAction action, void* data) {
     GUI::menuEnd(action);
 }
 
+void __attribute__((weak)) menuProbeSpeed(GUIAction action, void* data) {
+    GUI::flashToString(GUI::tmpString, PSTR("Probing Speed:"));
+    DRAW_FLOAT(GUI::tmpString, Com::PtUnitMMS, ZProbeHandler::getSpeed(), 1);
+    if (GUI::handleFloatValueAction(action, v, 0.20f, Motion1::homingFeedrate[Z_AXIS], 0.10f)) {
+        ZProbeHandler::setSpeed(v);
+    }
+}
+void __attribute__((weak)) menuProbeTrigHeight(GUIAction action, void* data) {
+    GUI::flashToString(GUI::tmpString, PSTR("Trigger Height:"));
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, ZProbeHandler::getZProbeHeight(), 2);
+    if (GUI::handleFloatValueAction(action, v, -10.0f, 10.0f, 0.01f)) {
+        ZProbeHandler::setZProbeHeight(v);
+    }
+}
+void __attribute__((weak)) menuProbeBedDistance(GUIAction action, void* data) {
+    GUI::flashToString(GUI::tmpString, PSTR("Bed Distance:"));
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, ZProbeHandler::getBedDistance(), 2);
+    if (GUI::handleFloatValueAction(action, v, 0.05f, 20.0f, 0.01f)) {
+        ZProbeHandler::setBedDistance(v);
+    }
+}
+
+void __attribute__((weak)) menuConfigProbe(GUIAction action, void* data) {
+    GUI::flashToString(GUI::tmpString, PSTR("= Config Probe ="));
+    GUI::menuStart(action);
+    GUI::menuText(action, GUI::tmpString, true);
+    GUI::menuBack(action);
+
+    //generic probe options
+    GUI::menuFloatP(action, PSTR("Probe Speed :"), ZProbeHandler::getSpeed(), 1, menuProbeSpeed, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Bed Distance:"), ZProbeHandler::getBedDistance(), 2, menuProbeBedDistance, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Trig. Height:"), ZProbeHandler::getZProbeHeight(), 2, menuProbeTrigHeight, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::menuOnOffP(action, PSTR("Heater Pause:"), ZProbeHandler::getHeaterPause(), directAction, reinterpret_cast<void*>(GUI_DIRECT_ACTION_TOGGLE_PROBE_PAUSE), GUIPageType::ACTION);
+
+    //unique probe options
+    if (ZProbeHandler::hasConfigMenu()) {
+        ZProbeHandler::showConfigMenu(action);
+    }
+
+    GUI::menuEnd(action);
+}
 const long baudrates[] PROGMEM = { 38400, 56000, 57600, 76800, 115200, 128000, 230400, 250000, 256000,
                                    460800, 500000, 0 };
 
@@ -566,6 +607,9 @@ void __attribute__((weak)) menuConfig(GUIAction action, void* data) {
         GUI::flashToStringFlash(GUI::tmpString, PSTR("@-Axis"), axisNames[i]);
         GUI::menuSelectable(action, GUI::tmpString, menuConfigAxis, (void*)((int)i), GUIPageType::MENU);
     }
+#if Z_PROBE_TYPE != Z_PROBE_TYPE_NONE
+    GUI::menuSelectableP(action, PSTR("Z-Probe"), menuConfigProbe, nullptr, GUIPageType::MENU);
+#endif
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_GUI_CONFIG
 #include "../io/redefine.h"

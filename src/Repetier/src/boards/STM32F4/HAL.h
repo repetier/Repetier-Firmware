@@ -289,8 +289,11 @@ public:
     static inline void pinMode(uint8_t pin, uint8_t mode) {
         if (mode == INPUT) {
             SET_INPUT(pin);
-        } else
+        } else if (mode == INPUT_PULLUP) {
+            PULLUP(pin, HIGH);
+        } else {
             SET_OUTPUT(pin);
+        }
     }
     static INLINE void delayMicroseconds(uint32_t usec) { //usec += 3;
         ::delayMicroseconds(usec);

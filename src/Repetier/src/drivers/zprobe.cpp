@@ -21,6 +21,7 @@
 
 #include "Repetier.h"
 
+#define Z_CRASH_THRESHOLD_STEPS 50
 #if Z_PROBE_TYPE == Z_PROBE_TYPE_DEFAULT
 
 uint16_t ZProbeHandler::eprStart;
@@ -40,7 +41,6 @@ float ZProbeHandler::getZProbeHeight() {
 
 void ZProbeHandler::setZProbeHeight(float _height) {
     height = _height;
-    EEPROM::markChanged();
 }
 
 void ZProbeHandler::activate() {
@@ -132,16 +132,27 @@ float ZProbeHandler::runProbe() {
     Motion1::copyCurrentPrinter(cPos);
     PrinterType::transform(cPos, cPosSteps);
     Motion1::copyCurrentPrinter(tPos);
+
     float secureDistance = (Motion1::maxPos[Z_AXIS] - Motion1::minPos[Z_AXIS]) * 1.5f;
+    if (Motion1::currentPosition[Z_AXIS] > 0.5 * ZProbeHandler::optimumProbingHeight() + 0.1 && fabsf(Motion1::currentPosition[Z_AXIS] - ZProbeHandler::optimumProbingHeight()) < 1.0f) {
+        secureDistance = getBedDistance() * 1.5f;
+    }
     tPos[Z_AXIS] -= secureDistance;
     PrinterType::transform(tPos, tPosSteps);
     int32_t secureSteps = lround(secureDistance * Motion1::resolution[Z_AXIS]);
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
     HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
+    Motion1::stepsRemaining[Z_AXIS] = 0;
     Motion1::moveByPrinter(tPos, speed, false);
     Motion1::waitForEndOfMoves();
     Motion1::endstopMode = EndstopMode::DISABLED;
+
+    if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+        Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+        Motion1::callAfterHomingOnSteppers();
+        return ILLEGAL_Z_PROBE;
+    }
     float z = secureDistance * ((fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]));
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
     measurements[0] = z;
@@ -184,10 +195,18 @@ float ZProbeHandler::runProbe() {
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
         HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
+        Motion1::stepsRemaining[Z_AXIS] = 0;
         Motion1::endstopMode = EndstopMode::PROBING;
         Motion1::moveByPrinter(tPos3, speed, false);
         Motion1::waitForEndOfMoves();
         Motion1::endstopMode = EndstopMode::DISABLED;
+
+        if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+            Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+            Motion1::callAfterHomingOnSteppers();
+            return ILLEGAL_Z_PROBE;
+        }
+
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
         measurements[r] = z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
 #else
@@ -261,9 +280,16 @@ float ZProbeHandler::runProbe() {
         deactivate();
     }
     if (ZProbe->update()) {
-        Com::printErrorFLN(PSTR("z-probe did not untrigger after going back to start position."));
-        Motion1::callAfterHomingOnSteppers();
-        return ILLEGAL_Z_PROBE;
+        millis_t startTime = HAL::timeInMilliseconds();
+        while (ZProbe->update() && ((HAL::timeInMilliseconds() - startTime) < 200)) {
+            Commands::checkForPeriodicalActions(false);
+        }
+
+        if (ZProbe->update()) {
+            Com::printErrorFLN(PSTR("z-probe did not untrigger after moving back to start position."));
+            Motion1::callAfterHomingOnSteppers();
+            return ILLEGAL_Z_PROBE;
+        }
     }
     Com::printF(Com::tZProbe, z, 3);
     Com::printF(Com::tSpaceXColon, Motion1::currentPosition[X_AXIS]);
@@ -325,6 +351,31 @@ float ZProbeHandler::optimumProbingHeight() {
     return bedDistance + (height > 0 ? 0 : -height);
 }
 
+void __attribute__((weak)) menuProbeCoating(GUIAction action, void* data) {
+    GUI::flashToString(GUI::tmpString, PSTR("Coating Height:"));
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, ZProbeHandler::getCoating(), 2);
+    if (GUI::handleFloatValueAction(action, v, 0.0f, 5.0f, 0.01f)) {
+        ZProbeHandler::setCoating(v);
+    }
+}
+void __attribute__((weak)) menuProbeOffset(GUIAction action, void* data) {
+    int axis = reinterpret_cast<int>(data); // 0 = x, 1 = y
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("@ Offset:"), axis ? axisNames[Y_AXIS] : axisNames[X_AXIS]);
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM,
+               axis ? ZProbeHandler::yOffset() : ZProbeHandler::xOffset(), 1);
+    if (GUI::handleFloatValueAction(action, v, -100.0f, 100.0f, 0.5f)) {
+        if (axis) {
+            ZProbeHandler::setYOffset(v);
+        } else {
+            ZProbeHandler::setXOffset(v);
+        }
+    }
+}
+void ZProbeHandler::showConfigMenu(GUIAction action) {
+    GUI::menuFloatP(action, PSTR("Coat. Height:"), ZProbeHandler::getCoating(), 2, menuProbeCoating, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("X Offset    :"), ZProbeHandler::xOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(0), GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Y Offset    :"), ZProbeHandler::yOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(1), GUIPageType::FIXED_CONTENT);
+}
 #endif
 
 #if Z_PROBE_TYPE == Z_PROBE_TYPE_NOZZLE
@@ -345,7 +396,6 @@ float ZProbeHandler::getZProbeHeight() {
 
 void ZProbeHandler::setZProbeHeight(float _height) {
     height = _height;
-    EEPROM::markChanged();
 }
 
 void ZProbeHandler::activate() {
@@ -453,16 +503,28 @@ float ZProbeHandler::runProbe() {
     Motion1::copyCurrentPrinter(cPos);
     PrinterType::transform(cPos, cPosSteps);
     Motion1::copyCurrentPrinter(tPos);
+
     float secureDistance = (Motion1::maxPos[Z_AXIS] - Motion1::minPos[Z_AXIS]) * 1.5f;
+    if (Motion1::currentPosition[Z_AXIS] > 0.5 * ZProbeHandler::optimumProbingHeight() + 0.1 && fabsf(Motion1::currentPosition[Z_AXIS] - ZProbeHandler::optimumProbingHeight()) < 1.0f) {
+        secureDistance = getBedDistance() * 1.5f;
+    }
     tPos[Z_AXIS] -= secureDistance;
     PrinterType::transform(tPos, tPosSteps);
     int32_t secureSteps = lround(secureDistance * Motion1::resolution[Z_AXIS]);
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
     HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
+    Motion1::stepsRemaining[Z_AXIS] = 0;
     Motion1::moveByPrinter(tPos, speed, false);
     Motion1::waitForEndOfMoves();
     Motion1::endstopMode = EndstopMode::DISABLED;
+
+    if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+        Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+        Motion1::callAfterHomingOnSteppers();
+        return ILLEGAL_Z_PROBE;
+    }
+
     float z = secureDistance * ((fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]));
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN && Z_PROBE_REPETITIONS > 1
     measurements[0] = z;
@@ -505,10 +567,18 @@ float ZProbeHandler::runProbe() {
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
         HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
+        Motion1::stepsRemaining[Z_AXIS] = 0;
         Motion1::endstopMode = EndstopMode::PROBING;
         Motion1::moveByPrinter(tPos3, speed, false);
         Motion1::waitForEndOfMoves();
         Motion1::endstopMode = EndstopMode::DISABLED;
+
+        if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+            Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+            Motion1::callAfterHomingOnSteppers();
+            return ILLEGAL_Z_PROBE;
+        }
+
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
         measurements[r] = z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
 #else
@@ -581,9 +651,16 @@ float ZProbeHandler::runProbe() {
         deactivate();
     }
     if (ZProbe->update()) {
-        Com::printErrorFLN(PSTR("z-probe did not untrigger after going back to start position."));
-        Motion1::callAfterHomingOnSteppers();
-        return ILLEGAL_Z_PROBE;
+        millis_t startTime = HAL::timeInMilliseconds();
+        while (ZProbe->update() && ((HAL::timeInMilliseconds() - startTime) < 200)) {
+            Commands::checkForPeriodicalActions(false);
+        }
+
+        if (ZProbe->update()) {
+            Com::printErrorFLN(PSTR("z-probe did not untrigger after moving back to start position."));
+            Motion1::callAfterHomingOnSteppers();
+            return ILLEGAL_Z_PROBE;
+        }
     }
     Com::printF(Com::tZProbe, z, 3);
     Com::printF(Com::tSpaceXColon, Motion1::currentPosition[X_AXIS]);
@@ -644,6 +721,22 @@ float ZProbeHandler::optimumProbingHeight() {
     return bedDistance + (height > 0 ? 0 : -height);
 }
 
+void __attribute__((weak)) menuProbeTemperature(GUIAction action, void* data) {
+    int maxTemp = reinterpret_cast<int>(data);
+    GUI::flashToString(GUI::tmpString, PSTR("Min. Nozzle Temp :"));
+    DRAW_LONG(GUI::tmpString, Com::tUnitDegCelsius, ZProbeHandler::getProbingTemp());
+    if (GUI::handleLongValueAction(action, v, 0, maxTemp, 5)) {
+        ZProbeHandler::setProbingTemp(v);
+    }
+}
+void ZProbeHandler::showConfigMenu(GUIAction action) {
+    Tool* t = Tool::getActiveTool();
+    HeatManager* hm = t->getHeater();
+    if (hm != nullptr) {
+        int maxTemp = hm->getMaxTemperature();
+        GUI::menuLongP(action, PSTR("Nozzle Temp:"), ZProbeHandler::getProbingTemp(), menuProbeTemperature, reinterpret_cast<void*>(maxTemp), GUIPageType::FIXED_CONTENT);
+    }
+}
 #endif
 
 #if Z_PROBE_TYPE == Z_PROBE_TYPE_BLTOUCH
@@ -665,7 +758,6 @@ float ZProbeHandler::getZProbeHeight() {
 
 void ZProbeHandler::setZProbeHeight(float _height) {
     height = _height;
-    EEPROM::markChanged();
 }
 
 void ZProbeHandler::activate() {
@@ -768,16 +860,28 @@ float ZProbeHandler::runProbe() {
     Motion1::copyCurrentPrinter(cPos);
     PrinterType::transform(cPos, cPosSteps);
     Motion1::copyCurrentPrinter(tPos);
+
     float secureDistance = (Motion1::maxPos[Z_AXIS] - Motion1::minPos[Z_AXIS]) * 1.5f;
+    if (Motion1::currentPosition[Z_AXIS] > 0.5 * ZProbeHandler::optimumProbingHeight() + 0.1 && fabsf(Motion1::currentPosition[Z_AXIS] - ZProbeHandler::optimumProbingHeight()) < 1.0f) {
+        secureDistance = getBedDistance() * 1.5f;
+    }
     tPos[Z_AXIS] -= secureDistance;
     PrinterType::transform(tPos, tPosSteps);
     int32_t secureSteps = lround(secureDistance * Motion1::resolution[Z_AXIS]);
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
     HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
+    Motion1::stepsRemaining[Z_AXIS] = 0;
     Motion1::moveByPrinter(tPos, speed, false);
     Motion1::waitForEndOfMoves();
     Motion1::endstopMode = EndstopMode::DISABLED;
+
+    if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+        Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+        Motion1::callAfterHomingOnSteppers();
+        return ILLEGAL_Z_PROBE;
+    }
+
     float z = secureDistance * ((fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]));
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN && Z_PROBE_REPETITIONS > 1
     measurements[0] = z;
@@ -820,10 +924,18 @@ float ZProbeHandler::runProbe() {
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
         HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
+        Motion1::stepsRemaining[Z_AXIS] = 0;
         Motion1::endstopMode = EndstopMode::PROBING;
         Motion1::moveByPrinter(tPos3, speed, false);
         Motion1::waitForEndOfMoves();
         Motion1::endstopMode = EndstopMode::DISABLED;
+
+        if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+            Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+            Motion1::callAfterHomingOnSteppers();
+            return ILLEGAL_Z_PROBE;
+        }
+
 #if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
         measurements[r] = z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
 #else
@@ -897,9 +1009,16 @@ float ZProbeHandler::runProbe() {
         deactivate();
     }
     if (ZProbe->update()) {
-        Com::printErrorFLN(PSTR("z-probe did not untrigger after going back to start position."));
-        Motion1::callAfterHomingOnSteppers();
-        return ILLEGAL_Z_PROBE;
+        millis_t startTime = HAL::timeInMilliseconds();
+        while (ZProbe->update() && ((HAL::timeInMilliseconds() - startTime) < 200)) {
+            Commands::checkForPeriodicalActions(false);
+        }
+
+        if (ZProbe->update()) {
+            Com::printErrorFLN(PSTR("z-probe did not untrigger after moving back to start position."));
+            Motion1::callAfterHomingOnSteppers();
+            return ILLEGAL_Z_PROBE;
+        }
     }
     Com::printF(Com::tZProbe, z, 3);
     Com::printF(Com::tSpaceXColon, Motion1::currentPosition[X_AXIS]);
@@ -976,4 +1095,21 @@ void ZProbeHandler::disableAlarmIfOn() {
     ZProbeServo.setPosition(1473, 0); // pin up
 }
 
+void __attribute__((weak)) menuProbeOffset(GUIAction action, void* data) {
+    int axis = reinterpret_cast<int>(data); // 0 = x, 1 = y
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("@ Offset:"), axis ? axisNames[Y_AXIS] : axisNames[X_AXIS]);
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM,
+               axis ? ZProbeHandler::yOffset() : ZProbeHandler::xOffset(), 1);
+    if (GUI::handleFloatValueAction(action, v, -100.0f, 100.0f, 0.5f)) {
+        if (axis) {
+            ZProbeHandler::setYOffset(v);
+        } else {
+            ZProbeHandler::setXOffset(v);
+        }
+    }
+}
+void ZProbeHandler::showConfigMenu(GUIAction action) {
+    GUI::menuFloatP(action, PSTR("X Offset    :"), ZProbeHandler::xOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(0), GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Y Offset    :"), ZProbeHandler::yOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(1), GUIPageType::FIXED_CONTENT);
+}
 #endif

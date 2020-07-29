@@ -144,7 +144,7 @@ void HeatManager::update() {
                 printName();
                 Com::printFLN(PSTR(" failed to rise under full power. Heater disabled."));
                 Com::printErrorFLN(PSTR("If this wasn't due to a hardware defect, the decoupling period might be set too low."));
-                Com::printErrorF(PSTR("No temperaure rise after (ms):"));
+                Com::printErrorF(PSTR("No temperature rise after (ms):"));
                 Com::print(decouplePeriod);
                 Com::println();
                 setError(HeaterError::NO_HEATUP);
@@ -488,6 +488,7 @@ void HeatManagerPID::autocalibrate(GCode* g) {
         millis_t time = HAL::timeInMilliseconds();
         maxTemp = RMath::max(maxTemp, currentTemperature);
         minTemp = RMath::min(minTemp, currentTemperature);
+        targetTemperature = heating ? temp : 0.0f;
         if (heating == true && currentTemperature > temp) { // switch heating -> off
             if (time - t2 > 5000) {
                 heating = false;
@@ -1009,6 +1010,7 @@ bool HeatManagerDynDeadTime::detectTimings(float temp, float& up, float& down, f
         last[i] = currentTemperature;
         avg[i & 3] = currentTemperature;
     }
+    targetTemperature = currentTemperature > temp - 10.0f ? temp - 10.0f : temp;
     millis_t timeReference = lastTime;
     millis_t timeSecond = HAL::timeInMilliseconds();
     while (mode != 5) {
@@ -1047,6 +1049,7 @@ bool HeatManagerDynDeadTime::detectTimings(float temp, float& up, float& down, f
         case 0: // Wait for minimum 10°C below temp to start testing
             if (currentTemperature < temp - 10) {
                 mode = 1;
+                targetTemperature = temp;
                 output->set(maxPWM);
             }
             break;
@@ -1055,6 +1058,7 @@ bool HeatManagerDynDeadTime::detectTimings(float temp, float& up, float& down, f
                 mode = 2;
                 referenceRaise = raise * reduce;
                 timeReference = time;
+                targetTemperature = 0.0f;
                 output->set(0);
                 goodCount = 0;
             }
@@ -1076,6 +1080,7 @@ bool HeatManagerDynDeadTime::detectTimings(float temp, float& up, float& down, f
                 mode = 4;
                 referenceRaise = raise * reduce;
                 timeReference = time;
+                targetTemperature = temp;
                 output->set(maxPWM);
                 goodCount = 0;
             }
@@ -1094,6 +1099,7 @@ bool HeatManagerDynDeadTime::detectTimings(float temp, float& up, float& down, f
             break;
         }
     }
+    targetTemperature = 0.0f;
     output->set(0);
     return true;
 }

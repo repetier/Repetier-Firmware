@@ -644,6 +644,14 @@ bool GUI::handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, 
 void GUI::menuBack(GUIAction& action) {
 #if DISABLED(UI_HAS_BACK_KEY)
     GUI::menuSelectableP(action, PSTR("Back"), nullptr, nullptr, GUIPageType::POP);
+#else
+    if (action == GUIAction::ANALYSE) {
+        if (cursorRow[level] < 0) {
+            cursorRow[level] = length[level];
+        }
+        maxCursorRow[level] = length[level];
+        length[level]++;
+    }
 #endif
 }
 
@@ -745,6 +753,9 @@ void directAction(GUIAction action, void* data) {
     case GUI_DIRECT_ACTION_DITTO_8:
         PrinterType::setDittoMode(1 + opt - GUI_DIRECT_ACTION_DITTO_2, false);
         GUI::pop();
+        break;
+    case GUI_DIRECT_ACTION_TOGGLE_PROBE_PAUSE:
+        ZProbeHandler::setHeaterPause(!ZProbeHandler::getHeaterPause());
         break;
     }
 }

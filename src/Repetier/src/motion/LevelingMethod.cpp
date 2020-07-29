@@ -234,6 +234,10 @@ bool Leveling::measure() {
     PlaneBuilder builder;
     builder.reset();
     PrinterType::getBedRectangle(xMin, xMax, yMin, yMax);
+    // Sanity check for bad eeprom config
+    if (xMin == xMax || yMin == yMax) {
+        return false;
+    }
     xMin += Z_PROBE_BORDER; // Safety border from config
     xMax -= Z_PROBE_BORDER;
     yMin += Z_PROBE_BORDER;
@@ -260,13 +264,13 @@ bool Leveling::measure() {
             }
             int xx;
             if (y & 1) { // zig zag pattern for faster measurement
-                px = xMax - x * dx;
+                px = xMax - (x * dx);
                 xx = GRID_SIZE - x - 1;
             } else {
-                px = xMin + x * dx;
+                px = xMin + (x * dx);
                 xx = x;
             }
-            py = yMin + y * dy;
+            py = yMin + (y * dy);
             pos[X_AXIS] = px - ZProbeHandler::xOffset();
             pos[Y_AXIS] = py - ZProbeHandler::yOffset();
             pos[Z_AXIS] = ZProbeHandler::optimumProbingHeight();
