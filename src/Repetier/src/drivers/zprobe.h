@@ -14,6 +14,9 @@ public:
     static float optimumProbingHeight() { return 0; }
     static bool isActive() { return false; }
 
+    static void setXOffset(float val) { }
+    static void setYOffset(float val) { }
+
     static float getZProbeHeight() { return 0; };
     static void setZProbeHeight(float height) {};
 
@@ -52,13 +55,17 @@ public:
     static void deactivate();
     static float runProbe();
     static bool probingPossible();
-    static float xOffset();
-    static float yOffset();
     static void init();
     static void eepromHandle();
     static void eepromReset();
     static float optimumProbingHeight();
     static bool isActive() { return activated; }
+
+    static float xOffset();
+    static float yOffset();
+
+    static void setXOffset(float val) { offsetX = val; }
+    static void setYOffset(float val) { offsetY = val; }
 
     static float getZProbeHeight();
     static void setZProbeHeight(float height);
@@ -108,6 +115,9 @@ public:
     static float optimumProbingHeight();
     static bool isActive() { return activated; }
 
+    static void setXOffset(float val) { }
+    static void setYOffset(float val) { }
+
     static float getProbingTemp() { return probeTemperature; }
     static void setProbingTemp(float val) { probeTemperature = val; }
 
@@ -137,7 +147,6 @@ class ZProbeHandler {
     static uint16_t eprStart;
     static float height;
     static float bedDistance;
-    // static float coating;
     static float offsetX;
     static float offsetY;
     static float speed;
