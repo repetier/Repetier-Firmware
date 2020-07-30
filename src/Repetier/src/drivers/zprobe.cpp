@@ -747,7 +747,6 @@ void ZProbeHandler::showConfigMenu(GUIAction action) {
 uint16_t ZProbeHandler::eprStart;
 float ZProbeHandler::height;
 float ZProbeHandler::bedDistance;
-float ZProbeHandler::coating;
 float ZProbeHandler::offsetX;
 float ZProbeHandler::offsetY;
 float ZProbeHandler::speed;
@@ -985,7 +984,6 @@ float ZProbeHandler::runProbe() {
     // }
 #endif
     z += height;
-    z -= coating;
     z -= zCorr;
     /* DEBUG_MSG2_FAST("StartSteps", cPosSteps[Z_AXIS]);
     DEBUG_MSG2_FAST("EndSteps", tPosSteps[Z_AXIS]);
@@ -1063,7 +1061,6 @@ void ZProbeHandler::eepromReset() {
     speed = Z_PROBE_SPEED;
     offsetX = Z_PROBE_X_OFFSET;
     offsetY = Z_PROBE_Y_OFFSET;
-    coating = Z_PROBE_COATING;
     pauseHeaters = Z_PROBE_PAUSE_HEATERS;
 }
 
