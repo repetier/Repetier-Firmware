@@ -734,6 +734,14 @@ void GUI::menuEnd(GUIAction action) {
         if (cursorRow[level] < 0) {
             cursorRow[level] = 0;
         }
+    } else if (action == GUIAction::DRAW) {
+        if (guiLine < UI_ROWS) {
+            bufClear();
+            const int count = (UI_ROWS - guiLine);
+            for (int i = 0; i < count; i++) {
+                printRow(guiLine++, buf);
+            }
+        }
     }
 }
 
@@ -1312,6 +1320,8 @@ void waitScreen(GUIAction action, void* data) {
 
         printRowCentered(0, text);
         GUI::bufClear();
+        printRow(1, GUI::buf);
+        printRow(2, GUI::buf);
         fast8_t len = refresh_counter % UI_COLS;
         for (fast8_t i = 0; i < len; i++) {
             GUI::bufAddChar('.');
