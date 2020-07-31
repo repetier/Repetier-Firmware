@@ -47,7 +47,7 @@ Adjust the scheme below to add custom translation
 #define UI_CTEXT_CALIBRATE_XY_EN "Calibrate XY"
 #define UI_CTEXT_CALIBRATE_Z_EN "Calibrate Z"
 #define UI_CTEXT_XY_P1_1_EN "  Please Prepare the"
-#define UI_CTEXT_XY_P1_2_EN " Printer for PLA Dual"
+#define UI_CTEXT_XY_P1_2_EN " Printer for Dual"
 #define UI_CTEXT_XY_P1_3_EN "    Head Printing"
 #define UI_CTEXT_XY_P3_1_EN "  Choose the Best"
 #define UI_CTEXT_XY_P3_2_EN " Aligning XY Values"

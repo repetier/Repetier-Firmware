@@ -369,6 +369,7 @@ void cZPHeight1(bool menu = true) {
       false); // if level has changed, distortion is also invalid
 #endif
   // Extruder::disableAllHeater();
+#ifndef BIOPRINTER
 #ifndef TEC4
   Extruder::setTemperatureForExtruder(170, 0, false);
   if (NUM_EXTRUDER > 1) {
@@ -388,7 +389,7 @@ void cZPHeight1(bool menu = true) {
   if (NUM_EXTRUDER > 1) {
     Extruder::setTemperatureForExtruder(0, 1, false);
   }
-
+#endif
   Printer::homeAxis(true, true, true);
   Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE,
                       EEPROM::zProbeBedDistance(), IGNORE_COORDINATE,
@@ -496,9 +497,9 @@ bool cExecuteOverride(int action, bool allowMoves) {
       uid.popMenu(false);
       uid.pushMenu(&cui_msg_autolevel_failed, true);
     } else {
-#if DISTORTION_CORRECTION     
-	    Printer::measureDistortion(); // add for G33 distortion correction
-#endif	    
+#if DISTORTION_CORRECTION
+      Printer::measureDistortion(); // add for G33 distortion correction
+#endif
       uid.popMenu(true);
     }
     Extruder::disableAllHeater();
@@ -817,1439 +818,7 @@ void cExecute(int action, bool allowMoves) {
     break;
   case UI_ACTION_FC_ABS:
     setPreheatTemps(225, 85, false, false);
-    preheatFCActive();                                      /*
-    This file is part of Repetier-Firmware.
-
-    Repetier-Firmware is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    Repetier-Firmware is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
-#if !defined(_UI_CUSTOM_MENU_H)
-#define _UI_CUSTOM_MENU_H
-
-
-#if UI_DISPLAY_TYPE != NO_DISPLAY
-
-UI_MENU_ACTIONCOMMAND_T(ui_menu_back, UI_TEXT_BACK_ID, UI_ACTION_BACK)
-#if UI_HAS_BACK_KEY == 0
-#define UI_MENU_ADDCONDBACK &ui_menu_back,
-#define UI_MENU_ADDCONDBACK_C ,&ui_menu_back
-#define UI_MENU_BACKCNT 1
-#else
-#define UI_MENU_ADDCONDBACK
-#define UI_MENU_ADDCONDBACK_C
-#define UI_MENU_BACKCNT 0
-#endif
-
-// new submenues and entries
-
-UI_MENU_HEADLINE_T(ui_empty,UI_TEXT_EMPTY_ID)
-UI_MENU_HEADLINE_T(ui_exy1a,UI_CTEXT_XY_P1_1_ID)
-UI_MENU_HEADLINE_T(ui_exy1b,UI_CTEXT_XY_P1_2_ID)
-UI_MENU_HEADLINE_T(ui_exy1c,UI_CTEXT_XY_P1_3_ID)
-UI_MENU_ACTIONCOMMAND_T(ui_exy1d,UI_TEXT_BACK_ID,UI_ACTION_XY1_BACK)
-UI_MENU_ACTIONCOMMAND_T(ui_exy1e,UI_CTEXT_CONTINUE_ID,UI_ACTION_XY1_CONT)
-
-#define UI_EXY1_ITEMS {&ui_exy1a,&ui_exy1b,&ui_exy1c,&ui_exy1d,&ui_exy1e}
-UI_STICKYMENU(ui_exy1,UI_EXY1_ITEMS,5)
-
-UI_MENU_HEADLINE_T(ui_exy2a,UI_TEXT_CLEARBED1_ID)
-UI_MENU_HEADLINE_T(ui_exy2b,UI_TEXT_CLEARBED2_ID)
-UI_MENU_HEADLINE_T(ui_exy2c,UI_TEXT_CLEARBED3_ID)
-UI_MENU_ACTIONCOMMAND_T(ui_exy2d,UI_TEXT_BACK_ID,UI_ACTION_XY2_BACK)
-UI_MENU_ACTIONCOMMAND_T(ui_exy2e,UI_CTEXT_START_PRINTING_ID,UI_ACTION_XY2_CONT)
-
-#define UI_EXY2_ITEMS {&ui_exy2a,&ui_exy2b,&ui_exy2c,&ui_exy2d,&ui_exy2e}
-UI_STICKYMENU(ui_exy2,UI_EXY2_ITEMS,5)
-
-UI_MENU_HEADLINE_T(ui_exy3a,UI_CTEXT_XY_P3_1_ID)
-UI_MENU_HEADLINE_T(ui_exy3b,UI_CTEXT_XY_P3_2_ID)
-UI_MENU_CHANGEACTION_T(ui_exy3c,UI_CTEXT_XY_P3_X_ID,UI_ACTION_EXY_XOFFSET)
-UI_MENU_CHANGEACTION_T(ui_exy3d,UI_CTEXT_XY_P3_Y_ID,UI_ACTION_EXY_YOFFSET)
-UI_MENU_ACTIONCOMMAND_T(ui_exy3e,UI_CTEXT_CONTINUE_ID,UI_ACTION_EXY_STORE)
-
-#define UI_EXY3_ITEMS {&ui_exy3a,&ui_exy3b,&ui_exy3c,&ui_exy3d,&ui_exy3e}
-UI_STICKYMENU(ui_exy3,UI_EXY3_ITEMS,5)
-
-UI_MENU_ACTIONCOMMAND_T(ui_calex,UI_CTEXT_CALIBRATE_EXTRUDERS_ID,UI_ACTION_CALEX)
-UI_MENU_ACTIONCOMMAND_T(ui_calex_xy,UI_CTEXT_CALIBRATE_XY_ID,UI_ACTION_CALEX_XY)
-UI_MENU_ACTIONCOMMAND(ui_calex_xyv2,"Calibrate XY w. Card",UI_ACTION_EXTRXY_V2)
-//added by FELIX
-//====================
-#ifdef TEC4
-#else
-UI_MENU_ACTIONCOMMAND_T(ui_calex_z,UI_CTEXT_CALIBRATE_Z_ID,UI_ACTION_CALEX_Z)
-#endif
-
-#ifdef TEC4
-#define UI_CALEXTR_SUBITEMS {&ui_menu_back, &ui_calex_xy}
-UI_MENU(ui_calextr_sub,UI_CALEXTR_SUBITEMS,2)
-#else
-#define UI_CALEXTR_SUBITEMS {&ui_menu_back, &ui_calex_z, &ui_calex_xy, &ui_calex_xyv2}
-UI_MENU(ui_calextr_sub,UI_CALEXTR_SUBITEMS,4)
-#endif
-//====================
-//added by FELIX
-
-UI_WIZARD4_T(ui_msg_printxycal, UI_ACTION_STATE,UI_CTEXT_PRINTXYCAL1_ID, UI_CTEXT_PRINTXYCAL2_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
-UI_WIZARD4_T(ui_msg_extzcalib, UI_ACTION_STATE,UI_CTEXT_EXTZCAL1_ID, UI_CTEXT_EXTZCAL2_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
-UI_WIZARD5_T(ui_msg_clearbed_zcalib, UI_ACTION_CALEX_Z2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
-
-UI_MENU_ACTIONCOMMAND_T(ui_preheatcool1,UI_CTEXT_PREHEATCOOL_ID,UI_ACTION_PRECOOL1)
-#if NUM_EXTRUDER > 1
-UI_MENU_ACTIONCOMMAND_T(ui_preheatcool2,UI_CTEXT_PREHEATCOOL2_ID,UI_ACTION_PRECOOL2)
-#endif
-UI_MENU_ACTIONCOMMAND_T(ui_removebed,UI_CTEXT_REMOVEBED_ID,UI_ACTION_REMOVEBED)
-
-UI_WIZARD4_T(cui_msg_measuring, UI_ACTION_STATE,UI_TEXT_EMPTY_ID, UI_TEXT_MEASURING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
-UI_WIZARD4(cui_msg_ext_xy_1, UI_ACTION_EXTRXY_V2_1,"Place card at the", "marked spot.", "", "     >>> OK <<<")
-UI_WIZARD4(cui_msg_ext_xy_error, UI_ACTION_MESSAGE,"Calibration failed", "", "", "     >>> OK <<<")
-UI_WIZARD4(cui_msg_ext_xy_success, UI_ACTION_MESSAGE,"Extruder Offset", "Calibration Finished.", "", "     >>> OK <<<")
-UI_WIZARD4(cui_msg_ext_xy_info, UI_ACTION_STATE,"XY Offset Calibration", "   Measuring ...", "", "   Please wait")
-UI_WIZARD4(cui_msg_autolevel_failed, UI_ACTION_MESSAGE,"Autoleveling failed", "Plate is not leveled!", "", "     >>> OK <<<")
-UI_WIZARD4(cui_msg_exzautolevel_failed, UI_ACTION_MESSAGE,"Autoleveling failed", "Extruder offsets", " not leveled!", "     >>> OK <<<")
-
-#ifndef TEC4
-UI_WIZARD4(cui_msg_preparing, UI_ACTION_STATE,"", "   Preparing ...", "", "   Please wait")
-#else
-UI_WIZARD4(cui_msg_preparing, UI_ACTION_STATE,"", "   Warming up...", "", "   Please wait")
-#endif              
-UI_WIZARD4(cui_calib_zprobe_info, UI_ACTION_CZREFH_INFO, "   Place the Felix","   calibration card"," between the Nozzle","   and Build PLT.")
-UI_WIZARD4(cui_calib_zprobe, UI_ACTION_CZREFH, "  Rotate the button","   until you feel","   slight friction","    on the card.")
-UI_WIZARD4(cui_calib_zprobe_succ, UI_ACTION_CZREFH_SUCC, "     Build PLT."," Leveled Correctly","","     >>> OK <<<")
-UI_WIZARD4(cui_calib_zprobe_dist, UI_ACTION_STATE, "", "   now measuring", "    buildsurface", "")
-UI_MENU_HEADLINE(ui_halfw," Max. 15" cDEG)
-UI_MENU_HEADLINE(ui_halfa," Turn back: %bb")
-UI_MENU_HEADLINE(ui_halfb," Turn front: %ba")
-UI_MENU_ACTIONCOMMAND(ui_halfc,"Measure Again",UI_ACTION_HALFAUTO_LEV2)
-UI_MENU_ACTIONCOMMAND(ui_halfd,"Cancel",UI_ACTION_HALFAUTO_LEV3)
-
-#define UI_HALF_ITEMS {&ui_halfw,&ui_halfa,&ui_halfb,&ui_halfc,&ui_halfd}
-UI_STICKYMENU(ui_half_show,UI_HALF_ITEMS,5)
-
-
-// Define precision for temperatures. With small displays only integer values fit.
-#undef UI_TEMP_PRECISION
-#define UI_TEMP_PRECISION 0
-
-// Define precision for temperatures. With small displays only integer values fit.
-#ifndef UI_TEMP_PRECISION
-#if UI_COLS>16
-#define UI_TEMP_PRECISION 0
-#else
-#define UI_TEMP_PRECISION 0
-#endif
-#endif
-
-#if HAVE_HEATED_BED // make sure it is only 0 or 1 to be used in menu math
-#undef HAVE_HEATED_BED
-#define HAVE_HEATED_BED 1
-#else
-#undef HAVE_HEATED_BED
-#define HAVE_HEATED_BED 0
-#endif
-
-/* ============= PAGES DEFINITION =============
-
-  If you are not inside a menu, the firmware displays pages with information.
-  Especially if you have only a small display it is convenient to have
-  more then one information page.
-*/
-
-/* Define your pages using dynamic strings. To define a page use
-  UI_PAGE6(name,row1,row2,row3,row4,row5,row6);
-  UI_PAGE4(name,row1,row2,row3,row4);
-  for 4 row displays and
-  UI_PAGE2(name,row1,row2);
-  for 2 row displays. You can add additional pages or change the default pages like you want.
-*/
-
-#if UI_ROWS>=5 && UI_DISPLAY_TYPE == DISPLAY_U8G
-
-//graphic main status
-
-UI_PAGE6_T(ui_page1, UI_TEXT_MAINPAGE6_1_ID, UI_TEXT_MAINPAGE6_2_ID, UI_TEXT_MAINPAGE6_3_ID, UI_TEXT_MAINPAGE6_4_ID, UI_TEXT_MAINPAGE6_5_ID, UI_TEXT_MAINPAGE6_6_ID)
-
-#if EEPROM_MODE != 0  && 0
-UI_PAGE6_T(ui_page2, UI_TEXT_PRINT_TIME_ID, UI_TEXT_PRINT_TIME_VALUE_ID, UI_TEXT_PRINT_FILAMENT_ID, UI_TEXT_PRINT_FILAMENT_VALUE_ID,UI_TEXT_EMPTY_ID,UI_TEXT_STATUS_ID)
-#define UI_PRINTTIME_PAGES ,&ui_page2
-#define UI_PRINTTIME_COUNT 1
-#else
-#define UI_PRINTTIME_PAGES
-#define UI_PRINTTIME_COUNT 0
-#endif
-
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
-UI_PAGE6_T(ui_page3, UI_TEXT_EXTR0_TEMP_ID, UI_TEXT_EXTR1_TEMP_ID, 
-#if NUM_EXTRUDER > 2
-  UI_TEXT_EXTR2_TEMP_ID,
-#endif
-#if NUM_EXTRUDER > 3
-           UI_TEXT_EXTR3_TEMP_ID,
-#endif
-#if NUM_EXTRUDER > 4
-           UI_TEXT_EXTR4_TEMP_ID,
-#endif
-#if HAVE_HEATED_BED && NUM_EXTRUDER < 5
-           UI_TEXT_BED_TEMP_ID,
-#endif
-#if NUM_EXTRUDER + HAVE_HEATED_BED < 5
-           UI_TEXT_EMPTY_ID, // UI_TEXT_FLOW_MULTIPLY_ID,
-#endif
-#if NUM_EXTRUDER + HAVE_HEATED_BED < 3
-           UI_TEXT_EMPTY_ID,
-#endif
-#if NUM_EXTRUDER + HAVE_HEATED_BED < 4
-            UI_TEXT_EMPTY_ID,
-#endif
-           UI_TEXT_STATUS_ID
-)
-#define UI_EXTRUDERS_PAGES ,&ui_page3
-#define UI_EXTRUDERS_PAGES_COUNT 1
-#elif NUM_EXTRUDER == 1 || MIXING_EXTRUDER == 1
-UI_PAGE6_T(ui_page3, UI_TEXT_EXTR0_TEMP_ID,
-#if HAVE_HEATED_BED
-UI_TEXT_BED_TEMP_ID,
-#endif
- UI_TEXT_FLOW_MULTIPLY_ID,
- UI_TEXT_EMPTY_ID,
- UI_TEXT_EMPTY_ID,
-#if !HAVE_HEATED_BED
- UI_TEXT_EMPTY_ID,
-#endif  
- UI_TEXT_STATUS_ID
-)
-#define UI_EXTRUDERS_PAGES ,&ui_page3
-#define UI_EXTRUDERS_PAGES_COUNT 1
-#else
-#define UI_EXTRUDERS_PAGES
-#define UI_EXTRUDERS_PAGES_COUNT 0
-#endif
-
-UI_PAGE6_T(ui_page4, UI_TEXT_ACTION_XPOSITION4A_ID, UI_TEXT_ACTION_YPOSITION4A_ID, UI_TEXT_ACTION_ZPOSITION4A_ID,UI_TEXT_EMPTY_ID,UI_TEXT_EMPTY_ID, UI_TEXT_STATUS_ID)
-
-/*
-  Merge pages together. Use the following pattern:
-  #define UI_PAGES {&name1,&name2,&name3}
-*/
-#define UI_PAGES {/*&ui_page1 UI_PRINTTIME_PAGES ,*/&ui_page4 UI_EXTRUDERS_PAGES}
-// How many pages do you want to have. Minimum is 1.
-#define UI_NUM_PAGES 1/*+UI_PRINTTIME_COUNT*/+UI_EXTRUDERS_PAGES_COUNT
-
-#elif UI_ROWS >= 4
-#if HAVE_HEATED_BED
-#if NUM_EXTRUDER > 0
-//   UI_PAGE4(ui_page1,cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG,"Z:%x2  Buf : %oB","Mul: %om   Flow: %of","%os")
-UI_PAGE4_T(ui_page1, UI_TEXT_MAINPAGE_TEMP_BED_ID, UI_TEXT_MAINPAGE_Z_BUF_ID, UI_TEXT_MAINPAGE_MUL_EUSAGE_ID, UI_TEXT_STATUS_ID)
-#else
-//   UI_PAGE4(ui_page1,"B%eB/%Eb" cDEG,"Z:%x2  Buf : %oB","Mul: %om   Flow: %of","%os")
-UI_PAGE4_T(ui_page1, UI_TEXT_MAINPAGE_BED_ID, UI_TEXT_MAINPAGE_Z_BUF_ID, UI_TEXT_MAINPAGE_MUL_EUSAGE_ID, UI_TEXT_STATUS_ID)
-#endif
-//UI_PAGE4(ui_page1,UI_TEXT_PAGE_EXTRUDER,UI_TEXT_PAGE_BED,UI_TEXT_PAGE_BUFFER,"%os");
-#else // no bed
-#if NUM_EXTRUDER > 0
-UI_PAGE4_T(ui_page1, UI_TEXT_PAGE_EXTRUDER_ID, UI_TEXT_MAINPAGE_Z_BUF_ID, UI_TEXT_MAINPAGE_MUL_EUSAGE_ID, UI_TEXT_STATUS_ID)
-#else
-UI_PAGE4_T(ui_page1, UI_TEXT_EMPTY_ID, UI_TEXT_MAINPAGE_Z_BUF_ID, UI_TEXT_MAINPAGE_MUL_EUSAGE_ID, UI_TEXT_STATUS_ID)
-#endif
-#endif
-UI_PAGE4_T(ui_page2, UI_TEXT_ACTION_XPOSITION4A_ID, UI_TEXT_ACTION_YPOSITION4A_ID, UI_TEXT_ACTION_ZPOSITION4A_ID, UI_TEXT_STATUS_ID)
-//UI_PAGE4(ui_page2,"dX:%y0 mm %sX","dY:%y1 mm %sY","dZ:%y2 mm %sZ","%os");
-#if NUM_EXTRUDER > 0
-UI_PAGE4_T(ui_page3, UI_TEXT_PAGE_EXTRUDER1_ID
-#else
-UI_PAGE4_T(ui_page3
-#endif
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
-           , UI_TEXT_PAGE_EXTRUDER2_ID
-#endif
-#if NUM_EXTRUDER>2 && MIXING_EXTRUDER == 0
-           , UI_TEXT_PAGE_EXTRUDER3_ID
-#endif
-#if HAVE_HEATED_BED
-           , UI_TEXT_PAGE_BED_ID
-#endif
-#if (NUM_EXTRUDER >= 3 && MIXING_EXTRUDER == 0 && !HAVE_HEATED_BED) || (NUM_EXTRUDER==2 && MIXING_EXTRUDER == 0 && HAVE_HEATED_BED==true)
-           , UI_TEXT_STATUS_ID
-#elif (NUM_EXTRUDER == 2 && MIXING_EXTRUDER == 0) || ((NUM_EXTRUDER == 1 || MIXING_EXTRUDER == 1) && HAVE_HEATED_BED)
-           , UI_TEXT_EMPTY_ID, UI_TEXT_STATUS_ID
-#elif (NUM_EXTRUDER == 1 || MIXING_EXTRUDER == 1) || (NUM_EXTRUDER == 0 &&  HAVE_HEATED_BED)
-           , UI_TEXT_EMPTY_ID, UI_TEXT_EMPTY_ID, UI_TEXT_STATUS_ID
-#elif NUM_EXTRUDER == 0
-           , UI_TEXT_EMPTY_ID, UI_TEXT_EMPTY_ID, UI_TEXT_EMPTY_ID, UI_TEXT_STATUS_ID
-#endif
-          )
-#if EEPROM_MODE != 0
-UI_PAGE4_T(ui_page4, UI_TEXT_PRINT_TIME_ID, UI_TEXT_PRINT_TIME_VALUE_ID, UI_TEXT_PRINT_FILAMENT_ID, UI_TEXT_PRINT_FILAMENT_VALUE_ID)
-#define UI_PRINTTIME_PAGES ,&ui_page4
-#define UI_PRINTTIME_COUNT 1
-#else
-#define UI_PRINTTIME_PAGES
-#define UI_PRINTTIME_COUNT 0
-#endif
-/*
-  Merge pages together. Use the following pattern:
-  #define UI_PAGES {&name1,&name2,&name3}
-*/
-#define UI_PAGES {/*&ui_page1,*/ &ui_page2, &ui_page3 UI_PRINTTIME_PAGES}
-// How many pages do you want to have. Minimum is 1.
-#define UI_NUM_PAGES 2+UI_PRINTTIME_COUNT
-#else
-#if HAVE_HEATED_BED
-UI_PAGE2_T(ui_page1, UI_TEXT_PAGE_EXTRUDER_ID, UI_TEXT_PAGE_BED_ID)
-#else
-UI_PAGE2_T(ui_page1, UI_TEXT_PAGE_EXTRUDER_ID, UI_TEXT_STATUS_ID)
-#endif
-UI_PAGE2_T(ui_page2, UI_TEXT_MAINPAGE_XY_ID, UI_TEXT_STATUS_ID)
-UI_PAGE2_T(ui_page3, UI_TEXT_ACTION_ZPOSITION4A_ID, UI_TEXT_STATUS_ID)
-/*
-  Merge pages together. Use the following pattern:
-  #define UI_PAGES {&name1,&name2,&name3}
-*/
-#define UI_PAGES {/* &ui_page1,*/ &ui_page2,&ui_page3}
-// How many pages do you want to have. Minimum is 1.
-#define UI_NUM_PAGES 2
-#endif
-
-/* ============ MENU definition ================
-
-  The menu works the same as pages. In additon you need to define what the lines do
-  or where to jump to. For that reason, the menu structure needs to be entered in
-  reverse order. Starting from the leaves, the menu structure is defined.
-*/
-
-/*
-  At first define all actions available in the menu. The actions define, what the
-  next/previous button will do. All menu actions work the same:
-  next/previous changes the value
-  ok sets the value if not already done and goes back to previous menu.
-*/
-
-
-
-// Language selection menu
-
-#if EEPROM_MODE != 0
-#define FIRSTLANG 1
-#if LANGUAGE_EN_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_en, "English", UI_ACTION_LANGUAGE_EN | UI_ACTION_TOPMENU)
-#define ADD_LANG_EN &ui_menu_setlang_en
-#undef FIRSTLANG
-#define FIRSTLANG 0
-#else
-#define ADD_LANG_EN
-#endif // LANGUAGE_EN_ACTIVE
-#if LANGUAGE_DE_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_de, "Deutsch", UI_ACTION_LANGUAGE_DE | UI_ACTION_TOPMENU)
-#if FIRSTLANG
-#define ADD_LANG_DE &ui_menu_setlang_de
-#undef FIRSTLANG
-#define FIRSTLANG 0
-#else
-#define ADD_LANG_DE ,&ui_menu_setlang_de
-#endif
-#else
-#define ADD_LANG_DE
-#endif // LANGUAGE_DE_ACTIVE
-#if LANGUAGE_ES_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_es, "Espanol", UI_ACTION_LANGUAGE_ES | UI_ACTION_TOPMENU)
-#if FIRSTLANG
-#define ADD_LANG_ES &ui_menu_setlang_es
-#undef FIRSTLANG
-#define FIRSTLANG 0
-#else
-#define ADD_LANG_ES ,&ui_menu_setlang_es
-#endif
-#else
-#define ADD_LANG_ES
-#endif // LANGUAGE_ES_ACTIVE
-#if LANGUAGE_PT_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_pt, "Portugues", UI_ACTION_LANGUAGE_PT | UI_ACTION_TOPMENU)
-#if FIRSTLANG
-#define ADD_LANG_PT &ui_menu_setlang_pt
-#undef FIRSTLANG
-#define FIRSTLANG 0
-#else
-#define ADD_LANG_PT ,&ui_menu_setlang_pt
-#endif
-#else
-#define ADD_LANG_PT
-#endif // LANGUAGE_PT_ACTIVE
-#if LANGUAGE_FR_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_fr, "Francais", UI_ACTION_LANGUAGE_FR | UI_ACTION_TOPMENU)
-#if FIRSTLANG
-#define ADD_LANG_FR &ui_menu_setlang_fr
-#undef FIRSTLANG
-#define FIRSTLANG 0
-#else
-#define ADD_LANG_FR ,&ui_menu_setlang_fr
-#endif
-#else
-#define ADD_LANG_FR
-#endif // LANGUAGE_FR_ACTIVE
-#if LANGUAGE_NL_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_nl, "Nederlandse", UI_ACTION_LANGUAGE_NL | UI_ACTION_TOPMENU)
-#if FIRSTLANG
-#define ADD_LANG_NL &ui_menu_setlang_nl
-#undef FIRSTLANG
-#define FIRSTLANG 0
-#else
-#define ADD_LANG_NL ,&ui_menu_setlang_nl
-#endif
-#else
-#define ADD_LANG_NL
-#endif // LANGUAGE_NL_ACTIVE
-#if LANGUAGE_IT_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_it, "Italiano", UI_ACTION_LANGUAGE_IT | UI_ACTION_TOPMENU)
-#if FIRSTLANG
-#define ADD_LANG_IT &ui_menu_setlang_it
-#undef FIRSTLANG
-#define FIRSTLANG 0
-#else
-#define ADD_LANG_IT ,&ui_menu_setlang_it
-#endif
-#else
-#define ADD_LANG_IT
-#endif // LANGUAGE_IT_ACTIVE
-#if LANGUAGE_FI_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_fi, "Suomi", UI_ACTION_LANGUAGE_FI | UI_ACTION_TOPMENU)
-#if FIRSTLANG
-#define ADD_LANG_SE &ui_menu_setlang_fi
-#undef FIRSTLANG
-#define FIRSTLANG 0
-#else
-#define ADD_LANG_FI ,&ui_menu_setlang_fi
-#endif
-#else
-#define ADD_LANG_FI
-#endif // LANGUAGE_FI_ACTIVE
-#if LANGUAGE_SE_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_se, "Svenska", UI_ACTION_LANGUAGE_SE | UI_ACTION_TOPMENU)
-#if FIRSTLANG
-#define ADD_LANG_SE &ui_menu_setlang_se
-#undef FIRSTLANG
-#define FIRSTLANG 0
-#else
-#define ADD_LANG_SE ,&ui_menu_setlang_se
-#endif
-#else
-#define ADD_LANG_SE
-#endif // LANGUAGE_SE_ACTIVE
-#if LANGUAGE_CZ_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_cz, "Cestina", UI_ACTION_LANGUAGE_CZ | UI_ACTION_TOPMENU)
-#if FIRSTLANG
-#define ADD_LANG_CZ &ui_menu_setlang_cz
-#undef FIRSTLANG
-#define FIRSTLANG 0
-#else
-#define ADD_LANG_CZ ,&ui_menu_setlang_cz
-#endif
-#else
-#define ADD_LANG_CZ
-#endif // LANGUAGE_CZ_ACTIVE
-#if LANGUAGE_PL_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_pl, "Polski", UI_ACTION_LANGUAGE_PL | UI_ACTION_TOPMENU)
-#if FIRSTLANG
-#define ADD_LANG_PL &ui_menu_setlang_pl
-#undef FIRSTLANG
-#define FIRSTLANG 0
-#else
-#define ADD_LANG_PL ,&ui_menu_setlang_pl
-#endif
-#else
-#define ADD_LANG_PL
-#endif // LANGUAGE_PL_ACTIVE
-#if LANGUAGE_TR_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_tr, "T" STR_uuml "rk", UI_ACTION_LANGUAGE_TR | UI_ACTION_TOPMENU)
-#if FIRSTLANG
-#define ADD_LANG_TR &ui_menu_setlang_tr
-#undef FIRSTLANG
-#define FIRSTLANG 0
-#else
-#define ADD_LANG_TR ,&ui_menu_setlang_tr
-#endif
-#else
-#define ADD_LANG_TR
-#endif // LANGUAGE_TR_ACTIVE
-#if LANGUAGE_RU_ACTIVE
-UI_MENU_ACTIONCOMMAND(ui_menu_setlang_ru, "Russian", UI_ACTION_LANGUAGE_RU | UI_ACTION_TOPMENU)
-#if FIRSTLANG
-#define ADD_LANG_RU &ui_menu_setlang_ru
-#undef FIRSTLANG
-#define FIRSTLANG 0
-#else
-#define ADD_LANG_RU ,&ui_menu_setlang_ru
-#endif
-#else
-#define ADD_LANG_RU
-#endif // LANGUAGE_RU_ACTIVE
-
-#define UI_MENU_LANGUAGES {UI_MENU_ADDCONDBACK ADD_LANG_EN ADD_LANG_DE ADD_LANG_ES ADD_LANG_PT ADD_LANG_FR ADD_LANG_NL ADD_LANG_IT ADD_LANG_FI ADD_LANG_SE ADD_LANG_CZ ADD_LANG_PL ADD_LANG_TR ADD_LANG_RU}
-#define UI_MENU_LANGUAGES_WIZ {ADD_LANG_EN ADD_LANG_DE ADD_LANG_ES ADD_LANG_PT ADD_LANG_FR ADD_LANG_NL ADD_LANG_IT ADD_LANG_FI ADD_LANG_SE ADD_LANG_CZ ADD_LANG_PL ADD_LANG_TR ADD_LANG_RU}
-UI_MENU(ui_menu_languages, UI_MENU_LANGUAGES, UI_MENU_BACKCNT + LANGUAGE_EN_ACTIVE + LANGUAGE_DE_ACTIVE + LANGUAGE_ES_ACTIVE + LANGUAGE_PT_ACTIVE + LANGUAGE_FR_ACTIVE + LANGUAGE_NL_ACTIVE + LANGUAGE_IT_ACTIVE + LANGUAGE_FI_ACTIVE + LANGUAGE_SE_ACTIVE + LANGUAGE_CZ_ACTIVE + LANGUAGE_PL_ACTIVE + LANGUAGE_TR_ACTIVE + LANGUAGE_RU_ACTIVE)
-UI_MENU_SUBMENU_T(ui_menu_conf_lang, UI_TEXT_LANGUAGE_ID, ui_menu_languages)
-UI_STICKYMENU(ui_menu_languages_wiz, UI_MENU_LANGUAGES_WIZ, LANGUAGE_EN_ACTIVE + LANGUAGE_DE_ACTIVE + LANGUAGE_ES_ACTIVE + LANGUAGE_PT_ACTIVE + LANGUAGE_FR_ACTIVE + LANGUAGE_NL_ACTIVE + LANGUAGE_IT_ACTIVE + LANGUAGE_FI_ACTIVE + LANGUAGE_SE_ACTIVE + LANGUAGE_CZ_ACTIVE + LANGUAGE_PL_ACTIVE + LANGUAGE_TR_ACTIVE + LANGUAGE_RU_ACTIVE)
-#define LANGMENU_ENTRY &ui_menu_conf_lang,
-#define LANGMENU_COUNT 1
-#else
-#define LANGMENU_ENTRY
-#define LANGMENU_COUNT 0
-#endif
-
-// Helper line
-
-UI_MENU_HEADLINE_T(ui_menu_empty,UI_TEXT_EMPTY_ID)
-
-
-// Error menu
-
-UI_MENU_ACTION2_T(ui_menu_error, UI_ACTION_DUMMY, UI_TEXT_ERROR_ID, UI_TEXT_ERRORMSG_ID)
-
-// Messages
-#if UI_ROWS >= 4
-UI_WIZARD4_T(ui_msg_decoupled, UI_ACTION_MESSAGE,  UI_TEXT_NOTIFICATION_ID, UI_TEXT_HEATER_DECOUPLED_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
-UI_WIZARD4_T(ui_msg_defectsensor, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_TEMPSENSOR_DEFECT_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
-UI_WIZARD4_T(ui_msg_slipping, UI_ACTION_MESSAGE,  UI_TEXT_NOTIFICATION_ID, UI_TEXT_SLIPPING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
-UI_WIZARD4_T(ui_msg_leveling_error, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_LEVELING_ERROR_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
-UI_WIZARD4_T(ui_msg_calibration_error, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_CALIBRATION_ERROR_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
-UI_WIZARD5_T(ui_msg_clearbed1, UI_ACTION_AUTOLEVEL2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_EMPTY_ID, UI_TEXT_OK_ID)
-UI_WIZARD5_T(ui_msg_clearbed2, UI_ACTION_MEASURE_DISTORTION2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID, UI_TEXT_CLEARBED3_ID, UI_TEXT_EMPTY_ID,  UI_TEXT_OK_ID)
-
-UI_WIZARD4_T(ui_msg_calibrating_bed, UI_ACTION_STATE,UI_TEXT_EMPTY_ID, UI_TEXT_CALIBRATING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
-UI_WIZARD4_T(ui_msg_homing, UI_ACTION_STATE,UI_TEXT_EMPTY_ID, UI_TEXT_HOMING_ID, UI_TEXT_EMPTY_ID, UI_TEXT_PLEASE_WAIT_ID)
-#else
-UI_WIZARD2_T(ui_msg_decoupled, UI_ACTION_MESSAGE,  UI_TEXT_NOTIFICATION_ID, UI_TEXT_HEATER_DECOUPLED_ID)
-UI_WIZARD2_T(ui_msg_defectsensor, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_TEMPSENSOR_DEFECT_ID)
-UI_WIZARD2_T(ui_msg_slipping, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_SLIPPING_ID)
-UI_WIZARD2_T(ui_msg_leveling_error, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_LEVELING_ERROR_ID)
-UI_WIZARD2_T(ui_msg_calibration_error, UI_ACTION_MESSAGE, UI_TEXT_NOTIFICATION_ID, UI_TEXT_CALIBRATION_ERROR_ID)
-UI_WIZARD2_T(ui_msg_clearbed1, UI_ACTION_AUTOLEVEL2, UI_TEXT_CLEARBED1_ID, UI_TEXT_CLEARBED2_ID)
-
-UI_WIZARD2_T(ui_msg_calibrating_bed, UI_ACTION_STATE, UI_TEXT_CALIBRATING_ID, UI_TEXT_PLEASE_WAIT_ID)
-UI_WIZARD2_T(ui_msg_homing, UI_ACTION_STATE, UI_TEXT_HOMING_ID, UI_TEXT_PLEASE_WAIT_ID)
-#endif
-
-// Filament change wizard
-
-#if FEATURE_RETRACTION
-#if UI_ROWS >= 4
-UI_WIZARD4_T(ui_wiz_filamentchange, UI_ACTION_WIZARD_FILAMENTCHANGE, UI_TEXT_WIZ_CH_FILAMENT1_ID, UI_TEXT_WIZ_CH_FILAMENT2_ID, UI_TEXT_WIZ_CH_FILAMENT3_ID, UI_TEXT_CLICK_DONE_ID)
-UI_WIZARD4_T(ui_wiz_jamwaitheat, UI_ACTION_WIZARD_JAM_WAITHEAT, UI_TEXT_WIZ_WAITTEMP1_ID, UI_TEXT_WIZ_WAITTEMP2_ID, UI_TEXT_EMPTY_ID, UI_TEXT_TEMP_SET_ID)
-UI_WIZARD4_T(ui_wiz_jamreheat, UI_ACTION_WIZARD_JAM_REHEAT, UI_TEXT_WIZ_REHEAT1_ID, UI_TEXT_WIZ_REHEAT2_ID, UI_TEXT_EMPTY_ID, UI_TEXT_CURRENT_TEMP_ID)
-#else
-UI_WIZARD2_T(ui_wiz_filamentchange, UI_ACTION_WIZARD_FILAMENTCHANGE, UI_TEXT_WIZ_CH_FILAMENT1_ID, UI_TEXT_CLICK_DONE_ID)
-UI_WIZARD2_T(ui_wiz_jamwaitheat, UI_ACTION_WIZARD_JAM_WAITHEAT, UI_TEXT_WIZ_WAITTEMP1_ID, UI_TEXT_WIZ_WAITTEMP2_ID)
-UI_WIZARD2_T(ui_wiz_jamreheat, UI_ACTION_WIZARD_JAM_REHEAT, UI_TEXT_WIZ_REHEAT1_ID, UI_TEXT_WIZ_REHEAT2_ID)
-#endif
-#endif
-
-// **** Positions sub menus
-
-#if UI_ROWS >= 4
-UI_MENU_ACTION4_T(ui_menu_xpos, UI_ACTION_XPOSITION, UI_TEXT_ACTION_XPOSITION4A_ID, UI_TEXT_ACTION_XPOSITION4B_ID, UI_TEXT_ACTION_XPOSITION4C_ID, UI_TEXT_ACTION_XPOSITION4D_ID)
-UI_MENU_ACTION4_T(ui_menu_ypos, UI_ACTION_YPOSITION, UI_TEXT_ACTION_YPOSITION4A_ID, UI_TEXT_ACTION_YPOSITION4B_ID, UI_TEXT_ACTION_YPOSITION4C_ID, UI_TEXT_ACTION_YPOSITION4D_ID)
-UI_MENU_ACTION4_T(ui_menu_zpos, UI_ACTION_ZPOSITION, UI_TEXT_ACTION_ZPOSITION4A_ID, UI_TEXT_ACTION_ZPOSITION4B_ID, UI_TEXT_ACTION_ZPOSITION4C_ID, UI_TEXT_ACTION_ZPOSITION4D_ID)
-UI_MENU_ACTION4_T(ui_menu_zpos_notest, UI_ACTION_ZPOSITION_NOTEST, UI_TEXT_ACTION_ZPOSITION4A_ID, UI_TEXT_ACTION_ZPOSITION4B_ID, UI_TEXT_ACTION_ZPOSITION4C_ID, UI_TEXT_ACTION_ZPOSITION4D_ID)
-UI_MENU_ACTION4_T(ui_menu_xpos_fast, UI_ACTION_XPOSITION_FAST, UI_TEXT_ACTION_XPOSITION_FAST4A_ID, UI_TEXT_ACTION_XPOSITION_FAST4B_ID, UI_TEXT_ACTION_XPOSITION_FAST4C_ID, UI_TEXT_ACTION_XPOSITION_FAST4D_ID)
-UI_MENU_ACTION4_T(ui_menu_ypos_fast, UI_ACTION_YPOSITION_FAST, UI_TEXT_ACTION_YPOSITION_FAST4A_ID, UI_TEXT_ACTION_YPOSITION_FAST4B_ID, UI_TEXT_ACTION_YPOSITION_FAST4C_ID, UI_TEXT_ACTION_YPOSITION_FAST4D_ID)
-UI_MENU_ACTION4_T(ui_menu_zpos_fast, UI_ACTION_ZPOSITION_FAST, UI_TEXT_ACTION_ZPOSITION_FAST4A_ID, UI_TEXT_ACTION_ZPOSITION_FAST4B_ID, UI_TEXT_ACTION_ZPOSITION_FAST4C_ID, UI_TEXT_ACTION_ZPOSITION_FAST4D_ID)
-UI_MENU_ACTION4_T(ui_menu_zpos_fast_notest, UI_ACTION_ZPOSITION_FAST_NOTEST, UI_TEXT_ACTION_ZPOSITION_FAST4A_ID, UI_TEXT_ACTION_ZPOSITION_FAST4B_ID, UI_TEXT_ACTION_ZPOSITION_FAST4C_ID, UI_TEXT_ACTION_ZPOSITION_FAST4D_ID)
-UI_MENU_ACTION4_T(ui_menu_epos, UI_ACTION_EPOSITION, UI_TEXT_ACTION_EPOSITION_FAST2A_ID, UI_TEXT_ACTION_EPOSITION_FAST2B_ID, UI_TEXT_PAGE_EXTRUDER_ID, UI_TEXT_METER_PRINTED_ID)
-#else
-UI_MENU_ACTION2_T(ui_menu_xpos, UI_ACTION_XPOSITION, UI_TEXT_ACTION_XPOSITION2A_ID, UI_TEXT_ACTION_XPOSITION2B_ID)
-UI_MENU_ACTION2_T(ui_menu_ypos, UI_ACTION_YPOSITION, UI_TEXT_ACTION_YPOSITION2A_ID, UI_TEXT_ACTION_YPOSITION2B_ID)
-UI_MENU_ACTION2_T(ui_menu_zpos, UI_ACTION_ZPOSITION, UI_TEXT_ACTION_ZPOSITION2A_ID, UI_TEXT_ACTION_ZPOSITION2B_ID)
-UI_MENU_ACTION2_T(ui_menu_zpos_notest, UI_ACTION_ZPOSITION_NOTEST, UI_TEXT_ACTION_ZPOSITION2A_ID, UI_TEXT_ACTION_ZPOSITION2B_ID)
-UI_MENU_ACTION2_T(ui_menu_xpos_fast, UI_ACTION_XPOSITION_FAST, UI_TEXT_ACTION_XPOSITION_FAST2A_ID, UI_TEXT_ACTION_XPOSITION_FAST2B_ID)
-UI_MENU_ACTION2_T(ui_menu_ypos_fast, UI_ACTION_YPOSITION_FAST, UI_TEXT_ACTION_YPOSITION_FAST2A_ID, UI_TEXT_ACTION_YPOSITION_FAST2B_ID)
-UI_MENU_ACTION2_T(ui_menu_zpos_fast, UI_ACTION_ZPOSITION_FAST, UI_TEXT_ACTION_ZPOSITION_FAST2A_ID, UI_TEXT_ACTION_ZPOSITION_FAST2B_ID)
-UI_MENU_ACTION2_T(ui_menu_zpos_fast_notest, UI_ACTION_ZPOSITION_FAST_NOTEST, UI_TEXT_ACTION_ZPOSITION_FAST2A_ID, UI_TEXT_ACTION_ZPOSITION_FAST2B_ID)
-UI_MENU_ACTION2_T(ui_menu_epos, UI_ACTION_EPOSITION, UI_TEXT_ACTION_EPOSITION_FAST2A_ID, UI_TEXT_ACTION_EPOSITION_FAST2B_ID)
-#endif
-
-/*
-  Next step is to define sub menus leading to the action.
-*/
-
-// **** Positioning menu
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_home_all, UI_TEXT_HOME_ALL_ID, UI_ACTION_HOME_ALL, 0, MENU_MODE_PRINTING)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_home_x, UI_TEXT_HOME_X_ID, UI_ACTION_HOME_X, 0, MENU_MODE_PRINTING)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_home_y, UI_TEXT_HOME_Y_ID, UI_ACTION_HOME_Y, 0, MENU_MODE_PRINTING)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_home_z, UI_TEXT_HOME_Z_ID, UI_ACTION_HOME_Z, 0, MENU_MODE_PRINTING)
-UI_MENU_ACTIONSELECTOR_T(ui_menu_go_xpos, UI_TEXT_X_POSITION_ID, ui_menu_xpos)
-UI_MENU_ACTIONSELECTOR_T(ui_menu_go_ypos, UI_TEXT_Y_POSITION_ID, ui_menu_ypos)
-UI_MENU_ACTIONSELECTOR_T(ui_menu_go_zpos, UI_TEXT_Z_POSITION_ID, ui_menu_zpos)
-UI_MENU_ACTIONSELECTOR_T(ui_menu_go_zpos_notest, UI_TEXT_Z_POSITION_ID, ui_menu_zpos_notest)
-UI_MENU_ACTIONSELECTOR_T(ui_menu_go_epos, UI_TEXT_E_POSITION_ID, ui_menu_epos)
-#if !UI_SPEEDDEPENDENT_POSITIONING
-UI_MENU_ACTIONSELECTOR_T(ui_menu_go_xfast, UI_TEXT_X_POS_FAST_ID, ui_menu_xpos_fast)
-UI_MENU_ACTIONSELECTOR_T(ui_menu_go_yfast, UI_TEXT_Y_POS_FAST_ID, ui_menu_ypos_fast)
-UI_MENU_ACTIONSELECTOR_T(ui_menu_go_zfast, UI_TEXT_Z_POS_FAST_ID, ui_menu_zpos_fast)
-UI_MENU_ACTIONSELECTOR_T(ui_menu_go_zfast_notest, UI_TEXT_Z_POS_FAST_ID, ui_menu_zpos_fast_notest)
-#define UI_SPEED 2
-#define UI_SPEED_X ,&ui_menu_go_xfast,&ui_menu_go_xpos
-#define UI_SPEED_Y ,&ui_menu_go_yfast,&ui_menu_go_ypos
-#define UI_SPEED_Z ,&ui_menu_go_zfast,&ui_menu_go_zpos
-#define UI_SPEED_Z_NOTEST ,&ui_menu_go_zfast_notest,&ui_menu_go_zpos_notest
-#else
-#define UI_SPEED 1
-#define UI_SPEED_X ,&ui_menu_go_xpos
-#define UI_SPEED_Y ,&ui_menu_go_ypos
-#define UI_SPEED_Z ,&ui_menu_go_zpos
-#define UI_SPEED_Z_NOTEST ,&ui_menu_go_zpos_notest
-#endif
-#if FEATURE_SERVO > 0 && UI_SERVO_CONTROL > 0
-UI_MENU_CHANGEACTION_T(ui_menu_servopos, UI_TEXT_SERVOPOS_ID, UI_ACTION_SERVOPOS)
-#define SERVOPOS_COUNT 1
-#define SERVOPOS_ENTRY ,&ui_menu_servopos
-#else
-#define SERVOPOS_COUNT 0
-#define SERVOPOS_ENTRY
-#endif
-// Offsets menu
-UI_MENU_CHANGEACTION_T(ui_menu_off_xpos, UI_TEXT_X_OFFSET_ID, UI_ACTION_XOFF)
-UI_MENU_CHANGEACTION_T(ui_menu_off_ypos, UI_TEXT_Y_OFFSET_ID, UI_ACTION_YOFF)
-UI_MENU_CHANGEACTION_T(ui_menu_off_zpos, UI_TEXT_Z_OFFSET_ID, UI_ACTION_ZOFF)
-#define UI_MENU_OFFSETS {UI_MENU_ADDCONDBACK &ui_menu_off_xpos,&ui_menu_off_ypos,&ui_menu_off_zpos}
-UI_MENU(ui_menu_offsets, UI_MENU_OFFSETS, UI_MENU_BACKCNT + 3)
-UI_MENU_SUBMENU_T(ui_menu_go_offsets, UI_TEXT_OFFSETS_ID, ui_menu_offsets)
-
-#define UI_MENU_POSITIONS {UI_MENU_ADDCONDBACK &ui_menu_home_all,&ui_menu_home_x,&ui_menu_home_y,&ui_menu_home_z UI_SPEED_X UI_SPEED_Y UI_SPEED_Z SERVOPOS_ENTRY}
-UI_MENU(ui_menu_positions, UI_MENU_POSITIONS, 4 + 3 * UI_SPEED + UI_MENU_BACKCNT + SERVOPOS_COUNT)
-
-#if FEATURE_Z_PROBE
-UI_MENU_HEADLINE_T(ui_menu_mzp_head,UI_TEXT_MEAS_ZP_HEIGHT_ID)
-UI_MENU_CHANGEACTION_T(ui_menu_mzp_realz,UI_TEXT_REAL_Z_ID,UI_ACTION_MEASURE_ZP_REALZ)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_mzp_cont, UI_TEXT_CONTINUE_ID, UI_ACTION_MEASURE_ZPROBE_HEIGHT2)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_mzp_close, UI_TEXT_CLOSE_ID, UI_ACTION_BACK)
-#define UI_MENU_MZP_ITEMS {&ui_menu_mzp_head,&ui_menu_mzp_realz,&ui_menu_mzp_cont,&ui_menu_mzp_close}
-UI_STICKYMENU(ui_menu_mzp,UI_MENU_MZP_ITEMS,4)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_measure_zprobe_height, UI_TEXT_MEAS_ZP_HEIGHT_ID, UI_ACTION_MEASURE_ZPROBE_HEIGHT)
-#define UI_CAL_ZHEIGHT_ENTRY ,&ui_menu_measure_zprobe_height
-#define UI_CAL_ZHEIGHT_CNT 1
-#else
-#define UI_CAL_ZHEIGHT_ENTRY
-#define UI_CAL_ZHEIGHT_CNT 0
-#endif
-
-// **** Delta calibration menu
-#if Z_HOME_DIR > 0
-UI_MENU_ACTIONCOMMAND_T(ui_menu_set_measured_origin, UI_TEXT_SET_MEASURED_ORIGIN_ID, UI_ACTION_SET_MEASURED_ORIGIN)
-#define UI_MENU_DELTA {UI_MENU_ADDCONDBACK &ui_menu_home_all UI_SPEED_Z_NOTEST,&ui_menu_set_measured_origin}
-UI_MENU(ui_menu_delta, UI_MENU_DELTA, 2 + UI_SPEED + UI_MENU_BACKCNT)
-#endif
-
-// **** Bed leveling menu
-#ifdef SOFTWARE_LEVELING
-UI_MENU_ACTIONCOMMAND_T(ui_menu_set_p1, UI_TEXT_SET_P1_ID, UI_ACTION_SET_P1)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_set_p2, UI_TEXT_SET_P2_ID, UI_ACTION_SET_P2)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_set_p3, UI_TEXT_SET_P3_ID, UI_ACTION_SET_P3)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_calculate_leveling, UI_TEXT_CALCULATE_LEVELING_ID, UI_ACTION_CALC_LEVEL)
-#define UI_MENU_LEVEL {UI_MENU_ADDCONDBACK &ui_menu_set_p1,&ui_menu_set_p2,&ui_menu_set_p3,&ui_menu_calculate_leveling UI_SPEED_X UI_SPEED_Y UI_SPEED_Z}
-UI_MENU(ui_menu_level, UI_MENU_LEVEL, 4 + 3 * UI_SPEED + UI_MENU_BACKCNT)
-#endif
-
-// **** Extruder menu
-#if NUM_EXTRUDER > 0
-UI_MENU_CHANGEACTION_T(ui_menu_ext_temp0, UI_TEXT_EXTR0_TEMP_ID, UI_ACTION_EXTRUDER0_TEMP)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_ext_temp0_printing, UI_TEXT_EXTR0_TEMP_ID, UI_ACTION_EXTRUDER0_TEMP,MENU_MODE_PRINTING,0)
-#define UI_TEMP0_PRINTING ,&ui_menu_ext_temp0_printing
-#define UI_TEMP0_CNT 1
-#else
-#define UI_TEMP0_PRINTING
-#define UI_TEMP0_CNT 0
-#endif
-UI_MENU_CHANGEACTION_T(ui_menu_ext_temp1, UI_TEXT_EXTR1_TEMP_ID, UI_ACTION_EXTRUDER1_TEMP)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_ext_temp1_printing, UI_TEXT_EXTR1_TEMP_ID, UI_ACTION_EXTRUDER1_TEMP,MENU_MODE_PRINTING,0)
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
-#define UI_TEMP1_PRINTING ,&ui_menu_ext_temp1_printing
-#define UI_TEMP1_CNT 1
-#else
-#define UI_TEMP1_PRINTING
-#define UI_TEMP1_CNT 0
-#endif
-#if NUM_EXTRUDER > 2 && MIXING_EXTRUDER == 0
-UI_MENU_CHANGEACTION_T(ui_menu_ext_temp2, UI_TEXT_EXTR2_TEMP_ID, UI_ACTION_EXTRUDER2_TEMP)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_ext_temp2_printing, UI_TEXT_EXTR2_TEMP_ID, UI_ACTION_EXTRUDER1_TEMP,MENU_MODE_PRINTING,0)
-#define UI_TEMP2_PRINTING ,&ui_menu_ext_temp2_printing
-#define UI_TEMP2_CNT 1
-#else
-#define UI_TEMP2_PRINTING
-#define UI_TEMP2_CNT 0
-#endif
-#if NUM_EXTRUDER > 3 && MIXING_EXTRUDER == 0
-UI_MENU_CHANGEACTION_T(ui_menu_ext_temp3, UI_TEXT_EXTR3_TEMP_ID, UI_ACTION_EXTRUDER3_TEMP)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_ext_temp3_printing, UI_TEXT_EXTR3_TEMP_ID, UI_ACTION_EXTRUDER1_TEMP,MENU_MODE_PRINTING,0)
-#define UI_TEMP3_PRINTING ,&ui_menu_ext_temp3_printing
-#define UI_TEMP3_CNT 1
-#else
-#define UI_TEMP3_PRINTING
-#define UI_TEMP3_CNT 0
-#endif
-#if NUM_EXTRUDER > 4 && MIXING_EXTRUDER == 0
-UI_MENU_CHANGEACTION_T(ui_menu_ext_temp4, UI_TEXT_EXTR4_TEMP_ID, UI_ACTION_EXTRUDER4_TEMP)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_ext_temp4_printing, UI_TEXT_EXTR4_TEMP_ID, UI_ACTION_EXTRUDER1_TEMP,MENU_MODE_PRINTING,0)
-#define UI_TEMP4_PRINTING ,&ui_menu_ext_temp4_printing
-#define UI_TEMP4_CNT 1
-#else
-#define UI_TEMP4_PRINTING
-#define UI_TEMP4_CNT 0
-#endif
-#if NUM_EXTRUDER > 5 && MIXING_EXTRUDER == 0
-UI_MENU_CHANGEACTION_T(ui_menu_ext_temp5, UI_TEXT_EXTR5_TEMP_ID, UI_ACTION_EXTRUDER5_TEMP)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_ext_temp5_printing, UI_TEXT_EXTR5_TEMP_ID, UI_ACTION_EXTRUDER1_TEMP,MENU_MODE_PRINTING,0)
-#define UI_TEMP5_PRINTING ,&ui_menu_ext_temp5_printing
-#define UI_TEMP5_CNT 1
-#else
-#define UI_TEMP5_PRINTING
-#define UI_TEMP5_CNT 0
-#endif
-UI_MENU_CHANGEACTION_T(ui_menu_bed_temp, UI_TEXT_BED_TEMP_ID, UI_ACTION_HEATED_BED_TEMP)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_bed_temp_printing, UI_TEXT_BED_TEMP_ID, UI_ACTION_HEATED_BED_TEMP,MENU_MODE_PRINTING,0)
-#if HAVE_HEATED_BED
-#define UI_BED_TEMP_PRINTING ,&ui_menu_bed_temp_printing
-#else
-#endif
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_sel0, UI_TEXT_EXTR0_SELECT_ID, UI_ACTION_SELECT_EXTRUDER0)
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_sel1, UI_TEXT_EXTR1_SELECT_ID, UI_ACTION_SELECT_EXTRUDER1)
-#endif
-#if NUM_EXTRUDER > 2 && MIXING_EXTRUDER == 0
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_sel2, UI_TEXT_EXTR2_SELECT_ID, UI_ACTION_SELECT_EXTRUDER2)
-#endif
-#if NUM_EXTRUDER > 3 && MIXING_EXTRUDER == 0
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_sel3, UI_TEXT_EXTR3_SELECT_ID, UI_ACTION_SELECT_EXTRUDER3)
-#endif
-#if NUM_EXTRUDER > 4 && MIXING_EXTRUDER == 0
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_sel4, UI_TEXT_EXTR4_SELECT_ID, UI_ACTION_SELECT_EXTRUDER4)
-#endif
-#if NUM_EXTRUDER > 5 && MIXING_EXTRUDER == 0
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_sel5, UI_TEXT_EXTR5_SELECT_ID, UI_ACTION_SELECT_EXTRUDER5)
-#endif
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_off0, UI_TEXT_EXTR0_OFF_ID, UI_ACTION_EXTRUDER0_OFF)
-#if NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_off1, UI_TEXT_EXTR1_OFF_ID, UI_ACTION_EXTRUDER1_OFF)
-#endif
-#if NUM_EXTRUDER > 2 && MIXING_EXTRUDER == 0
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_off2, UI_TEXT_EXTR2_OFF_ID, UI_ACTION_EXTRUDER2_OFF)
-#endif
-#if NUM_EXTRUDER > 3 && MIXING_EXTRUDER == 0
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_off3, UI_TEXT_EXTR3_OFF_ID, UI_ACTION_EXTRUDER3_OFF)
-#endif
-#if NUM_EXTRUDER > 4 && MIXING_EXTRUDER == 0
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_off4, UI_TEXT_EXTR4_OFF_ID, UI_ACTION_EXTRUDER4_OFF)
-#endif
-#if NUM_EXTRUDER > 5 && MIXING_EXTRUDER == 0
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_off5, UI_TEXT_EXTR5_OFF_ID, UI_ACTION_EXTRUDER5_OFF)
-#endif
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_origin, UI_TEXT_EXTR_ORIGIN_ID, UI_ACTION_RESET_EXTRUDER)
-#if FEATURE_DITTO_PRINTING
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_ditto0, UI_TEXT_DITTO_0_ID, UI_DITTO_0)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_ditto1, UI_TEXT_DITTO_1_ID, UI_DITTO_1)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_ditto2, UI_TEXT_DITTO_2_ID, UI_DITTO_2)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ext_ditto3, UI_TEXT_DITTO_3_ID, UI_DITTO_3)
-#if NUM_EXTRUDER == 3
-#define UI_DITTO_COMMANDS ,&ui_menu_ext_ditto0,&ui_menu_ext_ditto1,&ui_menu_ext_ditto2
-#define UI_DITTO_COMMANDS_COUNT 3
-#elif NUM_EXTRUDER == 4
-#define UI_DITTO_COMMANDS ,&ui_menu_ext_ditto0,&ui_menu_ext_ditto1,&ui_menu_ext_ditto2,&ui_menu_ext_ditto3
-#define UI_DITTO_COMMANDS_COUNT 4
-#else
-#define UI_DITTO_COMMANDS ,&ui_menu_ext_ditto0,&ui_menu_ext_ditto1
-#define UI_DITTO_COMMANDS_COUNT 2
-#endif
-#else
-#define UI_DITTO_COMMANDS
-#define UI_DITTO_COMMANDS_COUNT 0
-#endif
-#if MIXING_EXTRUDER || NUM_EXTRUDER == 1
-#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_off0,
-#define UI_MENU_EXTCNT 2
-#define UI_MENU_EXTSEL
-#define UI_MENU_EXTSEL_CNT 0
-#elif NUM_EXTRUDER == 2
-#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_sel0,&ui_menu_ext_sel1,
-#define UI_MENU_EXTCNT 6
-#define UI_MENU_EXTSEL ,&ui_menu_ext_sel0,&ui_menu_ext_sel1
-#define UI_MENU_EXTSEL_CNT 2
-#elif NUM_EXTRUDER == 3
-#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_temp2,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_off2,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,
-#define UI_MENU_EXTCNT 9
-#define UI_MENU_EXTSEL ,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2
-#define UI_MENU_EXTSEL_CNT 3
-#elif NUM_EXTRUDER == 4
-#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_temp2,&ui_menu_ext_temp3,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_off2,&ui_menu_ext_off3,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,
-#define UI_MENU_EXTCNT 12
-#define UI_MENU_EXTSEL ,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3
-#define UI_MENU_EXTSEL_CNT 4
-#elif NUM_EXTRUDER == 5
-#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_temp2,&ui_menu_ext_temp3,&ui_menu_ext_temp4,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_off2,&ui_menu_ext_off3,&ui_menu_ext_off4,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4,
-#define UI_MENU_EXTCNT 15
-#define UI_MENU_EXTSEL ,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4
-#define UI_MENU_EXTSEL_CNT 5
-#elif NUM_EXTRUDER == 6
-#define UI_MENU_EXTCOND &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_ext_temp2,&ui_menu_ext_temp3,&ui_menu_ext_temp4,&ui_menu_ext_temp5,&ui_menu_ext_off0,&ui_menu_ext_off1,&ui_menu_ext_off2,&ui_menu_ext_off3,&ui_menu_ext_off4,&ui_menu_ext_off5,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4,&ui_menu_ext_sel5,
-#define UI_MENU_EXTCNT 18
-#define UI_MENU_EXTSEL ,&ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4,&ui_menu_ext_sel4
-#define UI_MENU_EXTSEL_CNT 6
-#elif NUM_EXTRUDER == 0
-#define UI_MENU_EXTCOND
-#define UI_MENU_EXTCNT 0
-#define UI_MENU_EXTSEL
-#define UI_MENU_EXTSEL_CNT 0
-#endif
-#if HAVE_HEATED_BED
-#define UI_MENU_BEDCOND &ui_menu_bed_temp,
-#define UI_MENU_BEDCNT 1
-#else
-#define UI_MENU_BEDCOND
-#define UI_MENU_BEDCNT 0
-#endif
-
-#define UI_MENU_EXTRUDER {UI_MENU_ADDCONDBACK UI_MENU_BEDCOND UI_MENU_EXTCOND &ui_menu_go_epos,&ui_menu_ext_origin UI_DITTO_COMMANDS}
-UI_MENU(ui_menu_extruder, UI_MENU_EXTRUDER, UI_MENU_BACKCNT + UI_MENU_BEDCNT + UI_MENU_EXTCNT + 2 + UI_DITTO_COMMANDS_COUNT)
-
-// **** SD card menu
-
-// **** Fan menu
-
-#if FAN_PIN>-1 && FEATURE_FAN_CONTROL
-UI_MENU_CHANGEACTION_T(ui_menu_fan_fanspeed, UI_TEXT_ACTION_FANSPEED_ID, UI_ACTION_FANSPEED)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_fan_fanspeed_printing, UI_TEXT_ACTION_FANSPEED_ID, UI_ACTION_FANSPEED,MENU_MODE_PRINTING,0)
-#define UI_FANSPEED_PRINTING ,&ui_menu_fan_fanspeed_printing
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_fan_off, UI_TEXT_FAN_OFF_ID, UI_ACTION_FAN_OFF, MENU_MODE_FAN_RUNNING, 0)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_fan_25, UI_TEXT_FAN_25_ID, UI_ACTION_FAN_25)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_fan_50, UI_TEXT_FAN_50_ID, UI_ACTION_FAN_50)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_fan_75, UI_TEXT_FAN_75_ID, UI_ACTION_FAN_75)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_fan_full, UI_TEXT_FAN_FULL_ID, UI_ACTION_FAN_FULL)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_fan_ignoreM106, UI_TEXT_IGNORE_M106_ID, UI_ACTION_IGNORE_M106)
-#define UI_MENU_FAN {UI_MENU_ADDCONDBACK &ui_menu_fan_fanspeed,&ui_menu_fan_off,&ui_menu_fan_25,&ui_menu_fan_50,&ui_menu_fan_75,&ui_menu_fan_full,&ui_menu_fan_ignoreM106}
-UI_MENU(ui_menu_fan, UI_MENU_FAN, 7 + UI_MENU_BACKCNT)
-UI_MENU_SUBMENU_T(ui_menu_fan_sub, UI_TEXT_FANSPEED_ID, ui_menu_fan)
-#define UI_MENU_FAN_COND &ui_menu_fan_sub,
-#define UI_FANSPEED ,&ui_menu_fan_fanspeed
-#define UI_MENU_FAN_CNT 1
-#else
-#define UI_MENU_FAN_COND
-#define UI_FANSPEED
-#define UI_MENU_FAN_CNT 0
-#define UI_FANSPEED_PRINTING
-#endif
-
-#if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
-UI_MENU_CHANGEACTION_FILTER(ui_menu_fan2_fanspeed_printing,"Fan 2 speed:%FS%%%" /* UI_TEXT_ACTION_FANSPEED_ID*/, UI_ACTION_FAN2SPEED,MENU_MODE_PRINTING,0)
-UI_MENU_CHANGEACTION(ui_menu_fan2_fanspeed,"Fan 2 speed:%FS%%%" /* UI_TEXT_ACTION_FANSPEED_ID*/, UI_ACTION_FAN2SPEED)
-#define UI_FAN2SPEED_PRINTING ,&ui_menu_fan2_fanspeed_printing
-#define UI_FAN2SPEED ,&ui_menu_fan2_fanspeed
-#define UI_MENU_FAN2_CNT 1
-#else
-#define UI_MENU_FAN2_CNT 0
-#define UI_FAN2SPEED_PRINTING
-#define UI_FAN2SPEED
-#endif
-
-
-// **** General configuration settings
-
-UI_MENU_ACTION2_T(ui_menu_stepper2, UI_ACTION_STEPPER_INACTIVE, UI_TEXT_STEPPER_INACTIVE2A_ID, UI_TEXT_STEPPER_INACTIVE2B_ID)
-UI_MENU_ACTION2_T(ui_menu_maxinactive2, UI_ACTION_MAX_INACTIVE, UI_TEXT_POWER_INACTIVE2A_ID, UI_TEXT_POWER_INACTIVE2B_ID)
-UI_MENU_CHANGEACTION_T(ui_menu_general_baud, UI_TEXT_BAUDRATE_ID, UI_ACTION_BAUDRATE)
-UI_MENU_ACTIONSELECTOR_T(ui_menu_general_stepper_inactive, UI_TEXT_STEPPER_INACTIVE_ID, ui_menu_stepper2)
-UI_MENU_ACTIONSELECTOR_T(ui_menu_general_max_inactive, UI_TEXT_POWER_INACTIVE_ID, ui_menu_maxinactive2)
-#ifdef ZPROBE_HEIGHT_ROUTINE
-UI_MENU_ACTIONCOMMAND(ui_menu_calib_probe,"Calibrate Z-Probe",UI_ACTION_START_CZREFH);
-#define UI_CALIB_PROBE_ENTRY ,&ui_menu_calib_probe
-#define UI_CALIB_PROBE_COUNT 1
-#else
-#define UI_CALIB_PROBE_ENTRY
-#define UI_CALIB_PROBE_COUNT 0
-#endif
-
-#if FEATURE_AUTOLEVEL
-#ifdef HALFAUTOMATIC_LEVELING
-UI_MENU_ACTIONCOMMAND_T(ui_menu_autolevelbed,UI_TEXT_AUTOLEVEL_BED_ID,UI_ACTION_HALFAUTO_LEV);
-#define UI_TOOGLE_AUTOLEVEL_ENTRY ,&ui_menu_autolevelbed
-#define UI_TOGGLE_AUTOLEVEL_COUNT 1
-#else
-UI_MENU_ACTIONCOMMAND_T(ui_menu_autolevelbed,UI_TEXT_AUTOLEVEL_BED_ID,UI_ACTION_AUTOLEVEL);
-UI_MENU_ACTIONCOMMAND_T(ui_menu_toggle_autolevel, UI_TEXT_AUTOLEVEL_ONOFF_ID, UI_ACTION_AUTOLEVEL_ONOFF)
-#define UI_TOOGLE_AUTOLEVEL_ENTRY ,&ui_menu_autolevelbed,&ui_menu_toggle_autolevel
-#define UI_TOGGLE_AUTOLEVEL_COUNT 2
-#endif
-#else
-#define UI_TOOGLE_AUTOLEVEL_ENTRY
-#define UI_TOGGLE_AUTOLEVEL_COUNT 0
-#endif
-#define UI_MENU_GENERAL {UI_MENU_ADDCONDBACK &ui_menu_general_baud,&ui_menu_general_stepper_inactive,&ui_menu_general_max_inactive UI_TOOGLE_AUTOLEVEL_ENTRY UI_CALIB_PROBE_ENTRY}
-UI_MENU(ui_menu_general, UI_MENU_GENERAL, 3 + UI_MENU_BACKCNT + UI_TOGGLE_AUTOLEVEL_COUNT + UI_CALIB_PROBE_COUNT)
-
-
-// **** Bed Coating Menu
-
-#if UI_BED_COATING
-UI_MENU_ACTION2_T(ui_menu_nocoating_action,  UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET1_ID, UI_TEXT_NOCOATING_ID)
-UI_MENU_ACTION2_T(ui_menu_buildtak_action,  UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET1_ID, UI_TEXT_BUILDTAK_ID)
-UI_MENU_ACTION2_T(ui_menu_kapton_action,  UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET1_ID, UI_TEXT_KAPTON_ID)
-UI_MENU_ACTION2_T(ui_menu_bluetape_action, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET1_ID, UI_TEXT_BLUETAPE_ID)
-UI_MENU_ACTION2_T(ui_menu_pettape_action, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET1_ID, UI_TEXT_PETTAPE_ID)
-UI_MENU_ACTION2_T(ui_menu_gluestick_action, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET1_ID, UI_TEXT_GLUESTICK_ID)
-UI_MENU_ACTION2_T(ui_menu_coating_custom, UI_ACTION_DUMMY, UI_TEXT_BED_COATING_SET1_ID, UI_TEXT_COATING_THICKNESS_ID)
-
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_adjust_nocoating, UI_TEXT_NOCOATING_ID, UI_ACTION_NOCOATING, 0, MENU_MODE_PRINTING)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_adjust_buildtak, UI_TEXT_BUILDTAK_ID, UI_ACTION_BUILDTAK, 0, MENU_MODE_PRINTING)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_adjust_kapton, UI_TEXT_KAPTON_ID, UI_ACTION_KAPTON, 0, MENU_MODE_PRINTING)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_adjust_bluetape, UI_TEXT_BLUETAPE_ID, UI_ACTION_BLUETAPE, 0, MENU_MODE_PRINTING)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_adjust_pettape, UI_TEXT_PETTAPE_ID, UI_ACTION_PETTAPE, 0, MENU_MODE_PRINTING)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_adjust_gluestick, UI_TEXT_GLUESTICK_ID, UI_ACTION_GLUESTICK, 0, MENU_MODE_PRINTING)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_adjust_custom, UI_TEXT_COATING_CUSTOM_ID, UI_ACTION_COATING_CUSTOM, 0, MENU_MODE_PRINTING)
-#define UI_MENU_ADJUST {UI_MENU_ADDCONDBACK &ui_menu_adjust_buildtak,&ui_menu_adjust_kapton,&ui_menu_adjust_custom}
-UI_MENU(ui_menu_adjust, UI_MENU_ADJUST, 3 + UI_MENU_BACKCNT)
-#define UI_MENU_COATING_CNT 1
-#define UI_MENU_COATING_COND &ui_menu_prepare,
-UI_MENU_SUBMENU_FILTER_T(ui_menu_prepare, UI_TEXT_BED_COATING_ID, ui_menu_adjust, 0, MENU_MODE_PRINTING)
-
-#else
-#define UI_MENU_COATING_CNT 0
-#define UI_MENU_COATING_COND
-#endif
-
-
-// **** Quick menu
-#if PS_ON_PIN > -1
-UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_power, UI_TEXT_POWER_ID, UI_ACTION_POWER)
-#define MENU_PSON_COUNT 1
-#define MENU_PSON_ENTRY ,&ui_menu_quick_power
-#else
-#define MENU_PSON_COUNT 0
-#define MENU_PSON_ENTRY
-#endif
-#if CASE_LIGHTS_PIN >= 0
-UI_MENU_ACTIONCOMMAND_T(ui_menu_toggle_light, UI_TEXT_LIGHTS_ONOFF_ID, UI_ACTION_LIGHTS_ONOFF)
-#define UI_TOOGLE_LIGHT_ENTRY ,&ui_menu_toggle_light
-#define UI_TOGGLE_LIGHT_COUNT 1
-#else
-#define UI_TOOGLE_LIGHT_ENTRY
-#define UI_TOGGLE_LIGHT_COUNT 0
-#endif
-UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_preheat_pla, UI_TEXT_PREHEAT_SINGLE_ID, UI_ACTION_PREHEAT_SINGLE)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_preheat_abs, UI_TEXT_PREHEAT_ALL_ID, UI_ACTION_PREHEAT_ALL)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_cooldown, UI_TEXT_COOLDOWN_ID, UI_ACTION_COOLDOWN)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_quick_origin, UI_TEXT_SET_TO_ORIGIN_ID, UI_ACTION_SET_ORIGIN, 0, MENU_MODE_PRINTING)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_quick_stopstepper, UI_TEXT_DISABLE_STEPPER_ID, UI_ACTION_DISABLE_STEPPER, 0, MENU_MODE_PRINTING)
-#if FEATURE_BABYSTEPPING
-UI_MENU_CHANGEACTION_T(ui_menu_quick_zbaby, UI_TEXT_Z_BABYSTEPPING_ID, UI_ACTION_Z_BABYSTEPS)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_quick_zbaby_printing, UI_TEXT_Z_BABYSTEPPING_ID, UI_ACTION_Z_BABYSTEPS,MENU_MODE_PRINTING,0)
-#define BABY_CNT 1
-#define BABY_ENTRY ,&ui_menu_quick_zbaby
-#define BABY_ENTRY_PRINTING ,&ui_menu_quick_zbaby_printing
-#else
-#define BABY_CNT 0
-#define BABY_ENTRY
-#define BABY_ENTRY_PRINTING
-#endif
-UI_MENU_CHANGEACTION_T(ui_menu_quick_speedmultiply, UI_TEXT_SPEED_MULTIPLY_ID, UI_ACTION_FEEDRATE_MULTIPLY)
-UI_MENU_CHANGEACTION_T(ui_menu_quick_flowmultiply, UI_TEXT_FLOW_MULTIPLY_ID, UI_ACTION_FLOWRATE_MULTIPLY)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_quick_speedmultiply_printing, UI_TEXT_SPEED_MULTIPLY_ID, UI_ACTION_FEEDRATE_MULTIPLY,MENU_MODE_PRINTING,0)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_quick_flowmultiply_printing, UI_TEXT_FLOW_MULTIPLY_ID, UI_ACTION_FLOWRATE_MULTIPLY,MENU_MODE_PRINTING,0)
-#ifdef DEBUG_PRINT
-UI_MENU_ACTIONCOMMAND(ui_menu_quick_debug, "Write Debug", UI_ACTION_WRITE_DEBUG)
-#define DEBUG_PRINT_COUNT 1
-#define DEBUG_PRINT_EXTRA ,&ui_menu_quick_debug
-#else
-#define DEBUG_PRINT_COUNT 0
-#define DEBUG_PRINT_EXTRA
-#endif
-
-// Change Filament level 1 - extruder selection
-
-UI_MENU_HEADLINE_T(ui_menu_chf_head,UI_TEXT_CHANGE_FILAMENT_ID)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_cf_sel1,UI_CTEXT_SELECT_EX1_ID,UI_ACTION_FC_SELECT1)
-#if NUM_EXTRUDER == 1
-#define UI_MENU_CF1 {&ui_menu_chf_head, UI_MENU_ADDCONDBACK &ui_menu_cf_sel1}
-UI_MENU(ui_menu_chf, UI_MENU_CF1 , 2+UI_MENU_BACKCNT)
-#else
-UI_MENU_ACTIONCOMMAND_T(ui_menu_cf_sel2,UI_CTEXT_SELECT_EX2_ID,UI_ACTION_FC_SELECT2)
-#define UI_MENU_CF1 {&ui_menu_chf_head, UI_MENU_ADDCONDBACK &ui_menu_cf_sel1,&ui_menu_cf_sel2}
-UI_MENU(ui_menu_chf, UI_MENU_CF1 , 3+UI_MENU_BACKCNT)
-#endif
-
-// Change filament level 2 - material selection
-
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ch2_back, UI_TEXT_BACK_ID, UI_ACTION_FC_BACK1)
-UI_MENU_ACTIONCOMMAND(ui_menu_ch2_current,"Current: %eIc" cDEG "C",UI_ACTION_WIZARD_FILAMENTCHANGE)
-UI_MENU_ACTIONCOMMAND(ui_menu_ch2_pla,"PLA",UI_ACTION_FC_PLA)
-UI_MENU_ACTIONCOMMAND(ui_menu_ch2_petg,"PETG",UI_ACTION_FC_PETG)
-UI_MENU_ACTIONCOMMAND(ui_menu_ch2_pva,"PVA",UI_ACTION_FC_PVA)
-UI_MENU_ACTIONCOMMAND(ui_menu_ch2_flex,"FLEX",UI_ACTION_FC_FLEX)
-UI_MENU_ACTIONCOMMAND(ui_menu_ch2_abs,"ABS",UI_ACTION_FC_ABS)
-UI_MENU_ACTIONCOMMAND(ui_menu_ch2_glass,"GLASS",UI_ACTION_FC_GLASS)
-UI_MENU_ACTIONCOMMAND(ui_menu_ch2_wood,"WOOD",UI_ACTION_FC_WOOD)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ch2_custom,UI_TEXT_CUSTOM_ID,UI_ACTION_FC_CUSTOM)
-#define UI_MENU_CH2_ITEMS {&ui_menu_chf_head,&ui_menu_ch2_back,\
-&ui_menu_ch2_current,&ui_menu_ch2_pla,&ui_menu_ch2_petg,&ui_menu_ch2_pva,&ui_menu_ch2_flex,&ui_menu_ch2_abs,&ui_menu_ch2_glass,&ui_menu_ch2_wood,\
-&ui_menu_ch2_custom}
-UI_MENU(ui_menu_ch2,UI_MENU_CH2_ITEMS,11) 
-
-// Change filament - custom temperature
-
-UI_MENU_HEADLINE_T(ui_menu_ch2b_1,UI_CTEXT_SELECT_TEMP_ID)
-UI_MENU_HEADLINE(ui_menu_ch2b_2,"%w0\002C")
-UI_MENU_HEADLINE_T(ui_menu_ch2b_3,UI_TEXT_CLICK_DONE_ID)
-#define UI_MENU_CH2A {&ui_menu_ch2b_1,&ui_menu_ch2b_2,&ui_menu_ch2b_3}
-//UI_STICKYMENU(ui_menu_ch2a,UI_MENU_CH2A,3)
-UI_WIZARD4_T(ui_menu_ch2a, UI_ACTION_FC_CUSTOM_SET, UI_CTEXT_SELECT_TEMP_ID, UI_CTEXT_WIZ_TEMP_ID, UI_TEXT_EMPTY_ID, UI_TEXT_CLICK_DONE_ID)
-
-
-// Change filament heating ... info
-
-UI_MENU_HEADLINE_T(ui_menu_ch3_1,UI_CTEXT_HEATINGUP1_ID)
-UI_MENU_HEADLINE_T(ui_menu_ch3_2,UI_CTEXT_HEATINGUP2_ID)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_ch3_back, UI_TEXT_BACK_ID, UI_ACTION_FC_BACK1)
-#define UI_MENU_CH3 {&ui_menu_ch3_1,&ui_menu_ch3_2,&ui_menu_ch3_back}
-UI_STICKYMENU(ui_menu_ch3,UI_MENU_CH3,3)
-
-
-#if FEATURE_RETRACTION
-/* * Extruder 1
-O Extruder 2
-Temp. 170/180
-Continue
-Close */
-
-UI_MENU_CHANGEACTION_T(ui_menu_chf_temp,UI_TEXT_CUR_TEMP_ID,UI_ACTION_EXTRUDER_TEMP)
-UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_pla,"PLA",UI_ACTION_SPH_PLA_ACTIVE)
-UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_petg,"PETG",UI_ACTION_SPH_PETG_ACTIVE)
-UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_pva,"PVA",UI_ACTION_SPH_PVA_ACTIVE)
-UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_flex,"FLEX",UI_ACTION_SPH_FLEX_ACTIVE)
-UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_abs,"ABS",UI_ACTION_SPH_ABS_ACTIVE)
-UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_glass,"GLASS",UI_ACTION_SPH_GLASS_ACTIVE)
-UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_wood,"WOOD",UI_ACTION_SPH_WOOD_ACTIVE)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_chf_continue,UI_TEXT_CONTINUE_ID,UI_ACTION_WIZARD_FILAMENTCHANGE)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_chf_close,UI_TEXT_CLOSE_ID,UI_ACTION_BACK)
-#define UI_MENU_CHF_ITEMS {&ui_menu_chf_head UI_MENU_EXTSEL ,&ui_menu_chf_temp,\
-&ui_menu_chf_sph_pla,&ui_menu_chf_sph_petg,&ui_menu_chf_sph_pva,&ui_menu_chf_sph_flex,&ui_menu_chf_sph_abs,&ui_menu_chf_sph_glass,&ui_menu_chf_sph_wood,\
-&ui_menu_chf_continue,&ui_menu_chf_close}
-//UI_STICKYMENU(ui_menu_chf,UI_MENU_CHF_ITEMS,11+UI_MENU_EXTSEL_CNT) 
-#if NUM_EXTRUDER == 1
-UI_MENU_SUBMENU_T(ui_menu_quick_changefil,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_ch2)   
-UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_ch2,MENU_MODE_PRINTING,0)
-#else
-UI_MENU_SUBMENU_T(ui_menu_quick_changefil,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_chf)   
-UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMENT_ID,ui_menu_ch2,MENU_MODE_PRINTING,0)
-#endif
-//UI_MENU_ACTIONCOMMAND_T(ui_menu_quick_changefil, UI_TEXT_CHANGE_FILAMENT_ID, UI_ACTION_WIZARD_FILAMENTCHANGE)
-//UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_quick_changefil_printing, UI_TEXT_CHANGE_FILAMENT_ID, UI_ACTION_WIZARD_FILAMENTCHANGE,MENU_MODE_PRINTING,0)
-#define UI_CHANGE_FIL_CNT 1
-#define UI_CHANGE_FIL_ENT ,&ui_menu_quick_changefil
-#define UI_CHANGE_FIL_ENT_PRINTING ,&ui_menu_quick_changefil_printing
-#else
-#define UI_CHANGE_FIL_CNT 0
-#define UI_CHANGE_FIL_ENT
-#define UI_CHANGE_FIL_ENT_PRINTING
-#endif
-UI_MENU_SUBMENU_FILTER_T(ui_menu_move, UI_TEXT_POSITION_ID, ui_menu_positions,0,MENU_MODE_PRINTING)
-#if NUM_EXTRUDER > 1
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool2,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex ,&ui_menu_move \
-      , &ui_menu_quick_stopstepper UI_FANSPEED, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
-#else
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool1,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex ,&ui_menu_move \
-      , &ui_menu_quick_stopstepper UI_FANSPEED, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
-#endif      
-UI_MENU(ui_menu_quick, UI_MENU_QUICK, 10 + UI_MENU_BACKCNT + UI_CHANGE_FIL_CNT+ UI_CALIB_PROBE_COUNT)
-
-UI_MENU_HEADLINE_T(ui_menu_askstop_head, UI_TEXT_STOP_PRINT_ID)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_sd_askstop_no, UI_TEXT_NO_ID, UI_ACTION_BACK)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_askstop_yes,      UI_TEXT_YES_ID,     UI_ACTION_STOP_CONFIRMED | UI_ACTION_TOPMENU, MENU_MODE_PRINTING, 0)
-#if UI_ROWS >= 5
-#define UI_MENU_ASKSTOP {&ui_menu_empty,&ui_menu_askstop_head,&ui_menu_empty,&ui_menu_sd_askstop_no,&ui_menu_sd_askstop_yes}
-UI_MENU(ui_menu_askstop, UI_MENU_ASKSTOP, 5)
-#elif UI_ROWS == 4
-#define UI_MENU_ASKSTOP {&ui_menu_askstop_head,&ui_menu_empty,&ui_menu_sd_askstop_no,&ui_menu_sd_askstop_yes}
-UI_MENU(ui_menu_askstop, UI_MENU_ASKSTOP, 4)
-#else
-#define UI_MENU_ASKSTOP {&ui_menu_askstop_head,&ui_menu_sd_askstop_no,&ui_menu_sd_askstop_yes}
-UI_MENU(ui_menu_askstop, UI_MENU_ASKSTOP, 3)
-#endif
-
-// **** SD card menu
-
-#if SDSUPPORT
-
-// Dummy print menu to show missing card
-UI_MENU_HEADLINE(ui_menus_sd_pinsert, "Please insert SD card")
-#define UI_MENU_SD_NOCARD {UI_MENU_ADDCONDBACK &ui_menus_sd_pinsert}
-UI_MENU(ui_menu_sd_nocard, UI_MENU_SD_NOCARD, UI_MENU_BACKCNT + 1)
-UI_MENU_SUBMENU_FILTER_T(ui_menu_sd_printfile2, UI_TEXT_PRINT_FILE_ID,     ui_menu_sd_nocard,    0, MENU_MODE_SD_MOUNTED + MENU_MODE_SD_PRINTING)
-
-#define UI_MENU_SD_FILESELECTOR {&ui_menu_back}
-UI_MENU_FILESELECT(ui_menu_sd_fileselector, UI_MENU_SD_FILESELECTOR, 1)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_printfile, UI_TEXT_PRINT_FILE_ID,     UI_ACTION_SD_PRINT,    MENU_MODE_SD_MOUNTED,  MENU_MODE_SD_PRINTING)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_pause,     UI_TEXT_PAUSE_PRINT_ID,    UI_ACTION_SD_PAUSE,    MENU_MODE_SD_PRINTING, MENU_MODE_PAUSED)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_continue,  UI_TEXT_CONTINUE_PRINT_ID, UI_ACTION_SD_CONTINUE, MENU_MODE_SD_PRINTING+MENU_MODE_PAUSED,   0)
-// two versions of stop. Second is with security question since pausing can trigger stop with bad luck!
-//UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_stop,      UI_TEXT_STOP_PRINT_ID,     UI_ACTION_SD_STOP,     MENU_MODE_SD_PRINTING, 0)
-UI_MENU_SUBMENU_FILTER_T(ui_menu_sd_stop, UI_TEXT_STOP_PRINT_ID, ui_menu_askstop, MENU_MODE_SD_PRINTING, 0 )
-#define SD_PRINTFILE_ENTRY &ui_menu_sd_printfile,&ui_menu_sd_printfile2,
-#define SD_PRINTFILE_ENTRY_CNT 2
-#if SDCARDDETECT > -1
-#define UI_MOUNT_CNT 0
-#define UI_MOUNT_CMD
-#else
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_unmount, UI_TEXT_UNMOUNT_CARD_ID, UI_ACTION_SD_UNMOUNT, MENU_MODE_SD_MOUNTED, 0)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_mount, UI_TEXT_MOUNT_CARD_ID, UI_ACTION_SD_MOUNT, 0, MENU_MODE_SD_MOUNTED)
-#define UI_MOUNT_CNT 2
-#define UI_MOUNT_CMD ,&ui_menu_sd_unmount,&ui_menu_sd_mount
-#endif
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_menu_sd_delete, UI_TEXT_DELETE_FILE_ID, UI_ACTION_SD_DELETE, MENU_MODE_SD_MOUNTED, MENU_MODE_SD_PRINTING)
-#define UI_MENU_SD {UI_MENU_ADDCONDBACK &ui_menu_sd_printfile,&ui_menu_sd_pause,&ui_menu_sd_continue,&ui_menu_sd_stop UI_MOUNT_CMD ,&ui_menu_sd_delete}
-UI_MENU(ui_menu_sd, UI_MENU_SD, UI_MENU_BACKCNT + 5 + UI_MOUNT_CNT)
-UI_MENU_SUBMENU_T(ui_menu_sd_sub, UI_TEXT_SD_CARD_ID, ui_menu_sd)
-
-#define UI_MENU_SD_COND &ui_menu_sd_sub,
-#define UI_MENU_SD_CNT 1
-#else
-#define UI_MENU_SD_COND
-#define UI_MENU_SD_CNT 0
-#define SD_PRINTFILE_ENTRY
-#define SD_PRINTFILE_ENTRY_CNT 0
-#endif
-
-
-// **** Debugging menu
-UI_MENU_ACTIONCOMMAND_T(ui_menu_debug_echo,    UI_TEXT_DBG_ECHO_ID,    UI_ACTION_DEBUG_ECHO)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_debug_info,    UI_TEXT_DBG_INFO_ID,    UI_ACTION_DEBUG_INFO)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_debug_error,   UI_TEXT_DBG_ERROR_ID,   UI_ACTION_DEBUG_ERROR)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_debug_dryrun,  UI_TEXT_DBG_DRYRUN_ID,  UI_ACTION_DEBUG_DRYRUN)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_debug_endstop, UI_TEXT_DBG_ENDSTOP_ID, UI_ACTION_DEBUG_ENDSTOP)
-
-#define UI_MENU_DEBUGGING {UI_MENU_ADDCONDBACK &ui_menu_debug_echo,&ui_menu_debug_info,&ui_menu_debug_error,&ui_menu_debug_dryrun,&ui_menu_debug_endstop}
-UI_MENU(ui_menu_debugging, UI_MENU_DEBUGGING, 5 + UI_MENU_BACKCNT)
-
-// **** Acceleration settings
-#if DRIVE_SYSTEM != DELTA
-UI_MENU_CHANGEACTION_T(ui_menu_accel_printx,  UI_TEXT_PRINT_X_ID, UI_ACTION_PRINT_ACCEL_X)
-UI_MENU_CHANGEACTION_T(ui_menu_accel_printy,  UI_TEXT_PRINT_Y_ID, UI_ACTION_PRINT_ACCEL_Y)
-UI_MENU_CHANGEACTION_T(ui_menu_accel_printz,  UI_TEXT_PRINT_Z_ID, UI_ACTION_PRINT_ACCEL_Z)
-UI_MENU_CHANGEACTION_T(ui_menu_accel_travelx, UI_TEXT_MOVE_X_ID, UI_ACTION_MOVE_ACCEL_X)
-UI_MENU_CHANGEACTION_T(ui_menu_accel_travely, UI_TEXT_MOVE_Y_ID, UI_ACTION_MOVE_ACCEL_Y)
-UI_MENU_CHANGEACTION_T(ui_menu_accel_travelz, UI_TEXT_MOVE_Z_ID, UI_ACTION_MOVE_ACCEL_Z)
-UI_MENU_CHANGEACTION_T(ui_menu_accel_jerk,    UI_TEXT_JERK_ID, UI_ACTION_MAX_JERK)
-UI_MENU_CHANGEACTION_T(ui_menu_accel_zjerk,   UI_TEXT_ZJERK_ID, UI_ACTION_MAX_ZJERK)
-#define UI_MENU_ACCEL {UI_MENU_ADDCONDBACK &ui_menu_accel_printx,&ui_menu_accel_printy,&ui_menu_accel_printz,&ui_menu_accel_travelx,&ui_menu_accel_travely,&ui_menu_accel_travelz,&ui_menu_accel_jerk,&ui_menu_accel_zjerk}
-UI_MENU(ui_menu_accel, UI_MENU_ACCEL, 8 + UI_MENU_BACKCNT)
-
-// **** Feedrates
-UI_MENU_CHANGEACTION_T(ui_menu_feedrate_maxx,  UI_TEXT_FEED_MAX_X_ID,  UI_ACTION_MAX_FEEDRATE_X)
-UI_MENU_CHANGEACTION_T(ui_menu_feedrate_maxy,  UI_TEXT_FEED_MAX_Y_ID,  UI_ACTION_MAX_FEEDRATE_Y)
-UI_MENU_CHANGEACTION_T(ui_menu_feedrate_maxz,  UI_TEXT_FEED_MAX_Z_ID,  UI_ACTION_MAX_FEEDRATE_Z)
-UI_MENU_CHANGEACTION_T(ui_menu_feedrate_homex, UI_TEXT_FEED_HOME_X_ID, UI_ACTION_HOMING_FEEDRATE_X)
-UI_MENU_CHANGEACTION_T(ui_menu_feedrate_homey, UI_TEXT_FEED_HOME_Y_ID, UI_ACTION_HOMING_FEEDRATE_Y)
-UI_MENU_CHANGEACTION_T(ui_menu_feedrate_homez, UI_TEXT_FEED_HOME_Z_ID, UI_ACTION_HOMING_FEEDRATE_Z)
-#define UI_MENU_FEEDRATE {UI_MENU_ADDCONDBACK &ui_menu_feedrate_maxx,&ui_menu_feedrate_maxy,&ui_menu_feedrate_maxz,&ui_menu_feedrate_homex,&ui_menu_feedrate_homey,&ui_menu_feedrate_homez}
-UI_MENU(ui_menu_feedrate, UI_MENU_FEEDRATE, 6 + UI_MENU_BACKCNT)
-#else
-UI_MENU_CHANGEACTION_T(ui_menu_accel_printz, UI_TEXT_PRINT_Z_DELTA_ID, UI_ACTION_PRINT_ACCEL_Z)
-UI_MENU_CHANGEACTION_T(ui_menu_accel_travelz, UI_TEXT_MOVE_Z_DELTA_ID, UI_ACTION_MOVE_ACCEL_Z)
-UI_MENU_CHANGEACTION_T(ui_menu_accel_jerk, UI_TEXT_JERK_ID, UI_ACTION_MAX_JERK)
-#define UI_MENU_ACCEL {UI_MENU_ADDCONDBACK &ui_menu_accel_printz,&ui_menu_accel_travelz,&ui_menu_accel_jerk}
-UI_MENU(ui_menu_accel, UI_MENU_ACCEL, 3 + UI_MENU_BACKCNT)
-
-// **** Feedrates
-UI_MENU_CHANGEACTION_T(ui_menu_feedrate_maxz, UI_TEXT_FEED_MAX_Z_DELTA_ID, UI_ACTION_MAX_FEEDRATE_Z)
-UI_MENU_CHANGEACTION_T(ui_menu_feedrate_homez, UI_TEXT_FEED_HOME_Z_DELTA_ID, UI_ACTION_HOMING_FEEDRATE_Z)
-#define UI_MENU_FEEDRATE {UI_MENU_ADDCONDBACK &ui_menu_feedrate_maxz,&ui_menu_feedrate_homez}
-UI_MENU(ui_menu_feedrate, UI_MENU_FEEDRATE, 2 + UI_MENU_BACKCNT)
-#endif
-
-// ***** Info
-
-UI_MENU_HEADLINE_T(ui_info1, UI_CTEXT_TOT_TIME_ID)
-UI_MENU_HEADLINE_T(ui_info2, UI_CTEXT_TOT_FILAMENT_ID)
-#define UI_MENU_INFO {&ui_info1,&ui_info2,&ui_menu_back}
-UI_MENU(ui_menu_info, UI_MENU_INFO, 3)
-UI_MENU_SUBMENU_T(ui_menu_sub_info, UI_CTEXT_INFO_ID, ui_menu_info)
-
-// **** Extruder configuration
-
-UI_MENU_CHANGEACTION_T(ui_menu_cext_steps,          UI_TEXT_EXTR_STEPS_ID,              UI_ACTION_EXTR_STEPS)
-UI_MENU_CHANGEACTION_T(ui_menu_cext_start_feedrate, UI_TEXT_EXTR_START_FEED_ID,         UI_ACTION_EXTR_START_FEEDRATE)
-UI_MENU_CHANGEACTION_T(ui_menu_cext_max_feedrate,   UI_TEXT_EXTR_MAX_FEED_ID,           UI_ACTION_EXTR_MAX_FEEDRATE)
-UI_MENU_CHANGEACTION_T(ui_menu_cext_acceleration,   UI_TEXT_EXTR_ACCEL_ID,              UI_ACTION_EXTR_ACCELERATION)
-UI_MENU_CHANGEACTION_T(ui_menu_cext_watch_period,   UI_TEXT_EXTR_WATCH_ID,              UI_ACTION_EXTR_WATCH_PERIOD)
-UI_MENU_CHANGEACTION_T(ui_menu_ext_wait_temp,       UI_TEXT_EXTR_WAIT_RETRACT_TEMP_ID,  UI_ACTION_EXTR_WAIT_RETRACT_TEMP)
-UI_MENU_CHANGEACTION_T(ui_menu_ext_wait_units,      UI_TEXT_EXTR_WAIT_RETRACT_UNITS_ID, UI_ACTION_EXTR_WAIT_RETRACT_UNITS)
-#define UI_MENU_ADV_CNT 0
-#define UI_MENU_ADVANCE
-#if USE_ADVANCE
-#undef UI_MENU_ADV_CNT
-#define UI_MENU_ADV_CNT 1
-#undef UI_MENU_ADVANCE
-#define UI_MENU_ADVANCE ,&ui_menu_cext_advancel
-#if ENABLE_QUADRATIC_ADVANCE
-#undef UI_MENU_ADV_CNT
-#define UI_MENU_ADV_CNT 2
-#undef UI_MENU_ADVANCE
-#define UI_MENU_ADVANCE ,&ui_menu_cext_advancel,&ui_menu_cext_advancek
-UI_MENU_CHANGEACTION_T(ui_menu_cext_advancek, UI_TEXT_EXTR_ADVANCE_K_ID, UI_ACTION_ADVANCE_K)
-#endif
-UI_MENU_CHANGEACTION_T(ui_menu_cext_advancel, UI_TEXT_EXTR_ADVANCE_L_ID, UI_ACTION_ADVANCE_L)
-#endif
-UI_MENU_CHANGEACTION_T(       ui_menu_cext_manager, UI_TEXT_EXTR_MANAGER_ID, UI_ACTION_EXTR_HEATMANAGER)
-UI_MENU_CHANGEACTION_T(       ui_menu_cext_pmax,    UI_TEXT_EXTR_PMAX_ID,    UI_ACTION_PID_MAX)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_pgain,   UI_TEXT_EXTR_PGAIN_ID,   UI_ACTION_PID_PGAIN, MENU_MODE_FULL_PID, 0)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_igain,   UI_TEXT_EXTR_IGAIN_ID,   UI_ACTION_PID_IGAIN,  MENU_MODE_FULL_PID, 0)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_dgain,   UI_TEXT_EXTR_DGAIN_ID,   UI_ACTION_PID_DGAIN,  MENU_MODE_FULL_PID, 0)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_dmin,    UI_TEXT_EXTR_DMIN_ID,    UI_ACTION_DRIVE_MIN,  MENU_MODE_FULL_PID, 0)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_dmax,    UI_TEXT_EXTR_DMAX_ID,    UI_ACTION_DRIVE_MAX,  MENU_MODE_FULL_PID, 0)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_pgain_dt,   UI_TEXT_EXTR_DEADTIME_ID,   UI_ACTION_PID_PGAIN, MENU_MODE_DEADTIME, 0)
-UI_MENU_CHANGEACTION_FILTER_T(ui_menu_cext_dmax_dt,    UI_TEXT_EXTR_DMAX_DT_ID,    UI_ACTION_DRIVE_MAX,  MENU_MODE_DEADTIME, 0)
-#define UI_MENU_PIDCOND ,&ui_menu_cext_manager,&ui_menu_cext_pgain,&ui_menu_cext_igain,&ui_menu_cext_dgain,&ui_menu_cext_dmin,&ui_menu_cext_dmax, &ui_menu_cext_pgain_dt,&ui_menu_cext_dmax_dt,&ui_menu_cext_pmax
-#define UI_MENU_PIDCNT 9
-#if NUM_EXTRUDER > 5 && MIXING_EXTRUDER == 0
-UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset, UI_TEXT_EXTR_XOFF_ID, UI_ACTION_X_OFFSET)
-UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset, UI_TEXT_EXTR_YOFF_ID, UI_ACTION_Y_OFFSET)
-#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4,&ui_menu_ext_sel5,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
-#define UI_MENU_CONFEXTCNT 8
-#elif NUM_EXTRUDER > 4 && MIXING_EXTRUDER == 0
-UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset, UI_TEXT_EXTR_XOFF_ID, UI_ACTION_X_OFFSET)
-UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset, UI_TEXT_EXTR_YOFF_ID, UI_ACTION_Y_OFFSET)
-#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_ext_sel4,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
-#define UI_MENU_CONFEXTCNT 7
-#elif NUM_EXTRUDER > 3 && MIXING_EXTRUDER == 0
-UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset, UI_TEXT_EXTR_XOFF_ID, UI_ACTION_X_OFFSET)
-UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset, UI_TEXT_EXTR_YOFF_ID, UI_ACTION_Y_OFFSET)
-#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_ext_sel3,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
-#define UI_MENU_CONFEXTCNT 6
-#elif NUM_EXTRUDER > 2 && MIXING_EXTRUDER == 0
-UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset, UI_TEXT_EXTR_XOFF_ID, UI_ACTION_X_OFFSET)
-UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset, UI_TEXT_EXTR_YOFF_ID, UI_ACTION_Y_OFFSET)
-#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_ext_sel2,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
-#define UI_MENU_CONFEXTCNT 5
-#elif NUM_EXTRUDER > 1 && MIXING_EXTRUDER == 0
-UI_MENU_CHANGEACTION_T(ui_menu_cext_xoffset, UI_TEXT_EXTR_XOFF_ID, UI_ACTION_X_OFFSET)
-UI_MENU_CHANGEACTION_T(ui_menu_cext_yoffset, UI_TEXT_EXTR_YOFF_ID, UI_ACTION_Y_OFFSET)
-#define UI_MENU_CONFEXTCOND &ui_menu_ext_sel0,&ui_menu_ext_sel1,&ui_menu_cext_xoffset,&ui_menu_cext_yoffset,
-#define UI_MENU_CONFEXTCNT 4
-#else
-#define UI_MENU_CONFEXTCOND
-#define UI_MENU_CONFEXTCNT 0
-#endif
-#define UI_MENU_CEXTR {UI_MENU_ADDCONDBACK UI_MENU_CONFEXTCOND &ui_menu_cext_steps,&ui_menu_cext_start_feedrate,&ui_menu_cext_max_feedrate,&ui_menu_cext_acceleration,&ui_menu_cext_watch_period,&ui_menu_ext_wait_units,&ui_menu_ext_wait_temp UI_MENU_ADVANCE UI_MENU_PIDCOND}
-UI_MENU(ui_menu_cextr, UI_MENU_CEXTR, 7 + UI_MENU_BACKCNT + UI_MENU_PIDCNT + UI_MENU_CONFEXTCNT + UI_MENU_ADV_CNT)
-
-// HeatBed Configuration - use menu actions from extruder configuration
-#if HAVE_HEATED_BED
-#define UI_MENU_BEDCONF {UI_MENU_ADDCONDBACK UI_MENU_COATING_COND &ui_menu_cext_manager,&ui_menu_cext_pgain,&ui_menu_cext_igain,&ui_menu_cext_dgain,&ui_menu_cext_dmin,&ui_menu_cext_dmax,&ui_menu_cext_pgain_dt,&ui_menu_cext_pmax}
-UI_MENU(ui_menu_bedconf, UI_MENU_BEDCONF, 8 + UI_MENU_BACKCNT + UI_MENU_COATING_CNT)
-#endif
-
-
-
-// **** Configuration menu
-
-UI_MENU_SUBMENU_T(ui_menu_conf_general, UI_TEXT_GENERAL_ID,      ui_menu_general)
-UI_MENU_SUBMENU_T(ui_menu_conf_accel,   UI_TEXT_ACCELERATION_ID, ui_menu_accel)
-UI_MENU_SUBMENU_T(ui_menu_conf_feed,    UI_TEXT_FEEDRATE_ID,     ui_menu_feedrate)
-UI_MENU_SUBMENU_T(ui_menu_conf_extr,    UI_TEXT_EXTRUDER_ID,     ui_menu_cextr)
-#if HAVE_HEATED_BED
-UI_MENU_SUBMENU_T(ui_menu_conf_bed,    UI_TEXT_HEATING_BED_ID,  ui_menu_bedconf)
-#define UI_MENU_BEDCONF_COND ,&ui_menu_conf_bed
-#define UI_MENU_BEDCONF_CNT 1
-#else
-#define UI_MENU_BEDCONF_COND
-#define UI_MENU_BEDCONF_CNT 0
-#endif
-#if EEPROM_MODE!=0
-UI_MENU_ACTIONCOMMAND_T(ui_menu_conf_to_eeprom, UI_TEXT_STORE_TO_EEPROM_ID, UI_ACTION_STORE_EEPROM)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_conf_from_eeprom, UI_TEXT_LOAD_EEPROM_ID, UI_ACTION_LOAD_EEPROM)
-UI_MENU_ACTIONCOMMAND(ui_menu_conf_reset_eeeprom, "Reset EEPROM", UI_ACTION_RESET_EEPROM)
-#define UI_MENU_EEPROM_COND ,&ui_menu_conf_to_eeprom,&ui_menu_conf_from_eeprom, &ui_menu_conf_reset_eeeprom
-#define UI_MENU_EEPROM_CNT 3
-UI_MENU_ACTION2_T(ui_menu_eeprom_saved,  UI_ACTION_DUMMY, UI_TEXT_EEPROM_STOREDA_ID, UI_TEXT_EEPROM_STOREDB_ID)
-UI_MENU_ACTION2_T(ui_menu_eeprom_loaded, UI_ACTION_DUMMY, UI_TEXT_EEPROM_LOADEDA_ID, UI_TEXT_EEPROM_LOADEDB_ID)
-UI_MENU_ACTION2_T(ui_menu_eeprom_reset, UI_ACTION_DUMMY, UI_TEXT_EEPROM_RESETEDA_ID, UI_TEXT_EEPROM_RESETEDB_ID)
-#else
-#define UI_MENU_EEPROM_COND
-#define UI_MENU_EEPROM_CNT 0
-#endif
-#if defined(SOFTWARE_LEVELING) && DRIVE_SYSTEM == DELTA
-#define UI_MENU_SL_COND ,&ui_menu_conf_level
-#define UI_MENU_SL_CNT 1
-UI_MENU_SUBMENU_T(ui_menu_conf_level, UI_TEXT_LEVEL_ID, ui_menu_level)
-#else
-#define UI_MENU_SL_COND
-#define UI_MENU_SL_CNT 0
-#endif
-#if Z_HOME_DIR > 0
-#define UI_MENU_DELTA_COND ,&ui_menu_conf_delta
-#define UI_MENU_DELTA_CNT 1
-UI_MENU_SUBMENU_T(ui_menu_conf_delta, UI_TEXT_ZCALIB_ID, ui_menu_delta)
-#else
-#define UI_MENU_DELTA_COND
-#define UI_MENU_DELTA_CNT 0
-#endif
-#define UI_MENU_CONFIGURATION {UI_MENU_ADDCONDBACK &ui_menu_sub_info, LANGMENU_ENTRY &ui_menu_conf_extr UI_MENU_BEDCONF_COND ,&ui_menu_general_baud  UI_MENU_EEPROM_COND UI_MENU_DELTA_COND UI_MENU_SL_COND}
-UI_MENU(ui_menu_configuration, UI_MENU_CONFIGURATION, UI_MENU_BACKCNT + LANGMENU_COUNT + UI_MENU_EEPROM_CNT + UI_MENU_BEDCONF_CNT + UI_MENU_DELTA_CNT + UI_MENU_SL_CNT + 3)
-
-
-// **** Preheat menu ****
-
-#if HAVE_HEATED_BED + NUM_EXTRUDER > 0
-UI_MENU_HEADLINE_T(ui_menu_preheat_hdl,UI_TEXT_PREHEAT_TEMPS_ID)
-#if HAVE_HEATED_BED
-UI_MENU_CHANGEACTION_T(ui_menu_preheat_bed, UI_TEXT_PREHEAT_BED_ID, UI_ACTION_BED_PREHEAT)
-#define UI_MENU_PREHEAT_BED ,&ui_menu_preheat_bed
-#endif
-#if NUM_EXTRUDER > 0
-UI_MENU_CHANGEACTION_T(ui_menu_preheat_ext0, UI_TEXT_PREHEAT_E0_ID, UI_ACTION_EXT0_PREHEAT)
-#define UI_MENU_PREHEAT_EXT0 ,&ui_menu_preheat_ext0
-#else
-#define UI_MENU_PREHEAT_EXT0
-#endif
-#if NUM_EXTRUDER > 1
-UI_MENU_CHANGEACTION_T(ui_menu_preheat_ext1, UI_TEXT_PREHEAT_E1_ID, UI_ACTION_EXT1_PREHEAT)
-#define UI_MENU_PREHEAT_EXT1 ,&ui_menu_preheat_ext1
-#else
-#define UI_MENU_PREHEAT_EXT1
-#endif
-#if NUM_EXTRUDER > 2
-UI_MENU_CHANGEACTION_T(ui_menu_preheat_ext2, UI_TEXT_PREHEAT_E2_ID, UI_ACTION_EXT2_PREHEAT)
-#define UI_MENU_PREHEAT_EXT2 ,&ui_menu_preheat_ext2
-#else
-#define UI_MENU_PREHEAT_EXT2
-#endif
-#if NUM_EXTRUDER > 3
-UI_MENU_CHANGEACTION_T(ui_menu_preheat_ext3, UI_TEXT_PREHEAT_E3_ID, UI_ACTION_EXT3_PREHEAT)
-#define UI_MENU_PREHEAT_EXT3 ,&ui_menu_preheat_ext3
-#else
-#define UI_MENU_PREHEAT_EXT3
-#endif
-#if NUM_EXTRUDER > 4
-UI_MENU_CHANGEACTION_T(ui_menu_preheat_ext4, UI_TEXT_PREHEAT_E4_ID, UI_ACTION_EXT4_PREHEAT)
-#define UI_MENU_PREHEAT_EXT4 ,&ui_menu_preheat_ext4
-#else
-#define UI_MENU_PREHEAT_EXT4
-#endif
-#if NUM_EXTRUDER > 5
-UI_MENU_CHANGEACTION_T(ui_menu_preheat_ext5, UI_TEXT_PREHEAT_E5_ID, UI_ACTION_EXT5_PREHEAT)
-#define UI_MENU_PREHEAT_EXT5 ,&ui_menu_preheat_ext5
-#else
-#define UI_MENU_PREHEAT_EXT5
-#endif
-
-UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_pla_a,"PLA",UI_ACTION_SPH_PLA_ALL)
-UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_petg_a,"PETG",UI_ACTION_SPH_PETG_ALL)
-UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_pva_a,"PVA",UI_ACTION_SPH_PVA_ALL)
-UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_flex_a,"FLEX",UI_ACTION_SPH_FLEX_ALL)
-UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_abs_a,"ABS",UI_ACTION_SPH_ABS_ALL)
-UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_glass_a,"GLASS",UI_ACTION_SPH_GLASS_ALL)
-UI_MENU_ACTIONCOMMAND(ui_menu_chf_sph_wood_a,"WOOD",UI_ACTION_SPH_WOOD_ALL)
-
-#define UI_MENU_PREHEAT_SUB {&ui_menu_preheat_hdl UI_MENU_ADDCONDBACK_C UI_MENU_PREHEAT_BED UI_MENU_PREHEAT_EXT0 UI_MENU_PREHEAT_EXT1 UI_MENU_PREHEAT_EXT2 UI_MENU_PREHEAT_EXT3 UI_MENU_PREHEAT_EXT4 UI_MENU_PREHEAT_EXT5\
-,&ui_menu_chf_sph_pla_a,&ui_menu_chf_sph_petg_a,&ui_menu_chf_sph_pva_a,&ui_menu_chf_sph_flex_a,&ui_menu_chf_sph_abs_a,&ui_menu_chf_sph_glass_a,&ui_menu_chf_sph_wood_a}
-UI_MENU(ui_menu_preheat_sub, UI_MENU_PREHEAT_SUB, UI_MENU_BACKCNT + 8 + HAVE_HEATED_BED + NUM_EXTRUDER)
-UI_MENU_SUBMENU_T(ui_menu_preheat,UI_TEXT_PREHEAT_TEMPS_ID,ui_menu_preheat_sub)
-
-#define UI_MENU_PREHEAT ,&ui_menu_preheat
-#define UI_MENU_PREHEAT_CNT 1
-#else
-#define UI_MENU_PREHEAT 
-#define UI_MENU_PREHEAT_CNT 0
-#endif
-
-// Preheat info screen
-
-UI_MENU_HEADLINE_T(ui_msh_ph1, UI_TEXT_PREHEAT_TEMPS_ID)
-UI_MENU_HEADLINE_T(ui_msh_ph2, UI_TEXT_PREHEAT_BED_ID)
-UI_MENU_HEADLINE_T(ui_msh_ph3, UI_TEXT_PREHEAT_E0_ID)
-UI_MENU_HEADLINE_T(ui_msh_ph4, UI_TEXT_PREHEAT_E1_ID)
-UI_MENU_ACTIONCOMMAND_T(ui_msg_ph_ok, UI_TEXT_OK_ID, UI_ACTION_MESSAGE)
-#define UI_MENU_PREHEAT_SET {&ui_msh_ph1,&ui_msh_ph2,&ui_msh_ph3,&ui_msh_ph4,&ui_msg_ph_ok}
-UI_STICKYMENU(ui_menu_preheatinfo,UI_MENU_PREHEAT_SET,5)
-
-// **** Setup Menu
-
-/*
-Debug
-Z Calibrate
-Autlevel on/off
-Distortion map
-Distortion on/off
-Ignore M106 Cmd
-*/
-UI_MENU_SUBMENU_T(ui_debug, UI_TEXT_DEBUGGING_ID, ui_menu_debugging)
-
-#if DISTORTION_CORRECTION
-UI_MENU_ACTIONCOMMAND_T(ui_menu_measure_distortion,UI_TEXT_MEASURE_DISTORTION_ID, UI_ACTION_MEASURE_DISTORTION)
-UI_MENU_ACTIONCOMMAND_T(ui_menu_toggle_distortion,UI_TEXT_DISTORTION_CORR_ID, UI_ACTION_TOGGLE_DISTORTION)
-#define UI_DISTORTION_ENTRY ,&ui_menu_measure_distortion,&ui_menu_toggle_distortion
-#define UI_DISTORTION_COUNT 2
-#else
-#define UI_DISTORTION_ENTRY
-#define UI_DISTORTION_COUNT 0
-#endif
-
-#define UI_MENU_SETUP {UI_MENU_ADDCONDBACK &ui_debug UI_MENU_PREHEAT UI_TOOGLE_AUTOLEVEL_ENTRY UI_CALIB_PROBE_ENTRY UI_DISTORTION_ENTRY UI_CAL_ZHEIGHT_ENTRY ,&ui_calex ,&ui_menu_fan_ignoreM106}
-UI_MENU(ui_menu_setup, UI_MENU_SETUP, UI_MENU_BACKCNT + 3 + UI_MENU_PREHEAT_CNT + UI_TOGGLE_AUTOLEVEL_COUNT + UI_DISTORTION_COUNT + UI_CAL_ZHEIGHT_CNT + UI_CALIB_PROBE_COUNT)
-UI_MENU_SUBMENU_FILTER_T(ui_setup, UI_TEXT_SETUP_ID, ui_menu_setup,0,MENU_MODE_PRINTING)
-
-// Stop print security question
-
-
-// Main menu
-
-// stop/pause/continue entries
-
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_pause,UI_TEXT_PAUSE_PRINT_ID,UI_ACTION_PAUSE,MENU_MODE_PRINTING,MENU_MODE_PAUSED)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_continue,UI_TEXT_CONTINUE_PRINT_ID,UI_ACTION_CONTINUE,MENU_MODE_PAUSED,0)
-UI_MENU_ACTIONCOMMAND_FILTER_T(ui_stop,UI_TEXT_STOP_PRINT_ID,UI_ACTION_STOP,MENU_MODE_PRINTING,MENU_MODE_PAUSED)
-
-
-UI_MENU_SUBMENU_FILTER_T(ui_menu_control, UI_TEXT_QUICK_SETTINGS_ID, ui_menu_quick,0,MENU_MODE_PRINTING)
-UI_MENU_SUBMENU_FILTER_T(ui_menu_extrudercontrol, UI_TEXT_EXTRUDER_ID, ui_menu_extruder,0,MENU_MODE_PRINTING)
-
-UI_MENU_SUBMENU_FILTER_T(ui_menu_settings, UI_TEXT_CONFIGURATION_ID, ui_menu_configuration,0,MENU_MODE_PRINTING)
-#define UI_MENU_MAIN {UI_MENU_ADDCONDBACK &ui_menu_control ,&ui_stop,&ui_pause,&ui_continue UI_CHANGE_FIL_ENT_PRINTING\
-    BABY_ENTRY_PRINTING  ,&ui_menu_quick_speedmultiply_printing,&ui_menu_quick_flowmultiply_printing UI_TEMP0_PRINTING UI_TEMP1_PRINTING UI_TEMP2_PRINTING UI_TEMP3_PRINTING UI_TEMP4_PRINTING UI_TEMP5_PRINTING \
-    UI_BED_TEMP_PRINTING  UI_FANSPEED_PRINTING UI_FAN2SPEED_PRINTING  , SD_PRINTFILE_ENTRY \
-    &ui_menu_settings}
-   // &ui_menu_move, &ui_menu_extrudercontrol, 
-    
-UI_MENU(ui_menu_main, UI_MENU_MAIN, 7 + UI_MENU_BACKCNT + SD_PRINTFILE_ENTRY_CNT +UI_TEMP0_CNT+UI_TEMP1_CNT+UI_TEMP2_CNT+UI_TEMP3_CNT+\
-    UI_TEMP4_CNT+UI_TEMP5_CNT+ BABY_CNT+HAVE_HEATED_BED+UI_MENU_FAN_CNT+UI_MENU_FAN2_CNT + UI_CHANGE_FIL_CNT)
-
-/* Define menus accessible by action commands
-
-  You can create up to 10 user menus which are accessible by the action commands UI_ACTION_SHOW_USERMENU1 until UI_ACTION_SHOW_USERMENU10
-  You this the same way as with the menus above or you use one of the above menus. Then add a define like
-
-  #define UI_USERMENU1 ui_menu_conf_feed
-
-  which assigns the menu stored in ui_menu_conf_feed to the action UI_ACTION_SHOW_USERMENU1. Make sure only to change the numbers and not the name of the define.
-
-  When do you need this? You might want a fast button to change the temperature. In the default menu you have no menu
-  to change the temperature and view it the same time. So you need to make an action menu for this like:
-  UI_MENU_ACTION4C(ui_menu_extrtemp,UI_ACTION_EXTRUDER0_TEMP,"Temp. 0  :%E0" cDEG,"","","");
-  Then you assign this menu to a user menu:
-  #define UI_USERMENU2 ui_menu_extrtemp
-
-  Now you can assign the action  UI_ACTION_SHOW_USERMENU2+UI_ACTION_TOPMENU to a key and that will now show the temperture screen and allows
-  the change of temperature with the next/previous buttons.
-
-*/
-#endif
-#endif // __UI_MENU_H
-
+    preheatFCActive();
     break;
   case UI_ACTION_FC_GLASS:
     setPreheatTemps(225, 85, false, false);
@@ -2284,11 +853,16 @@ UI_MENU(ui_menu_main, UI_MENU_MAIN, 7 + UI_MENU_BACKCNT + SD_PRINTFILE_ENTRY_CNT
 #endif
   case UI_ACTION_EXTRXY_V2:
     uid.pushMenu(&cui_msg_preparing, true);
-    if (!Printer::isHomedAll()) {
-      Printer::homeAxis(true, true, true);
-    }
     Extruder::selectExtruderById(0);
-    Printer::moveToReal(0, 240, 40, IGNORE_COORDINATE, 100);
+    Printer::homeAxis(true, true, true);
+    /*if (!Printer::isHomedAll()) {
+      Printer::homeAxis(true,true,true);
+    }*/
+    // Printer::moveToReal(0,240,40,IGNORE_COORDINATE,100);
+    Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, 40,
+                        IGNORE_COORDINATE, 100);
+    Printer::moveToReal(CARD_CENTER_X, CARD_CENTER_Y, IGNORE_COORDINATE,
+                        IGNORE_COORDINATE, 100);
     uid.popMenu(false);
     uid.pushMenu(&cui_msg_ext_xy_1, true);
     break;
@@ -2376,6 +950,54 @@ bool measureXEdge(float x, float y, float width, float treshhold,
   return true;
 }
 
+bool measureXEdgePlusZ(float x, float y, float width, float treshhold,
+                  float &result, float &z) {
+  float xleft = x; // - width;
+  float xright = x + width;
+  width *= 0.5;
+  float zleft, zright, zcenter, zopt;
+  Printer::moveToReal(xleft, y, 2, IGNORE_COORDINATE, 100);
+  zleft = Printer::runZProbe(true, true, 1, true, false);
+  if (zleft == ILLEGAL_Z_PROBE) {
+    return false;
+  }
+  z = zleft;
+  Printer::moveToReal(xright, y, 2, IGNORE_COORDINATE, 100);
+  zright = Printer::runZProbe(true, true, 1, true, false);
+  if (zright == ILLEGAL_Z_PROBE) {
+    return false;
+  }
+  if (fabs(zright - zleft) < treshhold) {
+    Com::printFLN(PSTR("No card detected, aborting."));
+    return false;
+  }
+  zopt = 0.5 * (zleft + zright);
+  bool leftSide = zleft > zright;
+  do {
+    Printer::moveToReal(xleft + width, y, 2, IGNORE_COORDINATE, 40);
+    zcenter = Printer::runZProbe(true, true, 1, true, false);
+    if (zcenter == ILLEGAL_Z_PROBE) {
+      return false;
+    }
+    if (leftSide) {
+      if (zcenter < zopt) {
+        xright = xleft + width;
+      } else {
+        xleft += width;
+      }
+    } else {
+      if (zcenter > zopt) {
+        xright = xleft + width;
+      } else {
+        xleft += width;
+      }
+    }
+    width *= 0.5;
+  } while (width > 0.005);
+  result = xleft + width;
+  return true;
+}
+
 bool measureYEdge(float x, float y, float width, float treshhold,
                   float &result) {
   float xleft = y; // - width;
@@ -2423,14 +1045,115 @@ bool measureYEdge(float x, float y, float width, float treshhold,
   return true;
 }
 
+void calibrateXYZ() {
+    float x1, x2, x3, x4, y1, y2, y3, y4, z1, z2;
+    bool error = false;
+    // uid.popMenu(false);
+    // uid.pushMenu(&cui_msg_ext_xy_info, true);
+    UI_STATUS_UPD_F(PSTR("Calibrating XYZ"));
+#ifdef BIOPRINTER
+    extruder[1].xOffset =
+        static_cast<int32_t>(Printer::axisStepsPerMM[X_AXIS] * 50.8);
+#else
+    extruder[1].xOffset =
+        static_cast<int32_t>(Printer::axisStepsPerMM[X_AXIS] * 16);
+#endif
+    extruder[1].yOffset = 0;
+    Printer::setBlockingReceive(true);
+    Extruder::selectExtruderById(0);
+    error |= !measureXEdgePlusZ(CARD_CENTER_X, CARD_CENTER_Y, CARD_WIDTH, CARD_TRESHHOLD,
+                      x1, z1);
+      Com::printFLN(PSTR("Extruder 1 X Edge:"), x1);
+    if(!error) {                      
+      error |= !measureXEdge(CARD_CENTER_X - CARD_WIDTH, CARD_CENTER_Y, CARD_WIDTH,
+                      CARD_TRESHHOLD, x3);
+      Com::printFLN(PSTR("Extruder 1 X Edge 2:"), x3);
+    }
+    if(!error) {                      
+      Extruder::selectExtruderById(0);
+      error |= !measureYEdge(CARD_CENTER_X, CARD_CENTER_Y, CARD_HEIGHT, CARD_TRESHHOLD,
+                      y1);
+      Com::printFLN(PSTR("Extruder 1 Y Edge:"), y1);
+    }
+    if(!error) {                      
+      error |= !measureYEdge(CARD_CENTER_X, CARD_CENTER_Y - 0.75 * CARD_HEIGHT,
+                      0.75 * CARD_HEIGHT, CARD_TRESHHOLD, y3);
+      Com::printFLN(PSTR("Extruder 1 Y Edge 2:"), y3);
+    }
+    if(!error) {                      
+      Extruder::selectExtruderById(1);
+      error |= !measureXEdgePlusZ(CARD_CENTER_X, CARD_CENTER_Y, CARD_WIDTH, CARD_TRESHHOLD,
+                      x2, z2);
+      Com::printFLN(PSTR("Extruder 2 X Edge:"), x2);
+    }
+    if(!error) {                      
+      error |= !measureXEdge(CARD_CENTER_X - CARD_WIDTH, CARD_CENTER_Y, CARD_WIDTH,
+                      CARD_TRESHHOLD, x4);
+      Com::printFLN(PSTR("Extruder 2 X Edge 2:"), x4);
+    }
+    if(!error) {                      
+      error |= !measureYEdge(CARD_CENTER_X, CARD_CENTER_Y, 0.75 * CARD_HEIGHT,
+                      CARD_TRESHHOLD, y2);
+        Com::printFLN(PSTR("Extruder 2 Y Edge:"), y2);
+    }
+    if(!error) {                      
+        error |= !measureYEdge(CARD_CENTER_X, CARD_CENTER_Y - .75 * CARD_HEIGHT,
+                      .75 * CARD_HEIGHT, CARD_TRESHHOLD, y4);                            
+      Com::printFLN(PSTR("Extruder 2 Y Edge 2:"), y4);
+    }
+    // Printer::moveToReal(0,240,40,IGNORE_COORDINATE,100);
+    Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, 40,
+                        IGNORE_COORDINATE, 100);
+    Printer::moveToReal(CARD_CENTER_X, CARD_CENTER_Y, IGNORE_COORDINATE,
+                        IGNORE_COORDINATE, 100);
+    Extruder::selectExtruderById(0);
+
+    if(error) {
+      uid.popMenu(false);
+      uid.pushMenu(&cui_msg_ext_xy_error, true);
+      Printer::setBlockingReceive(false);
+      Com::printFLN(PSTR("Calibration failed"));
+      return;
+    }
+    int32_t xcor = static_cast<int32_t>(Printer::axisStepsPerMM[X_AXIS] * -0.5 *
+                                        (x2 + x4 - x1 - x3));
+    int32_t ycor = static_cast<int32_t>(Printer::axisStepsPerMM[Y_AXIS] * -0.5 *
+                                        (y2 + y4 - y1 - y3));
+    int32_t zcor = static_cast<int32_t>(Printer::axisStepsPerMM[Z_AXIS] * (z2 - z1));
+    extruder[1].xOffset += xcor;
+    extruder[1].yOffset += ycor;
+    extruder[1].zOffset += zcor;
+    Com::printF(PSTR("Calibration result xcorr:"), xcor);
+    Com::printF(PSTR(" ycorr:"), ycor);
+    Com::printFLN(PSTR(" zcorr:"), zcor);
+    Com::printF(PSTR("Calibration result xOffset_after:"), extruder[1].xOffset);
+    Com::printF(PSTR(" yOffset_after:"), extruder[1].yOffset);
+    Com::printFLN(PSTR(" zOffset_after:"), extruder[1].zOffset);
+    Com::printFLN(PSTR("Calibration success"));
+    UI_STATUS_UPD_F(PSTR("Calibration Success"));
+    if (xcor != 0 || ycor != 0 || zcor != 0) {
+      EEPROM::storeDataIntoEEPROM(false);
+    }
+    // uid.popMenu(false);
+    // uid.pushMenu(&cui_msg_ext_xy_success, true);
+    // uid.popMenu(true);
+    Printer::setBlockingReceive(false);  
+}
+
 void cOkWizard(int action) {
   switch (action) {
   case UI_ACTION_EXTRXY_V2_1: {
     float x1, x2, x3, x4, y1, y2, y3, y4;
-    uid.popMenu(false);
-    uid.pushMenu(&cui_msg_ext_xy_info, true);
+    // uid.popMenu(false);
+    // uid.pushMenu(&cui_msg_ext_xy_info, true);
+    UI_STATUS_UPD_F(PSTR("Calibrating XY"));
+#ifdef BIOPRINTER
+    extruder[1].xOffset =
+        static_cast<int32_t>(Printer::axisStepsPerMM[X_AXIS] * 50.8);
+#else
     extruder[1].xOffset =
         static_cast<int32_t>(Printer::axisStepsPerMM[X_AXIS] * 16);
+#endif
     extruder[1].yOffset = 0;
     Printer::setBlockingReceive(true);
     if (!measureXEdge(CARD_CENTER_X, CARD_CENTER_Y, CARD_WIDTH, CARD_TRESHHOLD,
@@ -2475,8 +1198,8 @@ void cOkWizard(int action) {
       break;
     }
     Com::printFLN(PSTR("Extruder 1 Y Edge:"), y1);
-    if (!measureYEdge(CARD_CENTER_X, CARD_CENTER_Y - CARD_HEIGHT, CARD_HEIGHT,
-                      CARD_TRESHHOLD, y3)) {
+    if (!measureYEdge(CARD_CENTER_X, CARD_CENTER_Y - 0.75 * CARD_HEIGHT,
+                      0.75 * CARD_HEIGHT, CARD_TRESHHOLD, y3)) {
       uid.popMenu(false);
       uid.pushMenu(&cui_msg_ext_xy_error, true);
       Printer::setBlockingReceive(false);
@@ -2484,16 +1207,16 @@ void cOkWizard(int action) {
     }
     Com::printFLN(PSTR("Extruder 1 Y Edge 2:"), y3);
     Extruder::selectExtruderById(1);
-    if (!measureYEdge(CARD_CENTER_X, CARD_CENTER_Y, CARD_HEIGHT, CARD_TRESHHOLD,
-                      y2)) {
+    if (!measureYEdge(CARD_CENTER_X, CARD_CENTER_Y, 0.75 * CARD_HEIGHT,
+                      CARD_TRESHHOLD, y2)) {
       uid.popMenu(false);
       uid.pushMenu(&cui_msg_ext_xy_error, true);
       Printer::setBlockingReceive(false);
       break;
     }
     Com::printFLN(PSTR("Extruder 2 Y Edge:"), y2);
-    if (!measureYEdge(CARD_CENTER_X, CARD_CENTER_Y - CARD_HEIGHT, CARD_HEIGHT,
-                      CARD_TRESHHOLD, y4)) {
+    if (!measureYEdge(CARD_CENTER_X, CARD_CENTER_Y - .75 * CARD_HEIGHT,
+                      .75 * CARD_HEIGHT, CARD_TRESHHOLD, y4)) {
       uid.popMenu(false);
       uid.pushMenu(&cui_msg_ext_xy_error, true);
       Printer::setBlockingReceive(false);
@@ -2501,7 +1224,11 @@ void cOkWizard(int action) {
     }
     Com::printFLN(PSTR("Extruder 2 Y Edge 2:"), y4);
     Extruder::selectExtruderById(0);
-    Printer::moveToReal(0, 240, 40, IGNORE_COORDINATE, 100);
+    // Printer::moveToReal(0,240,40,IGNORE_COORDINATE,100);
+    Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, 40,
+                        IGNORE_COORDINATE, 100);
+    Printer::moveToReal(CARD_CENTER_X, CARD_CENTER_Y, IGNORE_COORDINATE,
+                        IGNORE_COORDINATE, 100);
 
     int32_t xcor = static_cast<int32_t>(Printer::axisStepsPerMM[X_AXIS] * -0.5 *
                                         (x2 + x4 - x1 - x3));
@@ -2515,8 +1242,9 @@ void cOkWizard(int action) {
     Com::printFLN(PSTR(" yOffset_after:"), extruder[1].yOffset);
     if (xcor != 0 || ycor != 0)
       EEPROM::storeDataIntoEEPROM(false);
-    uid.popMenu(false);
-    uid.pushMenu(&cui_msg_ext_xy_success, true);
+    // uid.popMenu(false);
+    // uid.pushMenu(&cui_msg_ext_xy_success, true);
+    // uid.popMenu(true);
     Printer::setBlockingReceive(false);
   } break;
   case UI_ACTION_CZREFH_SUCC:
@@ -2694,6 +1422,18 @@ FSTRINGVALUE(removeBedGCode, "M140 S0\n"
                              "G28 Y0\n"
                              "M84\n");
 
+#ifdef BIOPRINTER
+FSTRINGVALUE(extzCalibGCode, "T0\n"
+                             "G28\n"
+                             "G1 X94 Y205 Z10 F9000\n"
+             //"G134 P0 S1\n" //G134 Px Sx Zx - Calibrate nozzle height
+             // difference (need z probe in nozzle!) Px = reference extruder, Sx
+             //= only measure extrude x against reference, Zx = add to measured
+             // z distance for Sx for correction. "M104 S0 T0\n" "M104 S0 T1\n"
+             //"M400"
+);
+FSTRINGVALUE(extzCalibGCode2, "M400");
+#else
 FSTRINGVALUE(extzCalibGCode, "M104 S190 T0\n"
                              "M104 S190 T1\n"
                              "M109 S190 T0\n"
@@ -2709,8 +1449,1606 @@ FSTRINGVALUE(extzCalibGCode, "M104 S190 T0\n"
 FSTRINGVALUE(extzCalibGCode2, "M104 S0 T0\n"
                               "M104 S0 T1\n"
                               "M400");
+#endif
 
 FSTRINGVALUE(calibrationGCode,
+#ifdef BIOPRINTER
+             "G90\n"
+             "M82\n"
+             "M106 S255\n"
+             "M140 S0\n"
+             "M104 T0 S0\n"
+             "M104 T1 S0\n"
+             "T0\n"
+             "M117 Homing\n"
+             "G28 Z0\n"
+             "M190 S0\n"
+             "G1 Z20 F7800\n"
+             "G1 X40 Y120 F5000\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G92 E0\n"
+             "G91\n"
+             "G1 Z20 F7800\n"
+             "G90\n"
+             "G1 X40 Y100 F7800\n"
+             "M104 T0 S0\n"
+             "M104 T1 S0\n"
+             "T1\n"
+             "G91\n"
+             "G1 Z-20 F7800\n"
+             "G90\n"
+             "G92 E0\n"
+             "G1 E0.25 F100\n"
+             "G92 E0\n"
+             "M109 T1 S0\n"
+             "T1\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.3 F1002\n"
+             "G1 X33.442 Y107.665 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X42.95 Y107.665 E0.0124 F225\n"
+             "G1 X42.95 Y117.173 E0.0248\n"
+             "G1 X33.442 Y117.173 E0.0372\n"
+             "G1 X33.442 Y107.665 E0.0496\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X42.278 Y108.021 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X42.593 Y108.337 E0.0006 F225\n"
+             "G1 X42.593 Y109.033 E0.0015\n"
+             "G1 X41.582 Y108.021 E0.0034\n"
+             "G1 X40.886 Y108.021 E0.0043\n"
+             "G1 X42.593 Y109.729 E0.0074\n"
+             "G1 X42.593 Y110.424 E0.0083\n"
+             "G1 X40.19 Y108.021 E0.0128\n"
+             "G1 X39.495 Y108.021 E0.0137\n"
+             "G1 X42.593 Y111.12 E0.0194\n"
+             "G1 X42.593 Y111.816 E0.0203\n"
+             "G1 X38.799 Y108.021 E0.0273\n"
+             "G1 X38.103 Y108.021 E0.0282\n"
+             "G1 X42.593 Y112.512 E0.0365\n"
+             "G1 X42.593 Y113.208 E0.0374\n"
+             "G1 X37.407 Y108.021 E0.047\n"
+             "G1 X36.711 Y108.021 E0.0479\n"
+             "G1 X42.593 Y113.903 E0.0587\n"
+             "G1 X42.593 Y114.599 E0.0596\n"
+             "G1 X36.016 Y108.021 E0.0718\n"
+             "G1 X35.32 Y108.021 E0.0727\n"
+             "G1 X42.593 Y115.295 E0.0861\n"
+             "G1 X42.593 Y115.991 E0.087\n"
+             "G1 X34.624 Y108.021 E0.1017\n"
+             "G1 X33.928 Y108.021 E0.1026\n"
+             "G1 X42.593 Y116.687 E0.1186\n"
+             "G1 X42.593 Y116.816 E0.1188\n"
+             "G1 X42.027 Y116.816 E0.1195\n"
+             "G1 X33.799 Y108.588 E0.1347\n"
+             "G1 X33.799 Y109.284 E0.1356\n"
+             "G1 X41.331 Y116.816 E0.1495\n"
+             "G1 X40.635 Y116.816 E0.1504\n"
+             "G1 X33.799 Y109.979 E0.1631\n"
+             "G1 X33.799 Y110.675 E0.164\n"
+             "G1 X39.94 Y116.816 E0.1753\n"
+             "G1 X39.244 Y116.816 E0.1762\n"
+             "G1 X33.799 Y111.371 E0.1863\n"
+             "G1 X33.799 Y112.067 E0.1872\n"
+             "G1 X38.548 Y116.816 E0.1959\n"
+             "G1 X37.852 Y116.816 E0.1968\n"
+             "G1 X33.799 Y112.762 E0.2043\n"
+             "G1 X33.799 Y113.458 E0.2052\n"
+             "G1 X37.156 Y116.816 E0.2114\n"
+             "G1 X36.461 Y116.816 E0.2123\n"
+             "G1 X33.799 Y114.154 E0.2173\n"
+             "G1 X33.799 Y114.85 E0.2182\n"
+             "G1 X35.765 Y116.816 E0.2218\n"
+             "G1 X35.069 Y116.816 E0.2227\n"
+             "G1 X33.799 Y115.546 E0.225\n"
+             "G1 X33.799 Y116.241 E0.226\n"
+             "G1 X34.373 Y116.816 E0.227\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X58.946 Y115.406 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X58.946 Y115.031 E0.0005 F300\n"
+             "G1 X58.947 Y114.937 E0.0006\n"
+             "G1 X58.962 Y114.844 E0.0007\n"
+             "G1 X58.99 Y114.761 E0.0009\n"
+             "G1 X59.088 Y114.73 E0.001\n"
+             "G1 X59.186 Y114.719 E0.0011\n"
+             "G1 X59.284 Y114.719 E0.0012\n"
+             "G1 X63.598 Y114.719 E0.0069\n"
+             "G1 X63.696 Y114.719 E0.007\n"
+             "G1 X63.795 Y114.709 E0.0071\n"
+             "G1 X63.903 Y114.676 E0.0073\n"
+             "G1 X63.936 Y114.568 E0.0074\n"
+             "G1 X63.946 Y114.469 E0.0076\n"
+             "G1 X63.946 Y114.374 E0.0077\n"
+             "G1 X63.946 Y112.863 E0.0097\n"
+             "G1 X63.946 Y112.769 E0.0098\n"
+             "G1 X63.936 Y112.669 E0.0099\n"
+             "G1 X63.903 Y112.562 E0.0101\n"
+             "G1 X63.795 Y112.529 E0.0102\n"
+             "G1 X63.696 Y112.519 E0.0103\n"
+             "G1 X63.598 Y112.519 E0.0105\n"
+             "G1 X59.284 Y112.519 E0.0161\n"
+             "G1 X59.186 Y112.519 E0.0162\n"
+             "G1 X59.088 Y112.507 E0.0164\n"
+             "G1 X58.99 Y112.476 E0.0165\n"
+             "G1 X58.962 Y112.394 E0.0166\n"
+             "G1 X58.947 Y112.3 E0.0167\n"
+             "G1 X58.946 Y112.206 E0.0168\n"
+             "G1 X58.946 Y111.831 E0.0173\n"
+             "G1 X58.947 Y111.737 E0.0175\n"
+             "G1 X58.962 Y111.644 E0.0176\n"
+             "G1 X58.99 Y111.561 E0.0177\n"
+             "G1 X59.088 Y111.53 E0.0178\n"
+             "G1 X59.186 Y111.519 E0.018\n"
+             "G1 X59.284 Y111.519 E0.0181\n"
+             "G1 X63.598 Y111.519 E0.0237\n"
+             "G1 X63.696 Y111.519 E0.0238\n"
+             "G1 X63.795 Y111.509 E0.024\n"
+             "G1 X63.903 Y111.476 E0.0241\n"
+             "G1 X63.936 Y111.368 E0.0243\n"
+             "G1 X63.946 Y111.269 E0.0244\n"
+             "G1 X63.946 Y111.174 E0.0245\n"
+             "G1 X63.946 Y109.663 E0.0265\n"
+             "G1 X63.946 Y109.569 E0.0266\n"
+             "G1 X63.936 Y109.469 E0.0268\n"
+             "G1 X63.903 Y109.362 E0.0269\n"
+             "G1 X63.795 Y109.329 E0.027\n"
+             "G1 X63.696 Y109.319 E0.0272\n"
+             "G1 X63.598 Y109.319 E0.0273\n"
+             "G1 X59.284 Y109.319 E0.0329\n"
+             "G1 X59.186 Y109.319 E0.0331\n"
+             "G1 X59.088 Y109.307 E0.0332\n"
+             "G1 X58.99 Y109.276 E0.0333\n"
+             "G1 X58.962 Y109.194 E0.0334\n"
+             "G1 X58.947 Y109.1 E0.0336\n"
+             "G1 X58.946 Y109.006 E0.0337\n"
+             "G1 X58.946 Y108.631 E0.0342\n"
+             "G1 X58.947 Y108.537 E0.0343\n"
+             "G1 X58.962 Y108.444 E0.0344\n"
+             "G1 X58.99 Y108.361 E0.0345\n"
+             "G1 X59.088 Y108.33 E0.0347\n"
+             "G1 X59.186 Y108.319 E0.0348\n"
+             "G1 X59.284 Y108.319 E0.0349\n"
+             "G1 X63.598 Y108.319 E0.0406\n"
+             "G1 X63.696 Y108.319 E0.0407\n"
+             "G1 X63.795 Y108.309 E0.0408\n"
+             "G1 X63.903 Y108.276 E0.041\n"
+             "G1 X63.936 Y108.168 E0.0411\n"
+             "G1 X63.946 Y108.069 E0.0413\n"
+             "G1 X63.946 Y107.974 E0.0414\n"
+             "G1 X63.946 Y106.463 E0.0433\n"
+             "G1 X63.946 Y106.369 E0.0435\n"
+             "G1 X63.936 Y106.269 E0.0436\n"
+             "G1 X63.903 Y106.162 E0.0437\n"
+             "G1 X63.795 Y106.129 E0.0439\n"
+             "G1 X63.696 Y106.119 E0.044\n"
+             "G1 X63.598 Y106.119 E0.0442\n"
+             "G1 X59.284 Y106.119 E0.0498\n"
+             "G1 X59.186 Y106.119 E0.0499\n"
+             "G1 X59.088 Y106.107 E0.05\n"
+             "G1 X58.99 Y106.076 E0.0502\n"
+             "G1 X58.962 Y105.994 E0.0503\n"
+             "G1 X58.947 Y105.9 E0.0504\n"
+             "G1 X58.946 Y105.806 E0.0505\n"
+             "G1 X58.946 Y105.431 E0.051\n"
+             "G1 X58.947 Y105.337 E0.0512\n"
+             "G1 X58.962 Y105.244 E0.0513\n"
+             "G1 X58.99 Y105.161 E0.0514\n"
+             "G1 X59.088 Y105.13 E0.0515\n"
+             "G1 X59.186 Y105.119 E0.0517\n"
+             "G1 X59.284 Y105.119 E0.0518\n"
+             "G1 X63.598 Y105.119 E0.0574\n"
+             "G1 X63.696 Y105.119 E0.0575\n"
+             "G1 X63.795 Y105.109 E0.0577\n"
+             "G1 X63.903 Y105.076 E0.0578\n"
+             "G1 X63.936 Y104.968 E0.058\n"
+             "G1 X63.946 Y104.869 E0.0581\n"
+             "G1 X63.946 Y104.774 E0.0582\n"
+             "G1 X63.946 Y103.263 E0.0602\n"
+             "G1 X63.946 Y103.169 E0.0603\n"
+             "G1 X63.936 Y103.069 E0.0604\n"
+             "G1 X63.903 Y102.962 E0.0606\n"
+             "G1 X63.795 Y102.929 E0.0607\n"
+             "G1 X63.696 Y102.919 E0.0609\n"
+             "G1 X63.598 Y102.919 E0.061\n"
+             "G1 X59.284 Y102.919 E0.0666\n"
+             "G1 X59.186 Y102.919 E0.0668\n"
+             "G1 X59.088 Y102.907 E0.0669\n"
+             "G1 X58.99 Y102.876 E0.067\n"
+             "G1 X58.962 Y102.794 E0.0671\n"
+             "G1 X58.947 Y102.7 E0.0673\n"
+             "G1 X58.946 Y102.606 E0.0674\n"
+             "G1 X58.946 Y102.231 E0.0679\n"
+             "G1 X58.947 Y102.137 E0.068\n"
+             "G1 X58.962 Y102.044 E0.0681\n"
+             "G1 X58.99 Y101.961 E0.0682\n"
+             "G1 X59.088 Y101.93 E0.0684\n"
+             "G1 X59.186 Y101.919 E0.0685\n"
+             "G1 X59.284 Y101.919 E0.0686\n"
+             "G1 X63.598 Y101.919 E0.0743\n"
+             "G1 X63.696 Y101.919 E0.0744\n"
+             "G1 X63.795 Y101.909 E0.0745\n"
+             "G1 X63.903 Y101.876 E0.0747\n"
+             "G1 X63.936 Y101.768 E0.0748\n"
+             "G1 X63.946 Y101.669 E0.0749\n"
+             "G1 X63.946 Y101.574 E0.0751\n"
+             "G1 X63.946 Y100.063 E0.077\n"
+             "G1 X63.946 Y99.969 E0.0772\n"
+             "G1 X63.936 Y99.869 E0.0773\n"
+             "G1 X63.903 Y99.762 E0.0774\n"
+             "G1 X63.795 Y99.729 E0.0776\n"
+             "G1 X63.696 Y99.719 E0.0777\n"
+             "G1 X63.598 Y99.719 E0.0778\n"
+             "G1 X59.284 Y99.719 E0.0835\n"
+             "G1 X59.186 Y99.719 E0.0836\n"
+             "G1 X59.088 Y99.707 E0.0837\n"
+             "G1 X58.99 Y99.676 E0.0839\n"
+             "G1 X58.962 Y99.594 E0.084\n"
+             "G1 X58.947 Y99.5 E0.0841\n"
+             "G1 X58.946 Y99.406 E0.0842\n"
+             "G1 X58.946 Y99.031 E0.0847\n"
+             "G1 X58.947 Y98.937 E0.0848\n"
+             "G1 X58.962 Y98.844 E0.085\n"
+             "G1 X58.99 Y98.761 E0.0851\n"
+             "G1 X59.088 Y98.73 E0.0852\n"
+             "G1 X59.186 Y98.719 E0.0853\n"
+             "G1 X59.284 Y98.719 E0.0855\n"
+             "G1 X63.598 Y98.719 E0.0911\n"
+             "G1 X63.696 Y98.719 E0.0912\n"
+             "G1 X63.795 Y98.709 E0.0914\n"
+             "G1 X63.903 Y98.676 E0.0915\n"
+             "G1 X63.936 Y98.568 E0.0917\n"
+             "G1 X63.946 Y98.469 E0.0918\n"
+             "G1 X63.946 Y98.374 E0.0919\n"
+             "G1 X63.946 Y96.863 E0.0939\n"
+             "G1 X63.946 Y96.769 E0.094\n"
+             "G1 X63.936 Y96.669 E0.0941\n"
+             "G1 X63.903 Y96.562 E0.0943\n"
+             "G1 X63.795 Y96.529 E0.0944\n"
+             "G1 X63.696 Y96.519 E0.0946\n"
+             "G1 X63.598 Y96.519 E0.0947\n"
+             "G1 X59.284 Y96.519 E0.1003\n"
+             "G1 X59.186 Y96.519 E0.1005\n"
+             "G1 X59.088 Y96.507 E0.1006\n"
+             "G1 X58.99 Y96.476 E0.1007\n"
+             "G1 X58.962 Y96.394 E0.1008\n"
+             "G1 X58.947 Y96.3 E0.101\n"
+             "G1 X58.946 Y96.206 E0.1011\n"
+             "G1 X58.946 Y95.831 E0.1016\n"
+             "G1 X58.947 Y95.737 E0.1017\n"
+             "G1 X58.962 Y95.644 E0.1018\n"
+             "G1 X58.99 Y95.561 E0.1019\n"
+             "G1 X59.088 Y95.53 E0.1021\n"
+             "G1 X59.186 Y95.519 E0.1022\n"
+             "G1 X59.284 Y95.519 E0.1023\n"
+             "G1 X63.598 Y95.519 E0.108\n"
+             "G1 X63.696 Y95.519 E0.1081\n"
+             "G1 X63.795 Y95.509 E0.1082\n"
+             "G1 X63.903 Y95.476 E0.1084\n"
+             "G1 X63.936 Y95.368 E0.1085\n"
+             "G1 X63.946 Y95.269 E0.1086\n"
+             "G1 X63.946 Y95.174 E0.1088\n"
+             "G1 X63.946 Y93.663 E0.1107\n"
+             "G1 X63.946 Y93.569 E0.1109\n"
+             "G1 X63.936 Y93.469 E0.111\n"
+             "G1 X63.903 Y93.362 E0.1111\n"
+             "G1 X63.795 Y93.329 E0.1113\n"
+             "G1 X63.696 Y93.319 E0.1114\n"
+             "G1 X63.598 Y93.319 E0.1115\n"
+             "G1 X59.284 Y93.319 E0.1172\n"
+             "G1 X59.186 Y93.319 E0.1173\n"
+             "G1 X59.088 Y93.307 E0.1174\n"
+             "G1 X58.99 Y93.276 E0.1176\n"
+             "G1 X58.962 Y93.194 E0.1177\n"
+             "G1 X58.947 Y93.1 E0.1178\n"
+             "G1 X58.946 Y93.006 E0.1179\n"
+             "G1 X58.946 Y92.631 E0.1184\n"
+             "G1 X58.947 Y92.537 E0.1185\n"
+             "G1 X58.962 Y92.444 E0.1187\n"
+             "G1 X58.99 Y92.361 E0.1188\n"
+             "G1 X59.088 Y92.33 E0.1189\n"
+             "G1 X59.186 Y92.319 E0.119\n"
+             "G1 X59.284 Y92.319 E0.1192\n"
+             "G1 X63.598 Y92.319 E0.1248\n"
+             "G1 X63.696 Y92.319 E0.1249\n"
+             "G1 X63.795 Y92.309 E0.1251\n"
+             "G1 X63.903 Y92.276 E0.1252\n"
+             "G1 X63.936 Y92.168 E0.1254\n"
+             "G1 X63.946 Y92.069 E0.1255\n"
+             "G1 X63.946 Y91.974 E0.1256\n"
+             "G1 X63.946 Y90.463 E0.1276\n"
+             "G1 X63.946 Y90.369 E0.1277\n"
+             "G1 X63.936 Y90.269 E0.1278\n"
+             "G1 X63.903 Y90.162 E0.128\n"
+             "G1 X63.795 Y90.129 E0.1281\n"
+             "G1 X63.696 Y90.119 E0.1283\n"
+             "G1 X63.598 Y90.119 E0.1284\n"
+             "G1 X59.284 Y90.119 E0.134\n"
+             "G1 X59.186 Y90.119 E0.1342\n"
+             "G1 X59.088 Y90.107 E0.1343\n"
+             "G1 X58.99 Y90.076 E0.1344\n"
+             "G1 X58.962 Y89.994 E0.1345\n"
+             "G1 X58.947 Y89.9 E0.1347\n"
+             "G1 X58.946 Y89.806 E0.1348\n"
+             "G1 X58.946 Y89.431 E0.1353\n"
+             "G1 X58.947 Y89.337 E0.1354\n"
+             "G1 X58.962 Y89.244 E0.1355\n"
+             "G1 X59.084 Y89.131 E0.1357\n"
+             "G1 X59.181 Y89.119 E0.1359\n"
+             "G1 X59.278 Y89.119 E0.136\n"
+             "G1 X64.614 Y89.119 E0.143\n"
+             "G1 X64.711 Y89.119 E0.1431\n"
+             "G1 X64.808 Y89.131 E0.1432\n"
+             "G1 X64.904 Y89.163 E0.1433\n"
+             "G1 X64.935 Y89.261 E0.1435\n"
+             "G1 X64.946 Y89.36 E0.1436\n"
+             "G1 X64.946 Y89.458 E0.1437\n"
+             "G1 X64.946 Y115.38 E0.1776\n"
+             "G1 X64.946 Y115.478 E0.1777\n"
+             "G1 X64.935 Y115.576 E0.1778\n"
+             "G1 X64.808 Y115.706 E0.1781\n"
+             "G1 X64.711 Y115.718 E0.1782\n"
+             "G1 X64.614 Y115.719 E0.1783\n"
+             "G1 X59.278 Y115.719 E0.1853\n"
+             "G1 X59.181 Y115.718 E0.1854\n"
+             "G1 X59.084 Y115.706 E0.1856\n"
+             "G1 X58.962 Y115.594 E0.1858\n"
+             "G1 X58.948 Y115.506 E0.1859\n"
+             "G1 X58.947 Y115.5 F300\n"
+             "G1 X58.946 Y115.406\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X68.065 Y95.118 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X67.971 Y95.103 E0.0001 F300\n"
+             "G1 X67.859 Y94.981 E0.0003\n"
+             "G1 X67.846 Y94.884 E0.0005\n"
+             "G1 X67.846 Y94.787 E0.0006\n"
+             "G1 X67.846 Y89.451 E0.0076\n"
+             "G1 X67.846 Y89.354 E0.0077\n"
+             "G1 X67.859 Y89.257 E0.0078\n"
+             "G1 X67.891 Y89.161 E0.008\n"
+             "G1 X67.989 Y89.13 E0.0081\n"
+             "G1 X68.087 Y89.119 E0.0082\n"
+             "G1 X68.185 Y89.119 E0.0083\n"
+             "G1 X94.107 Y89.119 E0.0422\n"
+             "G1 X94.205 Y89.119 E0.0423\n"
+             "G1 X94.303 Y89.13 E0.0425\n"
+             "G1 X94.401 Y89.161 E0.0426\n"
+             "G1 X94.434 Y89.257 E0.0427\n"
+             "G1 X94.446 Y89.354 E0.0428\n"
+             "G1 X94.446 Y89.451 E0.043\n"
+             "G1 X94.446 Y94.787 E0.0499\n"
+             "G1 X94.446 Y94.884 E0.0501\n"
+             "G1 X94.434 Y94.981 E0.0502\n"
+             "G1 X94.321 Y95.103 E0.0504\n"
+             "G1 X94.227 Y95.118 E0.0505\n"
+             "G1 X94.134 Y95.119 E0.0507\n"
+             "G1 X93.759 Y95.119 E0.0511\n"
+             "G1 X93.665 Y95.118 E0.0513\n"
+             "G1 X93.571 Y95.103 E0.0514\n"
+             "G1 X93.488 Y95.075 E0.0515\n"
+             "G1 X93.458 Y94.977 E0.0516\n"
+             "G1 X93.446 Y94.878 E0.0518\n"
+             "G1 X93.446 Y94.78 E0.0519\n"
+             "G1 X93.446 Y90.467 E0.0575\n"
+             "G1 X93.446 Y90.369 E0.0577\n"
+             "G1 X93.436 Y90.269 E0.0578\n"
+             "G1 X93.403 Y90.162 E0.0579\n"
+             "G1 X93.295 Y90.129 E0.0581\n"
+             "G1 X93.196 Y90.119 E0.0582\n"
+             "G1 X93.102 Y90.119 E0.0583\n"
+             "G1 X91.59 Y90.119 E0.0603\n"
+             "G1 X91.496 Y90.119 E0.0604\n"
+             "G1 X91.397 Y90.129 E0.0606\n"
+             "G1 X91.289 Y90.162 E0.0607\n"
+             "G1 X91.256 Y90.269 E0.0609\n"
+             "G1 X91.246 Y90.369 E0.061\n"
+             "G1 X91.246 Y90.467 E0.0611\n"
+             "G1 X91.246 Y94.78 E0.0668\n"
+             "G1 X91.246 Y94.878 E0.0669\n"
+             "G1 X91.234 Y94.977 E0.067\n"
+             "G1 X91.204 Y95.075 E0.0671\n"
+             "G1 X91.121 Y95.103 E0.0673\n"
+             "G1 X91.027 Y95.118 E0.0674\n"
+             "G1 X90.934 Y95.119 E0.0675\n"
+             "G1 X90.559 Y95.119 E0.068\n"
+             "G1 X90.465 Y95.118 E0.0681\n"
+             "G1 X90.371 Y95.103 E0.0682\n"
+             "G1 X90.288 Y95.075 E0.0684\n"
+             "G1 X90.258 Y94.977 E0.0685\n"
+             "G1 X90.246 Y94.878 E0.0686\n"
+             "G1 X90.246 Y94.78 E0.0687\n"
+             "G1 X90.246 Y90.467 E0.0744\n"
+             "G1 X90.246 Y90.369 E0.0745\n"
+             "G1 X90.236 Y90.269 E0.0746\n"
+             "G1 X90.203 Y90.162 E0.0748\n"
+             "G1 X90.095 Y90.129 E0.0749\n"
+             "G1 X89.996 Y90.119 E0.0751\n"
+             "G1 X89.902 Y90.119 E0.0752\n"
+             "G1 X88.39 Y90.119 E0.0772\n"
+             "G1 X88.296 Y90.119 E0.0773\n"
+             "G1 X88.197 Y90.129 E0.0774\n"
+             "G1 X88.089 Y90.162 E0.0776\n"
+             "G1 X88.056 Y90.269 E0.0777\n"
+             "G1 X88.046 Y90.369 E0.0778\n"
+             "G1 X88.046 Y90.467 E0.078\n"
+             "G1 X88.046 Y94.78 E0.0836\n"
+             "G1 X88.046 Y94.878 E0.0837\n"
+             "G1 X88.034 Y94.977 E0.0839\n"
+             "G1 X88.004 Y95.075 E0.084\n"
+             "G1 X87.921 Y95.103 E0.0841\n"
+             "G1 X87.827 Y95.118 E0.0842\n"
+             "G1 X87.734 Y95.119 E0.0844\n"
+             "G1 X87.359 Y95.119 E0.0848\n"
+             "G1 X87.265 Y95.118 E0.085\n"
+             "G1 X87.171 Y95.103 E0.0851\n"
+             "G1 X87.088 Y95.075 E0.0852\n"
+             "G1 X87.058 Y94.977 E0.0853\n"
+             "G1 X87.046 Y94.878 E0.0855\n"
+             "G1 X87.046 Y94.78 E0.0856\n"
+             "G1 X87.046 Y90.467 E0.0912\n"
+             "G1 X87.046 Y90.369 E0.0914\n"
+             "G1 X87.036 Y90.269 E0.0915\n"
+             "G1 X87.003 Y90.162 E0.0916\n"
+             "G1 X86.895 Y90.129 E0.0918\n"
+             "G1 X86.796 Y90.119 E0.0919\n"
+             "G1 X86.702 Y90.119 E0.092\n"
+             "G1 X85.19 Y90.119 E0.094\n"
+             "G1 X85.096 Y90.119 E0.0941\n"
+             "G1 X84.997 Y90.129 E0.0943\n"
+             "G1 X84.889 Y90.162 E0.0944\n"
+             "G1 X84.856 Y90.269 E0.0946\n"
+             "G1 X84.846 Y90.369 E0.0947\n"
+             "G1 X84.846 Y90.467 E0.0948\n"
+             "G1 X84.846 Y94.78 E0.1004\n"
+             "G1 X84.846 Y94.878 E0.1006\n"
+             "G1 X84.834 Y94.977 E0.1007\n"
+             "G1 X84.804 Y95.075 E0.1008\n"
+             "G1 X84.721 Y95.103 E0.101\n"
+             "G1 X84.627 Y95.118 E0.1011\n"
+             "G1 X84.534 Y95.119 E0.1012\n"
+             "G1 X84.159 Y95.119 E0.1017\n"
+             "G1 X84.065 Y95.118 E0.1018\n"
+             "G1 X83.971 Y95.103 E0.1019\n"
+             "G1 X83.888 Y95.075 E0.102\n"
+             "G1 X83.858 Y94.977 E0.1022\n"
+             "G1 X83.846 Y94.878 E0.1023\n"
+             "G1 X83.846 Y94.78 E0.1024\n"
+             "G1 X83.846 Y90.467 E0.1081\n"
+             "G1 X83.846 Y90.369 E0.1082\n"
+             "G1 X83.836 Y90.269 E0.1083\n"
+             "G1 X83.803 Y90.162 E0.1085\n"
+             "G1 X83.695 Y90.129 E0.1086\n"
+             "G1 X83.596 Y90.119 E0.1088\n"
+             "G1 X83.502 Y90.119 E0.1089\n"
+             "G1 X81.99 Y90.119 E0.1109\n"
+             "G1 X81.896 Y90.119 E0.111\n"
+             "G1 X81.797 Y90.129 E0.1111\n"
+             "G1 X81.689 Y90.162 E0.1113\n"
+             "G1 X81.656 Y90.269 E0.1114\n"
+             "G1 X81.646 Y90.369 E0.1115\n"
+             "G1 X81.646 Y90.467 E0.1117\n"
+             "G1 X81.646 Y94.78 E0.1173\n"
+             "G1 X81.646 Y94.878 E0.1174\n"
+             "G1 X81.634 Y94.977 E0.1176\n"
+             "G1 X81.604 Y95.075 E0.1177\n"
+             "G1 X81.521 Y95.103 E0.1178\n"
+             "G1 X81.427 Y95.118 E0.1179\n"
+             "G1 X81.334 Y95.119 E0.118\n"
+             "G1 X80.959 Y95.119 E0.1185\n"
+             "G1 X80.865 Y95.118 E0.1187\n"
+             "G1 X80.771 Y95.103 E0.1188\n"
+             "G1 X80.688 Y95.075 E0.1189\n"
+             "G1 X80.658 Y94.977 E0.119\n"
+             "G1 X80.646 Y94.878 E0.1192\n"
+             "G1 X80.646 Y94.78 E0.1193\n"
+             "G1 X80.646 Y90.467 E0.1249\n"
+             "G1 X80.646 Y90.369 E0.125\n"
+             "G1 X80.636 Y90.269 E0.1252\n"
+             "G1 X80.603 Y90.162 E0.1253\n"
+             "G1 X80.495 Y90.129 E0.1255\n"
+             "G1 X80.396 Y90.119 E0.1256\n"
+             "G1 X80.302 Y90.119 E0.1257\n"
+             "G1 X78.79 Y90.119 E0.1277\n"
+             "G1 X78.696 Y90.119 E0.1278\n"
+             "G1 X78.597 Y90.129 E0.128\n"
+             "G1 X78.489 Y90.162 E0.1281\n"
+             "G1 X78.456 Y90.269 E0.1282\n"
+             "G1 X78.446 Y90.369 E0.1284\n"
+             "G1 X78.446 Y90.467 E0.1285\n"
+             "G1 X78.446 Y94.78 E0.1341\n"
+             "G1 X78.446 Y94.878 E0.1343\n"
+             "G1 X78.434 Y94.977 E0.1344\n"
+             "G1 X78.404 Y95.075 E0.1345\n"
+             "G1 X78.321 Y95.103 E0.1346\n"
+             "G1 X78.227 Y95.118 E0.1348\n"
+             "G1 X78.134 Y95.119 E0.1349\n"
+             "G1 X77.759 Y95.119 E0.1354\n"
+             "G1 X77.665 Y95.118 E0.1355\n"
+             "G1 X77.571 Y95.103 E0.1356\n"
+             "G1 X77.488 Y95.075 E0.1357\n"
+             "G1 X77.458 Y94.977 E0.1359\n"
+             "G1 X77.446 Y94.878 E0.136\n"
+             "G1 X77.446 Y94.78 E0.1361\n"
+             "G1 X77.446 Y90.467 E0.1418\n"
+             "G1 X77.446 Y90.369 E0.1419\n"
+             "G1 X77.436 Y90.269 E0.142\n"
+             "G1 X77.403 Y90.162 E0.1422\n"
+             "G1 X77.295 Y90.129 E0.1423\n"
+             "G1 X77.196 Y90.119 E0.1425\n"
+             "G1 X77.102 Y90.119 E0.1426\n"
+             "G1 X75.59 Y90.119 E0.1445\n"
+             "G1 X75.496 Y90.119 E0.1447\n"
+             "G1 X75.397 Y90.129 E0.1448\n"
+             "G1 X75.289 Y90.162 E0.1449\n"
+             "G1 X75.256 Y90.269 E0.1451\n"
+             "G1 X75.246 Y90.369 E0.1452\n"
+             "G1 X75.246 Y90.467 E0.1454\n"
+             "G1 X75.246 Y94.78 E0.151\n"
+             "G1 X75.246 Y94.878 E0.1511\n"
+             "G1 X75.234 Y94.977 E0.1512\n"
+             "G1 X75.204 Y95.075 E0.1514\n"
+             "G1 X75.121 Y95.103 E0.1515\n"
+             "G1 X75.027 Y95.118 E0.1516\n"
+             "G1 X74.934 Y95.119 E0.1517\n"
+             "G1 X74.559 Y95.119 E0.1522\n"
+             "G1 X74.465 Y95.118 E0.1524\n"
+             "G1 X74.371 Y95.103 E0.1525\n"
+             "G1 X74.288 Y95.075 E0.1526\n"
+             "G1 X74.258 Y94.977 E0.1527\n"
+             "G1 X74.246 Y94.878 E0.1529\n"
+             "G1 X74.246 Y94.78 E0.153\n"
+             "G1 X74.246 Y90.467 E0.1586\n"
+             "G1 X74.246 Y90.369 E0.1587\n"
+             "G1 X74.236 Y90.269 E0.1589\n"
+             "G1 X74.203 Y90.162 E0.159\n"
+             "G1 X74.095 Y90.129 E0.1592\n"
+             "G1 X73.996 Y90.119 E0.1593\n"
+             "G1 X73.902 Y90.119 E0.1594\n"
+             "G1 X72.39 Y90.119 E0.1614\n"
+             "G1 X72.296 Y90.119 E0.1615\n"
+             "G1 X72.197 Y90.129 E0.1616\n"
+             "G1 X72.089 Y90.162 E0.1618\n"
+             "G1 X72.056 Y90.269 E0.1619\n"
+             "G1 X72.046 Y90.369 E0.1621\n"
+             "G1 X72.046 Y90.467 E0.1622\n"
+             "G1 X72.046 Y94.78 E0.1678\n"
+             "G1 X72.046 Y94.878 E0.168\n"
+             "G1 X72.034 Y94.977 E0.1681\n"
+             "G1 X72.004 Y95.075 E0.1682\n"
+             "G1 X71.921 Y95.103 E0.1683\n"
+             "G1 X71.827 Y95.118 E0.1685\n"
+             "G1 X71.734 Y95.119 E0.1686\n"
+             "G1 X71.359 Y95.119 E0.1691\n"
+             "G1 X71.265 Y95.118 E0.1692\n"
+             "G1 X71.171 Y95.103 E0.1693\n"
+             "G1 X71.088 Y95.075 E0.1694\n"
+             "G1 X71.058 Y94.977 E0.1696\n"
+             "G1 X71.046 Y94.878 E0.1697\n"
+             "G1 X71.046 Y94.78 E0.1698\n"
+             "G1 X71.046 Y90.467 E0.1755\n"
+             "G1 X71.046 Y90.369 E0.1756\n"
+             "G1 X71.036 Y90.269 E0.1757\n"
+             "G1 X71.003 Y90.162 E0.1759\n"
+             "G1 X70.895 Y90.129 E0.176\n"
+             "G1 X70.796 Y90.119 E0.1761\n"
+             "G1 X70.702 Y90.119 E0.1763\n"
+             "G1 X69.19 Y90.119 E0.1782\n"
+             "G1 X69.096 Y90.119 E0.1784\n"
+             "G1 X68.997 Y90.129 E0.1785\n"
+             "G1 X68.889 Y90.162 E0.1786\n"
+             "G1 X68.856 Y90.269 E0.1788\n"
+             "G1 X68.846 Y90.369 E0.1789\n"
+             "G1 X68.846 Y90.467 E0.179\n"
+             "G1 X68.846 Y94.78 E0.1847\n"
+             "G1 X68.846 Y94.878 E0.1848\n"
+             "G1 X68.834 Y94.977 E0.1849\n"
+             "G1 X68.804 Y95.075 E0.1851\n"
+             "G1 X68.721 Y95.103 E0.1852\n"
+             "G1 X68.627 Y95.118 E0.1853\n"
+             "G1 X68.534 Y95.119 E0.1854\n"
+             "G1 X68.165 Y95.119 E0.1859\n"
+             "G1 X68.159 Y95.119 F300\n"
+             "G1 X68.065 Y95.118\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G92 E0\n"
+             "G91\n"
+             "G1 Z20 F7800\n"
+             "G90\n"
+             "G1 X40 Y100 F7800\n"
+             "M104 T1 S0\n"
+             "M104 T0 S0\n"
+             "T0\n"
+             "G91\n"
+             "G1 Z-20 F7800\n"
+             "G90\n"
+             "G92 E0\n"
+             "G1 E0.25 F100\n"
+             "G92 E0\n"
+             "M109 T0 S0\n"
+             "T0\n"
+             "G1 X42.95 Y97.665 F2400\n"
+             "G92 E0\n"
+             "G1 X42.95 Y107.173 E0.0124 F225\n"
+             "G1 X33.442 Y107.173 E0.0248\n"
+             "G1 X33.442 Y97.665 E0.0372\n"
+             "G1 X42.95 Y97.665 E0.0496\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X42.019 Y98.021 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X42.593 Y98.596 E0.0011 F225\n"
+             "G1 X42.593 Y99.292 E0.002\n"
+             "G1 X41.323 Y98.021 E0.0043\n"
+             "G1 X40.627 Y98.021 E0.0052\n"
+             "G1 X42.593 Y99.987 E0.0088\n"
+             "G1 X42.593 Y100.683 E0.0098\n"
+             "G1 X39.931 Y98.021 E0.0147\n"
+             "G1 X39.236 Y98.021 E0.0156\n"
+             "G1 X42.593 Y101.379 E0.0218\n"
+             "G1 X42.593 Y102.075 E0.0227\n"
+             "G1 X38.54 Y98.021 E0.0302\n"
+             "G1 X37.844 Y98.021 E0.0311\n"
+             "G1 X42.593 Y102.771 E0.0398\n"
+             "G1 X42.593 Y103.466 E0.0407\n"
+             "G1 X37.148 Y98.021 E0.0508\n"
+             "G1 X36.452 Y98.021 E0.0517\n"
+             "G1 X42.593 Y104.162 E0.063\n"
+             "G1 X42.593 Y104.858 E0.0639\n"
+             "G1 X35.757 Y98.021 E0.0766\n"
+             "G1 X35.061 Y98.021 E0.0775\n"
+             "G1 X42.593 Y105.554 E0.0914\n"
+             "G1 X42.593 Y106.25 E0.0923\n"
+             "G1 X34.365 Y98.021 E0.1075\n"
+             "G1 X33.799 Y98.021 E0.1082\n"
+             "G1 X33.799 Y98.151 E0.1084\n"
+             "G1 X42.464 Y106.816 E0.1244\n"
+             "G1 X41.768 Y106.816 E0.1253\n"
+             "G1 X33.799 Y98.847 E0.14\n"
+             "G1 X33.799 Y99.542 E0.1409\n"
+             "G1 X41.072 Y106.816 E0.1543\n"
+             "G1 X40.377 Y106.816 E0.1552\n"
+             "G1 X33.799 Y100.238 E0.1674\n"
+             "G1 X33.799 Y100.934 E0.1683\n"
+             "G1 X39.681 Y106.816 E0.1791\n"
+             "G1 X38.985 Y106.816 E0.18\n"
+             "G1 X33.799 Y101.63 E0.1896\n"
+             "G1 X33.799 Y102.326 E0.1905\n"
+             "G1 X38.289 Y106.816 E0.1988\n"
+             "G1 X37.593 Y106.816 E0.1997\n"
+             "G1 X33.799 Y103.021 E0.2067\n"
+             "G1 X33.799 Y103.717 E0.2076\n"
+             "G1 X36.898 Y106.816 E0.2133\n"
+             "G1 X36.202 Y106.816 E0.2143\n"
+             "G1 X33.799 Y104.413 E0.2187\n"
+             "G1 X33.799 Y105.109 E0.2196\n"
+             "G1 X35.506 Y106.816 E0.2227\n"
+             "G1 X34.81 Y106.816 E0.2237\n"
+             "G1 X33.799 Y105.805 E0.2255\n"
+             "G1 X33.799 Y106.5 E0.2264\n"
+             "G1 X34.114 Y106.816 E0.227\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X65.646 Y108.282 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X65.646 Y100.955 E0.0096 F300\n"
+             "G1 X65.646 Y100.857 E0.0097\n"
+             "G1 X65.658 Y100.759 E0.0098\n"
+             "G1 X65.689 Y100.662 E0.01\n"
+             "G1 X65.783 Y100.631 E0.0101\n"
+             "G1 X65.88 Y100.619 E0.0102\n"
+             "G1 X65.977 Y100.619 E0.0104\n"
+             "G1 X68.299 Y100.619 E0.0134\n"
+             "G1 X68.396 Y100.619 E0.0135\n"
+             "G1 X68.495 Y100.609 E0.0136\n"
+             "G1 X68.603 Y100.576 E0.0138\n"
+             "G1 X68.636 Y100.468 E0.0139\n"
+             "G1 X68.646 Y100.369 E0.0141\n"
+             "G1 X68.646 Y100.271 E0.0142\n"
+             "G1 X68.646 Y95.957 E0.0198\n"
+             "G1 X68.646 Y95.859 E0.02\n"
+             "G1 X68.658 Y95.761 E0.0201\n"
+             "G1 X68.688 Y95.663 E0.0202\n"
+             "G1 X68.771 Y95.634 E0.0203\n"
+             "G1 X68.865 Y95.62 E0.0205\n"
+             "G1 X68.959 Y95.619 E0.0206\n"
+             "G1 X69.334 Y95.619 E0.0211\n"
+             "G1 X69.427 Y95.62 E0.0212\n"
+             "G1 X69.521 Y95.634 E0.0213\n"
+             "G1 X69.604 Y95.663 E0.0214\n"
+             "G1 X69.634 Y95.761 E0.0216\n"
+             "G1 X69.646 Y95.859 E0.0217\n"
+             "G1 X69.646 Y95.957 E0.0218\n"
+             "G1 X69.646 Y100.075 E0.0272\n"
+             "G1 X69.646 Y100.369 E0.0276\n"
+             "G1 X69.656 Y100.468 E0.0277\n"
+             "G1 X69.689 Y100.576 E0.0279\n"
+             "G1 X69.797 Y100.609 E0.028\n"
+             "G1 X69.896 Y100.619 E0.0282\n"
+             "G1 X69.99 Y100.619 E0.0283\n"
+             "G1 X71.302 Y100.619 E0.03\n"
+             "G1 X71.396 Y100.619 E0.0301\n"
+             "G1 X71.495 Y100.609 E0.0303\n"
+             "G1 X71.603 Y100.576 E0.0304\n"
+             "G1 X71.636 Y100.468 E0.0305\n"
+             "G1 X71.646 Y100.369 E0.0307\n"
+             "G1 X71.646 Y100.271 E0.0308\n"
+             "G1 X71.646 Y95.957 E0.0364\n"
+             "G1 X71.646 Y95.859 E0.0366\n"
+             "G1 X71.658 Y95.761 E0.0367\n"
+             "G1 X71.688 Y95.663 E0.0368\n"
+             "G1 X71.771 Y95.634 E0.037\n"
+             "G1 X71.865 Y95.62 E0.0371\n"
+             "G1 X71.959 Y95.619 E0.0372\n"
+             "G1 X72.334 Y95.619 E0.0377\n"
+             "G1 X72.427 Y95.62 E0.0378\n"
+             "G1 X72.521 Y95.634 E0.0379\n"
+             "G1 X72.604 Y95.663 E0.038\n"
+             "G1 X72.634 Y95.761 E0.0382\n"
+             "G1 X72.646 Y95.859 E0.0383\n"
+             "G1 X72.646 Y95.957 E0.0384\n"
+             "G1 X72.646 Y100.271 E0.0441\n"
+             "G1 X72.646 Y100.369 E0.0442\n"
+             "G1 X72.656 Y100.468 E0.0443\n"
+             "G1 X72.689 Y100.576 E0.0445\n"
+             "G1 X72.797 Y100.609 E0.0446\n"
+             "G1 X72.896 Y100.619 E0.0448\n"
+             "G1 X72.99 Y100.619 E0.0449\n"
+             "G1 X74.302 Y100.619 E0.0466\n"
+             "G1 X74.396 Y100.619 E0.0467\n"
+             "G1 X74.495 Y100.609 E0.0469\n"
+             "G1 X74.603 Y100.576 E0.047\n"
+             "G1 X74.636 Y100.468 E0.0471\n"
+             "G1 X74.646 Y100.369 E0.0473\n"
+             "G1 X74.646 Y100.271 E0.0474\n"
+             "G1 X74.646 Y95.957 E0.053\n"
+             "G1 X74.646 Y95.859 E0.0532\n"
+             "G1 X74.658 Y95.761 E0.0533\n"
+             "G1 X74.688 Y95.663 E0.0534\n"
+             "G1 X74.771 Y95.634 E0.0536\n"
+             "G1 X74.865 Y95.62 E0.0537\n"
+             "G1 X74.959 Y95.619 E0.0538\n"
+             "G1 X75.334 Y95.619 E0.0543\n"
+             "G1 X75.427 Y95.62 E0.0544\n"
+             "G1 X75.521 Y95.634 E0.0545\n"
+             "G1 X75.604 Y95.663 E0.0547\n"
+             "G1 X75.634 Y95.761 E0.0548\n"
+             "G1 X75.646 Y95.859 E0.0549\n"
+             "G1 X75.646 Y95.957 E0.055\n"
+             "G1 X75.646 Y100.271 E0.0607\n"
+             "G1 X75.646 Y100.369 E0.0608\n"
+             "G1 X75.656 Y100.468 E0.0609\n"
+             "G1 X75.689 Y100.576 E0.0611\n"
+             "G1 X75.797 Y100.609 E0.0612\n"
+             "G1 X75.896 Y100.619 E0.0614\n"
+             "G1 X75.99 Y100.619 E0.0615\n"
+             "G1 X77.302 Y100.619 E0.0632\n"
+             "G1 X77.396 Y100.619 E0.0633\n"
+             "G1 X77.495 Y100.609 E0.0635\n"
+             "G1 X77.603 Y100.576 E0.0636\n"
+             "G1 X77.636 Y100.468 E0.0638\n"
+             "G1 X77.646 Y100.369 E0.0639\n"
+             "G1 X77.646 Y100.271 E0.064\n"
+             "G1 X77.646 Y95.957 E0.0697\n"
+             "G1 X77.646 Y95.859 E0.0698\n"
+             "G1 X77.658 Y95.761 E0.0699\n"
+             "G1 X77.688 Y95.663 E0.07\n"
+             "G1 X77.771 Y95.634 E0.0702\n"
+             "G1 X77.865 Y95.62 E0.0703\n"
+             "G1 X77.959 Y95.619 E0.0704\n"
+             "G1 X78.334 Y95.619 E0.0709\n"
+             "G1 X78.427 Y95.62 E0.071\n"
+             "G1 X78.521 Y95.634 E0.0711\n"
+             "G1 X78.604 Y95.663 E0.0713\n"
+             "G1 X78.634 Y95.761 E0.0714\n"
+             "G1 X78.646 Y95.859 E0.0715\n"
+             "G1 X78.646 Y95.957 E0.0716\n"
+             "G1 X78.646 Y100.271 E0.0773\n"
+             "G1 X78.646 Y100.369 E0.0774\n"
+             "G1 X78.656 Y100.468 E0.0775\n"
+             "G1 X78.689 Y100.576 E0.0777\n"
+             "G1 X78.797 Y100.609 E0.0778\n"
+             "G1 X78.896 Y100.619 E0.078\n"
+             "G1 X78.99 Y100.619 E0.0781\n"
+             "G1 X80.302 Y100.619 E0.0798\n"
+             "G1 X80.396 Y100.619 E0.0799\n"
+             "G1 X80.495 Y100.609 E0.0801\n"
+             "G1 X80.603 Y100.576 E0.0802\n"
+             "G1 X80.636 Y100.468 E0.0804\n"
+             "G1 X80.646 Y100.369 E0.0805\n"
+             "G1 X80.646 Y100.271 E0.0806\n"
+             "G1 X80.646 Y95.957 E0.0863\n"
+             "G1 X80.646 Y95.859 E0.0864\n"
+             "G1 X80.658 Y95.761 E0.0865\n"
+             "G1 X80.688 Y95.663 E0.0866\n"
+             "G1 X80.771 Y95.634 E0.0868\n"
+             "G1 X80.865 Y95.62 E0.0869\n"
+             "G1 X80.959 Y95.619 E0.087\n"
+             "G1 X81.334 Y95.619 E0.0875\n"
+             "G1 X81.427 Y95.62 E0.0876\n"
+             "G1 X81.521 Y95.634 E0.0877\n"
+             "G1 X81.604 Y95.663 E0.0879\n"
+             "G1 X81.634 Y95.761 E0.088\n"
+             "G1 X81.646 Y95.859 E0.0881\n"
+             "G1 X81.646 Y95.957 E0.0883\n"
+             "G1 X81.646 Y100.271 E0.0939\n"
+             "G1 X81.646 Y100.369 E0.094\n"
+             "G1 X81.656 Y100.468 E0.0941\n"
+             "G1 X81.689 Y100.576 E0.0943\n"
+             "G1 X81.797 Y100.609 E0.0944\n"
+             "G1 X81.896 Y100.619 E0.0946\n"
+             "G1 X81.99 Y100.619 E0.0947\n"
+             "G1 X83.302 Y100.619 E0.0964\n"
+             "G1 X83.396 Y100.619 E0.0965\n"
+             "G1 X83.495 Y100.609 E0.0967\n"
+             "G1 X83.603 Y100.576 E0.0968\n"
+             "G1 X83.636 Y100.468 E0.097\n"
+             "G1 X83.646 Y100.369 E0.0971\n"
+             "G1 X83.646 Y100.271 E0.0972\n"
+             "G1 X83.646 Y95.957 E0.1029\n"
+             "G1 X83.646 Y95.859 E0.103\n"
+             "G1 X83.658 Y95.761 E0.1031\n"
+             "G1 X83.688 Y95.663 E0.1033\n"
+             "G1 X83.771 Y95.634 E0.1034\n"
+             "G1 X83.865 Y95.62 E0.1035\n"
+             "G1 X83.959 Y95.619 E0.1036\n"
+             "G1 X84.334 Y95.619 E0.1041\n"
+             "G1 X84.427 Y95.62 E0.1042\n"
+             "G1 X84.521 Y95.634 E0.1043\n"
+             "G1 X84.604 Y95.663 E0.1045\n"
+             "G1 X84.634 Y95.761 E0.1046\n"
+             "G1 X84.646 Y95.859 E0.1047\n"
+             "G1 X84.646 Y95.957 E0.1049\n"
+             "G1 X84.646 Y100.271 E0.1105\n"
+             "G1 X84.646 Y100.369 E0.1106\n"
+             "G1 X84.656 Y100.468 E0.1108\n"
+             "G1 X84.689 Y100.576 E0.1109\n"
+             "G1 X84.797 Y100.609 E0.111\n"
+             "G1 X84.896 Y100.619 E0.1112\n"
+             "G1 X84.99 Y100.619 E0.1113\n"
+             "G1 X86.302 Y100.619 E0.113\n"
+             "G1 X86.396 Y100.619 E0.1131\n"
+             "G1 X86.495 Y100.609 E0.1133\n"
+             "G1 X86.603 Y100.576 E0.1134\n"
+             "G1 X86.636 Y100.468 E0.1136\n"
+             "G1 X86.646 Y100.369 E0.1137\n"
+             "G1 X86.646 Y100.271 E0.1138\n"
+             "G1 X86.646 Y95.957 E0.1195\n"
+             "G1 X86.646 Y95.859 E0.1196\n"
+             "G1 X86.658 Y95.761 E0.1197\n"
+             "G1 X86.688 Y95.663 E0.1199\n"
+             "G1 X86.771 Y95.634 E0.12\n"
+             "G1 X86.865 Y95.62 E0.1201\n"
+             "G1 X86.959 Y95.619 E0.1202\n"
+             "G1 X87.334 Y95.619 E0.1207\n"
+             "G1 X87.427 Y95.62 E0.1208\n"
+             "G1 X87.521 Y95.634 E0.121\n"
+             "G1 X87.604 Y95.663 E0.1211\n"
+             "G1 X87.634 Y95.761 E0.1212\n"
+             "G1 X87.646 Y95.859 E0.1213\n"
+             "G1 X87.646 Y95.957 E0.1215\n"
+             "G1 X87.646 Y100.271 E0.1271\n"
+             "G1 X87.646 Y100.369 E0.1272\n"
+             "G1 X87.656 Y100.468 E0.1274\n"
+             "G1 X87.689 Y100.576 E0.1275\n"
+             "G1 X87.797 Y100.609 E0.1277\n"
+             "G1 X87.896 Y100.619 E0.1278\n"
+             "G1 X87.99 Y100.619 E0.1279\n"
+             "G1 X89.302 Y100.619 E0.1296\n"
+             "G1 X89.396 Y100.619 E0.1297\n"
+             "G1 X89.495 Y100.609 E0.1299\n"
+             "G1 X89.603 Y100.576 E0.13\n"
+             "G1 X89.636 Y100.468 E0.1302\n"
+             "G1 X89.646 Y100.369 E0.1303\n"
+             "G1 X89.646 Y100.271 E0.1304\n"
+             "G1 X89.646 Y95.957 E0.1361\n"
+             "G1 X89.646 Y95.859 E0.1362\n"
+             "G1 X89.658 Y95.761 E0.1363\n"
+             "G1 X89.688 Y95.663 E0.1365\n"
+             "G1 X89.771 Y95.634 E0.1366\n"
+             "G1 X89.865 Y95.62 E0.1367\n"
+             "G1 X89.959 Y95.619 E0.1368\n"
+             "G1 X90.334 Y95.619 E0.1373\n"
+             "G1 X90.427 Y95.62 E0.1374\n"
+             "G1 X90.521 Y95.634 E0.1376\n"
+             "G1 X90.604 Y95.663 E0.1377\n"
+             "G1 X90.634 Y95.761 E0.1378\n"
+             "G1 X90.646 Y95.859 E0.1379\n"
+             "G1 X90.646 Y95.957 E0.1381\n"
+             "G1 X90.646 Y100.271 E0.1437\n"
+             "G1 X90.646 Y100.369 E0.1438\n"
+             "G1 X90.656 Y100.468 E0.144\n"
+             "G1 X90.689 Y100.576 E0.1441\n"
+             "G1 X90.797 Y100.609 E0.1443\n"
+             "G1 X90.896 Y100.619 E0.1444\n"
+             "G1 X90.99 Y100.619 E0.1445\n"
+             "G1 X92.302 Y100.619 E0.1462\n"
+             "G1 X92.396 Y100.619 E0.1463\n"
+             "G1 X92.495 Y100.609 E0.1465\n"
+             "G1 X92.603 Y100.576 E0.1466\n"
+             "G1 X92.636 Y100.468 E0.1468\n"
+             "G1 X92.646 Y100.369 E0.1469\n"
+             "G1 X92.646 Y100.271 E0.147\n"
+             "G1 X92.646 Y95.957 E0.1527\n"
+             "G1 X92.646 Y95.859 E0.1528\n"
+             "G1 X92.658 Y95.761 E0.1529\n"
+             "G1 X92.688 Y95.663 E0.1531\n"
+             "G1 X92.771 Y95.634 E0.1532\n"
+             "G1 X92.865 Y95.62 E0.1533\n"
+             "G1 X92.959 Y95.619 E0.1534\n"
+             "G1 X93.334 Y95.619 E0.1539\n"
+             "G1 X93.427 Y95.62 E0.154\n"
+             "G1 X93.521 Y95.634 E0.1542\n"
+             "G1 X93.604 Y95.663 E0.1543\n"
+             "G1 X93.634 Y95.761 E0.1544\n"
+             "G1 X93.646 Y95.859 E0.1545\n"
+             "G1 X93.646 Y95.957 E0.1547\n"
+             "G1 X93.646 Y100.271 E0.1603\n"
+             "G1 X93.646 Y100.369 E0.1604\n"
+             "G1 X93.656 Y100.468 E0.1606\n"
+             "G1 X93.689 Y100.576 E0.1607\n"
+             "G1 X93.797 Y100.609 E0.1609\n"
+             "G1 X93.896 Y100.619 E0.161\n"
+             "G1 X93.993 Y100.619 E0.1611\n"
+             "G1 X96.315 Y100.619 E0.1642\n"
+             "G1 X96.412 Y100.619 E0.1643\n"
+             "G1 X96.509 Y100.631 E0.1644\n"
+             "G1 X96.603 Y100.662 E0.1645\n"
+             "G1 X96.634 Y100.759 E0.1647\n"
+             "G1 X96.646 Y100.857 E0.1648\n"
+             "G1 X96.646 Y100.955 E0.1649\n"
+             "G1 X96.646 Y108.282 E0.1745\n"
+             "G1 X96.646 Y108.38 E0.1746\n"
+             "G1 X96.634 Y108.478 E0.1748\n"
+             "G1 X96.602 Y108.576 E0.1749\n"
+             "G1 X96.504 Y108.607 E0.175\n"
+             "G1 X96.405 Y108.619 E0.1752\n"
+             "G1 X96.307 Y108.619 E0.1753\n"
+             "G1 X65.985 Y108.619 E0.2149\n"
+             "G1 X65.887 Y108.619 E0.2151\n"
+             "G1 X65.789 Y108.607 E0.2152\n"
+             "G1 X65.689 Y108.576 E0.2153\n"
+             "G1 X65.658 Y108.478 E0.2155\n"
+             "G1 X65.646 Y108.38 E0.2156\n"
+             "G1 X65.646 Y108.282 F300\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X67.027 Y106.546 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X67.062 Y106.546 E0 F300\n"
+             "G1 X67.933 Y106.547 E0.0013\n"
+             "G1 X68.03 Y106.544 E0.0014\n"
+             "G1 X68.127 Y106.527 E0.0016\n"
+             "G1 X68.224 Y106.496 E0.0017\n"
+             "G1 X68.238 Y106.481 E0.0018\n"
+             "G1 X68.269 Y106.385 E0.0019\n"
+             "G1 X68.286 Y106.288 E0.0021\n"
+             "G1 X68.289 Y106.191 E0.0022\n"
+             "G1 X68.289 Y102.608 E0.0074\n"
+             "G1 X68.289 Y102.512 E0.0075\n"
+             "G1 X68.289 Y102.378 E0.0077\n"
+             "G1 X68.345 Y102.246 E0.0079\n"
+             "G1 X68.483 Y102.204 E0.0081\n"
+             "G1 X68.61 Y102.191 E0.0083\n"
+             "G1 X68.702 Y102.191 E0.0084\n"
+             "G1 X69.161 Y102.191 E0.0091\n"
+             "G1 X69.253 Y102.191 E0.0092\n"
+             "G1 X69.381 Y102.203 E0.0094\n"
+             "G1 X69.519 Y102.246 E0.0096\n"
+             "G1 X69.562 Y102.384 E0.0098\n"
+             "G1 X69.574 Y102.512 E0.01\n"
+             "G1 X69.574 Y102.606 E0.0102\n"
+             "G1 X69.574 Y103.715 E0.0118\n"
+             "G1 X69.574 Y103.742 F300\n"
+             "G1 X69.573 Y103.815\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X67.968 Y102.191 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X67.877 Y102.191 E0.0001 F300\n"
+             "G1 X67.113 Y102.191 E0.0012\n"
+             "G1 X67.064 Y102.191 F300\n"
+             "G1 X67.013 Y102.192\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X58.446 Y102.231 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X58.446 Y102.606 E0.0005 F300\n"
+             "G1 X58.445 Y102.7 E0.0006\n"
+             "G1 X58.43 Y102.794 E0.0007\n"
+             "G1 X58.402 Y102.876 E0.0009\n"
+             "G1 X58.304 Y102.907 E0.001\n"
+             "G1 X58.206 Y102.919 E0.0011\n"
+             "G1 X58.108 Y102.919 E0.0013\n"
+             "G1 X53.794 Y102.919 E0.007\n"
+             "G1 X53.696 Y102.919 E0.0071\n"
+             "G1 X53.597 Y102.929 E0.0072\n"
+             "G1 X53.489 Y102.962 E0.0074\n"
+             "G1 X53.456 Y103.069 E0.0075\n"
+             "G1 X53.446 Y103.169 E0.0077\n"
+             "G1 X53.446 Y103.262 E0.0078\n"
+             "G1 X53.446 Y104.575 E0.0095\n"
+             "G1 X53.446 Y104.669 E0.0096\n"
+             "G1 X53.456 Y104.768 E0.0098\n"
+             "G1 X53.489 Y104.876 E0.0099\n"
+             "G1 X53.597 Y104.909 E0.0101\n"
+             "G1 X53.696 Y104.919 E0.0102\n"
+             "G1 X53.794 Y104.919 E0.0103\n"
+             "G1 X58.108 Y104.919 E0.016\n"
+             "G1 X58.206 Y104.919 E0.0162\n"
+             "G1 X58.304 Y104.93 E0.0163\n"
+             "G1 X58.402 Y104.961 E0.0164\n"
+             "G1 X58.43 Y105.044 E0.0165\n"
+             "G1 X58.445 Y105.137 E0.0167\n"
+             "G1 X58.446 Y105.231 E0.0168\n"
+             "G1 X58.446 Y105.606 E0.0173\n"
+             "G1 X58.445 Y105.7 E0.0174\n"
+             "G1 X58.43 Y105.794 E0.0175\n"
+             "G1 X58.402 Y105.876 E0.0176\n"
+             "G1 X58.304 Y105.907 E0.0178\n"
+             "G1 X58.206 Y105.919 E0.0179\n"
+             "G1 X58.108 Y105.919 E0.018\n"
+             "G1 X53.794 Y105.919 E0.0237\n"
+             "G1 X53.696 Y105.919 E0.0239\n"
+             "G1 X53.597 Y105.929 E0.024\n"
+             "G1 X53.489 Y105.962 E0.0242\n"
+             "G1 X53.456 Y106.069 E0.0243\n"
+             "G1 X53.446 Y106.169 E0.0244\n"
+             "G1 X53.446 Y106.262 E0.0246\n"
+             "G1 X53.446 Y107.575 E0.0263\n"
+             "G1 X53.446 Y107.669 E0.0264\n"
+             "G1 X53.456 Y107.768 E0.0266\n"
+             "G1 X53.489 Y107.876 E0.0267\n"
+             "G1 X53.597 Y107.909 E0.0269\n"
+             "G1 X53.696 Y107.919 E0.027\n"
+             "G1 X53.794 Y107.919 E0.0271\n"
+             "G1 X58.108 Y107.919 E0.0328\n"
+             "G1 X58.206 Y107.919 E0.0329\n"
+             "G1 X58.304 Y107.93 E0.0331\n"
+             "G1 X58.402 Y107.961 E0.0332\n"
+             "G1 X58.43 Y108.044 E0.0333\n"
+             "G1 X58.445 Y108.137 E0.0335\n"
+             "G1 X58.446 Y108.231 E0.0336\n"
+             "G1 X58.446 Y108.606 E0.0341\n"
+             "G1 X58.445 Y108.7 E0.0342\n"
+             "G1 X58.43 Y108.794 E0.0343\n"
+             "G1 X58.402 Y108.876 E0.0344\n"
+             "G1 X58.304 Y108.907 E0.0346\n"
+             "G1 X58.206 Y108.919 E0.0347\n"
+             "G1 X58.108 Y108.919 E0.0348\n"
+             "G1 X53.794 Y108.919 E0.0405\n"
+             "G1 X53.696 Y108.919 E0.0407\n"
+             "G1 X53.597 Y108.929 E0.0408\n"
+             "G1 X53.489 Y108.962 E0.0409\n"
+             "G1 X53.456 Y109.069 E0.0411\n"
+             "G1 X53.446 Y109.169 E0.0412\n"
+             "G1 X53.446 Y109.262 E0.0414\n"
+             "G1 X53.446 Y110.575 E0.0431\n"
+             "G1 X53.446 Y110.669 E0.0432\n"
+             "G1 X53.456 Y110.768 E0.0433\n"
+             "G1 X53.489 Y110.876 E0.0435\n"
+             "G1 X53.597 Y110.909 E0.0436\n"
+             "G1 X53.696 Y110.919 E0.0438\n"
+             "G1 X53.794 Y110.919 E0.0439\n"
+             "G1 X58.108 Y110.919 E0.0496\n"
+             "G1 X58.206 Y110.919 E0.0497\n"
+             "G1 X58.304 Y110.93 E0.0499\n"
+             "G1 X58.402 Y110.961 E0.05\n"
+             "G1 X58.43 Y111.044 E0.0501\n"
+             "G1 X58.445 Y111.137 E0.0502\n"
+             "G1 X58.446 Y111.231 E0.0504\n"
+             "G1 X58.446 Y111.606 E0.0509\n"
+             "G1 X58.445 Y111.7 E0.051\n"
+             "G1 X58.43 Y111.794 E0.0511\n"
+             "G1 X58.402 Y111.876 E0.0512\n"
+             "G1 X58.304 Y111.907 E0.0514\n"
+             "G1 X58.206 Y111.919 E0.0515\n"
+             "G1 X58.108 Y111.919 E0.0516\n"
+             "G1 X53.794 Y111.919 E0.0573\n"
+             "G1 X53.696 Y111.919 E0.0575\n"
+             "G1 X53.597 Y111.929 E0.0576\n"
+             "G1 X53.489 Y111.962 E0.0577\n"
+             "G1 X53.456 Y112.069 E0.0579\n"
+             "G1 X53.446 Y112.169 E0.058\n"
+             "G1 X53.446 Y112.262 E0.0581\n"
+             "G1 X53.446 Y113.575 E0.0599\n"
+             "G1 X53.446 Y113.669 E0.06\n"
+             "G1 X53.456 Y113.768 E0.0601\n"
+             "G1 X53.489 Y113.876 E0.0603\n"
+             "G1 X53.597 Y113.909 E0.0604\n"
+             "G1 X53.696 Y113.919 E0.0606\n"
+             "G1 X53.794 Y113.919 E0.0607\n"
+             "G1 X58.108 Y113.919 E0.0664\n"
+             "G1 X58.206 Y113.919 E0.0665\n"
+             "G1 X58.304 Y113.93 E0.0667\n"
+             "G1 X58.402 Y113.961 E0.0668\n"
+             "G1 X58.43 Y114.044 E0.0669\n"
+             "G1 X58.445 Y114.137 E0.067\n"
+             "G1 X58.446 Y114.231 E0.0672\n"
+             "G1 X58.446 Y114.606 E0.0676\n"
+             "G1 X58.445 Y114.7 E0.0678\n"
+             "G1 X58.43 Y114.794 E0.0679\n"
+             "G1 X58.402 Y114.876 E0.068\n"
+             "G1 X58.304 Y114.907 E0.0681\n"
+             "G1 X58.206 Y114.919 E0.0683\n"
+             "G1 X58.108 Y114.919 E0.0684\n"
+             "G1 X53.794 Y114.919 E0.0741\n"
+             "G1 X53.696 Y114.919 E0.0742\n"
+             "G1 X53.597 Y114.929 E0.0744\n"
+             "G1 X53.489 Y114.962 E0.0745\n"
+             "G1 X53.456 Y115.069 E0.0747\n"
+             "G1 X53.446 Y115.169 E0.0748\n"
+             "G1 X53.446 Y115.265 E0.0749\n"
+             "G1 X53.446 Y117.588 E0.078\n"
+             "G1 X53.446 Y117.685 E0.0781\n"
+             "G1 X53.433 Y117.782 E0.0783\n"
+             "G1 X53.403 Y117.876 E0.0784\n"
+             "G1 X53.305 Y117.907 E0.0785\n"
+             "G1 X53.208 Y117.919 E0.0787\n"
+             "G1 X53.11 Y117.919 E0.0788\n"
+             "G1 X45.782 Y117.919 E0.0885\n"
+             "G1 X45.685 Y117.919 E0.0886\n"
+             "G1 X45.587 Y117.907 E0.0887\n"
+             "G1 X45.488 Y117.874 E0.0889\n"
+             "G1 X45.458 Y117.776 E0.089\n"
+             "G1 X45.446 Y117.678 E0.0891\n"
+             "G1 X45.446 Y117.58 E0.0893\n"
+             "G1 X45.446 Y87.257 E0.1293\n"
+             "G1 X45.446 Y87.159 E0.1295\n"
+             "G1 X45.458 Y87.061 E0.1296\n"
+             "G1 X45.489 Y86.961 E0.1297\n"
+             "G1 X45.587 Y86.931 E0.1299\n"
+             "G1 X45.685 Y86.919 E0.13\n"
+             "G1 X45.782 Y86.919 E0.1301\n"
+             "G1 X53.11 Y86.919 E0.1398\n"
+             "G1 X53.208 Y86.919 E0.14\n"
+             "G1 X53.305 Y86.931 E0.1401\n"
+             "G1 X53.403 Y86.961 E0.1402\n"
+             "G1 X53.433 Y87.056 E0.1404\n"
+             "G1 X53.446 Y87.153 E0.1405\n"
+             "G1 X53.446 Y87.249 E0.1406\n"
+             "G1 X53.446 Y89.378 E0.1434\n"
+             "G1 X53.446 Y89.669 E0.1438\n"
+             "G1 X53.456 Y89.768 E0.1439\n"
+             "G1 X53.489 Y89.876 E0.1441\n"
+             "G1 X53.597 Y89.909 E0.1442\n"
+             "G1 X53.696 Y89.919 E0.1444\n"
+             "G1 X53.794 Y89.919 E0.1445\n"
+             "G1 X58.108 Y89.919 E0.1502\n"
+             "G1 X58.206 Y89.919 E0.1503\n"
+             "G1 X58.304 Y89.93 E0.1505\n"
+             "G1 X58.402 Y89.961 E0.1506\n"
+             "G1 X58.43 Y90.044 E0.1507\n"
+             "G1 X58.445 Y90.137 E0.1508\n"
+             "G1 X58.446 Y90.231 E0.151\n"
+             "G1 X58.446 Y90.606 E0.1515\n"
+             "G1 X58.445 Y90.7 E0.1516\n"
+             "G1 X58.43 Y90.794 E0.1517\n"
+             "G1 X58.402 Y90.876 E0.1518\n"
+             "G1 X58.304 Y90.907 E0.152\n"
+             "G1 X58.206 Y90.919 E0.1521\n"
+             "G1 X58.108 Y90.919 E0.1522\n"
+             "G1 X53.794 Y90.919 E0.1579\n"
+             "G1 X53.696 Y90.919 E0.1581\n"
+             "G1 X53.597 Y90.929 E0.1582\n"
+             "G1 X53.489 Y90.962 E0.1583\n"
+             "G1 X53.456 Y91.069 E0.1585\n"
+             "G1 X53.446 Y91.169 E0.1586\n"
+             "G1 X53.446 Y91.262 E0.1587\n"
+             "G1 X53.446 Y92.575 E0.1605\n"
+             "G1 X53.446 Y92.669 E0.1606\n"
+             "G1 X53.456 Y92.768 E0.1607\n"
+             "G1 X53.489 Y92.876 E0.1609\n"
+             "G1 X53.597 Y92.909 E0.161\n"
+             "G1 X53.696 Y92.919 E0.1612\n"
+             "G1 X53.794 Y92.919 E0.1613\n"
+             "G1 X58.108 Y92.919 E0.167\n"
+             "G1 X58.206 Y92.919 E0.1671\n"
+             "G1 X58.304 Y92.93 E0.1672\n"
+             "G1 X58.402 Y92.961 E0.1674\n"
+             "G1 X58.43 Y93.044 E0.1675\n"
+             "G1 X58.445 Y93.137 E0.1676\n"
+             "G1 X58.446 Y93.231 E0.1678\n"
+             "G1 X58.446 Y93.606 E0.1682\n"
+             "G1 X58.445 Y93.7 E0.1684\n"
+             "G1 X58.43 Y93.794 E0.1685\n"
+             "G1 X58.402 Y93.876 E0.1686\n"
+             "G1 X58.304 Y93.907 E0.1687\n"
+             "G1 X58.206 Y93.919 E0.1689\n"
+             "G1 X58.108 Y93.919 E0.169\n"
+             "G1 X53.794 Y93.919 E0.1747\n"
+             "G1 X53.696 Y93.919 E0.1748\n"
+             "G1 X53.597 Y93.929 E0.175\n"
+             "G1 X53.489 Y93.962 E0.1751\n"
+             "G1 X53.456 Y94.069 E0.1753\n"
+             "G1 X53.446 Y94.169 E0.1754\n"
+             "G1 X53.446 Y94.262 E0.1755\n"
+             "G1 X53.446 Y95.575 E0.1773\n"
+             "G1 X53.446 Y95.669 E0.1774\n"
+             "G1 X53.456 Y95.768 E0.1775\n"
+             "G1 X53.489 Y95.876 E0.1777\n"
+             "G1 X53.597 Y95.909 E0.1778\n"
+             "G1 X53.696 Y95.919 E0.1779\n"
+             "G1 X53.794 Y95.919 E0.1781\n"
+             "G1 X58.108 Y95.919 E0.1838\n"
+             "G1 X58.206 Y95.919 E0.1839\n"
+             "G1 X58.304 Y95.93 E0.184\n"
+             "G1 X58.402 Y95.961 E0.1842\n"
+             "G1 X58.43 Y96.044 E0.1843\n"
+             "G1 X58.445 Y96.137 E0.1844\n"
+             "G1 X58.446 Y96.231 E0.1845\n"
+             "G1 X58.446 Y96.606 E0.185\n"
+             "G1 X58.445 Y96.7 E0.1852\n"
+             "G1 X58.43 Y96.794 E0.1853\n"
+             "G1 X58.402 Y96.876 E0.1854\n"
+             "G1 X58.304 Y96.907 E0.1855\n"
+             "G1 X58.206 Y96.919 E0.1857\n"
+             "G1 X58.108 Y96.919 E0.1858\n"
+             "G1 X53.794 Y96.919 E0.1915\n"
+             "G1 X53.696 Y96.919 E0.1916\n"
+             "G1 X53.597 Y96.929 E0.1918\n"
+             "G1 X53.489 Y96.962 E0.1919\n"
+             "G1 X53.456 Y97.069 E0.1921\n"
+             "G1 X53.446 Y97.169 E0.1922\n"
+             "G1 X53.446 Y97.262 E0.1923\n"
+             "G1 X53.446 Y98.575 E0.194\n"
+             "G1 X53.446 Y98.669 E0.1942\n"
+             "G1 X53.456 Y98.768 E0.1943\n"
+             "G1 X53.489 Y98.876 E0.1945\n"
+             "G1 X53.597 Y98.909 E0.1946\n"
+             "G1 X53.696 Y98.919 E0.1947\n"
+             "G1 X53.794 Y98.919 E0.1949\n"
+             "G1 X58.108 Y98.919 E0.2006\n"
+             "G1 X58.206 Y98.919 E0.2007\n"
+             "G1 X58.304 Y98.93 E0.2008\n"
+             "G1 X58.402 Y98.961 E0.201\n"
+             "G1 X58.43 Y99.044 E0.2011\n"
+             "G1 X58.445 Y99.137 E0.2012\n"
+             "G1 X58.446 Y99.231 E0.2013\n"
+             "G1 X58.446 Y99.606 E0.2018\n"
+             "G1 X58.445 Y99.7 E0.2019\n"
+             "G1 X58.43 Y99.794 E0.2021\n"
+             "G1 X58.402 Y99.876 E0.2022\n"
+             "G1 X58.304 Y99.907 E0.2023\n"
+             "G1 X58.206 Y99.919 E0.2025\n"
+             "G1 X58.108 Y99.919 E0.2026\n"
+             "G1 X53.794 Y99.919 E0.2083\n"
+             "G1 X53.696 Y99.919 E0.2084\n"
+             "G1 X53.597 Y99.929 E0.2085\n"
+             "G1 X53.489 Y99.962 E0.2087\n"
+             "G1 X53.456 Y100.069 E0.2088\n"
+             "G1 X53.446 Y100.169 E0.209\n"
+             "G1 X53.446 Y100.262 E0.2091\n"
+             "G1 X53.446 Y101.575 E0.2108\n"
+             "G1 X53.446 Y101.669 E0.211\n"
+             "G1 X53.456 Y101.768 E0.2111\n"
+             "G1 X53.489 Y101.876 E0.2112\n"
+             "G1 X53.597 Y101.909 E0.2114\n"
+             "G1 X53.696 Y101.919 E0.2115\n"
+             "G1 X53.794 Y101.919 E0.2117\n"
+             "G1 X58.108 Y101.919 E0.2174\n"
+             "G1 X58.206 Y101.919 E0.2175\n"
+             "G1 X58.304 Y101.93 E0.2176\n"
+             "G1 X58.402 Y101.961 E0.2178\n"
+             "G1 X58.43 Y102.044 E0.2179\n"
+             "G1 X58.444 Y102.131 E0.218\n"
+             "G1 X58.445 Y102.137 F300\n"
+             "G1 X58.446 Y102.231\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X50.725 Y102.387 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X49.413 Y102.387 E0.0017 F300\n"
+             "G1 X49.313 Y102.387 F300\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X48.694 Y102.387 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X48.586 Y102.387 E0.0001 F300\n"
+             "G1 X48.515 Y102.459 E0.0003\n"
+             "G1 X48.449 Y102.543 E0.0004\n"
+             "G1 X48.38 Y102.619 E0.0006\n"
+             "G1 X48.305 Y102.684 E0.0007\n"
+             "G1 X48.226 Y102.741 E0.0008\n"
+             "G1 X48.142 Y102.788 E0.0009\n"
+             "G1 X46.681 Y103.531 E0.0031\n"
+             "G1 X46.61 Y103.603 E0.0032\n"
+             "G1 X46.551 Y103.699 E0.0034\n"
+             "G1 X46.492 Y103.796 E0.0035\n"
+             "G1 X46.432 Y103.892 E0.0037\n"
+             "G1 X46.373 Y103.989 E0.0038\n"
+             "G1 X46.314 Y104.085 E0.0039\n"
+             "G1 X46.304 Y104.102 E0.0039\n"
+             "G1 X46.255 Y104.181 F300\n"
+             "G1 X46.252 Y104.187\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X48.064 Y101.945 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X46.661 Y101.231 E0.0021 F300\n"
+             "G1 X46.586 Y101.131 E0.0022\n"
+             "G1 X46.53 Y101.04 E0.0024\n"
+             "G1 X46.474 Y100.95 E0.0025\n"
+             "G1 X46.419 Y100.859 E0.0026\n"
+             "G1 X46.363 Y100.768 E0.0027\n"
+             "G1 X46.307 Y100.677 E0.0028\n"
+             "G1 X46.304 Y100.672 E0.0028\n"
+             "G1 X46.252 Y100.586 F300\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X49.16 Y89.69 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X49.16 Y88.143 E0.002 F300\n"
+             "G1 X49.158 Y88.046 E0.0022\n"
+             "G1 X49.143 Y87.949 E0.0023\n"
+             "G1 X49.114 Y87.852 E0.0024\n"
+             "G1 X49.098 Y87.829 E0.0025\n"
+             "G1 X49.004 Y87.798 E0.0026\n"
+             "G1 X48.91 Y87.781 E0.0027\n"
+             "G1 X48.816 Y87.777 E0.0028\n"
+             "G1 X47.875 Y87.776 E0.0041\n"
+             "G1 X47.781 Y87.779 E0.0042\n"
+             "G1 X47.687 Y87.794 E0.0043\n"
+             "G1 X47.593 Y87.823 E0.0045\n"
+             "G1 X47.563 Y87.856 E0.0045\n"
+             "G1 X47.534 Y87.951 E0.0047\n"
+             "G1 X47.52 Y88.047 E0.0048\n"
+             "G1 X47.518 Y88.142 E0.0049\n"
+             "G1 X47.518 Y89.861 E0.0072\n"
+             "G1 X47.522 Y89.957 E0.0073\n"
+             "G1 X47.54 Y90.052 E0.0074\n"
+             "G1 X47.573 Y90.148 E0.0076\n"
+             "G1 X47.61 Y90.164 E0.0076\n"
+             "G1 X47.707 Y90.191 E0.0077\n"
+             "G1 X47.804 Y90.203 E0.0079\n"
+             "G1 X47.901 Y90.204 E0.008\n"
+             "G1 X48.774 Y90.204 E0.0092\n"
+             "G1 X48.871 Y90.204 E0.0093\n"
+             "G1 X48.968 Y90.191 E0.0094\n"
+             "G1 X49.065 Y90.165 E0.0095\n"
+             "G1 X49.162 Y90.125 E0.0097\n"
+             "G1 X49.259 Y90.166 E0.0098\n"
+             "G1 X49.356 Y90.192 E0.01\n"
+             "G1 X49.453 Y90.204 E0.0101\n"
+             "G1 X49.55 Y90.204 E0.0102\n"
+             "G1 X51.491 Y90.204 E0.0128\n"
+             "G1 X51.588 Y90.203 E0.0129\n"
+             "G1 X51.685 Y90.191 E0.013\n"
+             "G1 X51.782 Y90.164 E0.0132\n"
+             "G1 X51.841 Y90.082 E0.0133\n"
+             "G1 X51.849 Y90.047 E0.0133\n"
+             "G1 X51.861 Y89.998 F300\n"
+             "G1 X51.867 Y89.949\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X51.808 Y114.128 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X51.809 Y114.195 E0.0001 F300\n"
+             "G1 X51.809 Y114.904 E0.001\n"
+             "G1 X51.809 Y114.993 E0.0011\n"
+             "G1 X51.803 Y115.047 E0.0012\n"
+             "G1 X51.793 Y115.147 F300\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X51.421 Y115.415 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X51.323 Y115.415 E0.0001 F300\n"
+             "G1 X47.982 Y115.415 E0.0046\n"
+             "G1 X47.884 Y115.411 E0.0047\n"
+             "G1 X47.786 Y115.395 E0.0048\n"
+             "G1 X47.687 Y115.368 E0.005\n"
+             "G1 X47.634 Y115.268 E0.0051\n"
+             "G1 X47.606 Y115.172 E0.0053\n"
+             "G1 X47.59 Y115.077 E0.0054\n"
+             "G1 X47.585 Y114.981 E0.0055\n"
+             "G1 X47.587 Y114.218 E0.0065\n"
+             "G1 X47.586 Y114.123 F300\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X50.31 Y116.683 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X50.341 Y116.683 E0 F300\n"
+             "G1 X51.376 Y116.682 E0.0014\n"
+             "G1 X51.47 Y116.681 E0.0015\n"
+             "G1 X51.564 Y116.67 E0.0017\n"
+             "G1 X51.658 Y116.649 E0.0018\n"
+             "G1 X51.724 Y116.623 E0.0019\n"
+             "G1 X51.754 Y116.552 E0.002\n"
+             "G1 X51.784 Y116.454 E0.0021\n"
+             "G1 X51.803 Y116.357 E0.0022\n"
+             "G1 X51.809 Y116.259 E0.0024\n"
+             "G1 X51.809 Y115.868 E0.0029\n"
+             "G1 X51.806 Y115.771 E0.003\n"
+             "G1 X51.791 Y115.673 F300\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X79.398 Y107.817 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X79.494 Y107.764 E0 F300\n"
+             "G1 X79.59 Y107.712 E0.0001\n"
+             "G1 X79.687 Y107.66 E0.0002\n"
+             "G1 X79.783 Y107.608 E0.0004\n"
+             "G1 X79.879 Y107.556 E0.0005\n"
+             "G1 X79.975 Y107.504 E0.0006\n"
+             "G1 X80.071 Y107.452 E0.0008\n"
+             "G1 X80.146 Y107.385 E0.0009\n"
+             "G1 X80.985 Y106.096 E0.0029\n"
+             "G1 X81.037 Y106.016 E0.0031\n"
+             "G1 X81.094 Y105.938 E0.0032\n"
+             "G1 X81.161 Y105.867 E0.0033\n"
+             "G1 X81.236 Y105.801 E0.0034\n"
+             "G1 X81.319 Y105.741 E0.0036\n"
+             "G1 X81.405 Y105.609 E0.0038\n"
+             "G1 X81.404 Y105.452 E0.004\n"
+             "G1 X81.404 Y105.295 E0.0042\n"
+             "G1 X81.319 Y105.162 E0.0044\n"
+             "G1 X81.235 Y105.102 E0.0045\n"
+             "G1 X81.16 Y105.036 E0.0047\n"
+             "G1 X81.094 Y104.964 E0.0048\n"
+             "G1 X81.036 Y104.887 E0.0049\n"
+             "G1 X80.984 Y104.806 E0.005\n"
+             "G1 X80.036 Y103.353 E0.0073\n"
+             "G1 X79.962 Y103.286 E0.0074\n"
+             "G1 X79.866 Y103.234 E0.0076\n"
+             "G1 X79.769 Y103.182 E0.0077\n"
+             "G1 X79.673 Y103.13 E0.0079\n"
+             "G1 X79.576 Y103.078 E0.008\n"
+             "G1 X79.48 Y103.025 E0.0081\n"
+             "G1 X79.384 Y102.973 E0.0082\n"
+             "G1 X79.375 Y102.968 E0.0082\n"
+             "G1 X79.287 Y102.921 F300\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X81.776 Y104.881 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X81.828 Y104.801 E0.0001 F300\n"
+             "G1 X82.771 Y103.352 E0.0024\n"
+             "G1 X82.845 Y103.286 E0.0025\n"
+             "G1 X82.941 Y103.234 E0.0027\n"
+             "G1 X83.037 Y103.182 E0.0028\n"
+             "G1 X83.133 Y103.129 E0.0029\n"
+             "G1 X83.229 Y103.077 E0.0031\n"
+             "G1 X83.326 Y103.025 E0.0032\n"
+             "G1 X83.422 Y102.973 E0.0033\n"
+             "G1 X83.43 Y102.969 E0.0033\n"
+             "G1 X83.518 Y102.921 F300\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X81.772 Y106.015 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X81.825 Y106.096 E0.0001 F300\n"
+             "G1 X82.665 Y107.386 E0.0021\n"
+             "G1 X82.74 Y107.452 E0.0023\n"
+             "G1 X82.836 Y107.504 E0.0024\n"
+             "G1 X82.933 Y107.556 E0.0026\n"
+             "G1 X83.029 Y107.608 E0.0027\n"
+             "G1 X83.125 Y107.66 E0.0028\n"
+             "G1 X83.221 Y107.712 E0.0029\n"
+             "G1 X83.317 Y107.764 E0.003\n"
+             "G1 X83.326 Y107.769 E0.003\n"
+             "G1 X83.414 Y107.817 F300\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G1 Z0.55 F1002\n"
+             "G1 X92.422 Y104.905 F2400\n"
+             "G1 Z0.25 F1002\n"
+             "G1 E0 F100\n"
+             "G92 E0\n"
+             "G1 X90.911 Y104.906 E0.0023 F300\n"
+             "G1 X90.817 Y104.906 E0.0024\n"
+             "G1 X90.723 Y104.914 E0.0026\n"
+             "G1 X90.628 Y104.936 E0.0027\n"
+             "G1 X90.549 Y104.984 E0.0028\n"
+             "G1 X90.521 Y105.077 E0.003\n"
+             "G1 X90.506 Y105.171 E0.0031\n"
+             "G1 X90.504 Y105.264 E0.0033\n"
+             "G1 X90.504 Y106.2 E0.0047\n"
+             "G1 X90.507 Y106.294 E0.0048\n"
+             "G1 X90.524 Y106.387 E0.005\n"
+             "G1 X90.555 Y106.481 E0.0051\n"
+             "G1 X90.586 Y106.503 E0.0052\n"
+             "G1 X90.684 Y106.532 E0.0053\n"
+             "G1 X90.783 Y106.546 E0.0055\n"
+             "G1 X90.881 Y106.547 E0.0056\n"
+             "G1 X92.554 Y106.547 E0.0081\n"
+             "G1 X92.652 Y106.546 E0.0083\n"
+             "G1 X92.751 Y106.532 E0.0084\n"
+             "G1 X92.849 Y106.503 E0.0086\n"
+             "G1 X92.891 Y106.455 E0.0087\n"
+             "G1 X92.918 Y106.358 E0.0088\n"
+             "G1 X92.931 Y106.261 E0.009\n"
+             "G1 X92.932 Y106.164 E0.0091\n"
+             "G1 X92.932 Y105.29 E0.0104\n"
+             "G1 X92.931 Y105.193 E0.0106\n"
+             "G1 X92.919 Y105.096 E0.0107\n"
+             "G1 X92.892 Y104.999 E0.0109\n"
+             "G1 X92.852 Y104.902 E0.011\n"
+             "G1 X92.893 Y104.805 E0.0112\n"
+             "G1 X92.92 Y104.708 E0.0114\n"
+             "G1 X92.931 Y104.611 E0.0115\n"
+             "G1 X92.932 Y104.514 E0.0117\n"
+             "G1 X92.932 Y102.574 E0.0146\n"
+             "G1 X92.931 Y102.477 E0.0147\n"
+             "G1 X92.918 Y102.38 E0.0149\n"
+             "G1 X92.891 Y102.283 F300\n"
+             "G92 E0\n"
+             "G1 E-0.25 F100\n"
+             "G91\n"
+             "G1 Z25 F5000\n"
+             "G90\n"
+             "G1 X120 Y205 F7800\n"
+             "M104 T0 S0\n"
+             "M104 T1 S0\n"
+             "M140 S0\n"
+             "M117 Print Complete\n"
+             "M104 T0 S0\n"
+             "M104 T1 S0\n"
+             "M140 S0\n"
+             "M84\n"
+             "M4202\n"
+#else
 #ifdef TEC4
              "M80 \n"
              "M107\n"
@@ -5063,6 +5401,7 @@ FSTRINGVALUE(calibrationGCode,
              "M117 Print Complete\n"
              "M4202\n"
 #endif
+#endif
 );
 bool customMCode(GCode *com) {
   switch (com->M) {
@@ -5116,6 +5455,27 @@ bool customMCode(GCode *com) {
     cZPHeight2(false);
     break;
 #endif
+  case 4209:
+    // uid.pushMenu(&cui_msg_preparing,true);
+    Extruder::selectExtruderById(0);
+    /*if (!Printer::isHomedAll()) {
+      Printer::homeAxis(true,true,true);
+    }*/
+
+    // Printer::moveToReal(0,240,40,IGNORE_COORDINATE,100);
+    Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, 40,
+                        IGNORE_COORDINATE, 100);
+    Printer::moveToReal(CARD_CENTER_X, CARD_CENTER_Y, IGNORE_COORDINATE,
+                        IGNORE_COORDINATE, 100);
+    // uid.popMenu(false);
+    // uid.pushMenu(&cui_msg_ext_xy_1, true);
+    UI_STATUS_UPD_F(PSTR("Start Calibration"));
+    calibrateXYZ();
+    // cOkWizard(UI_ACTION_EXTRXY_V2_1); // added by FELIX
+    // uid.popMenu(true);
+    // Com::printFLN(PSTR("Calibration succes"));
+    // UI_STATUS_UPD_F(PSTR("Calibration Success"));
+    break;
   case 4210:
     reportPrintStatus(); // Report if printer is moving or not and if all
                          // heaters are off.

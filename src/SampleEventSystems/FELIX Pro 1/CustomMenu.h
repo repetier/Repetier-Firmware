@@ -64,7 +64,7 @@ UI_STICKYMENU(ui_exy3,UI_EXY3_ITEMS,5)
 
 UI_MENU_ACTIONCOMMAND_T(ui_calex,UI_CTEXT_CALIBRATE_EXTRUDERS_ID,UI_ACTION_CALEX)
 UI_MENU_ACTIONCOMMAND_T(ui_calex_xy,UI_CTEXT_CALIBRATE_XY_ID,UI_ACTION_CALEX_XY)
-UI_MENU_ACTIONCOMMAND(ui_calex_xyv2,"Calibrate XY w. Card",UI_ACTION_EXTRXY_V2)
+UI_MENU_ACTIONCOMMAND(ui_calex_xyv2,"Auto Calibrate XY",UI_ACTION_EXTRXY_V2)
 //added by FELIX
 //====================
 #ifdef TEC4
@@ -1040,11 +1040,16 @@ UI_MENU_SUBMENU_FILTER_T(ui_menu_quick_changefil_printing,UI_TEXT_CHANGE_FILAMEN
 #endif
 UI_MENU_SUBMENU_FILTER_T(ui_menu_move, UI_TEXT_POSITION_ID, ui_menu_positions,0,MENU_MODE_PRINTING)
 #if NUM_EXTRUDER > 1
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool2,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex ,&ui_menu_move \
-      , &ui_menu_quick_stopstepper UI_FANSPEED, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
+/*#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool2,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex ,&ui_menu_move \
+      , &ui_menu_quick_stopstepper UI_FANSPEED, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}*/
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool2 UI_CHANGE_FIL_ENT, &ui_removebed, &ui_menu_move \
+      , &ui_menu_quick_stopstepper UI_FANSPEED, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex}
 #else
-#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool1,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex ,&ui_menu_move \
+/*#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool1,&ui_removebed UI_CHANGE_FIL_ENT ,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex ,&ui_menu_move \
       , &ui_menu_quick_stopstepper UI_FANSPEED, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp}
+*/
+#define UI_MENU_QUICK {UI_MENU_ADDCONDBACK &ui_preheatcool1 UI_CHANGE_FIL_ENT, &ui_removebed, &ui_menu_move \
+      , &ui_menu_quick_stopstepper UI_FANSPEED, &ui_menu_ext_temp0,&ui_menu_ext_temp1,&ui_menu_bed_temp,&ui_menu_autolevelbed UI_CALIB_PROBE_ENTRY, &ui_calex}
 #endif      
 UI_MENU(ui_menu_quick, UI_MENU_QUICK, 10 + UI_MENU_BACKCNT + UI_CHANGE_FIL_CNT+ UI_CALIB_PROBE_COUNT)
 
