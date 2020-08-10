@@ -463,8 +463,7 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
     return 1;
 }
 
-#elif defined(__SAM3X8E__)
-
+#elif defined(__SAM3X8E__) || defined(STM32F1)
 inline void u8g2_spi_wait_short() {
     asm volatile("nop" ::); // 11.9ns
     asm volatile("nop" ::); // 11.9ns
@@ -542,8 +541,29 @@ inline void u8g2_spi_wait() {
     asm volatile("nop" ::); // 11.9ns
     asm volatile("nop" ::); // 11.9ns
 }
-#if 0
+
+#if defined(STM32F1)
+// coarse 100ns timer
+inline void u8g2_delay_x100ns(int x) {
+    while (x--) {               // adds at last 24ns
+        asm volatile("nop" ::); // 11.9ns
+        asm volatile("nop" ::); // 11.9ns
+        asm volatile("nop" ::); // 11.9ns
+        asm volatile("nop" ::); // 11.9ns
+        asm volatile("nop" ::); // 11.9ns
+// STM32F1's run at 72mhz, so each is 13.9ns
+#if !defined(STM32F1)
+        asm volatile("nop" ::); // 11.9ns
+        asm volatile("nop" ::); // 11.9ns  83.3ns total
+#endif
+    }
+}
+
+#if !defined(DISPLAY_SW_SPI_100NS_NOPS)
+#define DISPLAY_SW_SPI_100NS_NOPS 2
+#endif
 // Special hack for fast software SPI on due with repetier
+// - added the SKR E3 Mini with software SPI displays
 extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_ptr) {
     uint8_t i, b;
     uint8_t* data;
@@ -551,6 +571,14 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
 
     switch (msg) {
     case U8X8_MSG_BYTE_SEND: {
+#if defined(STM32F1)
+// We slow down at startup to allow the display's clock to stabilize
+// before running at full speed. 
+        static millis_t firstByteTime = HAL::timeInMilliseconds();
+        if ((HAL::timeInMilliseconds() - firstByteTime) < 300) {
+            HAL::delayMicroseconds(145);
+        }
+#endif
         uint8_t takeover_edge = u8x8_GetSPIClockPhase(u8x8);
         // return u8x8_byte_4wire_sw_spi(u8x8, msg, arg_int, arg_ptr);
         data = (uint8_t*)arg_ptr;
@@ -561,17 +589,25 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
             if (takeover_edge) {
                 for (i = 0; i < 8; i++) {
                     WRITE(UI_SPI_SCK, !startLevel);
+#if !defined(STM32F1)
                     u8g2_spi_wait();
+#endif
                     if (b & 128) {
                         WRITE(UI_SPI_MOSI, 1);
                     } else {
                         WRITE(UI_SPI_MOSI, 0);
                     }
                     b <<= 1;
+#if !defined(STM32F1)
                     u8g2_spi_wait();
                     WRITE(UI_SPI_SCK, startLevel); // Takeover
                     u8g2_spi_wait();
-                    // u8g2_spi_wait();
+#else 
+                    WRITE(UI_SPI_SCK, startLevel); // Takeover
+#if DISPLAY_SW_SPI_100NS_NOPS > 0
+                    u8g2_delay_x100ns(DISPLAY_SW_SPI_100NS_NOPS);
+#endif
+#endif
                 }
             } else { // takeover at first edge
                 for (i = 0; i < 8; i++) {
