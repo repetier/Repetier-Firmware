@@ -481,6 +481,10 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define SDCARDDETECT ORIG_SDCARDDETECT
 #define SDCARDDETECTINVERTED 0
 #endif
+
+#define SD_MENU_SHOW_HIDDEN_FILES 0
+#define SD_MENU_CACHE_SCROLL_ENTRIES 0   // Cache filenames while scrolling for better performance/infinite scroll
+
 #define SD_EXTENDED_DIR 1 /** Show extended directory including file length. Don't use this with Pronterface! */
 #define SD_RUN_ON_STOP ""
 #define SD_STOP_HEATER_AND_MOTORS_ON_STOP 1
