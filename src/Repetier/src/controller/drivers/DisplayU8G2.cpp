@@ -90,14 +90,18 @@ U8G2_KS0108_128X64_2 lcd(DISPLAY_ROTATION, UI_DISPLAY_D0_PIN, UI_DISPLAY_D1_PIN,
 #endif
 #endif
 
-void GUI::init() { 
-    HAL::delayMilliseconds(50);
-    processInit();
+millis_t init100msTicks = 0;
+void GUI::init() {
+    init100msTicks = 0;
 }
-void GUI::processInit() { 
+void GUI::processInit() {
+    if (++init100msTicks < 1) { // 100 ms
+        return;
+    }
+    if (displayReady) {
+        return;
+    }
     lcd.begin();
-    displayReady = true;
-    
     handleKeypress();
     nextAction = GUIAction::NONE;
     callbacks[0] = startScreen;
@@ -113,6 +117,7 @@ void GUI::processInit() {
         bufAddStringP(PSTR(REPETIER_VERSION));
         lcd.drawUTF8(20, 55, buf);
     } while (lcd.nextPage());
+    displayReady = true;
     lastRefresh = HAL::timeInMilliseconds() + UI_START_SCREEN_DELAY; // Show start screen 4s but will not delay start process
 }
 
