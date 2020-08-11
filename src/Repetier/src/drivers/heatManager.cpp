@@ -20,6 +20,7 @@ void menuDisableTemperature(GUIAction action, void* data) {
 #if FEATURE_CONTROLLER != NO_CONTROLLER
     HeatManager* hm = reinterpret_cast<HeatManager*>(data);
     hm->setTargetTemperature(hm->getMinTemperature());
+    GUI::cursorRow[GUI::level]--;
 #endif
 }
 
@@ -301,8 +302,8 @@ void HeatManager::showControlMenu(GUIAction action) {
     } else {
         GUI::flashToStringLong(GUI::tmpString, PSTR("Set Temp: @°C"), static_cast<int32_t>(lroundf(targetTemperature)));
         GUI::menuSelectable(action, GUI::tmpString, menuSetTemperature, this, GUIPageType::FIXED_CONTENT);
+        GUI::menuSelectableP(action, PSTR("Disable"), menuDisableTemperature, this, GUIPageType::ACTION);
     }
-    GUI::menuSelectableP(action, PSTR("Disable"), menuDisableTemperature, this, GUIPageType::ACTION);
 #endif
 }
 
@@ -915,12 +916,12 @@ int HeatManagerDynDeadTime::eepromSizeLocal() {
     return 6 * 4;
 }
 
-void HeatManagerDynDeadTime::showControlMenu(GUIAction action) {
+/* void HeatManagerDynDeadTime::showControlMenu(GUIAction action) {
 #if FEATURE_CONTROLLER != NO_CONTROLLER
     GUI::flashToStringLong(GUI::tmpString, PSTR("Set Temp: @°C"), static_cast<int32_t>(lroundf(targetTemperature)));
     GUI::menuSelectable(action, GUI::tmpString, menuSetTemperature, this, GUIPageType::FIXED_CONTENT);
 #endif
-}
+} */
 
 void menuSetDDPTime1(GUIAction action, void* data) {
 #if FEATURE_CONTROLLER != NO_CONTROLLER
