@@ -303,7 +303,7 @@ public:
     void setDeadUp2(float val) { deadUp2 = val; }
     float getDeadDown2() { return deadDown2; }
     void setDeadDown2(float val) { deadDown2 = val; }
-    void showControlMenu(GUIAction action);
+    // void showControlMenu(GUIAction action);
     void showConfigMenu(GUIAction action);
     virtual bool hasConfigMenu() { return true; }
 };

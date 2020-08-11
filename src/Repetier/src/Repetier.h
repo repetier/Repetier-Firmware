@@ -563,7 +563,10 @@ extern int debugWaitLoop;
 
 #include "communication/Commands.h"
 #include "communication/Eeprom.h"
+
+#if SDSUPPORT
 #include "communication/CSVParser.h"
+#endif
 
 #if CPU_ARCH == ARCH_AVR
 #define DELAY1MICROSECOND __asm__("nop\n\t" \
