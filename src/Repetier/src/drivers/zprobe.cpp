@@ -51,6 +51,7 @@ void ZProbeHandler::activate() {
     if (!Motion1::isAxisHomed(X_AXIS) || !Motion1::isAxisHomed(Y_AXIS)) {
         Motion1::homeAxes((Motion1::isAxisHomed(X_AXIS) ? 0 : 1) + (Motion1::isAxisHomed(Y_AXIS) ? 0 : 2));
     }
+    Printer::setZProbingActive(true);
     float cPos[NUM_AXES];
     Motion1::copyCurrentOfficial(cPos);
     PrinterType::closestAllowedPositionWithNewXYOffset(cPos, offsetX, offsetY, Z_PROBE_BORDER);
@@ -89,6 +90,7 @@ void ZProbeHandler::deactivate() {
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     activated = false;
+    Printer::setZProbingActive(false);
     if (pauseHeaters) {
         for (size_t i = 0; i < NUM_HEATERS; i++) {
             if (heaters[i]->isPaused()) {
@@ -406,6 +408,7 @@ void ZProbeHandler::activate() {
     if (!Motion1::isAxisHomed(X_AXIS) || !Motion1::isAxisHomed(Y_AXIS)) {
         Motion1::homeAxes((Motion1::isAxisHomed(X_AXIS) ? 0 : 1) + (Motion1::isAxisHomed(Y_AXIS) ? 0 : 2));
     }
+    Printer::setZProbingActive(true);
     float cPos[NUM_AXES];
     Tool* tool = Tool::getActiveTool();
     Motion1::copyCurrentOfficial(cPos);
@@ -462,6 +465,7 @@ void ZProbeHandler::deactivate() {
         hm->setTargetTemperature(activateTemperature);
     }
     activated = false;
+    Printer::setZProbingActive(false);
     if (pauseHeaters) {
         for (size_t i = 0; i < NUM_HEATERS; i++) {
             if (heaters[i]->isPaused()) {
@@ -771,6 +775,7 @@ void ZProbeHandler::activate() {
     if (!Motion1::isAxisHomed(X_AXIS) || !Motion1::isAxisHomed(Y_AXIS)) {
         Motion1::homeAxes((Motion1::isAxisHomed(X_AXIS) ? 0 : 1) + (Motion1::isAxisHomed(Y_AXIS) ? 0 : 2));
     }
+    Printer::setZProbingActive(true);
     float cPos[NUM_AXES];
     Motion1::copyCurrentOfficial(cPos);
     PrinterType::closestAllowedPositionWithNewXYOffset(cPos, offsetX, offsetY, Z_PROBE_BORDER);
@@ -819,6 +824,7 @@ void ZProbeHandler::deactivate() {
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     activated = false;
+    Printer::setZProbingActive(false);
     if (pauseHeaters) {
         for (size_t i = 0; i < NUM_HEATERS; i++) {
             if (heaters[i]->isPaused()) {
