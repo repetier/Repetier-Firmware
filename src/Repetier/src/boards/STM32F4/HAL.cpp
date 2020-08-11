@@ -450,8 +450,15 @@ void HAL::setHardwarePWM(int id, int value) {
 }
 
 void HAL::setHardwareFrequency(int id, uint32_t frequency) {
-    // TODO: handle HAL pwm frequency change requests
-    //
+    if (id < 0 || id >= 50) { // illegal id
+        return;
+    }
+    PWMEntry& entry = pwmEntries[id];
+    entry.ht->pause();
+    if (frequency) {
+        entry.ht->setOverflow(frequency, HERTZ_FORMAT);
+        entry.ht->resume();
+    }
 }
 
 ADC_HandleTypeDef AdcHandle = {};
