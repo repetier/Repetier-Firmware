@@ -1190,9 +1190,7 @@ void MCode_340(GCode* com) {
     uint8_t p = com->hasP() ? static_cast<uint8_t>(com->P) : 0;
     if (p < NUM_SERVOS) {
         ENSURE_POWER
-        int s = com->hasS() ? com->S : 0;
-        uint16_t r = com->hasR() ? com->R : 0; // auto off time in 100ms
-        servos[com->P]->setPosition(s, r);
+        servos[p]->executeGCode(com);
     }
 #endif
 }

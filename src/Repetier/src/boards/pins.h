@@ -135,5 +135,35 @@ inline void memcopy4(void* dest, void* source) {
 #ifndef UI_ENCODER_B
 #define UI_ENCODER_B -1
 #endif
+#ifndef MAX_VFAT_ENTRIES
+#ifdef AVR_BOARD
+#define MAX_VFAT_ENTRIES (2)
+#else
+#define MAX_VFAT_ENTRIES (3)
+#endif
+#endif
+/** Total size of the buffer used to store the long filenames */
+#define LONG_FILENAME_LENGTH (13 * MAX_VFAT_ENTRIES + 1)
+#define SD_MAX_FOLDER_DEPTH 2
+
+#if UI_DISPLAY_TYPE != DISPLAY_U8G
+#if (defined(USER_KEY1_PIN) && (USER_KEY1_PIN == UI_DISPLAY_D5_PIN || USER_KEY1_PIN == UI_DISPLAY_D6_PIN || USER_KEY1_PIN == UI_DISPLAY_D7_PIN)) || (defined(USER_KEY2_PIN) && (USER_KEY2_PIN == UI_DISPLAY_D5_PIN || USER_KEY2_PIN == UI_DISPLAY_D6_PIN || USER_KEY2_PIN == UI_DISPLAY_D7_PIN)) || (defined(USER_KEY3_PIN) && (USER_KEY3_PIN == UI_DISPLAY_D5_PIN || USER_KEY3_PIN == UI_DISPLAY_D6_PIN || USER_KEY3_PIN == UI_DISPLAY_D7_PIN)) || (defined(USER_KEY4_PIN) && (USER_KEY4_PIN == UI_DISPLAY_D5_PIN || USER_KEY4_PIN == UI_DISPLAY_D6_PIN || USER_KEY4_PIN == UI_DISPLAY_D7_PIN))
+#error You cannot use DISPLAY_D5_PIN, DISPLAY_D6_PIN or DISPLAY_D7_PIN for "User Keys" with character LCD display
+#endif
+#endif
+
+#ifndef SDCARDDETECT
+#define SDCARDDETECT -1
+#endif
+
+#ifndef SDSUPPORT
+#define SDSUPPORT 0
+#endif
+
+
+#include "communication/gcode.h"
+#if SDSUPPORT
+#include "SdFat/SdFat.h"
+#endif
 
 #endif

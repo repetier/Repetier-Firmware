@@ -50,6 +50,13 @@ extern ServoInterface* analogServoSlots[4];
         } \
         virtual void enable() { output::on(); } \
         virtual void disable() { output::off(); } \
+        virtual void executeGCode(GCode* com) { \
+            if (com->M == 340) { \
+                uint16_t r = com->hasR() ? com->R : 0; \
+                int s = com->hasS() ? com->S : 0; \
+                setPosition(s, r); \
+            } \
+        } \
     }; \
     extern name##Class name;
 
@@ -63,8 +70,8 @@ extern ServoInterface* analogServoSlots[4];
 #define SERVO_ANALOG(name, slot, output, minVal, maxVal, neutral) \
     name.init();
 
-#else
+#endif
 
+#ifndef SERVO_ANALOG
 #define SERVO_ANALOG(name, slot, output, minVal, maxVal, neutral)
-
 #endif

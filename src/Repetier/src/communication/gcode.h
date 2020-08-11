@@ -18,14 +18,19 @@
 #ifndef _GCODE_H
 #define _GCODE_H
 
+#include "communication/Communication.h"
+
 #define MAX_CMD_SIZE 96
 #define ARRAY_SIZE(_x) (sizeof(_x) / sizeof(_x[0]))
+#ifndef GCODE_BUFFER_SIZE
+#define GCODE_BUFFER_SIZE 1
+#endif
 
 enum class FirmwareState { NotBusy = 0,
-                     Processing,
-                     Paused,
-                     WaitHeater,
-                     DoorOpen };
+                           Processing,
+                           Paused,
+                           WaitHeater,
+                           DoorOpen };
 
 class SDCard;
 class Commands;
@@ -385,7 +390,7 @@ public:
     static void reportFatalError();
     static void resetFatalError();
     inline static bool hasFatalError() {
-        return fatalErrorMsg != NULL;
+        return fatalErrorMsg != nullptr;
     }
     static void keepAlive(enum FirmwareState state, int id = 0);
     static uint32_t keepAliveInterval;
