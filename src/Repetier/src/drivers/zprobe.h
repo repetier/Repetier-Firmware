@@ -161,6 +161,7 @@ class ZProbeHandler {
     static float speed;
     static bool activated;
     static uint16_t userPausedHeaters;
+    static int16_t deployDelay;
     static bool pauseHeaters;
 
     static bool isAlarmOn();
@@ -176,6 +177,9 @@ public:
     static void eepromReset();
     static float optimumProbingHeight();
     static bool isActive() { return activated; }
+
+    static void setDeployDelay(uint16_t in) { deployDelay = in; }
+    static uint16_t getDeployDelay() { return deployDelay; }
 
     static float xOffset();
     static float yOffset();
