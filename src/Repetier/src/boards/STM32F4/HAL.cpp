@@ -289,7 +289,7 @@ extern void TIMER_VECTOR(MOTION3_TIMER_NUM);
 extern void TIMER_VECTOR(PWM_TIMER_NUM);
 extern void TIMER_VECTOR(TONE_TIMER_NUM);
 
-#if NUM_SERVOS > 0
+#if NUM_SERVOS > 0 || NUM_BEEPERS > 0
 extern void servoOffTimer(HardwareTimer*);
 extern void TIMER_VECTOR(SERVO_TIMER_NUM);
 static uint32_t ServoPrescalerfactor = 20000;
@@ -832,11 +832,13 @@ void HAL::servoMicroseconds(uint8_t servoId, int microsec, uint16_t autoOff) {
     servoTimings[servoId] = microsec ? ((microsec * (servo->timer->getTimerClkFreq() / 1000000)) / ServoPrescalerfactor) - 1 : 0;
     servoAutoOff[servoId] = (microsec) ? (autoOff / 20) : 0;
 }
+#endif
 
 // ================== Interrupt handling ======================
 
 ServoInterface* analogServoSlots[4] = { nullptr, nullptr, nullptr, nullptr };
 void servoOffTimer(HardwareTimer* timer) {
+#if NUM_SERVOS > 0
     if (actServo) {
         actServo->disable();
         if (servoAutoOff[servoId]) {
@@ -861,6 +863,7 @@ void servoOffTimer(HardwareTimer* timer) {
             servo->tim->CCR1 = Servo2500;
         }
     }
+#endif
 // Add all generated servo interrupt handlers
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_SERVO_INTERRUPT
@@ -869,11 +872,12 @@ void servoOffTimer(HardwareTimer* timer) {
 
 // Servo timer Interrupt handler
 void TIMER_VECTOR(SERVO_TIMER_NUM) {
+#if NUM_SERVOS > 0
     if (actServo) {
         actServo->enable();
     }
-}
 #endif
+}
 
 /** \brief Timer interrupt routine to drive the stepper motors.
 */

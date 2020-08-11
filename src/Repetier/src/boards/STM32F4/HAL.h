@@ -37,7 +37,9 @@
 #include "pins.h"
 #include "Print.h"
 #include "fastio.h"
+#if FEATURE_WATCHDOG
 #include <IWatchdog.h>
+#endif
 
 // Which I2C port to use?
 #ifndef WIRE_PORT
@@ -448,7 +450,9 @@ public:
 
     // Watchdog support
     inline static void startWatchdog() {
+#if FEATURE_WATCHDOG
         IWatchdog.begin(WATCHDOG_INTERVAL);
+#endif
     };
     inline static void stopWatchdog() { }
     inline static void pingWatchdog() {
@@ -460,6 +464,8 @@ public:
 #if NUM_SERVOS > 0
     static unsigned int servoTimings[4];
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);
+#else 
+    static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff) { }
 #endif
 
     static void analogStart(void);
