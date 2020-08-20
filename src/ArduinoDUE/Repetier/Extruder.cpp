@@ -689,8 +689,13 @@ void Extruder::initExtruder() {
 #endif
     }
 #if HEATED_BED_HEATER_PIN > -1
+#if BED_HARDWARE_PWM
+    Printer::bedPWMPin = HAL::initHardwarePWM(HEATED_BED_HEATER_PIN, BED_HARDWARE_PWM);
+    HAL::setHardwarePWM(Printer::bedPWMPin, 0);
+#else
     SET_OUTPUT(HEATED_BED_HEATER_PIN);
     WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
+#endif
     Extruder::initHeatedBed();
 #endif
 #if ANALOG_INPUTS > 0

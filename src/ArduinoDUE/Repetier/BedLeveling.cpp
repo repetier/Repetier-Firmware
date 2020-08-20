@@ -451,8 +451,9 @@ bool runBedLeveling(int s) {
 #if Z_PROBE_Z_OFFSET_MODE == 1
         currentZ -= EEPROM::zProbeZOffset();
 #endif
-        Com::printF(PSTR("CurrentZ:"), currentZ);
+        Com::printF(PSTR("CurrentZ:"), currentZ); // this is at x=0, y=0!
         Com::printFLN(PSTR(" atZ:"), Printer::currentPosition[Z_AXIS]);
+        currentZ = plane.z(Printer::currentPosition[X_AXIS], Printer::currentPosition[Y_AXIS]); // we are not at 0,0 in general so update for our position!
         Printer::currentPositionSteps[Z_AXIS] = currentZ * Printer::axisStepsPerMM[Z_AXIS];
         Printer::updateCurrentPosition(
             true); // set position based on steps position
@@ -537,14 +538,16 @@ bool runBedLeveling(int s) {
 */
 void Printer::setAutolevelActive(bool on) {
 #if FEATURE_AUTOLEVEL
-    if (on == isAutolevelActive())
+    if (on == isAutolevelActive()) {
         return;
+    }
     flag0 = (on ? flag0 | PRINTER_FLAG0_AUTOLEVEL_ACTIVE
                 : flag0 & ~PRINTER_FLAG0_AUTOLEVEL_ACTIVE);
-    if (on)
+    if (on) {
         Com::printInfoFLN(Com::tAutolevelEnabled);
-    else
+    } else {
         Com::printInfoFLN(Com::tAutolevelDisabled);
+    }
     updateCurrentPosition(false);
 #endif // FEATURE_AUTOLEVEL
 }

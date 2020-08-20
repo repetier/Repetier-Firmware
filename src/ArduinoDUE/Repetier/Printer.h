@@ -50,7 +50,7 @@ Level 5: Nonlinear motor step position, only for nonlinear drive systems
 #undef AUTOMATIC_POWERUP
 #define AUTOMATIC_POWERUP 0
 #define ENSURE_POWER \
-    {}
+    { }
 #endif
 
 #if defined(DRV_TMC2130)
@@ -75,21 +75,21 @@ union wizardVar {
     uint8_t uc;
 
     wizardVar()
-        : i(0) {}
+        : i(0) { }
     wizardVar(float _f)
-        : f(_f) {}
+        : f(_f) { }
     wizardVar(int32_t _f)
-        : l(_f) {}
+        : l(_f) { }
     wizardVar(uint32_t _f)
-        : ul(_f) {}
+        : ul(_f) { }
     wizardVar(int16_t _f)
-        : i(_f) {}
+        : i(_f) { }
     wizardVar(uint16_t _f)
-        : ui(_f) {}
+        : ui(_f) { }
     wizardVar(int8_t _f)
-        : c(_f) {}
+        : c(_f) { }
     wizardVar(uint8_t _f)
-        : uc(_f) {}
+        : uc(_f) { }
 };
 
 #define PRINTER_FLAG0_STEPPER_DISABLED 1
@@ -499,7 +499,27 @@ public:
     static TMC2130Stepper* tmc_driver_e4;
 #endif
 #endif
-
+#if EXT0_HARDWARE_PWM
+    static int ext0PWMPin;
+#endif
+#if EXT1_HARDWARE_PWM
+    static int ext1PWMPin;
+#endif
+#if EXT2_HARDWARE_PWM
+    static int ext2PWMPin;
+#endif
+#if EXT3_HARDWARE_PWM
+    static int ext3PWMPin;
+#endif
+#if EXT4_HARDWARE_PWM
+    static int ext4PWMPin;
+#endif
+#if EXT5_HARDWARE_PWM
+    static int ext5PWMPin;
+#endif
+#if BED_HARDWARE_PWM
+    static int bedPWMPin;
+#endif
     static void handleInterruptEvent();
 
     static INLINE void setInterruptEvent(uint8_t evt, bool highPriority) {

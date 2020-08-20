@@ -43,6 +43,10 @@ static int32_t adcSamplesMax[ANALOG_INPUTS];
 static int adcCounter = 0, adcSamplePos = 0;
 #endif
 
+#ifndef HARDWARE_PWM_FREQUENCY
+#define HARDWARE_PWM_FREQUENCY 5000
+#endif
+
 static uint32_t adcEnable = 0;
 
 char HAL::virtualEeprom[EEPROM_BYTES] = { 0, 0, 0, 0, 0, 0, 0 };
@@ -163,6 +167,89 @@ void HAL::setupTimer() {
 #endif
 }
 
+// ---------- Start hardware pwm functions -----------
+
+struct TimerPWMPin {
+    TimerPWMPin(int _pin, Pio* _pio, uint32_t _pio_pin, byte _tc_channel, bool _peripheral_A)
+        : pin(_pin)
+        , pio(_pio)
+        , pio_pin(_pio_pin)
+        , tc_global_chan(_tc_channel >> 1)
+        , tc_local_chan((_tc_channel >> 1) % 3)
+        , peripheral_A(_peripheral_A)
+        , tio_line_AB(_tc_channel & 1)
+        , lastSetDuty(0) {
+        switch (_tc_channel / 6) {
+        case 1:
+            tc_base_address = TC1;
+            break;
+        case 2:
+            tc_base_address = TC2;
+            break;
+        default:
+            tc_base_address = TC0;
+            break;
+        }
+    }
+    int pin;
+    Pio* pio;
+    uint32_t pio_pin;
+    byte tc_global_chan;  // 0 .. 8 What's our overall timer channel number?
+    byte tc_local_chan;   // 0 .. 2 We're a timer channel inside a timer counter.
+    bool peripheral_A;    // Do we need to set the peripheral to A instead of B?
+    bool tio_line_AB;     // 0 = A, 1 = B Is this the TIOA or TIOB output pin?
+    Tc* tc_base_address;  // TC0 .. TC2 timer counter registers
+    ufast8_t lastSetDuty; // Last duty cycle we were set to. (for frequency changes).
+};
+
+// Each timer COUNTER has 3 timer channels.
+// Each timer CHANNEL has a TIOA* and TIOB* pin where * is the number of the timer channel.
+#define NUM_POSSIBLE_TIMER_PINS 18
+static TimerPWMPin timer_pins[NUM_POSSIBLE_TIMER_PINS] = {
+    { 2, PIOB, PIO_PB25B_TIOA0, TC0_CHA0, false },
+    { 61, PIOA, PIO_PA2A_TIOA1, TC0_CHA1, true }, // TC0
+    { 92, PIOA, PIO_PA5A_TIOA2, TC0_CHA2, true },
+
+    { 13, PIOB, PIO_PB27B_TIOB0, TC0_CHB0, false },
+    { 60, PIOA, PIO_PA3A_TIOB1, TC0_CHB1, true }, // TC0
+    { 58, PIOA, PIO_PA6A_TIOB2, TC0_CHB2, true },
+
+    { 108, PIOB, PIO_PB0B_TIOA3, TC1_CHA3, false },
+    { 110, PIOB, PIO_PB2B_TIOA4, TC1_CHA4, false }, // TC1
+    { 101, PIOB, PIO_PB4B_TIOA5, TC1_CHA5, false },
+
+    { 109, PIOB, PIO_PB1B_TIOB3, TC1_CHB3, false },
+    { 111, PIOB, PIO_PB3B_TIOB4, TC1_CHB4, false }, // TC1
+    { 102, PIOB, PIO_PB5B_TIOB5, TC1_CHB5, false },
+
+    { 5, PIOC, PIO_PC25B_TIOA6, TC2_CHA6, false },
+    { 3, PIOC, PIO_PC28B_TIOA7, TC2_CHA7, false }, // TC2
+    { 11, PIOD, PIO_PD7B_TIOA8, TC2_CHA8, false },
+
+    { 4, PIOC, PIO_PC26B_TIOB6, TC2_CHB6, false },
+    { 10, PIOC, PIO_PC29B_TIOB7, TC2_CHB7, false }, // TC2
+    { 12, PIOD, PIO_PD8B_TIOB8, TC2_CHB8, false }
+};
+
+struct TimerPWMChannel {
+    byte used_io;
+    TimerPWMPin* timer_A;
+    TimerPWMPin* timer_B;
+};
+
+static TimerPWMChannel timer_channel[9] = {
+    { false, nullptr, nullptr },
+    { false, nullptr, nullptr }, // TC0
+    { false, nullptr, nullptr },
+
+    { false, nullptr, nullptr },
+    { false, nullptr, nullptr }, // TC1
+    { false, nullptr, nullptr },
+
+    { false, nullptr, nullptr },
+    { false, nullptr, nullptr }, // TC2
+    { false, nullptr, nullptr }
+};
 struct PWMPin {
     int pin;
     Pio* pio;
@@ -195,7 +282,7 @@ static PWMPin pwm_pins[NUM_POSSIBLE_PWM_PINS] = {
     { 66, PIOB, PIO_PB15B_PWMH3, PWM_CH3, false },
     { 41, PIOC, PIO_PC9B_PWMH3, PWM_CH3, false },
     { 69, PIOA, PIO_PA0B_PWML3, PWM_CH3, true },
-    { 64, PIOB, PIO_PB19B_PWML3, PWM_CH3, true },
+    { 64, PIOB, PIO_PB19B_PWML3, PWM_CH3, true }, // double value 64
     { 40, PIOC, PIO_PC8B_PWML3, PWM_CH3, true },
     // {??, PIOC, PIO_PC20B_PWMH4, PWM_CH4, false} // Channel 4
     { 9, PIOC, PIO_PC21B_PWML4, PWM_CH4, true },
@@ -210,22 +297,40 @@ struct PWMChannel {
     bool used;
     PWMPin* pwm; // table index
     uint32_t scale;
+    ufast8_t lastSetDuty;
 };
 
-static PWMChannel pwm_channel[8] = { { false, nullptr, 0 }, { false, nullptr, 0 }, { false, nullptr, 0 }, { false, nullptr, 0 }, { false, nullptr, 0 }, { false, nullptr, 0 }, { false, nullptr, 0 }, { false, nullptr, 0 } };
+static PWMChannel pwm_channel[8] = {
+    { false, nullptr, 0 },
+    { false, nullptr, 0 },
+    { false, nullptr, 0 },
+    { false, nullptr, 0 },
+    { false, nullptr, 0 },
+    { false, nullptr, 0 },
+    { false, nullptr, 0 },
+    { false, nullptr, 0 }
+};
 
-static void computePWMDivider(uint32_t frequency, uint32_t& div,
-                              uint32_t& scale) {
+static void computePWMDivider(uint32_t frequency, uint32_t& div, uint32_t& scale) {
     uint32_t factor = 1;
     div = 0;
+    if (frequency < 1) {
+        frequency = 1;
+    }
     do {
         scale = VARIANT_MCK / (frequency * factor);
         if (scale <= 65535) {
             return;
         }
-        div = factor;
-        factor <<= 1;
-    } while (factor <= 1024);
+        div++;
+    } while ((factor <<= 1) <= 1024);
+
+    if (scale > 65535) {
+        scale = 65535;
+    }
+    if (div > 10) {
+        div = 10;
+    }
 }
 
 // Try to initialize pinNumber as hardware PWM. Returns internal
@@ -243,8 +348,55 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
             break;
         }
     }
+    bool foundTimer = false;
+    if (foundPin == -1) {
+        for (int i = 0; i < NUM_POSSIBLE_TIMER_PINS; i++) {
+            if (timer_pins[i].pin == pinNumber) {
+
+                if (!((timer_channel[timer_pins[i].tc_global_chan].used_io >> timer_pins[i].tio_line_AB) & 1)) {
+                    foundPin = i;
+                    foundTimer = true;
+                }
+                break;
+            }
+        }
+    }
     if (foundPin == -1) {
         return -1;
+    }
+
+    if (!frequency) {
+        frequency = 1;
+    }
+
+    if (foundTimer) {
+        TimerPWMPin& t = timer_pins[foundPin];
+        TimerPWMChannel& c = timer_channel[t.tc_global_chan];
+        c.used_io |= (1 << t.tio_line_AB);
+
+        if (!t.tio_line_AB) {
+            c.timer_A = &t;
+        } else {
+            c.timer_B = &t;
+        }
+
+        t.pio->PIO_PDR |= t.pio_pin;
+
+        if (!t.peripheral_A) {
+            t.pio->PIO_ABSR |= t.pio_pin;
+        } else {
+            t.pio->PIO_ABSR &= ~t.pio_pin;
+        }
+
+        pmc_enable_periph_clk(ID_TC0 + t.tc_global_chan);
+        TC_Configure(t.tc_base_address, t.tc_local_chan,
+                     TC_CMR_WAVSEL_UP_RC | TC_CMR_WAVE | TC_CMR_TCCLKS_TIMER_CLOCK1 | TC_CMR_EEVT_XC0);
+
+        TC_SetRC(t.tc_base_address, t.tc_local_chan, (F_CPU_TRUE / 2) / frequency);
+        TC_Start(t.tc_base_address, t.tc_local_chan);
+
+        // Avoid collisions with the pwm handler
+        return (1 << 7 | (t.tc_global_chan << 1)) | t.tio_line_AB;
     }
 
     PWMPin& p = pwm_pins[foundPin];
@@ -255,24 +407,28 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
     computePWMDivider(frequency, div, c.scale);
     pmc_enable_periph_clk(PWM_INTERFACE_ID);
     // configuring the pwm pin
-    PIO_Configure(p.pio,
-                  PIO_PERIPH_B, // port E and F would be A
-                  p.pio_pin, PIO_DEFAULT);
+    PIO_Configure(
+        p.pio,
+        PIO_PERIPH_B, // port E and F would be A
+        p.pio_pin,
+        PIO_DEFAULT);
 
-    PWMC_ConfigureChannelExt(PWM_INTERFACE,
-                             p.channel,               // channel
-                             div,                     // clock divider
-                             0,                       // left aligned
-                             p.invert ? 0 : (1 << 9), // polarity
-                             0,                       // interrupt on counter event at end's period
-                             0,                       // dead-time disabled
-                             0,                       // non inverted dead-time high output
-                             0                        // non inverted dead-time low output
+    PWMC_ConfigureChannelExt(
+        PWM_INTERFACE,
+        p.channel,               // channel
+        div,                     // clock divider
+        0,                       // left aligned
+        p.invert ? 0 : (1 << 9), // polarity
+        0,                       // interrupt on counter event at end's period
+        0,                       // dead-time disabled
+        0,                       // non inverted dead-time high output
+        0                        // non inverted dead-time low output
     );
 
-    PWMC_SetPeriod(PWM_INTERFACE,
-                   p.channel, // pin_info::channel,
-                   c.scale);
+    PWMC_SetPeriod(
+        PWM_INTERFACE,
+        p.channel, // pin_info::channel,
+        c.scale);
 
     PWMC_EnableChannel(PWM_INTERFACE, p.channel);
     setHardwarePWM(p.channel, 0); // init disabled
@@ -286,6 +442,7 @@ void HAL::setHardwarePWM(int id, int value) {
     if (id < 8) { // PWM channel 0..7
         PWMChannel& c = pwm_channel[id];
         uint32_t duty = (c.scale * value) / 255;
+        c.lastSetDuty = value;
         if ((PWM_INTERFACE->PWM_SR & (1 << id)) == 0) { // disabled, set value
             PWM_INTERFACE->PWM_CH_NUM[id].PWM_CDTY = duty;
         } else { // just update
@@ -293,8 +450,66 @@ void HAL::setHardwarePWM(int id, int value) {
         }
         return;
     }
-    // TODO: timers can also produce PWM
+
+    id &= ~0x80;
+
+    if ((id >> 1) > 8) {
+        return;
+    }
+    TimerPWMChannel& c = timer_channel[(id >> 1)];
+    TimerPWMPin& t = *((id & 0x1) ? c.timer_B : c.timer_A);
+
+    t.lastSetDuty = value;
+    if (!value) {
+        t.tc_base_address->TC_CHANNEL[t.tc_local_chan].TC_CMR &= t.tio_line_AB ? ~TC_CMR_BCPC_SET : ~TC_CMR_ACPC_SET;
+    } else {
+
+        t.tc_base_address->TC_CHANNEL[t.tc_local_chan].TC_CMR |= (t.tio_line_AB ? (TC_CMR_BCPB_CLEAR | TC_CMR_BCPC_SET | TC_CMR_EEVT_XC0) : (TC_CMR_ACPA_CLEAR | TC_CMR_ACPC_SET));
+
+        uint32_t freq = t.tc_base_address->TC_CHANNEL[t.tc_local_chan].TC_RC;
+        if (t.tio_line_AB) {
+            TC_SetRB(t.tc_base_address, t.tc_local_chan, ((freq * value) / 255));
+        } else {
+            TC_SetRA(t.tc_base_address, t.tc_local_chan, ((freq * value) / 255));
+        }
+    }
 }
+
+void HAL::setHardwareFrequency(int id, uint32_t frequency) {
+    if (id < 0 || !frequency) {
+        return;
+    }
+    if (id < 8) {
+        PWMChannel& c = pwm_channel[id];
+        uint32_t divisor = 0;
+
+        computePWMDivider(frequency, divisor, c.scale);
+
+        if (divisor != (PWM_INTERFACE->PWM_CH_NUM[id].PWM_CMR & PWM_CMR_CPRE_Msk)) {
+            // Only reconfigure the channel if we've got to redo the prescaler.
+            PWMC_ConfigureChannelExt(PWM_INTERFACE, id, divisor, 0, c.pwm->invert ? 0 : (1 << 9), 0, 0, 0, 0);
+            PWMC_EnableChannel(PWM_INTERFACE, id);
+        }
+
+        PWMC_SetPeriod(PWM_INTERFACE, id, c.scale);
+        HAL::setHardwarePWM(id, c.lastSetDuty);
+        return;
+    }
+    id &= ~0x80;
+    if ((id >> 1) > 8) {
+        return;
+    }
+
+    TimerPWMChannel& c = timer_channel[(id >> 1)];
+    TimerPWMPin t = *((id & 0x1) ? c.timer_B : c.timer_A);
+
+    TC_Stop(t.tc_base_address, t.tc_local_chan);
+    TC_SetRC(t.tc_base_address, t.tc_local_chan, (F_CPU_TRUE / 2) / frequency);
+    HAL::setHardwarePWM(id | 0x80, t.lastSetDuty);
+    TC_Start(t.tc_base_address, t.tc_local_chan);
+}
+
+// ----------- End hardware pwm functions ------------
 
 #if ANALOG_INPUTS > 0
 // Initialize ADC channels
@@ -765,7 +980,7 @@ void HAL::i2cStartWait(unsigned char address_and_direction) {
     uint32_t twiDirection = address_and_direction & 1;
     uint32_t address = address_and_direction >> 1;
 
-    while (!(TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP)) {}
+    while (!(TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP)) { }
 
     // set master mode register with no internal address
 
@@ -814,9 +1029,9 @@ void HAL::i2cStartAddr(unsigned char address_and_direction, unsigned int pos) {
  Terminates the data transfer and releases the I2C bus
 *************************************************************************/
 void HAL::i2cStop(void) {
-    while ((TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) != TWI_SR_TXRDY) {}      // wait for transmission finished
-    TWI_INTERFACE->TWI_CR = TWI_CR_STOP;                                   // send Stop
-    while (!((TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP) == TWI_SR_TXCOMP)) {} // wait for i2cCompleted
+    while ((TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) != TWI_SR_TXRDY) { }      // wait for transmission finished
+    TWI_INTERFACE->TWI_CR = TWI_CR_STOP;                                    // send Stop
+    while (!((TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP) == TWI_SR_TXCOMP)) { } // wait for i2cCompleted
 }
 
 /*************************************************************************
@@ -828,7 +1043,7 @@ void HAL::i2cStop(void) {
 *************************************************************************/
 void HAL::i2cWrite(uint8_t data) {
     TWI_INTERFACE->TWI_THR = data;
-    while ((TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) != TWI_SR_TXRDY) {} // wait for transmission finished
+    while ((TWI_INTERFACE->TWI_SR & TWI_SR_TXRDY) != TWI_SR_TXRDY) { } // wait for transmission finished
 }
 
 /*************************************************************************
@@ -836,7 +1051,7 @@ void HAL::i2cWrite(uint8_t data) {
  Return:  byte read from I2C device
 *************************************************************************/
 uint8_t HAL::i2cReadAck(void) {
-    while ((TWI_INTERFACE->TWI_SR & TWI_SR_RXRDY) != TWI_SR_RXRDY) {} // wait for received byte
+    while ((TWI_INTERFACE->TWI_SR & TWI_SR_RXRDY) != TWI_SR_RXRDY) { } // wait for received byte
     return TWI_INTERFACE->TWI_RHR;
 }
 
@@ -846,9 +1061,9 @@ uint8_t HAL::i2cReadAck(void) {
  Return:  byte read from I2C device
 *************************************************************************/
 uint8_t HAL::i2cReadNak(void) {
-    TWI_INTERFACE->TWI_CR = TWI_CR_STOP;                                   // send Stop
-    uint8_t data = i2cReadAck();                                           // read last byte
-    while (!((TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP) == TWI_SR_TXCOMP)) {} // wait for i2cCompleted ;
+    TWI_INTERFACE->TWI_CR = TWI_CR_STOP;                                    // send Stop
+    uint8_t data = i2cReadAck();                                            // read last byte
+    while (!((TWI_INTERFACE->TWI_SR & TWI_SR_TXCOMP) == TWI_SR_TXCOMP)) { } // wait for i2cCompleted ;
     return data;
 }
 
@@ -1096,32 +1311,81 @@ void PWM_TIMER_VECTOR() {
 
     if (pwm_count_heater == 0 && !PDM_FOR_EXTRUDER) {
 #if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1
+#if EXT0_HARDWARE_PWM
+        if (pwm_pos_set[0] != pwm_pos[0]) {
+            pwm_pos_set[0] = pwm_pos[0];
+            HAL::setHardwarePWM(Printer::ext0PWMPin, pwm_pos[0]);
+        }
+#else
         if ((pwm_pos_set[0] = (pwm_pos[0] & HEATER_PWM_MASK)) > 0)
             WRITE(EXT0_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
+#endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1 && !MIXING_EXTRUDER
+#if EXT1_HARDWARE_PWM
+        if (pwm_pos_set[1] != pwm_pos[1]) {
+            pwm_pos_set[1] = pwm_pos[1];
+            HAL::setHardwarePWM(Printer::ext1PWMPin, pwm_pos[1]);
+        }
+#else
         if ((pwm_pos_set[1] = (pwm_pos[1] & HEATER_PWM_MASK)) > 0)
             WRITE(EXT1_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
+#endif
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2 && !MIXING_EXTRUDER
+#if EXT2_HARDWARE_PWM
+        if (pwm_pos_set[2] != pwm_pos[2]) {
+            pwm_pos_set[2] = pwm_pos[2];
+            HAL::setHardwarePWM(Printer::ext2PWMPin, pwm_pos[2]);
+        }
+#else
         if ((pwm_pos_set[2] = (pwm_pos[2] & HEATER_PWM_MASK)) > 0)
             WRITE(EXT2_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
+#endif
 #if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3 && !MIXING_EXTRUDER
+#if EXT3_HARDWARE_PWM
+        if (pwm_pos_set[3] != pwm_pos[3]) {
+            pwm_pos_set[3] = pwm_pos[3];
+            HAL::setHardwarePWM(Printer::ext3PWMPin, pwm_pos[3]);
+        }
+#else
         if ((pwm_pos_set[3] = (pwm_pos[3] & HEATER_PWM_MASK)) > 0)
             WRITE(EXT3_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
+#endif
 #if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4 && !MIXING_EXTRUDER
+#if EXT4_HARDWARE_PWM
+        if (pwm_pos_set[4] != pwm_pos[4]) {
+            pwm_pos_set[4] = pwm_pos[4];
+            HAL::setHardwarePWM(Printer::ext4PWMPin, pwm_pos[4]);
+        }
+#else
         if ((pwm_pos_set[4] = (pwm_pos[4] & HEATER_PWM_MASK)) > 0)
             WRITE(EXT4_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
+#endif
 #if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5 && !MIXING_EXTRUDER
+#if EXT0_HARDWARE_PWM
+        if (pwm_pos_set[5] != pwm_pos[5]) {
+            pwm_pos_set[5] = pwm_pos[5];
+            HAL::setHardwarePWM(Printer::ext5PWMPin, pwm_pos[5]);
+        }
+#else
         if ((pwm_pos_set[5] = (pwm_pos[5] & HEATER_PWM_MASK)) > 0)
             WRITE(EXT5_HEATER_PIN, !HEATER_PINS_INVERTED);
 #endif
+#endif
 #if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
+#if BED_HARDWARE_PWM
+        if (pwm_pos_set[NUM_EXTRUDER] != pwm_pos[NUM_EXTRUDER]) {
+            pwm_pos_set[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER];
+            HAL::setHardwarePWM(Printer::bedPWMPin, pwm_pos[NUM_EXTRUDER]);
+        }
+#else
         if ((pwm_pos_set[NUM_EXTRUDER] = pwm_pos[NUM_EXTRUDER]) > 0)
             WRITE(HEATED_BED_HEATER_PIN, !HEATER_PINS_INVERTED);
+#endif
 #endif
     }
     if (pwm_count_cooler == 0 && !PDM_FOR_COOLER) {
@@ -1176,7 +1440,7 @@ void PWM_TIMER_VECTOR() {
             WRITE(FAN_THERMO_PIN, 1);
 #endif
     }
-#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1
+#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1 && EXT0_HARDWARE_PWM == 0
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT0_HEATER_PIN, pwm_pos[0], pwm_pos_set[0],
                          HEATER_PINS_INVERTED);
@@ -1194,7 +1458,7 @@ void PWM_TIMER_VECTOR() {
 #endif
 #endif
 #endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1 && !MIXING_EXTRUDER
+#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1 && !MIXING_EXTRUDER && EXT1_HARDWARE_PWM == 0
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT1_HEATER_PIN, pwm_pos[1], pwm_pos_set[1],
                          HEATER_PINS_INVERTED);
@@ -1212,7 +1476,7 @@ void PWM_TIMER_VECTOR() {
 #endif
 #endif
 #endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2 && !MIXING_EXTRUDER
+#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2 && !MIXING_EXTRUDER && EXT2_HARDWARE_PWM == 0
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT2_HEATER_PIN, pwm_pos[2], pwm_pos_set[2],
                          HEATER_PINS_INVERTED);
@@ -1230,7 +1494,7 @@ void PWM_TIMER_VECTOR() {
 #endif
 #endif
 #endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3 && !MIXING_EXTRUDER
+#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3 && !MIXING_EXTRUDER && EXT3_HARDWARE_PWM == 0
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT3_HEATER_PIN, pwm_pos[3], pwm_pos_set[3],
                          HEATER_PINS_INVERTED);
@@ -1248,7 +1512,7 @@ void PWM_TIMER_VECTOR() {
 #endif
 #endif
 #endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4 && !MIXING_EXTRUDER
+#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4 && !MIXING_EXTRUDER && EXT4_HARDWARE_PWM == 0
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT4_HEATER_PIN, pwm_pos[4], pwm_pos_set[4],
                          HEATER_PINS_INVERTED);
@@ -1266,7 +1530,7 @@ void PWM_TIMER_VECTOR() {
 #endif
 #endif
 #endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5 && !MIXING_EXTRUDER
+#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5 && !MIXING_EXTRUDER && EXT5_HARDWARE_PWM == 0
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(EXT5_HEATER_PIN, pwm_pos[5], pwm_pos_set[5],
                          HEATER_PINS_INVERTED);
@@ -1339,7 +1603,7 @@ void PWM_TIMER_VECTOR() {
         WRITE(FAN_THERMO_PIN, 0);
 #endif
 #endif
-#if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
+#if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED && BED_HARDWARE_PWM == 0
 #if PDM_FOR_EXTRUDER
     pulseDensityModulate(HEATED_BED_HEATER_PIN, pwm_pos[NUM_EXTRUDER],
                          pwm_pos_set[NUM_EXTRUDER], HEATER_PINS_INVERTED);
@@ -1387,8 +1651,9 @@ void PWM_TIMER_VECTOR() {
         if (adcCounter >= NUM_ADC_SAMPLES) {
             adcCounter = 0;
             adcSamplePos++;
-            if (adcSamplePos >= ANALOG_INPUT_MEDIAN)
+            if (adcSamplePos >= ANALOG_INPUT_MEDIAN) {
                 adcSamplePos = 0;
+            }
         }
         ADC->ADC_CR = ADC_CR_START; // reread values
     }
@@ -1476,7 +1741,7 @@ void BEEPER_TIMER_VECTOR() {
 #endif
 
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-RFDoubleSerial::RFDoubleSerial() {}
+RFDoubleSerial::RFDoubleSerial() { }
 void RFDoubleSerial::begin(unsigned long baud) {
     RFSERIAL.begin(baud);
     BT_SERIAL.begin(BLUETOOTH_BAUD);
@@ -1516,4 +1781,4 @@ RFDoubleSerial BTAdapter;
 
 // Dummy function to overload weak arduino function that always disables
 // watchdog. We do not need that as we do this our self.
-void watchdogSetup(void) {}
+void watchdogSetup(void) { }

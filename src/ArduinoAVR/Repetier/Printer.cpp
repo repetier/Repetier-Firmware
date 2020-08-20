@@ -241,6 +241,48 @@ TMC2130Stepper* Printer::tmc_driver_e3 = NULL;
 TMC2130Stepper* Printer::tmc_driver_e4 = NULL;
 #endif
 #endif
+#if EXT0_HARDWARE_PWM
+int Printer::ext0PWMPin = -1;
+#if HEATER_PINS_INVERTED
+#error Hardware PWM works not with inverted pins!
+#endif
+#endif
+#if EXT1_HARDWARE_PWM
+int Printer::ext1PWMPin = -1;
+#if HEATER_PINS_INVERTED
+#error Hardware PWM works not with inverted pins!
+#endif
+#endif
+#if EXT2_HARDWARE_PWM
+int Printer::ext2PWMPin = -1;
+#if HEATER_PINS_INVERTED
+#error Hardware PWM works not with inverted pins!
+#endif
+#endif
+#if EXT3_HARDWARE_PWM
+int Printer::ext3PWMPin = -1;
+#if HEATER_PINS_INVERTED
+#error Hardware PWM works not with inverted pins!
+#endif
+#endif
+#if EXT4_HARDWARE_PWM
+int Printer::ext4PWMPin = -1;
+#if HEATER_PINS_INVERTED
+#error Hardware PWM works not with inverted pins!
+#endif
+#endif
+#if EXT5_HARDWARE_PWM
+int Printer::ext5PWMPin = -1;
+#if HEATER_PINS_INVERTED
+#error Hardware PWM works not with inverted pins!
+#endif
+#endif
+#if BED_HARDWARE_PWM
+int Printer::bedPWMPin = -1;
+#if HEATER_PINS_INVERTED
+#error Hardware PWM works not with inverted pins!
+#endif
+#endif
 
 #if !NONLINEAR_SYSTEM
 void Printer::constrainDestinationCoords() {
@@ -604,10 +646,12 @@ void Printer::enablePowerIfNeeded() {
 */
 void Printer::kill(uint8_t onlySteppers) {
     EVENT_KILL(onlySteppers);
-    if (areAllSteppersDisabled() && onlySteppers)
+    if (areAllSteppersDisabled() && onlySteppers) {
         return;
-    if (Printer::isAllKilled())
+    }
+    if (Printer::isAllKilled()) {
         return;
+    }
 #if defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS > 0
     disableAllMotorDrivers();
 #endif // defined
@@ -616,15 +660,17 @@ void Printer::kill(uint8_t onlySteppers) {
 #if !defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT)
     disableZStepper();
 #else
-    if (!onlySteppers)
+    if (!onlySteppers) {
         disableZStepper();
+    }
 #endif
     Extruder::disableAllExtruderMotors();
     setAllSteppersDiabled();
     unsetHomedAll();
     if (!onlySteppers) {
-        for (uint8_t i = 0; i < NUM_EXTRUDER; i++)
+        for (uint8_t i = 0; i < NUM_EXTRUDER; i++) {
             Extruder::setTemperatureForExtruder(0, i);
+        }
         Extruder::setHeatedBedTemperature(0);
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_STANDBY_ID));
 #if defined(PS_ON_PIN) && PS_ON_PIN > -1 && !defined(NO_POWER_TIMEOUT)
@@ -634,8 +680,9 @@ void Printer::kill(uint8_t onlySteppers) {
         Printer::setPowerOn(false);
 #endif
         Printer::setAllKilled(true);
-    } else
+    } else {
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_STEPPER_DISABLED_ID));
+    }
 #if FAN_BOARD_PIN > -1
 #if HAVE_HEATED_BED
     if (heatedBedController.targetTemperatureC < 15) // turn off FAN_BOARD only if bed heater is off
@@ -1138,28 +1185,58 @@ void Printer::setup() {
     pwm_pos[PWM_BOARD_FAN] = BOARD_FAN_MIN_SPEED;
 #endif
 #if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1
+#if EXT0_HARDWARE_PWM
+    ext0PWMPin = HAL::initHardwarePWM(EXT0_HEATER_PIN, EXT0_HARDWARE_PWM);
+    HAL::setHardwarePWM(ext0PWMPin, 0);
+#else
     SET_OUTPUT(EXT0_HEATER_PIN);
     WRITE(EXT0_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
+#endif
 #if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
+#if EXT1_HARDWARE_PWM
+    ext1PWMPin = HAL::initHardwarePWM(EXT1_HEATER_PIN, EXT1_HARDWARE_PWM);
+    HAL::setHardwarePWM(ext1PWMPin, 0);
+#else
     SET_OUTPUT(EXT1_HEATER_PIN);
     WRITE(EXT1_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
+#endif
 #if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2
+#if EXT2_HARDWARE_PWM
+    ext2PWMPin = HAL::initHardwarePWM(EXT2_HEATER_PIN, EXT2_HARDWARE_PWM);
+    HAL::setHardwarePWM(ext2PWMPin, 0);
+#else
     SET_OUTPUT(EXT2_HEATER_PIN);
     WRITE(EXT2_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
+#endif
 #if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3
+#if EXT3_HARDWARE_PWM
+    ext3PWMPin = HAL::initHardwarePWM(EXT3_HEATER_PIN, EXT3_HARDWARE_PWM);
+    HAL::setHardwarePWM(ext3PWMPin, 0);
+#else
     SET_OUTPUT(EXT3_HEATER_PIN);
     WRITE(EXT3_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
+#endif
 #if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4
+#if EXT4_HARDWARE_PWM
+    ext4PWMPin = HAL::initHardwarePWM(EXT4_HEATER_PIN, EXT4_HARDWARE_PWM);
+    HAL::setHardwarePWM(ext4PWMPin, 0);
+#else
     SET_OUTPUT(EXT4_HEATER_PIN);
     WRITE(EXT4_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
+#endif
 #if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5
+#if EXT5_HARDWARE_PWM
+    ext5PWMPin = HAL::initHardwarePWM(EXT5_HEATER_PIN, EXT5_HARDWARE_PWM);
+    HAL::setHardwarePWM(ext5PWMPin, 0);
+#else
     SET_OUTPUT(EXT5_HEATER_PIN);
     WRITE(EXT5_HEATER_PIN, HEATER_PINS_INVERTED);
+#endif
 #endif
 #if defined(EXT0_EXTRUDER_COOLER_PIN) && EXT0_EXTRUDER_COOLER_PIN > -1
     SET_OUTPUT(EXT0_EXTRUDER_COOLER_PIN);
@@ -1433,12 +1510,14 @@ void Printer::defaultLoopActions() {
         previousMillisCmd = curtime;
     else {
         curtime -= previousMillisCmd;
-        if (maxInactiveTime != 0 && curtime > maxInactiveTime)
+        if (maxInactiveTime != 0 && curtime > maxInactiveTime) {
             Printer::kill(false);
-        else
+        } else {
             Printer::setAllKilled(false); // prevent repeated kills
-        if (stepperInactiveTime != 0 && curtime > stepperInactiveTime)
+        }
+        if (stepperInactiveTime != 0 && curtime > stepperInactiveTime) {
             Printer::kill(true);
+        }
     }
 #if SDCARDDETECT > -1 && SDSUPPORT
     sd.automount();

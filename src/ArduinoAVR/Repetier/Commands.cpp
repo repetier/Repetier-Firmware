@@ -3090,11 +3090,13 @@ void Commands::processMCode(GCode* com) {
         if (com->hasP() && com->P < 4 && com->P >= 0) {
             ENSURE_POWER
             int s = 0;
-            if (com->hasS())
+            if (com->hasS()) {
                 s = com->S;
+            }
             uint16_t r = 0;
-            if (com->hasR()) // auto off time in ms
+            if (com->hasR()) { // auto off time in ms
                 r = com->R;
+            }
             HAL::servoMicroseconds(com->P, s, r);
         }
         break;
@@ -3706,8 +3708,13 @@ void Commands::emergencyStop() {
     // HAL::forbidInterrupts(); // Don't allow interrupts to do their work
     Printer::kill(false);
     Extruder::manageTemperatures();
-    for (uint8_t i = 0; i < NUM_EXTRUDER + 3; i++)
+    for (uint8_t i = 0; i < NUM_EXTRUDER + 3; i++) {
         pwm_pos[i] = 0;
+    }
+#if defined(SUPPORT_LASER) && SUPPORT_LASER
+    LaserDriver::changeIntensity(0);
+    LaserDriver::laserOn = false;
+#endif
 #if EXT0_HEATER_PIN > -1 && NUM_EXTRUDER > 0
     WRITE(EXT0_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
@@ -3733,7 +3740,7 @@ void Commands::emergencyStop() {
     WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
 #endif
     UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_KILLED_ID));
-    HAL::delayMilliseconds(200);
+    HAL::delayMilliseconds(200); // wait for pwms to set harmless values
     InterruptProtectedBlock noInts;
     while (1) {
     }

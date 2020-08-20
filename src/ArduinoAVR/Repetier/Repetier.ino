@@ -57,7 +57,7 @@ zHeight, S = 2 store avg zHeight
 - G30 H<height> R<offset> Make probe define new Z and z offset (R) at trigger
 point assuming z-probe measured an object of H height.
 - G31 - Write signal of probe sensor
-- G32 S<0..2> P<0..1> - Autolevel print bed. S = 1 measure zLength, S = 2
+- G32 S<0..2> - Autolevel print bed. S = 1 measure zLength, S = 2
 Measure and store new zLength
 - G33 - Measure distortion map
 - G33 R0 - delete distortion map

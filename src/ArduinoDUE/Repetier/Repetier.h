@@ -268,6 +268,28 @@ Switch it off for production, it costs execution time. */
 
 #include "Configuration.h"
 
+#ifndef EXT0_HARDWARE_PWM
+#define EXT0_HARDWARE_PWM 0
+#endif
+#ifndef EXT1_HARDWARE_PWM
+#define EXT1_HARDWARE_PWM 0
+#endif
+#ifndef EXT2_HARDWARE_PWM
+#define EXT2_HARDWARE_PWM 0
+#endif
+#ifndef EXT3_HARDWARE_PWM
+#define EXT3_HARDWARE_PWM 0
+#endif
+#ifndef EXT4_HARDWARE_PWM
+#define EXT4_HARDWARE_PWM 0
+#endif
+#ifndef EXT5_HARDWARE_PWM
+#define EXT5_HARDWARE_PWM 0
+#endif
+#ifndef BED_HARDWARE_PWM
+#define BED_HARDWARE_PWM 0
+#endif
+
 #if USE_ADVANCE && ENABLE_QUADRATIC_ADVANCE && ENABLED(TEMP_GAIN)
 #error You can not enable TEMP_GAIN and ENABLE_QUADRATIC_ADVANCE the same time. Please disable one feature.
 #endif
