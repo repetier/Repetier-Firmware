@@ -26,8 +26,6 @@ class ToolCNC : public Tool {
     float rpm;
     int32_t startStopDelay;
     bool active;
-    ToolChangeHandler* toolChangeHandler;
-    CoolantHandler* coolantHandler;
 
 public:
     ToolCNC(float offX, float offY, float offZ,
@@ -40,15 +38,7 @@ public:
         , startScript(_startScript)
         , endScript(_endScript)
         , rpm(_rpm)
-        , startStopDelay(_startStopDelay)
-        , toolChangeHandler(nullptr)
-        , coolantHandler(nullptr) {
-    }
-    void setToolChangeHandler(ToolChangeHandler* th) final {
-        toolChangeHandler = th;
-    }
-    void setCoolantHandler(CoolantHandler* ch) final {
-        coolantHandler = ch;
+        , startStopDelay(_startStopDelay) {
     }
     virtual bool isSecondaryMove(bool isG0, bool isEMove) override final {
         if (isG0 || !active) {
@@ -76,19 +66,15 @@ public:
     void setRPM(float newRPM);
     void eepromHandle();
     void init();
-    void setAdvance(float adv) {}
+    void setAdvance(float adv) { }
     void updateDerived();
-    void retract(bool backwards, bool longRetract) {}
+    void retract(bool backwards, bool longRetract) { }
     int computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) { return intensity; }
     /// Gets called after each move is completed
     /// Switch between different seconcdary states will occur. Can add a pause or warmup
     virtual void M3(GCode* com);
     virtual void M4(GCode* com);
     virtual void M5(GCode* com);
-    virtual void M6(GCode* com);
-    virtual void M7(GCode* com);
-    virtual void M8(GCode* com);
-    virtual void M9(GCode* com);
     virtual ToolTypes getToolType() { return ToolTypes::MILL; }
     virtual bool showMachineCoordinates() { return false; }
     static void menuRPM(GUIAction action, void* data);

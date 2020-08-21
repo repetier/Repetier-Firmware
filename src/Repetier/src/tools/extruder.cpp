@@ -41,6 +41,9 @@ void ToolExtruder::activate() {
     Motion1::maxFeedrate[E_AXIS] = maxSpeed;
     Motion1::maxAcceleration[E_AXIS] = Motion1::maxTravelAcceleration[E_AXIS] = acceleration;
     Motion1::advanceK = advance;
+    if (changeHandler) {
+        changeHandler->activate(this);
+    }
     GCode::executeFString(startScript);
     Motion1::waitForEndOfMoves();
 }
@@ -48,6 +51,9 @@ void ToolExtruder::activate() {
 /// Gets called when the tool gets disabled.
 void ToolExtruder::deactivate() {
     GCode::executeFString(endScript);
+    if (changeHandler) {
+        changeHandler->deactivate(this);
+    }
     Motion1::setMotorForAxis(nullptr, E_AXIS);
 }
 

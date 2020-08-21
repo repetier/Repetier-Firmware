@@ -24,22 +24,69 @@ extern void menuExtruderFilamentDiameter(GUIAction action, void* data);
 extern void menuToolOffsetX(GUIAction action, void* data);
 extern void menuToolOffsetY(GUIAction action, void* data);
 extern void menuToolOffsetZ(GUIAction action, void* data);
+extern void menuCHServoPosition(GUIAction action, void* data);
 
 class Tool;
+class ServoInterface;
 
 class ToolChangeHandler {
 public:
     virtual void M6(GCode* com, Tool* tool) {};
-    virtual void activate() {};
-    virtual void deactivate() {};
+    virtual void activate(Tool* tool) {};
+    virtual void deactivate(Tool* tool) {};
     virtual int eepromSize() { return 0; }
+    virtual void eepromHandle(int pos) { }
+    virtual void configMenu(GUIAction action) { }
 };
 
 class ToolChangeCustomEvent : ToolChangeHandler {
 public:
     ToolChangeCustomEvent(Tool* tool);
-    void M6(GCode* com, Tool* tool) final;
+    void M6(GCode* com, Tool* tool) override final;
     void setup(Tool* tool);
+    void activate(Tool* tool) override final;
+    void deactivate(Tool* tool) override final;
+};
+
+/// Uses a servo to trigger activation. Value gets stored in eeprom to adjust value.
+class ToolChangeServo : ToolChangeHandler {
+    ServoInterface* servo;
+
+public:
+    int32_t timeout;
+    int16_t position;
+
+    ToolChangeServo(Tool* tool, ServoInterface* _servo, int16_t _defaultPosition, int32_t _timeout);
+    void M6(GCode* com, Tool* tool) override final;
+    void activate(Tool* tool) override final;
+    int eepromSize() override final;
+    void eepromHandle(int pos) override final;
+    void configMenu(GUIAction action) override final;
+};
+
+/// Merges to change handler into one instance
+class ToolChangeMerge : ToolChangeHandler {
+    ToolChangeHandler *t1, *t2;
+
+public:
+    ToolChangeMerge(Tool* tool, ToolChangeHandler* _t1, ToolChangeHandler* _t2);
+    void M6(GCode* com, Tool* tool) override final;
+    void activate(Tool* tool) override final;
+    void deactivate(Tool* tool) override final;
+    int eepromSize() override final;
+    void eepromHandle(int pos) override final;
+    void configMenu(GUIAction action) override final;
+};
+
+/// Acts liek the original instance just without eeprom settings
+class ToolChangeLink : ToolChangeHandler {
+    ToolChangeHandler* t;
+
+public:
+    ToolChangeLink(Tool* tool, ToolChangeHandler* _t);
+    void M6(GCode* com, Tool* tool) override final;
+    void activate(Tool* tool) override final;
+    void deactivate(Tool* tool) override final;
 };
 
 class CoolantHandler {
@@ -47,6 +94,11 @@ public:
     virtual void M7(GCode* com, Tool* tool) = 0;
     virtual void M8(GCode* com, Tool* tool) = 0;
     virtual void M9(GCode* com, Tool* tool) = 0;
+    virtual int eepromSize() { return 0; }
+    virtual void eepromHandle(int pos) { }
+    virtual void activate(Tool* tool) {};
+    virtual void deactivate(Tool* tool) {};
+    virtual void configMenu(GUIAction action) { }
 };
 
 class Tool {
@@ -68,6 +120,9 @@ protected:
     static Tool* const tools[];
 
 public:
+    ToolChangeHandler* changeHandler;
+    CoolantHandler* coolantHandler;
+
     Tool(float offX, float offY, float offZ, PWMHandler* _secondary)
         : offsetX(offX)
         , offsetY(offY)
@@ -77,6 +132,8 @@ public:
         activeSecondaryPerMMPS = 0;
         toolId = -1;
         errorFlags = 0;
+        changeHandler = nullptr;
+        coolantHandler = nullptr;
     }
     inline void setToolId(int t) { toolId = t; }
     inline int getToolId() { return toolId; }
@@ -105,15 +162,31 @@ public:
     ///< If returning true motion planner will insert a warmup sequence
     virtual bool requiresWarmup() { return warmupTime() != 0; }
     virtual int32_t warmupTime() { return 0; }
-    virtual void M3(GCode* com) {}
-    virtual void M4(GCode* com) {}
-    virtual void M5(GCode* com) {}
-    virtual void M6(GCode* com) {}
-    virtual void M7(GCode* com) {}
-    virtual void M8(GCode* com) {}
-    virtual void M9(GCode* com) {}
-    virtual void setToolChangeHandler(ToolChangeHandler* th) {}
-    virtual void setCoolantHandler(CoolantHandler* ch) {}
+    virtual void M3(GCode* com) { }
+    virtual void M4(GCode* com) { }
+    virtual void M5(GCode* com) { }
+    virtual void M6(GCode* com) {
+        if (changeHandler) {
+            changeHandler->M6(com, this);
+        }
+    }
+    virtual void M7(GCode* com) {
+        if (coolantHandler) {
+            coolantHandler->M7(com, this);
+        }
+    }
+    virtual void M8(GCode* com) {
+        if (coolantHandler) {
+            coolantHandler->M8(com, this);
+        }
+    }
+    virtual void M9(GCode* com) {
+        if (coolantHandler) {
+            coolantHandler->M9(com, this);
+        }
+    }
+    virtual void setToolChangeHandler(ToolChangeHandler* th) { changeHandler = th; }
+    virtual void setCoolantHandler(CoolantHandler* ch) { coolantHandler = ch; }
 
     /// Called when the tool gets activated.
     virtual void activate() = 0;
@@ -125,7 +198,7 @@ public:
     /// Set temperature in case tool supports temperatures.
     virtual HeatManager* getHeater() { return nullptr; }
     /// Sets intensity or similar value e.g. laser intensity or mill speed
-    virtual void setIntensity(int32_t intensity) {}
+    virtual void setIntensity(int32_t intensity) { }
     virtual bool supportsTemperatures() { return false; }
     virtual bool supportsIntensity() { return false; }
     float getOffsetX() { return offsetX; }
@@ -139,8 +212,8 @@ public:
     virtual float getMaxYank() { return 0; }
     virtual float getDiameter() { return 0; }
     virtual float getMaxTemp() { return 0; }
-    virtual void setDiameter(float d) {}
-    virtual void retract(bool backwards, bool longRetract) {}
+    virtual void setDiameter(float d) { }
+    virtual void retract(bool backwards, bool longRetract) { }
     void setEepromStart(int pos) {
         eepromStart = pos;
     }
@@ -148,34 +221,32 @@ public:
         return eepromStart;
     }
     virtual void eepromHandle();
-    virtual int eepromSize() {
-        return 12;
-    }
-    virtual void init() {}
-    virtual void setAdvance(float adv) {}
+    virtual int eepromSize();
+    virtual void init() { }
+    virtual void setAdvance(float adv) { }
     virtual void updateDerived() = 0;
-    virtual void setResolution(float stepspermm) {}
+    virtual void setResolution(float stepspermm) { }
     virtual void autocalibrate(GCode* g) {
         Com::printWarningFLN(PSTR("Autocalibration for this tool not supported!"));
     }
-    virtual void disableMotor() {}
-    virtual void enableMotor() {}
-    virtual void stepMotor() {}
-    virtual void unstepMotor() {}
-    virtual void directionMotor(bool dir) {}
+    virtual void disableMotor() { }
+    virtual void enableMotor() { }
+    virtual void stepMotor() { }
+    virtual void unstepMotor() { }
+    virtual void directionMotor(bool dir) { }
     virtual bool updateMotor() { return false; }
     /// Computes intensity based on speed
     virtual int computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) { return 0; }
     /// Gets called after each move is completed
-    virtual void moveFinished() {}
+    virtual void moveFinished() { }
     /// Switch between different seconcdary states will occur. Can add a pause or warmup
-    virtual void secondarySwitched(bool nowSecondary) {}
+    virtual void secondarySwitched(bool nowSecondary) { }
     /// Called if e.g. door is opened
-    virtual void afterPause() {}
-    virtual void beforeContinue() {}
+    virtual void afterPause() { }
+    virtual void beforeContinue() { }
     virtual bool secondaryIsFan() { return false; }
     int secondaryPercent() { return secondary ? (static_cast<int>(secondary->get()) * 100) / 255 : 0; }
-    virtual void extractG1(GCode* com) {}
+    virtual void extractG1(GCode* com) { }
     virtual bool isSecondaryMove(bool isG0, bool isEMove) { return false; }
     virtual ToolTypes getToolType() { return ToolTypes::EXTRUDER; }
     virtual bool showMachineCoordinates() { return true; }

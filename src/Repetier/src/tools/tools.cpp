@@ -20,13 +20,118 @@ Tool* Tool::activeTool = nullptr;
 Tool* const Tool::tools[] = TOOLS;
 
 ToolChangeCustomEvent::ToolChangeCustomEvent(Tool* tool) {
-    tool->setToolChangeHandler(this);
+    if (tool) {
+        tool->setToolChangeHandler(this);
+    }
 }
+
 void ToolChangeCustomEvent::M6(GCode* com, Tool* _tool) {
     EVENT_CUSTOM_TOOL_CHANGE_M6(com, _tool);
 }
+
 void ToolChangeCustomEvent::setup(Tool* _tool) {
     EVENT_CUSTOM_TOOL_CHANGE_SETUP(_tool);
+}
+
+void ToolChangeCustomEvent::activate(Tool* tool) {
+    EVENT_CUSTOM_TOOL_CHANGE_ACTIVATE(_tool);
+}
+
+void ToolChangeCustomEvent::deactivate(Tool* tool) {
+    EVENT_CUSTOM_TOOL_CHANGE_DEACTIVATE(_tool);
+}
+
+ToolChangeServo::ToolChangeServo(Tool* tool, ServoInterface* _servo, int16_t _defaultPosition, int32_t _timeout) {
+    servo = _servo;
+    position = _defaultPosition;
+    timeout = _timeout;
+    if (tool) {
+        tool->setToolChangeHandler(this);
+    }
+}
+
+void ToolChangeServo::M6(GCode* com, Tool* tool) {
+    servo->setPosition(position, timeout);
+    HAL::delayMilliseconds(timeout);
+}
+
+void ToolChangeServo::activate(Tool* tool) {
+    servo->setPosition(position, timeout);
+    HAL::delayMilliseconds(timeout);
+}
+
+int ToolChangeServo::eepromSize() {
+    return 2;
+}
+
+void ToolChangeServo::eepromHandle(int pos) {
+    EEPROM::handleInt(pos, PSTR("Servo position [us]"), position);
+}
+
+void ToolChangeServo::configMenu(GUIAction action) {
+    GUI::menuLongP(action, PSTR("Servo Pos. :"), position, menuCHServoPosition, this, GUIPageType::FIXED_CONTENT);
+}
+
+void __attribute__((weak)) menuCHServoPosition(GUIAction action, void* data) {
+    ToolChangeServo* ext = reinterpret_cast<ToolChangeServo*>(data);
+    int32_t pos = ext->position;
+    DRAW_LONG_P(PSTR("Servo Pos.:"), Com::tUnitStepsPerMM, pos);
+    if (GUI::handleLongValueAction(action, v, 0, 2000, 1)) {
+        ext->position = v;
+    }
+}
+
+ToolChangeMerge::ToolChangeMerge(Tool* tool, ToolChangeHandler* _t1, ToolChangeHandler* _t2) {
+    t1 = _t1;
+    t2 = _t2;
+    if (tool) {
+        tool->setToolChangeHandler(this);
+    }
+}
+
+void ToolChangeMerge::M6(GCode* com, Tool* tool) {
+    t1->M6(com, tool);
+    t2->M6(com, tool);
+}
+
+void ToolChangeMerge::activate(Tool* tool) {
+    t1->activate(tool);
+    t2->activate(tool);
+}
+
+void ToolChangeMerge::deactivate(Tool* tool) {
+    t1->deactivate(tool);
+    t2->deactivate(tool);
+}
+
+int ToolChangeMerge::eepromSize() {
+    return t1->eepromSize() + t2->eepromSize();
+}
+
+void ToolChangeMerge::eepromHandle(int pos) {
+    t1->eepromHandle(pos);
+    t2->eepromHandle(pos + t1->eepromSize());
+}
+
+void ToolChangeMerge::configMenu(GUIAction action) {
+    t1->configMenu(action);
+    t2->configMenu(action);
+}
+
+ToolChangeLink::ToolChangeLink(Tool* tool, ToolChangeHandler* _t) {
+    t = _t;
+    if (tool) {
+        tool->setToolChangeHandler(this);
+    }
+}
+void ToolChangeLink::M6(GCode* com, Tool* tool) {
+    t->M6(com, tool);
+}
+void ToolChangeLink::activate(Tool* tool) {
+    t->activate(tool);
+}
+void ToolChangeLink::deactivate(Tool* tool) {
+    t->deactivate(tool);
 }
 
 void __attribute__((weak)) menuToolOffsetXFine(GUIAction action, void* data) {
@@ -276,7 +381,7 @@ void Tool::waitForTemperatures() {
 
 void Tool::eepromHandleTools() {
     for (fast8_t i = 0; i < NUM_TOOLS; i++) {
-        EEPROM::handlePrefix(PSTR("Tool"), i + 1);
+        EEPROM::handlePrefix(PSTR("Tool "), i + 1);
         tools[i]->eepromHandle();
     }
     EEPROM::removePrefix();
@@ -288,8 +393,27 @@ void Tool::eepromHandle() {
 #endif
     EEPROM::handleFloat(eepromStart + 4, PSTR("Y Offset [mm]"), 3, offsetY);
     EEPROM::handleFloat(eepromStart + 8, PSTR("Z Offset [mm]"), 3, offsetZ);
+    int pos = eepromStart + 12;
+    if (changeHandler) {
+        changeHandler->eepromHandle(pos);
+        pos += changeHandler->eepromSize();
+    }
+    if (coolantHandler) {
+        coolantHandler->eepromHandle(pos);
+        // pos += coolantHandler->eepromSize();
+    }
 }
 
+int Tool::eepromSize() {
+    int size = 12;
+    if (changeHandler) {
+        size += changeHandler->eepromSize();
+    }
+    if (coolantHandler) {
+        size += coolantHandler->eepromSize();
+    }
+    return size;
+}
 void Tool::updateDerivedTools() {
     if (activeTool != nullptr) {
         activeTool->updateDerived();
