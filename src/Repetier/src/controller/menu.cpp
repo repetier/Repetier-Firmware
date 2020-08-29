@@ -316,6 +316,9 @@ void __attribute__((weak)) menuInfo(GUIAction action, void* data) {
     GUI::menuTextP(action, Com::tFirmwareCompiled);
     GUI::menuTextP(action, Com::tPrinterName);
     GUI::menuTextP(action, Com::tVendor);
+    if (Printer::isNativeUSB()) {
+        GUI::menuTextP(action, PSTR("Using Native USB"));
+    }
     GUI::menuEnd(action);
 }
 
@@ -757,7 +760,9 @@ void __attribute__((weak)) menuConfig(GUIAction action, void* data) {
     GUI::menuTextP(action, PSTR("= Configuration = "), true);
     GUI::menuBack(action);
 #if EEPROM_MODE > 0
-    GUI::menuLongP(action, PSTR("Baudrate:"), baudrate, menuBaudrate, nullptr, GUIPageType::FIXED_CONTENT);
+    if (!Printer::isNativeUSB()) {
+        GUI::menuLongP(action, PSTR("Baudrate:"), baudrate, menuBaudrate, nullptr, GUIPageType::FIXED_CONTENT);
+    }
 #endif
     FOR_ALL_AXES(i) {
         if (i == E_AXIS) {

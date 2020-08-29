@@ -523,6 +523,15 @@ void Printer::setup() {
     Printer::setPowerOn(true);
 #endif
 #endif
+
+#if (defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0) || CPU_ARCH == ARCH_AVR
+    constexpr bool isSerialUSB = false;
+#else
+    // GCC's __builtin_strncmp works with constexpr
+    constexpr bool isSerialUSB = (strncmp(PSTR(VALUE(RFSERIAL)), PSTR("SerialUSB"), sizeof("SerialUSB")) == 0);
+#endif
+    Printer::setNativeUSB(isSerialUSB);
+
 #if SDSUPPORT
     //power to SD reader
 #if SDPOWER > -1
