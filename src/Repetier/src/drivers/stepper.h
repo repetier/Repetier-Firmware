@@ -1,5 +1,9 @@
 #include <TMCStepper.h>
 
+#ifndef TMC_SW_SERIAL_BAUD
+#define TMC_SW_SERIAL_BAUD 19200
+#endif
+
 class EndstopDriver;
 class GCode;
 enum class GUIAction;
@@ -463,13 +467,22 @@ public:
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 class TMCStepper2209Driver : public StepperDriverBase, public ProgrammableStepperBase {
     TMC2209Stepper* driver;
+    bool usesSoftwareSerial;
 
 public:
     TMCStepper2209Driver(EndstopDriver* minES, EndstopDriver* maxES,
-                         TMC2209Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int16_t _stallSensitivity)
+                         TMC2209Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int16_t _stallSensitivity, bool _isSoftware)
         : StepperDriverBase(minES, maxES)
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
-        , driver(_driver) { }
+        , driver(_driver)
+        , usesSoftwareSerial(_isSoftware) {
+#if SW_CAPABLE_PLATFORM
+        if (usesSoftwareSerial && driver != nullptr) {
+            // Need to do this before ANY sort of serial commands or we'll get a infinite loop in the serial library
+            driver->beginSerial(TMC_SW_SERIAL_BAUD); // starts just the serial.
+        }
+#endif
+    }
     virtual void init();
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int16_t _stallSensitivity);
     inline void step() final {

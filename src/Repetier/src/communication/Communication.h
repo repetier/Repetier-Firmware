@@ -517,6 +517,7 @@ public:
     FSTRINGVAR(tMotorTBLColon)
     FSTRINGVAR(tMotorIOIN)
     FSTRINGVAR(tMotorGSTAT)
+    FSTRINGVAR(tMotorDriverShort)
     FSTRINGVAR(tMotorDriverOvertempCurrent)
     FSTRINGVAR(tMotorDriverOvertempWarningCurrent)
     FSTRINGVAR(tMotorCurrentDecreasedTo)
