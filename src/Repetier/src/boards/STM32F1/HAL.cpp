@@ -675,7 +675,7 @@ void HAL::analogEnable(int pinId) {
     uint32_t function = pinmap_function(pin, PinMap_ADC);
     // Set pin as analog input
     GPIO_InitTypeDef GPIO_InitStruct;
-    GPIO_InitStruct.Pin = STM_LL_GPIO_PIN(pin);
+    GPIO_InitStruct.Pin = STM_GPIO_PIN(pin);
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
