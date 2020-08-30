@@ -22,109 +22,42 @@
 
     Main author: repetier
 
+    STM32F1 port by AbsoluteCatalyst (moses.github@outlook.com) 
+    (Most of this still originally written by Repetier)
 */
 
 #include "Repetier.h"
 #ifdef STM32F1_BOARD
 #include <stm32f1xx_hal.h>
 #include <malloc.h>
-
 #include "PeripheralPins.h"
-#if MOTHERBOARD == MOTHERBOARD_E3_MINI_V1_2
-constexpr PinMap PinMap_PWM[] = {
-    { PA_0, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 1, 0) }, // TIM2_CH1
-// {PA_0,  TIM2,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM2_PARTIAL_2, 1, 0)}, // TIM2_CH1
-#ifdef STM32F103xE
-// {PA_0,  TIM5,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 1, 0)}, // TIM5_CH1
-#endif
-    { PA_1, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 2, 0) }, // TIM2_CH2
-// {PA_1,  TIM2,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM2_PARTIAL_2, 2, 0)}, // TIM2_CH2
-#ifdef STM32F103xE
-// {PA_1,  TIM5,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 2, 0)}, // TIM5_CH2
-#endif
-    { PA_2, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 3, 0) }, // TIM2_CH3
-// {PA_2,  TIM2,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM2_PARTIAL_1, 3, 0)}, // TIM2_CH3
-#ifdef STM32F103xE
-// {PA_2,  TIM5,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 3, 0)}, // TIM5_CH3
-#endif
-#ifndef STM32F103xE
-    { PA_3, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 4, 0) }, // TIM2_CH4
-// {PA_3,  TIM2,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM2_PARTIAL_1, 4, 0)}, // TIM2_CH4
-#else
-    { PA_3, TIM5, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 4, 0) }, // TIM5_CH4
-#endif
-    { PA_6, TIM3, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 1, 0) }, // TIM3_CH1
-#ifndef STM32F103xE
-    { PA_7, TIM1, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM1_PARTIAL, 1, 1) }, // TIM1_CH1N
-// {PA_7,  TIM3,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 2, 0)}, // TIM3_CH2
-#else
-    { PA_7, TIM8, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 1, 1) }, // TIM8_CH1N
-#endif
-    { PA_8, TIM1, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 1, 0) }, // TIM1_CH1
-    // {PA_8,  TIM1,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM1_PARTIAL, 1, 0)}, // TIM1_CH1
-    { PA_9, TIM1, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 2, 0) }, // TIM1_CH2
-    // {PA_9,  TIM1,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM1_PARTIAL, 2, 0)}, // TIM1_CH2
-    { PA_10, TIM1, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 3, 0) }, // TIM1_CH3
-    // {PA_10, TIM1,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM1_PARTIAL, 3, 0)}, // TIM1_CH3
-    { PA_11, TIM1, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 4, 0) }, // TIM1_CH4
-    // {PA_11, TIM1,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM1_PARTIAL, 4, 0)}, // TIM1_CH4
-    { PA_15, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM2_PARTIAL_1, 1, 0) }, // TIM2_CH1
-    // {PA_15, TIM2,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM2_ENABLE, 1, 0)}, // TIM2_CH1
-    // {PB_0,  TIM1,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM1_PARTIAL, 2, 1)}, // TIM1_CH2N
-    // {PB_0,  TIM3,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 3, 0)}, // TIM3_CH3
-    { PB_0, TIM3, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM3_PARTIAL, 3, 0) }, // TIM3_CH3
-#ifdef STM32F103xE
-// {PB_0,  TIM8,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 2, 1)}, // TIM8_CH2N
-#endif
-    { PB_1, TIM1, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM1_PARTIAL, 3, 1) }, // TIM1_CH3N
-// {PB_1,  TIM3,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 4, 0)}, // TIM3_CH4
-// {PB_1,  TIM3,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM3_PARTIAL, 4, 0)}, // TIM3_CH4
-#ifdef STM32F103xE
-// {PB_1,  TIM8,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 3, 1)}, // TIM8_CH3N
-#endif
-    { PB_3, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM2_PARTIAL_1, 2, 0) }, // TIM2_CH2
-    // {PB_3,  TIM2,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM2_ENABLE, 2, 0)}, // TIM2_CH2
-    { PB_4, TIM3, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM3_PARTIAL, 1, 0) },    // TIM3_CH1
-    { PB_5, TIM3, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM3_PARTIAL, 2, 0) },    // TIM3_CH2
-    { PB_6, TIM4, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 1, 0) },            // TIM4_CH1
-    { PB_7, TIM4, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 2, 0) },            // TIM4_CH2
-    { PB_8, TIM4, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 3, 0) },            // TIM4_CH3
-    { PB_9, TIM4, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 4, 0) },            // TIM4_CH4
-    { PB_10, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM2_PARTIAL_2, 3, 0) }, // TIM2_CH3
-    // {PB_10, TIM2,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM2_ENABLE, 3, 0)}, // TIM2_CH3
-    { PB_11, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM2_PARTIAL_2, 4, 0) }, // TIM2_CH4
-    // {PB_11, TIM2,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM2_ENABLE, 4, 0)}, // TIM2_CH4
-    { PB_13, TIM1, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 1, 1) },       // TIM1_CH1N
-    { PB_14, TIM1, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 2, 1) },       // TIM1_CH2N
-    { PB_15, TIM1, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 3, 1) },       // TIM1_CH3N
-    { PC_6, TIM3, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM3_ENABLE, 1, 0) }, // TIM3_CH1
-#ifdef STM32F103xE
-// {PC_6,  TIM8,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 1, 0)}, // TIM8_CH1
-#endif
-    { PC_7, TIM3, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM3_ENABLE, 2, 0) }, // TIM3_CH2
-#ifdef STM32F103xE
-// {PC_7,  TIM8,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 2, 0)}, // TIM8_CH2
-#endif
-#ifndef STM32F103xE
-    { PC_8, TIM3, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM3_ENABLE, 3, 0) }, // TIM3_CH3
-#else
-    { PC_8, TIM8, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 3, 0) }, // TIM8_CH3
-#endif
-#if 0
-  {PC_9,  TIM3,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM3_ENABLE, 4, 0)}, // TIM3_CH4 Moses - switched over to use TIM8 instead.
-#endif
-    { PC_9, TIM8, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 4, 0) }, // TIM8_CH4
-    { NC, NP, 0 }
-};
 
-#endif
+// For SKR E3 mini V1.2:
+// Optional: WWDG as timer (100hz-8khz)
+// 8 advanced - both heaters
+// 7 basic - softserial
+// 3 general - motion 3
+// 5 general - pwm timer
+// 4 general - motion 2
+// 6 basic - beeper (HW) - can't be anything else
+// 2 general - servo
+// 1 advanced - fan 1
 
 // Create timer names from TIMER_NUM macro
 
 #define _TIMER(num) TIM##num
 #define _TIMER_IRQ(num) TIM##num##_IRQn
-#define _TIMER_VECTOR(num) RF_TC##num##_Handler(HardwareTimer*)
+
+
+#if WEAK_HARDWARE_TIMERS
+#define _TIMER_VECTOR(num) TIM##num##_IRQHandler(void)
+#define _TIMER_VECTOR_NAME(num) TIM##num##_IRQHandler
+#else
+// Moses - as of v1.9.0 STM32Duino changed their callback system to use
+// std::function, so we don't use the HardwareTimer* parameter anymore.
+#define _TIMER_VECTOR(num) RF_TC##num##_Handler()
 #define _TIMER_VECTOR_NAME(num) RF_TC##num##_Handler
+#endif
 
 #define TIMER(num) _TIMER(num)
 #define TIMER_IRQ(num) _TIMER_IRQ(num)
@@ -166,7 +99,7 @@ struct PWMEntry {
     const PinMap* map;
     HardwareTimer* ht;
 };
-static PWMEntry pwmEntries[40];
+static PWMEntry pwmEntries[40] = { 0 };
 static int numPWMEntries = 0;
 
 TimerFunction timerList[] = {
@@ -330,19 +263,46 @@ HAL::HAL() {
 HAL::~HAL() {
     //dtor
 }
-TimerFunction* motion2;
-TimerFunction* motion3;
-TimerFunction* pwm;
-TimerFunction* servo;
+TimerFunction* motion2 = nullptr;
+TimerFunction* motion3 = nullptr;
+TimerFunction* pwm = nullptr;
+TimerFunction* servo = nullptr;
 TimerFunction* toneTimer = nullptr;
+
+/*
+ Moses - Weakening HardwareTimer's timer bare interrupt functions
+ and then replacing them here yields a performance increase.
+ STM32F103RCT6 (SKR Mini E3) - Switching a pin HIGH upon entering the motion3
+ timer (TIM6_IRQHandler), LOW right before exiting @ 150khz 
+
+ Using non-weak HardwareTimer callbacks: 3.364us
+ Using weakened bare timer IRQ's here:   1.362us
+ (Non-weak tested by writing the pin high/low inside of HardwareTimer.cpp)
+ Both timed under -O3 optimizations
+ 150khz~ seems to be the max stepper frequency I can achieve with non-weak timers
+ without issues.
+ 270khz~ with bare IRQ's
+*/
+
+#if WEAK_HARDWARE_TIMERS
+extern "C" void TIMER_VECTOR(MOTION2_TIMER_NUM);
+extern "C" void TIMER_VECTOR(MOTION3_TIMER_NUM);
+extern "C" void TIMER_VECTOR(PWM_TIMER_NUM);
+extern "C" void TIMER_VECTOR(TONE_TIMER_NUM);
+#else
 extern void TIMER_VECTOR(MOTION2_TIMER_NUM);
 extern void TIMER_VECTOR(MOTION3_TIMER_NUM);
 extern void TIMER_VECTOR(PWM_TIMER_NUM);
 extern void TIMER_VECTOR(TONE_TIMER_NUM);
+#endif
 
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
-extern void servoOffTimer(HardwareTimer*);
+extern void servoOffTimer();
+#if WEAK_HARDWARE_TIMERS
+extern "C" void TIMER_VECTOR(SERVO_TIMER_NUM);
+#else
 extern void TIMER_VECTOR(SERVO_TIMER_NUM);
+#endif
 static uint32_t ServoPrescalerfactor = 20000;
 static uint32_t Servo2500 = 2500;
 #endif
@@ -358,10 +318,35 @@ void HAL::hwSetup(void) {
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
     servo = reserveTimerInterrupt(SERVO_TIMER_NUM); // prevent pwm usage
     servo->timer = new HardwareTimer(TIMER(SERVO_TIMER_NUM));
-    servo->timer->setPWM(1, NC, 200, 50, TIMER_VECTOR_NAME(SERVO_TIMER_NUM), servoOffTimer);
-    ServoPrescalerfactor = servo->tim->PSC + 1;
+    // setPWM does a resume, but we need to do some config changes before that.
+    servo->timer->setMode(1, TIMER_OUTPUT_COMPARE_PWM1);
+    servo->timer->setOverflow(200, HERTZ_FORMAT);
+    servo->timer->attachInterrupt(TIMER_VECTOR_NAME(SERVO_TIMER_NUM));
+    servo->timer->attachInterrupt(1, &servoOffTimer);
+
+    LL_TIM_OC_EnableFast(servo->tim, servo->timer->getLLChannel(1));
+
+    ServoPrescalerfactor = (LL_TIM_GetPrescaler(servo->tim) + 1);
     Servo2500 = ((2500 * (servo->timer->getTimerClkFreq() / 1000000)) / ServoPrescalerfactor) - 1;
-    HAL_NVIC_SetPriority(TIMER_IRQ(SERVO_TIMER_NUM), 1, 0);
+    servo->timer->refresh();
+    servo->timer->resume();
+    HAL_NVIC_SetPriority(TIMER_IRQ(SERVO_TIMER_NUM), 2, 0);
+#endif
+
+#if NUM_BEEPERS > 0
+    for (int i = 0; i < NUM_BEEPERS; i++) {
+        if (beepers[i]->getOutputType() == 1) {
+            LL_GPIO_SetPinSpeed(get_GPIO_Port(STM_PORT(BEEPER_PIN)), STM_LL_GPIO_PIN(BEEPER_PIN), LL_GPIO_SPEED_FREQ_LOW);
+            // If we have any SW beepers, enable the beeper IRQ
+            toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
+            toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
+            toneTimer->timer->setMode(1, TIMER_OUTPUT_COMPARE);
+            toneTimer->timer->setOverflow(0, HERTZ_FORMAT);
+            toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM)); 
+            toneTimer->timer->setInterruptPriority(3, 0); 
+            break;
+        }
+    }
 #endif
 
 #if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
@@ -414,20 +399,6 @@ void HAL::setupTimer() {
     motion3->timer->attachInterrupt(TIMER_VECTOR_NAME(MOTION3_TIMER_NUM));
     motion3->timer->resume();
     HAL_NVIC_SetPriority(TIMER_IRQ(MOTION3_TIMER_NUM), 0, 0); // highest priority required!
-
-#if NUM_BEEPERS > 0
-    for (int i = 0; i < NUM_BEEPERS; i++) {
-        if (beepers[i]->getOutputType() == 1) {
-            // If we have any SW beepers, enable the beeper IRQ
-            toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
-            toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
-            toneTimer->timer->setMode(2, TIMER_OUTPUT_COMPARE);
-            toneTimer->timer->setOverflow(0, HERTZ_FORMAT);
-            toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
-            break;
-        }
-    }
-#endif
 }
 
 // Try to initialize pinNumber as hardware PWM. Returns internal
@@ -481,7 +452,15 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
             uint32_t channel = STM_PIN_CHANNEL(map->function);
             pinMode(pinNumber, OUTPUT);
             digitalWrite(pinNumber, LOW);
-            HT->setPWM(channel, p, tf->frequency, 0);
+
+            // preloading by default as of 1.9.0 (4.10900.200819)
+            HT->setMode(channel, TIMER_OUTPUT_COMPARE_PWM1, p);
+            HT->setOverflow(tf->frequency, HERTZ_FORMAT);
+
+            LL_TIM_OC_EnableFast(tf->tim, HT->getLLChannel(channel));
+
+            HT->refresh();
+            HT->resume();
             return numPWMEntries++;
         }
     }
@@ -493,10 +472,7 @@ void HAL::setHardwarePWM(int id, int value) {
         return;
     }
     PWMEntry& entry = pwmEntries[id];
-    uint32_t channel = STM_PIN_CHANNEL(entry.map->function);
-    entry.ht->pause();
-    entry.ht->setCaptureCompare(channel, value, RESOLUTION_8B_COMPARE_FORMAT); // set pwm 0
-    entry.ht->resume();
+    entry.ht->setCaptureCompare(STM_PIN_CHANNEL(entry.map->function), value, RESOLUTION_8B_COMPARE_FORMAT);
 }
 
 void HAL::setHardwareFrequency(int id, uint32_t frequency) {
@@ -504,11 +480,8 @@ void HAL::setHardwareFrequency(int id, uint32_t frequency) {
         return;
     }
     PWMEntry& entry = pwmEntries[id];
-    entry.ht->pause();
-    if (frequency) {
-        entry.ht->setOverflow(frequency, HERTZ_FORMAT);
-        entry.ht->resume();
-    }
+    entry.ht->setOverflow(frequency, HERTZ_FORMAT);
+    entry.ht->refresh();
 }
 
 ADC_HandleTypeDef AdcHandle = {};
@@ -566,7 +539,7 @@ void HAL::reportHALDebug() {
 // Problem with that callback is it's processing overhead.
 // At the /slowest/ setting that function gets called at ~37.5khz
 // Even with the simplest interrupt, just accessing it from flash
-// slows us down. 
+// slows us down.
 
 void HAL::analogStart(void) {
     // Analog channels being used are already enabled. Start conversion
@@ -825,15 +798,19 @@ void HAL::resetHardware() {
 void HAL::i2cSetClockspeed(uint32_t clockSpeedHz)
 
 {
+#if defined(WIRE_PORT) && !defined(HAL_I2C_MODULE_DISABLED)
     WIRE_PORT.setClock(clockSpeedHz);
+#endif
 }
 
 /*************************************************************************
  Initialization of the I2C bus interface. Need to be called only once
 *************************************************************************/
 void HAL::i2cInit(uint32_t clockSpeedHz) {
+#if defined(WIRE_PORT) && !defined(HAL_I2C_MODULE_DISABLED)
     WIRE_PORT.begin(); // create I2C master access
     WIRE_PORT.setClock(clockSpeedHz);
+#endif
 }
 
 /*************************************************************************
@@ -844,9 +821,11 @@ void HAL::i2cInit(uint32_t clockSpeedHz) {
 } */
 
 void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
+#if defined(WIRE_PORT) && !defined(HAL_I2C_MODULE_DISABLED)
     if (!i2cError) {
         i2cError |= (WIRE_PORT.requestFrom(address, bytes) != bytes);
     }
+#endif
 }
 /*************************************************************************
  Issues a start condition and sends address and transfer direction.
@@ -855,6 +834,7 @@ void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
  Input:   address and transfer direction of I2C device, internal address
 *************************************************************************/
 void HAL::i2cStartAddr(uint8_t address, unsigned int pos, uint8_t readBytes) {
+#if defined(WIRE_PORT) && !defined(HAL_I2C_MODULE_DISABLED)
     if (!i2cError) {
         WIRE_PORT.beginTransmission(address);
         WIRE_PORT.write(pos >> 8);
@@ -864,13 +844,16 @@ void HAL::i2cStartAddr(uint8_t address, unsigned int pos, uint8_t readBytes) {
             i2cError |= (WIRE_PORT.requestFrom(address, readBytes) != readBytes);
         }
     }
+#endif
 }
 
 /*************************************************************************
  Terminates the data transfer and releases the I2C bus
 *************************************************************************/
 void HAL::i2cStop(void) {
+#if defined(WIRE_PORT) && !defined(HAL_I2C_MODULE_DISABLED)
     i2cError |= WIRE_PORT.endTransmission();
+#endif
 }
 
 /*************************************************************************
@@ -879,9 +862,11 @@ void HAL::i2cStop(void) {
   Input:    byte to be transfered
 *************************************************************************/
 void HAL::i2cWrite(uint8_t data) {
+#if defined(WIRE_PORT) && !defined(HAL_I2C_MODULE_DISABLED)
     if (!i2cError) {
         WIRE_PORT.write(data);
     }
+#endif
 }
 
 /*************************************************************************
@@ -889,9 +874,11 @@ void HAL::i2cWrite(uint8_t data) {
  Return:  byte read from I2C device
 *************************************************************************/
 int HAL::i2cRead(void) {
+#if defined(WIRE_PORT) && !defined(HAL_I2C_MODULE_DISABLED)
     if (!i2cError && WIRE_PORT.available()) {
         return WIRE_PORT.read();
     }
+#endif
     return -1; // should never happen, but better then blocking
 }
 
@@ -910,7 +897,7 @@ void HAL::servoMicroseconds(uint8_t servoId, int microsec, uint16_t autoOff) {
 // ================== Interrupt handling ======================
 
 ServoInterface* analogServoSlots[4] = { nullptr, nullptr, nullptr, nullptr };
-void servoOffTimer(HardwareTimer* timer) {
+inline void servoOffTimer() {
 #if NUM_SERVOS > 0
     if (actServo) {
         actServo->disable();
@@ -943,6 +930,22 @@ void servoOffTimer(HardwareTimer* timer) {
 #include "io/redefine.h"
 }
 
+#if WEAK_HARDWARE_TIMERS
+// Servo timer Interrupt handler
+void TIMER_VECTOR(SERVO_TIMER_NUM) {
+#if NUM_SERVOS > 0
+    if (LL_TIM_IsActiveFlag_CC1(TIMER(SERVO_TIMER_NUM))) {
+        LL_TIM_ClearFlag_CC1(TIMER(SERVO_TIMER_NUM));
+        servoOffTimer();
+    } else if (LL_TIM_IsActiveFlag_UPDATE(TIMER(SERVO_TIMER_NUM))) {
+        LL_TIM_ClearFlag_UPDATE(TIMER(SERVO_TIMER_NUM));
+        if (actServo) {
+            actServo->enable();
+        }
+    }
+#endif
+}
+#else
 // Servo timer Interrupt handler
 void TIMER_VECTOR(SERVO_TIMER_NUM) {
 #if NUM_SERVOS > 0
@@ -951,12 +954,16 @@ void TIMER_VECTOR(SERVO_TIMER_NUM) {
     }
 #endif
 }
+#endif
 
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
 void TIMER_VECTOR(MOTION3_TIMER_NUM) {
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_STEPPER_PIN, 1);
+#endif
+#if WEAK_HARDWARE_TIMERS
+    LL_TIM_ClearFlag_UPDATE(TIMER(MOTION3_TIMER_NUM));
 #endif
     Motion3::timer();
 #if DEBUG_TIMING
@@ -977,6 +984,9 @@ void TIMER_VECTOR(PWM_TIMER_NUM) {
     WRITE(DEBUG_ISR_TEMP_PIN, 1);
 #endif
     //InterruptProtectedBlock noInt;
+#if WEAK_HARDWARE_TIMERS
+    LL_TIM_ClearFlag_UPDATE(TIMER(PWM_TIMER_NUM));
+#endif
 
     static uint8_t pwm_count0 = 0; // Used my IO_PWM_SOFTWARE!
     static uint8_t pwm_count1 = 0;
@@ -1028,6 +1038,9 @@ void TIMER_VECTOR(PWM_TIMER_NUM) {
 void TIMER_VECTOR(MOTION2_TIMER_NUM) {
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_MOTION_PIN, 1);
+#endif
+#if WEAK_HARDWARE_TIMERS
+    LL_TIM_ClearFlag_UPDATE(TIMER(MOTION2_TIMER_NUM));
 #endif
     Motion2::timer();
 #if DEBUG_TIMING
@@ -1110,7 +1123,7 @@ void HAL::noTone() {
     }
 #endif
     if (toneTimer != nullptr) { // could be called before timer are initialized!
-        toneTimer->timer->pause();
+        toneTimer->timer->pauseChannel(1);
     }
 #endif
 }

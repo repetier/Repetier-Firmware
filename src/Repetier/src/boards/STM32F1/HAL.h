@@ -42,8 +42,12 @@
 #endif
 
 // Which I2C port to use?
+#ifndef HAL_I2C_MODULE_DISABLED
 #ifndef WIRE_PORT
 #define WIRE_PORT Wire
+#endif
+#else
+#undef U8X8_HAVE_HW_I2C
 #endif
 
 #ifndef F_CPU
@@ -106,17 +110,6 @@ typedef char prog_char;
 #define TONE_TIMER_NUM 3
 #endif
 
-// For E3 mini V1.2:
-// Optional: WWDG as timer (100hz-8khz)
-// 8 advanced - heaters
-// 7 basic - softserial
-// 6 basic - motion 3
-// 5 general - pwm timer
-// 4 general - motion 2
-// 3 general - beeper (HW)
-// 2 general - servo
-// 1 advanced - fan 1
-
 // for host autoconfiguration
 #define SERIAL_BUFFER_SIZE SERIAL_RX_BUFFER_SIZE
 
@@ -128,14 +121,16 @@ typedef char prog_char;
 #define PULLUP(IO, v) \
     { ::pinMode(IO, (v != LOW ? INPUT_PULLUP : INPUT)); }
 
-#define WATCHDOG_INTERVAL 5000000 //us 5sec
+#define WATCHDOG_INTERVAL 8000000 //us 5sec
 
 #include "Arduino.h"
 #ifdef MAX_WIRE_INTERFACES
 #undef WIRE_INTERFACES_COUNT
 #define WIRE_INTERFACES_COUNT MAX_WIRE_INTERFACES
 #endif
+#ifndef HAL_I2C_MODULE_DISABLED
 #include <Wire.h>
+#endif
 
 #define _READ(pin) (LL_GPIO_IsInputPinSet(GPIO_##pin, GPIO_##pin##_MASK) ? 1 : 0)
 #define _WRITE(port, v) \
@@ -430,10 +425,6 @@ public:
         // Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
         RFSERIAL2.begin(baud);
-#endif // PC13 ("USB_CONN") is a small pulled up mosfet on the USB D+ line.
-#if defined(USB_ENABLE_PIN) && USB_ENABLE_PIN > -1
-        SET_OUTPUT(USB_ENABLE_PIN);
-        WRITE(USB_ENABLE_PIN, LOW);
 #endif
         RFSERIAL.begin(baud);
     }
@@ -479,7 +470,7 @@ public:
 #if NUM_SERVOS > 0
     static unsigned int servoTimings[4];
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);
-#else 
+#else
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff) { }
 #endif
 
