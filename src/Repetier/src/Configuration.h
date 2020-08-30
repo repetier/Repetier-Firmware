@@ -484,6 +484,8 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 
 #define SD_MENU_SHOW_HIDDEN_FILES 0
 #define SD_MENU_CACHE_SCROLL_ENTRIES 0   // Cache filenames while scrolling for better performance/infinite scroll
+#define SD_SPI_SPEED_MHZ 4               // SD Card HW-SPI Speed in MHz. SD Card "High Speed" mode is 50Mhz, but you may be
+                                         // limited to less based on your processor.  
 
 #define SD_EXTENDED_DIR 1 /** Show extended directory including file length. Don't use this with Pronterface! */
 #define SD_RUN_ON_STOP ""

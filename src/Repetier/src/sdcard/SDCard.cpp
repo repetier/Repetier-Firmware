@@ -23,6 +23,10 @@
 
 #if SDSUPPORT
 
+#ifndef SD_SPI_SPEED_MHZ
+#define SD_SPI_SPEED_MHZ 4
+#endif
+
 char tempLongFilename[LONG_FILENAME_LENGTH + 1];
 char fullName[LONG_FILENAME_LENGTH * SD_MAX_FOLDER_DEPTH + SD_MAX_FOLDER_DEPTH + 1];
 SDCardGCodeSource sdSource;
@@ -68,21 +72,22 @@ void SDCard::initsd() {
     sdactive = false;
 #if SDSS > -1
 #if SDCARDDETECT > -1
-    if (READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
+    if (READ(SDCARDDETECT) != SDCARDDETECTINVERTED) {
         return;
+    }
 #endif
     HAL::pingWatchdog();
     HAL::delayMilliseconds(50); // wait for stabilization of contacts, bootup ...
 #if ENABLE_SOFTWARE_SPI_CLASS
     fat.begin(SDSS);
 #else
-    fat.begin(SDSS, SD_SCK_MHZ(4)); // dummy init of SD_CARD
+    fat.begin(SDSS, SD_SCK_MHZ(constrain(SD_SPI_SPEED_MHZ, 1, 50))); // dummy init of SD_CARD
 #endif
     HAL::delayMilliseconds(50); // wait for init end
     HAL::pingWatchdog();
     /*if(dir[0].isOpen())
         dir[0].close();*/
-    if (!fat.begin(SDSS, SD_SCK_MHZ(4))) {
+    if (!fat.begin(SDSS, SD_SCK_MHZ(constrain(SD_SPI_SPEED_MHZ, 1, 50)))) {
         Com::printFLN(Com::tSDInitFail);
         sdmode = 100; // prevent automount loop!
         if (fat.card()->errorCode()) {
