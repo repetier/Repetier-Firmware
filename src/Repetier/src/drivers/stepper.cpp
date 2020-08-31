@@ -968,11 +968,6 @@ template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::init() {
     disable();
 
-    // teemuatlut's library resets SWSerial (and it's baudrate) inside begin,
-    // so just use these.
-    driver->pdn_disable(true);
-    driver->mstep_reg_select(true);
-
     // The TMC2209_n namespace doesn't recreate all the register structs for the 2209 specifically
     // We're meant to use the 2208's.
     // However, it does have it's own IOIN_t, COOLCONF_t, SG_RESULT_t, and SGTHRS_t tables!
