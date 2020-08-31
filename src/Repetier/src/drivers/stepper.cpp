@@ -967,7 +967,6 @@ void reportTMC2209(TMC2209Stepper* driver, ProgrammableStepperBase* b, int level
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::init() {
     disable();
-    driver->begin();
 
     // The TMC2209_n namespace doesn't recreate all the register structs for the 2209 specifically
     // We're meant to use the 2208's.
@@ -1005,8 +1004,6 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::init() {
     pwmconf.pwm_grad = 14;
     pwmconf.pwm_ofs = 36;
     driver->PWMCONF(pwmconf.sr);
-
-    //TMC2209_n::COOLCONF_t coolconf { 0 };
 
     if (hybridSpeed >= 0) {
         driver->TPWMTHRS(fclk * microsteps / static_cast<uint32_t>(256 * hybridSpeed * Motion1::resolution[getAxis()])); // need computed
@@ -1080,6 +1077,15 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
         otpw = true;
     } else {
         otpwCount = 0;
+    }
+    if (status.s2ga || status.s2gb || status.s2vsa || status.s2vsb) {
+        printMotorNumberAndName(false);
+        Com::printF(Com::tMotorDriverShort, (status.s2ga || status.s2gb) ? PSTR("to ground!") : PSTR("to low-side MOSFET!"));
+        if (status.s2ga || status.s2vsa) {
+            Com::printFLN(PSTR(" (Phase A)"));
+        } else {
+            Com::printFLN(PSTR(" (Phase B)"));
+        }
     }
 #endif
 }
