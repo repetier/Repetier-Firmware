@@ -1118,4 +1118,34 @@ void ZProbeHandler::showConfigMenu(GUIAction action) {
     GUI::menuFloatP(action, PSTR("X Offset    :"), ZProbeHandler::xOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(0), GUIPageType::FIXED_CONTENT);
     GUI::menuFloatP(action, PSTR("Y Offset    :"), ZProbeHandler::yOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(1), GUIPageType::FIXED_CONTENT);
 }
+
+void menuBLTouchAlarmRelease(GUIAction action, void* data) {
+    if (!Printer::isHoming() && !Printer::isZProbingActive()) {
+        ZProbeServo.setPosition(2194, 0);
+    }
+}
+void menuBLTouchStow(GUIAction action, void* data) {
+    if (!Printer::isHoming() && !Printer::isZProbingActive()) {
+        ZProbeServo.setPosition(1473, 0);
+    }
+}
+
+void menuBLTouchDeploy(GUIAction action, void* data) {
+    if (!Printer::isHoming() && !Printer::isZProbingActive()) {
+        ZProbeServo.setPosition(647, 0);
+    }
+}
+
+void menuBLTouchSelfTest(GUIAction action, void* data) {
+    if (!Printer::isHoming() && !Printer::isZProbingActive()) {
+        ZProbeServo.setPosition(1782, 0);
+    }
+}
+
+void ZProbeHandler::showControlMenu(GUIAction action) {
+    GUI::menuSelectableP(action, PSTR("Deploy Pin"), menuBLTouchDeploy, nullptr, GUIPageType::ACTION);
+    GUI::menuSelectableP(action, PSTR("Stow Pin"), menuBLTouchStow, nullptr, GUIPageType::ACTION);
+    GUI::menuSelectableP(action, PSTR("Self Test"), menuBLTouchSelfTest, nullptr, GUIPageType::ACTION);
+    GUI::menuSelectableP(action, PSTR("Alarm Release"), menuBLTouchAlarmRelease, nullptr, GUIPageType::ACTION);
+}
 #endif
