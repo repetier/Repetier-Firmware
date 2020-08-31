@@ -222,49 +222,47 @@ void __attribute__((weak)) menuConfigProbe(GUIAction action, void* data) {
     GUI::menuEnd(action);
 }
 
-void menuRunProbeOnce(GUIAction action, void* data) {
+class GCode;
+void __attribute__((weak)) menuRunProbeOnce(GUIAction action, void* data) {
+#if Z_PROBE_TYPE != Z_PROBE_TYPE_NONE
     if (!Printer::isHoming() && !Printer::isZProbingActive()) {
-        Printer::setZProbingActive(true); // Bug here
-        ZProbeHandler::activate();
-        float point = ZProbeHandler::runProbe();
-        if (point != ILLEGAL_Z_PROBE) {
-        } else {
-            GCode::fatalError(PSTR("Probing failed!"));
-        }
-        ZProbeHandler::deactivate();
-    }
-}
-void menuRunAutolevel(GUIAction action, void* data) {
-#if LEVELING_METHOD != LEVELING_METHOD_NONE
-    if (!Printer::isHoming() && !Printer::isZProbingActive()) {
-        bool ok = Leveling::measure();
-        if (!ok) {
-            GCode::fatalError(PSTR("Leveling failed!"));
-        }
+        Printer::setZProbingActive(true);
+        GCode innerCode;
+        innerCode.source = GCodeSource::activeSource;
+        innerCode.internalCommand = true;
+        innerCode.setG(30); // G30
+        Commands::executeGCode(&innerCode);
     }
 #endif
 }
-void menuBreakLongCmd( GUIAction action, void* ) {
-    Printer::breakLongCommand = true;
+void __attribute__((weak)) menuRunAutolevel(GUIAction action, void* data) {
+#if LEVELING_METHOD != LEVELING_METHOD_NONE && Z_PROBE_TYPE != Z_PROBE_TYPE_NONE
+    if (!Printer::isHoming() && !Printer::isZProbingActive()) {
+        Printer::setZProbingActive(true);
+        GCode innerCode;
+        innerCode.source = GCodeSource::activeSource;
+        innerCode.internalCommand = true;
+        innerCode.setG(32); // G32
+        Commands::executeGCode(&innerCode);
+    }
+#endif
 }
 void __attribute__((weak)) menuControlProbe(GUIAction action, void* data) {
+#if Z_PROBE_TYPE != Z_PROBE_TYPE_NONE
     GUI::menuStart(action);
     GUI::menuTextP(action, PSTR("= Control Probe ="), true);
     GUI::menuBack(action);
 
-    if (Printer::isZProbingActive() && !Printer::breakLongCommand) {
-        GUI::menuSelectableP(action, PSTR("Cancel Probing"), menuBreakLongCmd, reinterpret_cast<void*>(0), GUIPageType::ACTION);
-    }
-
-    GUI::menuSelectableP(action, PSTR("Run Single Probe"), menuRunProbeOnce, reinterpret_cast<void*>(0), GUIPageType::ACTION);
+    GUI::menuSelectableP(action, PSTR("Run Single Probe"), menuRunProbeOnce, nullptr, GUIPageType::ACTION);
 #if LEVELING_METHOD != LEVELING_METHOD_NONE // Odd case but best to check anyways
-    GUI::menuSelectableP(action, PSTR("Run Autoleveling"), menuRunAutolevel, reinterpret_cast<void*>(0), GUIPageType::ACTION);
+    GUI::menuSelectableP(action, PSTR("Run Autoleveling"), menuRunAutolevel, nullptr, GUIPageType::ACTION);
 #endif
     //unique probe controls
     if (ZProbeHandler::hasControlMenu()) {
         ZProbeHandler::showControlMenu(action);
     }
     GUI::menuEnd(action);
+#endif
 }
 
 const long baudrates[] PROGMEM = { 38400, 56000, 57600, 76800, 115200, 128000, 230400, 250000, 256000,
