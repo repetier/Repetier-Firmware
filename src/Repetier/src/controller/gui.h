@@ -147,6 +147,7 @@ public:
     static GUIAction nextAction;                 ///< Next action to execute on opdate
     static int nextActionRepeat;                 ///< Increment for next/previous
     static GUIStatusLevel statusLevel;
+    static bool textIsScrolling; 
 #if SDSUPPORT
     static char cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2];
     static uint8_t folderLevel;
