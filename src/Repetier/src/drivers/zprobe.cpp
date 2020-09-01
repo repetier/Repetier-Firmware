@@ -1089,8 +1089,9 @@ bool ZProbeHandler::isAlarmOn() {
 }
 
 void ZProbeHandler::disableAlarmIfOn() {
-    while (isAlarmOn()) {
-        ZProbeServo.setPosition(2194, 0); // reset Alarm
+    millis_t startTime = HAL::timeInMilliseconds();
+    while (isAlarmOn() && (HAL::timeInMilliseconds() - startTime) < 1500) {
+        ZProbeServo.setPosition(2194, 0);
     }
     ZProbeServo.setPosition(1473, 0); // pin up
 }
