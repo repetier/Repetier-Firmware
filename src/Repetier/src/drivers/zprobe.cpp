@@ -51,6 +51,7 @@ void ZProbeHandler::activate() {
     if (!Motion1::isAxisHomed(X_AXIS) || !Motion1::isAxisHomed(Y_AXIS)) {
         Motion1::homeAxes((Motion1::isAxisHomed(X_AXIS) ? 0 : 1) + (Motion1::isAxisHomed(Y_AXIS) ? 0 : 2));
     }
+    Printer::setZProbingActive(true);
     float cPos[NUM_AXES];
     Motion1::copyCurrentOfficial(cPos);
     PrinterType::closestAllowedPositionWithNewXYOffset(cPos, offsetX, offsetY, Z_PROBE_BORDER);
@@ -89,6 +90,7 @@ void ZProbeHandler::deactivate() {
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     activated = false;
+    Printer::setZProbingActive(false);
     if (pauseHeaters) {
         for (size_t i = 0; i < NUM_HEATERS; i++) {
             if (heaters[i]->isPaused()) {
@@ -406,6 +408,7 @@ void ZProbeHandler::activate() {
     if (!Motion1::isAxisHomed(X_AXIS) || !Motion1::isAxisHomed(Y_AXIS)) {
         Motion1::homeAxes((Motion1::isAxisHomed(X_AXIS) ? 0 : 1) + (Motion1::isAxisHomed(Y_AXIS) ? 0 : 2));
     }
+    Printer::setZProbingActive(true);
     float cPos[NUM_AXES];
     Tool* tool = Tool::getActiveTool();
     Motion1::copyCurrentOfficial(cPos);
@@ -462,6 +465,7 @@ void ZProbeHandler::deactivate() {
         hm->setTargetTemperature(activateTemperature);
     }
     activated = false;
+    Printer::setZProbingActive(false);
     if (pauseHeaters) {
         for (size_t i = 0; i < NUM_HEATERS; i++) {
             if (heaters[i]->isPaused()) {
@@ -771,6 +775,7 @@ void ZProbeHandler::activate() {
     if (!Motion1::isAxisHomed(X_AXIS) || !Motion1::isAxisHomed(Y_AXIS)) {
         Motion1::homeAxes((Motion1::isAxisHomed(X_AXIS) ? 0 : 1) + (Motion1::isAxisHomed(Y_AXIS) ? 0 : 2));
     }
+    Printer::setZProbingActive(true);
     float cPos[NUM_AXES];
     Motion1::copyCurrentOfficial(cPos);
     PrinterType::closestAllowedPositionWithNewXYOffset(cPos, offsetX, offsetY, Z_PROBE_BORDER);
@@ -819,6 +824,7 @@ void ZProbeHandler::deactivate() {
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     activated = false;
+    Printer::setZProbingActive(false);
     if (pauseHeaters) {
         for (size_t i = 0; i < NUM_HEATERS; i++) {
             if (heaters[i]->isPaused()) {
@@ -1112,5 +1118,35 @@ void __attribute__((weak)) menuProbeOffset(GUIAction action, void* data) {
 void ZProbeHandler::showConfigMenu(GUIAction action) {
     GUI::menuFloatP(action, PSTR("X Offset    :"), ZProbeHandler::xOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(0), GUIPageType::FIXED_CONTENT);
     GUI::menuFloatP(action, PSTR("Y Offset    :"), ZProbeHandler::yOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(1), GUIPageType::FIXED_CONTENT);
+}
+
+void menuBLTouchAlarmRelease(GUIAction action, void* data) {
+    if (!Printer::isHoming() && !Printer::isZProbingActive()) {
+        ZProbeServo.setPosition(2194, 0);
+    }
+}
+void menuBLTouchStow(GUIAction action, void* data) {
+    if (!Printer::isHoming() && !Printer::isZProbingActive()) {
+        ZProbeServo.setPosition(1473, 0);
+    }
+}
+
+void menuBLTouchDeploy(GUIAction action, void* data) {
+    if (!Printer::isHoming() && !Printer::isZProbingActive()) {
+        ZProbeServo.setPosition(647, 0);
+    }
+}
+
+void menuBLTouchSelfTest(GUIAction action, void* data) {
+    if (!Printer::isHoming() && !Printer::isZProbingActive()) {
+        ZProbeServo.setPosition(1782, 0);
+    }
+}
+
+void ZProbeHandler::showControlMenu(GUIAction action) {
+    GUI::menuSelectableP(action, PSTR("Deploy Pin"), menuBLTouchDeploy, nullptr, GUIPageType::ACTION);
+    GUI::menuSelectableP(action, PSTR("Stow Pin"), menuBLTouchStow, nullptr, GUIPageType::ACTION);
+    GUI::menuSelectableP(action, PSTR("Self Test"), menuBLTouchSelfTest, nullptr, GUIPageType::ACTION);
+    GUI::menuSelectableP(action, PSTR("Alarm Release"), menuBLTouchAlarmRelease, nullptr, GUIPageType::ACTION);
 }
 #endif

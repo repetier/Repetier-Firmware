@@ -29,6 +29,9 @@ public:
     static void showConfigMenu(GUIAction action) { }
     static bool hasConfigMenu() { return false; }
 
+    static void showControlMenu(GUIAction action) { }
+    static bool hasControlMenu() { return false; }
+
     static bool getHeaterPause() { return false; }
     static void setHeaterPause(bool set) { }
 
@@ -78,6 +81,9 @@ public:
 
     static void showConfigMenu(GUIAction action);
     static bool hasConfigMenu() { return true; }
+
+    static void showControlMenu(GUIAction action) { };
+    static bool hasControlMenu() { return false; }
 
     static bool getHeaterPause() { return pauseHeaters; }
     static void setHeaterPause(bool set) { pauseHeaters = set; }
@@ -133,6 +139,9 @@ public:
     static void showConfigMenu(GUIAction action);
     static bool hasConfigMenu() { return true; }
 
+    static void showControlMenu(GUIAction action) { };
+    static bool hasControlMenu() { return false; }
+
     static bool getHeaterPause() { return pauseHeaters; }
     static void setHeaterPause(bool set) { pauseHeaters = set; }
 
@@ -185,6 +194,9 @@ public:
 
     static void showConfigMenu(GUIAction action);
     static bool hasConfigMenu() { return true; }
+
+    static void showControlMenu(GUIAction action);
+    static bool hasControlMenu() { return true; }
 
     static bool getHeaterPause() { return pauseHeaters; }
     static void setHeaterPause(bool set) { pauseHeaters = set; }
