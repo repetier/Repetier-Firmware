@@ -633,6 +633,49 @@ void printRow(uint8_t r, char* txt) {
 #endif
 }
 
+static fast8_t textScrollPos = 0;
+static fast8_t textScrollWaits = 0;
+static bool textScrollDir = false;
+
+static char scrollBuf[sizeof(GUI::buf) + 1] = { 0 };
+static void scrollSelectedText(int* row) {
+    fast8_t lastCharPos = GUI::bufPos;
+    if (lastCharPos > UI_COLS) {
+        if (!GUI::textIsScrolling) {
+            // Wait a few refresh ticks before starting scroll.
+            textScrollWaits = 2;
+            GUI::textIsScrolling = true;
+        }
+        if (textScrollWaits <= 0) {
+            // Intentionally go one character over to show we're done.
+            fast8_t maxScrollX = constrain(((lastCharPos + 1) - UI_COLS), 0, static_cast<fast8_t>(sizeof(scrollBuf) - 1));
+            constexpr fast8_t scrollIncr = 1;
+            if (!textScrollDir) {
+                if ((textScrollPos += scrollIncr) >= maxScrollX) {
+                    textScrollDir = true; // Left scroll
+                    textScrollPos = maxScrollX;
+                    textScrollWaits = 2;
+                }
+            } else {
+                if ((textScrollPos -= scrollIncr) <= 0) {
+                    textScrollDir = false; // Right scroll back
+                    textScrollPos = 0;
+                    textScrollWaits = 1;
+                }
+            }
+        } else {
+            textScrollWaits--;
+        }
+        memmove(&scrollBuf[0], &GUI::buf[textScrollPos], sizeof(scrollBuf) - 1);
+        if (GUI::buf[0] == '>') {
+            scrollBuf[0] = '>';
+        }
+        printRow((*row)++, scrollBuf);
+    } else {
+        printRow((*row)++, GUI::buf);
+    }
+}
+
 void printRowCentered(uint8_t r, char* text) {
     unsigned int len = utf8Length(text);
     unsigned int extraSpaces = 0;
@@ -709,6 +752,13 @@ static int guiY;
 static int guiSelIndex;
 
 void GUI::menuStart(GUIAction action) {
+    if (npActionFound) {
+        if (GUI::textIsScrolling) {
+            GUI::textIsScrolling = false;
+            textScrollDir = false;
+            textScrollPos = textScrollWaits = 0;
+        }
+    }
     npActionFound = false;
     guiLine = 0;
     guiSelIndex = cursorRow[level];
@@ -766,7 +816,11 @@ void GUI::menuTextP(GUIAction& action, PGM_P text, bool highlight) {
         if (guiLine >= topRow[level] && guiLine < topRow[level] + UI_ROWS) {
             bufClear();
             bufAddStringP(text);
-            printRow(guiY++, buf);
+            if (guiLine == cursorRow[level]) {
+                scrollSelectedText(&guiY);
+            } else {
+                printRow(guiY++, buf);
+            }
         }
     } else if (action == GUIAction::NEXT) {
         if (!highlight && !npActionFound && guiLine > cursorRow[level]) {
@@ -903,7 +957,11 @@ void GUI::menuSelectableP(GUIAction& action, PGM_P text, GuiCallback cb, void* c
                 bufAddChar(' ');
             }
             GUI::bufAddStringP(text);
-            printRow(guiY++, buf);
+            if (guiLine == cursorRow[level]) {
+                scrollSelectedText(&guiY);
+            } else {
+                printRow(guiY++, buf);
+            }
         }
     } else if (action == GUIAction::NEXT) {
         if (!npActionFound && guiLine > cursorRow[level]) {
@@ -930,16 +988,11 @@ void GUI::menuText(GUIAction& action, char* text, bool highlight) {
         if (guiLine >= topRow[level] && guiLine < topRow[level] + UI_ROWS) {
             bufClear();
             bufAddString(text);
-            /* if (highlight) {
-                // bufAddChar('*');
-                // bufAddChar(' ');
-                bufAddString(text);
-                // bufAddChar(' ');
-                // bufAddChar('*');
+            if (guiLine == cursorRow[level]) {
+                scrollSelectedText(&guiY);
             } else {
-                bufAddString(text);
-            } */
-            printRow(guiY++, buf);
+                printRow(guiY++, buf);
+            }
         }
     } else if (action == GUIAction::NEXT) {
         if (!highlight && !npActionFound && guiLine > cursorRow[level]) {
@@ -1076,7 +1129,11 @@ void GUI::menuSelectable(GUIAction& action, char* text, GuiCallback cb, void* cD
                 bufAddChar(' ');
             }
             GUI::bufAddString(text);
-            printRow(guiY++, buf);
+            if (guiLine == cursorRow[level]) {
+                scrollSelectedText(&guiY);
+            } else {
+                printRow(guiY++, buf);
+            }
         }
     } else if (action == GUIAction::NEXT) {
         if (!npActionFound && guiLine > cursorRow[level]) {

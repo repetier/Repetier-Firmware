@@ -18,6 +18,7 @@ char GUI::status[MAX_COLS + 1];              ///< Status Line
 char GUI::buf[MAX_COLS + 1];                 ///< Buffer to build strings
 char GUI::tmpString[MAX_COLS + 1];           ///< Buffer to build strings
 fast8_t GUI::bufPos;                         ///< Pos for appending data
+bool GUI::textIsScrolling = false;           ///< Our selected row/text is now scrolling/anim
 #if SDSUPPORT
 char GUI::cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2] = { '/', 0 };
 uint8_t GUI::folderLevel = 0;
@@ -77,7 +78,7 @@ void GUI::update() {
     if (level > 0 && !isStickyPageType(pageType[level]) && (HAL::timeInMilliseconds() - lastAction) > UI_AUTORETURN_TO_MENU_AFTER) {
         level = 0;
     }
-    if (statusLevel == GUIStatusLevel::BUSY && timeDiff > 500) {
+    if ((statusLevel == GUIStatusLevel::BUSY || GUI::textIsScrolling) && timeDiff > 500) {
         contentChanged = true; // for faster spinning icon
     }
     if (timeDiff < 60000 && (timeDiff > 1000 || contentChanged)) {
