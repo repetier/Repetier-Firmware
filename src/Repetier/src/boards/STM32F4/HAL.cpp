@@ -72,7 +72,7 @@ const PinMap PinMap_PWM[] = {
 
 #define _TIMER(num) TIM##num
 #define _TIMER_IRQ(num) TIM##num##_IRQn
-#define _TIMER_VECTOR(num) RF_TC##num##_Handler(HardwareTimer*)
+#define _TIMER_VECTOR(num) RF_TC##num##_Handler()
 #define _TIMER_VECTOR_NAME(num) RF_TC##num##_Handler
 
 #define TIMER(num) _TIMER(num)
@@ -290,7 +290,7 @@ extern void TIMER_VECTOR(PWM_TIMER_NUM);
 extern void TIMER_VECTOR(TONE_TIMER_NUM);
 
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
-extern void servoOffTimer(HardwareTimer*);
+extern void servoOffTimer();
 extern void TIMER_VECTOR(SERVO_TIMER_NUM);
 static uint32_t ServoPrescalerfactor = 20000;
 static uint32_t Servo2500 = 2500;
@@ -309,6 +309,7 @@ void HAL::hwSetup(void) {
     servo = reserveTimerInterrupt(SERVO_TIMER_NUM); // prevent pwm usage
     servo->timer = new HardwareTimer(TIMER(SERVO_TIMER_NUM));
     servo->timer->setPWM(1, NC, 200, 50, TIMER_VECTOR_NAME(SERVO_TIMER_NUM), servoOffTimer);
+    servo->timer->refresh();
     ServoPrescalerfactor = servo->tim->PSC + 1;
     Servo2500 = ((2500 * (servo->timer->getTimerClkFreq() / 1000000)) / ServoPrescalerfactor) - 1;
     HAL_NVIC_SetPriority(TIMER_IRQ(SERVO_TIMER_NUM), 1, 0);
@@ -374,6 +375,8 @@ void HAL::setupTimer() {
             toneTimer->timer->setMode(2, TIMER_OUTPUT_COMPARE);
             toneTimer->timer->setOverflow(0, HERTZ_FORMAT);
             toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
+            toneTimer->timer->refresh();
+            toneTimer->timer->resume();
             break;
         }
     }
@@ -385,7 +388,7 @@ void HAL::setupTimer() {
 // are no pwm support for that pin or an other pin uses same PWM
 // channel.
 int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
-    if (pinNumber < 0) {
+    if (pinNumber < 0 || !frequency) {
         return -1;
     }
     PinName p = digitalPinToPinName(pinNumber);
@@ -431,7 +434,9 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
             uint32_t channel = STM_PIN_CHANNEL(map->function);
             pinMode(pinNumber, OUTPUT);
             digitalWrite(pinNumber, LOW);
+            // preloading on by default as of 1.9.0 (4.10900.200819)
             HT->setPWM(channel, p, tf->frequency, 0);
+            HT->refresh();
             return numPWMEntries++;
         }
     }
@@ -443,22 +448,14 @@ void HAL::setHardwarePWM(int id, int value) {
         return;
     }
     PWMEntry& entry = pwmEntries[id];
-    uint32_t channel = STM_PIN_CHANNEL(entry.map->function);
-    entry.ht->pause();
-    entry.ht->setCaptureCompare(channel, value, RESOLUTION_8B_COMPARE_FORMAT); // set pwm 0
-    entry.ht->resume();
+    entry.ht->setCaptureCompare(STM_PIN_CHANNEL(entry.map->function), value, RESOLUTION_8B_COMPARE_FORMAT);
 }
 
 void HAL::setHardwareFrequency(int id, uint32_t frequency) {
-    if (id < 0 || id >= 50) { // illegal id
+    if (id < 0 || id >= 50 || !frequency) { // illegal id
         return;
     }
-    PWMEntry& entry = pwmEntries[id];
-    entry.ht->pause();
-    if (frequency) {
-        entry.ht->setOverflow(frequency, HERTZ_FORMAT);
-        entry.ht->resume();
-    }
+    pwmEntries[id].ht->setOverflow(frequency, HERTZ_FORMAT);
 }
 
 ADC_HandleTypeDef AdcHandle = {};
@@ -695,14 +692,15 @@ void HAL::syncEEPROM() { // store to disk if changed
 }
 
 void HAL::importEEPROM() {
-    if (eepromFile.isOpen())
+    if (eepromFile.isOpen()) {
         eepromFile.close();
+    }
     if (!eepromFile.open("eeprom.bin", O_RDWR | O_CREAT | O_SYNC) || eepromFile.read(virtualEeprom, EEPROM_BYTES) != EEPROM_BYTES) {
         Com::printFLN(Com::tOpenFailedFile, "eeprom.bin");
     } else {
         Com::printFLN("EEPROM read from sd card.");
     }
-    EEPROM::readDataFromEspi::beginEPROM();
+    EEPROM::readDataFromEEPROM();
 }
 
 #endif
@@ -837,7 +835,7 @@ void HAL::servoMicroseconds(uint8_t servoId, int microsec, uint16_t autoOff) {
 // ================== Interrupt handling ======================
 
 ServoInterface* analogServoSlots[4] = { nullptr, nullptr, nullptr, nullptr };
-void servoOffTimer(HardwareTimer* timer) {
+void servoOffTimer() {
 #if NUM_SERVOS > 0
     if (actServo) {
         actServo->disable();
@@ -971,6 +969,7 @@ void TIMER_VECTOR(TONE_TIMER_NUM) {
 }
 #endif
 
+static bool toneStopped = true;
 void HAL::tone(uint32_t frequency) {
 #if NUM_BEEPERS > 0
 #if NUM_BEEPERS > 1
@@ -1007,9 +1006,11 @@ void HAL::tone(uint32_t frequency) {
     if (frequency < 1) {
         return;
     }
-    toneTimer->timer->pause();
     toneTimer->timer->setOverflow(2 * frequency, HERTZ_FORMAT);
-    toneTimer->timer->resume();
+    if (toneStopped) {
+        toneTimer->timer->refresh();
+        toneStopped = false;
+    }
 #endif
 }
 void HAL::noTone() {
@@ -1024,7 +1025,8 @@ void HAL::noTone() {
     }
 #endif
     if (toneTimer != nullptr) { // could be called before timer are initialized!
-        toneTimer->timer->pause();
+        toneTimer->timer->setOverflow(0, HERTZ_FORMAT);
+        toneStopped = true;
     }
 #endif
 }
