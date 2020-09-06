@@ -65,6 +65,8 @@
 
 #define INLINE __attribute__((always_inline))
 
+#define FORCE_INLINE __attribute__((always_inline)) inline 
+
 // do not use program space memory with Due
 #define PROGMEM
 #ifndef PGM_P

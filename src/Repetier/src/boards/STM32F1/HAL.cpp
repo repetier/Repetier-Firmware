@@ -30,16 +30,15 @@
 #ifdef STM32F1_BOARD
 #include <stm32f1xx_hal.h>
 #include <malloc.h>
-#include "PeripheralPins.h"
 
 // For SKR E3 mini V1.2:
 // Optional: WWDG as timer (100hz-8khz)
 // 8 advanced - both heaters
 // 7 basic - softserial
-// 3 general - motion 3
+// 6 general - motion 3
 // 5 general - pwm timer
 // 4 general - motion 2
-// 6 basic - beeper (HW) - can't be anything else
+// 3 basic - beeper (HW) - can't be anything else
 // 2 general - servo
 // 1 advanced - fan 1
 
@@ -53,8 +52,6 @@
 #define _TIMER_VECTOR(num) TIM##num##_IRQHandler(void)
 #define _TIMER_VECTOR_NAME(num) TIM##num##_IRQHandler
 #else
-// Moses - as of v1.9.0 STM32Duino changed their callback system to use
-// std::function, so we don't use the HardwareTimer* parameter anymore.
 #define _TIMER_VECTOR(num) RF_TC##num##_Handler()
 #define _TIMER_VECTOR_NAME(num) RF_TC##num##_Handler
 #endif
@@ -99,7 +96,7 @@ struct PWMEntry {
     const PinMap* map;
     HardwareTimer* ht;
 };
-static PWMEntry pwmEntries[40] = { 0 };
+static PWMEntry pwmEntries[20] = { 0 };
 static int numPWMEntries = 0;
 
 TimerFunction timerList[] = {
@@ -282,6 +279,8 @@ TimerFunction* toneTimer = nullptr;
  150khz~ seems to be the max stepper frequency I can achieve with non-weak timers
  without issues.
  270khz~ with bare IRQ's
+ (TODO: Maybe it'd be easier/safer to just selectively hide timers in the library
+ using macros, eg. "#if HWT_RELEASE_RAW_TIMx_IRQ" or something.)
 */
 
 #if WEAK_HARDWARE_TIMERS
@@ -318,32 +317,35 @@ void HAL::hwSetup(void) {
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
     servo = reserveTimerInterrupt(SERVO_TIMER_NUM); // prevent pwm usage
     servo->timer = new HardwareTimer(TIMER(SERVO_TIMER_NUM));
-    // setPWM does a resume, but we need to do some config changes before that.
-    servo->timer->setMode(1, TIMER_OUTPUT_COMPARE_PWM1);
+    servo->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
     servo->timer->setOverflow(200, HERTZ_FORMAT);
+
+    LL_TIM_OC_EnableFast(TIMER(SERVO_TIMER_NUM), servo->timer->getLLChannel(1));
+    LL_TIM_OC_EnablePreload(TIMER(SERVO_TIMER_NUM), servo->timer->getLLChannel(1));
+
     servo->timer->attachInterrupt(TIMER_VECTOR_NAME(SERVO_TIMER_NUM));
     servo->timer->attachInterrupt(1, &servoOffTimer);
 
-    LL_TIM_OC_EnableFast(servo->tim, servo->timer->getLLChannel(1));
+    servo->timer->refresh();
+    servo->timer->resume();
 
     ServoPrescalerfactor = (LL_TIM_GetPrescaler(servo->tim) + 1);
     Servo2500 = ((2500 * (servo->timer->getTimerClkFreq() / 1000000)) / ServoPrescalerfactor) - 1;
-    servo->timer->refresh();
-    servo->timer->resume();
     HAL_NVIC_SetPriority(TIMER_IRQ(SERVO_TIMER_NUM), 2, 0);
 #endif
 
 #if NUM_BEEPERS > 0
     for (int i = 0; i < NUM_BEEPERS; i++) {
         if (beepers[i]->getOutputType() == 1) {
-            LL_GPIO_SetPinSpeed(get_GPIO_Port(STM_PORT(BEEPER_PIN)), STM_LL_GPIO_PIN(BEEPER_PIN), LL_GPIO_SPEED_FREQ_LOW);
             // If we have any SW beepers, enable the beeper IRQ
             toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
             toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
-            toneTimer->timer->setMode(1, TIMER_OUTPUT_COMPARE);
-            toneTimer->timer->setOverflow(0, HERTZ_FORMAT);
-            toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM)); 
-            toneTimer->timer->setInterruptPriority(3, 0); 
+            toneTimer->timer->setMode(2, TIMER_OUTPUT_COMPARE);
+            toneTimer->timer->setOverflow(0);
+            toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
+            toneTimer->timer->setInterruptPriority(3, 0);
+            toneTimer->timer->refresh();
+            toneTimer->timer->resume();
             break;
         }
     }
@@ -399,6 +401,9 @@ void HAL::setupTimer() {
     motion3->timer->attachInterrupt(TIMER_VECTOR_NAME(MOTION3_TIMER_NUM));
     motion3->timer->resume();
     HAL_NVIC_SetPriority(TIMER_IRQ(MOTION3_TIMER_NUM), 0, 0); // highest priority required!
+
+    InterruptProtectedBlock noInts;
+    dwt_init();
 }
 
 // Try to initialize pinNumber as hardware PWM. Returns internal
@@ -406,7 +411,7 @@ void HAL::setupTimer() {
 // are no pwm support for that pin or an other pin uses same PWM
 // channel.
 int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
-    if (pinNumber < 0) {
+    if (pinNumber < 0 || !frequency) {
         return -1;
     }
     PinName p = digitalPinToPinName(pinNumber);
@@ -453,10 +458,11 @@ int HAL::initHardwarePWM(int pinNumber, uint32_t frequency) {
             pinMode(pinNumber, OUTPUT);
             digitalWrite(pinNumber, LOW);
 
-            // preloading by default as of 1.9.0 (4.10900.200819)
+            // preloading on by default as of 1.9.0 (4.10900.200819)
             HT->setMode(channel, TIMER_OUTPUT_COMPARE_PWM1, p);
             HT->setOverflow(tf->frequency, HERTZ_FORMAT);
 
+            // Not enabled by default for PWM.
             LL_TIM_OC_EnableFast(tf->tim, HT->getLLChannel(channel));
 
             HT->refresh();
@@ -476,12 +482,10 @@ void HAL::setHardwarePWM(int id, int value) {
 }
 
 void HAL::setHardwareFrequency(int id, uint32_t frequency) {
-    if (id < 0 || id >= 50) { // illegal id
+    if (id < 0 || id >= 50 || !frequency) { // illegal id
         return;
     }
-    PWMEntry& entry = pwmEntries[id];
-    entry.ht->setOverflow(frequency, HERTZ_FORMAT);
-    entry.ht->refresh();
+    pwmEntries[id].ht->setOverflow(frequency, HERTZ_FORMAT);
 }
 
 ADC_HandleTypeDef AdcHandle = {};
@@ -506,7 +510,7 @@ void reportAnalog() {
             Com::printFLN(" = ", static_cast<int32_t>(analogMap[i]->lastValue));
         }
     }
-    for (int i = 0; i < numAnalogInputs; i++) {
+    for (int i = 0; i < 3; i++) {
         Com::printF("adc ", i);
         Com::printF(" channel ", analogValues[i].channel);
         Com::printF(" pin ", analogValues[i].pin);
@@ -536,11 +540,6 @@ void HAL::reportHALDebug() {
 // ^^^ Use the HAL_ADC_ConvCpltCallback interrupt function instead of reading the dma
 // buffer inside our PWM interrupt.
 
-// Problem with that callback is it's processing overhead.
-// At the /slowest/ setting that function gets called at ~37.5khz
-// Even with the simplest interrupt, just accessing it from flash
-// slows us down.
-
 void HAL::analogStart(void) {
     // Analog channels being used are already enabled. Start conversion
     // only if we have any analog sources.
@@ -568,7 +567,6 @@ void HAL::analogStart(void) {
 #else
     sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
 #endif
-    //ADC_SAMPLETIME_239CYCLES_5 : ADC_SAMPLETIME_71CYCLES_5; ADC_SAMPLETIME_41CYCLES_5
     for (int i = 0; i < numAnalogInputs; i++) {
         sConfig.Channel = analogValues[i].channel;
         sConfig.Rank = i + 1;
@@ -585,7 +583,7 @@ void HAL::analogStart(void) {
 
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_ADC1_CLK_ENABLE();
-    __HAL_RCC_DMA1_CLK_ENABLE();
+    __HAL_RCC_DMA1_CLK_ENABLE(); // ADC1 is connected with DMA1
 
     hdma_adc.Instance = DMA1_Channel1;
     hdma_adc.Init.Direction = DMA_PERIPH_TO_MEMORY;
@@ -610,6 +608,7 @@ void HAL::analogStart(void) {
     //                                           v          v
     dmaerror += HAL_ADC_Start_DMA(&AdcHandle, adcData, numAnalogInputs);
 #ifndef USE_DMA_ADC_IRQ_CALLBACK
+    // Just in case.
     __HAL_DMA_DISABLE_IT(&hdma_adc, DMA_IT_HT | DMA_IT_TE | DMA_IT_TC);
 #endif
 }
@@ -653,8 +652,6 @@ void HAL::analogEnable(int pinId) {
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 
-    // TODO: initaliziing PA0 here completely resets port A for some reason.
-    // shuts off our PWM timers etc.
     HAL_GPIO_Init(get_GPIO_Port(STM_PORT(pin)), &GPIO_InitStruct);
     af->pin = pinId;
     af->channel = STM_PIN_CHANNEL(function);
@@ -743,8 +740,9 @@ void HAL::syncEEPROM() { // store to disk if changed
 }
 
 void HAL::importEEPROM() {
-    if (eepromFile.isOpen())
+    if (eepromFile.isOpen()) {
         eepromFile.close();
+    }
     if (!eepromFile.open("eeprom.bin", O_RDWR | O_CREAT | O_SYNC) || eepromFile.read(virtualEeprom, EEPROM_BYTES) != EEPROM_BYTES) {
         Com::printFLN(Com::tOpenFailedFile, "eeprom.bin");
     } else {
@@ -889,15 +887,20 @@ static uint8_t servoId = 0;
 static ServoInterface* actServo = nullptr;
 
 void HAL::servoMicroseconds(uint8_t servoId, int microsec, uint16_t autoOff) {
-    servoTimings[servoId] = microsec ? ((microsec * (servo->timer->getTimerClkFreq() / 1000000)) / ServoPrescalerfactor) - 1 : 0;
-    servoAutoOff[servoId] = (microsec) ? (autoOff / 20) : 0;
+    if (servo) {
+        servoTimings[servoId] = microsec ? ((microsec * (servo->timer->getTimerClkFreq() / 1000000)) / ServoPrescalerfactor) - 1 : 0;
+        servoAutoOff[servoId] = (microsec) ? (autoOff / 20) : 0;
+    }
 }
 #endif
 
 // ================== Interrupt handling ======================
 
 ServoInterface* analogServoSlots[4] = { nullptr, nullptr, nullptr, nullptr };
-inline void servoOffTimer() {
+#if WEAK_HARDWARE_TIMERS
+FORCE_INLINE
+#endif
+void servoOffTimer() {
 #if NUM_SERVOS > 0
     if (actServo) {
         actServo->disable();
@@ -933,15 +936,17 @@ inline void servoOffTimer() {
 #if WEAK_HARDWARE_TIMERS
 // Servo timer Interrupt handler
 void TIMER_VECTOR(SERVO_TIMER_NUM) {
-#if NUM_SERVOS > 0
+#if NUM_SERVOS > 0 || NUM_BEEPERS > 0
     if (LL_TIM_IsActiveFlag_CC1(TIMER(SERVO_TIMER_NUM))) {
         LL_TIM_ClearFlag_CC1(TIMER(SERVO_TIMER_NUM));
         servoOffTimer();
     } else if (LL_TIM_IsActiveFlag_UPDATE(TIMER(SERVO_TIMER_NUM))) {
         LL_TIM_ClearFlag_UPDATE(TIMER(SERVO_TIMER_NUM));
+#if NUM_SERVOS > 0
         if (actServo) {
             actServo->enable();
         }
+#endif
     }
 #endif
 }
@@ -1064,12 +1069,16 @@ void HAL::spiEnd() {
 
 #if NUM_BEEPERS > 0
 void TIMER_VECTOR(TONE_TIMER_NUM) {
+#if WEAK_HARDWARE_TIMERS
+    LL_TIM_ClearFlag_UPDATE(TIMER(TONE_TIMER_NUM));
+#endif
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_BEEPER_LOOP
 #include "io/redefine.h"
 }
 #endif
 
+static bool toneStopped = true;
 void HAL::tone(uint32_t frequency) {
 #if NUM_BEEPERS > 0
 #if NUM_BEEPERS > 1
@@ -1106,9 +1115,11 @@ void HAL::tone(uint32_t frequency) {
     if (frequency < 1) {
         return;
     }
-    toneTimer->timer->pause();
     toneTimer->timer->setOverflow(2 * frequency, HERTZ_FORMAT);
-    toneTimer->timer->resume();
+    if (toneStopped) {
+        toneTimer->timer->refresh();
+        toneStopped = false;
+    }
 #endif
 }
 void HAL::noTone() {
@@ -1123,13 +1134,14 @@ void HAL::noTone() {
     }
 #endif
     if (toneTimer != nullptr) { // could be called before timer are initialized!
-        toneTimer->timer->pauseChannel(1);
+        toneTimer->timer->setOverflow(0, HERTZ_FORMAT);
+        toneStopped = true;
     }
 #endif
 }
 
-typedef void (*pFunction)(void);
 void init(void) {
+    HAL_SuspendTick(); // BTT's bootloader might do some weird things.
     hw_config_init();
 }
 
