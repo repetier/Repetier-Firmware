@@ -144,15 +144,15 @@ private:
 class LightStorePWM : public LightStoreBase {
 public:
     LightStorePWM()
-    : LightStoreBase()
-    , refreshRateMS(30)
-    , targetPWM(255)
-    , curPWM(0)
-    , lastUpdate(0)
-    , lastBrightness(0)
-    , fadeStep(0)
-    , finalSetBrightness(0)
-    , finalSetMode(0) { };
+        : LightStoreBase()
+        , refreshRateMS(30)
+        , targetPWM(255)
+        , curPWM(0)
+        , lastUpdate(0)
+        , lastBrightness(0)
+        , fadeStep(0)
+        , finalSetBrightness(0)
+        , finalSetMode(0) { };
 
     virtual void reset() final;
     virtual void set(uint8_t mode, uint8_t red, uint8_t green, uint8_t blue, uint8_t brightness) final;
@@ -160,23 +160,23 @@ public:
     virtual uint8_t green() final { return 255; };
     virtual uint8_t blue() final { return 255; };
     virtual uint8_t brightness() final { return curPWM; };
-    virtual fast8_t updatePWM();
+    fast8_t updatePWM();
 
-    inline virtual fast8_t rolloverCheck(fast8_t step, bool add) final {
-        if (CPU_ARCH == ARCH_AVR) {
-            if (add) {
-                if ((255 - curPWM) < step) {
-                    return step = (255 - curPWM);
-                }
-            } else {
-                if (curPWM < step) {
-                    return step = curPWM;
-                }
+    inline fast8_t rolloverCheck(fast8_t step, bool add) {
+#if CPU_ARCH == ARCH_AVR
+        if (add) {
+            if ((255 - curPWM) < step) {
+                return step = (255 - curPWM);
+            }
+        } else {
+            if (curPWM < step) {
+                return step = curPWM;
             }
         }
+#endif
         return step;
     }
-    inline virtual fast8_t computePWMStep(uint16_t durationMS, uint16_t condBrightness) final {
+    inline fast8_t computePWMStep(uint16_t durationMS, uint16_t condBrightness) {
         return constrain((refreshRateMS * condBrightness) / durationMS, 1, 255);
     };
 
