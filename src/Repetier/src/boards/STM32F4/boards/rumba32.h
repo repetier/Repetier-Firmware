@@ -48,6 +48,12 @@ Header pins top:      13      11       9       7       5         3        1
 Header pins bottom:   14      12       10      8       6         4        2
                      PD12  PA10(RX1)  (SDA)   PA3   PD15(PWM2)  GND       5V
 
+For a second serial connection add
+-DHAVE_HWSERIAL1
+to the build flags in platformio.ini.
+In configration.h set BLUETOOTH_SERIAL 1
+This makes EXP3 pin 11/12 also a serial as described in pin header above.
+
 */
 #pragma once
 
