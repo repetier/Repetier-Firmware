@@ -163,6 +163,17 @@ void __attribute__((weak)) menuMaxYank(GUIAction action, void* data) {
         Motion1::maxYank[axis] = v;
     }
 }
+void __attribute__((weak)) menuConfigVolume(GUIAction action, void* data) {
+    DRAW_LONG_P(PSTR("Tone/UI Volume:"), Com::tUnitPercent, Printer::toneVolume);
+    if (GUI::handleLongValueAction(action, v, 0, 100, 1)) {
+        if (v > MINIMUM_TONE_VOLUME && Printer::toneVolume <= MINIMUM_TONE_VOLUME) {
+            BeeperSourceBase::muteAll(false);
+        } else if (v <= MINIMUM_TONE_VOLUME && Printer::toneVolume > MINIMUM_TONE_VOLUME) {
+            BeeperSourceBase::muteAll(true);
+        }
+        Printer::toneVolume = v;
+    }
+}
 void __attribute__((weak)) menuConfigAxis(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
     GUI::flashToStringFlash(GUI::tmpString, PSTR("= Config @-Axis ="), axisNames[axis]);
@@ -454,9 +465,6 @@ void __attribute__((weak)) menuControls(GUIAction action, void* data) {
     GUI::menuSelectable(action, GUI::tmpString, menuFlowMultiplier, nullptr, GUIPageType::FIXED_CONTENT);
 #ifndef NO_LIGHT_CONTROL
     GUI::menuSelectableP(action, PSTR("Toggle lights"), directAction, (void*)GUI_DIRECT_ACTION_TOGGLE_LIGHT, GUIPageType::ACTION);
-#endif
-#if NUM_BEEPERS > 0
-    GUI::menuSelectableP(action, PSTR("Toggle sounds"), directAction, (void*)GUI_DIRECT_ACTION_TOGGLE_SOUNDS, GUIPageType::ACTION);
 #endif
     GUI::menuSelectableP(action, PSTR("Home"), menuHome, nullptr, GUIPageType::MENU);
     GUI::menuSelectableP(action, PSTR("Move"), menuMove, nullptr, GUIPageType::MENU);
@@ -763,6 +771,10 @@ void __attribute__((weak)) menuConfig(GUIAction action, void* data) {
     if (!Printer::isNativeUSB()) {
         GUI::menuLongP(action, PSTR("Baudrate:"), baudrate, menuBaudrate, nullptr, GUIPageType::FIXED_CONTENT);
     }
+#endif
+#if NUM_BEEPERS > 0
+    GUI::flashToStringLong(GUI::tmpString, PSTR("Tone Volume: @%"), Printer::toneVolume);
+    GUI::menuSelectable(action, GUI::tmpString, menuConfigVolume, nullptr, GUIPageType::FIXED_CONTENT);
 #endif
     FOR_ALL_AXES(i) {
         if (i == E_AXIS) {

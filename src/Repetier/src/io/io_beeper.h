@@ -28,7 +28,7 @@
 
 #if IO_TARGET == IO_TARGET_CLASS_DEFINITION
 
-constexpr fast8_t beepBufSize = 50;
+static constexpr fast8_t beepBufSize = 50;
 
 struct TonePacket {
     //If the frequency is 0, it'll behave as putting a G4 P(duration) command in between M300's.
@@ -75,30 +75,37 @@ public:
         , toneTail(-1)
         , prevToneTime(0)
         , playingFreq(0)
+        , beepBuf { 0 }
         , lastConditionStep(0)
-        , curConditionStep(0) { }
-    virtual inline fast8_t getHeadDist() {
+        , curConditionStep(0)
+        , curValidCondition(nullptr)
+        , lastValidCondition(nullptr) {}
+    inline fast8_t getHeadDist() {
         return !isPlaying() ? 0 : (toneHead >= toneTail ? (toneHead - toneTail) : (beepBufSize - toneTail + toneHead));
     }
-    virtual inline ufast8_t getOutputType() { return 0; };
-    virtual inline uint16_t getCurFreq() { return playingFreq; }
-    virtual inline volatile bool isPlaying() { return playing; }
-    virtual inline volatile bool isHalted() { return halted; }
-    virtual inline bool isMuted() { return muted; }
-    virtual inline bool isBlocking() { return blocking; }
-    virtual inline bool mute(bool set) {
+    virtual ufast8_t getOutputType() { return 0; };
+    inline uint16_t getCurFreq() { return playingFreq; }
+    inline volatile bool isPlaying() { return playing; }
+    inline volatile bool isHalted() { return halted; }
+    inline bool isMuted() { return muted; }
+    inline bool isBlocking() { return blocking; }
+    static void muteAll(bool set); // public helper to mute all beepers globally
+    bool mute(bool set) {
+        if (set == isMuted()) {
+            return true;
+        }
         if (set && isPlaying()) {
             finishPlaying(); // Kill any timers/pwm only if we're playing.
         }
         return (muted = set);
     }
-    virtual bool pushTone(const TonePacket packet);
-    virtual bool playTheme(ToneTheme& theme, bool block);
-    virtual fast8_t process();
-    virtual ufast8_t getFreqDiv() = 0;
+    fast8_t process();
+    bool pushTone(const TonePacket packet);
+    bool playTheme(ToneTheme& theme, bool block);
+    virtual volatile ufast8_t getFreqDiv() = 0;
     virtual void setFreqDiv(ufast8_t div) = 0;
-    virtual void setCondition(bool set, ToneCondition& cond);
-    virtual void runConditions();
+    void setCondition(bool set, ToneCondition& cond);
+    void runConditions();
 
 protected:
     virtual void refreshBeepFreq() = 0;
@@ -111,7 +118,9 @@ protected:
     fast8_t toneTail;
     millis_t prevToneTime;
     uint16_t playingFreq;
-    TonePacket beepBuf[beepBufSize] {};
+    TonePacket beepBuf[beepBufSize];
+
+private:
     fast8_t lastConditionStep;
     fast8_t curConditionStep;
     ToneCondition* curValidCondition;
@@ -125,46 +134,32 @@ public:
         : BeeperSourceBase()
         , freqCnt(0)
         , freqDiv(0)
-        , pinState(false) {
+        , lastPinState(false) {
         IOPin::off();
-    };
-    virtual inline ufast8_t getOutputType() final {
-        return 1;
     }
-    virtual inline ufast8_t getFreqDiv() final {
-        return freqDiv;
-    }
-    virtual inline void setFreqDiv(ufast8_t div) final {
-        freqDiv = div;
-    }
-    inline void toggle() {
-        freqCnt = 0;
-        IOPin::set(pinState = !pinState);
-    }
-    volatile uint8_t freqCnt;
-
-private:
-    virtual void refreshBeepFreq() final {
-        InterruptProtectedBlock noInts;
-        if (playingFreq > 0) {
-            halted = false;
-            freqDiv = 0;
-            HAL::tone(playingFreq);
-        } else { // Turn off and just wait if we have no frequency.
-            HAL::noTone();
-            IOPin::set(pinState = (freqCnt = 0));
-            halted = true;
+    inline ufast8_t getOutputType() final { return 1; }
+    inline volatile ufast8_t getFreqDiv() final { return freqDiv; }
+    inline void setFreqDiv(ufast8_t div) final { freqDiv = div * 2; }
+    INLINE void toggle(bool state) {
+        if (isPlaying() && !isHalted()) {
+            if (!getFreqDiv()) {
+                IOPin::set((lastPinState = state));
+            } else if ((freqCnt++ >= getFreqDiv())) {
+                freqCnt = 0;
+                IOPin::set((lastPinState = state));
+            }
+        } else if (lastPinState) {
+            // Happens sometimes/irq races/etc
+            IOPin::set((lastPinState = false));
         }
     }
-    virtual void finishPlaying() final {
-        InterruptProtectedBlock noInts;
-        BeeperSourceBase::finishPlaying();
-        HAL::noTone();
-        IOPin::off();
-        freqDiv = freqCnt = 0;
-    }
+
+private:
+    void refreshBeepFreq() final;
+    void finishPlaying() final;
+    volatile ufast8_t freqCnt;
     volatile ufast8_t freqDiv;
-    volatile bool pinState;
+    volatile bool lastPinState;
 };
 
 class BeeperSourcePWM : public BeeperSourceBase {
@@ -174,13 +169,13 @@ public:
         , pwmPin(pwm) {
         pwmPin->set(0);
     };
-    virtual inline ufast8_t getOutputType() final { return 2; }
-    virtual inline ufast8_t getFreqDiv() final { return 0; }
-    virtual inline void setFreqDiv(ufast8_t div) final { }
+    inline ufast8_t getOutputType() final { return 2; }
+    volatile inline ufast8_t getFreqDiv() final { return 0; }
+    inline void setFreqDiv(ufast8_t div) final {}
 
 private:
-    virtual void refreshBeepFreq() final;
-    virtual inline void finishPlaying() final {
+    void refreshBeepFreq() final;
+    inline void finishPlaying() final {
         pwmPin->set(0);
         BeeperSourceBase::finishPlaying();
     }
@@ -246,10 +241,21 @@ private:
 
 #elif IO_TARGET == IO_TARGET_BEEPER_LOOP
 
+// Beeper loop now requires a HIGH/LOW phase signal to drive the beeper
 #define BEEPER_SOURCE_IO(name, IOPin) \
-    if (name.isPlaying() && !name.isHalted() && name.freqCnt++ >= name.getFreqDiv()) { \
-        name.toggle(); \
-    }
+    name.toggle(beeperIRQPhase);
+
+#elif IO_TARGET == IO_TARGET_RESTORE_FROM_CONFIG
+
+#if NUM_BEEPERS > 0
+Printer::toneVolume = constrain(DEFAULT_TONE_VOLUME, 0, 100);
+BeeperSourceBase::muteAll((Printer::toneVolume <= MINIMUM_TONE_VOLUME));
+#endif
+
+#elif IO_TARGET == IO_TARGET_TOOLS_TEMPLATES
+
+#define BEEPER_SOURCE_IO(name, IOPin) \
+    template class BeeperSourceIO<IOPin>;
 
 #endif
 

@@ -345,6 +345,14 @@ enum class BootReason {
 #define STORE_MOTOR_STALL_SENSITIVITY 1
 #endif
 
+#ifndef DEFAULT_TONE_VOLUME
+#define DEFAULT_TONE_VOLUME 100
+#endif
+
+#ifndef MINIMUM_TONE_VOLUME
+#define MINIMUM_TONE_VOLUME 5
+#endif
+
 #ifndef NUM_BEEPERS
 #define NUM_BEEPERS 0
 #define BEEPER_LIST \

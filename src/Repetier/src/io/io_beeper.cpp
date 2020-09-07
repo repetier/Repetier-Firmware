@@ -1,6 +1,11 @@
 #include "Repetier.h"
 
 // BASE --
+void BeeperSourceBase::muteAll(bool set) {
+    for (size_t i = 0; i < NUM_BEEPERS; i++) {
+        beepers[i]->mute(set);
+    }
+}
 bool BeeperSourceBase::pushTone(const TonePacket packet) {
     if (isMuted() || isBlocking() || !packet.duration) {
         return false;
@@ -10,10 +15,10 @@ bool BeeperSourceBase::pushTone(const TonePacket packet) {
     }
     beepBuf[toneHead] = packet;
     if (!isPlaying()) {
-        InterruptProtectedBlock noInts;
         prevToneTime = HAL::timeInMilliseconds();
         toneTail = 0;
         playingFreq = packet.frequency;
+        InterruptProtectedBlock noInts;
         playing = true;
         refreshBeepFreq();
     }
@@ -41,7 +46,7 @@ fast8_t BeeperSourceBase::process() {
     return toneTail;
 }
 
-void BeeperSourceBase::finishPlaying() {
+inline void BeeperSourceBase::finishPlaying() {
     playing = halted = blocking = false;
     toneHead = toneTail = -1;
     playingFreq = 0;
@@ -126,7 +131,7 @@ void BeeperSourceBase::setCondition(bool set, ToneCondition& condition) {
 void BeeperSourcePWM::refreshBeepFreq() {
     if (playingFreq > 0) {
         pwmPin->setFreq(playingFreq);
-        pwmPin->set(255 / 2);
+        pwmPin->set((Printer::toneVolume * 127) / 100);
         halted = false;
     } else { // Turn off and just wait if we have no frequency.
         halted = true;
@@ -134,3 +139,30 @@ void BeeperSourcePWM::refreshBeepFreq() {
     }
 }
 // PWM --
+// IO --
+template <class IOPin>
+void BeeperSourceIO<IOPin>::refreshBeepFreq() {
+    InterruptProtectedBlock noInts;
+    if (playingFreq > 0) {
+        halted = false;
+        freqDiv = 0;
+        HAL::tone(playingFreq);
+    } else { // Turn off and just wait if we have no frequency.
+        halted = true;
+        HAL::noTone();
+        IOPin::set((freqCnt = 0));
+    }
+}
+template <class IOPin>
+void BeeperSourceIO<IOPin>::finishPlaying() {
+    InterruptProtectedBlock noInts;
+    BeeperSourceBase::finishPlaying();
+    HAL::noTone();
+    IOPin::off();
+    freqDiv = freqCnt = 0;
+}
+// IO --
+
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_TOOLS_TEMPLATES
+#include "../io/redefine.h"
