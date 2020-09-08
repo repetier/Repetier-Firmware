@@ -297,6 +297,7 @@ extern void TIMER_VECTOR(TONE_TIMER_NUM);
 
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
 extern void servoOffTimer();
+extern void beeperComparePhase();
 #if WEAK_HARDWARE_TIMERS
 extern "C" void TIMER_VECTOR(SERVO_TIMER_NUM);
 #else
@@ -401,6 +402,26 @@ void HAL::setupTimer() {
     motion3->timer->attachInterrupt(TIMER_VECTOR_NAME(MOTION3_TIMER_NUM));
     motion3->timer->resume();
     HAL_NVIC_SetPriority(TIMER_IRQ(MOTION3_TIMER_NUM), 0, 0); // highest priority required!
+
+#if NUM_BEEPERS > 0
+    for (int i = 0; i < NUM_BEEPERS; i++) {
+        if (beepers[i]->getOutputType() == 1) {
+            // If we have any SW beepers, enable the beeper IRQ
+            toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
+            toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
+            toneTimer->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
+            toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
+            toneTimer->timer->attachInterrupt(1, &beeperComparePhase);
+            // Not on by default for output_compare
+            LL_TIM_OC_EnablePreload(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
+            LL_TIM_OC_EnableFast(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
+            toneTimer->timer->setInterruptPriority(3, 0);
+            toneTimer->timer->refresh();
+            toneTimer->timer->resume();
+            break;
+        }
+    }
+#endif
 
     InterruptProtectedBlock noInts;
     dwt_init();
@@ -1068,14 +1089,39 @@ void HAL::spiEnd() {
 }
 
 #if NUM_BEEPERS > 0
-void TIMER_VECTOR(TONE_TIMER_NUM) {
 #if WEAK_HARDWARE_TIMERS
-    LL_TIM_ClearFlag_UPDATE(TIMER(TONE_TIMER_NUM));
-#endif
+void beeperComparePhase() {}
+void TIMER_VECTOR(TONE_TIMER_NUM) {
+    bool beeperIRQPhase = false;
+    if (LL_TIM_IsActiveFlag_UPDATE(TIMER(TONE_TIMER_NUM))) {
+        LL_TIM_ClearFlag_UPDATE(TIMER(TONE_TIMER_NUM));
+        beeperIRQPhase = true;
+    }
+    if (LL_TIM_IsActiveFlag_CC1(TIMER(TONE_TIMER_NUM))) {
+        LL_TIM_ClearFlag_CC1(TIMER(TONE_TIMER_NUM));
+        beeperIRQPhase = false;
+    }
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_BEEPER_LOOP
 #include "io/redefine.h"
+    UNUSED(beeperIRQPhase);
 }
+#else
+FORCE_INLINE void beeperComparePhase() {
+    bool beeperIRQPhase = false;
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_BEEPER_LOOP
+#include "io/redefine.h"
+    UNUSED(beeperIRQPhase);
+}
+void TIMER_VECTOR(TONE_TIMER_NUM) {
+    bool beeperIRQPhase = true;
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_BEEPER_LOOP
+#include "io/redefine.h"
+    UNUSED(beeperIRQPhase);
+}
+#endif
 #endif
 
 static bool toneStopped = true;
@@ -1115,9 +1161,12 @@ void HAL::tone(uint32_t frequency) {
     if (frequency < 1) {
         return;
     }
-    toneTimer->timer->setOverflow(2 * frequency, HERTZ_FORMAT);
-    if (toneStopped) {
-        toneTimer->timer->refresh();
+    // The HardwareTimer functions are kinda slow compared.
+    uint32_t autoReload = (F_CPU_TRUE / frequency) - 1;
+    LL_TIM_SetAutoReload(TIMER(TONE_TIMER_NUM), autoReload);
+    LL_TIM_OC_SetCompareCH1(TIMER(TONE_TIMER_NUM), ((autoReload + 1) * (Printer::toneVolume * 50)) / 10000);
+    if (toneStopped) { // Only generate updates if the timer's dead.
+        LL_TIM_GenerateEvent_UPDATE(TIMER(TONE_TIMER_NUM));
         toneStopped = false;
     }
 #endif
@@ -1133,10 +1182,8 @@ void HAL::noTone() {
         }
     }
 #endif
-    if (toneTimer != nullptr) { // could be called before timer are initialized!
-        toneTimer->timer->setOverflow(0, HERTZ_FORMAT);
-        toneStopped = true;
-    }
+    LL_TIM_SetAutoReload(TIMER(TONE_TIMER_NUM), 0);
+    toneStopped = true;
 #endif
 }
 
