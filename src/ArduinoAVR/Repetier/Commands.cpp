@@ -2461,23 +2461,27 @@ void Commands::processMCode(GCode* com) {
     case 109: // M109 - Wait for extruder heater to reach target.
 #if NUM_EXTRUDER > 0
     {
-        if (reportTempsensorError())
+        if (reportTempsensorError()) {
             break;
+        }
         previousMillisCmd = HAL::timeInMilliseconds();
-        if (Printer::debugDryrun())
+        if (Printer::debugDryrun()) {
             break;
+        }
         Commands::waitUntilEndOfAllMoves();
         Extruder* actExtruder = Extruder::current;
-        if (com->hasT() && com->T < NUM_EXTRUDER)
+        if (com->hasT() && com->T < NUM_EXTRUDER) {
             actExtruder = &extruder[com->T];
-        if (com->hasS())
+        }
+        if (com->hasS()) {
             Extruder::setTemperatureForExtruder(com->S + (com->hasO() ? com->O : 0),
                                                 actExtruder->id,
                                                 com->hasF() && com->F > 0, true);
-        else if (com->hasH())
+        } else if (com->hasH()) {
             Extruder::setTemperatureForExtruder(
                 actExtruder->tempControl.preheatTemperature + (com->hasO() ? com->O : 0),
                 actExtruder->id, com->hasF() && com->F > 0, true);
+        }
     }
 #endif
         previousMillisCmd = HAL::timeInMilliseconds();

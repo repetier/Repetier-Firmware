@@ -99,6 +99,9 @@ extern void cEEPROMInitUncached();
 // #define UI_ACTION_RESET_EEPROM  1551
 #define UI_ACTION_EXTRXY_V2 1552
 #define UI_ACTION_EXTRXY_V2_1 1553
+#define UI_ACTION_CZDS_P1 1554
+#define UI_ACTION_CZDS_P1_CONT 1555
+#define UI_ACTION_CZDS_P2_CONT 1556
 
 #ifndef HALF_P1_X
 #ifdef TEC4

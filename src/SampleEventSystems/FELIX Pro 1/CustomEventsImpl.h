@@ -847,6 +847,31 @@ void cExecute(int action, bool allowMoves) {
         uid.popMenu(false);
         uid.pushMenu(&cui_msg_ext_xy_1, true);
         break;
+#ifdef BIOPRINTER
+    case UI_ACTION_CZDS_P1:
+        uid.pushMenu(&ui_czds_p1, true);
+        break;
+    case UI_ACTION_CZDS_P1_CONT:
+        Printer::homeAxis(true, true, true);
+        Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, 20.0f, IGNORE_COORDINATE, 5.0, true);
+        Printer::moveToReal(50.0f, 100.0f, IGNORE_COORDINATE, IGNORE_COORDINATE, 100.0, true);
+        Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, 5.0f, IGNORE_COORDINATE, 5.0, true);
+        Printer::updateCurrentPosition(true);
+        Commands::waitUntilEndOfAllMoves();
+        uid.popMenu(false);
+        uid.pushMenu(&ui_czds_p2, true);
+        break;
+    case UI_ACTION_CZDS_P2_CONT:
+        Printer::zBedOffset += Printer::currentPosition[Z_AXIS];
+        HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET, Printer::zBedOffset);
+        EEPROM::storeDataIntoEEPROM(false);
+        Printer::homeAxis(true, true, true);
+        // Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, 20.0f, IGNORE_COORDINATE, 5.0, true);
+        Printer::updateCurrentPosition(true);
+        uid.popMenu(false);
+        uid.pushMenu(&ui_czds_p3, true);
+        break;
+#endif
     }
 }
 
@@ -1220,6 +1245,10 @@ void cOkWizard(int action) {
         // uid.popMenu(true);
         Printer::setBlockingReceive(false);
     } break;
+    case UI_ACTION_ZPOSITION_NOTEST:
+    case UI_ACTION_ZPOSITION_FAST_NOTEST:
+        uid.popMenu(true);
+        break;
     case UI_ACTION_CZREFH_SUCC:
         uid.menuLevel = 0;
         break;
@@ -5458,6 +5487,31 @@ bool customMCode(GCode* com) {
             EEPROM::storeDataIntoEEPROM(false);
 #endif
         }
+    } break;
+    case 4212: // Prepare for syringe calibration
+    {
+        /* G28 ; find reference position
+G1 Z20 ; move nozzle up, to prevent collision
+G1 X50 Y100 ;Move xy to middle of table
+G1 Z5 ; move head down to z=5 just above the printed object.
+Report back to repetier-server 
+*/
+        Printer::homeAxis(true, true, true);
+        Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, 20.0f, IGNORE_COORDINATE, 5.0, true);
+        Printer::moveToReal(50.0f, 100.0f, IGNORE_COORDINATE, IGNORE_COORDINATE, 100.0, true);
+        Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, 5.0f, IGNORE_COORDINATE, 5.0, true);
+        Printer::updateCurrentPosition(true);
+        Commands::waitUntilEndOfAllMoves();
+        Com::printFLN(PSTR("M4212 finished")); // detection mark for server
+    } break;
+    case 4213: // store height as new coating height
+    {
+        Printer::zBedOffset += Printer::currentPosition[Z_AXIS];
+        Com::printFLN(PSTR("New coating thickness:"), Printer::zBedOffset, 2);
+        Printer::updateCurrentPosition(true);
+        HAL::eprSetFloat(EPR_Z_PROBE_Z_OFFSET, Printer::zBedOffset);
+        EEPROM::storeDataIntoEEPROM(false);
+        Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, 20.0f, IGNORE_COORDINATE, 5.0, true);
     } break;
     case 4220: {
         if (com->hasS() && com->S == 1) {

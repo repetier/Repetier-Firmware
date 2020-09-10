@@ -368,10 +368,12 @@ void Extruder::manageTemperatures() {
 }
 
 void TemperatureController::waitForTargetTemperature() {
-    if (targetTemperatureC < 30)
+    if (targetTemperatureC < 30) {
         return;
-    if (Printer::debugDryrun())
+    }
+    if (Printer::debugDryrun()) {
         return;
+    }
     bool oldReport = Printer::isAutoreportTemp();
     Printer::setAutoreportTemp(true);
     //millis_t time = HAL::timeInMilliseconds();
