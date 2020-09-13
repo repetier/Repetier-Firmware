@@ -287,7 +287,10 @@ void initializeLCD() {
     // according to datasheet, we need at least 40ms after power rises above 2.7V
     // before sending commands. Arduino can turn on way before 4.5V.
     // is this delay long enough for all cases??
-    HAL::delayMilliseconds(235);
+
+    if (GUI::displayReady) {
+        return;
+    }
     SET_OUTPUT(UI_DISPLAY_D4_PIN);
     SET_OUTPUT(UI_DISPLAY_D5_PIN);
     SET_OUTPUT(UI_DISPLAY_D6_PIN);
@@ -709,8 +712,25 @@ void printRowCentered(uint8_t r, char* text) {
 #endif
 }
 
+millis_t init100msTicks = 0;
 void GUI::init() {
+    // Function called immediately at bootup
+    init100msTicks = 0;
+}
+void GUI::processInit() {
+    // Function called every 100ms (from GUI::update())
+    // if displayReady is not set.
+
+    // A 200-300ms delay from inital power up -> to
+    // sending commands seems to be safe for these little
+    // character displays, otherwise you might get gibberish/
+    // glitched characters etc.
+    if (++init100msTicks < 3) { // 300 ms
+        return;
+    }
+
     initializeLCD();
+    displayReady = true;
     handleKeypress();
     nextAction = GUIAction::NONE;
     callbacks[0] = startScreen;

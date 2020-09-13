@@ -19,6 +19,7 @@ char GUI::buf[MAX_COLS + 1];                 ///< Buffer to build strings
 char GUI::tmpString[MAX_COLS + 1];           ///< Buffer to build strings
 fast8_t GUI::bufPos;                         ///< Pos for appending data
 bool GUI::textIsScrolling = false;           ///< Our selected row/text is now scrolling/anim
+bool GUI::displayReady = false;    		     ///< Ignores touches/UI actions until set
 #if SDSUPPORT
 char GUI::cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2] = { '/', 0 };
 uint8_t GUI::folderLevel = 0;
@@ -27,6 +28,8 @@ uint8_t GUI::folderLevel = 0;
 #if DISPLAY_DRIVER == DRIVER_NONE
 void GUI::init() { ///< Initialize display
     level = 0;
+}
+void GUI::processInit() { ///< Function repeatedly called if displayReady isn't true
 }
 
 void GUI::refresh() {
@@ -50,8 +53,12 @@ void GUI::resetMenu() { ///< Go to start page
 
 void GUI::update() {
 #if DISPLAY_DRIVER != DRIVER_NONE
-    millis_t timeDiff = HAL::timeInMilliseconds() - lastRefresh;
+    if (!displayReady) {
+        processInit();
+        return;
+    }
 
+    millis_t timeDiff = HAL::timeInMilliseconds() - lastRefresh;
     handleKeypress(); // Test for new keys
 
     if (nextAction == GUIAction::BACK) {

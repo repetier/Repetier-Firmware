@@ -139,6 +139,7 @@ public:
     static GUIPageType pageType[GUI_MAX_LEVEL];  ///< page type
     static millis_t lastRefresh;                 ///< Last refresh time
     static millis_t lastAction;                  ///< Last action time for autoreturn to display
+    static bool displayReady;                    ///< GUI is fully initalized & ready for input
     static bool contentChanged;                  ///< set to true if forced refresh is wanted
     static char status[MAX_COLS + 1];            ///< Status Line
     static char buf[MAX_COLS + 1];               ///< Buffer to build strings
@@ -173,12 +174,13 @@ public:
     static void setStatusP(FSTRINGPARAM(text), GUIStatusLevel lvl);
     static void setStatus(char* text, GUIStatusLevel lvl);
 
-    static void resetMenu(); ///< Go to start page
-    static void init();      ///< Initialize display
-    static void refresh();   ///< Refresh display
-    static void update();    ///< Calls refresh, checks buttons
-    static void pop();       ///< Go 1 level higher if possible
-    static void popBusy();   ///< Pop if waiting is on top
+    static void resetMenu();   ///< Go to start page
+    static void init();        ///< Initialize display
+    static void processInit(); ///< Continue initializing display if not ready
+    static void refresh();     ///< Refresh display
+    static void update();      ///< Calls refresh, checks buttons
+    static void pop();         ///< Go 1 level higher if possible
+    static void popBusy();     ///< Pop if waiting is on top
     static void push(GuiCallback cb, void* cData, GUIPageType tp);
     static void replace(GuiCallback cb, void* cData, GUIPageType tp);
     static bool isStickyPageType(GUIPageType t);
