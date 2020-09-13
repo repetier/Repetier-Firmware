@@ -98,7 +98,7 @@ void GUI::processInit() {
     if (++init100msTicks < 1) { // 100 ms
         return;
     }
-    if (displayReady) {
+    if (bootState) {
         return;
     }
     lcd.begin();
@@ -117,8 +117,8 @@ void GUI::processInit() {
         bufAddStringP(PSTR(REPETIER_VERSION));
         lcd.drawUTF8(20, 55, buf);
     } while (lcd.nextPage());
-    displayReady = true;
     lastRefresh = HAL::timeInMilliseconds() + UI_START_SCREEN_DELAY; // Show start screen 4s but will not delay start process
+    bootState = 1;
 }
 
 static fast8_t refresh_counter = 0;

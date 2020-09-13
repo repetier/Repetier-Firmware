@@ -288,7 +288,7 @@ void initializeLCD() {
     // before sending commands. Arduino can turn on way before 4.5V.
     // is this delay long enough for all cases??
 
-    if (GUI::displayReady) {
+    if (GUI::bootState) {
         return;
     }
     SET_OUTPUT(UI_DISPLAY_D4_PIN);
@@ -719,7 +719,7 @@ void GUI::init() {
 }
 void GUI::processInit() {
     // Function called every 100ms (from GUI::update())
-    // if displayReady is not set.
+    // if bootState isn't > 0
 
     // A 200-300ms delay from inital power up -> to
     // sending commands seems to be safe for these little
@@ -730,7 +730,6 @@ void GUI::processInit() {
     }
 
     initializeLCD();
-    displayReady = true;
     handleKeypress();
     nextAction = GUIAction::NONE;
     callbacks[0] = startScreen;
@@ -750,6 +749,7 @@ void GUI::processInit() {
     bufAddStringP(Com::tVendor);
     printRow(3, buf);
     lastRefresh = HAL::timeInMilliseconds() + UI_START_SCREEN_DELAY; // Show start screen 4s but will not delay start process
+    bootState = 1; // Switch to a skippable boot animation state
 }
 
 static fast8_t refresh_counter = 0;

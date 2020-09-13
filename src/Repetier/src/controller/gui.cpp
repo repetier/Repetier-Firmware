@@ -19,7 +19,7 @@ char GUI::buf[MAX_COLS + 1];                 ///< Buffer to build strings
 char GUI::tmpString[MAX_COLS + 1];           ///< Buffer to build strings
 fast8_t GUI::bufPos;                         ///< Pos for appending data
 bool GUI::textIsScrolling = false;           ///< Our selected row/text is now scrolling/anim
-bool GUI::displayReady = false;    		     ///< Ignores touches/UI actions until set
+ufast8_t GUI::bootState = 0;                 ///< Ignores touches/UI actions until > 0
 #if SDSUPPORT
 char GUI::cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2] = { '/', 0 };
 uint8_t GUI::folderLevel = 0;
@@ -29,7 +29,7 @@ uint8_t GUI::folderLevel = 0;
 void GUI::init() { ///< Initialize display
     level = 0;
 }
-void GUI::processInit() { ///< Function repeatedly called if displayReady isn't true
+void GUI::processInit() { ///< Function repeatedly called if bootState isn't true
 }
 
 void GUI::refresh() {
@@ -53,12 +53,19 @@ void GUI::resetMenu() { ///< Go to start page
 
 void GUI::update() {
 #if DISPLAY_DRIVER != DRIVER_NONE
-    if (!displayReady) {
+    millis_t timeDiff = HAL::timeInMilliseconds() - lastRefresh;
+
+    if (!bootState) { // Small delay before starting driver
         processInit();
         return;
+    } else if (bootState == 1) { // Boot screen
+        if (contentChanged || (timeDiff < 60000 && timeDiff > 1000)) { 
+            // Skip if any key presses or timeout. 
+            bootState = 2;
+            lastRefresh = HAL::timeInMilliseconds();
+        }
     }
 
-    millis_t timeDiff = HAL::timeInMilliseconds() - lastRefresh;
     handleKeypress(); // Test for new keys
 
     if (nextAction == GUIAction::BACK) {
