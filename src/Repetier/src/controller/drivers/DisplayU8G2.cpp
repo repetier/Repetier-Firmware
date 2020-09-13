@@ -95,12 +95,10 @@ void GUI::init() {
     init100msTicks = 0;
 }
 void GUI::processInit() {
-    if (++init100msTicks < 1) { // 100 ms
+    if (++init100msTicks < 1 || bootState != GUIBootState::DISPLAY_INIT) { // 100 ms
         return;
     }
-    if (bootState) {
-        return;
-    }
+
     lcd.begin();
     handleKeypress();
     nextAction = GUIAction::NONE;
@@ -118,7 +116,7 @@ void GUI::processInit() {
         lcd.drawUTF8(20, 55, buf);
     } while (lcd.nextPage());
     lastRefresh = HAL::timeInMilliseconds() + UI_START_SCREEN_DELAY; // Show start screen 4s but will not delay start process
-    bootState = 1;
+    bootState = GUIBootState::IN_INTRO;
 }
 
 static fast8_t refresh_counter = 0;

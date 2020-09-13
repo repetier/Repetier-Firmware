@@ -39,6 +39,12 @@
 #define GUI_DIRECT_ACTION_DITTO_8 33
 #define GUI_DIRECT_ACTION_TOGGLE_PROBE_PAUSE 34
 
+enum class GUIBootState {
+    DISPLAY_INIT = 0,
+    IN_INTRO = 1,
+    READY = 2
+};
+
 enum class GUIAction {
     NONE = 0,
     DRAW = 1,
@@ -139,7 +145,7 @@ public:
     static GUIPageType pageType[GUI_MAX_LEVEL];  ///< page type
     static millis_t lastRefresh;                 ///< Last refresh time
     static millis_t lastAction;                  ///< Last action time for autoreturn to display
-    static ufast8_t bootState;                   ///< GUI boot sequence, > 0 means ready for inputs. 
+    static GUIBootState bootState;               ///< GUI boot sequence state 
     static bool contentChanged;                  ///< set to true if forced refresh is wanted
     static char status[MAX_COLS + 1];            ///< Status Line
     static char buf[MAX_COLS + 1];               ///< Buffer to build strings

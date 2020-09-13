@@ -19,7 +19,7 @@ char GUI::buf[MAX_COLS + 1];                 ///< Buffer to build strings
 char GUI::tmpString[MAX_COLS + 1];           ///< Buffer to build strings
 fast8_t GUI::bufPos;                         ///< Pos for appending data
 bool GUI::textIsScrolling = false;           ///< Our selected row/text is now scrolling/anim
-ufast8_t GUI::bootState = 0;                 ///< Ignores touches/UI actions until > 0
+GUIBootState GUI::bootState = GUIBootState::DISPLAY_INIT;
 #if SDSUPPORT
 char GUI::cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2] = { '/', 0 };
 uint8_t GUI::folderLevel = 0;
@@ -55,13 +55,13 @@ void GUI::update() {
 #if DISPLAY_DRIVER != DRIVER_NONE
     millis_t timeDiff = HAL::timeInMilliseconds() - lastRefresh;
 
-    if (!bootState) { // Small delay before starting driver
+    if (bootState == GUIBootState::DISPLAY_INIT) { // Small delay before we start processing
         processInit();
         return;
-    } else if (bootState == 1) { // Boot screen
+    } else if (bootState == GUIBootState::IN_INTRO) { // Boot screen
         if (contentChanged || (timeDiff < 60000 && timeDiff > 1000)) { 
             // Skip if any key presses or timeout. 
-            bootState = 2;
+            bootState = GUIBootState::READY;
             lastRefresh = HAL::timeInMilliseconds();
         }
     }
