@@ -764,7 +764,7 @@ void HAL::importEEPROM() {
 // Print apparent cause of start/restart
 void HAL::showStartReason() {
     if (startReason == BootReason::BROWNOUT) {
-        Com::printInfoFLN(PSTR("Low power reset"));
+        Com::printInfoFLN(Com::tBrownOut);
     } else if (startReason == BootReason::WATCHDOG_RESET) {
         Com::printInfoFLN(Com::tWatchdog);
     } else if (startReason == BootReason::SOFTWARE_RESET) {

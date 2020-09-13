@@ -145,7 +145,7 @@ public:
     static GUIPageType pageType[GUI_MAX_LEVEL];  ///< page type
     static millis_t lastRefresh;                 ///< Last refresh time
     static millis_t lastAction;                  ///< Last action time for autoreturn to display
-    static GUIBootState bootState;               ///< GUI boot sequence state 
+    static GUIBootState curBootState;            ///< GUI boot sequence state 
     static bool contentChanged;                  ///< set to true if forced refresh is wanted
     static char status[MAX_COLS + 1];            ///< Status Line
     static char buf[MAX_COLS + 1];               ///< Buffer to build strings

@@ -18,8 +18,8 @@ char GUI::status[MAX_COLS + 1];              ///< Status Line
 char GUI::buf[MAX_COLS + 1];                 ///< Buffer to build strings
 char GUI::tmpString[MAX_COLS + 1];           ///< Buffer to build strings
 fast8_t GUI::bufPos;                         ///< Pos for appending data
+GUIBootState GUI::curBootState = GUIBootState::DISPLAY_INIT;
 bool GUI::textIsScrolling = false;           ///< Our selected row/text is now scrolling/anim
-GUIBootState GUI::bootState = GUIBootState::DISPLAY_INIT;
 #if SDSUPPORT
 char GUI::cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2] = { '/', 0 };
 uint8_t GUI::folderLevel = 0;
@@ -29,7 +29,7 @@ uint8_t GUI::folderLevel = 0;
 void GUI::init() { ///< Initialize display
     level = 0;
 }
-void GUI::processInit() { ///< Function repeatedly called if bootState isn't true
+void GUI::processInit() { ///< Function repeatedly called if curBootState isn't at least IN_INTRO
 }
 
 void GUI::refresh() {
@@ -55,13 +55,13 @@ void GUI::update() {
 #if DISPLAY_DRIVER != DRIVER_NONE
     millis_t timeDiff = HAL::timeInMilliseconds() - lastRefresh;
 
-    if (bootState == GUIBootState::DISPLAY_INIT) { // Small delay before we start processing
+    if (curBootState == GUIBootState::DISPLAY_INIT) { // Small delay before we start processing
         processInit();
         return;
-    } else if (bootState == GUIBootState::IN_INTRO) { // Boot screen
+    } else if (curBootState == GUIBootState::IN_INTRO) { // Boot screen
         if (contentChanged || (timeDiff < 60000 && timeDiff > 1000)) { 
             // Skip if any key presses or timeout. 
-            bootState = GUIBootState::READY;
+            curBootState = GUIBootState::READY;
             lastRefresh = HAL::timeInMilliseconds();
             if (HAL::startReason == BootReason::WATCHDOG_RESET) {
                 GUI::setStatusP(PSTR("Reset by Watchdog!"), GUIStatusLevel::WARNING);
