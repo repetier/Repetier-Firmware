@@ -338,6 +338,7 @@ public:
     static char virtualEeprom[EEPROM_BYTES];
     static bool wdPinged;
     static uint8_t i2cError;
+    static BootReason startReason;
 
     HAL();
     virtual ~HAL();
@@ -353,6 +354,7 @@ public:
     static void setHardwareFrequency(int id, uint32_t frequency);
     // do any hardware-specific initialization here
     static inline void hwSetup(void) {
+        updateStartReason();
 #if !FEATURE_WATCHDOG
         // Disable watchdog
         REG_WDT_CTRLA = 0;                   // Disable the WDT
@@ -622,6 +624,7 @@ public:
         RFSERIAL.flush();
     }
     static void setupTimer();
+    static void updateStartReason();
     static void showStartReason();
     static int getFreeRam();
     static void resetHardware();

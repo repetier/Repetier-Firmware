@@ -43,6 +43,7 @@ extern "C" char* sbrk(int i);
 char HAL::virtualEeprom[EEPROM_BYTES] = { 0, 0, 0, 0, 0, 0, 0 };
 bool HAL::wdPinged = true;
 uint8_t HAL::i2cError = 0;
+BootReason HAL::startReason = BootReason::UNKNOWN;
 
 volatile uint8_t HAL::insideTimer1 = 0;
 
@@ -762,20 +763,35 @@ void HAL::importEEPROM() {
 
 // Print apparent cause of start/restart
 void HAL::showStartReason() {
-    uint8_t mcu = REG_RSTC_RCAUSE;
-    if (mcu & RSTC_RCAUSE_POR) {
-        Com::printInfoFLN(Com::tPowerUp);
-    }
-    // this is return from backup mode on SAM
-    if (mcu & (RSTC_RCAUSE_BODCORE | RSTC_RCAUSE_BODVDD)) {
-        Com::printInfoFLN(Com::tBrownOut);
-    }
-    if (mcu & RSTC_RCAUSE_WDT) {
+    if (startReason == BootReason::BROWNOUT) {
+        Com::printInfoFLN(PSTR("Low power reset"));
+    } else if (startReason == BootReason::WATCHDOG_RESET) {
         Com::printInfoFLN(Com::tWatchdog);
+    } else if (startReason == BootReason::SOFTWARE_RESET) {
+        Com::printInfoFLN(PSTR("Software reset"));
+    } else if (startReason == BootReason::POWER_UP) {
+        Com::printInfoFLN(Com::tPowerUp);
+    } else if (startReason == BootReason::EXTERNAL_PIN) {
+        Com::printInfoFLN(PSTR("External reset pin reset"));
+    } else {
+        Com::printInfoFLN(PSTR("Unknown reset reason"));
     }
-    Com::printInfoFLN(Com::tSoftwareReset);
-    if (mcu & RSTC_RCAUSE_EXT) {
-        Com::printInfoFLN(Com::tExternalReset);
+}
+void HAL::updateStartReason() {
+    uint8_t mcu = REG_RSTC_RCAUSE;
+    if (mcu & (RSTC_RCAUSE_BODCORE | RSTC_RCAUSE_BODVDD)) {
+        // this is return from backup mode on SAM
+        startReason = BootReason::BROWNOUT;
+    } else if (mcu & RSTC_RCAUSE_WDT) {
+        startReason = BootReason::WATCHDOG_RESET;
+    } else if (mcu & RSTC_RCAUSE_EXT) {
+        startReason = BootReason::EXTERNAL_PIN;
+    } else if (mcu & RSTC_RCAUSE_SYST) {
+        startReason = BootReason::SOFTWARE_RESET;
+    } else if (mcu & RSTC_RCAUSE_POR) {
+        startReason = BootReason::POWER_UP;
+    } else {
+        startReason = BootReason::UNKNOWN;
     }
 }
 

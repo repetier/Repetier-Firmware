@@ -58,6 +58,7 @@ static uint32_t adcEnable = 0;
 char HAL::virtualEeprom[EEPROM_BYTES] = { 0, 0, 0, 0, 0, 0, 0 };
 bool HAL::wdPinged = true;
 uint8_t HAL::i2cError = 0;
+BootReason HAL::startReason = BootReason::UNKNOWN;
 
 volatile uint8_t HAL::insideTimer1 = 0;
 #ifndef DUE_SOFTWARE_SPI
@@ -629,22 +630,41 @@ void HAL::importEEPROM() {
 
 // Print apparent cause of start/restart
 void HAL::showStartReason() {
+    if (startReason == BootReason::BROWNOUT) {
+        Com::printInfoFLN(PSTR("Low power reset"));
+    } else if (startReason == BootReason::WATCHDOG_RESET) {
+        Com::printInfoFLN(Com::tWatchdog);
+    } else if (startReason == BootReason::SOFTWARE_RESET) {
+        Com::printInfoFLN(PSTR("Software reset"));
+    } else if (startReason == BootReason::POWER_UP) {
+        Com::printInfoFLN(Com::tPowerUp);
+    } else if (startReason == BootReason::EXTERNAL_PIN) {
+        Com::printInfoFLN(PSTR("External reset pin reset"));
+    } else {
+        Com::printInfoFLN(PSTR("Unknown reset reason"));
+    }
+}
+void HAL::updateStartReason() {
     int mcu = (RSTC->RSTC_SR & RSTC_SR_RSTTYP_Msk) >> RSTC_SR_RSTTYP_Pos;
     switch (mcu) {
     case 0:
-        Com::printInfoFLN(Com::tPowerUp);
+        startReason = BootReason::POWER_UP;
         break;
     case 1:
         // this is return from backup mode on SAM
-        Com::printInfoFLN(Com::tBrownOut);
+        startReason = BootReason::BROWNOUT;
+        break;
     case 2:
-        Com::printInfoFLN(Com::tWatchdog);
+        startReason = BootReason::WATCHDOG_RESET;
         break;
     case 3:
-        Com::printInfoFLN(Com::tSoftwareReset);
+        startReason = BootReason::SOFTWARE_RESET;
         break;
     case 4:
-        Com::printInfoFLN(Com::tExternalReset);
+        startReason = BootReason::EXTERNAL_PIN;
+        break;
+    default:
+        startReason = BootReason::UNKNOWN;
     }
 }
 

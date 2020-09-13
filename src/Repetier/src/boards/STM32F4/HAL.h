@@ -266,6 +266,7 @@ public:
     static char virtualEeprom[EEPROM_BYTES];
     static bool wdPinged;
     static uint8_t i2cError;
+    static BootReason startReason; 
 
     HAL();
     virtual ~HAL();
@@ -429,6 +430,7 @@ public:
         RFSERIAL.flush();
     }
     static void setupTimer();
+    static void updateStartReason();
     static void showStartReason();
     static int getFreeRam();
     static void resetHardware();

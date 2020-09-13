@@ -63,6 +63,11 @@ void GUI::update() {
             // Skip if any key presses or timeout. 
             bootState = GUIBootState::READY;
             lastRefresh = HAL::timeInMilliseconds();
+            if (HAL::startReason == BootReason::WATCHDOG_RESET) {
+                GUI::setStatusP(PSTR("Reset by Watchdog!"), GUIStatusLevel::WARNING);
+            } else if (HAL::startReason == BootReason::BROWNOUT) {
+                GUI::setStatusP(PSTR("Brownout reset!"), GUIStatusLevel::WARNING);
+            }
         }
     }
 
