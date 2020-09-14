@@ -39,6 +39,12 @@
 #define GUI_DIRECT_ACTION_DITTO_8 33
 #define GUI_DIRECT_ACTION_TOGGLE_PROBE_PAUSE 34
 
+enum class GUIBootState {
+    DISPLAY_INIT = 0,
+    IN_INTRO = 1,
+    READY = 2
+};
+
 enum class GUIAction {
     NONE = 0,
     DRAW = 1,
@@ -139,6 +145,7 @@ public:
     static GUIPageType pageType[GUI_MAX_LEVEL];  ///< page type
     static millis_t lastRefresh;                 ///< Last refresh time
     static millis_t lastAction;                  ///< Last action time for autoreturn to display
+    static GUIBootState curBootState;            ///< GUI boot sequence state 
     static bool contentChanged;                  ///< set to true if forced refresh is wanted
     static char status[MAX_COLS + 1];            ///< Status Line
     static char buf[MAX_COLS + 1];               ///< Buffer to build strings
@@ -173,12 +180,13 @@ public:
     static void setStatusP(FSTRINGPARAM(text), GUIStatusLevel lvl);
     static void setStatus(char* text, GUIStatusLevel lvl);
 
-    static void resetMenu(); ///< Go to start page
-    static void init();      ///< Initialize display
-    static void refresh();   ///< Refresh display
-    static void update();    ///< Calls refresh, checks buttons
-    static void pop();       ///< Go 1 level higher if possible
-    static void popBusy();   ///< Pop if waiting is on top
+    static void resetMenu();   ///< Go to start page
+    static void init();        ///< Initialize display
+    static void processInit(); ///< Continue initializing display if not ready
+    static void refresh();     ///< Refresh display
+    static void update();      ///< Calls refresh, checks buttons
+    static void pop();         ///< Go 1 level higher if possible
+    static void popBusy();     ///< Pop if waiting is on top
     static void push(GuiCallback cb, void* cData, GUIPageType tp);
     static void replace(GuiCallback cb, void* cData, GUIPageType tp);
     static bool isStickyPageType(GUIPageType t);

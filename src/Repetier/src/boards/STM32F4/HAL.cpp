@@ -94,6 +94,7 @@ extern "C" char* sbrk(int i);
 char HAL::virtualEeprom[EEPROM_BYTES] = { 0 };
 bool HAL::wdPinged = true;
 uint8_t HAL::i2cError = 0;
+BootReason HAL::startReason = BootReason::UNKNOWN;
 
 enum class TimerUsage {
     UNUSED,
@@ -297,6 +298,7 @@ static uint32_t Servo2500 = 2500;
 #endif
 
 void HAL::hwSetup(void) {
+    updateStartReason();
 #if DEBUG_TIMING
     SET_OUTPUT(DEBUG_ISR_STEPPER_PIN);
     SET_OUTPUT(DEBUG_ISR_MOTION_PIN);
@@ -705,30 +707,43 @@ void HAL::importEEPROM() {
 
 #endif
 
-// Print apparent cause of start/restart
 void HAL::showStartReason() {
-    if (__HAL_RCC_GET_FLAG(RCC_FLAG_LPWRRST)) {
+    if (startReason == BootReason::LOW_POWER) {
         Com::printInfoFLN(PSTR("Low power reset"));
-    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_WWDGRST)) {
-        Com::printInfoFLN(Com::tWatchdog);
-    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST)) {
-        Com::printInfoFLN(PSTR("Independent watchdog reset"));
-    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST)) {
-        Com::printInfoFLN(PSTR("Software reset"));
-    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST)) {
-        Com::printInfoFLN(Com::tPowerUp);
-    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_PINRST)) {
-        Com::printInfoFLN(PSTR("External reset pin reset"));
-    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_BORRST)) {
+    } else if (startReason == BootReason::BROWNOUT) {
         Com::printInfoFLN(Com::tBrownOut);
+    } else if (startReason == BootReason::WATCHDOG_RESET) {
+        Com::printInfoFLN(Com::tWatchdog);
+    } else if (startReason == BootReason::SOFTWARE_RESET) {
+        Com::printInfoFLN(PSTR("Software reset"));
+    } else if (startReason == BootReason::POWER_UP) {
+        Com::printInfoFLN(Com::tPowerUp);
+    } else if (startReason == BootReason::EXTERNAL_PIN) {
+        Com::printInfoFLN(PSTR("External reset pin reset"));
     } else {
         Com::printInfoFLN(PSTR("Unknown reset reason"));
     }
-
+}
+void HAL::updateStartReason() {
+    if (__HAL_RCC_GET_FLAG(RCC_FLAG_LPWRRST)) {
+        startReason = BootReason::LOW_POWER;
+    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_BORRST)) {
+        startReason = BootReason::BROWNOUT;
+    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_WWDGRST)
+               || __HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST)) {
+        startReason = BootReason::WATCHDOG_RESET;
+    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST)) {
+        startReason = BootReason::SOFTWARE_RESET;
+    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST)) {
+        startReason = BootReason::POWER_UP;
+    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_PINRST)) {
+        startReason = BootReason::EXTERNAL_PIN;
+    } else {
+        startReason = BootReason::UNKNOWN;
+    }
     // Clear all the reset flags or else they will remain set during future resets until system power is fully removed.
     __HAL_RCC_CLEAR_RESET_FLAGS();
 }
-
 // Return available memory
 int HAL::getFreeRam() {
     struct mallinfo memstruct = mallinfo();

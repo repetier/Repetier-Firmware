@@ -206,6 +206,16 @@ public:
     virtual void executeGCode(GCode* com);
 };
 
+enum class BootReason {
+    SOFTWARE_RESET = 0,
+    BROWNOUT = 1,
+    LOW_POWER = 2,
+    WATCHDOG_RESET = 3,
+    EXTERNAL_PIN = 4,
+    POWER_UP = 5,
+    UNKNOWN = -1
+};
+
 #include "io/temperature_tables.h"
 #include "Configuration.h"
 
