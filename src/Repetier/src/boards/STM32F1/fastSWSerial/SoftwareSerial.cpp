@@ -39,10 +39,25 @@
   This requires WEAK_HARDWARE_TIMERS defined and obviously 
   the original timer IRQ's found in HardwareTimers.cpp marked as 
   __attribute__ ((weak)) to work.
-  
+
+    !Extra note @ 9/13/20!
+        Compiling with GCC'S LTO (Link time optimization -flto)
+        while having weak attribute marked timers AND the 
+        WEAK_HARDWARE_TIMERS macro missing/undefined and /NOT/ replacing 
+        the timers yourself, will freeze the micro because of the multiple
+        weak symbols from the core and HWTimer. (GCC undefined behavior etc)
+        Compiling with LTO off doesn't seem to cause an issue.
+
   If you're using a custom TIMER_SERIAL timer, make SURE to also define 
   TIMER_SERIAL_RAW_IRQ with the correct TIM timer handler. 
   eg #define TIMER_SERIAL_RAW_IRQ TIM8_IRQHandler
+
+  -- AbsoluteCatalyst 9/13/2020 update:
+        Slightly improved performance via usage of STM32's 
+        slimmer/faster LL HAL driver and less redundant 
+        operations performed in setSpeed. My next update
+        on this will be implementing DMA.
+
 */
 
 //
@@ -130,17 +145,26 @@
 #endif
 #endif
 
+// Moses - TODO
+#define TIMER_SERIAL_DMA_CHAN DMA2_Channel4
+
+#ifndef TIMER_SERIAL_DMA_CHAN
+#define TIMER_SERIAL_DMA_CHAN nullptr
+#endif
+
 #if !defined(TIMER_SERIAL_RAW_IRQ) && defined(WEAK_HARDWARE_TIMERS)
 #error No raw timer interrupt defined, but using weak hardware timers! define TIMER_SERIAL_RAW_IRQ in variant.h
 #endif
 //
 // Statics
 //
+DMA_HandleTypeDef SoftwareSerial::timerDMAHandle;
 HardwareTimer SoftwareSerial::timer(TIMER_SERIAL);
+TIM_TypeDef* SoftwareSerial::timerInst = TIMER_SERIAL;
 SoftwareSerial* SoftwareSerial::active_listener = nullptr;
 SoftwareSerial* volatile SoftwareSerial::active_out = nullptr;
 SoftwareSerial* volatile SoftwareSerial::active_in = nullptr;
-int32_t SoftwareSerial::tx_tick_cnt = 0; // OVERSAMPLE ticks needed for a bit
+int32_t SoftwareSerial::tx_tick_cnt = 0;          // OVERSAMPLE ticks needed for a bit
 int32_t volatile SoftwareSerial::rx_tick_cnt = 0; // OVERSAMPLE ticks needed for a bit
 uint32_t SoftwareSerial::tx_buffer = 0;
 int32_t SoftwareSerial::tx_bit_cnt = 0;
@@ -152,35 +176,33 @@ uint32_t SoftwareSerial::cur_speed = 0;
 // Private methods
 //
 
-void SoftwareSerial::setSpeed(uint32_t speed)
-{
+void SoftwareSerial::setSpeed(uint32_t speed) {
     if (speed != cur_speed) {
-        timer.pause();
+        LL_TIM_DisableCounter(timerInst);
         if (speed != 0) {
-            // Disable the timer
-            uint32_t clock_rate, cmp_value;
-            // Get timer clock
-            clock_rate = timer.getTimerClkFreq();
-            int pre = 1;
-            // Calculate prescale an compare value
-            do {
-                cmp_value = clock_rate / (speed * OVERSAMPLE);
-                if (cmp_value >= UINT16_MAX) {
-                    clock_rate = clock_rate / 2;
-                    pre *= 2;
-                }
-            } while (cmp_value >= UINT16_MAX);
-            timer.setPrescaleFactor(pre);
-            timer.setOverflow(cmp_value);
-            timer.setCount(0);
-#if defined(WEAK_HARDWARE_TIMERS)
-            timer.attachInterrupt([] {}); 
-#else
-            timer.attachInterrupt(&handleInterrupt);
-#endif
-            timer.resume();
+            LL_TIM_SetCounter(timerInst, 0);
+            LL_TIM_ClearFlag_UPDATE(timerInst);
+            LL_TIM_EnableIT_UPDATE(timerInst);
+            if (!_ready) { // Begin() sometimes gets called before the timer is even initialized. So do these here.
+                uint32_t clock_rate = 0, cmp_value = 0;
+                // Get timer clock
+                clock_rate = timer.getTimerClkFreq();
+                int pre = 1;
+                // Calculate prescale an compare value
+                do {
+                    cmp_value = clock_rate / (speed * OVERSAMPLE);
+                    if (cmp_value >= UINT16_MAX) {
+                        clock_rate = clock_rate / 2;
+                        pre *= 2;
+                    }
+                } while (cmp_value >= UINT16_MAX); 
+                LL_TIM_SetPrescaler(timerInst, pre);
+                LL_TIM_SetAutoReload(timerInst, cmp_value);
+                _ready = true;
+            }
+            LL_TIM_EnableCounter(timerInst);
         } else {
-            timer.detachInterrupt();
+            LL_TIM_DisableIT_UPDATE(timerInst);
         }
         cur_speed = speed;
     }
@@ -188,8 +210,7 @@ void SoftwareSerial::setSpeed(uint32_t speed)
 
 // This function sets the current object as the "listening"
 // one and returns true if it replaces another
-bool SoftwareSerial::listen()
-{
+bool SoftwareSerial::listen() {
     if (active_listener != this) {
         // wait for any transmit to complete as we may change speed
         while (active_out)
@@ -208,8 +229,7 @@ bool SoftwareSerial::listen()
 }
 
 // Stop listening. Returns true if we were actually listening.
-bool SoftwareSerial::stopListening()
-{
+bool SoftwareSerial::stopListening() {
     if (active_listener == this) {
         // wait for any output to complete
         while (active_out)
@@ -226,23 +246,21 @@ bool SoftwareSerial::stopListening()
     return false;
 }
 
-inline void SoftwareSerial::setTX()
-{
+inline void SoftwareSerial::setTX() {
     if (_inverse_logic) {
         LL_GPIO_ResetOutputPin(_transmitPinPort, _transmitPinNumber);
     } else {
         LL_GPIO_SetOutputPin(_transmitPinPort, _transmitPinNumber);
     }
-    pinMode(_transmitPin, OUTPUT);
+    LL_GPIO_SetPinMode(_transmitPinPort, _transmitPinNumber, LL_GPIO_MODE_OUTPUT);
 }
 
-inline void SoftwareSerial::setRX()
-{
-    pinMode(_receivePin, _inverse_logic ? INPUT_PULLDOWN : INPUT_PULLUP); // pullup for normal logic!
+inline void SoftwareSerial::setRX() {
+    LL_GPIO_SetPinPull(_receivePinPort, _receivePinNumber, _inverse_logic ? LL_GPIO_PULL_DOWN : LL_GPIO_PULL_UP);
+    LL_GPIO_SetPinMode(_receivePinPort, _receivePinNumber, LL_GPIO_MODE_INPUT);
 }
 
-inline void SoftwareSerial::setRXTX(bool input)
-{
+inline void SoftwareSerial::setRXTX(bool input) {
     if (_half_duplex) {
         if (input) {
             if (active_in != this) {
@@ -260,9 +278,8 @@ inline void SoftwareSerial::setRXTX(bool input)
     }
 }
 
-inline void SoftwareSerial::send()
-{
-    if (--tx_tick_cnt <= 0) { // if tx_tick_cnt > 0 interrupt is discarded. Only when tx_tick_cnt reach 0 we set TX pin.
+inline void SoftwareSerial::send() {
+    if (--tx_tick_cnt <= 0) {    // if tx_tick_cnt > 0 interrupt is discarded. Only when tx_tick_cnt reach 0 we set TX pin.
         if (tx_bit_cnt++ < 10) { // tx_bit_cnt < 10 transmission is not fiisehed (10 = 1 start +8 bits + 1 stop)
             // send data (including start and stop bits)
             if (tx_buffer & 1) {
@@ -272,7 +289,7 @@ inline void SoftwareSerial::send()
             }
             tx_buffer >>= 1;
             tx_tick_cnt = OVERSAMPLE; // Wait OVERSAMPLE tick to send next bit
-        } else { // Transmission finished
+        } else {                      // Transmission finished
             tx_tick_cnt = 1;
             if (_output_pending) {
                 active_out = nullptr;
@@ -292,14 +309,13 @@ inline void SoftwareSerial::send()
 //
 // The receive routine called by the interrupt handler
 //
-inline void SoftwareSerial::recv()
-{
+inline void SoftwareSerial::recv() {
     if (--rx_tick_cnt <= 0) { // if rx_tick_cnt > 0 interrupt is discarded. Only when rx_tick_cnt reach 0 RX pin is considered
         bool inbit = LL_GPIO_IsInputPinSet(_receivePinPort, _receivePinNumber) ^ _inverse_logic;
         if (rx_bit_cnt == -1) { // rx_bit_cnt = -1 :  waiting for start bit
             if (!inbit) {
                 // got start bit
-                rx_bit_cnt = 0; // rx_bit_cnt == 0 : start bit received
+                rx_bit_cnt = 0;               // rx_bit_cnt == 0 : start bit received
                 rx_tick_cnt = OVERSAMPLE + 1; // Wait 1 bit (OVERSAMPLE ticks) + 1 tick in order to sample RX pin in the middle of the edge (and not too close to the edge)
                 rx_buffer = 0;
             } else {
@@ -326,7 +342,7 @@ inline void SoftwareSerial::recv()
             if (inbit) {
                 rx_buffer |= 0x80;
             }
-            rx_bit_cnt++; // Preprare for next bit
+            rx_bit_cnt++;             // Preprare for next bit
             rx_tick_cnt = OVERSAMPLE; // Wait OVERSAMPLE ticks before sampling next bit
         }
     }
@@ -335,8 +351,7 @@ inline void SoftwareSerial::recv()
 //
 // Interrupt handling
 //
-inline void SoftwareSerial::handleInterrupt()
-{
+inline void SoftwareSerial::handleInterrupt() {
     if (active_in) {
         active_in->recv();
     } else if (active_out) {
@@ -345,8 +360,7 @@ inline void SoftwareSerial::handleInterrupt()
 }
 
 #if defined(WEAK_HARDWARE_TIMERS)
-extern "C" void TIMER_SERIAL_RAW_IRQ(void)
-{
+extern "C" void TIMER_SERIAL_RAW_IRQ(void) {
     LL_TIM_ClearFlag_UPDATE(TIMER_SERIAL);
     SoftwareSerial::handleInterrupt();
 }
@@ -362,13 +376,13 @@ SoftwareSerial::SoftwareSerial(uint16_t receivePin, uint16_t transmitPin, bool i
     , _transmitPinPort(digitalPinToPort(transmitPin))
     , _transmitPinNumber(STM_LL_GPIO_PIN(digitalPinToPinName(transmitPin)))
     , _speed(0)
+    , _ready(false)
     , _buffer_overflow(false)
     , _inverse_logic(inverse_logic)
     , _half_duplex(receivePin == transmitPin)
     , _output_pending(0)
     , _receive_buffer_tail(0)
-    , _receive_buffer_head(0)
-{
+    , _receive_buffer_head(0) {
     if ((receivePin < NUM_DIGITAL_PINS) || (transmitPin < NUM_DIGITAL_PINS)) {
         /* Enable GPIO clock for tx and rx pin*/
         set_GPIO_Port_Clock(STM_PORT(digitalPinToPinName(transmitPin)));
@@ -381,8 +395,7 @@ SoftwareSerial::SoftwareSerial(uint16_t receivePin, uint16_t transmitPin, bool i
 //
 // Destructor
 //
-SoftwareSerial::~SoftwareSerial()
-{
+SoftwareSerial::~SoftwareSerial() {
     end();
 }
 
@@ -390,8 +403,7 @@ SoftwareSerial::~SoftwareSerial()
 // Public methods
 //
 
-void SoftwareSerial::begin(long speed)
-{
+void SoftwareSerial::begin(long speed) {
 #ifdef FORCE_BAUD_RATE
     speed = FORCE_BAUD_RATE;
 #endif
@@ -405,16 +417,14 @@ void SoftwareSerial::begin(long speed)
     }
 }
 
-void SoftwareSerial::end()
-{
+void SoftwareSerial::end() {
     stopListening();
 }
 
 // Read data from buffer
-int SoftwareSerial::read()
-{
+int SoftwareSerial::read() {
     // Empty buffer?
-    if (_receive_buffer_head == _receive_buffer_tail) {
+    if (!_ready || _receive_buffer_head == _receive_buffer_tail) {
         return -1;
     }
 
@@ -424,13 +434,17 @@ int SoftwareSerial::read()
     return d;
 }
 
-int SoftwareSerial::available()
-{
-    return (_receive_buffer_tail + _SS_MAX_RX_BUFF - _receive_buffer_head) % _SS_MAX_RX_BUFF;
+int SoftwareSerial::available() {
+    if (!_ready) {
+        return 0;
+    }
+    return ((_receive_buffer_tail + _SS_MAX_RX_BUFF - _receive_buffer_head) % _SS_MAX_RX_BUFF);
 }
 
-size_t SoftwareSerial::write(uint8_t b)
-{
+size_t SoftwareSerial::write(uint8_t b) {
+    if (!_ready) {
+        return 0;
+    }
     // wait for previous transmit to complete
     _output_pending = 1;
     while (active_out)
@@ -452,15 +466,13 @@ size_t SoftwareSerial::write(uint8_t b)
     return 1;
 }
 
-void SoftwareSerial::flush()
-{
+void SoftwareSerial::flush() {
     noInterrupts();
     _receive_buffer_head = _receive_buffer_tail = 0;
     interrupts();
 }
 
-int SoftwareSerial::peek()
-{
+int SoftwareSerial::peek() {
     // Empty buffer?
     if (_receive_buffer_head == _receive_buffer_tail) {
         return -1;
@@ -470,7 +482,6 @@ int SoftwareSerial::peek()
     return _receive_buffer[_receive_buffer_head];
 }
 
-void SoftwareSerial::setInterruptPriority(uint32_t preemptPriority, uint32_t subPriority)
-{
+void SoftwareSerial::setInterruptPriority(uint32_t preemptPriority, uint32_t subPriority) {
     timer.setInterruptPriority(preemptPriority, subPriority);
 }

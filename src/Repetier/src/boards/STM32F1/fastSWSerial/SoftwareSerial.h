@@ -30,7 +30,6 @@
  * http://arduiniana.org.
  */
 
-
 /* 
   AbsoluteCatalyst (moses.github@outlook.com) 8/29/2020 - This is a small
   modification of the original SoftwareSerial found in STM32Duino's library. 
@@ -39,12 +38,26 @@
   This requires WEAK_HARDWARE_TIMERS defined and obviously 
   the original timer IRQ's found in HardwareTimers.cpp marked as 
   __attribute__ ((weak)) to work.
-  
+
+    !Extra note @ 9/13/20!
+        Compiling with GCC'S LTO (Link time optimization -flto)
+        while having weak attribute marked timers AND the 
+        WEAK_HARDWARE_TIMERS macro missing/undefined and /NOT/ replacing 
+        the timers yourself, will freeze the micro because of the multiple
+        weak symbols from the core and HWTimer. (GCC undefined behavior etc)
+        Compiling with LTO off doesn't seem to cause an issue.
+
   If you're using a custom TIMER_SERIAL timer, make SURE to also define 
   TIMER_SERIAL_RAW_IRQ with the correct TIM timer handler. 
   eg #define TIMER_SERIAL_RAW_IRQ TIM8_IRQHandler
-*/
 
+  -- AbsoluteCatalyst 9/13/2020 update:
+        Slightly improved performance via usage of STM32's 
+        slimmer/faster LL HAL driver and less redundant 
+        operations performed in setSpeed. My next update
+        on this will be implementing DMA.
+
+*/
 
 #ifndef SOFTWARESERIAL_H
 #define SOFTWARESERIAL_H
@@ -62,16 +75,17 @@ class SoftwareSerial : public Stream {
     // per object data
     uint16_t _receivePin;
     uint16_t _transmitPin;
-    GPIO_TypeDef *_receivePinPort;
+    GPIO_TypeDef* _receivePinPort;
     uint32_t _receivePinNumber;
-    GPIO_TypeDef *_transmitPinPort;
+    GPIO_TypeDef* _transmitPinPort;
     uint32_t _transmitPinNumber;
     uint32_t _speed;
+    bool _ready;
 
-    uint16_t _buffer_overflow: 1;
-    uint16_t _inverse_logic: 1;
-    uint16_t _half_duplex: 1;
-    uint16_t _output_pending: 1;
+    uint16_t _buffer_overflow : 1;
+    uint16_t _inverse_logic : 1;
+    uint16_t _half_duplex : 1;
+    uint16_t _output_pending : 1;
 
     unsigned char _receive_buffer[_SS_MAX_RX_BUFF];
     volatile uint8_t _receive_buffer_tail;
@@ -80,8 +94,8 @@ class SoftwareSerial : public Stream {
     uint32_t delta_start = 0;
 
     // static data
-    static bool initialised;
     static HardwareTimer timer;
+    static TIM_TypeDef* timerInst;
     static SoftwareSerial *active_listener;
     static SoftwareSerial *volatile active_out;
     static SoftwareSerial *volatile active_in;
@@ -109,23 +123,22 @@ class SoftwareSerial : public Stream {
 #endif
     // public methods
 
+    static DMA_HandleTypeDef timerDMAHandle;
     SoftwareSerial(uint16_t receivePin, uint16_t transmitPin, bool inverse_logic = false);
     virtual ~SoftwareSerial();
     void begin(long speed);
     bool listen();
     void end();
-    bool isListening()
-    {
-      return active_listener == this;
+    bool isListening() {
+        return active_listener == this;
     }
     bool stopListening();
-    bool overflow()
-    {
-      bool ret = _buffer_overflow;
-      if (ret) {
-        _buffer_overflow = false;
-      }
-      return ret;
+    bool overflow() {
+        bool ret = _buffer_overflow;
+        if (ret) {
+            _buffer_overflow = false;
+        }
+        return ret;
     }
     int peek();
 
@@ -133,9 +146,8 @@ class SoftwareSerial : public Stream {
     virtual int read();
     virtual int available();
     virtual void flush();
-    operator bool()
-    {
-      return true;
+    operator bool() {
+        return true;
     }
 
     static void setInterruptPriority(uint32_t preemptPriority, uint32_t subPriority);
