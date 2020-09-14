@@ -750,7 +750,7 @@ void GUI::processInit() {
     bufAddStringP(Com::tVendor);
     printRow(3, buf);
     lastRefresh = HAL::timeInMilliseconds() + UI_START_SCREEN_DELAY; // Show start screen 4s but will not delay start process
-    curBootState = GUIBootState::IN_INTRO; // Switch to a skippable boot animation state
+    curBootState = GUIBootState::IN_INTRO;                           // Switch to a skippable boot animation state
 }
 
 static fast8_t refresh_counter = 0;
@@ -1388,7 +1388,55 @@ void __attribute__((weak)) infoScreen(GUIAction action, void* data) {
         GUI::pop();
     }
 }
+void __attribute__((weak)) warningScreenP(GUIAction action, void* data) {
+    if (action == GUIAction::DRAW) {
+        GUI::bufClear();
+        GUI::bufAddStringP(PSTR("Warning"));
+        printRow(0, GUI::buf);
+        GUI::bufClear();
+        GUI::bufAddStringP((const char*)data);
+        printRowCentered(1, GUI::buf);
 
+        GUI::bufClear();
+        printRow(2, GUI::buf);
+        GUI::bufAddStringP(Com::tBtnOK);
+        printRowCentered(3, GUI::buf);
+    } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
+        GUI::pop();
+    }
+}
+void __attribute__((weak)) errorScreenP(GUIAction action, void* data) {
+    if (action == GUIAction::DRAW) {
+        GUI::bufClear();
+        GUI::bufAddStringP(PSTR("Error"));
+        printRow(0, GUI::buf);
+        GUI::bufClear();
+        GUI::bufAddStringP((const char*)data);
+        printRowCentered(1, GUI::buf);
+        GUI::bufClear();
+        printRow(2, GUI::buf);
+        GUI::bufAddStringP(Com::tBtnOK);
+        printRowCentered(3, GUI::buf);
+    } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
+        GUI::pop();
+    }
+}
+void __attribute__((weak)) infoScreenP(GUIAction action, void* data) {
+    if (action == GUIAction::DRAW) {
+        GUI::bufClear();
+        GUI::bufAddStringP(PSTR("Info"));
+        printRow(0, GUI::buf);
+        GUI::bufClear();
+        GUI::bufAddStringP((const char*)data);
+        printRowCentered(1, GUI::buf);
+        GUI::bufClear();
+        printRow(2, GUI::buf);
+        GUI::bufAddStringP(Com::tBtnOK);
+        printRowCentered(3, GUI::buf);
+    } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
+        GUI::pop();
+    }
+}
 #define SPIN_CENTER_X 10
 #define SPIN_CENTER_Y 38
 
@@ -1397,6 +1445,24 @@ void waitScreen(GUIAction action, void* data) {
         char* text = static_cast<char*>(data);
 
         printRowCentered(0, text);
+        GUI::bufClear();
+        printRow(1, GUI::buf);
+        printRow(2, GUI::buf);
+        fast8_t len = refresh_counter % UI_COLS;
+        for (fast8_t i = 0; i < len; i++) {
+            GUI::bufAddChar('.');
+        }
+        printRow(3, GUI::buf);
+    }
+}
+
+void waitScreenP(GUIAction action, void* data) {
+    if (action == GUIAction::DRAW) {
+        char* text = static_cast<char*>(data);
+
+        GUI::bufClear();
+        GUI::bufAddStringP((const char*)data);
+        printRowCentered(0, GUI::buf);
         GUI::bufClear();
         printRow(1, GUI::buf);
         printRow(2, GUI::buf);

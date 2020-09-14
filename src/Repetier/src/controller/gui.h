@@ -86,9 +86,13 @@ extern void printProgress(GUIAction action, void* data);
 extern void mainMenu(GUIAction action, void* data);
 extern void startScreen(GUIAction action, void* data);
 extern void warningScreen(GUIAction action, void* data);
+extern void warningScreenP(GUIAction action, void* data);
 extern void errorScreen(GUIAction action, void* data);
+extern void errorScreenP(GUIAction action, void* data);
 extern void infoScreen(GUIAction action, void* data);
+extern void infoScreenP(GUIAction action, void* data);
 extern void waitScreen(GUIAction action, void* data);
+extern void waitScreenP(GUIAction action, void* data);
 extern void directAction(GUIAction action, void* data);
 extern void selectToolAction(GUIAction action, void* data);
 
@@ -145,7 +149,7 @@ public:
     static GUIPageType pageType[GUI_MAX_LEVEL];  ///< page type
     static millis_t lastRefresh;                 ///< Last refresh time
     static millis_t lastAction;                  ///< Last action time for autoreturn to display
-    static GUIBootState curBootState;            ///< GUI boot sequence state 
+    static GUIBootState curBootState;            ///< GUI boot sequence state
     static bool contentChanged;                  ///< set to true if forced refresh is wanted
     static char status[MAX_COLS + 1];            ///< Status Line
     static char buf[MAX_COLS + 1];               ///< Buffer to build strings
@@ -154,7 +158,7 @@ public:
     static GUIAction nextAction;                 ///< Next action to execute on opdate
     static int nextActionRepeat;                 ///< Increment for next/previous
     static GUIStatusLevel statusLevel;
-    static bool textIsScrolling; 
+    static bool textIsScrolling;
 #if SDSUPPORT
     static char cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2];
     static uint8_t folderLevel;

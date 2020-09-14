@@ -19,7 +19,7 @@ char GUI::buf[MAX_COLS + 1];                 ///< Buffer to build strings
 char GUI::tmpString[MAX_COLS + 1];           ///< Buffer to build strings
 fast8_t GUI::bufPos;                         ///< Pos for appending data
 GUIBootState GUI::curBootState = GUIBootState::DISPLAY_INIT;
-bool GUI::textIsScrolling = false;           ///< Our selected row/text is now scrolling/anim
+bool GUI::textIsScrolling = false; ///< Our selected row/text is now scrolling/anim
 #if SDSUPPORT
 char GUI::cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2] = { '/', 0 };
 uint8_t GUI::folderLevel = 0;
@@ -42,6 +42,10 @@ void __attribute__((weak)) waitScreen(GUIAction action, void* data) { }
 void __attribute__((weak)) infoScreen(GUIAction action, void* data) { }
 void __attribute__((weak)) warningScreen(GUIAction action, void* data) { }
 void __attribute__((weak)) errorScreen(GUIAction action, void* data) { }
+void __attribute__((weak)) waitScreenP(GUIAction action, void* data) { }
+void __attribute__((weak)) infoScreenP(GUIAction action, void* data) { }
+void __attribute__((weak)) warningScreenP(GUIAction action, void* data) { }
+void __attribute__((weak)) errorScreenP(GUIAction action, void* data) { }
 #endif
 
 #if DISPLAY_DRIVER != DRIVER_NONE
@@ -54,24 +58,26 @@ void GUI::resetMenu() { ///< Go to start page
 void GUI::update() {
 #if DISPLAY_DRIVER != DRIVER_NONE
     millis_t timeDiff = HAL::timeInMilliseconds() - lastRefresh;
-
+    handleKeypress();                                 // Test for new keys
     if (curBootState == GUIBootState::DISPLAY_INIT) { // Small delay before we start processing
         processInit();
+        nextAction = GUIAction::NONE;
+        contentChanged = false;
         return;
     } else if (curBootState == GUIBootState::IN_INTRO) { // Boot screen
-        if (contentChanged || (timeDiff < 60000 && timeDiff > 1000)) { 
-            // Skip if any key presses or timeout. 
+        if (contentChanged || (timeDiff < 60000 && timeDiff > 1000)) {
+            // Skip if any key presses or timeout.
             curBootState = GUIBootState::READY;
             lastRefresh = HAL::timeInMilliseconds();
             if (HAL::startReason == BootReason::WATCHDOG_RESET) {
-                GUI::setStatusP(PSTR("Reset by Watchdog!"), GUIStatusLevel::WARNING);
+                push(warningScreenP, (void*)PSTR("Reset by Watchdog!"), GUIPageType::STATUS);
+                // GUI::setStatusP(PSTR("Reset by Watchdog!"), GUIStatusLevel::WARNING);
             } else if (HAL::startReason == BootReason::BROWNOUT) {
-                GUI::setStatusP(PSTR("Brownout reset!"), GUIStatusLevel::WARNING);
+                push(warningScreenP, (void*)PSTR("Brownout reset!"), GUIPageType::STATUS);
+                // GUI::setStatusP(PSTR("Brownout reset!"), GUIStatusLevel::WARNING);
             }
         }
     }
-
-    handleKeypress(); // Test for new keys
 
     if (nextAction == GUIAction::BACK) {
         Printer::playDefaultSound(DefaultSounds::OK);

@@ -263,7 +263,7 @@ void GUI::menuTextP(GUIAction& action, PGM_P text, bool highlight) {
                 guiY += 10;
                 if (guiLine == cursorRow[level]) {
                     lcd.drawBox(0, guiY - 8, 128, 10);
-                    lcd.setDrawColor(0); 
+                    lcd.setDrawColor(0);
                     scrollSelectedText(0, guiY);
                     lcd.setDrawColor(1);
                 } else {
@@ -940,6 +940,7 @@ void __attribute__((weak)) warningScreen(GUIAction action, void* data) {
         GUI::pop();
     }
 }
+
 void __attribute__((weak)) errorScreen(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         drawStatusLine();
@@ -960,6 +961,7 @@ void __attribute__((weak)) errorScreen(GUIAction action, void* data) {
         GUI::pop();
     }
 }
+
 void __attribute__((weak)) infoScreen(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         drawStatusLine();
@@ -971,6 +973,74 @@ void __attribute__((weak)) infoScreen(GUIAction action, void* data) {
         lcd.setFont(u8g2_font_6x10_mf);
         int len = strlen(static_cast<char*>(data));
         lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(data));
+        lcd.setDrawColor(0);
+        GUI::bufClear();
+        GUI::bufAddStringP(Com::tBtnOK);
+        lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+        lcd.setDrawColor(1);
+    } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
+        GUI::pop();
+    }
+}
+
+void __attribute__((weak)) warningScreenP(GUIAction action, void* data) {
+    if (action == GUIAction::DRAW) {
+        drawStatusLine();
+        lcd.setFont(u8g2_font_10x20_mf);
+        lcd.drawXBM(2, 13, WARNING_width, WARNING_height, WARNING_bits); // 26x26 pixel
+        GUI::bufClear();
+        GUI::bufAddStringP(PSTR("Warning"));
+        lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
+        lcd.setFont(u8g2_font_6x10_mf);
+        GUI::bufClear();
+        GUI::bufAddStringP((const char*)data);
+        int len = strlen(static_cast<char*>(GUI::buf));
+        lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(GUI::buf));
+        lcd.setDrawColor(0);
+        GUI::bufClear();
+        GUI::bufAddStringP(Com::tBtnOK);
+        lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+        lcd.setDrawColor(1);
+    } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
+        GUI::pop();
+    }
+}
+void __attribute__((weak)) errorScreenP(GUIAction action, void* data) {
+    if (action == GUIAction::DRAW) {
+        drawStatusLine();
+        lcd.setFont(u8g2_font_10x20_mf);
+        lcd.drawXBM(2, 13, ERROR_width, ERROR_height, ERROR_bits); // 26x26 pixel
+        GUI::bufClear();
+        GUI::bufAddStringP(PSTR("Error"));
+        lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
+        lcd.setFont(u8g2_font_6x10_mf);
+        GUI::bufClear();
+        GUI::bufAddStringP((const char*)data);
+        int len = strlen(static_cast<char*>(GUI::buf));
+        lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(GUI::buf));
+        lcd.setDrawColor(0);
+        GUI::bufClear();
+        GUI::bufAddStringP(Com::tBtnOK);
+        lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+        lcd.setDrawColor(1);
+    } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
+        GUI::pop();
+    }
+}
+
+void __attribute__((weak)) infoScreenP(GUIAction action, void* data) {
+    if (action == GUIAction::DRAW) {
+        drawStatusLine();
+        lcd.setFont(u8g2_font_10x20_mf);
+        lcd.drawXBM(2, 13, INFO_width, INFO_height, INFO_bits); // 26x26 pixel
+        GUI::bufClear();
+        GUI::bufAddStringP(PSTR("Info"));
+        lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
+        lcd.setFont(u8g2_font_6x10_mf);
+        GUI::bufClear();
+        GUI::bufAddStringP((const char*)data);
+        int len = strlen(static_cast<char*>(GUI::buf));
+        lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(GUI::buf));
         lcd.setDrawColor(0);
         GUI::bufClear();
         GUI::bufAddStringP(Com::tBtnOK);
@@ -1028,4 +1098,49 @@ void waitScreen(GUIAction action, void* data) {
     }
 }
 
+void waitScreenP(GUIAction action, void* data) {
+    if (action == GUIAction::DRAW) {
+        drawStatusLine();
+        switch (refresh_counter % 9) {
+        case 0:
+            lcd.drawXBM(SPIN_CENTER_X - SPIN1_width / 2, SPIN_CENTER_Y - SPIN1_height / 2, SPIN1_width, SPIN1_height, SPIN1_bits);
+            break;
+        case 1:
+            lcd.drawXBM(SPIN_CENTER_X - SPIN2_width / 2, SPIN_CENTER_Y - SPIN2_height / 2, SPIN2_width, SPIN2_height, SPIN2_bits);
+            break;
+        case 2:
+            lcd.drawXBM(SPIN_CENTER_X - SPIN3_width / 2, SPIN_CENTER_Y - SPIN3_height / 2, SPIN3_width, SPIN3_height, SPIN3_bits);
+            break;
+        case 3:
+            lcd.drawXBM(SPIN_CENTER_X - SPIN4_width / 2, SPIN_CENTER_Y - SPIN4_height / 2, SPIN4_width, SPIN4_height, SPIN4_bits);
+            break;
+        case 4:
+            lcd.drawXBM(SPIN_CENTER_X - SPIN5_width / 2, SPIN_CENTER_Y - SPIN5_height / 2, SPIN5_width, SPIN5_height, SPIN5_bits);
+            break;
+        case 5:
+            lcd.drawXBM(SPIN_CENTER_X - SPIN6_width / 2, SPIN_CENTER_Y - SPIN6_height / 2, SPIN6_width, SPIN6_height, SPIN6_bits);
+            break;
+        case 6:
+            lcd.drawXBM(SPIN_CENTER_X - SPIN7_width / 2, SPIN_CENTER_Y - SPIN7_height / 2, SPIN7_width, SPIN7_height, SPIN7_bits);
+            break;
+        case 7:
+            lcd.drawXBM(SPIN_CENTER_X - SPIN8_width / 2, SPIN_CENTER_Y - SPIN8_height / 2, SPIN8_width, SPIN8_height, SPIN8_bits);
+            break;
+        case 8:
+            lcd.drawXBM(SPIN_CENTER_X - SPIN9_width / 2, SPIN_CENTER_Y - SPIN9_height / 2, SPIN9_width, SPIN9_height, SPIN9_bits);
+            refresh_counter = 8;
+            break;
+        }
+        GUI::bufClear();
+        GUI::bufAddStringP((const char*)data);
+        int len = strlen(static_cast<char*>(GUI::buf));
+        if (len <= 10) {
+            lcd.setFont(u8g2_font_10x20_mf);
+            lcd.drawUTF8(73 - len * 5, SPIN_CENTER_Y + 7, static_cast<char*>(GUI::buf));
+        } else {
+            lcd.setFont(u8g2_font_6x10_mf);
+            lcd.drawUTF8(73 - len * 3, SPIN_CENTER_Y + 3, static_cast<char*>(GUI::buf));
+        }
+    }
+}
 #endif
