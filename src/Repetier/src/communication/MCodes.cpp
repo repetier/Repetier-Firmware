@@ -25,56 +25,56 @@
 
 const int8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 
-void MCode_3(GCode* com) { // Spindle CW on, laser intensity
+void __attribute__((weak)) MCode_3(GCode* com) { // Spindle CW on, laser intensity
     Tool* t = Tool::getActiveTool();
     if (t) {
         t->M3(com);
     }
 }
 
-void MCode_4(GCode* com) { // Spindle CCW, laser intensity
+void __attribute__((weak)) MCode_4(GCode* com) { // Spindle CCW, laser intensity
     Tool* t = Tool::getActiveTool();
     if (t) {
         t->M4(com);
     }
 }
 
-void MCode_5(GCode* com) { // Spindle, laser off
+void __attribute__((weak)) MCode_5(GCode* com) { // Spindle, laser off
     Tool* t = Tool::getActiveTool();
     if (t) {
         t->M5(com);
     }
 }
 
-void MCode_6(GCode* com) { // Tool Change
+void __attribute__((weak)) MCode_6(GCode* com) { // Tool Change
     Tool* t = Tool::getActiveTool();
     if (t) {
         t->M6(com);
     }
 }
 
-void MCode_7(GCode* com) { // Mist cooland On
+void __attribute__((weak)) MCode_7(GCode* com) { // Mist cooland On
     Tool* t = Tool::getActiveTool();
     if (t) {
         t->M7(com);
     }
 }
 
-void MCode_8(GCode* com) { // Flood Coolant on
+void __attribute__((weak)) MCode_8(GCode* com) { // Flood Coolant on
     Tool* t = Tool::getActiveTool();
     if (t) {
         t->M8(com);
     }
 }
 
-void MCode_9(GCode* com) { // Coolant off
+void __attribute__((weak)) MCode_9(GCode* com) { // Coolant off
     Tool* t = Tool::getActiveTool();
     if (t) {
         t->M9(com);
     }
 }
 
-void MCode_17(GCode* com) {
+void __attribute__((weak)) MCode_17(GCode* com) {
     Motion1::waitForEndOfMoves();
     bool named = false;
     if (com->hasX()) {
@@ -109,7 +109,7 @@ void MCode_17(GCode* com) {
     Printer::unsetAllSteppersDisabled();
 }
 
-void MCode_18(GCode* com) {
+void __attribute__((weak)) MCode_18(GCode* com) {
     Motion1::waitForEndOfMoves();
     bool named = false;
     if (com->hasX()) {
@@ -143,7 +143,7 @@ void MCode_18(GCode* com) {
     }
 }
 
-void MCode_20(GCode* com) {
+void __attribute__((weak)) MCode_20(GCode* com) {
 #if SDSUPPORT
 #if JSON_OUTPUT
     if (com->hasString() && com->text[1] == '2') { // " S2 P/folder"
@@ -164,19 +164,19 @@ void MCode_20(GCode* com) {
 #endif
 }
 
-void MCode_21(GCode* com) {
+void __attribute__((weak)) MCode_21(GCode* com) {
 #if SDSUPPORT
     sd.mount();
 #endif
 }
 
-void MCode_22(GCode* com) {
+void __attribute__((weak)) MCode_22(GCode* com) {
 #if SDSUPPORT
     sd.unmount();
 #endif
 }
 
-void MCode_23(GCode* com) {
+void __attribute__((weak)) MCode_23(GCode* com) {
 #if SDSUPPORT
     if (com->hasString()) {
         sd.fat.chdir();
@@ -185,46 +185,46 @@ void MCode_23(GCode* com) {
 #endif
 }
 
-void MCode_24(GCode* com) {
+void __attribute__((weak)) MCode_24(GCode* com) {
 #if SDSUPPORT
     sd.startPrint();
 #endif
 }
 
-void MCode_25(GCode* com) {
+void __attribute__((weak)) MCode_25(GCode* com) {
 #if SDSUPPORT
     sd.pausePrint();
 #endif
 }
 
-void MCode_26(GCode* com) {
+void __attribute__((weak)) MCode_26(GCode* com) {
 #if SDSUPPORT
     if (com->hasS())
         sd.setIndex(com->S);
 #endif
 }
 
-void MCode_27(GCode* com) {
+void __attribute__((weak)) MCode_27(GCode* com) {
 #if SDSUPPORT
     sd.printStatus();
 #endif
 }
 
-void MCode_28(GCode* com) {
+void __attribute__((weak)) MCode_28(GCode* com) {
 #if SDSUPPORT
     if (com->hasString())
         sd.startWrite(com->text);
 #endif
 }
 
-void MCode_29(GCode* com) {
+void __attribute__((weak)) MCode_29(GCode* com) {
 #if SDSUPPORT
 //processed in write to file routine above
 //savetosd = false;
 #endif
 }
 
-void MCode_30(GCode* com) {
+void __attribute__((weak)) MCode_30(GCode* com) {
 #if SDSUPPORT
     if (com->hasString()) {
         sd.fat.chdir();
@@ -233,7 +233,7 @@ void MCode_30(GCode* com) {
 #endif
 }
 
-void MCode_32(GCode* com) {
+void __attribute__((weak)) MCode_32(GCode* com) {
 #if SDSUPPORT
     if (com->hasString()) {
         sd.fat.chdir();
@@ -242,7 +242,7 @@ void MCode_32(GCode* com) {
 #endif
 }
 
-void MCode_36(GCode* com) {
+void __attribute__((weak)) MCode_36(GCode* com) {
 #if JSON_OUTPUT && SDSUPPORT
     if (com->hasString()) {
         sd.JSONFileInfo(com->text);
@@ -250,7 +250,7 @@ void MCode_36(GCode* com) {
 #endif
 }
 
-void MCode_42(GCode* com) {
+void __attribute__((weak)) MCode_42(GCode* com) {
     // Tool::getTool(com->T)->unstepMotor();
     // return;
     if (com->hasP()) {
@@ -283,7 +283,7 @@ void MCode_42(GCode* com) {
 }
 
 // Test z probe accuracy
-void MCode_48(GCode* com) {
+void __attribute__((weak)) MCode_48(GCode* com) {
     if (!Printer::isHomedAll()) {
         Com::printWarningFLN(PSTR("Printer not homed!"));
         return;
@@ -324,7 +324,7 @@ void MCode_48(GCode* com) {
     }
 }
 
-void MCode_80(GCode* com) {
+void __attribute__((weak)) MCode_80(GCode* com) {
 #if PS_ON_PIN > -1
     Motion1::waitForEndOfMoves();
     previousMillisCmd = HAL::timeInMilliseconds();
@@ -334,7 +334,7 @@ void MCode_80(GCode* com) {
 #endif
 }
 
-void MCode_81(GCode* com) {
+void __attribute__((weak)) MCode_81(GCode* com) {
 #if PS_ON_PIN > -1
     Motion1::waitForEndOfMoves();
     SET_OUTPUT(PS_ON_PIN); //GND
@@ -343,15 +343,15 @@ void MCode_81(GCode* com) {
 #endif
 }
 
-void MCode_82(GCode* com) {
+void __attribute__((weak)) MCode_82(GCode* com) {
     Printer::relativeExtruderCoordinateMode = false;
 }
 
-void MCode_83(GCode* com) {
+void __attribute__((weak)) MCode_83(GCode* com) {
     Printer::relativeExtruderCoordinateMode = true;
 }
 
-void MCode_84(GCode* com) {
+void __attribute__((weak)) MCode_84(GCode* com) {
     if (com->hasS()) {
         stepperInactiveTime = com->S * 1000;
     } else {
@@ -360,14 +360,14 @@ void MCode_84(GCode* com) {
     }
 }
 
-void MCode_85(GCode* com) {
+void __attribute__((weak)) MCode_85(GCode* com) {
     if (com->hasS())
         maxInactiveTime = (int32_t)com->S * 1000;
     else
         maxInactiveTime = 0;
 }
 
-void MCode_92(GCode* com) {
+void __attribute__((weak)) MCode_92(GCode* com) {
     Motion1::fillPosFromGCode(*com, Motion1::resolution, Motion1::resolution);
     Printer::updateDerivedParameter();
     if (com->hasE()) {
@@ -375,7 +375,7 @@ void MCode_92(GCode* com) {
     }
 }
 
-void MCode_99(GCode* com) {
+void __attribute__((weak)) MCode_99(GCode* com) {
     millis_t wait = 10000;
     if (com->hasS()) {
         wait = 1000 * com->S;
@@ -408,7 +408,7 @@ void MCode_99(GCode* com) {
     Printer::unsetAllSteppersDisabled();
 }
 
-void MCode_104(GCode* com) {
+void __attribute__((weak)) MCode_104(GCode* com) {
 #if NUM_TOOLS > 0
     previousMillisCmd = HAL::timeInMilliseconds();
     if (HeatManager::reportTempsensorError() || Printer::debugDryrun()) {
@@ -447,12 +447,12 @@ void MCode_104(GCode* com) {
 #endif // NUM_TOOLS > 0
 }
 
-void MCode_105(GCode* com) {
+void __attribute__((weak)) MCode_105(GCode* com) {
     Com::writeToAll = false;
     Commands::printTemperatures(com->hasX());
 }
 
-void MCode_106(GCode* com) {
+void __attribute__((weak)) MCode_106(GCode* com) {
     if (com->hasI()) {
         if (com->I != 0) {
             Printer::flag2 |= PRINTER_FLAG2_IGNORE_M106_COMMAND;
@@ -476,7 +476,7 @@ void MCode_106(GCode* com) {
     }
 }
 
-void MCode_107(GCode* com) {
+void __attribute__((weak)) MCode_107(GCode* com) {
     if (!(Printer::flag2 & PRINTER_FLAG2_IGNORE_M106_COMMAND)) {
         int p = 0;
         if (com->hasP()) {
@@ -493,11 +493,11 @@ void MCode_107(GCode* com) {
     }
 }
 
-void MCode_108(GCode* com) {
+void __attribute__((weak)) MCode_108(GCode* com) {
     Printer::breakLongCommand = false;
 }
 
-void MCode_109(GCode* com) {
+void __attribute__((weak)) MCode_109(GCode* com) {
 #if NUM_TOOLS > 0
     if (HeatManager::reportTempsensorError())
         return;
@@ -547,7 +547,7 @@ void MCode_109(GCode* com) {
 #endif
 }
 
-void MCode_111(GCode* com) {
+void __attribute__((weak)) MCode_111(GCode* com) {
     if (com->hasS()) {
         Printer::setDebugLevel(static_cast<uint8_t>(com->S));
     }
@@ -570,7 +570,7 @@ void MCode_111(GCode* com) {
     Com::printFLN(PSTR("debug:Endstops:"), Printer::debugEndStop(), BoolFormat::ONOFF);
 }
 
-void MCode_114(GCode* com) {
+void __attribute__((weak)) MCode_114(GCode* com) {
     Com::writeToAll = false;
     Motion1::printCurrentPosition();
     if (com->hasS() && com->S) {
@@ -584,7 +584,7 @@ void MCode_114(GCode* com) {
     }
 }
 
-void MCode_115(GCode* com) {
+void __attribute__((weak)) MCode_115(GCode* com) {
     Com::writeToAll = false;
     Com::printFLN(Com::tFirmware);
 #if FEATURE_CONTROLLER != NO_CONTROLLER
@@ -631,7 +631,8 @@ void MCode_115(GCode* com) {
 #endif
     Commands::reportPrinterUsage();
 }
-void MCode_116(GCode* com) {
+
+void __attribute__((weak)) MCode_116(GCode* com) {
     for (fast8_t h = 0; h <= NUM_HEATERS; h++) {
         EVENT_WAITING_HEATER(h);
         heaters[h]->waitForTargetTemperature();
@@ -639,7 +640,7 @@ void MCode_116(GCode* com) {
     }
 }
 
-void MCode_117(GCode* com) {
+void __attribute__((weak)) MCode_117(GCode* com) {
     if (com->hasString()) {
         GUI::setStatus(com->text, GUIStatusLevel::REGULAR);
 #if JSON_OUTPUT && defined(WRITE_MESSAGES_To_JSON)
@@ -649,7 +650,7 @@ void MCode_117(GCode* com) {
     }
 }
 
-void MCode_118(GCode* com) {
+void __attribute__((weak)) MCode_118(GCode* com) {
     if (com->hasString()) {
         Com::printF(Com::tEcho);
         Com::printFLN(com->text);
@@ -663,7 +664,8 @@ void reportEndstop(EndstopDriver& d, PGM_P text) {
         d.report();
     }
 }
-void MCode_119(GCode* com) {
+
+void __attribute__((weak)) MCode_119(GCode* com) {
     Com::writeToAll = false;
     Motion1::waitForEndOfMoves();
     updateEndstops();
@@ -693,11 +695,11 @@ void MCode_119(GCode* com) {
     Com::println();
 }
 
-void MCode_120(GCode* com) {
+void __attribute__((weak)) MCode_120(GCode* com) {
     MCode_300(com); // Beep test
 }
 
-void MCode_140(GCode* com) {
+void __attribute__((weak)) MCode_140(GCode* com) {
 #if NUM_HEATED_BEDS > 0
     {
         previousMillisCmd = HAL::timeInMilliseconds();
@@ -730,7 +732,7 @@ void MCode_140(GCode* com) {
 #endif
 }
 
-void MCode_141(GCode* com) {
+void __attribute__((weak)) MCode_141(GCode* com) {
 #if NUM_HEATED_CHAMBERS > 0
     {
         previousMillisCmd = HAL::timeInMilliseconds();
@@ -763,12 +765,12 @@ void MCode_141(GCode* com) {
 #endif
 }
 
-void MCode_155(GCode* com) {
+void __attribute__((weak)) MCode_155(GCode* com) {
     Printer::setAutoreportTemp((com->hasS() && com->S != 0) || !com->hasS());
     Printer::lastTempReport = HAL::timeInMilliseconds();
 }
 
-void MCode_163(GCode* com) {
+void __attribute__((weak)) MCode_163(GCode* com) {
 #if 0 // mixing extruder
     if (com->hasS() && com->hasP() && com->S < NUM_EXTRUDER && com->S >= 0)
         Extruder::setMixingWeight(com->S, com->P);
@@ -776,7 +778,7 @@ void MCode_163(GCode* com) {
 #endif
 }
 
-void MCode_164(GCode* com) {
+void __attribute__((weak)) MCode_164(GCode* com) {
 #if 0 // mixing extruder
     if (!com->hasS() || com->S < 0 || com->S >= VIRTUAL_EXTRUDER)
         break; // ignore illegal values
@@ -790,7 +792,7 @@ void MCode_164(GCode* com) {
 #endif
 }
 
-void MCode_170(GCode* com) {
+void __attribute__((weak)) MCode_170(GCode* com) {
     /* M170 - Set or retrieve preheat temperatures
         Parameter:
         B<bedPreheat> : Sets bed preheat temperature
@@ -844,7 +846,7 @@ void MCode_170(GCode* com) {
         }*/
 }
 
-void MCode_190(GCode* com) {
+void __attribute__((weak)) MCode_190(GCode* com) {
 #if NUM_HEATED_BEDS > 0
     {
         previousMillisCmd = HAL::timeInMilliseconds();
@@ -886,7 +888,7 @@ void MCode_190(GCode* com) {
 #endif
 }
 
-void MCode_191(GCode* com) {
+void __attribute__((weak)) MCode_191(GCode* com) {
 #if NUM_HEATED_CHAMBERS > 0
     {
         previousMillisCmd = HAL::timeInMilliseconds();
@@ -928,7 +930,7 @@ void MCode_191(GCode* com) {
 #endif
 }
 
-void MCode_200(GCode* com) {
+void __attribute__((weak)) MCode_200(GCode* com) {
     uint8_t extruderId = Tool::getActiveToolId();
     if (com->hasT() && com->T < NUM_TOOLS) {
         extruderId = com->T;
@@ -953,17 +955,17 @@ void MCode_200(GCode* com) {
     }
 }
 
-void MCode_201(GCode* com) {
+void __attribute__((weak)) MCode_201(GCode* com) {
     Motion1::fillPosFromGCode(*com, Motion1::maxAcceleration, Motion1::maxAcceleration);
     Printer::updateDerivedParameter();
 }
 
-void MCode_202(GCode* com) {
+void __attribute__((weak)) MCode_202(GCode* com) {
     Motion1::fillPosFromGCode(*com, Motion1::maxAcceleration, Motion1::maxAcceleration);
     Printer::updateDerivedParameter();
 }
 
-void MCode_203(GCode* com) {
+void __attribute__((weak)) MCode_203(GCode* com) {
     if (com->hasX()) {
         Motion1::maxFeedrate[X_AXIS] = com->X / 60.0f;
     }
@@ -993,7 +995,7 @@ void MCode_203(GCode* com) {
 #endif
 }
 
-void MCode_204(GCode* com) {
+void __attribute__((weak)) MCode_204(GCode* com) {
     // Convert to new system
     HeatManager* pid = Tool::getActiveTool()->getHeater();
     if (com->hasS()) {
@@ -1012,36 +1014,36 @@ void MCode_204(GCode* com) {
                 com->hasZ() ? com->Z : pid->getD());
 }
 
-void MCode_205(GCode* com) {
+void __attribute__((weak)) MCode_205(GCode* com) {
     Com::writeToAll = false;
     EEPROM::writeSettings();
 }
 
-void MCode_206(GCode* com) {
+void __attribute__((weak)) MCode_206(GCode* com) {
     Com::writeToAll = false;
     EEPROM::update(com);
 }
 
-void MCode_207(GCode* com) {
+void __attribute__((weak)) MCode_207(GCode* com) {
     Motion1::fillPosFromGCode(*com, Motion1::maxYank, Motion1::maxYank);
     Com::printF(Com::tJerkColon, Motion1::maxYank[X_AXIS]);
     Com::printFLN(Com::tZJerkColon, Motion1::maxYank[Z_AXIS]);
 }
 
-void MCode_209(GCode* com) {
+void __attribute__((weak)) MCode_209(GCode* com) {
     if (com->hasS())
         Printer::setAutoretract(com->S != 0);
 }
 
-void MCode_220(GCode* com) {
+void __attribute__((weak)) MCode_220(GCode* com) {
     Commands::changeFeedrateMultiply(com->getS(Printer::feedrateMultiply));
 }
 
-void MCode_221(GCode* com) {
+void __attribute__((weak)) MCode_221(GCode* com) {
     Commands::changeFlowrateMultiply(com->getS(Printer::extrudeMultiply));
 }
 
-void MCode_226(GCode* com) {
+void __attribute__((weak)) MCode_226(GCode* com) {
     if (!com->hasS() || !com->hasP())
         return;
     {
@@ -1059,11 +1061,11 @@ void MCode_226(GCode* com) {
     }
 }
 
-void MCode_232(GCode* com) {
+void __attribute__((weak)) MCode_232(GCode* com) {
     // Report max advance has been removed
 }
 
-void MCode_251(GCode* com) {
+void __attribute__((weak)) MCode_251(GCode* com) {
 #if Z_HOME_DIR > 0 && MAX_HARDWARE_ENDSTOP_Z
     Printer::zLength -= Printer::currentPosition[Z_AXIS];
     Printer::currentPositionSteps[Z_AXIS] = 0;
@@ -1080,7 +1082,7 @@ void MCode_251(GCode* com) {
 #endif
 }
 
-void MCode_280(GCode* com) {
+void __attribute__((weak)) MCode_280(GCode* com) {
     bool mirror = false;
     fast8_t count = 0;
     if (com->hasS() && com->S > 0 && com->S < NUM_TOOLS) {
@@ -1098,7 +1100,7 @@ void MCode_280(GCode* com) {
     Com::printFLN(PSTR(" Mirror:"), (int)Motion1::dittoMirror);
 }
 
-void MCode_281(GCode* com) {
+void __attribute__((weak)) MCode_281(GCode* com) {
 #if FEATURE_WATCHDOG
     if (com->hasX()) {
         HAL::stopWatchdog();
@@ -1119,7 +1121,7 @@ void MCode_281(GCode* com) {
 #endif
 }
 
-void MCode_300(GCode* com) {
+void __attribute__((weak)) MCode_300(GCode* com) {
 #if NUM_BEEPERS > 0
     if (!Printer::tonesEnabled) {
         return;
@@ -1133,11 +1135,11 @@ void MCode_300(GCode* com) {
 #endif
 }
 
-void MCode_302(GCode* com) {
+void __attribute__((weak)) MCode_302(GCode* com) {
     Printer::setColdExtrusionAllowed(!com->hasS() || (com->hasS() && com->S != 0));
 }
 
-void MCode_303(GCode* com) {
+void __attribute__((weak)) MCode_303(GCode* com) {
     int t = 0;
     if (com->hasP()) {
         t = com->P;
@@ -1153,14 +1155,14 @@ void MCode_303(GCode* com) {
     }
 }
 
-void MCode_320(GCode* com) {
+void __attribute__((weak)) MCode_320(GCode* com) {
     Motion1::setAutolevelActive(true);
     if (com->hasS() && com->S) {
         EEPROM::storeDataIntoEEPROM();
     }
 }
 
-void MCode_321(GCode* com) {
+void __attribute__((weak)) MCode_321(GCode* com) {
 #if LEVELING_METHOD > 0
     Motion1::setAutolevelActive(false);
     if (com->hasS() && com->S) {
@@ -1172,7 +1174,7 @@ void MCode_321(GCode* com) {
 #endif
 }
 
-void MCode_322(GCode* com) {
+void __attribute__((weak)) MCode_322(GCode* com) {
 #if LEVELING_METHOD > 0
     Motion1::resetTransformationMatrix(false);
     if (com->hasS() && com->S) {
@@ -1181,11 +1183,11 @@ void MCode_322(GCode* com) {
 #endif
 }
 
-void MCode_323(GCode* com) {
+void __attribute__((weak)) MCode_323(GCode* com) {
     Leveling::execute_M323(com);
 }
 
-void MCode_340(GCode* com) {
+void __attribute__((weak)) MCode_340(GCode* com) {
 #if NUM_SERVOS > 0
     uint8_t p = com->hasP() ? static_cast<uint8_t>(com->P) : 0;
     if (p < NUM_SERVOS) {
@@ -1195,7 +1197,7 @@ void MCode_340(GCode* com) {
 #endif
 }
 
-void MCode_350(GCode* com) {
+void __attribute__((weak)) MCode_350(GCode* com) {
     if (com->hasP() && com->hasS() && com->P >= 0 && com->P < NUM_MOTORS) {
         if (Motion1::drivers[com->P]->implementsSetMicrosteps()) {
             Motion1::drivers[com->P]->setMicrosteps((int)com->S);
@@ -1205,7 +1207,7 @@ void MCode_350(GCode* com) {
     }
 }
 
-void MCode_355(GCode* com) {
+void __attribute__((weak)) MCode_355(GCode* com) {
     if (com->hasS()) {
         Printer::caseLightMode = static_cast<fast8_t>(com->S);
     }
@@ -1215,12 +1217,12 @@ void MCode_355(GCode* com) {
     Printer::reportCaseLightStatus();
 }
 
-void MCode_360(GCode* com) {
+void __attribute__((weak)) MCode_360(GCode* com) {
     Com::writeToAll = false;
     Printer::showConfiguration();
 }
 
-void MCode_374(GCode* com) {
+void __attribute__((weak)) MCode_374(GCode* com) {
 #if LEVELING_METHOD == LEVELING_METHOD_GRID
     if (com->hasString()) {
         Leveling::exportBumpMatrix(com->text);
@@ -1230,7 +1232,7 @@ void MCode_374(GCode* com) {
 #endif
 }
 
-void MCode_375(GCode* com) {
+void __attribute__((weak)) MCode_375(GCode* com) {
 #if LEVELING_METHOD == LEVELING_METHOD_GRID
     if (com->hasString()) {
         Leveling::importBumpMatrix(com->text);
@@ -1239,27 +1241,27 @@ void MCode_375(GCode* com) {
     Com::printErrorFLN(Com::tNoGridLeveling);
 #endif
 }
-void MCode_400(GCode* com) {
+void __attribute__((weak)) MCode_400(GCode* com) {
     Motion1::waitForEndOfMoves();
 }
 
-void MCode_401(GCode* com) {
+void __attribute__((weak)) MCode_401(GCode* com) {
     Motion1::pushToMemory();
 }
 
-void MCode_402(GCode* com) {
+void __attribute__((weak)) MCode_402(GCode* com) {
     Motion1::popFromMemory();
     Motion1::moveByOfficial(Motion1::tmpPosition, Printer::feedrate, false);
     // Printer::GoToMemoryPosition(com->hasX(), com->hasY(), com->hasZ(), com->hasE(), (com->hasF() ? com->F : Printer::feedrate));
 }
 
-void MCode_408(GCode* com) {
+void __attribute__((weak)) MCode_408(GCode* com) {
 #if JSON_OUTPUT
     Printer::showJSONStatus(com->hasS() ? static_cast<int>(com->S) : 0);
 #endif
 }
 
-void MCode_415(GCode* com) {
+void __attribute__((weak)) MCode_415(GCode* com) {
 #if HOST_RESCUE
     if (com->hasS()) { // Enable rescue system
         Printer::enableRescue(com->S != 0);
@@ -1274,17 +1276,17 @@ void MCode_415(GCode* com) {
 #endif
 }
 
-void MCode_416(GCode* com) {
+void __attribute__((weak)) MCode_416(GCode* com) {
 #if !EMERGENCY_PARSER
     Printer::handlePowerLoss();
 #endif
 }
 
-void MCode_460(GCode* com) {
+void __attribute__((weak)) MCode_460(GCode* com) {
     // set thermo fan min/max temp - unimplemented
 }
 
-void MCode_500(GCode* com) {
+void __attribute__((weak)) MCode_500(GCode* com) {
 #if EEPROM_MODE != 0
     EEPROM::storeDataIntoEEPROM(false);
     Com::printInfoFLN(Com::tConfigStoredEEPROM);
@@ -1293,7 +1295,7 @@ void MCode_500(GCode* com) {
 #endif
 }
 
-void MCode_501(GCode* com) {
+void __attribute__((weak)) MCode_501(GCode* com) {
 #if EEPROM_MODE != 0
     EEPROM::readDataFromEEPROM();
     // Extruder::selectExtruderById(Extruder::current->id);
@@ -1303,16 +1305,16 @@ void MCode_501(GCode* com) {
 #endif
 }
 
-void MCode_502(GCode* com) {
+void __attribute__((weak)) MCode_502(GCode* com) {
     EEPROM::restoreEEPROMSettingsFromConfiguration();
 }
 
-void MCode_513(GCode* com) {
+void __attribute__((weak)) MCode_513(GCode* com) {
     // TODO: jam
     // Extruder::markAllUnjammed();
 }
 
-void MCode_530(GCode* com) {
+void __attribute__((weak)) MCode_530(GCode* com) {
     if (com->hasL()) {
         Printer::maxLayer = static_cast<int>(com->L);
     }
@@ -1325,12 +1327,12 @@ void MCode_530(GCode* com) {
     GUI::resetMenu();
 }
 
-void MCode_531(GCode* com) {
+void __attribute__((weak)) MCode_531(GCode* com) {
     strncpy(Printer::printName, com->text, 20);
     Printer::printName[20] = 0;
 }
 
-void MCode_532(GCode* com) {
+void __attribute__((weak)) MCode_532(GCode* com) {
     if (com->hasX())
         Printer::progress = com->X;
     if (Printer::progress > 100.0)
@@ -1341,7 +1343,7 @@ void MCode_532(GCode* com) {
         Printer::currentLayer = static_cast<int>(com->L);
 }
 
-void MCode_539(GCode* com) {
+void __attribute__((weak)) MCode_539(GCode* com) {
     if (com->hasS()) {
         Printer::setSupportStartStop(com->S != 0);
     }
@@ -1355,19 +1357,19 @@ void MCode_539(GCode* com) {
     }
 }
 
-void MCode_540(GCode* com) {
+void __attribute__((weak)) MCode_540(GCode* com) {
     Motion1::reportBuffers();
     Motion2::reportBuffers();
     Motion3::reportBuffers();
 }
 
-void MCode_600(GCode* com) {
+void __attribute__((weak)) MCode_600(GCode* com) {
     // #if FEATURE_CONTROLLER != NO_CONTROLLER && FEATURE_RETRACTION
     // uid.executeAction(UI_ACTION_WIZARD_FILAMENTCHANGE, true);
     // #endif
 }
 
-void MCode_601(GCode* com) {
+void __attribute__((weak)) MCode_601(GCode* com) {
     bool extruder = com->hasE() ? com->E != 0 : true;
     bool bed = com->hasB() && com->B != 0;
     bool chamber = com->hasC() && com->C != 0;
@@ -1400,7 +1402,7 @@ void MCode_601(GCode* com) {
     }
 }
 
-void MCode_602(GCode* com) {
+void __attribute__((weak)) MCode_602(GCode* com) {
     Motion1::waitForEndOfMoves();
     if (com->hasS())
         Printer::setDebugJam(com->S > 0);
@@ -1410,7 +1412,7 @@ void MCode_602(GCode* com) {
     Com::printFLN(PSTR(" Enabled:"), (int)!Printer::isJamcontrolDisabled());
 }
 
-void MCode_604(GCode* com) {
+void __attribute__((weak)) MCode_604(GCode* com) {
     // TODO: Jam handling
     /*    
 #if EXTRUDER_JAM_CONTROL && NUM_EXTRUDER > 0
@@ -1430,18 +1432,18 @@ void MCode_604(GCode* com) {
 */
 }
 
-void MCode_606(GCode* com) {
+void __attribute__((weak)) MCode_606(GCode* com) {
     PrinterType::park(com);
 }
 
-void MCode_669(GCode* com) {
+void __attribute__((weak)) MCode_669(GCode* com) {
     millis_t t1 = HAL::timeInMilliseconds();
     GUI::refresh();
     millis_t diff = HAL::timeInMilliseconds() - t1;
     Com::printFLN(PSTR("LCD Refresh time:"), static_cast<int32_t>(diff));
 }
 
-void MCode_890(GCode* com) {
+void __attribute__((weak)) MCode_890(GCode* com) {
     /*
 #if LEVELING_METHOD > 0 && FEATURE_Z_PROBE
     if (com->hasX() && com->hasY()) {
@@ -1454,7 +1456,7 @@ void MCode_890(GCode* com) {
 */
 }
 
-void MCode_900(GCode* com) {
+void __attribute__((weak)) MCode_900(GCode* com) {
     Tool* t = Tool::getActiveTool();
     if (com->hasT() && com->T < NUM_TOOLS) {
         t = Tool::getTool(com->T);
@@ -1480,7 +1482,7 @@ void MCode_900(GCode* com) {
     Com::println();
 }
 
-void MCode_907(GCode* com) {
+void __attribute__((weak)) MCode_907(GCode* com) {
 #if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
     // If "S" is specified, use that as initial default value, then update each axis w/ specific values as found later.
     if (com->hasS()) {
@@ -1500,7 +1502,7 @@ void MCode_907(GCode* com) {
 #endif
 }
 
-void MCode_908(GCode* com) {
+void __attribute__((weak)) MCode_908(GCode* com) {
     if (com->hasP() && com->hasS() && com->P >= 0 && com->P < NUM_MOTORS) {
         if (Motion1::drivers[com->P]->implementsSetMaxCurrent()) {
             Motion1::drivers[com->P]->setMaxCurrent((int)com->S);
@@ -1510,24 +1512,24 @@ void MCode_908(GCode* com) {
     }
 }
 
-void MCode_909(GCode* com) {
+void __attribute__((weak)) MCode_909(GCode* com) {
 #if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
     dacPrintValues();
 #endif
 }
 
-void MCode_910(GCode* com) {
+void __attribute__((weak)) MCode_910(GCode* com) {
 #if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
     dacCommitEeprom();
 #endif
 }
 
-void MCode_998(GCode* com) {
+void __attribute__((weak)) MCode_998(GCode* com) {
     // TODO: debug messages
     // UI_MESSAGE(com->S);
 }
 
-void MCode_999(GCode* com) {
+void __attribute__((weak)) MCode_999(GCode* com) {
     Printer::failedMode = false;
     if (com->hasS()) {
         GCode::fatalError(Com::tTestM999);
@@ -1538,7 +1540,7 @@ void MCode_999(GCode* com) {
     }
 }
 
-void MCode_Stepper(GCode* com) {
+void __attribute__((weak)) MCode_Stepper(GCode* com) {
     if (com->hasP() && com->P >= 0 && com->P < NUM_MOTORS) {
         Motion1::drivers[com->P]->handleMCode(*com);
     }
