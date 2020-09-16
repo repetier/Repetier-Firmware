@@ -127,7 +127,7 @@ public:
     virtual float getP() { return 0; }
     virtual float getI() { return 0; }
     virtual float getD() { return 0; }
-    virtual void setPID(float p, float i, float d) {}
+    virtual void setPID(float p, float i, float d) { }
     inline millis_t getSampleTime() {
         return sampleTime;
     }
@@ -137,7 +137,7 @@ public:
     virtual void eepromHandleLocal(int pos) = 0;
     virtual int eepromSizeLocal() { return 0; };
     void update();
-    virtual void updateDerived() {}
+    virtual void updateDerived() { }
     /** Waits until the set target temperature is reached */
     void waitForTargetTemperature();
     inline float getMaxTemperature() { return maxTemperature; }
@@ -146,7 +146,7 @@ public:
         Com::printWarningFLN(PSTR("Autocalibration for this tool not supported!"));
     }
     virtual void showControlMenu(GUIAction action); // Default set temperature
-    virtual void showConfigMenu(GUIAction action) {}
+    virtual void showConfigMenu(GUIAction action) { }
     virtual bool hasConfigMenu();
     bool isExtruderHeater() const { return heaterType == 'E'; }
     bool isBedHeater() const { return heaterType == 'B'; }
@@ -164,6 +164,10 @@ public:
 class HeatManagerBangBang : public HeatManager {
 
 public:
+    HeatManagerBangBang(char htType, fast8_t _index, IOTemperature* _input, PWMHandler* output, float maxTemp, fast8_t maxPwm, millis_t _sampleTime, float decVariance, millis_t decPeriod, bool _hotPluggable)
+        : HeatManager(htType, _index, _input,
+                      output, maxTemp, maxPwm, _sampleTime, decVariance, decPeriod, _hotPluggable) {
+    }
     void updateLocal(float tempError) {
         output->set(currentTemperature > targetTemperature ? 0 : maxPWM);
     }
