@@ -57,7 +57,9 @@
 #define U8X8_HAVE_HW_SPI
 
 /* Assumption: All Arduino Boards have "Wire.h" */
+#ifndef HAL_I2C_MODULE_DISABLED
 #define U8X8_HAVE_HW_I2C
+#endif
 
 /* Undefine U8X8_HAVE_HW_SPI for those Boards without SPI.h */
 

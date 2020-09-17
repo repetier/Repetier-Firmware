@@ -551,43 +551,70 @@ inline void u8g2_delay_x100ns(int x) {
         asm volatile("nop" ::); // 11.9ns
         asm volatile("nop" ::); // 11.9ns
         asm volatile("nop" ::); // 11.9ns
-// STM32F1's run at 72mhz, so each is 13.9ns
+                                // STM32F1's run at 72mhz, so each is 13.9ns
 #if !defined(STM32F1)
         asm volatile("nop" ::); // 11.9ns
         asm volatile("nop" ::); // 11.9ns  83.3ns total
 #endif
     }
 }
-
-#if !defined(DISPLAY_SW_SPI_100NS_NOPS)
-#define DISPLAY_SW_SPI_100NS_NOPS 2
-#endif
 // Special hack for fast software SPI on due with repetier
-// - added the SKR E3 Mini with software SPI displays
+// - added the SKR E3 Mini with software SPI displays, adaptive delay
+#pragma GCC push_options
+#pragma GCC optimize("O3")
 extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uint8_t arg_int, void* arg_ptr) {
-    uint8_t i, b;
+    const uint8_t startLevel = u8x8_GetSPIClockDefaultLevel(u8x8);
+    uint8_t b = 0;
     uint8_t* data;
-    uint8_t startLevel = u8x8_GetSPIClockDefaultLevel(u8x8); // polarity
+#if defined(STM32F1)
+    // notes: EXCCNT/overhead counter overflows at 256 despite being uint32
+    constexpr ufast8_t filterShift = 8; // lowpass filter shift/average applied to overhead cycles
+                                        // gathered between successive byte sends.
+
+    constexpr uint32_t clocksPerByte = 1600; // approx clock cycles for a byte + wait
+
+    constexpr ufast8_t itOvrheadMult = 16; // multiplier "strength" applied to our overhead cycles
+                                           // before subtracting them from clocks per byte
+
+    static uint32_t genItOvrhead;  // unshifted filtered/averaged overhead cycle count.
+    static ufast8_t exitItOvrhead; // reference overhead count right at the end of a byte send
+#endif
 
     switch (msg) {
     case U8X8_MSG_BYTE_SEND: {
 #if defined(STM32F1)
-// We slow down at startup to allow the display's clock to stabilize
-// before running at full speed. 
+        if (exitItOvrhead) {
+            if (DWT->EXCCNT) {
+                constexpr ufast8_t beta = 7;
+                uint32_t input = (exitItOvrhead > DWT->EXCCNT ? (exitItOvrhead - DWT->EXCCNT)
+                                                              : (DWT->EXCCNT - exitItOvrhead))
+                    << filterShift;
+                genItOvrhead = ((genItOvrhead << beta) - genItOvrhead) + input;
+                genItOvrhead >>= beta;
+            }
+        }
+        // Slow down during boot (reset command?) for the display to stabilize and avoid artifacts
         static millis_t firstByteTime = HAL::timeInMilliseconds();
-        if ((HAL::timeInMilliseconds() - firstByteTime) < 300) {
-            HAL::delayMicroseconds(145);
+        if (firstByteTime) {
+            if ((HAL::timeInMilliseconds() - firstByteTime) < 300) { // 300ms seems to be minimum
+                HAL::delayMicroseconds(145);
+            } else {
+                firstByteTime = 0; // Stop calculating once done
+            }
         }
 #endif
-        uint8_t takeover_edge = u8x8_GetSPIClockPhase(u8x8);
-        // return u8x8_byte_4wire_sw_spi(u8x8, msg, arg_int, arg_ptr);
+        const uint8_t takeover_edge = u8x8_GetSPIClockPhase(u8x8);
         data = (uint8_t*)arg_ptr;
         while (arg_int > 0) {
             b = *data;
             data++;
             arg_int--;
+#if defined(STM32F1)
+            uint32_t startClock = DWT->CYCCNT - ((genItOvrhead >> filterShift) * itOvrheadMult);
+            // push reference clock count back a little using the overhead cycles average * multiplier.
+#endif
             if (takeover_edge) {
-                for (i = 0; i < 8; i++) {
+                for (size_t i = 0; i < 8; i++) {
                     WRITE(UI_SPI_SCK, !startLevel);
 #if !defined(STM32F1)
                     u8g2_spi_wait();
@@ -598,34 +625,48 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
                         WRITE(UI_SPI_MOSI, 0);
                     }
                     b <<= 1;
-#if !defined(STM32F1)
+#if !defined(STM32F1) // Orig due timings
                     u8g2_spi_wait();
                     WRITE(UI_SPI_SCK, startLevel); // Takeover
                     u8g2_spi_wait();
-#else 
+#else                 // STM32F1 timings
+                    u8g2_delay_x100ns(2);
                     WRITE(UI_SPI_SCK, startLevel); // Takeover
-#if DISPLAY_SW_SPI_100NS_NOPS > 0
-                    u8g2_delay_x100ns(DISPLAY_SW_SPI_100NS_NOPS);
-#endif
+                    u8g2_delay_x100ns(3);
 #endif
                 }
+#if defined(STM32F1)
+                do {
+                } while ((DWT->CYCCNT - startClock) < clocksPerByte);
+#endif
             } else { // takeover at first edge
-                for (i = 0; i < 8; i++) {
+                for (size_t i = 0; i < 8; i++) {
                     if (b & 128) {
                         WRITE(UI_SPI_MOSI, 1);
                     } else {
                         WRITE(UI_SPI_MOSI, 0);
                     }
                     b <<= 1;
+#if !defined(STM32F1) // Orig due
                     u8g2_spi_wait();
                     WRITE(UI_SPI_SCK, !startLevel); // Takeover
                     u8g2_spi_wait();
-                    // u8g2_spi_wait();
-                    WRITE(UI_SPI_SCK, startLevel);
-                    //u8g2_spi_wait();
+#else
+                    u8g2_delay_x100ns(2);
+                    WRITE(UI_SPI_SCK, !startLevel); // Takeover
+                    u8g2_delay_x100ns(3);
+                    WRITE(UI_SPI_SCK, startLevel); 
+#endif
                 }
+#if defined(STM32F1)
+                do {
+                } while ((DWT->CYCCNT - startClock) < clocksPerByte);
+#endif
             }
         }
+#if defined(STM32F1) // our overhead cycle ref spent in interrupts.
+        exitItOvrhead = DWT->EXCCNT;
+#endif
     } break;
 
     case U8X8_MSG_BYTE_INIT:
@@ -655,6 +696,9 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
 
         break;
     case U8X8_MSG_BYTE_END_TRANSFER:
+#if defined(STM32F1) // Ignore gaps between transfers, they're too unpredictable and EXECNT overflows.
+        exitItOvrhead = 0;
+#endif
         // return u8x8_byte_4wire_sw_spi(u8x8, msg, arg_int, arg_ptr);
         WRITE(UI_SPI_SCK, startLevel);
         u8x8->gpio_and_delay_cb(u8x8, U8X8_MSG_DELAY_NANO, u8x8->display_info->pre_chip_disable_wait_ns, NULL);
@@ -666,6 +710,7 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
     }
     return 1;
 }
+#pragma GCC pop_options
 #else
 
 // coarse 100ns timer
