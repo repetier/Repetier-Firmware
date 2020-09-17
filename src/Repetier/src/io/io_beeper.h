@@ -48,7 +48,7 @@ public:
         memcpy_P(&beep, &savedTheme[index], sizeof(TonePacket));
         return beep;
     }
-    const inline fast8_t getSize() { return themeSize; }
+    inline fast8_t getSize() { return themeSize; }
 
 private:
     const TonePacket* savedTheme;
@@ -85,8 +85,8 @@ public:
     }
     virtual ufast8_t getOutputType() { return 0; };
     inline uint16_t getCurFreq() { return playingFreq; }
-    inline volatile bool isPlaying() { return playing; }
-    inline volatile bool isHalted() { return halted; }
+    inline bool isPlaying() { return playing; }
+    inline bool isHalted() { return halted; }
     inline bool isMuted() { return muted; }
     inline bool isBlocking() { return blocking; }
     static void muteAll(bool set); // public helper to mute all beepers globally
@@ -102,7 +102,7 @@ public:
     fast8_t process();
     bool pushTone(const TonePacket packet);
     bool playTheme(ToneTheme& theme, bool block);
-    virtual volatile ufast8_t getFreqDiv() = 0;
+    virtual ufast8_t getFreqDiv() = 0;
     virtual void setFreqDiv(ufast8_t div) = 0;
     void setCondition(bool set, ToneCondition& cond);
     void runConditions();
@@ -110,8 +110,8 @@ public:
 protected:
     virtual void refreshBeepFreq() = 0;
     virtual void finishPlaying();
-    volatile bool playing;
-    volatile bool halted; // Special state between beeps/duration only beeps.
+    bool playing;
+    bool halted; // Special state between beeps/duration only beeps.
     bool muted;           // eeprom etc
     bool blocking;
     fast8_t toneHead;
@@ -138,7 +138,7 @@ public:
         IOPin::off();
     }
     inline ufast8_t getOutputType() final { return 1; }
-    inline volatile ufast8_t getFreqDiv() final { return freqDiv; }
+    inline ufast8_t getFreqDiv() final { return freqDiv; }
     inline void setFreqDiv(ufast8_t div) final { freqDiv = div * 2; }
     INLINE void toggle(bool state) {
         if (isPlaying() && !isHalted()) {
@@ -157,9 +157,9 @@ public:
 private:
     void refreshBeepFreq() final;
     void finishPlaying() final;
-    volatile ufast8_t freqCnt;
-    volatile ufast8_t freqDiv;
-    volatile bool lastPinState;
+    ufast8_t freqCnt;
+    ufast8_t freqDiv;
+    bool lastPinState;
 };
 
 class BeeperSourcePWM : public BeeperSourceBase {
@@ -170,7 +170,7 @@ public:
         pwmPin->set(0);
     };
     inline ufast8_t getOutputType() final { return 2; }
-    volatile inline ufast8_t getFreqDiv() final { return 0; }
+    inline ufast8_t getFreqDiv() final { return 0; }
     inline void setFreqDiv(ufast8_t div) final {}
 
 private:
