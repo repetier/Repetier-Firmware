@@ -127,9 +127,11 @@
     name.eepromReserve();
 #define STEPPER_TMC2208_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, fclk, minEndstop, maxEndstop) \
     serial.begin(115200); \
+    serial.setInterruptPriority(5); \
     name.eepromReserve();
 #define STEPPER_TMC2209_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, slaveAddr, stallSensitivity, fclk, minEndstop, maxEndstop) \
-    serial.begin(500000); \
+    serial.begin(115200); \
+    serial.setInterruptPriority(5); \
     name.eepromReserve();
 #define STEPPER_TMC2209_SW_UART(name, stepPin, dirPin, enablePin, rxPin, txPin, rsense, microsteps, currentMillis, stealth, hybridSpeed, slaveAddr, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.eepromReserve();
