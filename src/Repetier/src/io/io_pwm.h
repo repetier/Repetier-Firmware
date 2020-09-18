@@ -90,7 +90,7 @@
 #define IO_PWM_RAMP(name, pwmname, upDelay100ms, downDelay100ms, difThreshold) \
     if (name.realPwm != name.targPwm) { \
         if (!GCode::hasFatalError()) { \
-            name.realPwm = RMath::min(RMath::max((name.realPwm + (name.targPwm > name.realPwm ? name.steps : -name.steps)), 0), (255 << name.scale)); \
+            name.realPwm = RMath::min(RMath::max((name.realPwm + (name.targPwm > name.realPwm ? name.steps : -name.steps)), static_cast<uint16_t>(0u)), static_cast<uint16_t>(255u << name.scale)); \
             if (abs(name.realPwm - name.targPwm) <= name.steps) { \
                 name.realPwm = name.targPwm; \
             } \
