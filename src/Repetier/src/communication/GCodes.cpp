@@ -500,7 +500,7 @@ void __attribute__((weak)) GCode_31(GCode* com) {
 
 void __attribute__((weak)) GCode_32(GCode* com) {
     bool ok = Leveling::execute_G32(com);
-    if (ok && Motion1::homeDir[Z_AXIS] > 0 && ZProbe != nullptr) {
+    if (ok && Motion1::homeDir[Z_AXIS] > 0 && ZProbe != nullptr && !Printer::breakLongCommand) {
         bool oldDistortion = Leveling::isDistortionEnabled();
         Leveling::setDistortionEnabled(false);
 
