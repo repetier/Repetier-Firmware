@@ -259,7 +259,7 @@ bool Leveling::measure() {
     bool ok = true;
     for (int y = 0; y < GRID_SIZE; y++) {
         for (int x = 0; x < GRID_SIZE; x++) {
-            if (!ok) {
+            if (!ok || Printer::breakLongCommand) {
                 break;
             }
             int xx;
@@ -290,7 +290,7 @@ bool Leveling::measure() {
             }
         }
     }
-    if (builder.numPoints() < 3) {
+    if (ok && builder.numPoints() < 3 && !Printer::breakLongCommand) {
         ok = false;
         Com::printFLN(PSTR("You need at least 3 valid points for correction!"));
     }
@@ -299,7 +299,7 @@ bool Leveling::measure() {
     Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
 #endif
     ZProbeHandler::deactivate();
-    if (ok) {
+    if (ok && !Printer::breakLongCommand) {
 #if NUM_HEATED_BEDS
         gridTemp = heatedBeds[0]->getTargetTemperature();
 #endif
@@ -318,7 +318,7 @@ bool Leveling::measure() {
         setDistortionEnabled(true); // if we support it we should use it by default
         reportDistortionStatus();
 #endif
-    } else {
+    } else if (!ok) {
         resetEeprom();
     }
     Motion1::printCurrentPosition();
@@ -908,7 +908,7 @@ bool Leveling::measure() {
     PlaneBuilder builder;
     builder.reset();
     float h1(0), h2(0), h3(0), h4(0);
-    bool ok(true);
+    bool ok = true, prevAuto = Motion1::isAutolevelActive();
     const float apx = L_P1_X - L_P2_X;
     const float apy = L_P1_Y - L_P2_Y;
     const float abx = L_P3_X - L_P2_X;
@@ -922,31 +922,33 @@ bool Leveling::measure() {
     float y1Mirror = L_P1_Y + 2.0 * (xy - L_P1_Y);
     Motion1::setAutolevelActive(false, true);
     Motion1::homeAxes(7); // Home x, y and z
-    Motion1::setTmpPositionXYZ(L_P1_X, L_P1_Y, ZProbeHandler::optimumProbingHeight());
-    ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
-    ZProbeHandler::activate();
-    h1 = ZProbeHandler::runProbe();
-    ok &= h1 != ILLEGAL_Z_PROBE;
-    if (ok) {
+    if (!Printer::breakLongCommand) {
+        Motion1::setTmpPositionXYZ(L_P1_X, L_P1_Y, ZProbeHandler::optimumProbingHeight());
+        ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
+        ZProbeHandler::activate();
+        h1 = ZProbeHandler::runProbe();
+        ok &= h1 != ILLEGAL_Z_PROBE;
+    }
+    if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(L_P2_X, L_P2_Y, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
         h2 = ZProbeHandler::runProbe();
         ok &= h2 != ILLEGAL_Z_PROBE;
     }
-    if (ok) {
+    if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(L_P3_X, L_P3_Y, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
         h3 = ZProbeHandler::runProbe();
         ok &= h3 != ILLEGAL_Z_PROBE;
     }
-    if (ok) {
+    if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(x1Mirror, y1Mirror, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
         h4 = ZProbeHandler::runProbe();
         ok &= h4 != ILLEGAL_Z_PROBE;
     }
     ZProbeHandler::deactivate();
-    if (ok) {
+    if (ok && !Printer::breakLongCommand) {
         const float t2 = h2 + (h3 - h2) * t; // theoretical height for crossing point for symmetric axis
         h1 = t2 - (h4 - h1) * 0.5;           // remove bending part
         builder.addPoint(L_P1_X, L_P1_Y, h1);
@@ -954,6 +956,8 @@ bool Leveling::measure() {
         builder.addPoint(L_P3_X, L_P3_Y, h3);
         builder.createPlane(plane, false);
         LevelingCorrector::correct(&plane);
+    } else if (ok && Printer::breakLongCommand) {
+        Motion1::setAutolevelActive(prevAuto, true);
     }
     Motion1::printCurrentPosition();
     return ok;
@@ -975,34 +979,38 @@ bool Leveling::measure() {
     Plane plane;
     PlaneBuilder builder;
     builder.reset();
-    float h1, h2, h3;
-    bool ok = true;
-    Motion1::setAutolevelActive(false);
+    float h1 = 0.0f, h2 = 0.0f, h3 = 0.0f;
+    bool ok = true, prevAuto = Motion1::isAutolevelActive();
+    Motion1::setAutolevelActive(false, true);
     Motion1::homeAxes(7); // Home x, y and z
-    Motion1::setTmpPositionXYZ(L_P1_X, L_P1_Y, ZProbeHandler::optimumProbingHeight());
-    ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
-    ZProbeHandler::activate();
-    h1 = ZProbeHandler::runProbe();
-    ok &= h1 != ILLEGAL_Z_PROBE;
-    if (ok) {
+    if (!Printer::breakLongCommand) {
+        Motion1::setTmpPositionXYZ(L_P1_X, L_P1_Y, ZProbeHandler::optimumProbingHeight());
+        ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
+        ZProbeHandler::activate();
+        h1 = ZProbeHandler::runProbe();
+        ok &= h1 != ILLEGAL_Z_PROBE;
+    }
+    if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(L_P2_X, L_P2_Y, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
         h2 = ZProbeHandler::runProbe();
         ok &= h2 != ILLEGAL_Z_PROBE;
     }
-    if (ok) {
+    if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(L_P3_X, L_P3_Y, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
         h3 = ZProbeHandler::runProbe();
         ok &= h3 != ILLEGAL_Z_PROBE;
     }
     ZProbeHandler::deactivate();
-    if (ok) {
+    if (ok && !Printer::breakLongCommand) {
         builder.addPoint(L_P1_X, L_P1_Y, h1);
         builder.addPoint(L_P2_X, L_P2_Y, h2);
         builder.addPoint(L_P3_X, L_P3_Y, h3);
         builder.createPlane(plane, false);
         LevelingCorrector::correct(&plane);
+    } else if (ok && Printer::breakLongCommand) {
+        Motion1::setAutolevelActive(prevAuto, true);
     }
     Motion1::printCurrentPosition();
     return ok;

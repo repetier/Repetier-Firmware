@@ -32,6 +32,9 @@ void __attribute__((weak)) GCode_0_1(GCode* com) {
 #endif
     if (com->hasP()) {
         Printer::setNoDestinationCheck(com->P == 0);
+        if (com->hasNoXYZ()) {
+            Com::printFLN(PSTR("Destination checking "), com->P != 0, BoolFormat::ONOFF);
+        }
     }
     Tool::getActiveTool()->extractG1(com);
     Printer::setDestinationStepsFromGCode(com); // For X Y Z E F
@@ -500,7 +503,7 @@ void __attribute__((weak)) GCode_31(GCode* com) {
 
 void __attribute__((weak)) GCode_32(GCode* com) {
     bool ok = Leveling::execute_G32(com);
-    if (ok && Motion1::homeDir[Z_AXIS] > 0 && ZProbe != nullptr) {
+    if (ok && Motion1::homeDir[Z_AXIS] > 0 && ZProbe != nullptr && !Printer::breakLongCommand) {
         bool oldDistortion = Leveling::isDistortionEnabled();
         Leveling::setDistortionEnabled(false);
 

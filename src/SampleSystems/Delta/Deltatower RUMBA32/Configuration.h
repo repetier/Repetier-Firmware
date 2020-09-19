@@ -222,7 +222,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
 #define NUM_HEATED_CHAMBERS 0
 #define HEATED_CHAMBER_LIST \
-    {}
+    { }
 
 #define SERVO_LIST \
     { &ZProbeServo }
@@ -457,7 +457,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define UI_AUTORETURN_TO_MENU_AFTER 30000
 
 #define CASE_LIGHT_DEFAULT_ON 0
-#define UI_START_SCREEN_DELAY 2000
+#define UI_START_SCREEN_DELAY 4000
 
 //#define CUSTOM_EVENTS
 //#define CUSTOM_MENU

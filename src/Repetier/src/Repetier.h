@@ -383,6 +383,10 @@ extern ServoInterface* servos[];
 #define Z_PROBE_PAUSE_HEATERS 0
 #endif
 
+#ifndef Z_PROBE_BLTOUCH_DEPLOY_DELAY 
+#define Z_PROBE_BLTOUCH_DEPLOY_DELAY 1000
+#endif
+
 #ifndef MAX_ROOM_TEMPERATURE
 #define MAX_ROOM_TEMPERATURE 25
 #endif

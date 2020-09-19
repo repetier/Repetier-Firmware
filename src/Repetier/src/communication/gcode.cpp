@@ -1087,6 +1087,7 @@ GCodeSource* GCodeSource::sources[MAX_DATA_SOURCES] = { &serial0Source };
 GCodeSource* GCodeSource::writeableSources[MAX_DATA_SOURCES] = { &serial0Source };
 #endif
 GCodeSource* GCodeSource::activeSource = &serial0Source;
+GCodeSource* GCodeSource::usbHostSource = nullptr;
 
 void GCodeSource::registerSource(GCodeSource* newSource) {
     for (fast8_t i = 0; i < numSources; i++) { // skip register if already contained
@@ -1177,6 +1178,17 @@ GCodeSource::GCodeSource() {
     waitingForResend = -1;
 }
 
+bool GCodeSource::hasBaudSources() {
+    if (!usbHostSource) {
+        return true;
+    }
+    for (fast8_t i = 0; i < numWriteSources; i++) {
+        if (writeableSources[i] && writeableSources[i] != usbHostSource) {
+            return true;
+        }
+    }
+    return false;
+}
 // ----- serial connection source -----
 
 SerialGCodeSource::SerialGCodeSource(Stream* p) {
@@ -1185,6 +1197,12 @@ SerialGCodeSource::SerialGCodeSource(Stream* p) {
     bufReadPos = bufLength = bufWritePos = 0;
     commandsReceivingWritePosition = 0;
     commentDetected = false;
+#endif
+
+#if (CPU_ARCH != ARCH_AVR)
+    if (stream && (stream == &SerialUSB)) {
+        usbHostSource = this;
+    }
 #endif
 }
 bool SerialGCodeSource::isOpen() {

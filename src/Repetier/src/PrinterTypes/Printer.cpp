@@ -523,6 +523,9 @@ void Printer::setup() {
     Printer::setPowerOn(true);
 #endif
 #endif
+
+    Printer::setNativeUSB(!GCodeSource::hasBaudSources());
+
 #if SDSUPPORT
     //power to SD reader
 #if SDPOWER > -1
