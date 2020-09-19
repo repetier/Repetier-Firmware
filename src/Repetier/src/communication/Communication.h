@@ -49,6 +49,7 @@ class GCodeSource {
 
 public:
     static GCodeSource* activeSource;
+    static GCodeSource* usbHostSource; 
     static void registerSource(GCodeSource* newSource);
     static void removeSource(GCodeSource* delSource);
     static void rotateSource();           ///< Move active to next source
@@ -56,6 +57,7 @@ public:
     static void prefetchAll();
     static void printAllFLN(FSTRINGPARAM(text));
     static void printAllFLN(FSTRINGPARAM(text), int32_t v);
+    static bool hasBaudSources();
     uint32_t lastLineNumber;
     uint8_t wasLastCommandReceivedAsBinary; ///< Was the last successful command in binary mode?
     millis_t timeOfLastDataPacket;

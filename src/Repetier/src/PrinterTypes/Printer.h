@@ -130,6 +130,7 @@ public:
 #define PRINTER_FLAG3_AUTOREPORT_TEMP 16
 #define PRINTER_FLAG3_SUPPORTS_STARTSTOP 32
 #define PRINTER_FLAG3_DOOR_OPEN 64
+#define PRINTER_FLAG3_NATIVE_USB 128
 
 // List of possible interrupt events (1-255 allowed)
 #define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
@@ -534,7 +535,12 @@ public:
         flag2 = (b ? flag2 | PRINTER_FLAG2_JAMCONTROL_DISABLED : flag2 & ~PRINTER_FLAG2_JAMCONTROL_DISABLED);
         Com::printFLN(PSTR("Jam control disabled:"), b);
     }
-
+    static INLINE void setNativeUSB(bool yes) {
+        flag3 = (yes ? flag3 | PRINTER_FLAG3_NATIVE_USB : flag3 & ~PRINTER_FLAG3_NATIVE_USB); 
+    }
+    static INLINE bool isNativeUSB() { 
+        return flag3 & PRINTER_FLAG3_NATIVE_USB;
+    }
     static INLINE void toggleAnimation() {
         setAnimation(!isAnimation());
     }
