@@ -39,7 +39,7 @@
 Implemented Codes
 
 - G0  -> G1
-- G1  - Coordinated Movement X Y Z E, S1 disables boundary check, S0 enables it
+- G1  - Coordinated Movement X Y Z E, P1 disables boundary check, P0 enables it
 - G2 - Clockwise arc  X,Y,E = end position, R = Radius or I,J = center
 - G3 - Counterclockwise arc   X,Y,E = end position, R = Radius or I,J = center
 - G4  - Dwell S<seconds> or P<milliseconds>
@@ -178,6 +178,7 @@ Custom M Codes
 - M530 S<printing> L<layer> - Enables explicit printing mode (S1) or disables it (S0). L can set layer count
 - M531 filename - Define filename being printed
 - M532 X<percent> L<curLayer> - update current print state progress (X=0..100) and layer L
+- M539 S<supportStartStop> P<paused> - S1 Tells firmware that host will use the feature. P1/0 signals paused/running state.
 - M600 Change filament
 - M601 S<1/0> B<1/0> P<1/0> - Pause extruders. B1 also pauses heated bed. Paused extrudes disable heaters and motor. Continue (S0) reheats extruder to old temp. P0 does not wait for target temperature.
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
