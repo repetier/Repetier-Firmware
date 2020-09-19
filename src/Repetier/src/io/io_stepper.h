@@ -125,6 +125,14 @@
     name.eepromReserve();
 #define STEPPER_TMC5160_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.eepromReserve();
+#if defined(SAMD51_BOARD)
+#define STEPPER_TMC2208_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, fclk, minEndstop, maxEndstop) \
+    serial.begin(115200); \
+    name.eepromReserve();
+#define STEPPER_TMC2209_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, slaveAddr, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    serial.begin(115200); \
+    name.eepromReserve();
+#else
 #define STEPPER_TMC2208_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, fclk, minEndstop, maxEndstop) \
     serial.begin(115200); \
     serial.setInterruptPriority(5); \
@@ -133,6 +141,7 @@
     serial.begin(115200); \
     serial.setInterruptPriority(5); \
     name.eepromReserve();
+#endif
 #define STEPPER_TMC2209_SW_UART(name, stepPin, dirPin, enablePin, rxPin, txPin, rsense, microsteps, currentMillis, stealth, hybridSpeed, slaveAddr, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.eepromReserve();
 
@@ -153,7 +162,7 @@
 #define STEPPER_TMC2209_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, slaveAddr, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.init();
 #define STEPPER_TMC2209_SW_UART(name, stepPin, dirPin, enablePin, rxPin, txPin, rsense, microsteps, currentMillis, stealth, hybridSpeed, slaveAddr, stallSensitivity, fclk, minEndstop, maxEndstop) \
-    SoftwareSerial::setInterruptPriority(1, 0);\
+    SoftwareSerial::setInterruptPriority(1, 0); \
     name.init();
 #define STEPPER_MIRROR2(name, motor1, motor2, minEndstop, maxEndstop) \
     name.init();
