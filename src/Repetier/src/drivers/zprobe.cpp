@@ -755,8 +755,8 @@ float ZProbeHandler::offsetX;
 float ZProbeHandler::offsetY;
 float ZProbeHandler::speed;
 bool ZProbeHandler::activated;
-
 uint16_t ZProbeHandler::userPausedHeaters;
+int16_t ZProbeHandler::deployDelay;
 bool ZProbeHandler::pauseHeaters;
 float ZProbeHandler::getZProbeHeight() {
     return height;
@@ -783,9 +783,9 @@ void ZProbeHandler::activate() {
     GCode::executeFString(Com::tZProbeStartScript);
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Motion1::setToolOffset(-offsetX, -offsetY, 0);
-    ZProbeServo.setPosition(647, 0); // deploy pin
-    HAL::delayMilliseconds(1000);    // give time to deploy
-    if (isAlarmOn()) {               // to close to bed, alarm triggered already from deploy, so raise 5mm
+    ZProbeServo.setPosition(647, 0);     // deploy pin
+    HAL::delayMilliseconds(deployDelay); // give time to deploy
+    if (isAlarmOn()) {                   // to close to bed, alarm triggered already from deploy, so raise 5mm
         Com::printWarningFLN(PSTR("Z-probe triggered before probing - raising z!"));
         cPos[Z_AXIS] += 5.0;
         Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[Z_AXIS], false);
@@ -1057,7 +1057,7 @@ float ZProbeHandler::yOffset() {
 
 void ZProbeHandler::init() {
     eepromReset();
-    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_Z_PROBE, 1, 21);
+    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_Z_PROBE, 1, 23);
     activated = false;
 }
 
@@ -1068,6 +1068,7 @@ void ZProbeHandler::eepromReset() {
     offsetX = Z_PROBE_X_OFFSET;
     offsetY = Z_PROBE_Y_OFFSET;
     pauseHeaters = Z_PROBE_PAUSE_HEATERS;
+    deployDelay = Z_PROBE_BLTOUCH_DEPLOY_DELAY;
 }
 
 void ZProbeHandler::eepromHandle() {
@@ -1078,6 +1079,7 @@ void ZProbeHandler::eepromHandle() {
     EEPROM::handleFloat(eprStart + 12, PSTR("X offset [mm]"), 3, offsetX);
     EEPROM::handleFloat(eprStart + 16, PSTR("Y offset [mm]"), 3, offsetY);
     EEPROM::handleByte(eprStart + 20, PSTR("Pause heaters [0/1]"), pauseHeaters);
+    EEPROM::handleInt(eprStart + 21, PSTR("Deploy delay [ms]"), deployDelay);
     EEPROM::removePrefix();
 }
 
@@ -1102,7 +1104,7 @@ void ZProbeHandler::disableAlarmIfOn() {
     ZProbeServo.setPosition(1473, 0); // pin up
 }
 
-void __attribute__((weak)) menuProbeOffset(GUIAction action, void* data) {
+void menuProbeOffset(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data); // 0 = x, 1 = y
     GUI::flashToStringFlash(GUI::tmpString, PSTR("@ Offset:"), axis ? axisNames[Y_AXIS] : axisNames[X_AXIS]);
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM,
@@ -1115,7 +1117,16 @@ void __attribute__((weak)) menuProbeOffset(GUIAction action, void* data) {
         }
     }
 }
+
+void menuProbeDeployDelay(GUIAction action, void* data) {
+    DRAW_LONG_P(PSTR("Delay: "), Com::tUnitMilliSeconds, ZProbeHandler::getDeployDelay());
+    if (GUI::handleLongValueAction(action, v, 0, 5000, 10)) {
+        ZProbeHandler::setDeployDelay(v);
+    }
+}
+
 void ZProbeHandler::showConfigMenu(GUIAction action) {
+    GUI::menuLongP(action, PSTR("Deploy Delay:"), ZProbeHandler::getDeployDelay(), menuProbeDeployDelay, nullptr, GUIPageType::FIXED_CONTENT);
     GUI::menuFloatP(action, PSTR("X Offset    :"), ZProbeHandler::xOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(0), GUIPageType::FIXED_CONTENT);
     GUI::menuFloatP(action, PSTR("Y Offset    :"), ZProbeHandler::yOffset(), 1, menuProbeOffset, reinterpret_cast<void*>(1), GUIPageType::FIXED_CONTENT);
 }

@@ -422,7 +422,10 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 // Z_PROBE_TYPE_NONE - No z probe available
 // Z_PROBE_TYPE_DEFAULT - Default z probe triggers on a pin change
 // Z_PROBE_TYPE_NOZZLE - Nozzle is z probe. Supports heating before probing.
+
 // Z_PROBE_TYPE_BLTOUCH - BLtouch/3DTouch z probe. Contains logic for pin.
+// Z_PROBE_BLTOUCH_DEPLOY_DELAY - Delay to wait while it's pin deploys before probing. Defaults to 1s.
+
 #define Z_PROBE_TYPE Z_PROBE_TYPE_NONE
 #define Z_PROBE_HEIGHT 3             // Distance bed-nozzle when trigger switches
 #define Z_PROBE_BED_DISTANCE 10      // Optimal starting distance
