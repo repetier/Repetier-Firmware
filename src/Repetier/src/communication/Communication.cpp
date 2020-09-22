@@ -400,7 +400,7 @@ FSTRINGVALUE(Com::tEPRAdvanceL, "advance L [0=off]")
 FSTRINGVALUE(Com::tEPRPreheatTemp, "Preheat temp. [�C]")
 FSTRINGVALUE(Com::tEPRPreheatBedTemp, "Bed Preheat temp. [�C]")
 #if NUM_BEEPERS > 0
-FSTRINGVALUE(Com::tEPRTonesEnabled, "Tones enabled [0/1]")
+FSTRINGVALUE(Com::tEPRToneVolume, "Tone volume [%]")
 #endif
 //FSTRINGVALUE(Com::tSDRemoved,UI_TEXT_SD_REMOVED)
 //FSTRINGVALUE(Com::tSDInserted,UI_TEXT_SD_INSERTED)

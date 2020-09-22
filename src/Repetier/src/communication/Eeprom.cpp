@@ -120,10 +120,9 @@ void EEPROM::callHandle() {
 #endif
 
 #if NUM_BEEPERS > 0
-    handleByte(EPR_TONES_ENABLED, Com::tEPRTonesEnabled, Printer::tonesEnabled);
-    for (size_t i = 0; i < NUM_BEEPERS; i++) {
-        beepers[i]->mute(!Printer::tonesEnabled);
-    }
+    handleByte(EPR_TONE_VOLUME, Com::tEPRToneVolume,
+               reinterpret_cast<uint8_t&>(Printer::toneVolume = constrain(Printer::toneVolume, 0, 100)));
+    BeeperSourceBase::muteAll((Printer::toneVolume <= MINIMUM_TONE_VOLUME));
 #endif
 
     Motion1::eepromHandle();

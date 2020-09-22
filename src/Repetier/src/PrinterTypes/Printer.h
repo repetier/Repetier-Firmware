@@ -296,7 +296,7 @@ public:
 
     static void handleInterruptEvent();
 
-    static uint8_t tonesEnabled;
+    static ufast8_t toneVolume;
 
     static INLINE void setInterruptEvent(uint8_t evt, bool highPriority) {
         if (highPriority || interruptEvent == 0)

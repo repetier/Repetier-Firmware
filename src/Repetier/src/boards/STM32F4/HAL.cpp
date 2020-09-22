@@ -292,6 +292,7 @@ extern void TIMER_VECTOR(TONE_TIMER_NUM);
 
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
 extern void servoOffTimer();
+extern void beeperComparePhase();
 extern void TIMER_VECTOR(SERVO_TIMER_NUM);
 static uint32_t ServoPrescalerfactor = 20000;
 static uint32_t Servo2500 = 2500;
@@ -374,9 +375,13 @@ void HAL::setupTimer() {
             // If we have any SW beepers, enable the beeper IRQ
             toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
             toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
-            toneTimer->timer->setMode(2, TIMER_OUTPUT_COMPARE);
+            toneTimer->timer->setMode(2, TIMER_OUTPUT_COMPARE, NC);
             toneTimer->timer->setOverflow(0, HERTZ_FORMAT);
             toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
+            toneTimer->timer->attachInterrupt(2, &beeperComparePhase);
+            // Not on by default for output_compare
+            LL_TIM_OC_EnablePreload(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(2));
+            LL_TIM_OC_EnableFast(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(2));
             toneTimer->timer->refresh();
             toneTimer->timer->resume();
             break;
@@ -977,10 +982,19 @@ void HAL::spiEnd() {
 }
 
 #if NUM_BEEPERS > 0
-void TIMER_VECTOR(TONE_TIMER_NUM) {
+void beeperComparePhase() {
+    bool beeperIRQPhase = false;
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_BEEPER_LOOP
 #include "io/redefine.h"
+    UNUSED(beeperIRQPhase);
+}
+void TIMER_VECTOR(TONE_TIMER_NUM) {
+    bool beeperIRQPhase = true;
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_BEEPER_LOOP
+#include "io/redefine.h"
+    UNUSED(beeperIRQPhase);
 }
 #endif
 
@@ -1021,9 +1035,11 @@ void HAL::tone(uint32_t frequency) {
     if (frequency < 1) {
         return;
     }
-    toneTimer->timer->setOverflow(2 * frequency, HERTZ_FORMAT);
-    if (toneStopped) {
-        toneTimer->timer->refresh();
+    uint32_t autoReload = (F_CPU_TRUE / frequency) - 1;
+    LL_TIM_SetAutoReload(TIMER(TONE_TIMER_NUM), autoReload);
+    LL_TIM_OC_SetCompareCH2(TIMER(TONE_TIMER_NUM), ((autoReload + 1) * (Printer::toneVolume * 50)) / 10000);
+    if (toneStopped) { // Only generate updates if the timer's dead.
+        LL_TIM_GenerateEvent_UPDATE(TIMER(TONE_TIMER_NUM));
         toneStopped = false;
     }
 #endif
@@ -1039,10 +1055,8 @@ void HAL::noTone() {
         }
     }
 #endif
-    if (toneTimer != nullptr) { // could be called before timer are initialized!
-        toneTimer->timer->setOverflow(0, HERTZ_FORMAT);
-        toneStopped = true;
-    }
+    LL_TIM_SetAutoReload(TIMER(TONE_TIMER_NUM), 0);
+    toneStopped = true;
 #endif
 }
 

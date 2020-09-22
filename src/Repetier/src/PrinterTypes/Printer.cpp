@@ -95,7 +95,7 @@ bool Printer::failedMode = false;
 fast8_t Printer::caseLightMode = CASE_LIGHT_DEFAULT_ON;
 fast8_t Printer::caseLightBrightness = 255;
 
-uint8_t Printer::tonesEnabled = true;
+ufast8_t Printer::toneVolume = DEFAULT_TONE_VOLUME;
 
 FirmwareEvent FirmwareEvent::eventList[4];
 volatile fast8_t FirmwareEvent::start = 0;

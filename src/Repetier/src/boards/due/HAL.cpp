@@ -162,8 +162,8 @@ void HAL::setupTimer() {
 
             TC_Configure(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, TC_CMR_WAVE | TC_CMR_WAVSEL_UP_RC | TC_CMR_TCCLKS_TIMER_CLOCK1);
 
-            BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IER = TC_IER_CPCS;
-            BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS;
+            BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IER = TC_IER_CPCS | TC_IER_CPAS;
+            BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_IDR = ~TC_IER_CPCS & ~TC_IER_CPAS;
             NVIC_EnableIRQ((IRQn_Type)BEEPER_TIMER_IRQ);
             break;
         }
@@ -988,11 +988,10 @@ void HAL::servoMicroseconds(uint8_t servo, int microsec, uint16_t autoOff) {
 ServoInterface* analogServoSlots[4] = { nullptr, nullptr, nullptr, nullptr };
 // Servo timer Interrupt handler
 void SERVO_TIMER_VECTOR() {
-    static uint32_t interval;
-
     // apparently have to read status register
-    TC_GetStatus(SERVO_TIMER, SERVO_TIMER_CHANNEL);
-
+    SERVO_TIMER->TC_CHANNEL[SERVO_TIMER_CHANNEL].TC_SR;
+#if NUM_SERVOS > 0
+    static uint32_t interval = 0;
     fast8_t servoId = servoIndex >> 1;
     ServoInterface* act = analogServoSlots[servoId];
     if (act == nullptr) {
@@ -1004,8 +1003,9 @@ void SERVO_TIMER_VECTOR() {
                      SERVO5000US - interval);
             if (servoAutoOff[servoId]) {
                 servoAutoOff[servoId]--;
-                if (servoAutoOff[servoId] == 0)
+                if (servoAutoOff[servoId] == 0) {
                     HAL::servoTimings[servoId] = 0;
+                }
             }
         } else { // enable
             InterruptProtectedBlock noInt;
@@ -1023,6 +1023,7 @@ void SERVO_TIMER_VECTOR() {
     if (servoIndex > 7) {
         servoIndex = 0;
     }
+#endif
 // Add all generated servo interrupt handlers
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_SERVO_INTERRUPT
@@ -1068,7 +1069,7 @@ void PWM_TIMER_VECTOR() {
 #endif
     //InterruptProtectedBlock noInt;
     // apparently have to read status register
-    TC_GetStatus(PWM_TIMER, PWM_TIMER_CHANNEL);
+    PWM_TIMER->TC_CHANNEL[PWM_TIMER_CHANNEL].TC_SR;
 
     static uint8_t pwm_count0 = 0; // Used my IO_PWM_SOFTWARE!
     static uint8_t pwm_count1 = 0;
@@ -1164,10 +1165,18 @@ void MOTION2_TIMER_VECTOR() {
 #if NUM_BEEPERS > 0
 // IRQ handler for tone generator
 void BEEPER_TIMER_VECTOR() {
-    TC_GetStatus(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
+    // always need to feed the beeper loop a bool "beeperIRQPhase"
+    // beeper turns ON at at max counter timer hit. Turns OFF at RA compare
+    // (our timer's "duty" counter)
+
+    bool beeperIRQPhase = false;
+    if ((BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_SR) & TC_SR_CPCS) {
+        beeperIRQPhase = true;
+    }
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_BEEPER_LOOP
 #include "io/redefine.h"
+    (void)beeperIRQPhase; // avoid gcc unused warning 
 }
 #endif
 
@@ -1189,7 +1198,7 @@ void HAL::tone(uint32_t frequency) {
             }
             beeperCurFreq = playingBeepers[i - NUM_BEEPERS]->getCurFreq();
             beeperCurFreq -= (beeperCurFreq % reduce);
-            playingBeepers[i - NUM_BEEPERS]->setFreqDiv((multiFreq / beeperCurFreq) - 1);
+            playingBeepers[i - NUM_BEEPERS]->setFreqDiv(curPlaying > 1 ? constrain((multiFreq / beeperCurFreq) - 1, 0, 1000) : 0);
         } else {
             if (beepers[i]->getOutputType() == 1 && beepers[i]->isPlaying()) {
                 beeperCurFreq = beepers[i]->getCurFreq();
@@ -1204,16 +1213,18 @@ void HAL::tone(uint32_t frequency) {
     }
     frequency = multiFreq;
 #endif
-    frequency *= 2;
     if (frequency < 1) {
         return;
     }
     if (!(TC_GetStatus(BEEPER_TIMER, BEEPER_TIMER_CHANNEL) & TC_SR_CLKSTA)) {
         TC_Start(BEEPER_TIMER, BEEPER_TIMER_CHANNEL);
     }
+    // 100% volume is 50% duty
+    float percent = (static_cast<float>(Printer::toneVolume) * 50.0f) * 0.0001f;
     uint32_t rc = (F_CPU_TRUE / 2) / frequency;
+    uint32_t ra = static_cast<uint32_t>(static_cast<float>(rc) * percent);
     TC_SetRC(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, rc);
-    // If the counter is already beyond our desired RC, reset it.
+    TC_SetRA(BEEPER_TIMER, BEEPER_TIMER_CHANNEL, ra);
     if (TC_ReadCV(BEEPER_TIMER, BEEPER_TIMER_CHANNEL) > rc) {
         BEEPER_TIMER->TC_CHANNEL[BEEPER_TIMER_CHANNEL].TC_CCR = TC_CCR_SWTRG;
     }
