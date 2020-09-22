@@ -1107,10 +1107,12 @@ void watchdogSetup(void) {
 
 #if NUM_BEEPERS > 0
 void TC3_Handler(void) {
+    static bool beeperIRQPhase = true;
     TONE_TC->COUNT16.INTFLAG.bit.MC0 = 1; // Clear the interrupt
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_BEEPER_LOOP
 #include "io/redefine.h"
+    beeperIRQPhase = !beeperIRQPhase;
 }
 #endif
 
