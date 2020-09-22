@@ -148,7 +148,7 @@ void __attribute__((weak)) drawStatusLine() {
     GUI::bufAddHeaterTemp(heatedBeds[0], true);
 #endif
     lcd.setFont(u8g2_font_5x7_mf);
-    lcd.drawUTF8(0, 6, GUI::buf);
+    lcd.drawUTF8(1, 7, GUI::buf);
     lcd.drawHLine(0, 8, 128);
 }
 
@@ -257,17 +257,17 @@ void GUI::menuTextP(GUIAction& action, PGM_P text, bool highlight) {
                 guiY += 12;
                 lcd.drawBox(0, guiY - 9, 128, 10);
                 lcd.setDrawColor(0);
-                lcd.drawUTF8(0, guiY - 1, GUI::buf);
+                lcd.drawUTF8(1, guiY - 1, GUI::buf);
                 lcd.setDrawColor(1);
             } else {
                 guiY += 10;
                 if (guiLine == cursorRow[level]) {
                     lcd.drawBox(0, guiY - 8, 128, 10);
-                    lcd.setDrawColor(0);
-                    scrollSelectedText(0, guiY);
+                    lcd.setDrawColor(0); 
+                    scrollSelectedText(1, guiY);
                     lcd.setDrawColor(1);
                 } else {
-                    lcd.drawUTF8(0, guiY, GUI::buf);
+                    lcd.drawUTF8(1, guiY, GUI::buf);
                 }
             }
         }
@@ -453,17 +453,17 @@ void GUI::menuText(GUIAction& action, char* text, bool highlight) {
                 guiY += 12;
                 lcd.drawBox(0, guiY - 9, 128, 10);
                 lcd.setDrawColor(0);
-                lcd.drawUTF8(0, guiY - 1, GUI::buf);
+                lcd.drawUTF8(1, guiY - 1, GUI::buf);
                 lcd.setDrawColor(1);
             } else {
                 guiY += 10;
                 if (guiLine == cursorRow[level]) {
                     lcd.drawBox(0, guiY - 8, 128, 10);
                     lcd.setDrawColor(0);
-                    scrollSelectedText(0, guiY);
+                    scrollSelectedText(1, guiY);
                     lcd.setDrawColor(1);
                 } else {
-                    lcd.drawUTF8(0, guiY, GUI::buf);
+                    lcd.drawUTF8(1, guiY, GUI::buf);
                 }
             }
         }
@@ -691,7 +691,7 @@ void GUI::showValue(char* text, PGM_P unit, char* value) {
     drawStatusLine();
     // Head
     lcd.setFont(u8g2_font_6x10_mf);
-    lcd.drawUTF8(0, 19, text);
+    lcd.drawUTF8(1, 19, text);
 
     // Unit
     lcd.setFont(u8g2_font_5x7_mf);
@@ -767,7 +767,7 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
                     GUI::bufAddInt(at->getToolId() + 1, 1);
                     GUI::bufAddChar(':');
                     GUI::bufAddHeaterTemp(at->getHeater(), true);
-                    lcd.drawUTF8(0, 16 + n * 7, GUI::buf);
+                    lcd.drawUTF8(1, 16 + n * 7, GUI::buf);
                     n++;
                 }
             }
@@ -777,7 +777,7 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
             GUI::bufAddStringP("Fan:");
             GUI::bufAddInt(tool->secondaryPercent(), 3);
             GUI::bufAddChar('%');
-            lcd.drawUTF8(0, 16 + n * 7, GUI::buf);
+            lcd.drawUTF8(1, 16 + n * 7, GUI::buf);
             n++;
         }
         if (NUM_TOOLS > 1 && tool->getToolType() == ToolTypes::EXTRUDER && n < 6) {
@@ -787,7 +787,7 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
             if (Motion1::dittoMirror) {
                 GUI::bufAddChar('M');
             }
-            lcd.drawUTF8(0, 16 + n * 7, GUI::buf);
+            lcd.drawUTF8(1, 16 + n * 7, GUI::buf);
             n++;
         }
         if (NUM_TOOLS > 1 && tool->getToolType() == ToolTypes::EXTRUDER && n < 6) {
@@ -795,17 +795,17 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
             GUI::bufAddStringP("Flow:");
             GUI::bufAddInt(Printer::extrudeMultiply, 3);
             GUI::bufAddChar('%');
-            lcd.drawUTF8(0, 16 + n * 7, GUI::buf);
+            lcd.drawUTF8(1, 16 + n * 7, GUI::buf);
             n++;
         }
         if (n < 6 && Printer::areAllSteppersDisabled()) {
             GUI::bufClear();
             GUI::bufAddStringP("Motors off");
-            lcd.drawUTF8(0, 16 + n * 7, GUI::buf);
+            lcd.drawUTF8(1, 16 + n * 7, GUI::buf);
             n++;
         }
         lcd.setFont(u8g2_font_6x10_mf);
-        lcd.drawUTF8(0, 61, GUI::status);
+        lcd.drawUTF8(1, 61, GUI::status);
     }
     if (Printer::isPrinting()) {
         GUI::replaceOn(GUIAction::NEXT, printProgress, nullptr, GUIPageType::FIXED_CONTENT);
@@ -834,19 +834,19 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
             GUI::bufAddStringP(PSTR("Prog:"));
             GUI::bufAddFloat(Printer::progress, 3, 1);
             GUI::bufAddStringP(PSTR(" %"));
-            lcd.drawUTF8(0, y0 + 1, GUI::buf);
+            lcd.drawUTF8(1, y0 + 1, GUI::buf);
             lcd.drawFrame(0, y0 + 5, 62, 9);
             lcd.drawBox(0, y0 + 6, static_cast<u8g2_uint_t>(62.0 * Printer::progress * 0.01), 7);
 
             if (Printer::maxLayer > 0) {
                 GUI::bufClear();
                 GUI::bufAddStringP(PSTR("Layer:"));
-                lcd.drawUTF8(0, 42, GUI::buf);
+                lcd.drawUTF8(1, 42, GUI::buf);
                 GUI::bufClear();
                 GUI::bufAddInt(Printer::currentLayer, 5);
                 GUI::bufAddStringP(PSTR("/"));
                 GUI::bufAddInt(Printer::maxLayer, 5);
-                lcd.drawUTF8(0, 50, GUI::buf);
+                lcd.drawUTF8(1, 50, GUI::buf);
             }
             // Right side, try to show Z, E, B, Fan, Chamber, Multiplier
             int n = 0;
@@ -910,7 +910,7 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
                 n++;
             }
             lcd.setFont(u8g2_font_6x10_mf);
-            lcd.drawUTF8(0, 61, GUI::status);
+            lcd.drawUTF8(1, 61, GUI::status);
         } else {
             startScreen(action, data); // print is finished!
         }
