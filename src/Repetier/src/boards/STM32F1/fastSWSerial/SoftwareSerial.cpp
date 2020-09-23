@@ -36,27 +36,24 @@
   modification of the original SoftwareSerial found in STM32Duino's library. 
   The only changes are the use of bare timer IRQ functions rather than 
   the callback functions HardwareTimer provides to improve performance.
-  This requires WEAK_HARDWARE_TIMERS defined and obviously 
-  the original timer IRQ's found in HardwareTimers.cpp marked as 
-  __attribute__ ((weak)) to work.
 
-    !Extra note @ 9/13/20!
-        Compiling with GCC'S LTO (Link time optimization -flto)
-        while having weak attribute marked timers AND the 
-        WEAK_HARDWARE_TIMERS macro missing/undefined and /NOT/ replacing 
-        the timers yourself, will freeze the micro because of the multiple
-        weak symbols from the core and HWTimer. (GCC undefined behavior etc)
-        Compiling with LTO off doesn't seem to cause an issue.
+  This requires a modified CMSIS assembly startup file for your device with
+  renamed timer handler functions prefixed with RAW_ (eg. RAW_TIMx_Handler())
 
   If you're using a custom TIMER_SERIAL timer, make SURE to also define 
-  TIMER_SERIAL_RAW_IRQ with the correct TIM timer handler. 
-  eg #define TIMER_SERIAL_RAW_IRQ TIM8_IRQHandler
+  TIMER_SERIAL_RAW_IRQ with the correct RAW_TIM timer handler. 
+  eg #define TIMER_SERIAL_RAW_IRQ RAW_TIM8_IRQHandler
 
   -- AbsoluteCatalyst 9/13/2020 update:
         Slightly improved performance via usage of STM32's 
         slimmer/faster LL HAL driver and less redundant 
         operations performed in setSpeed. My next update
-        on this will be implementing DMA.
+        on this will be implementing DMA. - ok not yet
+
+  -- AbsoluteCatalyst 9/19/20 quick update:
+        Removed all the WEAK_* macros and undid the hack itself.
+        Now switched over to a custom CMSIS startup file with renamed IRQ
+        timer handlers. RAW_TIMx_Handler() etc. Simple.
 
 */
 
@@ -75,70 +72,70 @@
 #if !defined(TIMER_SERIAL)
 #undef TIMER_SERIAL_RAW_IRQ
 #if defined(TIM18_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM18_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM18_IRQHandler
 #define TIMER_SERIAL TIM18
 #elif defined(TIM7_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM7_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM7_IRQHandler
 #define TIMER_SERIAL TIM7
 #elif defined(TIM6_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM6_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM6_IRQHandler
 #define TIMER_SERIAL TIM6
 #elif defined(TIM22_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM22_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM22_IRQHandler
 #define TIMER_SERIAL TIM22
 #elif defined(TIM21_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM21_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM21_IRQHandler
 #define TIMER_SERIAL TIM21
 #elif defined(TIM17_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM17_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM17_IRQHandler
 #define TIMER_SERIAL TIM17
 #elif defined(TIM16_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM16_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM16_IRQHandler
 #define TIMER_SERIAL TIM16
 #elif defined(TIM15_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM15_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM15_IRQHandler
 #define TIMER_SERIAL TIM15
 #elif defined(TIM14_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM14_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM14_IRQHandler
 #define TIMER_SERIAL TIM14
 #elif defined(TIM13_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM13_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM13_IRQHandler
 #define TIMER_SERIAL TIM13
 #elif defined(TIM11_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM11_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM11_IRQHandler
 #define TIMER_SERIAL TIM11
 #elif defined(TIM10_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM10_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM10_IRQHandler
 #define TIMER_SERIAL TIM10
 #elif defined(TIM12_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM12_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM12_IRQHandler
 #define TIMER_SERIAL TIM12
 #elif defined(TIM19_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM19_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM19_IRQHandler
 #define TIMER_SERIAL TIM19
 #elif defined(TIM9_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM9_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM9_IRQHandler
 #define TIMER_SERIAL TIM9
 #elif defined(TIM5_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM5_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM5_IRQHandler
 #define TIMER_SERIAL TIM5
 #elif defined(TIM4_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM4_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM4_IRQHandler
 #define TIMER_SERIAL TIM4
 #elif defined(TIM3_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM3_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM3_IRQHandler
 #define TIMER_SERIAL TIM3
 #elif defined(TIM2_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM2_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM2_IRQHandler
 #define TIMER_SERIAL TIM2
 #elif defined(TIM20_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM20_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM20_IRQHandler
 #define TIMER_SERIAL TIM20
 #elif defined(TIM8_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM8_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM8_IRQHandler
 #define TIMER_SERIAL TIM8
 #elif defined(TIM1_BASE)
-#define TIMER_SERIAL_RAW_IRQ TIM1_IRQHandler
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM1_IRQHandler
 #define TIMER_SERIAL TIM1
 #else
 #error No suitable timer found for SoftwareSerial, define TIMER_SERIAL in variant.h
@@ -152,8 +149,8 @@
 #define TIMER_SERIAL_DMA_CHAN nullptr
 #endif
 
-#if !defined(TIMER_SERIAL_RAW_IRQ) && defined(WEAK_HARDWARE_TIMERS)
-#error No raw timer interrupt defined, but using weak hardware timers! define TIMER_SERIAL_RAW_IRQ in variant.h
+#if !defined(TIMER_SERIAL_RAW_IRQ)
+#error No raw timer interrupt handler defined!
 #endif
 //
 // Statics
@@ -195,7 +192,7 @@ void SoftwareSerial::setSpeed(uint32_t speed) {
                         clock_rate = clock_rate / 2;
                         pre *= 2;
                     }
-                } while (cmp_value >= UINT16_MAX); 
+                } while (cmp_value >= UINT16_MAX);
                 LL_TIM_SetPrescaler(timerInst, pre);
                 LL_TIM_SetAutoReload(timerInst, cmp_value);
                 _ready = true;
@@ -359,12 +356,10 @@ inline void SoftwareSerial::handleInterrupt() {
     }
 }
 
-#if defined(WEAK_HARDWARE_TIMERS)
 extern "C" void TIMER_SERIAL_RAW_IRQ(void) {
     LL_TIM_ClearFlag_UPDATE(TIMER_SERIAL);
     SoftwareSerial::handleInterrupt();
 }
-#endif
 //
 // Constructor
 //

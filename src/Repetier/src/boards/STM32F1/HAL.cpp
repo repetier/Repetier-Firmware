@@ -48,13 +48,8 @@
 #define _TIMER_IRQ(num) TIM##num##_IRQn
 
 
-#if WEAK_HARDWARE_TIMERS
-#define _TIMER_VECTOR(num) TIM##num##_IRQHandler(void)
-#define _TIMER_VECTOR_NAME(num) TIM##num##_IRQHandler
-#else
-#define _TIMER_VECTOR(num) RF_TC##num##_Handler()
-#define _TIMER_VECTOR_NAME(num) RF_TC##num##_Handler
-#endif
+#define _TIMER_VECTOR(num) RAW_TIM##num##_IRQHandler(void)
+#define _TIMER_VECTOR_NAME(num) RAW_TIM##num##_IRQHandler
 
 #define TIMER(num) _TIMER(num)
 #define TIMER_IRQ(num) _TIMER_IRQ(num)
@@ -283,26 +278,15 @@ TimerFunction* toneTimer = nullptr;
  using macros, eg. "#if HWT_RELEASE_RAW_TIMx_IRQ" or something.)
 */
 
-#if WEAK_HARDWARE_TIMERS
 extern "C" void TIMER_VECTOR(MOTION2_TIMER_NUM);
 extern "C" void TIMER_VECTOR(MOTION3_TIMER_NUM);
 extern "C" void TIMER_VECTOR(PWM_TIMER_NUM);
 extern "C" void TIMER_VECTOR(TONE_TIMER_NUM);
-#else
-extern void TIMER_VECTOR(MOTION2_TIMER_NUM);
-extern void TIMER_VECTOR(MOTION3_TIMER_NUM);
-extern void TIMER_VECTOR(PWM_TIMER_NUM);
-extern void TIMER_VECTOR(TONE_TIMER_NUM);
-#endif
 
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
 extern void servoOffTimer();
 extern void beeperComparePhase();
-#if WEAK_HARDWARE_TIMERS
 extern "C" void TIMER_VECTOR(SERVO_TIMER_NUM);
-#else
-extern void TIMER_VECTOR(SERVO_TIMER_NUM);
-#endif
 static uint32_t ServoPrescalerfactor = 20000;
 static uint32_t Servo2500 = 2500;
 #endif
@@ -375,7 +359,7 @@ void HAL::setupTimer() {
     pwm->timer->setOverflow(PWM_CLOCK_FREQ, HERTZ_FORMAT);
     pwm->timer->attachInterrupt(TIMER_VECTOR_NAME(PWM_TIMER_NUM));
     pwm->timer->resume();
-    HAL_NVIC_SetPriority(TIMER_IRQ(PWM_TIMER_NUM), 2, 0);
+    HAL_NVIC_SetPriority(TIMER_IRQ(PWM_TIMER_NUM), 4, 0);
 
     // Timer for stepper motor control
 
@@ -883,10 +867,7 @@ void HAL::servoMicroseconds(uint8_t servoId, int microsec, uint16_t autoOff) {
 // ================== Interrupt handling ======================
 
 ServoInterface* analogServoSlots[4] = { nullptr, nullptr, nullptr, nullptr };
-#if WEAK_HARDWARE_TIMERS
-FORCE_INLINE
-#endif
-void servoOffTimer() {
+FORCE_INLINE void servoOffTimer() {
 #if NUM_SERVOS > 0
     if (actServo) {
         actServo->disable();
@@ -919,7 +900,6 @@ void servoOffTimer() {
 #include "io/redefine.h"
 }
 
-#if WEAK_HARDWARE_TIMERS
 // Servo timer Interrupt handler
 void TIMER_VECTOR(SERVO_TIMER_NUM) {
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
@@ -936,16 +916,6 @@ void TIMER_VECTOR(SERVO_TIMER_NUM) {
     }
 #endif
 }
-#else
-// Servo timer Interrupt handler
-void TIMER_VECTOR(SERVO_TIMER_NUM) {
-#if NUM_SERVOS > 0
-    if (actServo) {
-        actServo->enable();
-    }
-#endif
-}
-#endif
 
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
@@ -953,9 +923,7 @@ void TIMER_VECTOR(MOTION3_TIMER_NUM) {
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_STEPPER_PIN, 1);
 #endif
-#if WEAK_HARDWARE_TIMERS
     LL_TIM_ClearFlag_UPDATE(TIMER(MOTION3_TIMER_NUM));
-#endif
     Motion3::timer();
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_STEPPER_PIN, 0);
@@ -977,9 +945,7 @@ void TIMER_VECTOR(PWM_TIMER_NUM) {
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_TEMP_PIN, 1);
 #endif
-#if WEAK_HARDWARE_TIMERS 
-    LL_TIM_ClearFlag_UPDATE(TIMER(PWM_TIMER_NUM)); 
-#endif
+    LL_TIM_ClearFlag_UPDATE(TIMER(PWM_TIMER_NUM));
 
     static uint8_t pwm_count0 = 0; // Used my IO_PWM_SOFTWARE!
     static uint8_t pwm_count1 = 0;
@@ -1030,9 +996,7 @@ void TIMER_VECTOR(MOTION2_TIMER_NUM) {
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_MOTION_PIN, 1);
 #endif
-#if WEAK_HARDWARE_TIMERS
     LL_TIM_ClearFlag_UPDATE(TIMER(MOTION2_TIMER_NUM));
-#endif
     Motion2::timer();
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_MOTION_PIN, 0);
@@ -1054,7 +1018,6 @@ void HAL::spiEnd() {
 }
 
 #if NUM_BEEPERS > 0
-#if WEAK_HARDWARE_TIMERS
 void beeperComparePhase() { }
 void TIMER_VECTOR(TONE_TIMER_NUM) {
     bool beeperIRQPhase = false;
@@ -1071,22 +1034,6 @@ void TIMER_VECTOR(TONE_TIMER_NUM) {
 #include "io/redefine.h"
     UNUSED(beeperIRQPhase);
 }
-#else
-FORCE_INLINE void beeperComparePhase() {
-    bool beeperIRQPhase = false;
-#undef IO_TARGET
-#define IO_TARGET IO_TARGET_BEEPER_LOOP
-#include "io/redefine.h"
-    UNUSED(beeperIRQPhase);
-}
-void TIMER_VECTOR(TONE_TIMER_NUM) {
-    bool beeperIRQPhase = true;
-#undef IO_TARGET
-#define IO_TARGET IO_TARGET_BEEPER_LOOP
-#include "io/redefine.h"
-    UNUSED(beeperIRQPhase);
-}
-#endif
 #endif
 
 static bool toneStopped = true;

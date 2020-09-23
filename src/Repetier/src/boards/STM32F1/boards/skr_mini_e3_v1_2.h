@@ -22,32 +22,31 @@
 #error "Oops! Select skr_mini_e3_v1_2 in platformio.ini -> default_envs"
 #endif
 
-// Users expect Serial to be usb port!
 #ifndef Serial
 #define Serial SerialUSB
 #endif
 
-#define CPU_ARCH ARCH_ARM
-#define MAX_RAM 47960
+#define CPU_ARCH                ARCH_ARM
+#define MAX_RAM                 47960
 
 // Steppers
 #define ORIG_X_STEP_PIN         PA2
 #define ORIG_X_DIR_PIN          PB12
 #define ORIG_X_ENABLE_PIN       PB14
  
-#define ORIG_X_MIN_PIN          32 // PC0
+#define ORIG_X_MIN_PIN          PC0
 
 #define ORIG_Y_STEP_PIN         PB10
 #define ORIG_Y_DIR_PIN          PB2
 #define ORIG_Y_ENABLE_PIN       PB11
 
-#define ORIG_Y_MIN_PIN          33 // PC1
+#define ORIG_Y_MIN_PIN          PC1
 
 #define ORIG_Z_STEP_PIN         PB0
 #define ORIG_Z_DIR_PIN          PC5
 #define ORIG_Z_ENABLE_PIN       PB1 
 
-#define ORIG_Z_MIN_PIN          34 // PC2
+#define ORIG_Z_MIN_PIN          PC2
 
 #define ORIG_E0_STEP_PIN        PB3
 #define ORIG_E0_DIR_PIN         PB4
@@ -58,12 +57,18 @@
 #define Z_SW_SERIAL_TMC_PIN     PC10
 #define E0_SW_SERIAL_TMC_PIN    PC11  
 
+#define TMC_SW_SERIAL_BAUD      57600
+
 #define SERVO_1_PIN             PA1
-#define BLTOUCH_Z_MIN           PC14 // PC14 
+#define BLTOUCH_Z_MIN           PC14
 
 // Temperature Sensors
-#define TEMP_0_PIN static_cast<int>(PA_0)
-#define TEMP_1_PIN static_cast<int>(PC_3) // TB bed 
+#define TEMP_0_PIN              PA0 // HOTEND
+#define TEMP_1_PIN              PC3 // BED 
+
+#define TEMP_CPU                ADC_CHANNEL_TEMPSENSOR
+#define VREF_CPU                ADC_CHANNEL_VREFINT
+
 // Heaters / Fans
 #define HEATER_0_PIN            PC8
 #define HEATER_1_PIN            PC9
@@ -104,11 +109,7 @@
 #ifndef EEPROM_AVAILABLE
 #define EEPROM_AVAILABLE        EEPROM_FLASH 
 #endif
-
 #endif
-
-
-
 
 #ifndef EEPROM_MODE
 #define EEPROM_MODE             EEPROM_NONE
@@ -121,10 +122,10 @@
 //
 
 #ifndef SDSS
-#define SDSS static_cast<int>(PA_4)
+#define SDSS                    PA4
 #endif 
 
-#define ORIG_SDCARDDETECT       36 //PC4
+#define ORIG_SDCARDDETECT       PC4
 #define SDCARDDETECTINVERTED    false
 
 #define STATUS_LED_PIN          PA15             // Small PCB LED
@@ -134,10 +135,6 @@
 #define POWER_RELAY_MODULE_PIN  PC12 // AKA PT-DET (J7 Connector)
 // I don't know how there's functions but I believe it could be tied to ORIG_PS_ON_PIN
 // (which turns off and on a power supply)
-
-// small pulled up mosfet on the USB D+ line.
-#define USB_ENABLE_PIN          PC13
-
 
 // LCD / Controller
 #ifndef CUSTOM_CONTROLLER_PINS
@@ -159,12 +156,11 @@
  
 /* // Moses - for debugging stm32f1 hal only
 #define ENABLE_SOFTWARE_SPI_CLASS 1
-#define SD_SOFT_MISO_PIN PA6
-#define SD_SOFT_MOSI_PIN PA7
-#define SD_SOFT_SCK_PIN PA5
+#define SD_SOFT_MISO_PIN        PA6
+#define SD_SOFT_MOSI_PIN        PA7
+#define SD_SOFT_SCK_PIN         PA5
 */
 
-#define TMC_SW_SERIAL_BAUD      57600
 
 #define ORIG_PS_ON_PIN          NO_PIN 
 #define ORIG_X_MAX_PIN          NO_PIN

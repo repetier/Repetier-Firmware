@@ -35,27 +35,24 @@
   modification of the original SoftwareSerial found in STM32Duino's library. 
   The only changes are the use of bare timer IRQ functions rather than 
   the callback functions HardwareTimer provides to improve performance.
-  This requires WEAK_HARDWARE_TIMERS defined and obviously 
-  the original timer IRQ's found in HardwareTimers.cpp marked as 
-  __attribute__ ((weak)) to work.
 
-    !Extra note @ 9/13/20!
-        Compiling with GCC'S LTO (Link time optimization -flto)
-        while having weak attribute marked timers AND the 
-        WEAK_HARDWARE_TIMERS macro missing/undefined and /NOT/ replacing 
-        the timers yourself, will freeze the micro because of the multiple
-        weak symbols from the core and HWTimer. (GCC undefined behavior etc)
-        Compiling with LTO off doesn't seem to cause an issue.
+  This requires a modified CMSIS assembly startup file for your device with
+  renamed timer handler functions prefixed with RAW_ (eg. RAW_TIMx_Handler())
 
   If you're using a custom TIMER_SERIAL timer, make SURE to also define 
-  TIMER_SERIAL_RAW_IRQ with the correct TIM timer handler. 
-  eg #define TIMER_SERIAL_RAW_IRQ TIM8_IRQHandler
+  TIMER_SERIAL_RAW_IRQ with the correct RAW_TIM timer handler. 
+  eg #define TIMER_SERIAL_RAW_IRQ RAW_TIM8_IRQHandler
 
   -- AbsoluteCatalyst 9/13/2020 update:
         Slightly improved performance via usage of STM32's 
         slimmer/faster LL HAL driver and less redundant 
         operations performed in setSpeed. My next update
-        on this will be implementing DMA.
+        on this will be implementing DMA. - ok not yet
+
+  -- AbsoluteCatalyst 9/19/20 quick update:
+        Removed all the WEAK_* macros and undid the hack itself.
+        Now switched over to a custom CMSIS startup file with renamed IRQ
+        timer handlers. RAW_TIMx_Handler() etc. Simple.
 
 */
 
@@ -71,7 +68,7 @@
 #define _SS_MAX_RX_BUFF 64 // RX buffer size
 
 class SoftwareSerial : public Stream {
-  private:
+private:
     // per object data
     uint16_t _receivePin;
     uint16_t _transmitPin;
@@ -96,9 +93,9 @@ class SoftwareSerial : public Stream {
     // static data
     static HardwareTimer timer;
     static TIM_TypeDef* timerInst;
-    static SoftwareSerial *active_listener;
-    static SoftwareSerial *volatile active_out;
-    static SoftwareSerial *volatile active_in;
+    static SoftwareSerial* active_listener;
+    static SoftwareSerial* volatile active_out;
+    static SoftwareSerial* volatile active_in;
     static int32_t tx_tick_cnt;
     static volatile int32_t rx_tick_cnt;
     static uint32_t tx_buffer;
@@ -114,13 +111,8 @@ class SoftwareSerial : public Stream {
     void setRX();
     void setSpeed(uint32_t speed);
     void setRXTX(bool input);
-#if defined(WEAK_HARDWARE_TIMERS) // Could always just be left public 
-  public:
+public:
     static void handleInterrupt();
-#else 
-    static void handleInterrupt();
-  public:
-#endif
     // public methods
 
     static DMA_HandleTypeDef timerDMAHandle;

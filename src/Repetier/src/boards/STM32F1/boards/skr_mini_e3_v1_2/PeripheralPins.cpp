@@ -12,7 +12,6 @@
  * Automatically generated from STM32F103R(8-B)Tx.xml and STM32F103R(C-D-E)Tx.xml
  */
 
-// moses todo put this in our conf.
 #include "Arduino.h"
 #include "PeripheralPins.h"
 
@@ -22,8 +21,80 @@
  * =====
  */
 
-//*** ADC ***
+constexpr PinName digitalPin[] = {
+    PA_0,  //D0
+    PA_1,  //D1
+    PA_2,  //D2
+    PA_3,  //D3
+    PA_4,  //D4
+    PA_5,  //D5
+    PA_6,  //D6
+    PA_7,  //D7
+    PA_8,  //D8
+    PA_9,  //D9
+    PA_10, //D10
+    PA_11, //D11
+    PA_12, //D12
+    PA_13, //D13
+    PA_14, //D14
+    PA_15, //D15
+    PB_0,  //D16
+    PB_1,  //D17
+    PB_2,  //D18
+    PB_3,  //D19
+    PB_4,  //D20
+    PB_5,  //D21
+    PB_6,  //D22
+    PB_7,  //D23
+    PB_8,  //D24
+    PB_9,  //D25
+    PB_10, //D26
+    PB_11, //D27
+    PB_12, //D28
+    PB_13, //D29
+    PB_14, //D30
+    PB_15, //D31
+    PC_0,  //D32
+    PC_1,  //D33
+    PC_2,  //D34
+    PC_3,  //D35
+    PC_4,  //D36
+    PC_5,  //D37
+    PC_6,  //D38
+    PC_7,  //D39
+    PC_8,  //D40
+    PC_9,  //D41
+    PC_10, //D42
+    PC_11, //D43
+    PC_12, //D44
+    PC_13, //D45
+    PC_14, //D46
+    PC_15, //D47
+    PD_0,  //D48
+    PD_1,  //D49
+    PD_2   //D50
+};
 
+constexpr uint32_t analogInputPin[] = {
+    PA_0, //A0
+    PA_1, //A1
+    PA_2, //A2
+    PA_3, //A3
+    PA_4, //A4
+    PA_5, //A5
+    PA_6, //A6
+    PA_7, //A7
+    PB_0, //A8
+    PB_1, //A9
+    PC_0, //A10
+    PC_1, //A11
+    PC_2, //A12
+    PC_3, //A13
+    PC_4, //A14
+    PC_5  //A15
+};
+
+//*** ADC ***
 #ifdef HAL_ADC_MODULE_ENABLED
 constexpr PinMap PinMap_ADC[] = {
     { PA_0, ADC1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 0, 0) }, // ADC1_IN0
@@ -106,7 +177,6 @@ constexpr PinMap PinMap_I2C_SCL[] = {
 #endif
 
 //*** PWM ***
-
 #ifdef HAL_TIM_MODULE_ENABLED
 constexpr PinMap PinMap_PWM[] = {
     { PA_0, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 1, 0) }, // TIM2_CH1
@@ -299,6 +369,6 @@ constexpr PinMap PinMap_USB[] = {
     { PA_12, USB, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, AFIO_NONE) }, // USB_DP
     { NC, NP, 0 }
 };
-#endif
-
  
+
+#endif
