@@ -262,20 +262,17 @@ TimerFunction* servo = nullptr;
 TimerFunction* toneTimer = nullptr;
 
 /*
- Moses - Weakening HardwareTimer's timer bare interrupt functions
- and then replacing them here yields a performance increase.
+ Moses - renaming the timer interrupt handlers in the CMSIS startup file
+ and then using them manually rather than HardwareTimer/HAL yields a 
+ performance increase. (We steal them back since they're used by HardwareTimer)
  STM32F103RCT6 (SKR Mini E3) - Switching a pin HIGH upon entering the motion3
- timer (TIM6_IRQHandler), LOW right before exiting @ 150khz 
+ timer (TIM6_IRQHandler here), LOW right before exiting @ 150khz 
 
- Using non-weak HardwareTimer callbacks: 3.364us
- Using weakened bare timer IRQ's here:   1.362us
- (Non-weak tested by writing the pin high/low inside of HardwareTimer.cpp)
- Both timed under -O3 optimizations
- 150khz~ seems to be the max stepper frequency I can achieve with non-weak timers
- without issues.
- 270khz~ with bare IRQ's
- (TODO: Maybe it'd be easier/safer to just selectively hide timers in the library
- using macros, eg. "#if HWT_RELEASE_RAW_TIMx_IRQ" or something.)
+ Using HardwareTimer callbacks: 3.364us
+ Using raw IRQ's here:   1.362us
+ 
+ (HardwareTimer tested by writing the pin high/low inside of HardwareTimer.cpp
+  and inside it's TIM6_IRQHandler.)
 */
 
 extern "C" void TIMER_VECTOR(MOTION2_TIMER_NUM);
@@ -285,7 +282,6 @@ extern "C" void TIMER_VECTOR(TONE_TIMER_NUM);
 
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
 extern void servoOffTimer();
-extern void beeperComparePhase();
 extern "C" void TIMER_VECTOR(SERVO_TIMER_NUM);
 static uint32_t ServoPrescalerfactor = 20000;
 static uint32_t Servo2500 = 2500;
@@ -379,7 +375,7 @@ void HAL::setupTimer() {
             toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
             toneTimer->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
             toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
-            toneTimer->timer->attachInterrupt(1, &beeperComparePhase);
+            toneTimer->timer->attachInterrupt(1, [] {});
             // Not on by default for output_compare
             LL_TIM_OC_EnablePreload(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
             LL_TIM_OC_EnableFast(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
@@ -763,9 +759,7 @@ void HAL::resetHardware() {
  Setting for I2C Clock speed. needed to change  clock speed for different peripherals
 ****************************************************************************************/
 
-void HAL::i2cSetClockspeed(uint32_t clockSpeedHz)
-
-{
+void HAL::i2cSetClockspeed(uint32_t clockSpeedHz) {
 #if defined(WIRE_PORT) && !defined(HAL_I2C_MODULE_DISABLED)
     WIRE_PORT.setClock(clockSpeedHz);
 #endif
@@ -1018,7 +1012,6 @@ void HAL::spiEnd() {
 }
 
 #if NUM_BEEPERS > 0
-void beeperComparePhase() { }
 void TIMER_VECTOR(TONE_TIMER_NUM) {
     bool beeperIRQPhase = false;
     if (LL_TIM_IsActiveFlag_UPDATE(TIMER(TONE_TIMER_NUM))) {

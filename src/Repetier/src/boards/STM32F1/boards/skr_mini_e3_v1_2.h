@@ -133,7 +133,7 @@
 
 // Meant for Bigtree's relay module (auto shutdown) 
 #define POWER_RELAY_MODULE_PIN  PC12 // AKA PT-DET (J7 Connector)
-// I don't know how there's functions but I believe it could be tied to ORIG_PS_ON_PIN
+// I'm unsure how their module functions but I believe it could be tied to ORIG_PS_ON_PIN
 // (which turns off and on a power supply)
 
 // LCD / Controller
