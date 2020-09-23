@@ -308,6 +308,7 @@ static uint32_t Servo2500 = 2500;
 #endif
 
 void HAL::hwSetup(void) {
+    updateStartReason();
 #if DEBUG_TIMING
     SET_OUTPUT(DEBUG_ISR_STEPPER_PIN);
     SET_OUTPUT(DEBUG_ISR_MOTION_PIN);
@@ -333,23 +334,6 @@ void HAL::hwSetup(void) {
     ServoPrescalerfactor = (LL_TIM_GetPrescaler(servo->tim) + 1);
     Servo2500 = ((2500 * (servo->timer->getTimerClkFreq() / 1000000)) / ServoPrescalerfactor) - 1;
     HAL_NVIC_SetPriority(TIMER_IRQ(SERVO_TIMER_NUM), 2, 0);
-#endif
-
-#if NUM_BEEPERS > 0
-    for (int i = 0; i < NUM_BEEPERS; i++) {
-        if (beepers[i]->getOutputType() == 1) {
-            // If we have any SW beepers, enable the beeper IRQ
-            toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
-            toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
-            toneTimer->timer->setMode(2, TIMER_OUTPUT_COMPARE);
-            toneTimer->timer->setOverflow(0);
-            toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
-            toneTimer->timer->setInterruptPriority(3, 0);
-            toneTimer->timer->refresh();
-            toneTimer->timer->resume();
-            break;
-        }
-    }
 #endif
 
 #if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
@@ -422,9 +406,6 @@ void HAL::setupTimer() {
         }
     }
 #endif
-
-    InterruptProtectedBlock noInts;
-    dwt_init();
 }
 
 // Try to initialize pinNumber as hardware PWM. Returns internal
@@ -519,19 +500,19 @@ struct AnalogFunction {
 };
 
 // Initialize ADC channels
-static AnalogFunction analogValues[MAX_ANALOG_INPUTS] = { false, -1, 0, nullptr, -1 };
-static AnalogFunction* analogMap[256] = { nullptr }; // Map pin number to entry in analogValues
+static AnalogFunction analogValues[NUM_ANALOG_INPUTS] = { false, -1, 0, nullptr, -1 };
+static AnalogFunction* analogMap[300] = { nullptr }; // Map pin number to entry in analogValues
 int numAnalogInputs = 0;
-uint32_t adcData[16] = { 0 }; // Target for DMA adc transfer
+uint16_t adcData[NUM_ANALOG_INPUTS] = { 0 }; // Target for DMA adc transfer
 
 void reportAnalog() {
-    for (int i = 0; i < 256; i++) {
+    for (int i = 0; i < 300; i++) {
         if (analogMap[i]) {
             Com::printF("Analog ", i);
             Com::printFLN(" = ", static_cast<int32_t>(analogMap[i]->lastValue));
         }
     }
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < numAnalogInputs; i++) {
         Com::printF("adc ", i);
         Com::printF(" channel ", analogValues[i].channel);
         Com::printF(" pin ", analogValues[i].pin);
@@ -557,17 +538,12 @@ void HAL::reportHALDebug() {
     Com::printFLN("dmaerror:", dmaerror);
 }
 
-//#define USE_DMA_ADC_IRQ_CALLBACK 1
-// ^^^ Use the HAL_ADC_ConvCpltCallback interrupt function instead of reading the dma
-// buffer inside our PWM interrupt.
-
 void HAL::analogStart(void) {
     // Analog channels being used are already enabled. Start conversion
     // only if we have any analog sources.
     if (numAnalogInputs == 0) {
         return;
     }
-    ADC_ChannelConfTypeDef sConfig = { 0 };
 
     // All of the following needs more tuning, but works decently for now.
     AdcHandle.Instance = ADC1;
@@ -583,35 +559,33 @@ void HAL::analogStart(void) {
         adcerror++;
         return;
     }
-#ifndef USE_DMA_ADC_IRQ_CALLBACK
+    ADC_ChannelConfTypeDef sConfig = { 0 };
     sConfig.SamplingTime = ADC_SAMPLETIME_41CYCLES_5;
-#else
-    sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
-#endif
+
     for (int i = 0; i < numAnalogInputs; i++) {
         sConfig.Channel = analogValues[i].channel;
         sConfig.Rank = i + 1;
         if (HAL_ADC_ConfigChannel(&AdcHandle, &sConfig) != HAL_OK) {
             adcerror++;
-            // Error_Handler();
         }
     }
-
-    RCC_PeriphCLKInitTypeDef PeriphClkInit;
-    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-    PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV8;
-    HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
-
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_ADC1_CLK_ENABLE();
     __HAL_RCC_DMA1_CLK_ENABLE(); // ADC1 is connected with DMA1
+
+    RCC_PeriphCLKInitTypeDef PeriphClkInit = { 0 };
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+    PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV4;
+    HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
+
+    HAL_ADCEx_Calibration_Start(&AdcHandle);
 
     hdma_adc.Instance = DMA1_Channel1;
     hdma_adc.Init.Direction = DMA_PERIPH_TO_MEMORY;
     hdma_adc.Init.PeriphInc = DMA_PINC_DISABLE;
     hdma_adc.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_adc.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
-    hdma_adc.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+    hdma_adc.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+    hdma_adc.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
     hdma_adc.Init.Mode = DMA_CIRCULAR;
     hdma_adc.Init.Priority = DMA_PRIORITY_HIGH;
     dmaerror += HAL_DMA_Init(&hdma_adc);
@@ -620,39 +594,10 @@ void HAL::analogStart(void) {
     dmaInitError = hdma_adc.ErrorCode;
     __HAL_LINKDMA(&AdcHandle, DMA_Handle, hdma_adc);
 
-#ifdef USE_DMA_ADC_IRQ_CALLBACK
-    HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 3, 0);
-    HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-#endif
-
-    // Todo: fix/check if adcdata's size is correct for word
-    //                                           v          v
-    dmaerror += HAL_ADC_Start_DMA(&AdcHandle, adcData, numAnalogInputs);
-#ifndef USE_DMA_ADC_IRQ_CALLBACK
+    dmaerror += HAL_ADC_Start_DMA(&AdcHandle, (uint32_t*)(adcData), numAnalogInputs);
     // Just in case.
     __HAL_DMA_DISABLE_IT(&hdma_adc, DMA_IT_HT | DMA_IT_TE | DMA_IT_TC);
-#endif
 }
-
-#ifdef USE_DMA_ADC_IRQ_CALLBACK
-extern "C" void DMA1_Channel1_IRQHandler(void) {
-    HAL_DMA_IRQHandler(&hdma_adc);
-}
-extern "C" void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle) {
-#ifdef DEBUG_TIMING
-    WRITE(DEBUG_ISR_ANALOG_PIN, 1);
-#endif
-    for (int i = 0; i < numAnalogInputs; i++) {
-        analogValues[i].lastValue = adcData[i];
-    }
-#undef IO_TARGET
-#define IO_TARGET IO_TARGET_ANALOG_INPUT_LOOP
-#include "io/redefine.h"
-#ifdef DEBUG_TIMING
-    WRITE(DEBUG_ISR_ANALOG_PIN, 0);
-#endif
-}
-#endif
 
 void HAL::analogEnable(int pinId) {
     PinName pin = static_cast<PinName>(pinId);
@@ -666,14 +611,16 @@ void HAL::analogEnable(int pinId) {
     analogMap[pinId] = af;
     af->enabled = true;
     uint32_t function = pinmap_function(pin, PinMap_ADC);
-    // Set pin as analog input
-    GPIO_InitTypeDef GPIO_InitStruct;
-    GPIO_InitStruct.Pin = STM_GPIO_PIN(pin);
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-
-    HAL_GPIO_Init(get_GPIO_Port(STM_PORT(pin)), &GPIO_InitStruct);
+    // Moses - Todo: need to finish temp & vref inputs
+    if (pin != PADC_TEMP && pin != PADC_VREF) {
+        // Set pin as analog input
+        GPIO_InitTypeDef GPIO_InitStruct;
+        GPIO_InitStruct.Pin = STM_GPIO_PIN(pin);
+        GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+        GPIO_InitStruct.Pull = GPIO_NOPULL;
+        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+        HAL_GPIO_Init(get_GPIO_Port(STM_PORT(pin)), &GPIO_InitStruct);
+    }
     af->pin = pinId;
     af->channel = STM_PIN_CHANNEL(function);
 }
@@ -774,9 +721,27 @@ void HAL::importEEPROM() {
 
 #endif
 
+void HAL::updateStartReason() {
+    if (__HAL_RCC_GET_FLAG(RCC_FLAG_LPWRRST)) {
+        startReason = BootReason::LOW_POWER;
+    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_WWDGRST)
+               || __HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST)) {
+        startReason = BootReason::WATCHDOG_RESET;
+    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST)) {
+        startReason = BootReason::SOFTWARE_RESET;
+    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST)) {
+        startReason = BootReason::POWER_UP;
+    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_PINRST)) {
+        startReason = BootReason::EXTERNAL_PIN;
+    } else {
+        startReason = BootReason::UNKNOWN;
+    }
+    // Clear all the reset flags or else they will remain set during future resets until system power is fully removed.
+    __HAL_RCC_CLEAR_RESET_FLAGS();
+}
 // Print apparent cause of start/restart
 void HAL::showStartReason() {
-    if (__HAL_RCC_GET_FLAG(RCC_FLAG_LPWRRST)) {
+    if (startReason == BootReason::LOW_POWER) {
         Com::printInfoFLN(PSTR("Low power reset"));
     } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_WWDGRST)) {
         Com::printInfoFLN(PSTR("Windowed watchdog reset"));
@@ -997,6 +962,9 @@ void TIMER_VECTOR(MOTION3_TIMER_NUM) {
 #endif
 }
 
+//at 10khz:
+// 0       1       2        3        4
+// 39.2Hz, 78.7Hz, 158.7Hz, 322.5Hz, 666.6Hz
 ufast8_t pwmSteps[] = { 1, 2, 4, 8, 16 };
 ufast8_t pwmMasks[] = { 255, 254, 252, 248, 240 };
 
@@ -1009,9 +977,8 @@ void TIMER_VECTOR(PWM_TIMER_NUM) {
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_TEMP_PIN, 1);
 #endif
-    //InterruptProtectedBlock noInt;
-#if WEAK_HARDWARE_TIMERS
-    LL_TIM_ClearFlag_UPDATE(TIMER(PWM_TIMER_NUM));
+#if WEAK_HARDWARE_TIMERS 
+    LL_TIM_ClearFlag_UPDATE(TIMER(PWM_TIMER_NUM)); 
 #endif
 
     static uint8_t pwm_count0 = 0; // Used my IO_PWM_SOFTWARE!
@@ -1036,7 +1003,6 @@ void TIMER_VECTOR(PWM_TIMER_NUM) {
     pwm_count3 += 8;
     pwm_count4 += 16;
 
-#ifndef USE_DMA_ADC_IRQ_CALLBACK
     if (__HAL_DMA_GET_FLAG(&hdma_adc, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc))) {
         for (int i = 0; i < numAnalogInputs; i++) {
             analogValues[i].lastValue = adcData[i];
@@ -1046,7 +1012,6 @@ void TIMER_VECTOR(PWM_TIMER_NUM) {
 #include "io/redefine.h"
         __HAL_DMA_CLEAR_FLAG(&hdma_adc, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc));
     }
-#endif
 
     GUI::handleKeypress();
 #if FEATURE_WATCHDOG
@@ -1090,7 +1055,7 @@ void HAL::spiEnd() {
 
 #if NUM_BEEPERS > 0
 #if WEAK_HARDWARE_TIMERS
-void beeperComparePhase() {}
+void beeperComparePhase() { }
 void TIMER_VECTOR(TONE_TIMER_NUM) {
     bool beeperIRQPhase = false;
     if (LL_TIM_IsActiveFlag_UPDATE(TIMER(TONE_TIMER_NUM))) {
@@ -1188,13 +1153,14 @@ void HAL::noTone() {
 }
 
 void init(void) {
-    HAL_SuspendTick(); // BTT's bootloader might do some weird things.
+    HAL_SuspendTick();
     hw_config_init();
 }
 
+// moses todo: implement HAL usb connected handler
+// #include "usbd_cdc_if.h"
+//CDC_connected();
 void HAL::switchToBootMode() {
-    // Todo: can use this to immediately load a new firmware version
-    // using BTT's bootloader.
 }
 
 #endif

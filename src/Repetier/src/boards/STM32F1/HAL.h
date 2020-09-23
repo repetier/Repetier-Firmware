@@ -116,7 +116,7 @@ typedef char prog_char;
 #define SERIAL_BUFFER_SIZE SERIAL_RX_BUFFER_SIZE
 
 #define PWM_CLOCK_FREQ 10000
-#define PWM_COUNTER_100MS 1000
+#define PWM_COUNTER_100MS PWM_CLOCK_FREQ / 10
 
 // #define MAX_ANALOG_INPUTS 16 // gets already set in pins_arduino.h
 
