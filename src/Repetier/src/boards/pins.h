@@ -84,10 +84,15 @@ inline void memcopy4(void* dest, void* source) {
 #define SAMD51_BOARD 1
 #include "SAMD51/pins.h"
 
-#elif MOTHERBOARD >= 2000 && MOTHERBOARD < 3000
+#elif MOTHERBOARD >= 2000 && MOTHERBOARD < 2500
 
 #define M0_BOARD
 #include "M0/pins.h"
+
+#elif MOTHERBOARD >= 2500 && MOTHERBOARD < 3000
+
+#define STM32F1_BOARD
+#include "STM32F1/pins.h"
 
 #elif MOTHERBOARD >= 3000 && MOTHERBOARD < 3500
 
@@ -111,6 +116,9 @@ inline void memcopy4(void* dest, void* source) {
 #endif
 #ifdef M0_BOARD
 #include "M0/HAL.h"
+#endif
+#ifdef STM32F1_BOARD
+#include "STM32F1/HAL.h"
 #endif
 #ifdef STM32F4_BOARD
 #include "STM32F4/HAL.h"
