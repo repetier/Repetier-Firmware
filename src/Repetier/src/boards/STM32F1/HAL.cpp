@@ -70,6 +70,7 @@ extern "C" char* sbrk(int i);
 char HAL::virtualEeprom[EEPROM_BYTES] = { 0 };
 bool HAL::wdPinged = true;
 uint8_t HAL::i2cError = 0;
+BootReason HAL::startReason = BootReason::UNKNOWN;
 
 enum class TimerUsage {
     UNUSED,
@@ -723,22 +724,17 @@ void HAL::updateStartReason() {
 void HAL::showStartReason() {
     if (startReason == BootReason::LOW_POWER) {
         Com::printInfoFLN(PSTR("Low power reset"));
-    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_WWDGRST)) {
-        Com::printInfoFLN(PSTR("Windowed watchdog reset"));
-    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST)) {
+    } else if (startReason == BootReason::WATCHDOG_RESET) {
         Com::printInfoFLN(Com::tWatchdog);
-    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST)) {
+    } else if (startReason == BootReason::SOFTWARE_RESET) {
         Com::printInfoFLN(PSTR("Software reset"));
-    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST)) {
+    } else if (startReason == BootReason::POWER_UP) {
         Com::printInfoFLN(Com::tPowerUp);
-    } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_PINRST)) {
+    } else if (startReason == BootReason::EXTERNAL_PIN) {
         Com::printInfoFLN(PSTR("External reset pin reset"));
     } else {
         Com::printInfoFLN(PSTR("Unknown reset reason"));
     }
-
-    // Clear all the reset flags or else they will remain set during future resets until system power is fully removed.
-    __HAL_RCC_CLEAR_RESET_FLAGS();
 }
 
 // Return available memory
