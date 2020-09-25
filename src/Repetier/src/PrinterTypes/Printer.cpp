@@ -148,8 +148,8 @@ void Printer::setDebugLevel(uint8_t newLevel) {
             // Disable all heaters in case they were on
             HeatManager::disableAllHeaters();
         }
+        Com::printFLN(PSTR("DebugLevel:"), (int)newLevel);
     }
-    Com::printFLN(PSTR("DebugLevel:"), (int)newLevel);
 }
 
 void Printer::toggleEcho() {
