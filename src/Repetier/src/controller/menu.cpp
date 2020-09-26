@@ -810,6 +810,7 @@ void __attribute__((weak)) menuConfig(GUIAction action, void* data) {
     }
     GUI::menuSelectableP(action, PSTR("Store Settings"), directAction, (void*)GUI_DIRECT_ACTION_STORE_EEPROM, GUIPageType::ACTION);
     GUI::menuSelectableP(action, PSTR("Factory Reset"), directAction, (void*)GUI_DIRECT_ACTION_FACTORY_RESET, GUIPageType::ACTION);
+    GUI::menuSelectableP(action, PSTR("Reboot"), directAction, (void*)GUI_DIRECT_ACTION_REBOOT, GUIPageType::ACTION);
     GUI::menuEnd(action);
 }
 

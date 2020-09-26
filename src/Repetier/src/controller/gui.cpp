@@ -781,6 +781,10 @@ void directAction(GUIAction action, void* data) {
     case GUI_DIRECT_ACTION_TOGGLE_PROBE_PAUSE:
         ZProbeHandler::setHeaterPause(!ZProbeHandler::getHeaterPause());
         break;
+    case GUI_DIRECT_ACTION_REBOOT:
+        HAL::serialFlush();
+        HAL::resetHardware();
+        break;
     }
 }
 
