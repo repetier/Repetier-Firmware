@@ -30,7 +30,7 @@
 #define MAX_RAM                 47960
 
 // Steppers
-#define ORIG_X_STEP_PIN         PA2
+#define ORIG_X_STEP_PIN         PB13
 #define ORIG_X_DIR_PIN          PB12
 #define ORIG_X_ENABLE_PIN       PB14
  
@@ -51,6 +51,8 @@
 #define ORIG_E0_STEP_PIN        PB3
 #define ORIG_E0_DIR_PIN         PB4
 #define ORIG_E0_ENABLE_PIN      PD2
+
+#define ORIG_E0_MIN_PIN         PC15 // E0-STOP
 
 #define X_SW_SERIAL_TMC_PIN     PB15
 #define Y_SW_SERIAL_TMC_PIN     PC6  
