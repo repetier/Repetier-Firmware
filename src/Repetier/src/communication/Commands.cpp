@@ -191,8 +191,7 @@ void Commands::waitUntilEndOfAllBuffers() {
     }
 }
 
-void Commands::printTemperatures(bool showRaw) {
-    int error;
+void Commands::printTemperatures() {
 #if NUM_TOOLS > 0
     Tool* t = Tool::getActiveTool();
     if (t != nullptr && t->supportsTemperatures()) {
@@ -221,20 +220,22 @@ void Commands::printTemperatures(bool showRaw) {
 }
 
 void Commands::changeFeedrateMultiply(int factor) {
-    if (factor < 25)
+    if (factor < 25) {
         factor = 25;
-    if (factor > 500)
+    } else if (factor > 500) {
         factor = 500;
+    }
     Printer::feedrate *= (float)factor / (float)Printer::feedrateMultiply;
     Printer::feedrateMultiply = factor;
     Com::printFLN(Com::tSpeedMultiply, factor);
 }
 
 void Commands::changeFlowrateMultiply(int factor) {
-    if (factor < 25)
+    if (factor < 25) {
         factor = 25;
-    if (factor > 200)
+    } else if (factor > 200) {
         factor = 200;
+    }
     Printer::extrudeMultiply = factor;
     // TODO: volumetric extrusion
     //if (Extruder::current->diameter <= 0)

@@ -449,7 +449,7 @@ void __attribute__((weak)) MCode_104(GCode* com) {
 
 void __attribute__((weak)) MCode_105(GCode* com) {
     Com::writeToAll = false;
-    Commands::printTemperatures(com->hasX());
+    Commands::printTemperatures();
 }
 
 void __attribute__((weak)) MCode_106(GCode* com) {
