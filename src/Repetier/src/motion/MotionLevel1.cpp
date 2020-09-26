@@ -616,6 +616,11 @@ bool Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate, bool second
         || (tool != nullptr && tool->getHeater() != nullptr && (tool->getHeater()->getCurrentTemperature() < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()))
 #endif
     ) { // ignore
+#if MIN_EXTRUDER_TEMP > MAX_ROOM_TEMPERATURE
+        if (coords[E_AXIS] != IGNORE_COORDINATE && !Printer::debugDryrun()) {
+            Com::printWarningFLN(Com::tColdExtrusionPrevented);
+        }
+#endif
         destinationPositionTransformed[E_AXIS] = currentPositionTransformed[E_AXIS];
     }
     if (feedrate == IGNORE_COORDINATE) {
@@ -793,6 +798,11 @@ bool Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate, bool seconda
         || (tool != nullptr && tool->getHeater() != nullptr && (tool->getHeater()->getCurrentTemperature() < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed()))
 #endif
     ) {
+#if MIN_EXTRUDER_TEMP > MAX_ROOM_TEMPERATURE
+        if (coords[E_AXIS] != IGNORE_COORDINATE && !Printer::debugDryrun()) {
+            Com::printWarningFLN(Com::tColdExtrusionPrevented);
+        }
+#endif
         currentPositionTransformed[E_AXIS] = destinationPositionTransformed[E_AXIS];
     }
     PrinterType::transformedToOfficial(destinationPositionTransformed, currentPosition);

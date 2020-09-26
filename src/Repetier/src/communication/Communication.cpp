@@ -132,6 +132,7 @@ FSTRINGVALUE(Com::tUnitPWM, "0-255")
 FSTRINGVALUE(Com::tUnitRPM, "1/min")
 FSTRINGVALUE(Com::tM999, "Fail mode active. Send M999 to disable failed mode!")
 FSTRINGVALUE(Com::tTestM999, "Testing fatal error")
+FSTRINGVALUE(Com::tColdExtrusionPrevented, "Cold extrusion prevented")
 #if JSON_OUTPUT
 FSTRINGVALUE(Com::tJSONDir, "{\"dir\":\"")
 FSTRINGVALUE(Com::tJSONFiles, "\",\"files\":[")
