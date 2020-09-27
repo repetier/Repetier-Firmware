@@ -342,7 +342,7 @@ void Printer::kill(uint8_t onlySteppers) {
     } else {
         UI_STATUS_UPD("Motors disabled");
     }
-    Commands::printTemperatures(false);
+    Commands::printTemperatures();
 }
 
 // This is for untransformed move to coordinates in printers absolute Cartesian space

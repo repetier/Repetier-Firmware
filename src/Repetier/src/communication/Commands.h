@@ -35,7 +35,7 @@ public:
     static void waitUntilEndOfAllMoves();
     static void waitUntilEndOfAllBuffers();
     static void waitMS(uint32_t wait);
-    static void printTemperatures(bool showRaw = false);
+    static void printTemperatures();
     static void changeFeedrateMultiply(int factorInPercent);
     static void changeFlowrateMultiply(int factorInPercent);
     static void reportPrinterUsage();
