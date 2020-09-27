@@ -199,11 +199,11 @@ extern void updateEndstops();
 class GCode;
 class ServoInterface {
 public:
-    virtual int getPosition();
-    virtual void setPosition(int pos, int32_t timeout);
-    virtual void enable();
-    virtual void disable();
-    virtual void executeGCode(GCode* com);
+    virtual int getPosition() = 0;
+    virtual void setPosition(int pos, int32_t timeout) = 0;
+    virtual void enable() = 0;
+    virtual void disable() = 0;
+    virtual void executeGCode(GCode* com) = 0;
 };
 
 enum class BootReason {
