@@ -2492,15 +2492,17 @@ void Commands::processMCode(GCode* com) {
             break;
         UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HEATING_BED_ID));
         Commands::waitUntilEndOfAllMoves();
-        if (com->hasS())
+        if (com->hasS()) {
             Extruder::setHeatedBedTemperature(com->S + (com->hasO() ? com->O : 0),
                                               com->hasF() && com->F > 0);
-        else if (com->hasH())
+        } else if (com->hasH()) {
             Extruder::setHeatedBedTemperature(heatedBedController.preheatTemperature + (com->hasO() ? com->O : 0),
                                               com->hasF() && com->F > 0);
+        }
 #if defined(SKIP_M190_IF_WITHIN) && SKIP_M190_IF_WITHIN > 0
-        if (abs(heatedBedController.currentTemperatureC - heatedBedController.targetTemperatureC) < SKIP_M190_IF_WITHIN)
+        if (abs(heatedBedController.currentTemperatureC - heatedBedController.targetTemperatureC) < SKIP_M190_IF_WITHIN) {
             break;
+        }
 #endif
         EVENT_WAITING_HEATER(-1);
         tempController[HEATED_BED_INDEX]->waitForTargetTemperature();

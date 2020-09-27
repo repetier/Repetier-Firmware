@@ -1088,7 +1088,7 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
                 if (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 5 : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC + 5) {
                     maxWaitUntil = currentTime + 120000L;
                 }
-            } else if ((millis_t)(maxWaitUntil - currentTime) < 2000000000UL) {
+            } else if ((millis_t)(maxWaitUntil - currentTime) > 2000000000UL) {
                 break;
             }
             if ((waituntil == 0 && (dirRising ? actExtruder->tempControl.currentTemperatureC >= actExtruder->tempControl.targetTemperatureC - 1 : actExtruder->tempControl.currentTemperatureC <= actExtruder->tempControl.targetTemperatureC + 1))
