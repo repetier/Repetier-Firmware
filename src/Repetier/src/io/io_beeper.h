@@ -79,7 +79,8 @@ public:
         , lastConditionStep(0)
         , curConditionStep(0)
         , curValidCondition(nullptr)
-        , lastValidCondition(nullptr) {}
+        , lastValidCondition(nullptr) { }
+    virtual ~BeeperSourceBase() { };
     inline fast8_t getHeadDist() {
         return !isPlaying() ? 0 : (toneHead >= toneTail ? (toneHead - toneTail) : (beepBufSize - toneTail + toneHead));
     }
