@@ -27,7 +27,7 @@
 
 void LevelingCorrector::correct(Plane* plane) {
     // adjust current z
-    Motion1::currentPositionTransformed[Z_AXIS] = plane->z(Motion1::currentPositionTransformed[X_AXIS], Motion1::currentPositionTransformed[X_AXIS]);
+    Motion1::currentPositionTransformed[Z_AXIS] = plane->z(Motion1::currentPositionTransformed[X_AXIS], Motion1::currentPositionTransformed[Y_AXIS]);
     Motion1::updatePositionsFromCurrentTransformed();
     // enable rotation
 #if LEVELING_METHOD > 0
