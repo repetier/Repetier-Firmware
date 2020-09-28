@@ -330,6 +330,7 @@ extern millis_t eprSyncTime;
 extern void FEUpdateChanges(void);
 extern void FEInit(void);
 #endif
+extern void analogInit(void);
 
 class HAL {
 public:
@@ -360,7 +361,7 @@ public:
         REG_WDT_CTRLA = 0;                   // Disable the WDT
         while (WDT->SYNCBUSY.bit.ENABLE) { } // Wait for synchronization
 #endif
-
+        analogInit();
 #if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
         HAL::i2cInit(TWI_CLOCK_FREQ);
 #endif
@@ -642,7 +643,7 @@ public:
     static void i2cSetClockspeed(uint32_t clockSpeedHz);
     static void i2cInit(uint32_t clockSpeedHz);
     static void i2cStartRead(uint8_t address7bit, uint8_t bytes);
-    // static void i2cStart(uint8_t address7bit);
+    static void i2cStart(uint8_t address7bit);
     static void i2cStartAddr(uint8_t address7bit, unsigned int pos, uint8_t readBytes);
     static void i2cStop(void);
     static void i2cWrite(uint8_t data);
@@ -673,6 +674,9 @@ public:
     static void reportHALDebug() { }
     static volatile uint8_t insideTimer1;
     static void switchToBootMode();
+
+private:
+    static void analogInit(void);
 };
 
 #endif // HAL_H

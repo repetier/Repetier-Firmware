@@ -33,6 +33,11 @@
 #include <samd51/include/samd51.h>
 //#include <samd51/include/pio/samd51p20a.h>
 
+#if (MOTHERBOARD == MOTHERBOARD_AGC_SMARTRAMPS_NO_EEPROM || MOTHERBOARD == MOTHERBOARD_AGC_SMARTRAMPS_EEPROM || MOTHERBOARD == MOTHERBOARD_AGC_RADDS)
+
+#define ANALOG_PIN_TO_CHANNEL(p) (p < 62 ? p - 46 : p - 67)
+#define ANALOG_TO_DIGITAL_PIN(p) ((p < 8) ? 67 + (p) : (p < 16) ? 54 + (p)-8 : (p < 18) ? 12 + (p)-16 : (p == 18) ? 9 : -1)
+
 // 0 .. 53 - Digital pins
 // ----------------------
 // 0/1 - UART (Serial)
@@ -280,9 +285,11 @@
 #define DIO94_PORT PORTA
 #define DIO94_PIN PORT_PA11
 
-// onboard SD detect 
+// onboard SD detect
 #define DIO95_PORT PORTB
 #define DIO95_PIN PORT_PB31
+
+#endif // (MOTHERBOARD == MOTHERBOARD_AGC_SMARTRAMPS_NO_EEPROM || MOTHERBOARD == MOTHERBOARD_AGC_SMARTRAMPS_EEPROM || MOTHERBOARD == MOTHERBOARD_AGC_RADDS)
 
 #ifndef DIO0_PIN
 #error pins for this chip not defined in arduino.h! If you write an appropriate pin definition and have this firmware work on your chip, please submit a pull request

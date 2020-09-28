@@ -560,41 +560,39 @@ void HAL::setHardwareFrequency(int id, uint32_t frequency) {
     // TODO: handle HAL pwm frequency change requests
     //
 }
-// Initialize ADC channels
-#define ANALOG_PIN_TO_CHANNEL(p) (p < 62 ? p - 46 : p - 67)
-int32_t analogValues[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-const PinDescription* analogEnabled[16] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+
+int32_t analogValues[NUM_ANALOG_INPUTS] = { 0 };
+const PinDescription* analogEnabled[NUM_ANALOG_INPUTS] = { nullptr };
+
+Adc* analogAdcMap[NUM_ANALOG_INPUTS]; // = {ADC0,ADC0,ADC0};
+
 void reportAnalog() {
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < NUM_ANALOG_INPUTS; i++) {
         if (analogEnabled[i]) {
             Com::printF("Analog ", i);
             Com::printFLN(" = ", analogValues[i]);
         }
     }
 }
-Adc* analogAdcMap[16] = {
-    ADC0, // D67
-    ADC0,
-    ADC0,
-    ADC1,
-    ADC1,
-    ADC1,
-    ADC1,
-    ADC1, // D74
-    ADC1, // D54
-    ADC1,
-    ADC1,
-    ADC1,
-    ADC1,
-    ADC0,
-    ADC0,
-    ADC0 // D61
-};
+void HAL::analogInit(void) {
+    //    #define ANALOG_TO_DIGITAL_PIN(p) (p < NUM_ANALOG_INPUTS ? p + PIN_A0 : -1 )
+    for (int i = 0; i < NUM_ANALOG_INPUTS; i++) {
+        int Channel = ANALOG_TO_DIGITAL_PIN(i);
+        const PinDescription* pd = &g_APinDescription[Channel];
+        uint32_t attr = pd->ulPinAttribute;
+        if (attr & PIN_ATTR_ANALOG) {
+            analogAdcMap[i] = { ADC0 };
+        } else {
+            analogAdcMap[i] = { ADC1 };
+        }
+    }
+}
+
 static int analogConvertPos = -1;
 void HAL::analogStart(void) {
     // Analog channels being used are already enabled. Start conversion
     // only if we have any analog sources.
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < NUM_ANALOG_INPUTS; i++) {
         if (analogEnabled[i] != nullptr) {
             analogConvertPos = i;
             // Set ADC clock to 48MHz clock
@@ -648,14 +646,14 @@ inline void analogISRFunction() {
     int count = 0;
     do {
         count++;
-        if (++analogConvertPos == 16) {
+        if (++analogConvertPos == NUM_ANALOG_INPUTS) {
             // Process data
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_ANALOG_INPUT_LOOP
 #include "io/redefine.h"
             analogConvertPos = 0;
         }
-    } while (analogEnabled[analogConvertPos] == nullptr && count < 16);
+    } while (analogEnabled[analogConvertPos] == nullptr && count < NUM_ANALOG_INPUTS);
 
     // start new conversion
     if (analogEnabled[analogConvertPos] != nullptr) {
@@ -682,7 +680,7 @@ void ADC1_1_Handler(void) {
 }
 void HAL::analogEnable(int channel) {
     int cNum = ANALOG_PIN_TO_CHANNEL(channel);
-    if (cNum < 0 || cNum >= 16) {
+    if (cNum < 0 || cNum >= NUM_ANALOG_INPUTS) {
         return;
     }
     pinPeripheral(channel, PIO_ANALOG);
@@ -694,7 +692,7 @@ void HAL::analogEnable(int channel) {
 
 int HAL::analogRead(int pin) {
     int cNum = ANALOG_PIN_TO_CHANNEL(pin);
-    if (cNum < 0 || cNum >= 16) { // protect for config errors
+    if (cNum < 0 || cNum >= NUM_ANALOG_INPUTS) { // protect for config errors
         return 0;
     }
     return analogValues[cNum];
