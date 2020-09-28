@@ -633,7 +633,7 @@ void __attribute__((weak)) MCode_115(GCode* com) {
 }
 
 void __attribute__((weak)) MCode_116(GCode* com) {
-    for (fast8_t h = 0; h <= NUM_HEATERS; h++) {
+    for (fast8_t h = 0; h < NUM_HEATERS; h++) {
         EVENT_WAITING_HEATER(h);
         heaters[h]->waitForTargetTemperature();
         EVENT_HEATING_FINISHED(h);
@@ -1123,7 +1123,7 @@ void __attribute__((weak)) MCode_281(GCode* com) {
 
 void __attribute__((weak)) MCode_300(GCode* com) {
 #if NUM_BEEPERS > 0
-    // Can't really hear anything lower. 
+    // Can't really hear anything lower.
     if (Printer::toneVolume <= MINIMUM_TONE_VOLUME) {
         return;
     }

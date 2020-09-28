@@ -646,6 +646,23 @@ bool GUI::handleFloatValueAction(GUIAction& action, float& value, float min, flo
     return orig != value;
 }
 
+bool GUI::handleFloatValueAction(GUIAction& action, float& value, float increment) {
+    if (action == GUIAction::CLICK || action == GUIAction::BACK) {
+        GUI::pop();
+        return false;
+    }
+    float orig = value;
+    if (action == GUIAction::NEXT) {
+        value += nextActionRepeat * increment;
+        contentChanged = true;
+    }
+    if (action == GUIAction::PREVIOUS) {
+        value -= nextActionRepeat * increment;
+        contentChanged = true;
+    }
+    return orig != value;
+}
+
 bool GUI::handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, int32_t max, int32_t increment) {
     if (action == GUIAction::CLICK || action == GUIAction::BACK) {
         GUI::pop();

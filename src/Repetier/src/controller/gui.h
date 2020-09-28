@@ -228,6 +228,7 @@ public:
     static void showValueP(PGM_P text, PGM_P unit, char* value);
     static void showValue(char* text, PGM_P unit, char* value);
     static bool handleFloatValueAction(GUIAction& action, float& value, float min, float max, float increment);
+    static bool handleFloatValueAction(GUIAction& action, float& value, float increment);
     static bool handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, int32_t max, int32_t increment);
 };
 

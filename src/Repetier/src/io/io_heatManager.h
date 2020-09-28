@@ -20,6 +20,7 @@
 #undef HEAT_MANAGER_PID
 #undef HEAT_MANAGER_DYN_DEAD_TIME
 #undef HEAT_MANAGER_PELTIER_PID
+#undef HEAT_MANAGER_DEFINE_HYSTERESIS
 
 #if IO_TARGET == IO_TARGET_PERIODICAL_ACTIONS // periodical action
 
@@ -45,6 +46,9 @@
 
 #define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
     name.init();
+
+#define HEAT_MANAGER_DEFINE_HYSTERESIS(name, hysteresisTemperature, hysteresisTime, maxWait) \
+    name.initHysteresis(hysteresisTemperature, hysteresisTime, maxWait);
 
 #elif IO_TARGET == IO_TARGET_CLASS_DEFINITION
 
@@ -81,6 +85,8 @@
     name.resetFromConfig(maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax);
 #define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable) \
     name.resetFromConfig(maxPwm, decVariance, decPeriod, time1, up1, down1, time2, up2, down2);
+#define HEAT_MANAGER_DEFINE_HYSTERESIS(name, hysteresisTemperature, hysteresisTime, maxWait) \
+    name.initHysteresis(hysteresisTemperature, hysteresisTime, maxWait);
 
 #elif IO_TARGET == IO_TARGET_TOOLS_TEMPLATES // template definitions in tools.cpp
 
@@ -100,4 +106,8 @@
 #endif
 #ifndef HEAT_MANAGER_DYN_DEAD_TIME
 #define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, sampleTime, maxPwm, decVariance, decPeriod, time1, up1, down1, time2, up2, down2, hotPlugable)
+#endif
+
+#ifndef HEAT_MANAGER_DEFINE_HYSTERESIS
+#define HEAT_MANAGER_DEFINE_HYSTERESIS(name, hysteresisTemperature, hysteresisTime, maxWait)
 #endif
