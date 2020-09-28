@@ -73,8 +73,15 @@ void GUI::update() {
                 push(warningScreenP, (void*)PSTR("Reset by Watchdog!"), GUIPageType::STATUS);
                 Printer::playDefaultSound(DefaultSounds::WARNING);
             } else if (HAL::startReason == BootReason::BROWNOUT) {
+#ifdef ALWAYS_SHOW_BROWNOUT_WARNING
                 push(warningScreenP, (void*)PSTR("Brownout reset!"), GUIPageType::STATUS);
                 Printer::playDefaultSound(DefaultSounds::WARNING);
+#else
+                if (Printer::isRescueRequired()) {
+                    push(warningScreenP, (void*)PSTR("Brownout reset!"), GUIPageType::STATUS);
+                    Printer::playDefaultSound(DefaultSounds::WARNING);
+                }
+#endif
             }
         }
     }
