@@ -193,7 +193,7 @@ void SoftwareSerial::setSpeed(uint32_t speed) {
                         pre *= 2;
                     }
                 } while (cmp_value >= UINT16_MAX);
-                LL_TIM_SetPrescaler(timerInst, pre);
+                LL_TIM_SetPrescaler(timerInst, pre - 1);
                 LL_TIM_SetAutoReload(timerInst, cmp_value);
                 _ready = true;
             }
@@ -348,7 +348,7 @@ inline void SoftwareSerial::recv() {
 //
 // Interrupt handling
 //
-inline void SoftwareSerial::handleInterrupt() {
+__attribute__((always_inline)) inline void SoftwareSerial::handleInterrupt() {
     if (active_in) {
         active_in->recv();
     } else if (active_out) {

@@ -71,10 +71,10 @@ void GUI::update() {
             lastRefresh = HAL::timeInMilliseconds();
             if (HAL::startReason == BootReason::WATCHDOG_RESET) {
                 push(warningScreenP, (void*)PSTR("Reset by Watchdog!"), GUIPageType::STATUS);
-                // GUI::setStatusP(PSTR("Reset by Watchdog!"), GUIStatusLevel::WARNING);
+                Printer::playDefaultSound(DefaultSounds::WARNING);
             } else if (HAL::startReason == BootReason::BROWNOUT) {
                 push(warningScreenP, (void*)PSTR("Brownout reset!"), GUIPageType::STATUS);
-                // GUI::setStatusP(PSTR("Brownout reset!"), GUIStatusLevel::WARNING);
+                Printer::playDefaultSound(DefaultSounds::WARNING);
             }
         }
     }
