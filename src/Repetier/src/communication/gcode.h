@@ -35,7 +35,14 @@ enum class FirmwareState { NotBusy = 0,
 class SDCard;
 class Commands;
 class GCode;
+
+#ifndef SERIAL_IN_BUFFER
+#ifdef SERIAL_BUFFER_SIZE
+#define SERIAL_IN_BUFFER SERIAL_BUFFER_SIZE
+#else
 #define SERIAL_IN_BUFFER 128
+#endif
+#endif
 
 class SerialGCodeSource : public GCodeSource {
     Stream* stream;

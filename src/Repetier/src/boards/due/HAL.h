@@ -32,8 +32,13 @@
 
 // You can set different sizes if you want, but with binary mode it does not get faster
 #ifndef SERIAL_RX_BUFFER_SIZE
+#ifdef SERIAL_BUFFER_SIZE
+#define SERIAL_RX_BUFFER_SIZE SERIAL_BUFFER_SIZE
+#else
 #define SERIAL_RX_BUFFER_SIZE 128
 #endif
+#endif
+ 
 
 #ifndef HAL_H
 #define HAL_H
