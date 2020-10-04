@@ -816,7 +816,9 @@ void Commands::executeGCode(GCode* com) {
     if (com->hasG()) {
         processGCode(com);
     } else if (com->hasM()) {
-        processMCode(com);
+        if (!com->isImmediateM()) {
+            processMCode(com);
+        }
     } else if (com->hasT()) { // Process T code
         if (!Printer::failedMode) {
             Motion1::waitForEndOfMoves();

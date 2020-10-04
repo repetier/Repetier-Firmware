@@ -34,6 +34,10 @@
 #define EMERGENCY_PARSER 1
 #endif
 
+#ifndef IMMEDIATE_HOST_COMMANDS
+#define IMMEDIATE_HOST_COMMANDS EMERGENCY_PARSER
+#endif
+
 #include "utilities/constants.h"
 
 // Some helper macros
