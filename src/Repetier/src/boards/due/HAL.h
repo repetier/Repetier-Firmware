@@ -337,6 +337,8 @@ public:
         updateStartReason();
 #if !FEATURE_WATCHDOG
         WDT_Disable(WDT); // Disable watchdog
+#else
+        WDT->WDT_MR |= WDT_MR_WDDBGHLT; // Disable watchdog when debugging only.
 #endif
 
 #if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
