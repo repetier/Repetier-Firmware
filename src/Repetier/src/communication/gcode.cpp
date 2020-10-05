@@ -1270,7 +1270,7 @@ void SerialGCodeSource::prefetchContent() {
         } else // ASCII command
         {
             char ch = commandReceiving[commandsReceivingWritePosition - 1];
-            if (ch == 0 || ch == '\n' || ch == '\r' || !GCodeSource::activeSource->isOpen() /*|| (!commentDetected && ch == ':')*/) // complete line read
+            if (ch == 0 || ch == '\n' || ch == '\r' || !isOpen()) //!GCodeSource::activeSource->isOpen() /*|| (!commentDetected && ch == ':')*/) // complete line read
             {
                 commandReceiving[commandsReceivingWritePosition - 1] = 0;
                 commentDetected = false;
