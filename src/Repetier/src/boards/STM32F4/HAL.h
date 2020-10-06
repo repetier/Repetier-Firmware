@@ -419,7 +419,15 @@ public:
     static inline void serialSetBaudrate(long baud) {
         // Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
+        RFSERIAL2.end();
         RFSERIAL2.begin(baud);
+#endif
+#if defined(USBCON) && defined(USBD_USE_CDC) 
+        if (static_cast<Stream*>(&RFSERIAL) != &SerialUSB) {
+            RFSERIAL.end();
+        }
+#else
+        RFSERIAL.end();
 #endif
         RFSERIAL.begin(baud);
     }

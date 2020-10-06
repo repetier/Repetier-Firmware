@@ -299,14 +299,19 @@ void __attribute__((weak)) menuBaudrate(GUIAction action, void* data) {
         int32_t rate;
         do {
             rate = pgm_read_dword(&(baudrates[(uint8_t)p]));
-            if (rate == baudrate)
+            if (rate == baudrate) {
                 break;
+            }
             p++;
         } while (rate != 0);
-        if (rate == 0)
+        if (rate == 0) {
             p -= 2;
+        }
         if (GUI::handleLongValueAction(action, p, 0, 10, 1)) {
             baudrate = pgm_read_dword(&(baudrates[p]));
+        } else if (action == GUIAction::CLICK) {
+            // Update baudrates on click/pop
+            HAL::serialSetBaudrate(baudrate);
         }
     }
 }
