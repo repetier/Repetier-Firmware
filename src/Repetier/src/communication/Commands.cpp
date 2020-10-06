@@ -812,10 +812,8 @@ void Commands::executeGCode(GCode* com) {
         processMCode(com);
     } else if (com->hasT()) { // Process T code
         if (!Printer::failedMode) {
-            //com->printCommand(); // for testing if this the source of extruder switches
             Motion1::waitForEndOfMoves();
             Tool::selectTool(com->T);
-            // Extruder::selectExtruderById(com->T);
         }
     } else {
         if (Printer::debugErrors()) {

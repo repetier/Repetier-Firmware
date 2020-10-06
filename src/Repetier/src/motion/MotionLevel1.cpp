@@ -1715,7 +1715,7 @@ void Motion1::homeAxes(fast8_t axes) {
     }
 #endif
 */
-    if (Tool::getActiveTool() != nullptr && ok) { // select only if all is homed or we get unwanted moves!
+    if (Tool::getActiveTool() != nullptr && ok && (axes & 7) != 0) { // select only if all is homed or we get unwanted moves! Also only do it if position has changed allowing homing of non position axis in extruder selection.
         Tool::selectTool(activeToolId, true);
     }
     oldCoordinates[E_AXIS] = currentPosition[E_AXIS];
