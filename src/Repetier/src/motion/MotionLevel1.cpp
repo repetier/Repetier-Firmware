@@ -1584,7 +1584,8 @@ void Motion1::homeAxes(fast8_t axes) {
     Printer::setHoming(true);
 #if ZHOME_PRE_RAISE
     // float zAmountRaised = 0;
-    if (ZHOME_PRE_RAISE == 2 || Motion1::minAxisEndstops[Z_AXIS]->update()) {
+    if (ZHOME_PRE_RAISE == 2
+            || (Motion1::minAxisEndstops[Z_AXIS] && Motion1::minAxisEndstops[Z_AXIS]->update())) {
         if (!isAxisHomed(Z_AXIS) || currentPosition[Z_AXIS] + ZHOME_PRE_RAISE_DISTANCE < maxPos[Z_AXIS]) {
             setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_PRE_RAISE_DISTANCE);
             moveRelativeByOfficial(tmpPosition, homingFeedrate[Z_AXIS], false);

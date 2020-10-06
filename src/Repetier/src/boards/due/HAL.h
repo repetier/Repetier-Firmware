@@ -32,8 +32,13 @@
 
 // You can set different sizes if you want, but with binary mode it does not get faster
 #ifndef SERIAL_RX_BUFFER_SIZE
+#ifdef SERIAL_BUFFER_SIZE
+#define SERIAL_RX_BUFFER_SIZE SERIAL_BUFFER_SIZE
+#else
 #define SERIAL_RX_BUFFER_SIZE 128
 #endif
+#endif
+ 
 
 #ifndef HAL_H
 #define HAL_H
@@ -337,6 +342,8 @@ public:
         updateStartReason();
 #if !FEATURE_WATCHDOG
         WDT_Disable(WDT); // Disable watchdog
+#else
+        WDT->WDT_MR |= WDT_MR_WDDBGHLT; // Disable watchdog when debugging only.
 #endif
 
 #if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
