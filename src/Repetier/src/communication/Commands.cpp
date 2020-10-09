@@ -85,6 +85,9 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
 #if EMERGENCY_PARSER
     GCodeSource::prefetchAll();
 #endif
+    if (Printer::isRescueRequired() || Motion1::length != 0 || Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED)) {
+        previousMillisCmd = HAL::timeInMilliseconds();
+    }
     EVENT_PERIODICAL;
 #if defined(DOOR_PIN) && DOOR_PIN > -1
     if (Printer::updateDoorOpen()) {
