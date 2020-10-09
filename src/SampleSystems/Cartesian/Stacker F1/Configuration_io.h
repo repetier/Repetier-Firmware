@@ -2,7 +2,7 @@
 
 This file defines io solutions used. This is the lowest level and is the base
 for all higher level functions using io operations. At several places we need
-subsets of these list of operations. To make configuration easy and easy to 
+subsets of these list of operations. To make configuration easy and easy to
 understand, we use a technique called "x macros". This requires that only
 predefined macro names for IO are used here. Do NOT add anything else here
 or compilation/functionality will break.
@@ -11,7 +11,7 @@ Rules:
 1. Each definition will create a class that is named like the first parameter.
 This class is later used as input to templates building higher functions. By
 convention the names should start with IO followed by something that helps you
-identify the function. 
+identify the function.
 2. Do not use a semicolon at the end. Macro definition gets different meanings
 and will add the semicolon if required.
 
@@ -86,10 +86,9 @@ IO_INPUT_DUMMY(ControllerReset, false)
 
 // Define your endstops inputs
 
-//IO_INPUT_PULLUP(IOEndstopXMax, ORIG_X_MAX_PIN)
+// IO_INPUT_PULLUP(IOEndstopXMax, ORIG_X_MAX_PIN)
 IO_INPUT_INVERTED_PULLUP(IOEndstopXMin, ORIG_X_MIN_PIN)
 IO_INPUT_INVERTED_PULLUP(IOEndstopYMin, ORIG_Y_MIN_PIN)
-IO_INPUT_INVERTED_PULLUP(IOEndstopZMin, ORIG_Z_MIN_PIN)
 IO_INPUT(IOJam1, ORIG_Z_MAX_PIN)
 
 // Define our endstops solutions
@@ -98,13 +97,23 @@ IO_INPUT(IOJam1, ORIG_Z_MAX_PIN)
 
 ENDSTOP_SWITCH_HW(endstopXMin, IOEndstopXMin, X_AXIS, false)
 ENDSTOP_SWITCH_HW(endstopYMin, IOEndstopYMin, Y_AXIS, false)
-ENDSTOP_SWITCH_HW(endstopZMin, IOEndstopZMin, Z_AXIS, false)
 ENDSTOP_NONE(endstopXMax)
 ENDSTOP_NONE(endstopYMax)
 ENDSTOP_NONE(endstopZMax)
+
 // Set to nullptr for no zprobe or &endstopName for a switch
+#ifdef STACKER_WITH_ZPROBE
+IO_INPUT_PULLUP(IOEndstopZProbe, ORIG_Z_MIN_PIN)
+ENDSTOP_SWITCH_HW(endstopZProbe, IOEndstopZProbe, ZPROBE_AXIS, false)
+ENDSTOP_NONE(endstopZMin)
+#undef ZPROBE_ADDRESS
+#define ZPROBE_ADDRESS &endstopZProbe
+#else
+IO_INPUT_INVERTED_PULLUP(IOEndstopZMin, ORIG_Z_MIN_PIN)
+ENDSTOP_SWITCH_HW(endstopZMin, IOEndstopZMin, Z_AXIS, false)
 #undef ZPROBE_ADDRESS
 #define ZPROBE_ADDRESS nullptr
+#endif
 
 // Define fans
 
@@ -117,7 +126,8 @@ IO_PWM_SOFTWARE(CoolerFan, IOCoolerFan1, 0)
 // IO_PDM_SOFTWARE(Fan1NoKSPWM, IOFan1) // alternative to PWM signals
 IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20, 85)
 IO_PWM_SOFTWARE(BoardFan, IOBoardFan, 4)
-COOLER_MANAGER_MOTORS(BoardFanController, BoardFan, 0, 192, 10) // reduced max power for more silent fan
+COOLER_MANAGER_MOTORS(BoardFanController, BoardFan, 0, 192,
+                      10) // reduced max power for more silent fan
 // Define temperature sensors
 
 // Typically they require an analog input (12 bit) so define
@@ -159,8 +169,13 @@ STEPPER_SIMPLE(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, endstopNone, endstopNone)
 // Heat manages are used for every component that needs to
 // control temperature. Higher level classes take these as input
 // and simple heater like a heated bed use it directly.
-HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 120, 255, 1000, 10, 300000, 196.0, 33.0, 290, 80, 255, false)
-HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 310, 255, 1000, 20, 20000, 20.0, 4.0, 48, 40, 255, false)
+HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 120, 255, 1000, 10,
+                 300000, 196.0, 33.0, 290, 80, 255, false)
+HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 310, 255,
+                 1000, 20, 20000, 20.0, 4.0, 48, 40, 255, false)
+// Extruder temperature must be in a +/-2°C corridor for 20 seconds when we wait for
+// target temperature. Stops after 300 seconds with error if it does not succeed.
+HEAT_MANAGER_DEFINE_HYSTERESIS(HeaterExtruder1, 2.0, 20000, 300000)
 COOLER_MANAGER_SENSOR(ExtruderCooler, TempExt1, CoolerFan, 70, 200, 150, 255)
 
 // Coolers are stand alone functions that allow it to control
@@ -173,7 +188,8 @@ COOLER_MANAGER_SENSOR(ExtruderCooler, TempExt1, CoolerFan, 70, 200, 150, 255)
 // Define tools. They get inserted into a tool array in configuration.h
 // Typical tools are:
 
-TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 440, 20, 50, 5000, 177, "", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 440, 20,
+              50, 5000, 177, "", "", &Fan1PWM)
 
 // IO_INPUT_LOG(IOJam1Mon, IOJam1, true)
 // IO_INPUT_LOG(IOJam2Mon, IOJam2, true)
@@ -182,8 +198,10 @@ FILAMENT_DETECTOR(JamDetector1, IOJam1, ToolExtruder1)
 // IO_OUTPUT(caseLightPin, HEATER_6_PIN)
 IO_PWM_HARDWARE(caseLightPWM, HEATER_6_PIN, 500)
 LIGHT_STATE_PWM(caseLightState)
-LIGHT_COND(caseLightState, true, Printer::caseLightMode, 255, 255, 255, Printer::caseLightBrightness)
-LIGHT_COND(caseLightState, GUI::statusLevel == GUIStatusLevel::ERROR, LIGHT_STATE_BLINK_SLOW, 255, 255, 255, Printer::caseLightBrightness)
+LIGHT_COND(caseLightState, true, Printer::caseLightMode, 255, 255, 255,
+           Printer::caseLightBrightness)
+LIGHT_COND(caseLightState, GUI::statusLevel == GUIStatusLevel::ERROR,
+           LIGHT_STATE_BLINK_SLOW, 255, 255, 255, Printer::caseLightBrightness)
 LIGHT_SOURCE_PWM(caseLightDriver, caseLightPWM, caseLightState)
 
 // Define beeper output
@@ -191,4 +209,3 @@ LIGHT_SOURCE_PWM(caseLightDriver, caseLightPWM, caseLightState)
 IO_OUTPUT(IOBeeperMain, BEEPER_PIN)
 BEEPER_SOURCE_IO(MainBeeper, IOBeeperMain)
 #endif
-

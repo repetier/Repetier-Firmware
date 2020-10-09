@@ -234,6 +234,7 @@ public:
     static float advanceEDRatio;         // Ratio of extrusion
     static int32_t intLengthBuffered;    // buffered length except active block
     static int32_t maxIntLengthBuffered; // maximum length to buffer more moves
+    static float totalBabystepZ;         // Sum since homing for z helper functions
 #if FEATURE_AXISCOMP
     static float axisCompTanXY, axisCompTanXZ, axisCompTanYZ;
 #endif

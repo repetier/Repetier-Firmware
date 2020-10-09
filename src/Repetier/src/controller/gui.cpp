@@ -493,12 +493,14 @@ void GUI::flashToString(char* dest, FSTRINGPARAM(text)) {
     }
     dest[pos] = 0;
 }
+
 void GUI::flashToStringLong(char* dest, FSTRINGPARAM(text), int32_t value) {
     fast8_t pos = 0;
     while (pos < MAX_COLS) {
         uint8_t c = HAL::readFlashByte(text++);
-        if (c == 0)
+        if (c == 0) {
             break;
+        }
         if (c == '@') {
             uint8_t dig = 0;
             if (value < 0) {
@@ -518,6 +520,58 @@ void GUI::flashToStringLong(char* dest, FSTRINGPARAM(text), int32_t value) {
             while (*str && pos < MAX_COLS) {
                 dest[pos++] = *str;
                 str++;
+            }
+        } else {
+            dest[pos++] = c;
+        }
+    }
+    dest[pos] = 0;
+}
+
+void GUI::flashToStringFloat(char* dest, FSTRINGPARAM(text), float value, int digits) {
+    fast8_t pos = 0;
+    while (pos < MAX_COLS) {
+        uint8_t c = HAL::readFlashByte(text++);
+        if (c == 0) {
+            break;
+        }
+        if (c == '@') {
+            // Handle negative numbers
+            if (value < 0.0) {
+                dest[pos++] = '-';
+                value = -value;
+            }
+            value += pgm_read_float(&roundingTable[digits]); // for correct rounding
+
+            // Extract the integer part of the number and print it
+            uint32_t int_part = static_cast<uint32_t>(value);
+            float remainder = value - static_cast<float>(int_part);
+            uint8_t dig = 0;
+            char buf2[13]; // Assumes 8-bit chars plus zero byte.
+            char* str = &buf2[12];
+            buf2[12] = 0;
+            do {
+                unsigned long m = int_part;
+                int_part /= 10;
+                char c = m - 10 * int_part;
+                *--str = c + '0';
+                dig++;
+            } while (int_part);
+            while (*str && pos < MAX_COLS) {
+                dest[pos++] = *str;
+                str++;
+            }
+
+            // Print the decimal point, but only if there are digits beyond
+            if (digits > 0) {
+                dest[pos++] = '.';
+                // Extract digits from the remainder one at a time
+                while (digits-- > 0) {
+                    remainder *= 10.0;
+                    uint8_t toPrint = static_cast<uint8_t>(remainder);
+                    dest[pos++] = '0' + toPrint;
+                    remainder -= toPrint;
+                }
             }
         } else {
             dest[pos++] = c;

@@ -72,6 +72,7 @@ fast8_t Motion1::dittoMode = 0;   // copy extrusion signals
 fast8_t Motion1::dittoMirror = 0; // mirror for dual x printer
 fast8_t Motion1::alwaysCheckEndstops;
 bool Motion1::autolevelActive = false;
+float Motion1::totalBabystepZ = 0.0f; // Sum since homing for z helper functions
 #if FEATURE_AXISCOMP
 float Motion1::axisCompTanXY, Motion1::axisCompTanXZ, Motion1::axisCompTanYZ;
 #endif
@@ -1585,7 +1586,7 @@ void Motion1::homeAxes(fast8_t axes) {
 #if ZHOME_PRE_RAISE
     // float zAmountRaised = 0;
     if (ZHOME_PRE_RAISE == 2
-            || (Motion1::minAxisEndstops[Z_AXIS] && Motion1::minAxisEndstops[Z_AXIS]->update())) {
+        || (Motion1::minAxisEndstops[Z_AXIS] && Motion1::minAxisEndstops[Z_AXIS]->update())) {
         if (!isAxisHomed(Z_AXIS) || currentPosition[Z_AXIS] + ZHOME_PRE_RAISE_DISTANCE < maxPos[Z_AXIS]) {
             setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_PRE_RAISE_DISTANCE);
             moveRelativeByOfficial(tmpPosition, homingFeedrate[Z_AXIS], false);
@@ -1668,6 +1669,7 @@ void Motion1::homeAxes(fast8_t axes) {
     Leveling::setDistortionEnabled(bcActive);
 
     if (axes & axisBits[Z_AXIS]) {
+        totalBabystepZ = 0;
         Motion1::correctBumpOffset(); // activate bump offset, needs distorion enabled to have an effect!
         // Add z probe correctons
         int32_t motorPos[NUM_AXES];

@@ -197,7 +197,7 @@ public:
         return ((params & 32) != 0);
     }
     inline void setZ(float val) {
-        X = val;
+        Z = val;
         params |= 32;
     }
     inline void unsetZ() {

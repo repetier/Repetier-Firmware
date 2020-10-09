@@ -548,8 +548,11 @@ void PrinterType::M290(GCode* com) {
     InterruptProtectedBlock lock;
     if (com->hasZ()) {
         float z = constrain(com->Z, -2, 2);
+        Motion1::totalBabystepZ += z;
         Motion2::openBabysteps[Z_AXIS] += z * Motion1::resolution[Z_AXIS];
     }
+    lock.unprotect();
+    Com::printFLN(PSTR("BabystepZ:"), Motion1::totalBabystepZ, 4);
 }
 
 PGM_P PrinterType::getGeometryName() {

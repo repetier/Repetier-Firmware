@@ -4,6 +4,15 @@ const char* const axisNames[] PROGMEM = {
     "X", "Y", "Z", "E", "A", "B", "C"
 };
 
+void __attribute__((weak)) menuBabystepZ(GUIAction action, void* data) {
+    DRAW_FLOAT_P(PSTR("Babystep Z:"), Com::tUnitMM, Motion1::totalBabystepZ, 2);
+    if (GUI::handleFloatValueAction(action, v, 0.01f)) {
+        GCode mod;
+        mod.setZ(v - Motion1::totalBabystepZ);
+        PrinterType::M290(&mod);
+    }
+}
+
 void __attribute__((weak)) menuMoveAxisFine(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
     GUI::flashToStringFlash(GUI::tmpString, PSTR("Move @-Axis (0.01mm):"), axisNames[axis]);
@@ -11,7 +20,7 @@ void __attribute__((weak)) menuMoveAxisFine(GUIAction action, void* data) {
     if (!Tool::getActiveTool()->showMachineCoordinates()) {
         v -= Motion1::g92Offsets[axis];
     }
-    if (GUI::handleFloatValueAction(action, v, Motion1::minPos[axis], Motion1::maxPos[axis], 0.01)) {
+    if (GUI::handleFloatValueAction(action, v, Motion1::minPos[axis], Motion1::maxPos[axis], 0.01f)) {
         Motion1::copyCurrentOfficial(Motion1::tmpPosition);
         Motion1::tmpPosition[axis] = v;
         Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[axis], false);
@@ -467,6 +476,8 @@ void __attribute__((weak)) menuControls(GUIAction action, void* data) {
     GUI::menuSelectable(action, GUI::tmpString, menuSpeedMultiplier, nullptr, GUIPageType::FIXED_CONTENT);
     GUI::flashToStringLong(GUI::tmpString, PSTR("Flow: @%"), Printer::extrudeMultiply);
     GUI::menuSelectable(action, GUI::tmpString, menuFlowMultiplier, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::flashToStringFloat(GUI::tmpString, PSTR("Babystep Z: @mm"), Motion1::totalBabystepZ, 2);
+    GUI::menuSelectable(action, GUI::tmpString, menuBabystepZ, nullptr, GUIPageType::FIXED_CONTENT);
 #ifndef NO_LIGHT_CONTROL
     GUI::menuSelectableP(action, PSTR("Toggle lights"), directAction, (void*)GUI_DIRECT_ACTION_TOGGLE_LIGHT, GUIPageType::ACTION);
 #endif

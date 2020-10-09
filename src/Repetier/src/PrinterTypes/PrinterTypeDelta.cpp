@@ -274,9 +274,9 @@ float PrinterType::feedrateForMoveSteps(fast8_t axes) {
     return feedrate;
 }
 
-void PrinterType::deactivatedTool(fast8_t id) {}
+void PrinterType::deactivatedTool(fast8_t id) { }
 
-void PrinterType::activatedTool(fast8_t id) {}
+void PrinterType::activatedTool(fast8_t id) { }
 
 void PrinterType::eepromHandle() {
     EEPROM::handlePrefix(PSTR("Delta"));
@@ -408,11 +408,14 @@ bool PrinterType::canSelectTool(fast8_t toolId) {
 void PrinterType::M290(GCode* com) {
     InterruptProtectedBlock lock;
     if (com->hasZ()) {
-        float z = constrain(com->Z, -2, 2);
+        float z = constrain(com->Z, -2.0f, 2.0f);
+        Motion1::totalBabystepZ += z;
         Motion2::openBabysteps[X_AXIS] += z * Motion1::resolution[X_AXIS];
         Motion2::openBabysteps[Y_AXIS] += z * Motion1::resolution[Y_AXIS];
         Motion2::openBabysteps[Z_AXIS] += z * Motion1::resolution[Z_AXIS];
     }
+    lock.unprotect();
+    Com::printFLN(PSTR("BabystepZ:"), Motion1::totalBabystepZ, 4);
 }
 
 PGM_P PrinterType::getGeometryName() {

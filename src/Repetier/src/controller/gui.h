@@ -176,6 +176,7 @@ public:
 
     static void flashToString(char* dest, FSTRINGPARAM(text));
     static void flashToStringLong(char* dest, FSTRINGPARAM(text), int32_t val);
+    static void flashToStringFloat(char* dest, FSTRINGPARAM(text), float val, int prec = 0);
     static void flashToStringFlash(char* dest, FSTRINGPARAM(text), FSTRINGPARAM(val));
     static void flashToStringString(char* dest, FSTRINGPARAM(text), char* val);
 

@@ -163,8 +163,11 @@ STEPPER_TMC2130_HW_SPI(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, ORIG_E1_CS_PIN, 0
 // and simple heater like a heated bed use it directly.
 // HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 120, 255, 1000, 10, 300000, 131.1, 3.76, 1143, 80, 255, false)
 HEAT_MANAGER_BANG_BANG(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 120, 255, 5, 1000, true)
+HEAT_MANAGER_DEFINE_HYSTERESIS(HeatedBed1, 0.0, 20000, 0)
 HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 310, 255, 1000, 20, 20000, 18.3, 2.13, 39, 40, 235, false)
+HEAT_MANAGER_DEFINE_HYSTERESIS(HeaterExtruder1, 2.0, 20000, 300000)
 HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 310, 255, 1000, 20, 20000, 18.3, 2.13, 39, 40, 235, false)
+HEAT_MANAGER_DEFINE_HYSTERESIS(HeaterExtruder2, 2.0, 20000, 300000)
 COOLER_MANAGER_SENSOR(ExtruderCooler, TempHottestExtruder, CoolerFan, 70, 200, 150, 255)
 
 // Coolers are stand alone functions that allow it to control

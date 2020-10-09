@@ -131,8 +131,8 @@ float PrinterType::feedrateForMoveSteps(fast8_t axes) {
     return feedrate;
 }
 
-void PrinterType::deactivatedTool(fast8_t id) {}
-void PrinterType::activatedTool(fast8_t id) {}
+void PrinterType::deactivatedTool(fast8_t id) { }
+void PrinterType::activatedTool(fast8_t id) { }
 void PrinterType::eepromHandle() {
     EEPROM::handlePrefix(PSTR("Printer"));
     EEPROM::handleFloat(eprStart + 0, PSTR("Bed X Min [mm]"), 2, bedRectangle[X_AXIS][0]);
@@ -151,7 +151,7 @@ void PrinterType::init() {
     restoreFromConfiguration();
     eprStart = EEPROM::reserve(EEPROM_SIGNATURE_CARTESIAN, 1, 4 * 4);
 }
-void PrinterType::updateDerived() {}
+void PrinterType::updateDerived() { }
 void PrinterType::enableMotors(fast8_t axes) {
     FOR_ALL_AXES(i) {
         if ((axes & axisBits[i]) != 0 && Motion1::motors[i]) {
@@ -206,7 +206,6 @@ bool PrinterType::canSelectTool(fast8_t toolId) {
 }
 
 void PrinterType::M290(GCode* com) {
-    HAL::delayMilliseconds(20);
     InterruptProtectedBlock lock;
     if (com->hasX()) {
         float x = constrain(com->X, -2, 2);
@@ -218,8 +217,11 @@ void PrinterType::M290(GCode* com) {
     }
     if (com->hasZ()) {
         float z = constrain(com->Z, -2, 2);
+        Motion1::totalBabystepZ += z;
         Motion2::openBabysteps[Z_AXIS] += z * Motion1::resolution[Z_AXIS];
     }
+    lock.unprotect();
+    Com::printFLN(PSTR("BabystepZ:"), Motion1::totalBabystepZ, 4);
 }
 
 PGM_P PrinterType::getGeometryName() {
