@@ -27,6 +27,10 @@ void PrinterType::homeAxis(fast8_t axis) {
     Motion1::simpleHome(axis);
 }
 
+/** Check if given position pos is an allowed position. Coordinate system here
+ * is the transformed coordinates. In addition zOfficial is the z position in 
+ * official coordinates.
+ */
 bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
     if (Printer::isNoDestinationCheck()) {
         return true;
@@ -40,8 +44,9 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
     }
     for (fast8_t i = 0; i < Z_AXIS; i++) {
         if (Motion1::axesHomed & axisBits[i]) {
-            if (pos[i] < Motion1::minPos[i]
-                || pos[i] > Motion1::maxPos[i]) {
+            if (pos[i] < Motion1::minPosOff[i]
+                || pos[i] > Motion1::maxPosOff[i]) {
+                Com::printFLN(PSTR("Axis failed:"), (int32_t)i);
                 return false;
             }
         }
@@ -50,14 +55,16 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
 }
 
 void PrinterType::closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety) {
+    // offX and offY are with sign as stored in tool not when assigned later!
+    // pos is in official coordinate system
     float offsets[3] = { offX, offY, 0 };
     float tOffMin, tOffMax;
     for (fast8_t i = 0; i <= Z_AXIS; i++) {
         Tool::minMaxOffsetForAxis(i, tOffMin, tOffMax);
 
         float p = pos[i] - offsets[i];
-        float minP = Motion1::minPos[i] + safety + tOffMax - tOffMin;
-        float maxP = Motion1::maxPos[i] - Motion1::rotMax[i] - safety + tOffMax - tOffMin;
+        float minP = Motion1::minPos[i] + safety /* + tOffMax */ - tOffMin;
+        float maxP = Motion1::maxPos[i] /* - Motion1::rotMax[i] */ - safety + tOffMax /* - tOffMin */;
         if (p < minP) {
             pos[i] += minP - p;
         } else if (p > maxP) {

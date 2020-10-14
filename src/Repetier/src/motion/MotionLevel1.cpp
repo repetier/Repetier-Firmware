@@ -315,8 +315,8 @@ void Motion1::updateRotMinMax() {
     for (fast8_t i = 0; i <= Z_AXIS; i++) {
         float vMin, vMax;
         Tool::minMaxOffsetForAxis(i, vMin, vMax);
-        minPosOff[i] = minPos[i] + vMin - vMax;
-        maxPosOff[i] = maxPos[i] + vMax - vMin;
+        minPosOff[i] = minPos[i] /* + vMin */ - vMax;
+        maxPosOff[i] = maxPos[i] /* + vMax */ - vMin;
     }
     minPosOff[Z_AXIS] = 0; // we can't go below bed!
     rotMax[X_AXIS] = rotMax[Y_AXIS] = rotMax[Z_AXIS] = 0;
@@ -343,11 +343,13 @@ void Motion1::updateRotMinMax() {
         maxPosOff[i] = maxPos[i];
     }
     autolevelActive = old;
+#ifdef DEBUG_MOVES
     Com::printArrayFLN(PSTR("minPosOff:"), minPosOff, 3);
     Com::printArrayFLN(PSTR("maxPosOff:"), maxPosOff, 3);
     Com::printArrayFLN(PSTR("rotMin:"), rotMin, 3);
     Com::printArrayFLN(PSTR("rotMax:"), rotMax, 3);
     Com::printArrayFLN(PSTR("transform:"), autolevelTransformation, 9, 5);
+#endif
 }
 
 void Motion1::fillPosFromGCode(GCode& code, float pos[NUM_AXES], float fallback) {
@@ -958,13 +960,15 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
     buf.length = sqrtf(length2);
     buf.intLength = static_cast<int32_t>(1000.0f * buf.length);
     buf.invLength = 1.0 / buf.length;
-    /* if (Printer::debugEcho()) {
+#ifdef DEBUG_MOVES
+    if (Printer::debugEcho()) {
         Com::printF("Move CX:", currentPositionTransformed[X_AXIS]);
 #if NUM_AXES > A_AXIS
         Com::printF(" AX:", currentPositionTransformed[A_AXIS]);
 #endif
         Com::printF(" CY:", currentPositionTransformed[Y_AXIS]);
         Com::printF(" CZ:", currentPositionTransformed[Z_AXIS]);
+        Com::printF(" OX:", toolOffset[X_AXIS]);
         Com::printF(" l:", buf.length);
         Com::printFLN(" f:", feedrate);
         Com::printF("Move DX:", delta[X_AXIS]);
@@ -976,7 +980,8 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
         Com::printFLN(" DZ:", delta[Z_AXIS]);
         // Com::printArrayFLN(PSTR("cpt4:"), Motion1::currentPositionTransformed, 5, 2);
         // Com::printArrayFLN(PSTR("mp:"), Motion2::lastMotorPos[Motion2::lastMotorIdx], 5);
-    } */
+    }
+#endif
     buf.action = Motion1Action::MOVE;
     if (endstopMode != EndstopMode::DISABLED) {
         buf.flags = FLAG_CHECK_ENDSTOPS;
@@ -1817,10 +1822,10 @@ bool Motion1::simpleHome(fast8_t axis) {
     if (!eStop.update()) { // don't test if we are still there
         moveRelativeByOfficial(dest, homingFeedrate[axis], false);
         waitForEndOfMoves();
-        updatePositionsFromCurrent();
-        Motion2::setMotorPositionFromTransformed();
-        HAL::delayMilliseconds(50);
     }
+    updatePositionsFromCurrent();
+    Motion2::setMotorPositionFromTransformed();
+    HAL::delayMilliseconds(50);
 
     // Move back for retest
     endstopMode = EndstopMode::DISABLED;
@@ -1847,7 +1852,7 @@ bool Motion1::simpleHome(fast8_t axis) {
     HAL::delayMilliseconds(30);
     float minOff, maxOff;
     float curPos = homeDir[axis] > 0 ? maxPos[axis] : minPos[axis];
-    Tool::minMaxOffsetForAxis(axis, minOff, maxOff);
+    Tool::minMaxOffsetForAxis(axis, minOff, maxOff);           // Offsets as defined in tool!
     dest[axis] = -homeDir[axis] * (homeEndstopDistance[axis]); // - Tool::getActiveTool()->getOffsetForAxis(axis));
     if (axis != Z_AXIS) {
         if (homeDir[axis] < 0) {

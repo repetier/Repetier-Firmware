@@ -412,15 +412,21 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define HOMING_FEEDRATE_X 25
 #define HOMING_FEEDRATE_Y 25
 #define HOMING_FEEDRATE_Z 10
-#define ZHOME_PRE_RAISE 2
-#define ZHOME_PRE_RAISE_DISTANCE 0
+#define ZHOME_PRE_RAISE 1
+#define ZHOME_PRE_RAISE_DISTANCE 10
 #define RAISE_Z_ON_TOOLCHANGE 0
 #define ZHOME_MIN_TEMPERATURE 0
 #define ZHOME_HEAT_ALL 0
 #define ZHOME_HEIGHT 0
+#ifdef STACKER_WITH_ZPROBE
+#define FIXED_Z_HOME_POSITION 1
+#define ZHOME_X_POS 50
+#define ZHOME_Y_POS 50
+#else
 #define FIXED_Z_HOME_POSITION 0
 #define ZHOME_X_POS 0
 #define ZHOME_Y_POS 0
+#endif
 
 // ################# XYZ movements ###################
 

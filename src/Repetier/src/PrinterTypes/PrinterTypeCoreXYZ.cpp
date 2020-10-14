@@ -40,8 +40,8 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
     }
     for (fast8_t i = 0; i <= Z_AXIS; i++) {
         if (Motion1::axesHomed & axisBits[i]) {
-            if (pos[i] < Motion1::minPos[i]
-                || pos[i] > Motion1::maxPos[i]) {
+            if (pos[i] < Motion1::minPosOff[i]
+                || pos[i] > Motion1::maxPosOff[i]) {
                 return false;
             }
         }
@@ -56,8 +56,8 @@ void PrinterType::closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], flo
         Tool::minMaxOffsetForAxis(i, tOffMin, tOffMax);
 
         float p = pos[i] - offsets[i];
-        float minP = Motion1::minPos[i] + safety + tOffMax - tOffMin;
-        float maxP = Motion1::maxPos[i] - Motion1::rotMax[i] - safety + tOffMax - tOffMin;
+        float minP = Motion1::minPos[i] + safety /* + tOffMax */ - tOffMin;
+        float maxP = Motion1::maxPos[i] /* - Motion1::rotMax[i] */ - safety + tOffMax /* - tOffMin */;
         if (p < minP) {
             pos[i] += minP - p;
         } else if (p > maxP) {

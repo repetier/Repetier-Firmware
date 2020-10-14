@@ -151,7 +151,7 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
                 if (pos[i] < Motion1::minPos[A_AXIS] + Motion1::rotMin[X_AXIS] || pos[A_AXIS] > Motion1::maxPos[i] + Motion1::rotMax[X_AXIS]) {
                     return false;
                 }
-            } else if (pos[i] < Motion1::minPos[i] || pos[i] > Motion1::maxPos[i]) {
+            } else if (pos[i] < Motion1::minPosOff[i] || pos[i] > Motion1::maxPosOff[i]) {
                 return false;
             }
             // Com::printFLN(PSTR(" hit"));
@@ -169,8 +169,8 @@ void PrinterType::closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], flo
         Tool::minMaxOffsetForAxis(i, tOffMin, tOffMax);
 
         float p = pos[i] - offsets[i];
-        float minP = Motion1::minPos[i] + safety + tOffMax - tOffMin;
-        float maxP = Motion1::maxPos[i] - safety + tOffMax - tOffMin;
+        float minP = Motion1::minPos[i] + safety /* + tOffMax */ - tOffMin;
+        float maxP = Motion1::maxPos[i] - safety + tOffMax /* - tOffMin */;
         if (p < minP) {
             pos[i] += minP - p;
         } else if (p > maxP) {

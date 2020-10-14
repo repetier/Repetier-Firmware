@@ -130,7 +130,10 @@ void PrinterType::homeAxis(fast8_t axis) {
     }
 }
 
-// called in transformed coordinates!
+/** Check if given position pos is an allowed position. Coordinate system here
+ * is the transformed coordinates. In addition zOfficial is the z position in 
+ * official coordinates.
+ */
 bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
     if (Printer::isNoDestinationCheck()) {
         return true;
@@ -142,22 +145,23 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
     if (zOfficial < Motion1::minPos[Z_AXIS] || zOfficial > Motion1::maxPos[Z_AXIS]) {
         return false;
     }
-    if (pos[Z_AXIS] < Motion1::minPosOff[Z_AXIS] || pos[Z_AXIS] > Motion1::maxPosOff[Z_AXIS]) {
+    /*if (pos[Z_AXIS] < Motion1::minPosOff[Z_AXIS] || pos[Z_AXIS] > Motion1::maxPosOff[Z_AXIS]) {
         return false;
-    }
+    } */
     float px = pos[X_AXIS]; // + Motion1::toolOffset[X_AXIS]; // need to consider tool offsets
     float py = pos[Y_AXIS]; // + Motion1::toolOffset[Y_AXIS];
     return px * px + py * py <= printRadiusSquared;
 }
 
 void PrinterType::closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety) {
-    // pos is in official coordinates!
+    // offX and offY are with sign as stored in tool not when assigned later!
+    // pos is in official coordinate system
     float offsets[2] = { offX, offY };
     float tOffMin, tOffMax;
     float tPos[2], t2Pos[2];
     for (int loop = 0; loop < 2; loop++) { // can need 2 iterations to be valid!
         float dist = 0, dist2 = 0;
-        for (fast8_t i = 0; i < 2; i++) {
+        for (fast8_t i = 0; i < Z_AXIS; i++) {
             tPos[i] = pos[i] - offsets[i];
             t2Pos[i] = pos[i] + Motion1::toolOffset[i];
             dist += tPos[i] * tPos[i];

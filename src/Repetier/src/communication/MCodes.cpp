@@ -1035,6 +1035,30 @@ void __attribute__((weak)) MCode_209(GCode* com) {
         Printer::setAutoretract(com->S != 0);
 }
 
+void __attribute__((weak)) MCode_218(GCode* com) {
+    uint8_t t = Tool::getActiveToolId();
+    if (com->hasT()) {
+        if (com->T >= NUM_TOOLS) {
+            Com::printWarningF(PSTR("Illegal tool id"));
+            return;
+        }
+        t = com->T;
+    }
+    Tool* tool = Tool::getTool(t);
+    if (com->hasX()) {
+        tool->setOffsetForAxis(X_AXIS, com->X);
+    }
+    if (com->hasY()) {
+        tool->setOffsetForAxis(Y_AXIS, com->Y);
+    }
+    if (com->hasZ()) {
+        tool->setOffsetForAxis(Z_AXIS, com->Z);
+    }
+    if (!com->hasNoXYZ()) {
+        EEPROM::markChanged();
+    }
+}
+
 void __attribute__((weak)) MCode_220(GCode* com) {
     Commands::changeFeedrateMultiply(com->getS(Printer::feedrateMultiply));
 }

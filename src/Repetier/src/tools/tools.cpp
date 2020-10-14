@@ -258,6 +258,9 @@ void Tool::unselectTool() {
 
 void Tool::selectTool(fast8_t id, bool force) {
     bool doMove = activeToolId != 255;
+    if (Printer::isZProbingActive()) { // stop probing when selecting a tool
+        ZProbeHandler::deactivate();
+    }
     // Test for valid tool id
     if (id < 0 || id >= NUM_TOOLS || !PrinterType::canSelectTool(id)) {
         Com::printWarningF(PSTR("Illegal tool number selected:"));

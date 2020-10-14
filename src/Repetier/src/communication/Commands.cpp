@@ -587,6 +587,9 @@ void Commands::processMCode(GCode* com) {
     case 209: // M209 S<0/1> Enable/disable autoretraction
         MCode_209(com);
         break;
+    case 218: // M218 T<toolid> X<offsetX> Y<offsetY> Z<offsetZ> - Store new tool offsets
+        MCode_218(com);
+        break;
     case 220: // M220 S<Feedrate multiplier in percent>
         MCode_220(com);
         break;
