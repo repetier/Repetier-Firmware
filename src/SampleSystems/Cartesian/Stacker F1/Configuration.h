@@ -27,6 +27,8 @@ Early stage version for Stacke F1 printer - use with care
 // ******* Model dependent changes ***********
 // Adds z probe support
 #define STACKER_WITH_ZPROBE
+// Adds 2 z end stops 
+#define STACKER_2_Z_END_STOPS
 
 /**************** READ FIRST ************************
 
@@ -403,7 +405,11 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define ALWAYS_CHECK_ENDSTOPS 0
 #define X_HOME_DIR -1
 #define Y_HOME_DIR -1
+#ifdef STACKER_2_Z_END_STOPS
+#define Z_HOME_DIR 1
+#else
 #define Z_HOME_DIR -1
+#endif
 #define A_HOME_DIR 1
 #define MOVE_X_WHEN_HOMED 1
 #define MOVE_Y_WHEN_HOMED 1

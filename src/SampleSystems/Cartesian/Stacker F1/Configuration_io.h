@@ -99,8 +99,16 @@ ENDSTOP_SWITCH_HW(endstopXMin, IOEndstopXMin, X_AXIS, false)
 ENDSTOP_SWITCH_HW(endstopYMin, IOEndstopYMin, Y_AXIS, false)
 ENDSTOP_NONE(endstopXMax)
 ENDSTOP_NONE(endstopYMax)
-ENDSTOP_NONE(endstopZMax)
 
+#ifdef STACKER_2_Z_END_STOPS
+IO_INPUT_INVERTED_PULLUP(IOEndstopZMax1, ORIG_Z_MAX_PIN) // TODO: Set correct pin
+IO_INPUT_INVERTED_PULLUP(IOEndstopZMax2, ORIG_Z_MAX_PIN) // TODO: Set correct pin
+ENDSTOP_SWITCH_HW(endstopZMax1, IOEndstopZMax1, -1, true)
+ENDSTOP_SWITCH_HW(endstopZMax2, IOEndstopZMax2, -1, true)
+ENDSTOP_MERGE2(endstopZMax, endstopZMax1, endstopZMax2, Z_AXIS, true)
+#else
+ENDSTOP_NONE(endstopZMax)
+#endif
 // Set to nullptr for no zprobe or &endstopName for a switch
 #ifdef STACKER_WITH_ZPROBE
 IO_INPUT_PULLUP(IOEndstopZProbe, ORIG_Z_MIN_PIN)
@@ -161,8 +169,13 @@ IO_PWM_SOFTWARE(PWMBed1, IOBed1, 1)
 // minimum endstop here!
 STEPPER_SIMPLE(XMotor, IOX1Step, IOX1Dir, IOX1Enable, endstopNone, endstopNone)
 STEPPER_SIMPLE(YMotor, IOY1Step, IOY1Dir, IOY1Enable, endstopNone, endstopNone)
+#ifdef STACKER_2_Z_END_STOPS
+STEPPER_SIMPLE(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, endstopNone, endstopZMax1)
+STEPPER_SIMPLE(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, endstopNone, endstopZMax2)
+#else
 STEPPER_SIMPLE(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, endstopNone, endstopNone)
 STEPPER_SIMPLE(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, endstopNone, endstopNone)
+#endif
 STEPPER_MIRROR2(ZMotor, Z1Motor, Z2Motor, endstopNone, endstopNone)
 STEPPER_SIMPLE(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, endstopNone, endstopNone)
 
