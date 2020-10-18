@@ -544,8 +544,12 @@ public:
 
     static inline void serialSetBaudrate(long baud) {
         Serial.setInterruptPriority(1);
+        if (static_cast<Stream*>(&RFSERIAL) != &SerialUSB) { // When just updating the baudrate, don't restart USB.
+            RFSERIAL.end();
+        }
         RFSERIAL.begin(baud);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
+        RFSERIAL2.end();
         RFSERIAL2.begin(baud);
 #endif
     }

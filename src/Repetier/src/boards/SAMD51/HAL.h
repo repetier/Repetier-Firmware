@@ -614,8 +614,10 @@ public:
     static inline void serialSetBaudrate(long baud) {
         // Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
+        RFSERIAL2.end();
         RFSERIAL2.begin(baud);
 #endif
+        RFSERIAL.end();
         RFSERIAL.begin(baud);
     }
     static inline void serialFlush() {
