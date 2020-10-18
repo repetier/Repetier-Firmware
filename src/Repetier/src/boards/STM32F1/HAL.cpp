@@ -47,7 +47,6 @@
 #define _TIMER(num) TIM##num
 #define _TIMER_IRQ(num) TIM##num##_IRQn
 
-
 #define _TIMER_VECTOR(num) RAW_TIM##num##_IRQHandler(void)
 #define _TIMER_VECTOR_NAME(num) RAW_TIM##num##_IRQHandler
 
@@ -899,7 +898,7 @@ void TIMER_VECTOR(SERVO_TIMER_NUM) {
     } else if (LL_TIM_IsActiveFlag_UPDATE(TIMER(SERVO_TIMER_NUM))) {
         LL_TIM_ClearFlag_UPDATE(TIMER(SERVO_TIMER_NUM));
 #if NUM_SERVOS > 0
-        if (actServo) {
+        if (actServo && HAL::servoTimings[servoId]) {
             actServo->enable();
         }
 #endif

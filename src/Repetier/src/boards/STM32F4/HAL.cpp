@@ -891,7 +891,7 @@ void servoOffTimer() {
 // Servo timer Interrupt handler
 void TIMER_VECTOR(SERVO_TIMER_NUM) {
 #if NUM_SERVOS > 0
-    if (actServo) {
+    if (actServo && HAL::servoTimings[servoId]) {
         actServo->enable();
     }
 #endif

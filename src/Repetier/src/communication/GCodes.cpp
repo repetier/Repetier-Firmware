@@ -466,6 +466,7 @@ void __attribute__((weak)) GCode_30(GCode* com) {
         Com::printFLN(PSTR("Z-probe height [mm]:"), zProbeHeight);
 
     } else {
+        // H is always the height you measured and R is which Z position you want to assign it.
         float z = ZProbeHandler::runProbe();
         if (z == ILLEGAL_Z_PROBE) {
             GCode::fatalError(PSTR("G30 probing failed!"));
@@ -480,7 +481,7 @@ void __attribute__((weak)) GCode_30(GCode* com) {
                 z += zCorr;
             }
 #endif
-            Motion1::g92Offsets[Z_AXIS] = o - h;
+            Motion1::g92Offsets[Z_AXIS] = o - h; // o = what it should be official - h = here I am
             Motion1::currentPosition[Z_AXIS] = z + h + Motion1::minPos[Z_AXIS];
             Motion1::updatePositionsFromCurrent();
             Motion1::setAxisHomed(Z_AXIS, true);
