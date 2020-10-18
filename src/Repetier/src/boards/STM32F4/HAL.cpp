@@ -1035,7 +1035,11 @@ void HAL::tone(uint32_t frequency) {
     if (frequency < 1) {
         return;
     }
-    uint32_t autoReload = (F_CPU_TRUE / frequency) - 1;
+    
+    uint32_t autoReload = (F_CPU_TRUE / frequency); 
+    uint32_t prescale = (autoReload / 0x10000) + 1;
+    LL_TIM_SetPrescaler(TIMER(TONE_TIMER_NUM), prescale - 1); 
+    autoReload /= prescale;
     LL_TIM_SetAutoReload(TIMER(TONE_TIMER_NUM), autoReload);
     LL_TIM_OC_SetCompareCH2(TIMER(TONE_TIMER_NUM), ((autoReload + 1) * (Printer::toneVolume * 50)) / 10000);
     if (toneStopped) { // Only generate updates if the timer's dead.
