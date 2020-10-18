@@ -375,13 +375,13 @@ void HAL::setupTimer() {
             // If we have any SW beepers, enable the beeper IRQ
             toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
             toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
-            toneTimer->timer->setMode(2, TIMER_OUTPUT_COMPARE, NC);
-            toneTimer->timer->setOverflow(0, HERTZ_FORMAT);
+            // Timer 11 has only one channel, 1.
+            toneTimer->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
             toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
-            toneTimer->timer->attachInterrupt(2, &beeperComparePhase);
+            toneTimer->timer->attachInterrupt(1, &beeperComparePhase);
             // Not on by default for output_compare
-            LL_TIM_OC_EnablePreload(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(2));
-            LL_TIM_OC_EnableFast(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(2));
+            LL_TIM_OC_EnablePreload(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
+            LL_TIM_OC_EnableFast(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
             toneTimer->timer->refresh();
             toneTimer->timer->resume();
             break;
@@ -1037,7 +1037,7 @@ void HAL::tone(uint32_t frequency) {
     }
     uint32_t autoReload = (F_CPU_TRUE / frequency) - 1;
     LL_TIM_SetAutoReload(TIMER(TONE_TIMER_NUM), autoReload);
-    LL_TIM_OC_SetCompareCH2(TIMER(TONE_TIMER_NUM), ((autoReload + 1) * (Printer::toneVolume * 50)) / 10000);
+    LL_TIM_OC_SetCompareCH1(TIMER(TONE_TIMER_NUM), ((autoReload + 1) * (Printer::toneVolume * 50)) / 10000);
     if (toneStopped) { // Only generate updates if the timer's dead.
         LL_TIM_GenerateEvent_UPDATE(TIMER(TONE_TIMER_NUM));
         toneStopped = false;
