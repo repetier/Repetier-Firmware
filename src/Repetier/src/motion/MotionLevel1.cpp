@@ -605,6 +605,7 @@ void Motion1::setTmpPositionXYZE(float x, float y, float z, float e) {
 
 // Move with coordinates in official coordinates (before offset, transform, ...)
 bool Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
+    bool movingEAxis = (coords[E_AXIS] != currentPosition[E_AXIS]);
     Printer::unparkSafety();
     FOR_ALL_AXES(i) {
         if (coords[i] != IGNORE_COORDINATE) {
@@ -620,8 +621,8 @@ bool Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate, bool second
 #endif
     ) { // ignore
 #if MIN_EXTRUDER_TEMP > MAX_ROOM_TEMPERATURE
-        if (coords[E_AXIS] != IGNORE_COORDINATE && !Printer::debugDryrun()) {
-            Com::printWarningFLN(Com::tColdExtrusionPrevented);
+        if (movingEAxis && coords[E_AXIS] != IGNORE_COORDINATE && !Printer::debugDryrun()) {
+            Com::printWarningFLN(Com::tColdExtrusionPrevented); 
         }
 #endif
         destinationPositionTransformed[E_AXIS] = currentPositionTransformed[E_AXIS];
@@ -787,6 +788,7 @@ void Motion1::setToolOffset(float ox, float oy, float oz) {
 
 // Move to the printer coordinates (after offset, transform, ...)
 bool Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
+    bool movingEAxis = (coords[E_AXIS] != destinationPositionTransformed[E_AXIS]);
     Printer::unparkSafety();
     FOR_ALL_AXES(i) {
         if (coords[i] == IGNORE_COORDINATE) {
@@ -802,7 +804,7 @@ bool Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate, bool seconda
 #endif
     ) {
 #if MIN_EXTRUDER_TEMP > MAX_ROOM_TEMPERATURE
-        if (coords[E_AXIS] != IGNORE_COORDINATE && !Printer::debugDryrun()) {
+        if (movingEAxis && coords[E_AXIS] != IGNORE_COORDINATE && !Printer::debugDryrun()) {
             Com::printWarningFLN(Com::tColdExtrusionPrevented);
         }
 #endif
