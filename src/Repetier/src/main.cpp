@@ -121,7 +121,7 @@ Custom M Codes
 - M118 <message> - Write message to host
 - M119 - Report endstop status
 - M140 S<temp> H1 O<offset> F1 - Set bed target temp, F1 makes a beep when temperature is reached the first time
-- M155 S<1/0> P<milliseconds> Enable/disable auto report temperatures. When enabled firmware will emit temperatures every second by default. Set P<ms> to change the autoreport frequency (100ms - 10s), resets to 1s if P is omitted.
+- M155 S<1/0> P<milliseconds> Enable/disable auto report temperatures. When enabled firmware will emit temperatures every second by default. Set P<ms> to change the autoreport frequency (100ms - 10s), resets to 1000ms if P is omitted.
 - M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
 - M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
 - M170 B<bedtemp> T<extruderid> S<extrudertemp> L0 - Set preset temperatures for extruder (T+S) or bed (B) or list settings (L0)

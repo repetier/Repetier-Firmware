@@ -772,8 +772,8 @@ void __attribute__((weak)) MCode_155(GCode* com) {
         millis_t period = constrain(com->P, 0, 10000);
         Printer::autoReportPeriodMS = (period <= 100) ? 0 : period;
         // Can't autoreport faster than 100ms, just set to 0 to use periodical's 100ms tick.
-    } else { // Reset period to 1s if P is omitted.
-        Printer::autoReportPeriodMS = 1000u;
+    } else { // Reset period to 1000ms if P is omitted.
+        Printer::autoReportPeriodMS = 1000;
     }
 }
 

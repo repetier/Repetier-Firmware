@@ -114,7 +114,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     HAL::pingWatchdog();
 #endif
 
-    // Report temperatures every second, so we do not need to send M105
+    // Report temperatures every autoReportPeriodMS (default 1000ms), so we do not need to send M105 
     if (Printer::isAutoreportTemp()) {
         millis_t now = HAL::timeInMilliseconds();
         if (now - Printer::lastTempReport > Printer::autoReportPeriodMS) {
