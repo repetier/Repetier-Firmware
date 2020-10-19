@@ -263,7 +263,8 @@ public:
     static uint32_t interval;            ///< Last step duration in ticks.
     static uint32_t timer;               ///< used for acceleration/deceleration timing
     static uint32_t stepNumber;          ///< Step number in current move.
-    static millis_t lastTempReport;      ///< Time o flast temperature report for autoreport temperatures
+    static millis_t lastTempReport;      ///< Time of last temperature report for autoreport temperatures
+    static millis_t autoReportPeriodMS;  ///< Configurable delay between autoreports in ms. Default 1000ms. 
     static int32_t printingTime;         ///< Printing time in seconds
     static float extrudeMultiplyError;   ///< Accumulated error during extrusion
     static float extrusionFactor;        ///< Extrusion multiply factor
