@@ -768,6 +768,13 @@ void __attribute__((weak)) MCode_141(GCode* com) {
 void __attribute__((weak)) MCode_155(GCode* com) {
     Printer::setAutoreportTemp((com->hasS() && com->S != 0) || !com->hasS());
     Printer::lastTempReport = HAL::timeInMilliseconds();
+    if (com->hasP()) {
+        millis_t period = constrain(com->P, 0, 10000);
+        Printer::autoReportPeriodMS = (period <= 100) ? 0 : period;
+        // Can't autoreport faster than 100ms, just set to 0 to use periodical's 100ms tick.
+    } else { // Reset period to 1000ms if P is omitted.
+        Printer::autoReportPeriodMS = 1000;
+    }
 }
 
 void __attribute__((weak)) MCode_163(GCode* com) {
