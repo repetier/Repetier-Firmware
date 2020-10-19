@@ -1176,7 +1176,7 @@ void BEEPER_TIMER_VECTOR() {
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_BEEPER_LOOP
 #include "io/redefine.h"
-    (void)beeperIRQPhase; // avoid gcc unused warning 
+    (void)beeperIRQPhase; // avoid gcc unused warning
 }
 #endif
 

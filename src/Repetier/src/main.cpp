@@ -59,7 +59,7 @@ Implemented Codes
 - G33 X<xpos> Y<ypos> Z<newdistortioncorrection> - Set new distortion for nearest distortion point.
 - G90 - Use absolute coordinates
 - G91 - Use relative coordinates
-- G92 - Set current position to coordinates given
+- G92 - Set current position to coordinates given. If no position is given all are reset initial value after homing.
 - G131 - set extruder offset position to 0 - needed for calibration with G132
 - G132 - calibrate endstop positions. Call this, after calling G131 and after centering the extruder holder.
 - G133 - measure steps until max endstops for deltas. Can be used to detect lost steps within tolerances of endstops.

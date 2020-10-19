@@ -543,25 +543,35 @@ void __attribute__((weak)) GCode_33(GCode* com) {
 
 void __attribute__((weak)) GCode_90(GCode* com) {
     Printer::relativeCoordinateMode = false;
-    if (com->internalCommand)
+    if (com->internalCommand) {
         Com::printInfoFLN(PSTR("Absolute positioning"));
+    }
 }
 
 void __attribute__((weak)) GCode_91(GCode* com) {
     Printer::relativeCoordinateMode = true;
-    if (com->internalCommand)
+    if (com->internalCommand) {
         Com::printInfoFLN(PSTR("Relative positioning"));
+    }
 }
 
 void __attribute__((weak)) GCode_92(GCode* com) {
     Motion1::fillPosFromGCode(*com, Motion1::tmpPosition, IGNORE_COORDINATE);
+    bool changed = false;
     FOR_ALL_AXES(i) {
         if (i != E_AXIS && Motion1::tmpPosition[i] != IGNORE_COORDINATE) {
             Motion1::g92Offsets[i] = Motion1::tmpPosition[i] - Motion1::currentPosition[i];
+            changed = true;
         }
     }
     if (com->hasE()) {
         Motion1::destinationPositionTransformed[E_AXIS] = Motion1::currentPosition[E_AXIS] = Motion1::currentPositionTransformed[E_AXIS] = Printer::convertToMM(com->E);
+        changed = true;
+    }
+    if (!changed) {
+        FOR_ALL_AXES(i) {
+            Motion1::g92Offsets[i] = 0;
+        }
     }
     // if (com->hasX() || com->hasY() || com->hasZ()) {
     Com::printF(PSTR("X_OFFSET:"), Motion1::g92Offsets[X_AXIS], 3);
