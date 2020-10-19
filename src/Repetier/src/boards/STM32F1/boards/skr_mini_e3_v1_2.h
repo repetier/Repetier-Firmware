@@ -26,6 +26,10 @@
 #define Serial SerialUSB
 #endif
 
+#ifndef SDSUPPORT
+#define SDSUPPORT               true
+#endif
+
 #define CPU_ARCH                ARCH_ARM
 #define MAX_RAM                 47960
 
