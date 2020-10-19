@@ -1,7 +1,7 @@
 /*
- Ardiono pin mapping is very logical: ArduinoPin = port * 16 + portpin
+ Arduino pin mapping is very logical: ArduinoPin = port * 16 + portpin
  With port = 0 for port A until 4 for port E, portpin is 0..15
-Symbolic names PA0 - PE15 are defined already in variant.h!
+ Symbolic names PA0 - PE15 are defined already in variant.h!
 
 */
 
@@ -13,22 +13,22 @@ Symbolic names PA0 - PE15 are defined already in variant.h!
 #define _FASTIO_H
 
 // Port A
-#define GPIO_0 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_1 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_2 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_3 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_4 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_5 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_6 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_7 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_8 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_9 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_10 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_11 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_12 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_13 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_14 (GPIO_TypeDef*)get_GPIO_Port(0)
-#define GPIO_15 (GPIO_TypeDef*)get_GPIO_Port(0)
+#define GPIO_0 GPIOA
+#define GPIO_1 GPIOA
+#define GPIO_2 GPIOA
+#define GPIO_3 GPIOA
+#define GPIO_4 GPIOA
+#define GPIO_5 GPIOA
+#define GPIO_6 GPIOA
+#define GPIO_7 GPIOA
+#define GPIO_8 GPIOA
+#define GPIO_9 GPIOA
+#define GPIO_10 GPIOA
+#define GPIO_11 GPIOA
+#define GPIO_12 GPIOA
+#define GPIO_13 GPIOA
+#define GPIO_14 GPIOA
+#define GPIO_15 GPIOA
 
 #define GPIO_0_MASK LL_GPIO_PIN_0
 #define GPIO_1_MASK LL_GPIO_PIN_1
@@ -48,22 +48,22 @@ Symbolic names PA0 - PE15 are defined already in variant.h!
 #define GPIO_15_MASK LL_GPIO_PIN_15
 
 // Port B
-#define GPIO_16 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_17 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_18 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_19 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_20 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_21 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_22 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_23 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_24 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_25 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_26 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_27 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_28 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_29 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_30 (GPIO_TypeDef*)get_GPIO_Port(1)
-#define GPIO_31 (GPIO_TypeDef*)get_GPIO_Port(1)
+#define GPIO_16 GPIOB
+#define GPIO_17 GPIOB
+#define GPIO_18 GPIOB
+#define GPIO_19 GPIOB
+#define GPIO_20 GPIOB
+#define GPIO_21 GPIOB
+#define GPIO_22 GPIOB
+#define GPIO_23 GPIOB
+#define GPIO_24 GPIOB
+#define GPIO_25 GPIOB
+#define GPIO_26 GPIOB
+#define GPIO_27 GPIOB
+#define GPIO_28 GPIOB
+#define GPIO_29 GPIOB
+#define GPIO_30 GPIOB
+#define GPIO_31 GPIOB
 
 #define GPIO_16_MASK LL_GPIO_PIN_0
 #define GPIO_17_MASK LL_GPIO_PIN_1
@@ -84,22 +84,22 @@ Symbolic names PA0 - PE15 are defined already in variant.h!
 
 // Port C
 #if defined GPIOC_BASE
-#define GPIO_32 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_33 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_34 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_35 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_36 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_37 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_38 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_39 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_40 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_41 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_42 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_43 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_44 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_45 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_46 (GPIO_TypeDef*)get_GPIO_Port(2)
-#define GPIO_47 (GPIO_TypeDef*)get_GPIO_Port(2)
+#define GPIO_32 GPIOC
+#define GPIO_33 GPIOC
+#define GPIO_34 GPIOC
+#define GPIO_35 GPIOC
+#define GPIO_36 GPIOC
+#define GPIO_37 GPIOC
+#define GPIO_38 GPIOC
+#define GPIO_39 GPIOC
+#define GPIO_40 GPIOC
+#define GPIO_41 GPIOC
+#define GPIO_42 GPIOC
+#define GPIO_43 GPIOC
+#define GPIO_44 GPIOC
+#define GPIO_45 GPIOC
+#define GPIO_46 GPIOC
+#define GPIO_47 GPIOC
 
 #define GPIO_32_MASK LL_GPIO_PIN_0
 #define GPIO_33_MASK LL_GPIO_PIN_1
@@ -121,22 +121,22 @@ Symbolic names PA0 - PE15 are defined already in variant.h!
 
 // Port D
 #if defined GPIOD_BASE
-#define GPIO_48 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_49 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_50 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_51 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_52 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_53 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_54 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_55 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_56 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_57 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_58 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_59 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_60 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_61 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_62 (GPIO_TypeDef*)get_GPIO_Port(3)
-#define GPIO_63 (GPIO_TypeDef*)get_GPIO_Port(3)
+#define GPIO_48 GPIOD
+#define GPIO_49 GPIOD
+#define GPIO_50 GPIOD
+#define GPIO_51 GPIOD
+#define GPIO_52 GPIOD
+#define GPIO_53 GPIOD
+#define GPIO_54 GPIOD
+#define GPIO_55 GPIOD
+#define GPIO_56 GPIOD
+#define GPIO_57 GPIOD
+#define GPIO_58 GPIOD
+#define GPIO_59 GPIOD
+#define GPIO_60 GPIOD
+#define GPIO_61 GPIOD
+#define GPIO_62 GPIOD
+#define GPIO_63 GPIOD
 
 #define GPIO_48_MASK LL_GPIO_PIN_0
 #define GPIO_49_MASK LL_GPIO_PIN_1
@@ -157,23 +157,23 @@ Symbolic names PA0 - PE15 are defined already in variant.h!
 #endif
 
 // Port E
-#if defined GPIOC_BASE
-#define GPIO_64 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_65 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_66 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_67 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_68 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_69 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_70 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_71 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_72 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_73 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_74 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_75 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_76 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_77 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_78 (GPIO_TypeDef*)get_GPIO_Port(4)
-#define GPIO_79 (GPIO_TypeDef*)get_GPIO_Port(4)
+#if defined GPIOE_BASE
+#define GPIO_64 GPIOE
+#define GPIO_65 GPIOE
+#define GPIO_66 GPIOE
+#define GPIO_67 GPIOE
+#define GPIO_68 GPIOE
+#define GPIO_69 GPIOE
+#define GPIO_70 GPIOE
+#define GPIO_71 GPIOE
+#define GPIO_72 GPIOE
+#define GPIO_73 GPIOE
+#define GPIO_74 GPIOE
+#define GPIO_75 GPIOE
+#define GPIO_76 GPIOE
+#define GPIO_77 GPIOE
+#define GPIO_78 GPIOE
+#define GPIO_79 GPIOE
 
 #define GPIO_64_MASK LL_GPIO_PIN_0
 #define GPIO_65_MASK LL_GPIO_PIN_1
@@ -195,22 +195,22 @@ Symbolic names PA0 - PE15 are defined already in variant.h!
 
 // Port F
 #if defined GPIOF_BASE
-#define GPIO_80 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_81 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_82 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_83 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_84 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_85 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_86 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_87 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_88 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_89 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_90 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_91 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_92 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_93 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_94 (GPIO_TypeDef*)get_GPIO_Port(5)
-#define GPIO_95 (GPIO_TypeDef*)get_GPIO_Port(5)
+#define GPIO_80 GPIOF
+#define GPIO_81 GPIOF
+#define GPIO_82 GPIOF
+#define GPIO_83 GPIOF
+#define GPIO_84 GPIOF
+#define GPIO_85 GPIOF
+#define GPIO_86 GPIOF
+#define GPIO_87 GPIOF
+#define GPIO_88 GPIOF
+#define GPIO_89 GPIOF
+#define GPIO_90 GPIOF
+#define GPIO_91 GPIOF
+#define GPIO_92 GPIOF
+#define GPIO_93 GPIOF
+#define GPIO_94 GPIOF
+#define GPIO_95 GPIOF
 
 #define GPIO_80_MASK LL_GPIO_PIN_0
 #define GPIO_81_MASK LL_GPIO_PIN_1
@@ -232,22 +232,22 @@ Symbolic names PA0 - PE15 are defined already in variant.h!
 
 // Port G
 #if defined GPIOG_BASE
-#define GPIO_96 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_97 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_98 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_99 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_100 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_101 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_102 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_103 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_104 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_105 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_106 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_107 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_108 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_109 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_110 (GPIO_TypeDef*)get_GPIO_Port(6)
-#define GPIO_111 (GPIO_TypeDef*)get_GPIO_Port(6)
+#define GPIO_96 GPIOG
+#define GPIO_97 GPIOG
+#define GPIO_98 GPIOG
+#define GPIO_99 GPIOG
+#define GPIO_100 GPIOG
+#define GPIO_101 GPIOG
+#define GPIO_102 GPIOG
+#define GPIO_103 GPIOG
+#define GPIO_104 GPIOG
+#define GPIO_105 GPIOG
+#define GPIO_106 GPIOG
+#define GPIO_107 GPIOG
+#define GPIO_108 GPIOG
+#define GPIO_109 GPIOG
+#define GPIO_110 GPIOG
+#define GPIO_111 GPIOG
 
 #define GPIO_96_MASK LL_GPIO_PIN_0
 #define GPIO_97_MASK LL_GPIO_PIN_1
@@ -268,23 +268,23 @@ Symbolic names PA0 - PE15 are defined already in variant.h!
 #endif
 
 // Port H
-#if defined GPIOC_BASE
-#define GPIO_112 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_113 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_114 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_115 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_116 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_117 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_118 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_119 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_120 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_121 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_122 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_123 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_124 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_125 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_126 (GPIO_TypeDef*)get_GPIO_Port(7)
-#define GPIO_127 (GPIO_TypeDef*)get_GPIO_Port(7)
+#if defined GPIOH_BASE
+#define GPIO_112 GPIOH
+#define GPIO_113 GPIOH
+#define GPIO_114 GPIOH
+#define GPIO_115 GPIOH
+#define GPIO_116 GPIOH
+#define GPIO_117 GPIOH
+#define GPIO_118 GPIOH
+#define GPIO_119 GPIOH
+#define GPIO_120 GPIOH
+#define GPIO_121 GPIOH
+#define GPIO_122 GPIOH
+#define GPIO_123 GPIOH
+#define GPIO_124 GPIOH
+#define GPIO_125 GPIOH
+#define GPIO_126 GPIOH
+#define GPIO_127 GPIOH
 
 #define GPIO_112_MASK LL_GPIO_PIN_0
 #define GPIO_113_MASK LL_GPIO_PIN_1
@@ -305,23 +305,23 @@ Symbolic names PA0 - PE15 are defined already in variant.h!
 #endif
 
 // Port I
-#if defined GPIOC_BASE
-#define GPIO_128 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_129 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_130 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_131 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_132 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_133 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_134 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_135 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_136 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_137 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_138 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_139 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_140 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_141 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_142 (GPIO_TypeDef*)get_GPIO_Port(8)
-#define GPIO_143 (GPIO_TypeDef*)get_GPIO_Port(8)
+#if defined GPIOI_BASE
+#define GPIO_128 GPIOI
+#define GPIO_129 GPIOI
+#define GPIO_130 GPIOI
+#define GPIO_131 GPIOI
+#define GPIO_132 GPIOI
+#define GPIO_133 GPIOI
+#define GPIO_134 GPIOI
+#define GPIO_135 GPIOI
+#define GPIO_136 GPIOI
+#define GPIO_137 GPIOI
+#define GPIO_138 GPIOI
+#define GPIO_139 GPIOI
+#define GPIO_140 GPIOI
+#define GPIO_141 GPIOI
+#define GPIO_142 GPIOI
+#define GPIO_143 GPIOI
 
 #define GPIO_128_MASK LL_GPIO_PIN_0
 #define GPIO_129_MASK LL_GPIO_PIN_1
@@ -343,22 +343,22 @@ Symbolic names PA0 - PE15 are defined already in variant.h!
 
 // Port J
 #if defined GPIOJ_BASE
-#define GPIO_144 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_145 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_146 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_147 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_148 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_149 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_150 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_151 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_152 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_153 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_154 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_155 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_156 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_157 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_158 (GPIO_TypeDef*)get_GPIO_Port(9)
-#define GPIO_159 (GPIO_TypeDef*)get_GPIO_Port(9)
+#define GPIO_144 GPIOJ
+#define GPIO_145 GPIOJ
+#define GPIO_146 GPIOJ
+#define GPIO_147 GPIOJ
+#define GPIO_148 GPIOJ
+#define GPIO_149 GPIOJ
+#define GPIO_150 GPIOJ
+#define GPIO_151 GPIOJ
+#define GPIO_152 GPIOJ
+#define GPIO_153 GPIOJ
+#define GPIO_154 GPIOJ
+#define GPIO_155 GPIOJ
+#define GPIO_156 GPIOJ
+#define GPIO_157 GPIOJ
+#define GPIO_158 GPIOJ
+#define GPIO_159 GPIOJ
 
 #define GPIO_144_MASK LL_GPIO_PIN_0
 #define GPIO_145_MASK LL_GPIO_PIN_1
@@ -380,22 +380,22 @@ Symbolic names PA0 - PE15 are defined already in variant.h!
 
 // Port K
 #if defined GPIOK_BASE
-#define GPIO_160 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_161 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_162 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_163 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_164 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_165 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_166 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_167 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_168 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_169 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_170 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_171 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_172 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_173 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_174 (GPIO_TypeDef*)get_GPIO_Port(10)
-#define GPIO_175 (GPIO_TypeDef*)get_GPIO_Port(10)
+#define GPIO_160 GPIOK
+#define GPIO_161 GPIOK
+#define GPIO_162 GPIOK
+#define GPIO_163 GPIOK
+#define GPIO_164 GPIOK
+#define GPIO_165 GPIOK
+#define GPIO_166 GPIOK
+#define GPIO_167 GPIOK
+#define GPIO_168 GPIOK
+#define GPIO_169 GPIOK
+#define GPIO_170 GPIOK
+#define GPIO_171 GPIOK
+#define GPIO_172 GPIOK
+#define GPIO_173 GPIOK
+#define GPIO_174 GPIOK
+#define GPIO_175 GPIOK
 
 #define GPIO_160_MASK LL_GPIO_PIN_0
 #define GPIO_161_MASK LL_GPIO_PIN_1

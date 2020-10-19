@@ -91,6 +91,8 @@ typedef char prog_char;
 #ifndef MOTION2_TIMER_NUM
 #define MOTION2_TIMER_NUM 6
 #endif
+// Beware! On STM32F4's, TIM10's IRQHandler is shared with TIM1's!
+// Both timers will interrupt with the same function! 
 #ifndef PWM_TIMER_NUM
 #define PWM_TIMER_NUM 10
 #endif
@@ -108,8 +110,8 @@ typedef char prog_char;
 // for host autoconfiguration
 #define SERIAL_BUFFER_SIZE SERIAL_RX_BUFFER_SIZE
 
-#define PWM_CLOCK_FREQ 5000
-#define PWM_COUNTER_100MS 500
+#define PWM_CLOCK_FREQ 10000
+#define PWM_COUNTER_100MS 1000
 
 // #define MAX_ANALOG_INPUTS 16 // gets already set in pins_arduino.h
 
@@ -407,7 +409,7 @@ public:
         //__disable_irq();
     }
     static inline millis_t timeInMilliseconds() {
-        return millis();
+        return HAL_GetTick();
     }
     static inline char readFlashByte(PGM_P ptr) {
         return pgm_read_byte(ptr);
