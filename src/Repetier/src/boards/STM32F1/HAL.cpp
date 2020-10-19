@@ -540,7 +540,7 @@ void HAL::analogStart(void) {
         return;
     }
     ADC_ChannelConfTypeDef sConfig = { 0 };
-    sConfig.SamplingTime = ADC_SAMPLETIME_41CYCLES_5;
+    sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
 
     for (int i = 0; i < numAnalogInputs; i++) {
         sConfig.Channel = analogValues[i].channel;
@@ -555,7 +555,7 @@ void HAL::analogStart(void) {
 
     RCC_PeriphCLKInitTypeDef PeriphClkInit = { 0 };
     PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-    PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV4;
+    PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV8;
     HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
 
     HAL_ADCEx_Calibration_Start(&AdcHandle);
