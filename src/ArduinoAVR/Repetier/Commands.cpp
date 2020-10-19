@@ -1791,6 +1791,10 @@ void Commands::processGCode(GCode* com) {
             Com::printF(PSTR(" Y_OFFSET:"), Printer::coordinateOffset[Y_AXIS], 3);
             Com::printFLN(PSTR(" Z_OFFSET:"), Printer::coordinateOffset[Z_AXIS], 3);
         }
+        if (! com->hasX() && ! com->hasY() && ! com->hasZ() && ! com->hasE()) {
+            Printer::setOrigin(0,0,0);
+            Com::printFLN(PSTR(" RESET X Y Y origin"));
+        }
     } break;
 #if DRIVE_SYSTEM == DELTA
     case 100: { // G100 Calibrate floor or rod radius
