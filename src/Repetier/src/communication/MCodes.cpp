@@ -1436,10 +1436,12 @@ void __attribute__((weak)) MCode_601(GCode* com) {
 
 void __attribute__((weak)) MCode_602(GCode* com) {
     Motion1::waitForEndOfMoves();
-    if (com->hasS())
+    if (com->hasS()) {
         Printer::setDebugJam(com->S > 0);
-    if (com->hasP())
+    }
+    if (com->hasP()) {
         Printer::setJamcontrolDisabled(com->P > 0);
+    }
     Com::printF(PSTR("Debug Jam:"), (int)Printer::isDebugJam());
     Com::printFLN(PSTR(" Enabled:"), (int)!Printer::isJamcontrolDisabled());
 }

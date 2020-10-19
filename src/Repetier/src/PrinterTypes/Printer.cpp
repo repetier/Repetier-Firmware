@@ -62,7 +62,7 @@ int Printer::maxLayer = -1;       // -1 = unknown
 char Printer::printName[21] = ""; // max. 20 chars + 0
 float Printer::progress = 0;
 millis_t Printer::lastTempReport = 0;
-millis_t Printer::autoReportPeriodMS = 1000; 
+millis_t Printer::autoReportPeriodMS = 1000;
 int32_t Printer::printingTime = 0;
 
 uint32_t Printer::interval = 30000;      ///< Last step duration in ticks.
@@ -278,8 +278,9 @@ void Printer::updateDerivedParameter() {
 }
 #if AUTOMATIC_POWERUP
 void Printer::enablePowerIfNeeded() {
-    if (Printer::isPowerOn())
+    if (Printer::isPowerOn()) {
         return;
+    }
     SET_OUTPUT(PS_ON_PIN); //GND
     Printer::setPowerOn(true);
     WRITE(PS_ON_PIN, (POWER_INVERTING ? HIGH : LOW));
@@ -704,8 +705,9 @@ void Printer::handleInterruptEvent() {
     switch (event) {
 #if EXTRUDER_JAM_CONTROL
     case PRINTER_INTERRUPT_EVENT_JAM_DETECTED:
-        if (isJamcontrolDisabled())
+        if (isJamcontrolDisabled()) {
             break;
+        }
         EVENT_JAM_DETECTED;
         Com::printFLN(PSTR("important:Extruder jam detected"));
         UI_ERROR_P(Com::translatedF(UI_TEXT_EXTRUDER_JAM_ID));

@@ -391,7 +391,7 @@ extern ServoInterface* servos[];
 #define Z_PROBE_PAUSE_HEATERS 0
 #endif
 
-#ifndef Z_PROBE_BLTOUCH_DEPLOY_DELAY 
+#ifndef Z_PROBE_BLTOUCH_DEPLOY_DELAY
 #define Z_PROBE_BLTOUCH_DEPLOY_DELAY 1000
 #endif
 
@@ -424,9 +424,6 @@ extern ServoInterface* servos[];
 #define EXTRUDER_JAM_CONTROL 1
 #else
 #define EXTRUDER_JAM_CONTROL 0
-#endif
-#ifndef JAM_METHOD
-#define JAM_METHOD 1
 #endif
 
 #ifndef DEBUG_FREE_MEMORY
