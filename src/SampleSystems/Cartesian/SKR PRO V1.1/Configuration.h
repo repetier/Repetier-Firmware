@@ -32,7 +32,7 @@
 // The follwing variables are required early to decide on the right modules.
 #define NUM_TOOLS 1
 #define NUM_SERVOS 1                         // Number of servos available
-#define MOTHERBOARD MOTHERBOARD_SKR_PRO_V1_1
+#define MOTHERBOARD MOTHERBOARD_E3_MINI_V1_2
 #define EEPROM_MODE EEPROM_SDCARD
 
 #define RFSERIAL SerialUSB 
