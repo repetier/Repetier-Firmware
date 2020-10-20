@@ -57,7 +57,7 @@ void PrinterType::closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], flo
 
         float p = pos[i] - offsets[i];
         float minP = Motion1::minPos[i] + safety - tOffMax;
-        float maxP = Motion1::maxPos[i] - safety + tOffMin;
+        float maxP = Motion1::maxPos[i] - safety - tOffMin;
         if (p < minP) {
             pos[i] += minP - p;
         } else if (p > maxP) {

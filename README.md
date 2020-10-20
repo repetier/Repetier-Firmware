@@ -66,7 +66,7 @@ try to update from time to time.
 
 Done:
 - New motion system and planner for better flexibility.
-- Supported hardware: Due based boards (SAM3x8E), SAMD51 (Adafruig Grand Central Metro) and STM32F4xxx (RUMBA32)
+- Supported hardware: Due based boards (SAM3x8E), SAMD51 (Adafruit Grand Central Metro) and STM32F4xxx (RUMBA32)
 - First tests of the new modular configuration scheme.
 - Pure cartesian printer system.
 - Core XYZ printer system.
@@ -90,8 +90,12 @@ Done:
 ToDo:
 - Add more preconfigured boards and displays
 - Port AVR HAL to new system
+- Add LPC1768 support
 - Add SAMD21 HAL
+- LCD solution for filament change
 - recheck event system
+- Automatic delta leveling
+- Multi language support
 - New config tool
 
 #### Benefits of new system

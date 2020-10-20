@@ -281,7 +281,7 @@ void Tool::selectTool(fast8_t id, bool force) {
 #if RAISE_Z_ON_TOOLCHANGE > 0
     float lastZ = Motion1::currentPosition[Z_AXIS];
     if (doMove && Motion1::isAxisHomed(Z_AXIS)) {
-        Motion1::setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, lastZ + RAISE_Z_ON_TOOLCHANGE);
+        Motion1::setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, RMath::min(lastZ + RAISE_Z_ON_TOOLCHANGE, Motion1::maxPos[Z_AXIS]));
         Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
         Motion1::waitForEndOfMoves();
     }
