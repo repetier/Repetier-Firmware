@@ -22,7 +22,7 @@ and will add the semicolon if required.
     with an installed BLTouch and a generic Creality Ender 3 128x64 graphics
     display.
 
-    Check out https://repetier.com/config/introduction/ for more thorough 
+    Check out https://docfirmwarev2.repetier.com/config/introduction for more thorough 
     information on configuring RFW V2!
 */
 
