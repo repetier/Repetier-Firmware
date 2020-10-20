@@ -72,6 +72,7 @@
 #define PD2   50 //D50
 
 #define CMSIS_STARTUP_FILE      "skr_startup_stm32f103xe.s"
+#define VECT_TAB_OFFSET         0x7000 // vector table offset due to bootloader
 
 #define TIMER_SERIAL            TIM7
 #define TIMER_SERIAL_RAW_IRQ    RAW_TIM7_IRQHandler 
@@ -86,6 +87,12 @@
 
 #define PIN_WIRE_SDA            PB7
 #define PIN_WIRE_SCL            PB6
+
+// Always have the TFT serial2 port defined for config.h changes and compiles. 
+#define HAL_USART_MODULE_ENABLED
+#define HAVE_HWSERIAL2
+
+#define UART_IRQ_PRIO           3
 
 //#define DEBUG_UART_BAUDRATE 115200
 //#define DEBUG_UART PA_2

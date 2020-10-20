@@ -17,9 +17,7 @@
     "arduino": {
       "ldscript": "ldscript.ld"
     },
-    "mcu": "stm32f103rct6",
-    "variant": "Generic_F103Rx",
-    "board": "skr_mini_e3_v1_2"
+    "mcu": "stm32f103rct6"
   },
   "debug": {
     "jlink_device": "STM32F103RC",
