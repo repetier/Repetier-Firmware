@@ -32,7 +32,6 @@
 #include <malloc.h>
 
 // For SKR E3 mini V1.2:
-// Optional: WWDG as timer (100hz-8khz)
 // 8 advanced - both heaters
 // 7 basic - softserial
 // 6 general - motion 3
@@ -41,6 +40,16 @@
 // 3 basic - beeper (HW) - can't be anything else
 // 2 general - servo
 // 1 advanced - fan 1
+
+// For SKR E3 mini V2.0:
+// 8 advanced - both heaters
+// 7 basic - free
+// 6 general - motion 3
+// 5 general - pwm timer
+// 4 general - motion 2
+// 3 basic - beeper (HW) - can't be anything else
+// 2 general - servo
+// 1 advanced - free
 
 // Create timer names from TIMER_NUM macro
 

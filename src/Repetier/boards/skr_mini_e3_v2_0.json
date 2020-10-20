@@ -14,7 +14,7 @@
         "0x0004"
       ]
     ],
-    "variant": "skr_mini_e3_v1_2",
+    "variant": "skr_mini_e3_v2_0",
     "ldscript": "ldscript.ld",
     "mcu": "stm32f103rct6"
   },
@@ -29,7 +29,7 @@
     "libopencm3",
     "stm32cube"
   ],
-  "name": "SKR E3 Mini V1.2",
+  "name": "SKR E3 Mini V2.0",
   "upload": {
     "disable_flushing": true,
     "maximum_ram_size": 49152,
