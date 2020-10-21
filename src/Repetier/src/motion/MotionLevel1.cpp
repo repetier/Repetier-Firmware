@@ -450,12 +450,14 @@ float Motion1::getShowPosition(fast8_t axis) {
     }
     return currentPosition[axis] + g92Offsets[axis];
 }
+
 void Motion1::setMotorForAxis(StepperDriverBase* motor, fast8_t axis) {
     waitForEndOfMoves();
     motors[axis] = motor;
     if (motor != nullptr) {
         motor->setAxis(axis);
     }
+    Motion3::setDirectionsForNewMotors();
 }
 
 fast8_t Motion1::buffersUsed() {
@@ -622,7 +624,7 @@ bool Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate, bool second
     ) { // ignore
 #if MIN_EXTRUDER_TEMP > MAX_ROOM_TEMPERATURE
         if (movingEAxis && coords[E_AXIS] != IGNORE_COORDINATE && !Printer::debugDryrun()) {
-            Com::printWarningFLN(Com::tColdExtrusionPrevented); 
+            Com::printWarningFLN(Com::tColdExtrusionPrevented);
         }
 #endif
         destinationPositionTransformed[E_AXIS] = currentPositionTransformed[E_AXIS];

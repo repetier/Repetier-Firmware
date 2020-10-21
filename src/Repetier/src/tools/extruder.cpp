@@ -33,7 +33,6 @@ void ToolExtruder::reset(float offx, float offy, float offz, float diameter, flo
 
 /// Called when the tool gets activated.
 void ToolExtruder::activate() {
-    Motion1::waitForEndOfMoves();
     Motion1::setMotorForAxis(stepper, E_AXIS);
     Motion1::maxYank[E_AXIS] = yank;
     Motion1::resolution[E_AXIS] = stepsPerMM;

@@ -42,6 +42,33 @@ void Motion3::init() {
     }
 }
 
+void Motion3::setDirectionsForNewMotors() {
+#ifdef XMOTOR_SWITCHABLE
+    Motion1::motors[X_AXIS]->dir(lastDirection & 1);
+#else
+    XMotor.dir(lastDirection & 1);
+#endif
+    YMotor.dir(lastDirection & 2);
+    ZMotor.dir(lastDirection & 4);
+#if NUM_AXES > A_AXIS
+    AMotor.dir(lastDirection & 16);
+#endif
+#if NUM_AXES > B_AXIS
+    BMotor.dir(lastDirection & 32);
+#endif
+#if NUM_AXES > C_AXIS
+    CMotor.dir(lastDirection & 64);
+#endif
+    if (Motion1::dittoMode) {
+        for (fast8_t i = 0; i <= Motion1::dittoMode; i++) {
+            Tool::tools[i]->directionMotor(lastDirection & 8);
+        }
+    } else {
+        if (Motion1::motors[E_AXIS]) {
+            Motion1::motors[E_AXIS]->dir(lastDirection & 8);
+        }
+    }
+}
 /* Motion3Buffer* Motion3::tryReserve() {
     if (length < NUM_MOTION3_BUFFER) {
         return &buffers[last];
@@ -63,7 +90,6 @@ bool Motion3::activateNext() {
         Motion1::axesTriggered = 0;
         Motion1::motorTriggered = 0;
         Motion3::skipParentId = 255;
-        newDir = true; // might have changed or motors might have changed
     }
     if (newDir) {
         // Set direction first to give driver some time

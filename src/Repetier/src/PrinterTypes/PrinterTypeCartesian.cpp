@@ -46,7 +46,6 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
         if (Motion1::axesHomed & axisBits[i]) {
             if (pos[i] < Motion1::minPosOff[i]
                 || pos[i] > Motion1::maxPosOff[i]) {
-                Com::printFLN(PSTR("Axis failed:"), (int32_t)i);
                 return false;
             }
         }

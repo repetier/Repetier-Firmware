@@ -56,6 +56,7 @@ public:
     to ensure best accuracy in motion.
     */
     static void timer();
+    static void setDirectionsForNewMotors();
     /** Return pointer to next available buffer or nullptr. */
     static inline Motion3Buffer* tryReserve() {
         if (length < NUM_MOTION3_BUFFER) {
