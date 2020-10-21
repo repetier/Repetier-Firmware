@@ -27,6 +27,8 @@
 
 #if MOTHERBOARD == MOTHERBOARD_E3_MINI_V1_2
 #include "boards/skr_mini_e3_v1_2.h"
+#elif MOTHERBOARD == MOTHERBOARD_E3_MINI_V2_0
+#include "boards/skr_mini_e3_v2_0.h"
 #endif
 
 #ifndef SDSSORIG

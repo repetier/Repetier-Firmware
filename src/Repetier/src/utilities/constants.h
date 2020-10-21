@@ -50,6 +50,7 @@
 
 // STM32F1 based boards
 #define MOTHERBOARD_E3_MINI_V1_2 2500
+#define MOTHERBOARD_E3_MINI_V2_0 2501
 
 // STM32F4 based boards (3000 - 3499)
 #define MOTHERBOARD_RUMBA32 3000

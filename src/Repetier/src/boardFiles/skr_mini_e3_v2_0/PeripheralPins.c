@@ -19,9 +19,9 @@
  * Note: Commented lines are alternative possibilities which are not used per default.
  *       If you change them, you will have to know what you do
  * =====
- */
+ */ 
 
-constexpr PinName digitalPin[] = {
+const PinName digitalPin[] = {
     PA_0,  //D0
     PA_1,  //D1
     PA_2,  //D2
@@ -75,7 +75,7 @@ constexpr PinName digitalPin[] = {
     PD_2   //D50
 };
 
-constexpr uint32_t analogInputPin[] = {
+const uint32_t analogInputPin[] = {
     PA_0, //A0
     PA_1, //A1
     PA_2, //A2
@@ -96,7 +96,7 @@ constexpr uint32_t analogInputPin[] = {
 
 //*** ADC ***
 #ifdef HAL_ADC_MODULE_ENABLED
-constexpr PinMap PinMap_ADC[] = {
+const PinMap PinMap_ADC[] = {
     { PA_0, ADC1, STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 0, 0) }, // ADC1_IN0
 // {PA_0,  ADC2,  STM_PIN_DATA_EXT(STM_MODE_ANALOG, GPIO_NOPULL, 0, 0, 0)}, // ADC2_IN0
 #ifdef STM32F103xE
@@ -162,13 +162,13 @@ constexpr PinMap PinMap_ADC[] = {
 
 //*** I2C ***
 #ifdef HAL_I2C_MODULE_ENABLED
-constexpr PinMap PinMap_I2C_SDA[] = {
+const PinMap PinMap_I2C_SDA[] = {
     { PB_7, I2C1, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, AFIO_NONE) },
     { PB_9, I2C1, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, AFIO_I2C1_ENABLE) },
     { PB_11, I2C2, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, AFIO_NONE) },
     { NC, NP, 0 }
 };
-constexpr PinMap PinMap_I2C_SCL[] = {
+const PinMap PinMap_I2C_SCL[] = {
     { PB_6, I2C1, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, AFIO_NONE) },
     { PB_8, I2C1, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, AFIO_I2C1_ENABLE) },
     { PB_10, I2C2, STM_PIN_DATA(STM_MODE_AF_OD, GPIO_NOPULL, AFIO_NONE) },
@@ -178,7 +178,7 @@ constexpr PinMap PinMap_I2C_SCL[] = {
 
 //*** PWM ***
 #ifdef HAL_TIM_MODULE_ENABLED
-constexpr PinMap PinMap_PWM[] = {
+const PinMap PinMap_PWM[] = {
     { PA_0, TIM2, STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE, 1, 0) }, // TIM2_CH1
 // {PA_0,  TIM2,   STM_PIN_DATA_EXT(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_TIM2_PARTIAL_2, 1, 0)}, // TIM2_CH1
 #ifdef STM32F103xE
@@ -271,7 +271,7 @@ constexpr PinMap PinMap_PWM[] = {
 
 //*** SERIAL ***
 #ifdef HAL_UART_MODULE_ENABLED
-constexpr PinMap PinMap_UART_TX[] = {
+const PinMap PinMap_UART_TX[] = {
     { PA_2, USART2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
     { PA_9, USART1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
     { PB_6, USART1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_USART1_ENABLE) },
@@ -286,7 +286,7 @@ constexpr PinMap PinMap_UART_TX[] = {
 #endif
     { NC, NP, 0 }
 };
-constexpr PinMap PinMap_UART_RX[] = {
+const PinMap PinMap_UART_RX[] = {
     { PA_3, USART2, STM_PIN_DATA(STM_MODE_INPUT, GPIO_PULLUP, AFIO_NONE) },
     { PA_10, USART1, STM_PIN_DATA(STM_MODE_INPUT, GPIO_PULLUP, AFIO_NONE) },
     { PB_7, USART1, STM_PIN_DATA(STM_MODE_INPUT, GPIO_PULLUP, AFIO_USART1_ENABLE) },
@@ -301,14 +301,14 @@ constexpr PinMap PinMap_UART_RX[] = {
 #endif
     { NC, NP, 0 }
 };
-constexpr PinMap PinMap_UART_RTS[] = {
+const PinMap PinMap_UART_RTS[] = {
     { PA_1, USART2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
     { PA_12, USART1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
     { PB_14, USART3, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
     { PB_14, USART3, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_USART3_PARTIAL) },
     { NC, NP, 0 }
 };
-constexpr PinMap PinMap_UART_CTS[] = {
+const PinMap PinMap_UART_CTS[] = {
     { PA_0, USART2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
     { PA_11, USART1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
     { PB_13, USART3, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
@@ -320,7 +320,7 @@ constexpr PinMap PinMap_UART_CTS[] = {
 //*** SPI ***
 
 #ifdef HAL_SPI_MODULE_ENABLED
-constexpr PinMap PinMap_SPI_MOSI[] = {
+const PinMap PinMap_SPI_MOSI[] = {
     { PA_7, SPI1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
 #ifndef STM32F103xE
     { PB_5, SPI1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_SPI1_ENABLE) },
@@ -330,7 +330,7 @@ constexpr PinMap PinMap_SPI_MOSI[] = {
     { PB_15, SPI2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
     { NC, NP, 0 }
 };
-constexpr PinMap PinMap_SPI_MISO[] = {
+const PinMap PinMap_SPI_MISO[] = {
     { PA_6, SPI1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
 #ifndef STM32F103xE
     { PB_4, SPI1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_SPI1_ENABLE) },
@@ -340,7 +340,7 @@ constexpr PinMap PinMap_SPI_MISO[] = {
     { PB_14, SPI2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
     { NC, NP, 0 }
 };
-constexpr PinMap PinMap_SPI_SCLK[] = {
+const PinMap PinMap_SPI_SCLK[] = {
     { PA_5, SPI1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
 #ifndef STM32F103xE
     { PB_3, SPI1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_SPI1_ENABLE) },
@@ -350,7 +350,7 @@ constexpr PinMap PinMap_SPI_SCLK[] = {
     { PB_13, SPI2, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
     { NC, NP, 0 }
 };
-constexpr PinMap PinMap_SPI_SSEL[] = {
+const PinMap PinMap_SPI_SSEL[] = {
     { PA_4, SPI1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_NONE) },
 #ifndef STM32F103xE
     { PA_15, SPI1, STM_PIN_DATA(STM_MODE_AF_PP, GPIO_PULLUP, AFIO_SPI1_ENABLE) },
@@ -364,7 +364,7 @@ constexpr PinMap PinMap_SPI_SSEL[] = {
 
 //*** USB ***
 #ifdef HAL_PCD_MODULE_ENABLED
-constexpr PinMap PinMap_USB[] = {
+const PinMap PinMap_USB[] = {
     { PA_11, USB, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, AFIO_NONE) }, // USB_DM
     { PA_12, USB, STM_PIN_DATA(STM_MODE_INPUT, GPIO_NOPULL, AFIO_NONE) }, // USB_DP
     { NC, NP, 0 }

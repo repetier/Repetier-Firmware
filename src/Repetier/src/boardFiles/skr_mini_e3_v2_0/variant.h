@@ -92,12 +92,14 @@
 #define HAL_USART_MODULE_ENABLED
 #define HAVE_HWSERIAL2
 
+// HW USART3 for the V2's TMC2209 drivers
+#define HAVE_HWSERIAL3
 #define UART_IRQ_PRIO           3
 
 //#define DEBUG_UART_BAUDRATE 115200
 //#define DEBUG_UART PA_2
 
-#define USBD_ATTACH_PIN         PC13
+#define USBD_ATTACH_PIN         PA14 // Different on the V2! (Also SWCLK)
 #define USBD_ATTACH_LEVEL       LOW
 
 #define RAW_TIM8_IRQn           RAW_TIM8_UP_IRQn
