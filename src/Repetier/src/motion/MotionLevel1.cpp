@@ -1727,11 +1727,12 @@ void Motion1::homeAxes(fast8_t axes) {
     }
 #endif
 */
+    oldCoordinates[E_AXIS] = currentPosition[E_AXIS];
+    moveByOfficial(oldCoordinates, moveFeedrate[X_AXIS], false);     // make official pos = homing pos reagrdless of transformation
     if (Tool::getActiveTool() != nullptr && ok && (axes & 7) != 0) { // select only if all is homed or we get unwanted moves! Also only do it if position has changed allowing homing of non position axis in extruder selection.
         Tool::selectTool(activeToolId, true);
     }
-    oldCoordinates[E_AXIS] = currentPosition[E_AXIS];
-    moveByOfficial(oldCoordinates, moveFeedrate[X_AXIS], false); // make official pos = homing pos reagrdless of transformation
+
     Motion1::printCurrentPosition();
     GUI::popBusy();
 }

@@ -87,10 +87,9 @@ Timer 1 (PE13, PE14), 2 (PB8, PB9), 3 (PB0, PC6, PC7), 4 (PD12), 9 (PE5, PE6)
 #define ORIG_E1_DIAG0_PIN PG14
 
 // Temperature Sensors
-#define TEMP_1_PIN static_cast<int>(PA_2) // TB bed
-
-#define THERMOCOUPLE_0_PIN static_cast<int>(PA_0) // A10 on EXP3
-#define THERMOCOUPLE_1_PIN static_cast<int>(PA_1) // A9 on EXP3
+#define THERMOCOUPLE_0_PIN static_cast<int>(PA_0)
+#define THERMOCOUPLE_1_PIN static_cast<int>(PA_1)
+#define THERMOCOUPLE_2_PIN static_cast<int>(PA_2)
 
 #define FILAMENT_SENSOR0 PE12
 #define FILAMENT_SENSOR1 PE15
