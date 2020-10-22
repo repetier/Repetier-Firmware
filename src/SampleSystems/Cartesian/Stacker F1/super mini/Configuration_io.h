@@ -156,15 +156,14 @@ IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20, 85)
 // Typically they require an analog input (12 bit) so define
 // them first.
 
-IO_ANALOG_INPUT(IOAnalogBed1, TEMP_1_PIN, 5)
+IO_ANALOG_INPUT(IOAnalogBed1, THERMOCOUPLE_2_PIN, 5)
 IO_ANALOG_INPUT(IOAnalogExt1, THERMOCOUPLE_0_PIN, 5)
 
 // Need a conversion table for epcos NTC
-IO_TEMP_TABLE_NTC(TempTableATC_104GT, ATC_104GT)
 IO_TEMP_TABLE_PTC(TempTablePT100, PT100_STACKER)
 // Now create the temperature inputs
 
-IO_TEMPERATURE_TABLE(TempBed1, IOAnalogBed1, TempTableATC_104GT)
+IO_TEMPERATURE_TABLE(TempBed1, IOAnalogBed1, TempTablePT100)
 IO_TEMPERATURE_TABLE(TempExt1, IOAnalogExt1, TempTablePT100)
 
 // Use PWM outputs to heat. If using hardware PWM make sure
