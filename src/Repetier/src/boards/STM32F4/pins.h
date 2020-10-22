@@ -29,6 +29,10 @@
 #include "boards/rumba32.h"
 #endif
 
+#if MOTHERBOARD == MOTHERBOARD_STACKER3D_SUPER_MINI
+#include "boards/stacker3d_super_mini.h"
+#endif
+
 #ifndef SDSSORIG
 #define SDSSORIG -1
 #endif
@@ -161,6 +165,30 @@
 #define PS_ON_PIN ORIG_PS_ON_PIN
 #endif
 
+#ifndef TEMP_0_PIN
+#define TEMP_0_PIN -1
+#endif
+
+#ifndef TEMP_1_PIN
+#define TEMP_1_PIN -1
+#endif
+
+#ifndef TEMP_2_PIN
+#define TEMP_2_PIN -1
+#endif
+
+#ifndef TEMP_3_PIN
+#define TEMP_3_PIN -1
+#endif
+
+#ifndef TEMP_4_PIN
+#define TEMP_4_PIN -1
+#endif
+
+#ifndef TEMP_5_PIN
+#define TEMP_5_PIN -1
+#endif
+
 #ifndef ORIG_SDCARDDETECT
 #define ORIG_SDCARDDETECT -1
 #endif
@@ -170,7 +198,7 @@
 
 #define SENSITIVE_PINS \
     { \
-        0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, LED_PIN, ORIG_PS_ON_PIN, \
-            HEATER_0_PIN, HEATER_1_PIN, FAN_PIN, E0_PINS E1_PINS E2_PINS E3_PINS E4_PINS E5_PINS E6_PINS TEMP_0_PIN, TEMP_1_PIN, SDSS \
+        0, 1, X_STEP_PIN, X_DIR_PIN, X_ENABLE_PIN, X_MIN_PIN, X_MAX_PIN, Y_STEP_PIN, Y_DIR_PIN, Y_ENABLE_PIN, Y_MIN_PIN, Y_MAX_PIN, Z_STEP_PIN, Z_DIR_PIN, Z_ENABLE_PIN, Z_MIN_PIN, Z_MAX_PIN, ORIG_PS_ON_PIN, \
+            HEATER_0_PIN, HEATER_1_PIN, FAN_PIN, E0_PINS E1_PINS E2_PINS E3_PINS E4_PINS E5_PINS E6_PINS TEMP_0_PIN, TEMP_1_PIN, TEMP_2_PIN, TEMP_3_PIN, TEMP_4_PIN, TEMP_5_PIN, SDSS \
     }
 #endif

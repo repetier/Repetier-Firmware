@@ -1,5 +1,0 @@
-Update 29.05.17
-
-added Laser Power Limit
-
-corrected typos , drawing

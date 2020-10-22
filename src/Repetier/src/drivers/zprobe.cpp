@@ -21,6 +21,11 @@
 
 #include "Repetier.h"
 
+#if Z_PROBE_REPETITIONS == 1
+#undef Z_PROBE_USE_MEDIAN
+#define Z_PROBE_USE_MEDIAN 0
+#endif
+
 #define Z_CRASH_THRESHOLD_STEPS 50
 #if Z_PROBE_TYPE == Z_PROBE_TYPE_DEFAULT
 
