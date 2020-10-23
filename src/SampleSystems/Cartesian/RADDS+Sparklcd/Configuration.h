@@ -16,8 +16,7 @@
 
 */
 
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
+#pragma once
 
 /**************** READ FIRST ************************
 
@@ -37,17 +36,17 @@
 */
 
 // The follwing variables are required early to decide on the right modules.
-#define NUM_TOOLS 4
+#define NUM_TOOLS 2
 #define NUM_EXTRUDER 2
-#define NUM_SERVOS 1    // Number of serves available
-#define MOTHERBOARD 402 // 405
-#define EEPROM_MODE 1
+#define NUM_SERVOS 1                  // Number of serves available
+#define MOTHERBOARD MOTHERBOARD_RADDS // 405
+#define EEPROM_MODE 3
 #define RFSERIAL Serial
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
 // Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
 // If it is incompatible you will get compiler errors about write functions not being compatible!
 //#define COMPAT_PRE1
-#define BLUETOOTH_SERIAL -1
+#define BLUETOOTH_SERIAL 101
 #define BLUETOOTH_BAUD 115200
 #define WAITING_IDENTIFIER "wait"
 #define JSON_OUTPUT 1
@@ -67,11 +66,11 @@
 #define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
 #define HOST_RESCUE 1                // Enable host rescue help system
 //#define DEBUG_RESCUE                 // Uncomment to add power loss entry in debug menu while printing
-#define POWERLOSS_LEVEL 2            // How much time do we have on powerloss, 0 = no move, 1 = short just raise Z, 2 = long full park move
-#define POWERLOSS_UP 5               // How much to move up if mode 1 is active
-#define Z_PROBE_TYPE 2               // 0 = no z probe, 1 = default z probe, 2 = Nozzle as probe
-#define Z_PROBE_BORDER 2             // Safety border to ensure position is allowed
-#define Z_PROBE_TEMPERATURE 170      // Temperature for type 2
+#define POWERLOSS_LEVEL 2       // How much time do we have on powerloss, 0 = no move, 1 = short just raise Z, 2 = long full park move
+#define POWERLOSS_UP 5          // How much to move up if mode 1 is active
+#define Z_PROBE_TYPE 2          // 0 = no z probe, 1 = default z probe, 2 = Nozzle as probe
+#define Z_PROBE_BORDER 2        // Safety border to ensure position is allowed
+#define Z_PROBE_TEMPERATURE 170 // Temperature for type 2
 
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta, 3 = Dual X-Axis
 #define PRINTER_TYPE 0
@@ -169,9 +168,9 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 
 // All fans in this list list become controllable with M106/M107
 // by selecteing the fan number with P0..P<NUM_FANS-1>
-#define NUM_FANS 2
+#define NUM_FANS 1
 #define FAN_LIST \
-    { &Fan1PWM, &Fan1PWM }
+    { &Fan1PWM }
 
 #define NUM_HEATED_BEDS 1
 #define HEATED_BED_LIST \
@@ -179,12 +178,12 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 
 #define NUM_HEATED_CHAMBERS 0
 #define HEATED_CHAMBER_LIST \
-    {}
+    { }
 
 #define SERVO_LIST \
     { &Servo1 }
 #define TOOLS \
-    { &ToolExtruder1, &ToolExtruder2, &Laser3, &CNC4 }
+    { &ToolExtruder1, &ToolExtruder2 }
 
 // Heaters enumerate all heaters, so we can loop over them
 // or call commands on a specific heater number.
@@ -197,9 +196,9 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 // Id's start at 0 and depend on position in this array.
 #define NUM_MOTORS 5
 #define MOTORS \
-    { &XMotor, &YMotor, &ZMotor, &AL1Motor, &AL2Motor }
+    { &XMotor, &YMotor, &ZMotor }
 #define MOTOR_NAMES \
-    { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("Adj. 1"), PSTR("Adj. 2") }
+    { PSTR("X"), PSTR("Y"), PSTR("Z") }
 
 // Some common settings for trinamic driver settings
 /**
@@ -264,17 +263,6 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 // ################## EDIT THESE SETTINGS MANUALLY ################
 // ################ END MANUAL SETTINGS ##########################
 
-#undef FAN_BOARD_PIN
-#define FAN_BOARD_PIN -1
-#define BOARD_FAN_SPEED 255
-#define BOARD_FAN_MIN_SPEED 0
-#define FAN_THERMO_PIN -1
-#define FAN_THERMO_MIN_PWM 128
-#define FAN_THERMO_MAX_PWM 255
-#define FAN_THERMO_MIN_TEMP 45
-#define FAN_THERMO_MAX_TEMP 60
-#define FAN_THERMO_THERMISTOR_PIN -1
-#define FAN_THERMO_THERMISTOR_TYPE 1
 #undef Y_MIN_PIN
 #define Y_MIN_PIN -1
 #undef X_MAX_PIN
@@ -284,15 +272,10 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #undef Z_MAX_PIN
 #define Z_MAX_PIN -1
 
-#define MIXING_EXTRUDER 0
-
-#define DRIVE_SYSTEM 0
-#define EXTRUDER_FAN_COOL_TEMP 50
 #define KILL_IF_SENSOR_DEFECT 0
 #define RETRACT_ON_PAUSE 2
 #define PAUSE_START_COMMANDS ""
 #define PAUSE_END_COMMANDS ""
-#define SHARED_EXTRUDER_HEATER 0
 
 #define AUTORETRACT_ENABLED 0
 #define RETRACTION_LENGTH 3
@@ -309,24 +292,11 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define FILAMENTCHANGE_SHORTRETRACT 2.5
 #define FILAMENTCHANGE_LONGRETRACT 50
 #define JAM_METHOD 1
-#define JAM_STEPS 220
-#define JAM_SLOWDOWN_STEPS 1000
-#define JAM_SLOWDOWN_TO 75
-#define JAM_ERROR_STEPS 1500
-#define JAM_MIN_STEPS 10
 #define JAM_ACTION 1
 
 #define RETRACT_DURING_HEATUP true
 #define PID_CONTROL_RANGE 20
-#define SKIP_M109_IF_WITHIN 5
-#define SCALE_PID_TO_MAX 0
-#define TEMP_HYSTERESIS 0
 #define EXTRUDE_MAXLENGTH 160
-
-#define GENERIC_THERM_VREF 5
-#define GENERIC_THERM_NUM_ENTRIES 33
-#define HEATER_PWM_SPEED 0
-#define COOLER_PWM_SPEED 0
 
 // ############# Heated bed configuration ########################
 
@@ -394,12 +364,10 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define X_BACKLASH 0
 #define Y_BACKLASH 0
 #define Z_BACKLASH 0
-#define DIRECTION_DELAY 0
 #define MAX_JERK 5
 #define MAX_ZJERK 0.3
 #define PRINTLINE_CACHE_SIZE 32
 #define MOVE_CACHE_LOW 10
-#define LOW_TICKS_PER_MOVE 250000
 #define EXTRUDER_SWITCH_XY_SPEED 100
 #define FEATURE_DITTO_PRINTING 0
 
@@ -488,23 +456,8 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define ARC_SUPPORT 0
 #define FEATURE_MEMORY_POSITION 1
 #define FEATURE_CHECKSUM_FORCED 0
-#define FEATURE_FAN_CONTROL 1
-#define FEATURE_FAN2_CONTROL 0
-#define ADC_KEYPAD_PIN -1
-#define LANGUAGE_EN_ACTIVE 1
-#define LANGUAGE_DE_ACTIVE 1
-#define LANGUAGE_NL_ACTIVE 1
-#define LANGUAGE_PT_ACTIVE 1
-#define LANGUAGE_IT_ACTIVE 1
-#define LANGUAGE_ES_ACTIVE 1
-#define LANGUAGE_FI_ACTIVE 1
-#define LANGUAGE_SE_ACTIVE 1
-#define LANGUAGE_FR_ACTIVE 1
-#define LANGUAGE_CZ_ACTIVE 1
-#define LANGUAGE_PL_ACTIVE 1
-#define LANGUAGE_TR_ACTIVE 1
-#define UI_PRINTER_NAME "FELIX Pro 1"
-#define UI_PRINTER_COMPANY "FELIXprinters"
+#define UI_PRINTER_NAME "Testsetup"
+#define UI_PRINTER_COMPANY "Repetier"
 #define UI_PAGES_DURATION 4000
 #define UI_SPEEDDEPENDENT_POSITIONING 0
 #define UI_DISABLE_AUTO_PAGESWITCH 1
@@ -516,34 +469,8 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define UI_KEY_FIRST_REPEAT 500
 #define UI_KEY_REDUCE_REPEAT 50
 #define UI_KEY_MIN_REPEAT 50
-#define FEATURE_BEEPER 0
 #define CASE_LIGHTS_PIN 25
 #define CASE_LIGHT_DEFAULT_ON 1
 #define UI_START_SCREEN_DELAY 2000
-#define UI_DYNAMIC_ENCODER_SPEED 1
-#define UI_HEAD "E1:%e0\002C E2:%e1\002C B:%eb\002C"
-/**
-Beeper sound definitions for short beeps during key actions
-and longer beeps for important actions.
-Parameter is delay in microseconds and the secons is the number of repetitions.
-Values must be in range 1..255
-*/
-#define BEEPER_SHORT_SEQUENCE 2, 2
-#define BEEPER_LONG_SEQUENCE 8, 8
-#define UI_SET_MIN_HEATED_BED_TEMP 30
-#define UI_SET_MAX_HEATED_BED_TEMP 120
-#define UI_SET_MIN_EXTRUDER_TEMP 80
-#define UI_SET_MAX_EXTRUDER_TEMP 275
-#define UI_SET_EXTRUDER_FEEDRATE 5
-#define UI_SET_EXTRUDER_RETRACT_DISTANCE 3
 
 //#define CUSTOM_EVENTS
-//#define CUSTOM_MENU
-//#define CUSTOM_TRANSLATIONS
-#define HALFAUTOMATIC_LEVELING 1
-// add z probe height routine
-#define ZPROBE_HEIGHT_ROUTINE
-#define ZPROBE_REF_HEIGHT 5.97
-#define Z_UP_AFTER_HOME 10
-
-#endif

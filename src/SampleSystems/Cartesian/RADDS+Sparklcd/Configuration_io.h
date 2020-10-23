@@ -53,18 +53,6 @@ IO_OUTPUT(IOE2Step, ORIG_E1_STEP_PIN)
 IO_OUTPUT(IOE2Dir, ORIG_E1_DIR_PIN)
 IO_OUTPUT_INVERTED(IOE2Enable, ORIG_E1_ENABLE_PIN)
 
-// Autolevel Motor 1
-
-IO_OUTPUT(IOAL1Step, 51)
-IO_OUTPUT(IOAL1Dir, 53)
-IO_OUTPUT_INVERTED(IOAL1Enable, 49)
-
-// Autolevel Motor 1
-
-IO_OUTPUT(IOAL2Step, 39)
-IO_OUTPUT(IOAL2Dir, 13)
-IO_OUTPUT_INVERTED(IOAL2Enable, 40)
-
 // Servo output
 
 IO_OUTPUT(Servo1Pin, 5)
@@ -75,9 +63,6 @@ IO_INPUT(IOEndstopXMin, ORIG_X_MIN_PIN)
 // IO_INPUT_INVERTED(IOEndstopXMin, ORIG_X_MIN_PIN)
 IO_INPUT(IOEndstopYMax, ORIG_Y_MAX_PIN)
 IO_INPUT_PULLUP(IOEndstopZMin, ORIG_Z_MIN_PIN)
-
-IO_INPUT(IOJam1, 35)
-IO_INPUT(IOJam2, 33)
 
 // Controller input pins
 
@@ -124,7 +109,7 @@ IO_OUTPUT(IOFan1, ORIG_FAN_PIN)
 IO_PWM_SOFTWARE(Fan1NoKSPWM, IOFan1, 0)
 // IO_PWM_HARDWARE(Fan1PWM, 37,5000)
 // IO_PDM_SOFTWARE(Fan1NoKSPWM, IOFan1) // alternative to PWM signals
-IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20)
+IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20, 100)
 // For debugging - reports new values and then calls real pwm
 IO_PWM_REPORT(Fan1Report, Fan1PWM)
 // Define temperature sensors
@@ -172,8 +157,6 @@ STEPPER_SIMPLE(E1MotorBase, IOE1Step, IOE1Dir, IOE1Enable, endstopNone, endstopN
 STEPPER_OBSERVEABLE(E1Motor, E1MotorBase)
 STEPPER_SIMPLE(E2MotorBase, IOE2Step, IOE2Dir, IOE2Enable, endstopNone, endstopNone)
 STEPPER_OBSERVEABLE(E2Motor, E2MotorBase)
-STEPPER_SIMPLE(AL1Motor, IOAL1Step, IOAL1Dir, IOAL1Enable, endstopNone, endstopNone)
-STEPPER_SIMPLE(AL2Motor, IOAL2Step, IOAL2Dir, IOAL2Enable, endstopNone, endstopNone)
 
 // Servos
 SERVO_ANALOG(Servo1, 0, Servo1Pin, 500, 2500, 1050)
@@ -182,9 +165,9 @@ SERVO_ANALOG(Servo1, 0, Servo1Pin, 500, 2500, 1050)
 // control temperature. Higher level classes take these as input
 // and simple heater like a heated bed use it directly.
 
-HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 120, 255, 5, 30000, 12.0, 33.0, 290.0, 80, 255, true)
-HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
-HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
+HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 120, 255, 1000, 5, 30000, 12.0, 33.0, 290.0, 80, 255, true)
+HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255, 1000, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
+HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 1000, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
 
 // Coolers are stand alone functions that allow it to control
 // a fan with external sensors. Many extruders require a cooling
@@ -197,14 +180,10 @@ HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 10, 
 // Typical tools are:
 // TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript)
 
-TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, /*AL1Motor */ E1Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
 TOOL_EXTRUDER(ToolExtruder2, 16.775, 0.615, -0.97, HeaterExtruder2, /*AL2Motor */ E2Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 2\nM400\nM340 P0 S1500 R600\nG4 P300", "M340 P0 S800 R600\nG4 P300", &Fan1PWM)
-TOOL_LASER(Laser3, 0, 0, 0, Fan1NoKSPWM, fakeOut, fakeOut, 3000, 1, 100, 150.0, 1.5, "", "")
-TOOL_CNC(CNC4, 0, 0, 0, Fan1NoKSPWM, fakeOut, fakeOut, fakeOut, 7000, 3000, "", "")
-
-// Use a signal that changes while extruder moves
-JAM_DETECTOR_HW(JamExtruder1, E1Motor, IOJam1, ToolExtruder1, 220, 10, 500)
-JAM_DETECTOR_HW(JamExtruder2, E2Motor, IOJam2, ToolExtruder2, 220, 10, 500)
+// TOOL_LASER(Laser3, 0, 0, 0, Fan1NoKSPWM, fakeOut, fakeOut, 3000, 1, 100, 150.0, 1.5, "", "")
+// TOOL_CNC(CNC4, 0, 0, 0, Fan1NoKSPWM, fakeOut, fakeOut, fakeOut, 7000, 3000, "", "")
 
 // Use a signal that is high, when filament is loaded
 //FILAMENT_DETECTOR(FilamentDetector1, IOJam1, ToolExtruder1)

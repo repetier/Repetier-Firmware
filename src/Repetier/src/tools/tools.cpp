@@ -69,9 +69,12 @@ void ToolChangeServo::eepromHandle(int pos) {
 }
 
 void ToolChangeServo::configMenu(GUIAction action) {
+#if FEATURE_CONTROLLER != NO_CONTROLLER
     GUI::menuLongP(action, PSTR("Servo Pos. :"), position, menuCHServoPosition, this, GUIPageType::FIXED_CONTENT);
+#endif
 }
 
+#if FEATURE_CONTROLLER != NO_CONTROLLER
 void __attribute__((weak)) menuCHServoPosition(GUIAction action, void* data) {
     ToolChangeServo* ext = reinterpret_cast<ToolChangeServo*>(data);
     int32_t pos = ext->position;
@@ -80,6 +83,7 @@ void __attribute__((weak)) menuCHServoPosition(GUIAction action, void* data) {
         ext->position = v;
     }
 }
+#endif
 
 ToolChangeMerge::ToolChangeMerge(Tool* tool, ToolChangeHandler* _t1, ToolChangeHandler* _t2) {
     t1 = _t1;
