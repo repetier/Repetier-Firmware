@@ -38,7 +38,6 @@
 #define SERIAL_RX_BUFFER_SIZE 128
 #endif
 #endif
- 
 
 #ifndef HAL_H
 #define HAL_H
@@ -323,7 +322,7 @@ public:
     static char virtualEeprom[EEPROM_BYTES];
     static bool wdPinged;
     static uint8_t i2cError;
-    static BootReason startReason; 
+    static BootReason startReason;
 
     HAL();
     virtual ~HAL();
@@ -543,15 +542,19 @@ public:
     }
 
     static inline void serialSetBaudrate(long baud) {
+        static bool serialInitialized = false;
         Serial.setInterruptPriority(1);
-        if (static_cast<Stream*>(&RFSERIAL) != &SerialUSB) { // When just updating the baudrate, don't restart USB.
+        if (serialInitialized && static_cast<Stream*>(&RFSERIAL) != &SerialUSB) { // When just updating the baudrate, don't restart USB.
             RFSERIAL.end();
         }
         RFSERIAL.begin(baud);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-        RFSERIAL2.end();
+        if (serialInitialized && static_cast<Stream*>(&RFSERIAL2) != &SerialUSB) { // When just updating the baudrate, don't restart USB.
+            RFSERIAL2.end();
+        }
         RFSERIAL2.begin(baud);
 #endif
+        serialInitialized = true;
     }
     static inline void serialFlush() {
         RFSERIAL.flush();

@@ -333,8 +333,8 @@ void Motion1::updateRotMinMax() {
     }
     // add some safety margin preventing triggering end stops.
     for (fast8_t i = 0; i <= Z_AXIS; i++) {
-        rotMax[i] *= 1.001;
-        rotMin[i] *= 1.001;
+        rotMax[i] += 0.01; // Add small epsilon to compensate rounding errors in transformations
+        rotMin[i] -= 0.01;
         minPosOff[i] += rotMin[i];
         maxPosOff[i] += rotMax[i];
     }
