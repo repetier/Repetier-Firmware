@@ -47,7 +47,7 @@ void Motion2::init() {
 }
 // Timer gets called at PREPARE_FREQUENCY so it has enough time to
 // prefill data structures required by stepper interrupt. Each segment planned
-// is for a 2000 / PREPARE_FREQUENCY long period of constant speed. We try to
+// is for a 1 / BLOCK_FREQUENCY long period of constant speed. We try to
 // precompute up to 16 such tiny buffers and with the double frequency We
 // should be on the safe side of never getting an underflow.
 __attribute__((optimize("unroll-loops"))) void Motion2::timer() {
@@ -231,7 +231,7 @@ __attribute__((optimize("unroll-loops"))) void Motion2::timer() {
         m3->usedAxes = 0;
         if ((m3->stepsRemaining = velocityProfile->stepsPerSegment) == 0) {
             if (m3->last) { // extreme case, normally never happens
-                m3->usedAxes = 0;
+                // m3->usedAxes = 0;
                 m3->stepsRemaining = 1;
                 // Need to add this move to handle finished state correctly
                 Motion3::pushReserved();
