@@ -149,18 +149,18 @@ void __attribute__((weak)) menuMaxSpeed(GUIAction action, void* data) {
 void __attribute__((weak)) menuMaxAcceleration(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
     GUI::flashToStringFlash(GUI::tmpString, PSTR("Max @ Print Accel.:"), axisNames[axis]);
-    DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS2, Motion1::maxAcceleration[axis], 0);
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS2, Motion1::maxAccelerationEEPROM[axis], 0);
     if (GUI::handleFloatValueAction(action, v, 50, 20000, 50)) {
-        Motion1::maxAcceleration[axis] = v;
+        Motion1::maxAcceleration[axis] = Motion1::maxAccelerationEEPROM[axis] = v;
     }
 }
 
 void __attribute__((weak)) menuMaxTravelAcceleration(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
     GUI::flashToStringFlash(GUI::tmpString, PSTR("Max @ Travel Accel.:"), axisNames[axis]);
-    DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS2, Motion1::maxTravelAcceleration[axis], 0);
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS2, Motion1::maxTravelAccelerationEEPROM[axis], 0);
     if (GUI::handleFloatValueAction(action, v, 50, 20000, 50)) {
-        Motion1::maxTravelAcceleration[axis] = v;
+        Motion1::maxTravelAcceleration[axis] = Motion1::maxTravelAccelerationEEPROM[axis] = v;
     }
 }
 

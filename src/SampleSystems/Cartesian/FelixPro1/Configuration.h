@@ -37,7 +37,7 @@
 */
 
 // The follwing variables are required early to decide on the right modules.
-#define NUM_TOOLS 4
+#define NUM_TOOLS 2
 #define NUM_EXTRUDER 2
 #define NUM_SERVOS 1                  // Number of servos available
 #define MOTHERBOARD MOTHERBOARD_FELIX // 405
@@ -180,13 +180,18 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 
 #define NUM_HEATED_CHAMBERS 0
 #define HEATED_CHAMBER_LIST \
-    {}
+    { }
 
 #define SERVO_LIST \
     { &Servo1 }
-    
+
+#if NUM_TOOLS == 2
+#define TOOLS \
+    { &ToolExtruder1, &ToolExtruder2 }
+#else
 #define TOOLS \
     { &ToolExtruder1, &ToolExtruder2, &Laser3, &CNC4 }
+#endif
 
 // Heaters enumerate all heaters, so we can loop over them
 // or call commands on a specific heater number.
@@ -266,17 +271,6 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 // ################## EDIT THESE SETTINGS MANUALLY ################
 // ################ END MANUAL SETTINGS ##########################
 
-#undef FAN_BOARD_PIN
-#define FAN_BOARD_PIN -1
-#define BOARD_FAN_SPEED 255
-#define BOARD_FAN_MIN_SPEED 0
-#define FAN_THERMO_PIN -1
-#define FAN_THERMO_MIN_PWM 128
-#define FAN_THERMO_MAX_PWM 255
-#define FAN_THERMO_MIN_TEMP 45
-#define FAN_THERMO_MAX_TEMP 60
-#define FAN_THERMO_THERMISTOR_PIN -1
-#define FAN_THERMO_THERMISTOR_TYPE 1
 #undef Y_MIN_PIN
 #define Y_MIN_PIN -1
 #undef X_MAX_PIN
@@ -286,15 +280,9 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #undef Z_MAX_PIN
 #define Z_MAX_PIN -1
 
-#define MIXING_EXTRUDER 0
-
-#define DRIVE_SYSTEM 0
-#define EXTRUDER_FAN_COOL_TEMP 50
-#define KILL_IF_SENSOR_DEFECT 0
 #define RETRACT_ON_PAUSE 2
 #define PAUSE_START_COMMANDS ""
 #define PAUSE_END_COMMANDS ""
-#define SHARED_EXTRUDER_HEATER 0
 
 #define AUTORETRACT_ENABLED 0
 #define RETRACTION_LENGTH 3
@@ -310,31 +298,9 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define FILAMENTCHANGE_REHOME 1
 #define FILAMENTCHANGE_SHORTRETRACT 2.5
 #define FILAMENTCHANGE_LONGRETRACT 50
-#define JAM_METHOD 1
-#define JAM_STEPS 220
-#define JAM_SLOWDOWN_STEPS 1000
-#define JAM_SLOWDOWN_TO 75
-#define JAM_ERROR_STEPS 1500
-#define JAM_MIN_STEPS 10
 #define JAM_ACTION 1
 
-#define RETRACT_DURING_HEATUP true
-#define PID_CONTROL_RANGE 20
-#define SKIP_M109_IF_WITHIN 5
-#define SCALE_PID_TO_MAX 0
-#define TEMP_HYSTERESIS 0
 #define EXTRUDE_MAXLENGTH 160
-
-#define GENERIC_THERM_VREF 5
-#define GENERIC_THERM_NUM_ENTRIES 33
-#define HEATER_PWM_SPEED 0
-#define COOLER_PWM_SPEED 0
-
-// ############# Heated bed configuration ########################
-
-#define SKIP_M190_IF_WITHIN 5
-#define MIN_EXTRUDER_TEMP 150
-#define MILLISECONDS_PREHEAT_TIME 30000
 
 // ################ Endstop configuration #####################
 
@@ -362,9 +328,6 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 // ##########################################################################################
 // ##                           Movement settings                                          ##
 // ##########################################################################################
-
-#define FEATURE_BABYSTEPPING 1
-#define BABYSTEP_MULTIPLICATOR 64
 
 // Delta settings
 #define DELTA_HOME_ON_POWER 0
@@ -396,14 +359,10 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define X_BACKLASH 0
 #define Y_BACKLASH 0
 #define Z_BACKLASH 0
-#define DIRECTION_DELAY 0
 #define MAX_JERK 5
 #define MAX_ZJERK 0.3
 #define PRINTLINE_CACHE_SIZE 32
-#define MOVE_CACHE_LOW 10
-#define LOW_TICKS_PER_MOVE 250000
 #define EXTRUDER_SWITCH_XY_SPEED 100
-#define FEATURE_DITTO_PRINTING 0
 
 // ################# Misc. settings ##################
 
@@ -484,65 +443,24 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define SDCARDDETECT ORIG_SDCARDDETECT
 #define SDCARDDETECTINVERTED 0
 #endif
+
+#define SD_MENU_SHOW_HIDDEN_FILES 0
+#define SD_MENU_CACHE_SCROLL_ENTRIES 0 // Cache filenames while scrolling for better performance/infinite scroll
+#define SD_SPI_SPEED_MHZ 4             // SD Card HW-SPI Speed in MHz. SD Card "High Speed" mode is 50Mhz, but you may be limited to less based on your processor.
+
 #define SD_EXTENDED_DIR 1 /** Show extended directory including file length. Don't use this with Pronterface! */
 #define SD_RUN_ON_STOP ""
 #define SD_STOP_HEATER_AND_MOTORS_ON_STOP 1
-#define ARC_SUPPORT 0
-#define FEATURE_MEMORY_POSITION 1
+#define ARC_SUPPORT 1
 #define FEATURE_CHECKSUM_FORCED 0
-#define FEATURE_FAN_CONTROL 1
-#define FEATURE_FAN2_CONTROL 0
-#define ADC_KEYPAD_PIN -1
-#define LANGUAGE_EN_ACTIVE 1
-#define LANGUAGE_DE_ACTIVE 1
-#define LANGUAGE_NL_ACTIVE 1
-#define LANGUAGE_PT_ACTIVE 1
-#define LANGUAGE_IT_ACTIVE 1
-#define LANGUAGE_ES_ACTIVE 1
-#define LANGUAGE_FI_ACTIVE 1
-#define LANGUAGE_SE_ACTIVE 1
-#define LANGUAGE_FR_ACTIVE 1
-#define LANGUAGE_CZ_ACTIVE 1
-#define LANGUAGE_PL_ACTIVE 1
-#define LANGUAGE_TR_ACTIVE 1
 #define UI_PRINTER_NAME "FELIX Pro 1"
 #define UI_PRINTER_COMPANY "FELIXprinters"
 #define UI_DISABLE_AUTO_PAGESWITCH 1
 #define UI_AUTORETURN_TO_MENU_AFTER 30000
-#define FEATURE_UI_KEYS 0
-#define UI_ENCODER_SPEED 2
-#define UI_REVERSE_ENCODER 0
-#define UI_KEY_BOUNCETIME 10
-#define UI_KEY_FIRST_REPEAT 500
-#define UI_KEY_REDUCE_REPEAT 50
-#define UI_KEY_MIN_REPEAT 50
-#define FEATURE_BEEPER 0
 #define CASE_LIGHTS_PIN 25
 #define CASE_LIGHT_DEFAULT_ON 1
 #define UI_START_SCREEN_DELAY 2000
-#define UI_HEAD "E1:%e0\002C E2:%e1\002C B:%eb\002C"
-/**
-Beeper sound definitions for short beeps during key actions
-and longer beeps for important actions.
-Parameter is delay in microseconds and the secons is the number of repetitions.
-Values must be in range 1..255
-*/
-#define BEEPER_SHORT_SEQUENCE 2, 2
-#define BEEPER_LONG_SEQUENCE 8, 8
-#define UI_SET_MIN_HEATED_BED_TEMP 30
-#define UI_SET_MAX_HEATED_BED_TEMP 120
-#define UI_SET_MIN_EXTRUDER_TEMP 80
-#define UI_SET_MAX_EXTRUDER_TEMP 275
-#define UI_SET_EXTRUDER_FEEDRATE 5
-#define UI_SET_EXTRUDER_RETRACT_DISTANCE 3
 
 //#define CUSTOM_EVENTS
-//#define CUSTOM_MENU
-//#define CUSTOM_TRANSLATIONS
-#define HALFAUTOMATIC_LEVELING 1
-// add z probe height routine
-#define ZPROBE_HEIGHT_ROUTINE
-#define ZPROBE_REF_HEIGHT 5.97
-#define Z_UP_AFTER_HOME 10
 
 #endif

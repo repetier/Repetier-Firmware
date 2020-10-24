@@ -215,6 +215,8 @@ public:
     static float moveFeedrate[NUM_AXES]; // Used for genral moves like coordinate changes
     static float maxAcceleration[NUM_AXES];
     static float maxTravelAcceleration[NUM_AXES];
+    static float maxAccelerationEEPROM[NUM_AXES];       // to prevent M201 from changing defaults permanentls
+    static float maxTravelAccelerationEEPROM[NUM_AXES]; // to prevent M202 from changing defaults permanently
     static float resolution[NUM_AXES];
     static float minPos[NUM_AXES];
     static float maxPos[NUM_AXES];
@@ -327,7 +329,7 @@ public:
     static void buildTransformationMatrix(Plane& plane);
 #endif
     static void updateDerived();
-    static void eepromHandle();
+    static void eepromHandle(bool firstImport);
     static void eepromReset();
     static void callBeforeHomingOnSteppers();
     static void callAfterHomingOnSteppers();

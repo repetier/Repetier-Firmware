@@ -832,12 +832,12 @@ void Printer::showConfiguration() {
     Com::config(PSTR("XSize:"), Motion1::maxPos[X_AXIS] - Motion1::minPos[X_AXIS]);
     Com::config(PSTR("YSize:"), Motion1::maxPos[Y_AXIS] - Motion1::minPos[Y_AXIS]);
     Com::config(PSTR("ZSize:"), Motion1::maxPos[Z_AXIS] - Motion1::minPos[Z_AXIS]);
-    Com::config(PSTR("XPrintAccel:"), Motion1::maxAcceleration[X_AXIS]);
-    Com::config(PSTR("YPrintAccel:"), Motion1::maxAcceleration[Y_AXIS]);
-    Com::config(PSTR("ZPrintAccel:"), Motion1::maxAcceleration[Z_AXIS]);
-    Com::config(PSTR("XTravelAccel:"), Motion1::maxTravelAcceleration[X_AXIS]);
-    Com::config(PSTR("YTravelAccel:"), Motion1::maxTravelAcceleration[Y_AXIS]);
-    Com::config(PSTR("ZTravelAccel:"), Motion1::maxTravelAcceleration[Z_AXIS]);
+    Com::config(PSTR("XPrintAccel:"), Motion1::maxAccelerationEEPROM[X_AXIS]);
+    Com::config(PSTR("YPrintAccel:"), Motion1::maxAccelerationEEPROM[Y_AXIS]);
+    Com::config(PSTR("ZPrintAccel:"), Motion1::maxAccelerationEEPROM[Z_AXIS]);
+    Com::config(PSTR("XTravelAccel:"), Motion1::maxTravelAccelerationEEPROM[X_AXIS]);
+    Com::config(PSTR("YTravelAccel:"), Motion1::maxTravelAccelerationEEPROM[Y_AXIS]);
+    Com::config(PSTR("ZTravelAccel:"), Motion1::maxTravelAccelerationEEPROM[Z_AXIS]);
     PrinterType::M360();
     if (NUM_HEATED_BEDS > 0) {
         Com::config(PSTR("MaxBedTemp:"), heatedBeds[0]->getMaxTemperature());

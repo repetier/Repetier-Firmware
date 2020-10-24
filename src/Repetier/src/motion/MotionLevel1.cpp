@@ -32,6 +32,8 @@ float Motion1::homingFeedrate[NUM_AXES];
 float Motion1::moveFeedrate[NUM_AXES];
 float Motion1::maxAcceleration[NUM_AXES];
 float Motion1::maxTravelAcceleration[NUM_AXES];
+float Motion1::maxAccelerationEEPROM[NUM_AXES];
+float Motion1::maxTravelAccelerationEEPROM[NUM_AXES];
 float Motion1::resolution[NUM_AXES];
 float Motion1::minPos[NUM_AXES];
 float Motion1::maxPos[NUM_AXES];
@@ -148,15 +150,15 @@ void Motion1::setFromConfig() {
     moveFeedrate[Z_AXIS] = Z_SPEED;
     moveFeedrate[E_AXIS] = E_SPEED;
 
-    maxAcceleration[X_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X;
-    maxAcceleration[Y_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
-    maxAcceleration[Z_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
-    maxAcceleration[E_AXIS] = 1000;
+    maxAcceleration[X_AXIS] = maxAccelerationEEPROM[X_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X;
+    maxAcceleration[Y_AXIS] = maxAccelerationEEPROM[Y_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
+    maxAcceleration[Z_AXIS] = maxAccelerationEEPROM[Z_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
+    maxAcceleration[E_AXIS] = maxAccelerationEEPROM[E_AXIS] = 1000;
 
-    maxTravelAcceleration[X_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X;
-    maxTravelAcceleration[Y_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
-    maxTravelAcceleration[Z_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
-    maxTravelAcceleration[E_AXIS] = 1000;
+    maxTravelAcceleration[X_AXIS] = maxTravelAccelerationEEPROM[X_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X;
+    maxTravelAcceleration[Y_AXIS] = maxTravelAccelerationEEPROM[Y_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y;
+    maxTravelAcceleration[Z_AXIS] = maxTravelAccelerationEEPROM[Z_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z;
+    maxTravelAcceleration[E_AXIS] = maxTravelAccelerationEEPROM[E_AXIS] = 1000;
 
     homeRetestDistance[X_AXIS] = ENDSTOP_X_BACK_MOVE;
     homeRetestDistance[Y_AXIS] = ENDSTOP_Y_BACK_MOVE;
@@ -218,8 +220,8 @@ void Motion1::setFromConfig() {
     maxFeedrate[A_AXIS] = MAX_FEEDRATE_A;
     homingFeedrate[A_AXIS] = HOMING_FEEDRATE_A;
     moveFeedrate[A_AXIS] = A_SPEED;
-    maxAcceleration[A_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_A;
-    maxTravelAcceleration[A_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_A;
+    maxAcceleration[A_AXIS] = maxAccelerationEEPROM[A_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_A;
+    maxTravelAcceleration[A_AXIS] = maxTravelAccelerationEEPROM[A_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_A;
     homeRetestDistance[A_AXIS] = ENDSTOP_A_BACK_MOVE;
     homeRetestReduction[A_AXIS] = ENDSTOP_A_RETEST_REDUCTION_FACTOR;
     homeEndstopDistance[A_AXIS] = ENDSTOP_A_BACK_ON_HOME;
@@ -237,8 +239,8 @@ void Motion1::setFromConfig() {
     maxFeedrate[B_AXIS] = MAX_FEEDRATE_B;
     homingFeedrate[B_AXIS] = HOMING_FEEDRATE_B;
     moveFeedrate[A_AXIS] = B_SPEED;
-    maxAcceleration[B_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_B;
-    maxTravelAcceleration[B_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_B;
+    maxAcceleration[B_AXIS] = maxAccelerationEEPROM[B_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_B;
+    maxTravelAcceleration[B_AXIS] = maxTravelAccelerationEEPROM[B_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_B;
     homeRetestDistance[B_AXIS] = ENDSTOP_B_BACK_MOVE;
     homeRetestReduction[B_AXIS] = ENDSTOP_B_RETEST_REDUCTION_FACTOR;
     homeEndstopDistance[B_AXIS] = ENDSTOP_B_BACK_ON_HOME;
@@ -256,8 +258,8 @@ void Motion1::setFromConfig() {
     maxFeedrate[C_AXIS] = MAX_FEEDRATE_C;
     homingFeedrate[C_AXIS] = HOMING_FEEDRATE_C;
     moveFeedrate[C_AXIS] = C_SPEED;
-    maxAcceleration[C_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_C;
-    maxTravelAcceleration[C_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_C;
+    maxAcceleration[C_AXIS] = maxAccelerationEEPROM[C_AXIS] = MAX_ACCELERATION_UNITS_PER_SQ_SECOND_C;
+    maxTravelAcceleration[C_AXIS] = maxTravelAccelerationEEPROM[C_AXIS] = MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_C;
     homeRetestDistance[C_AXIS] = ENDSTOP_C_BACK_MOVE;
     homeRetestReduction[C_AXIS] = ENDSTOP_C_RETEST_REDUCTION_FACTOR;
     homeEndstopDistance[C_AXIS] = ENDSTOP_C_BACK_ON_HOME;
@@ -1948,7 +1950,7 @@ PGM_P Motion1::getAxisString(fast8_t axis) {
     return Com::tXAxis; // make compiler happy
 }
 
-void Motion1::eepromHandle() {
+void Motion1::eepromHandle(bool firstImport) {
     int p = 0;
     FOR_ALL_AXES(i) {
         if (i == E_AXIS) {
@@ -1963,8 +1965,8 @@ void Motion1::eepromHandle() {
             if (i != X_AXIS && i != Y_AXIS) {
 #endif
                 EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_FEEDRATE, PSTR("max. feedrate [mm/s]"), 3, maxFeedrate[i]);
-                EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_ACCELERATION, PSTR("max. print acceleration [mm/s^2]"), 3, maxAcceleration[i]);
-                EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_TRAVEL_ACCELERATION, PSTR("max. travel acceleration [mm/s^2]"), 3, maxTravelAcceleration[i]);
+                EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_ACCELERATION, PSTR("max. print acceleration [mm/s^2]"), 3, maxAccelerationEEPROM[i]);
+                EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_TRAVEL_ACCELERATION, PSTR("max. travel acceleration [mm/s^2]"), 3, maxTravelAccelerationEEPROM[i]);
                 EEPROM::handleFloat(eprStart + p + EPR_M1_HOMING_FEEDRATE, PSTR("homing feedrate [mm/s]"), 3, homingFeedrate[i]);
                 EEPROM::handleFloat(eprStart + p + EPR_M1_MOVE_FEEDRATE, PSTR("move feedrate [mm/s]"), 3, moveFeedrate[i]);
                 EEPROM::handleFloat(eprStart + p + EPR_M1_MAX_YANK, PSTR("max. yank(jerk) [mm/s]"), 3, maxYank[i]);
@@ -1998,9 +2000,15 @@ void Motion1::eepromHandle() {
     EEPROM::handleFloat(eprStart + EPR_M1_AXIS_COMP_YZ, Com::tAxisCompTanXZ, 6, axisCompTanXZ);
 #endif
     // Rotation matrix is only read/written but not shown
-    if (EEPROM::mode != 0) {
+    if (EEPROM::mode != EEPROMMode::REPORT) {
         for (fast8_t i = 0; i < 9; i++) {
             EEPROM::handleFloat(eprStart + EPR_M1_AUTOLEVEL_MATRIX + 4 * i, nullptr, 6, autolevelTransformation[i]);
+        }
+    }
+    if (firstImport) {
+        FOR_ALL_AXES(i) {
+            maxAcceleration[i] = maxAccelerationEEPROM[i];
+            maxTravelAcceleration[i] = maxTravelAccelerationEEPROM[i];
         }
     }
 }
