@@ -136,7 +136,7 @@ bool PrinterType::positionAllowed(float pos[NUM_AXES], float zOfficial) {
         return true;
     }
     // Extra contrain to protect Z conditionbased on official coordinate system
-    if (zOfficial < Motion1::minPos[Z_AXIS] || zOfficial > Motion1::maxPos[Z_AXIS]) {
+    if (zOfficial < Motion1::minPos[Z_AXIS] - 0.01 || zOfficial > Motion1::maxPos[Z_AXIS] + 0.01) {
         return false;
     }
     for (fast8_t i = 0; i <= A_AXIS; i++) {
