@@ -114,7 +114,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     HAL::pingWatchdog();
 #endif
 
-    // Report temperatures every autoReportPeriodMS (default 1000ms), so we do not need to send M105 
+    // Report temperatures every autoReportPeriodMS (default 1000ms), so we do not need to send M105
     if (Printer::isAutoreportTemp()) {
         millis_t now = HAL::timeInMilliseconds();
         if (now - Printer::lastTempReport > Printer::autoReportPeriodMS) {
@@ -382,8 +382,8 @@ void Commands::processGCode(GCode* com) {
 */
 extern void reportAnalog();
 void Commands::processMCode(GCode* com) {
-    if (Printer::failedMode && !(com->M == 110 || com->M == 999 || com->M == 0)) {
-        return;
+    if (Printer::failedMode && (com->M == 104 || com->M == 109 || com->M == 190 || com->M == 140 || com->M == 141 || com->M == 600 || com->M == 601)) {
+        return; // one of the forbidden m codes was send
     }
 
     if (EVENT_UNHANDLED_M_CODE(com)) {
