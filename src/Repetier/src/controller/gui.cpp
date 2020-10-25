@@ -820,20 +820,14 @@ void directAction(GUIAction action, void* data) {
         sd.mount();
 #endif
         break;
-    case GUI_DIRECT_ACTION_STOP_SD_PRINT:
-#if SDSUPPORT
-        sd.stopPrint();
-#endif
+    case GUI_DIRECT_ACTION_STOP_PRINT:
+        Printer::stopPrint();
         break;
-    case GUI_DIRECT_ACTION_PAUSE_SD_PRINT:
-#if SDSUPPORT
-        sd.pausePrint(true);
-#endif
+    case GUI_DIRECT_ACTION_PAUSE_PRINT:
+        Printer::pausePrint();
         break;
-    case GUI_DIRECT_ACTION_CONTINUE_SD_PRINT:
-#if SDSUPPORT
-        sd.continuePrint(true);
-#endif
+    case GUI_DIRECT_ACTION_CONTINUE_PRINT:
+        Printer::continuePrint();
         break;
     case GUI_DIRECT_ACTION_POWERLOSS:
         Printer::handlePowerLoss();
