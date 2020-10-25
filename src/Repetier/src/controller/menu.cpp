@@ -847,20 +847,23 @@ void __attribute__((weak)) mainMenu(GUIAction action, void* data) {
     } else {
         GUI::menuSelectableP(action, PSTR("Controls"), menuControls, nullptr, GUIPageType::MENU);
     }
-#if SDSUPPORT
-    if (sd.sdactive) {
-        if (sd.sdmode == 0 && !Printer::isPrinting()) {
-            GUI::menuSelectableP(action, PSTR("SD Print"), menuSDPrint, nullptr, GUIPageType::MENU);
-        } else if (sd.sdmode == 1) { // sd printing
-            GUI::menuSelectableP(action, PSTR("Pause SD Print"), directAction, (void*)GUI_DIRECT_ACTION_PAUSE_SD_PRINT, GUIPageType::ACTION);
-            GUI::menuSelectableP(action, PSTR("Stop SD Print"), directAction, (void*)GUI_DIRECT_ACTION_STOP_SD_PRINT, GUIPageType::ACTION);
-        } else if (sd.sdmode == 2) { // sd paused
-            GUI::menuSelectableP(action, PSTR("Continue SD Print"), directAction, (void*)GUI_DIRECT_ACTION_CONTINUE_SD_PRINT, GUIPageType::ACTION);
-            GUI::menuSelectableP(action, PSTR("Stop SD Print"), directAction, (void*)GUI_DIRECT_ACTION_STOP_SD_PRINT, GUIPageType::ACTION);
+
+    if ((Printer::isPrinting() || Printer::isMenuMode(MENU_MODE_PAUSED))) {
+        if (Printer::isMenuMode(MENU_MODE_PAUSED)) {
+            GUI::menuSelectableP(action, PSTR("Continue Print"), directAction, (void*)GUI_DIRECT_ACTION_CONTINUE_PRINT, GUIPageType::ACTION);
+        } else {
+            GUI::menuSelectableP(action, PSTR("Pause Print"), directAction, (void*)GUI_DIRECT_ACTION_PAUSE_PRINT, GUIPageType::ACTION);
         }
+        GUI::menuSelectableP(action, PSTR("Stop Print"), directAction, (void*)GUI_DIRECT_ACTION_STOP_PRINT, GUIPageType::ACTION);
+    } else {
+#if SDSUPPORT
+        if (sd.sdactive && sd.sdmode == 0) {
+            GUI::menuSelectableP(action, PSTR("SD Print"), menuSDPrint, nullptr, GUIPageType::MENU);
+        }
+#endif
     }
-#if SDCARDDETECT < 0 // Offer mount option
-    else {
+#if SDSUPPORT && SDCARDDETECT < 0 // Offer mount option
+    if (!sd.sdactive) {
         GUI::menuSelectableP(action, PSTR("Mount SD Card"), directAction, (void*)GUI_DIRECT_ACTION_MOUNT_SD_CARD, GUIPageType::ACTION);
     }
 #endif
