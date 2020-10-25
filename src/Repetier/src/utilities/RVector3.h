@@ -154,3 +154,57 @@ inline RVector3 operator*(const RVector3& lhs, float rhs) {
 inline RVector3 operator*(float lhs, const RVector3& rhs) {
     return rhs.scale(lhs);
 }
+
+template <int rows, int cols>
+class RMatrix {
+    float data[rows][cols];
+
+    RMatrix() {
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                data[r][c] = 0.0;
+            }
+        }
+    }
+
+    void swapRows(int i, int j) {
+        for (int c = 0; c < cols; c++) {
+            float tmp = data[i][c];
+            data[i][c] = data[j][c];
+            data[j][c] = tmp;
+        }
+    }
+
+    void gaussJordan(float solution[rows]) {
+        int i, j, k;
+        for (i = 0; i < rows; i++) {
+            float vmax = fabs(data[i][i]);
+            for (j = i + 1; j < rows; j++) {
+                float rmax = fabs(data[j][i]);
+                if (rmax > vmax) {
+                    swapRows(i, j);
+                    vmax = rmax;
+                }
+            }
+            float v = data[i][i];
+            for (j = 0; j < i; j++) {
+                float factor = data[j][i] / v;
+                data[j][i] = 0.0;
+                for (k = i + 1; k < cols; k++) {
+                    data[j][k] = -data[i][k];
+                }
+            }
+            for (j = i + 1; j < rows; j++) {
+                float factor = data[j][i] / v;
+                data[j][i] = 0.0;
+                for (k = i + 1; k < cols; k++) {
+                    data[j][k] -= data[i][k] * factor;
+                }
+            }
+        }
+        for (i = 0; i < rows; i++) {
+            solution[i] = data[i][rows] / data[i][i];
+        }
+    }
+    float& operator()(int r, int c) { return data[r][c]; }
+};
