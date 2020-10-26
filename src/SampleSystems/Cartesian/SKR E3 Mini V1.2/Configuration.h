@@ -386,7 +386,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZProbe)
 // Leveling method
 // 0 = none, 3 = 3 points, 1 = grid, 2 = 4 point symmetric
 #define LEVELING_METHOD 1
-#define GRID_SIZE 15
+#define MAX_GRID_SIZE 15                  // Maximum grid size allocation in memory, imported grid can be smaller
 #define ENABLE_BUMP_CORRECTION 1          // CPU intensive, so only activate if required
 #define BUMP_CORRECTION_START_DEGRADE 0.5 // Until this height we correct 100%
 #define BUMP_CORRECTION_END_HEIGHT 2      // From this height on we do no correction
