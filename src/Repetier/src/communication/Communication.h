@@ -340,6 +340,7 @@ public:
     FSTRINGVAR(tErrorImportBump)
     FSTRINGVAR(tErrorExportBump)
     FSTRINGVAR(tNoGridLeveling)
+    FSTRINGVAR(tNoDistortionData)
     FSTRINGVAR(tTransformationMatrix)
     FSTRINGVAR(tZProbeFailed)
     FSTRINGVAR(tZProbeMax)

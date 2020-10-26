@@ -87,7 +87,7 @@ Early stage version for Stacke X2 printer - use with care
      // temperature
 #define LEVELING_METHOD 1
 #define ENABLE_BUMP_CORRECTION 1
-#define GRID_SIZE 5
+#define MAX_GRID_SIZE 5                   // Maximum grid size allocation in memory, imported grid can be smaller
 #define BUMP_CORRECTION_START_DEGRADE 0.5
 #define BUMP_CORRECTION_END_HEIGHT 1.5
 #define BUMP_LIMIT_TO 0

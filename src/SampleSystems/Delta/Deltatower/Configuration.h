@@ -441,7 +441,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define L_P2_Y 45
 #define L_P3_X 137
 #define L_P3_Y 210
-#define GRID_SIZE 5
+#define MAX_GRID_SIZE 5                   // Maximum grid size allocation in memory, imported grid can be smaller
 #define ENABLE_BUMP_CORRECTION 1          // CPU intensive, so only activate if required
 #define BUMP_CORRECTION_START_DEGRADE 0.5 // Until this height we correct 100%
 #define BUMP_CORRECTION_END_HEIGHT 2      // From this height on we do no correction

@@ -129,7 +129,7 @@ Early stage version for Stacke F1 printer - use with care
 #define Z_PROBE_FINISHED_SCRIPT ""
 #define Z_PROBE_RUN_AFTER_EVERY_PROBE ""
 #define LEVELING_METHOD 1 // Grid measurement
-#define GRID_SIZE 6
+#define MAX_GRID_SIZE 6                   // Maximum grid size allocation in memory, imported grid can be smaller
 #define ENABLE_BUMP_CORRECTION 1          // CPU intensive, so only activate if required
 #define BUMP_CORRECTION_START_DEGRADE 0.5 // Until this height we correct 100%
 #define BUMP_CORRECTION_END_HEIGHT 2      // From this height on we do no correction
