@@ -389,7 +389,8 @@ void Commands::processMCode(GCode* com) {
     if (EVENT_UNHANDLED_M_CODE(com)) {
         return;
     }
-    switch (com->M) {
+    uint16_t mCode = com->isPriorityM() ? com->getPriorityM() : com->M; 
+    switch (mCode) {
     case 0:
         // HAL::reportHALDebug();
         break;
