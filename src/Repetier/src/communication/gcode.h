@@ -381,15 +381,15 @@ public:
         return ((params2 & 32768) != 0);
     }
     inline void reset() { params = params2 = 0; }
-    inline bool isImmediateM() { // flag (eg.1, 2, 3) << 14u | MCode
-#if IMMEDIATE_HOST_COMMANDS
-        return ((M >> 14u) == 3u); // using 3 for now.
+    inline bool isPriorityM() {
+#if HOST_PRIORITY_CONTROLS
+        return (M >= 10000 && M < 19999);
 #else 
         return false;
 #endif
     }
-    inline uint16_t calcFromImmediateM() {
-        return (isImmediateM() ? (M & 8191u) : 0u);
+    inline uint16_t getPriorityM() {
+        return (isPriorityM() ? (M - 10000) : M);
     }
     void printCommand();
     bool parseBinary(uint8_t* buffer, fast8_t length, bool fromSerial);
