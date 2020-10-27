@@ -1310,6 +1310,8 @@ void SerialGCodeSource::testEmergency(GCode& gcode) {
             Printer::handlePowerLoss();
         } else if (gcode.M == 205) {
             EEPROM::writeSettings();
+        } else if (gcode.isPriorityM()) {
+            Commands::processMCode(&gcode);
         }
     }
 }

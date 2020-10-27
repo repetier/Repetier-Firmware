@@ -389,7 +389,8 @@ void Commands::processMCode(GCode* com) {
     if (EVENT_UNHANDLED_M_CODE(com)) {
         return;
     }
-    switch (com->M) {
+    uint16_t mCode = com->isPriorityM() ? com->getPriorityM() : com->M; 
+    switch (mCode) {
     case 0:
         // HAL::reportHALDebug();
         break;
@@ -816,7 +817,9 @@ void Commands::executeGCode(GCode* com) {
     if (com->hasG()) {
         processGCode(com);
     } else if (com->hasM()) {
-        processMCode(com);
+        if (!com->isPriorityM()) {
+            processMCode(com);
+        }
     } else if (com->hasT()) { // Process T code
         if (!Printer::failedMode) {
             Motion1::waitForEndOfMoves();

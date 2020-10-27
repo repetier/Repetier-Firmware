@@ -472,7 +472,9 @@ void __attribute__((weak)) MCode_106(GCode* com) {
                 }
             }
         }
-        Printer::setFanSpeed(com->hasS() ? com->S : 255, false, p, com->hasD() ? static_cast<uint32_t>(com->D * 1000) : 0);
+        Printer::setFanSpeed(com->hasS() ? com->S : 255, com->isPriorityM(),
+                             p,
+                             (com->hasD() ? static_cast<uint32_t>(com->D * 1000) : 0));
     }
 }
 
@@ -489,7 +491,7 @@ void __attribute__((weak)) MCode_107(GCode* com) {
                 }
             }
         }
-        Printer::setFanSpeed(0, false, p);
+        Printer::setFanSpeed(0, com->isPriorityM(), p);
     }
 }
 
@@ -628,6 +630,11 @@ void __attribute__((weak)) MCode_115(GCode* com) {
     Com::cap(PSTR("EMERGENCY_PARSER:1"));
 #else
     Com::cap(PSTR("EMERGENCY_PARSER:0"));
+#endif
+#if EMERGENCY_PARSER && HOST_PRIORITY_CONTROLS
+    Com::cap(PSTR("HOST_PRIORITY_CONTROLS:1"));
+#else
+    Com::cap(PSTR("HOST_PRIORITY_CONTROLS:0"));
 #endif
     Commands::reportPrinterUsage();
 }
