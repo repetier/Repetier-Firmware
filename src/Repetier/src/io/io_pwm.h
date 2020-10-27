@@ -237,7 +237,7 @@
             : pwm(0) \
             , kickcount(0) {} \
         void set(fast8_t _pwm) final { \
-            if (kickcount == 0 && _pwm < treshold && _pwm > 0 && time100ms > 0) { \
+            if (kickcount == 0 && _pwm < treshold && _pwm > pwm && time100ms > 0) { \
                 pwm = _pwm; \
                 kickcount = time100ms; \
                 pwmname.set(255); \
