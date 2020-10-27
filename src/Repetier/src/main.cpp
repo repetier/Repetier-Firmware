@@ -67,6 +67,7 @@ Implemented Codes
 - G203 P<motorId>            - Report current motor position
 - G204 P<motorId> S<0/1>     - Enable/disable motor
 - G205 P<motorId> S<0/1> E<0/1> - Home motor, S1 = go back to stored position, E1 = home only if endstop was never met, meaning it was never homed with motor.
+- G320 P<params> U<normalise> - Optimize delta geometry for flat bed. params= 3,4,6 or 6 (6 default) parameters to optimize. U1 = default = normalise end stops to minimum position.
 
 RepRap M Codes
 

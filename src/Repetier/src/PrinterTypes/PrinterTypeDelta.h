@@ -18,17 +18,19 @@
 
 #if PRINTER_TYPE == PRINTER_TYPE_DELTA
 
+class DeltaCalibrator;
 class PrinterType {
+    friend class DeltaCalibrator;
     enum class MotionMode {
         MOTION_DELTA = 0,
         MOTION_PER_AXIS = 1
     };
     static float diagonal;
     static float horizontalRadius;
-    static float bedRadius;
-    static float printRadius;
+    static float bedRadius;   // Radius of bed where we could print
+    static float printRadius; // reachable transformed positions
     static float printRadiusSquared;
-    static float angleA, angleB, angleC;
+    static float angleA, angleB, angleC; // Pillar positions
     static float correctionA, correctionB, correctionC;
     static float radiusCorrectionA, radiusCorrectionB, radiusCorrectionC;
     static float diagonalSquaredA;
@@ -37,9 +39,9 @@ class PrinterType {
     static float APosX, APosY;
     static float BPosX, BPosY;
     static float CPosX, CPosY;
-    static float homeOffsetA, homeOffsetB, homeOffsetC;
-    static uint16_t eeprom; // start position eeprom
-    static MotionMode mode; // 0 = delta, 1 = cartesian
+    static float homeOffsetA, homeOffsetB, homeOffsetC; // end stop offsets
+    static uint16_t eeprom;                             // start position eeprom
+    static MotionMode mode;                             // 0 = delta, 1 = cartesian
 
     static void homeZ();
     static bool untriggerEndstops();
@@ -66,7 +68,7 @@ public:
     static float feedrateForMoveSteps(fast8_t axes);
     static void deactivatedTool(fast8_t id);
     static void activatedTool(fast8_t id);
-    static void toolchangeFinished() {}
+    static void toolchangeFinished() { }
     static void eepromHandle();
     static void restoreFromConfiguration();
     static void init();
@@ -84,6 +86,8 @@ public:
     static bool canSelectTool(fast8_t toolId);
     static void M290(GCode* com);
     static void M360();
+    static bool runMCode(GCode* com);
+    static bool runGCode(GCode* com);
     static PGM_P getGeometryName();
 };
 #define MACHINE_TYPE "Delta"

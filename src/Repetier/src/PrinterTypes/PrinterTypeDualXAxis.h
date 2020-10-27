@@ -77,6 +77,8 @@ public:
     static bool canSelectTool(fast8_t toolId);
     static void M290(GCode* com);
     static void M360();
+    static bool runMCode(GCode* com);
+    static bool runGCode(GCode* com);
     static PGM_P getGeometryName();
 };
 #define MACHINE_TYPE "Dual X"

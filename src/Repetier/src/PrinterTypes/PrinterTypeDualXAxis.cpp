@@ -555,6 +555,22 @@ void PrinterType::M290(GCode* com) {
     Com::printFLN(PSTR("BabystepZ:"), Motion1::totalBabystepZ, 4);
 }
 
+bool PrinterType::runMCode(GCode* com) {
+    switch (com->M) {
+    case 290:
+        M290(com);
+        return false;
+    case 360:
+        M360();
+        return false;
+    }
+    return true;
+}
+
+bool PrinterType::runGCode(GCode* com) {
+    return false;
+}
+
 PGM_P PrinterType::getGeometryName() {
     return PSTR("Dual X");
 }

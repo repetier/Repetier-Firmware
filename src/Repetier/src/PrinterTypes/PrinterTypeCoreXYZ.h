@@ -43,7 +43,7 @@ public:
     static float feedrateForMoveSteps(fast8_t axes);
     static void deactivatedTool(fast8_t id);
     static void activatedTool(fast8_t id);
-    static void toolchangeFinished() {}
+    static void toolchangeFinished() { }
     static void eepromHandle();
     static void restoreFromConfiguration();
     static void init();
@@ -61,6 +61,8 @@ public:
     static bool canSelectTool(fast8_t toolId);
     static void M290(GCode* com);
     static void M360();
+    static bool runMCode(GCode* com);
+    static bool runGCode(GCode* com);
     static PGM_P getGeometryName();
 };
 #define MACHINE_TYPE "Core_XYZ"

@@ -285,6 +285,7 @@ void Commands::processGCode(GCode* com) {
         previousMillisCmd = HAL::timeInMilliseconds();
         return;
     }
+    bool unknown = false;
     switch (com->G) {
     case 0: // G0 -> G1
     case 1: // G1
@@ -369,7 +370,13 @@ void Commands::processGCode(GCode* com) {
     case 205:
         GCode_205(com);
         break;
+    case 320:
+        unknown = PrinterType::runGCode(com);
+        break;
     default:
+        unknown = true;
+    }
+    if (unknown) {
         if (Printer::debugErrors()) {
             Com::printF(Com::tUnknownCommand);
             com->printCommand();
@@ -389,6 +396,7 @@ void Commands::processMCode(GCode* com) {
     if (EVENT_UNHANDLED_M_CODE(com)) {
         return;
     }
+    bool unknown = false;
     switch (com->M) {
     case 0:
         // HAL::reportHALDebug();
@@ -788,12 +796,15 @@ void Commands::processMCode(GCode* com) {
         Com::printFLN(PSTR(" YPosSteps:"), lp[1]);
     } break; */
     default:
+        unknown = true;
+    } // switch
+    if (unknown) {
         if (Printer::debugErrors()) {
             Com::writeToAll = false;
             Com::printF(Com::tUnknownCommand);
             com->printCommand();
         }
-    } // switch
+    }
 }
 
 /**

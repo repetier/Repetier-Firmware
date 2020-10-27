@@ -159,6 +159,7 @@ template <int rows, int cols>
 class RMatrix {
     float data[rows][cols];
 
+public:
     RMatrix() {
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
@@ -175,11 +176,11 @@ class RMatrix {
         }
     }
 
-    void gaussJordan(float solution[rows]) {
+    void gaussJordan(float solution[rows], int numRows = rows) {
         int i, j, k;
-        for (i = 0; i < rows; i++) {
+        for (i = 0; i < numRows; i++) {
             float vmax = fabs(data[i][i]);
-            for (j = i + 1; j < rows; j++) {
+            for (j = i + 1; j < numRows; j++) {
                 float rmax = fabs(data[j][i]);
                 if (rmax > vmax) {
                     swapRows(i, j);
@@ -191,10 +192,10 @@ class RMatrix {
                 float factor = data[j][i] / v;
                 data[j][i] = 0.0;
                 for (k = i + 1; k < cols; k++) {
-                    data[j][k] = -data[i][k];
+                    data[j][k] = -data[i][k] * factor;
                 }
             }
-            for (j = i + 1; j < rows; j++) {
+            for (j = i + 1; j < numRows; j++) {
                 float factor = data[j][i] / v;
                 data[j][i] = 0.0;
                 for (k = i + 1; k < cols; k++) {
@@ -202,8 +203,8 @@ class RMatrix {
                 }
             }
         }
-        for (i = 0; i < rows; i++) {
-            solution[i] = data[i][rows] / data[i][i];
+        for (i = 0; i < numRows; i++) {
+            solution[i] = data[i][numRows] / data[i][i];
         }
     }
     float& operator()(int r, int c) { return data[r][c]; }
