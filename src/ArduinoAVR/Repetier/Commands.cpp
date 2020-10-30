@@ -1794,6 +1794,10 @@ void Commands::processGCode(GCode* com) {
         if (!(com->hasX() || com->hasY() || com->hasZ() || com->hasE())) {
             Printer::setOrigin(0, 0, 0);
         }
+        if (!com->hasX() && !com->hasY() && !com->hasZ() && !com->hasE()) {
+            Printer::setOrigin(0, 0, 0);
+            Com::printFLN(PSTR(" RESET X Y Y origin"));
+        }
         Com::printF(PSTR("X_OFFSET:"), Printer::coordinateOffset[X_AXIS], 3);
         Com::printF(PSTR(" Y_OFFSET:"), Printer::coordinateOffset[Y_AXIS], 3);
         Com::printFLN(PSTR(" Z_OFFSET:"), Printer::coordinateOffset[Z_AXIS], 3);
