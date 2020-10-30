@@ -402,8 +402,8 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted) {
     HAL::eprSetFloat(EPR_BED_PID_DGAIN, heatedBedController.pidDGain);
     HAL::eprSetByte(EPR_BED_PID_MAX, heatedBedController.pidMax);
 #if ENABLED(TEMP_GAIN)
-    HAL::eprSetFloat(EPR_EXTRUDER_GAIN, heatedBedController.tempGain);
-    HAL::eprSetFloat(EPR_EXTRUDER_BIAS, heatedBedController.tempBias);
+    HAL::eprSetFloat(EPR_HEATED_BED_GAIN, heatedBedController.tempGain);
+    HAL::eprSetFloat(EPR_HEATED_BED_BIAS, heatedBedController.tempBias);
 #endif
 #else
     HAL::eprSetByte(EPR_BED_DRIVE_MAX, HEATED_BED_PID_INTEGRAL_DRIVE_MAX);

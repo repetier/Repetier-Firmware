@@ -346,8 +346,8 @@ void Commands::reportPrinterUsage() {
 // Digipot methods for controling current and microstepping
 
 #if defined(DIGIPOTSS_PIN) && DIGIPOTSS_PIN > -1
-int digitalPotWrite(int address,
-                    uint16_t value) { // From Arduino DigitalPotControl example
+void digitalPotWrite(int address,
+                     uint16_t value) { // From Arduino DigitalPotControl example
     if (value > 255)
         value = 255;
     WRITE(DIGIPOTSS_PIN, LOW); // take the SS pin low to select the chip
@@ -1763,34 +1763,40 @@ void Commands::processGCode(GCode* com) {
 #endif
     case 90: // G90
         Printer::relativeCoordinateMode = false;
-        if (com->internalCommand)
+        if (com->internalCommand) {
             Com::printInfoFLN(PSTR("Absolute positioning"));
+        }
         break;
     case 91: // G91
         Printer::relativeCoordinateMode = true;
-        if (com->internalCommand)
+        if (com->internalCommand) {
             Com::printInfoFLN(PSTR("Relative positioning"));
+        }
         break;
     case 92: { // G92
         float xOff = Printer::coordinateOffset[X_AXIS];
         float yOff = Printer::coordinateOffset[Y_AXIS];
         float zOff = Printer::coordinateOffset[Z_AXIS];
-        if (com->hasX())
+        if (com->hasX()) {
             xOff = Printer::convertToMM(com->X) - Printer::currentPosition[X_AXIS];
-        if (com->hasY())
+        }
+        if (com->hasY()) {
             yOff = Printer::convertToMM(com->Y) - Printer::currentPosition[Y_AXIS];
-        if (com->hasZ())
+        }
+        if (com->hasZ()) {
             zOff = Printer::convertToMM(com->Z) - Printer::currentPosition[Z_AXIS];
+        }
         Printer::setOrigin(xOff, yOff, zOff);
         if (com->hasE()) {
             Printer::destinationPositionTransformed[E_AXIS] = Printer::currentPositionTransformed[E_AXIS] = Printer::convertToMM(com->E);
             Printer::destinationSteps[E_AXIS] = Printer::currentPositionSteps[E_AXIS] = Printer::destinationPositionTransformed[E_AXIS] * Printer::axisStepsPerMM[E_AXIS];
         }
-        if (com->hasX() || com->hasY() || com->hasZ()) {
-            Com::printF(PSTR("X_OFFSET:"), Printer::coordinateOffset[X_AXIS], 3);
-            Com::printF(PSTR(" Y_OFFSET:"), Printer::coordinateOffset[Y_AXIS], 3);
-            Com::printFLN(PSTR(" Z_OFFSET:"), Printer::coordinateOffset[Z_AXIS], 3);
+        if (!(com->hasX() || com->hasY() || com->hasZ() || com->hasE())) {
+            Printer::setOrigin(0, 0, 0);
         }
+        Com::printF(PSTR("X_OFFSET:"), Printer::coordinateOffset[X_AXIS], 3);
+        Com::printF(PSTR(" Y_OFFSET:"), Printer::coordinateOffset[Y_AXIS], 3);
+        Com::printFLN(PSTR(" Z_OFFSET:"), Printer::coordinateOffset[Z_AXIS], 3);
     } break;
 #if DRIVE_SYSTEM == DELTA
     case 100: { // G100 Calibrate floor or rod radius
