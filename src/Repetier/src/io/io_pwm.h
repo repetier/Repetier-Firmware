@@ -80,7 +80,7 @@
 
 #elif IO_TARGET == IO_TARGET_100MS // 100ms
 
-#define IO_PWM_KICKSTART(name, pwmname, timems, treshold) \
+#define IO_PWM_KICKSTART(name, pwmname, time100ms, treshold) \
     if (name.kickcount > 0) { \
         if (--name.kickcount == 0) { \
             pwmname.set(name.pwm); \
@@ -340,7 +340,7 @@
 #define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow) \
     name##Class name;
 
-#define IO_PWM_KICKSTART(name, pwmname, timems, treshold) \
+#define IO_PWM_KICKSTART(name, pwmname, time100ms, treshold) \
     name##Class name;
 
 #define IO_PWM_RAMP(name, pwmname, upDelay100ms, downDelay100ms, difThreshold) \
@@ -376,7 +376,7 @@
 #define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow)
 #endif
 #ifndef IO_PWM_KICKSTART
-#define IO_PWM_KICKSTART(name, pwmname, timems, treshold)
+#define IO_PWM_KICKSTART(name, pwmname, time100ms, treshold)
 #endif
 #ifndef IO_PWM_RAMP
 #define IO_PWM_RAMP(name, pwmname, upDelay100ms, downDelay100ms, difThreshold)
