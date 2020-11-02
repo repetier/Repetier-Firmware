@@ -310,6 +310,8 @@ void HAL::hwSetup(void) {
 
 // Set up all timer interrupts
 void HAL::setupTimer() {
+    /*!< 4 bits for pre-emption priority (0-15) 0 bits for subpriority */
+    HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
     motion2 = reserveTimerInterrupt(MOTION2_TIMER_NUM); // prevent pwm usage
     motion2->timer = new HardwareTimer(TIMER(MOTION2_TIMER_NUM));
     motion2->timer->setMode(2, TIMER_OUTPUT_COMPARE);
@@ -351,6 +353,7 @@ void HAL::setupTimer() {
             // Not on by default for output_compare
             LL_TIM_OC_EnablePreload(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
             LL_TIM_OC_EnableFast(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
+            toneTimer->timer->setInterruptPriority(1, 0);
             toneTimer->timer->refresh();
             toneTimer->timer->resume();
             break;
