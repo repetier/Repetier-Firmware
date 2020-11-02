@@ -88,6 +88,10 @@
 #define PIN_WIRE_SDA            PB7
 #define PIN_WIRE_SCL            PB6
 
+#ifndef EXTI_IRQ_PRIO
+#define EXTI_IRQ_PRIO 1 // Endstops
+#endif
+
 // Always have the TFT serial2 port defined for config.h changes and compiles. 
 #define HAL_USART_MODULE_ENABLED
 #define HAVE_HWSERIAL2

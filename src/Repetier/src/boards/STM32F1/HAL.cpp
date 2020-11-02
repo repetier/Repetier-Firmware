@@ -322,7 +322,7 @@ void HAL::hwSetup(void) {
 
     ServoPrescalerfactor = (LL_TIM_GetPrescaler(servo->tim) + 1);
     Servo2500 = ((2500 * (servo->timer->getTimerClkFreq() / 1000000)) / ServoPrescalerfactor) - 1;
-    HAL_NVIC_SetPriority(TIMER_IRQ(SERVO_TIMER_NUM), 2, 0);
+    HAL_NVIC_SetPriority(TIMER_IRQ(SERVO_TIMER_NUM), 3, 0);
 #endif
 
 #if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
@@ -348,6 +348,10 @@ void HAL::hwSetup(void) {
 
 // Set up all timer interrupts
 void HAL::setupTimer() {
+
+    /*!< 4 bits for pre-emption priority (0-15) 0 bits for subpriority */
+    HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
+
     motion2 = reserveTimerInterrupt(MOTION2_TIMER_NUM); // prevent pwm usage
     motion2->timer = new HardwareTimer(TIMER(MOTION2_TIMER_NUM));
     motion2->timer->setMode(2, TIMER_OUTPUT_COMPARE);
@@ -364,7 +368,7 @@ void HAL::setupTimer() {
     pwm->timer->setOverflow(PWM_CLOCK_FREQ, HERTZ_FORMAT);
     pwm->timer->attachInterrupt(TIMER_VECTOR_NAME(PWM_TIMER_NUM));
     pwm->timer->resume();
-    HAL_NVIC_SetPriority(TIMER_IRQ(PWM_TIMER_NUM), 4, 0);
+    HAL_NVIC_SetPriority(TIMER_IRQ(PWM_TIMER_NUM), 6, 0);
 
     // Timer for stepper motor control
 
@@ -388,7 +392,7 @@ void HAL::setupTimer() {
             // Not on by default for output_compare
             LL_TIM_OC_EnablePreload(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
             LL_TIM_OC_EnableFast(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
-            toneTimer->timer->setInterruptPriority(3, 0);
+            toneTimer->timer->setInterruptPriority(1, 0);
             toneTimer->timer->refresh();
             toneTimer->timer->resume();
             break;
@@ -1074,9 +1078,9 @@ void HAL::tone(uint32_t frequency) {
     // Faster timer reconfigurations to remove small gap between tone frequency changes
     uint32_t autoReload = (F_CPU_TRUE / frequency); 
     uint32_t prescale = (autoReload / 0x10000) + 1;
-    LL_TIM_SetPrescaler(TIMER(TONE_TIMER_NUM), prescale - 1); 
+    LL_TIM_SetPrescaler(TIMER(TONE_TIMER_NUM), prescale - 1);
     autoReload /= prescale;
-    LL_TIM_SetAutoReload(TIMER(TONE_TIMER_NUM), autoReload);  
+    LL_TIM_SetAutoReload(TIMER(TONE_TIMER_NUM), autoReload);
     LL_TIM_OC_SetCompareCH1(TIMER(TONE_TIMER_NUM), ((autoReload + 1) * (Printer::toneVolume * 50)) / 10000);
     if (toneStopped) { // Only generate updates if the timer's dead.
         LL_TIM_GenerateEvent_UPDATE(TIMER(TONE_TIMER_NUM));
