@@ -381,6 +381,16 @@ public:
         return ((params2 & 32768) != 0);
     }
     inline void reset() { params = params2 = 0; }
+    inline bool isPriorityM() {
+#if HOST_PRIORITY_CONTROLS
+        return (M >= 10000 && M < 19999);
+#else 
+        return false;
+#endif
+    }
+    inline uint16_t getPriorityM() {
+        return (isPriorityM() ? (M - 10000) : M);
+    }
     void printCommand();
     bool parseBinary(uint8_t* buffer, fast8_t length, bool fromSerial);
     bool parseAscii(char* line, bool fromSerial);

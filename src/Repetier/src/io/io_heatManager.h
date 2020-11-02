@@ -88,7 +88,7 @@
 #define HEAT_MANAGER_DEFINE_HYSTERESIS(name, hysteresisTemperature, hysteresisTime, maxWait) \
     name.initHysteresis(hysteresisTemperature, hysteresisTime, maxWait);
 
-#elif IO_TARGET == IO_TARGET_TOOLS_TEMPLATES // template definitions in tools.cpp
+#elif IO_TARGET == IO_TARGET_TEMPLATES // template definitions in tools.cpp
 
 #define HEAT_MANAGER_PELTIER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable, pType, flowPin, minTemp) \
     template class HeatManagerPeltierPID<flowPin, pType, minTemp>;

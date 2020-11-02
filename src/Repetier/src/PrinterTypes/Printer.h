@@ -132,6 +132,7 @@ public:
 #define PRINTER_FLAG3_DOOR_OPEN 64
 #define PRINTER_FLAG3_NATIVE_USB 128
 
+#define PRINTER_REPORT_FLAG_ENDSTOPS 1 // report end stop state as soon as possible
 // List of possible interrupt events (1-255 allowed)
 #define PRINTER_INTERRUPT_EVENT_JAM_DETECTED 1
 #define PRINTER_INTERRUPT_EVENT_JAM_SIGNAL0 2
@@ -260,11 +261,12 @@ public:
     static uint8_t rescueOn;             // 1 is rescue is enabled
     static uint8_t flag0, flag1;         // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
     static uint8_t flag2, flag3;         // Some more flags
+    static uint8_t reportFlag;           ///< Report several staus infos on next loop
     static uint32_t interval;            ///< Last step duration in ticks.
     static uint32_t timer;               ///< used for acceleration/deceleration timing
     static uint32_t stepNumber;          ///< Step number in current move.
     static millis_t lastTempReport;      ///< Time of last temperature report for autoreport temperatures
-    static millis_t autoReportPeriodMS;  ///< Configurable delay between autoreports in ms. Default 1000ms. 
+    static millis_t autoReportPeriodMS;  ///< Configurable delay between autoreports in ms. Default 1000ms.
     static int32_t printingTime;         ///< Printing time in seconds
     static float extrudeMultiplyError;   ///< Accumulated error during extrusion
     static float extrusionFactor;        ///< Extrusion multiply factor
@@ -362,6 +364,18 @@ public:
 
     static INLINE void debugReset(uint8_t flags) {
         setDebugLevel(debugLevel & ~flags);
+    }
+
+    static INLINE bool isReportFlag(uint8_t flags) {
+        return (reportFlag & flags);
+    }
+
+    static INLINE void reportFlagSet(uint8_t flags) {
+        reportFlag |= flags;
+    }
+
+    static INLINE void reportFlagReset(uint8_t flags) {
+        reportFlag = (reportFlag & ~flags);
     }
 #if AUTOMATIC_POWERUP
     static void enablePowerIfNeeded();
@@ -537,9 +551,9 @@ public:
         Com::printFLN(PSTR("Jam control disabled:"), b);
     }
     static INLINE void setNativeUSB(bool yes) {
-        flag3 = (yes ? flag3 | PRINTER_FLAG3_NATIVE_USB : flag3 & ~PRINTER_FLAG3_NATIVE_USB); 
+        flag3 = (yes ? flag3 | PRINTER_FLAG3_NATIVE_USB : flag3 & ~PRINTER_FLAG3_NATIVE_USB);
     }
-    static INLINE bool isNativeUSB() { 
+    static INLINE bool isNativeUSB() {
         return flag3 & PRINTER_FLAG3_NATIVE_USB;
     }
     static INLINE void toggleAnimation() {

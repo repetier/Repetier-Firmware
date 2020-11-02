@@ -236,7 +236,7 @@
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage) \
     name.reset(distanceSteps, jitterSteps, jamPercentage);
 
-#elif IO_TARGET == IO_TARGET_TOOLS_TEMPLATES // template definitions in tools.cpp
+#elif IO_TARGET == IO_TARGET_TEMPLATES // template definitions in tools.cpp
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScrip, fan)
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \

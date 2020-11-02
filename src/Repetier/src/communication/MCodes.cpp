@@ -295,7 +295,9 @@ void __attribute__((weak)) MCode_48(GCode* com) {
     PrinterType::closestAllowedPositionWithNewXYOffset(Motion1::tmpPosition, ZProbeHandler::xOffset(), ZProbeHandler::yOffset(), Z_PROBE_BORDER);
     Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
     int n = com->hasP() ? com->P : 10;
-    ZProbeHandler::activate();
+    if (!ZProbeHandler::activate()) {
+        return;
+    }
     float sum = 0, minH = 1000, maxH = -1000, A = 0, Q = 0;
     bool ok = true;
     for (int i = 0; i < n; i++) {
@@ -472,7 +474,9 @@ void __attribute__((weak)) MCode_106(GCode* com) {
                 }
             }
         }
-        Printer::setFanSpeed(com->hasS() ? com->S : 255, false, p, com->hasD() ? static_cast<uint32_t>(com->D * 1000) : 0);
+        Printer::setFanSpeed(com->hasS() ? com->S : 255, com->isPriorityM(),
+                             p,
+                             (com->hasD() ? static_cast<uint32_t>(com->D * 1000) : 0));
     }
 }
 
@@ -489,7 +493,7 @@ void __attribute__((weak)) MCode_107(GCode* com) {
                 }
             }
         }
-        Printer::setFanSpeed(0, false, p);
+        Printer::setFanSpeed(0, com->isPriorityM(), p);
     }
 }
 
@@ -629,6 +633,11 @@ void __attribute__((weak)) MCode_115(GCode* com) {
 #else
     Com::cap(PSTR("EMERGENCY_PARSER:0"));
 #endif
+#if EMERGENCY_PARSER && HOST_PRIORITY_CONTROLS
+    Com::cap(PSTR("HOST_PRIORITY_CONTROLS:1"));
+#else
+    Com::cap(PSTR("HOST_PRIORITY_CONTROLS:0"));
+#endif
     Commands::reportPrinterUsage();
 }
 
@@ -666,10 +675,15 @@ void reportEndstop(EndstopDriver& d, PGM_P text) {
 }
 
 void __attribute__((weak)) MCode_119(GCode* com) {
-    Com::writeToAll = false;
-    Motion1::waitForEndOfMoves();
-    updateEndstops();
-    updateEndstops();
+    bool oldWriteAll = Com::writeToAll;
+    if (com) { // skip if internally used to write status or homing might fail
+        Com::writeToAll = false;
+        Motion1::waitForEndOfMoves();
+        updateEndstops();
+        updateEndstops();
+    } else {
+        Com::writeToAll = true;
+    }
     Com::printF(PSTR("endstops hit:"));
     reportEndstop(endstopXMin, Com::tXMinColon);
     reportEndstop(endstopXMax, Com::tXMaxColon);
@@ -693,6 +707,7 @@ void __attribute__((weak)) MCode_119(GCode* com) {
         reportEndstop(*ZProbe, Com::tZProbeState);
     }
     Com::println();
+    Com::writeToAll = oldWriteAll;
 }
 
 void __attribute__((weak)) MCode_120(GCode* com) {

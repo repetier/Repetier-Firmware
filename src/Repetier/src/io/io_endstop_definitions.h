@@ -68,9 +68,16 @@
 #define ENDSTOP_MERGE3(name, e1, e2, e3, axis, dir) EndstopMerge3 name(&e1, &e2, &e3, axis, dir);
 #define ENDSTOP_MERGE4(name, e1, e2, e3, e4, axis, dir) EndstopMerge4 name(&e1, &e2, &e3, &e4, axis, dir);
 
+#elif IO_TARGET == IO_TARGET_TEMPLATES // template definitions in tools.cpp
+
+#define ENDSTOP_SWITCH(name, pin) extern EndstopSwitchDriver<pin> name;
+#define ENDSTOP_SWITCH_HW(name, pin, axis, dir) \
+    template class EndstopSwitchHardwareDriver<pin, axis, dir>;
+#define ENDSTOP_SWITCH_DEBOUNCE(name, pin, level) template class EndstopSwitchDebounceDriver<pin, level>;
+#define ENDSTOP_STEPPER(name) template class EndstopStepperControlledDriver;
+
 #elif IO_TARGET == IO_TARGET_ENDSTOP_UPDATE
 
-#define ENDSTOP_NONE(name)
 #define ENDSTOP_SWITCH(name, pin) name.update();
 #define ENDSTOP_SWITCH_HW(name, pin, axis, dir)
 #define ENDSTOP_SWITCH_DEBOUNCE(name, pin, level) name.update();
@@ -79,15 +86,29 @@
 #define ENDSTOP_MERGE3(name, e1, e2, e3, axis, dir) name.update();
 #define ENDSTOP_MERGE4(name, e1, e2, e3, e4, axis, dir) name.update();
 
-#else
+#endif
 
+#ifndef ENDSTOP_NONE
 #define ENDSTOP_NONE(name)
+#endif
+#ifndef ENDSTOP_SWITCH
 #define ENDSTOP_SWITCH(name, pin)
+#endif
+#ifndef ENDSTOP_SWITCH_HW
 #define ENDSTOP_SWITCH_HW(name, pin, axis, dir)
+#endif
+#ifndef ENDSTOP_SWITCH_DEBOUNCE
 #define ENDSTOP_SWITCH_DEBOUNCE(name, pin, level)
+#endif
+#ifndef ENDSTOP_STEPPER
 #define ENDSTOP_STEPPER(name)
+#endif
+#ifndef ENDSTOP_MERGE2
 #define ENDSTOP_MERGE2(name, e1, e2, axis, dir)
+#endif
+#ifndef ENDSTOP_MERGE3
 #define ENDSTOP_MERGE3(name, e1, e2, e3, axis, dir)
+#endif
+#ifndef ENDSTOP_MERGE4
 #define ENDSTOP_MERGE4(name, e1, e2, e3, e4, axis, dir)
-
 #endif

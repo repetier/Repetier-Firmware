@@ -317,17 +317,19 @@ __attribute__((optimize("unroll-loops"))) void Motion2::timer() {
                 }
             }
             if (*delta > m3->errorUpdate) { // test if more steps wanted then possible, should never happen!
-                // adjust *np by the number of steps we can not execute so physical step position does not get corrupted.
-                // That way next segment can correct remaining steps.
+                                            // adjust *np by the number of steps we can not execute so physical step position does not get corrupted.
+                                            // That way next segment can correct remaining steps.
+#ifdef DEBUG_MOTION_ERRORS
+                Com::printF(PSTR("StepError"), (int)i);
+                Com::printF(PSTR(" d:"), *delta);
+                Com::printFLN(PSTR(" eu:"), m3->errorUpdate);
+#endif
                 if (m3->directions & *bits) { // positive move, reduce *np
                     *np -= (*delta - m3->errorUpdate) >> 1;
                 } else {
                     *np += (*delta - m3->errorUpdate) >> 1;
                 }
                 *delta = m3->errorUpdate;
-#ifdef DEBUG_MOTION_ERRORS
-                Com::printFLN(PSTR("StepError"), (int)i);
-#endif
             }
             m3->error[i] = -m3->stepsRemaining;
             delta++;

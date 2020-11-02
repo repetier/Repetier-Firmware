@@ -35,13 +35,13 @@ class DeltaCalibrator {
 
     float Xbc, Xca, Xab, Ybc, Yca, Yab;
     float coreFa, coreFb, coreFc;
-    float Q, Q2, D2;
+    float Q, Q2, D2[3];
     float towerX[3], towerY[3];
     float homedCarriageHeight;
 
     DeltaCalibrator() {
         diagonal = PrinterType::diagonal;
-        radius = PrinterType::printRadius;
+        radius = PrinterType::horizontalRadius;
         homedHeight = Motion1::maxPos[Z_AXIS];
         xStop = PrinterType::homeOffsetA;
         yStop = PrinterType::homeOffsetB;
@@ -50,9 +50,10 @@ class DeltaCalibrator {
 
         // prevent not initialized warnings
         Xbc = Xca = Xab = Ybc = Yca = Yab = 0;
-        coreFa = coreFb = coreFc = Q = Q2 = D2 = 0;
+        coreFa = coreFb = coreFc = Q = Q2 = D2[0] = D2[1] = D2[2] = 0;
         towerX[0] = towerX[1] = towerX[2] = towerY[0] = towerY[1] = towerY[2] = 0;
         homedCarriageHeight = 0;
+        recalc();
     }
 
     DeltaCalibrator(DeltaCalibrator& o)
@@ -71,7 +72,7 @@ class DeltaCalibrator {
 
     void storeInPrinter() {
         PrinterType::diagonal = diagonal;
-        PrinterType::printRadius = radius;
+        PrinterType::horizontalRadius = radius;
         Motion1::maxPos[Z_AXIS] = homedHeight;
         PrinterType::homeOffsetA = xStop;
         PrinterType::homeOffsetB = yStop;
@@ -96,7 +97,7 @@ class DeltaCalibrator {
         float C0 = S + towerX[0] * Q;
         float C = C0 * C0;
         C0 = P - towerY[0] * Q;
-        C += (C0 * C0 + Ha * Ha - D2) * Q2;
+        C += C0 * C0 + (Ha * Ha - diagonal * diagonal) * Q2;
         return (minusHalfB - sqrtf(minusHalfB * minusHalfB - A * C)) / A;
     }
 
@@ -121,7 +122,9 @@ class DeltaCalibrator {
         coreFc = RMath::sqr(towerX[2]) + RMath::sqr(towerY[2]);
         Q = 2.0 * (Xca * Yab - Xab * Yca);
         Q2 = Q * Q;
-        D2 = diagonal * diagonal;
+        D2[X_AXIS] = RMath::sqr(diagonal + PrinterType::correctionA);
+        D2[Y_AXIS] = RMath::sqr(diagonal + PrinterType::correctionB);
+        D2[Z_AXIS] = RMath::sqr(diagonal + PrinterType::correctionC);
         float tempHeight = diagonal;
         homedCarriageHeight = homedHeight + tempHeight - inverseTransform(tempHeight, tempHeight, tempHeight);
     }
@@ -136,7 +139,7 @@ class DeltaCalibrator {
     }
 
     float computeDerivative(int deriv, float ha, float hb, float hc) {
-        float perturb = 0.2; // perturbation amount in mm or degrees
+        constexpr float perturb = 0.2f; // perturbation amount in mm or degrees
         DeltaCalibrator hiParams(*this);
         DeltaCalibrator loParams(*this);
         switch (deriv) {
@@ -169,10 +172,10 @@ class DeltaCalibrator {
         hiParams.recalc();
         loParams.recalc();
 
-        float zHi = hiParams.inverseTransform((deriv == 0) ? ha + perturb : ha, (deriv == 1) ? hb + perturb : hb, (deriv == 2) ? hc + perturb : hc);
-        float zLo = loParams.inverseTransform((deriv == 0) ? ha - perturb : ha, (deriv == 1) ? hb - perturb : hb, (deriv == 2) ? hc - perturb : hc);
+        float zHi = hiParams.inverseTransform(deriv == 0 ? ha + perturb : ha, deriv == 1 ? hb + perturb : hb, deriv == 2 ? hc + perturb : hc);
+        float zLo = loParams.inverseTransform(deriv == 0 ? ha - perturb : ha, deriv == 1 ? hb - perturb : hb, deriv == 2 ? hc - perturb : hc);
 
-        return (zHi - zLo) / (2.0 * perturb);
+        return (zHi - zLo) / (2.0f * perturb);
     }
 
     // Perform 3, 4, 6 or 7-factor adjustment.
@@ -183,17 +186,19 @@ class DeltaCalibrator {
     //  B tower X position adjustment
     //  C tower Y position adjustment
     //  Diagonal rod length adjustment
-    void adjust(int numFactors, float* v, bool norm) {
+    void adjust(int numFactors, float v[7], bool norm) {
         float oldCarriageHeightA = homedCarriageHeight + xStop; // save for later
 
         // Update endstop adjustments
-        xStop += v[0];
-        yStop += v[1];
-        zStop += v[2];
+        xStop += v[X_AXIS];
+        yStop += v[Y_AXIS];
+        zStop += v[Z_AXIS];
         if (norm) {
             normaliseEndstopAdjustments();
         }
-
+        // Com::printFLN(PSTR("xstop:"), xStop, 3);
+        // Com::printFLN(PSTR("ystop:"), yStop, 3);
+        // Com::printFLN(PSTR("zstop:"), zStop, 3);
         if (numFactors >= 4) {
             radius += v[3];
 
@@ -205,19 +210,18 @@ class DeltaCalibrator {
                     diagonal += v[6];
                 }
             }
-
-            recalc();
         }
+        recalc();
 
         // Adjusting the diagonal and the tower positions affects the homed carriage height.
         // We need to adjust homedHeight to allow for this, to get the change that was requested in the endstop corrections.
-        float heightError = homedCarriageHeight + xStop - oldCarriageHeightA - v[0];
+        float heightError = homedCarriageHeight + xStop - oldCarriageHeightA - v[X_AXIS];
         homedHeight -= heightError;
         homedCarriageHeight -= heightError;
     }
 
     float transform(float machinePos[NUM_AXES], int axis) {
-        return machinePos[Z_AXIS] + sqrtf(D2 - RMath::sqr(machinePos[X_AXIS] - towerX[axis]) - RMath::sqr(machinePos[Y_AXIS] - towerY[axis]));
+        return machinePos[Z_AXIS] + sqrtf(D2[axis] - RMath::sqr(machinePos[X_AXIS] - towerX[axis]) - RMath::sqr(machinePos[Y_AXIS] - towerY[axis]));
     }
 
 public:
@@ -225,6 +229,8 @@ public:
         if (numFactors != 3 && numFactors != 4 && numFactors != 6 && numFactors != 7) {
             Com::printWarningFLN(PSTR("only 3, 4, 6 and 7 factors are supported"));
         }
+        Com::printF(PSTR("Delta calibration with "), numFactors);
+        Com::printFLN(PSTR(" factors started"));
         DeltaCalibrator deltaParams;
         // Transform the probing points to motor endpoints and store them in a matrix, so that we can do multiple iterations using the same data
         RMatrix<NUM_DELTA_CALIB_POINTS, 3> probeMotorPositions;
@@ -233,27 +239,30 @@ public:
         float rad = RMath::min(PrinterType::bedRadius, PrinterType::printRadius);
         float zBedProbePoints[NUM_DELTA_CALIB_POINTS];
         Motion1::setAutolevelActive(false, true);
+        Leveling::setDistortionEnabled(false);
         Motion1::resetTransformationMatrix(true);
         Motion1::homeAxes(7); // Home x, y and z
         Motion1::setTmpPositionXYZ(0, 0, ZProbeHandler::optimumProbingHeight());
         Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
-        ZProbeHandler::activate();
+        if (!ZProbeHandler::activate()) {
+            return;
+        }
         float r, deg;
         for (int i = 0; i < NUM_DELTA_CALIB_POINTS; ++i) {
-            float pos[NUM_AXES] = { 0.0 };
+            float pos[NUM_AXES] = { 0.0f };
             if (i < 6) {
                 r = rad;
-                deg = 30.0 * static_cast<float>(i);
+                deg = PrinterType::angleA + 60.0f * static_cast<float>(i);
             } else if (i == 6) {
                 r = 0;
             } else {
-                deg = 45.0 + static_cast<float>(i - 7) * 90.0;
-                r = 0.5 * rad;
+                deg = 45.0f + static_cast<float>(i - 7) * 90.0f;
+                r = 0.5f * rad;
             }
-            pos[0] = r * cos(degToRad(deg));
-            pos[1] = r * sin(degToRad(deg));
-            pos[2] = ZProbeHandler::optimumProbingHeight();
-            pos[3] = IGNORE_COORDINATE;
+            pos[X_AXIS] = r * cos(degToRad(deg));
+            pos[Y_AXIS] = r * sin(degToRad(deg));
+            pos[Z_AXIS] = ZProbeHandler::optimumProbingHeight();
+            pos[E_AXIS] = IGNORE_COORDINATE;
             PrinterType::closestAllowedPositionWithNewXYOffset(pos, ZProbeHandler::xOffset(), ZProbeHandler::yOffset(), Z_PROBE_BORDER + 1.0);
             Motion1::moveByOfficial(pos, Motion1::moveFeedrate[X_AXIS], false);
             zBedProbePoints[i] = ZProbeHandler::runProbe();
@@ -261,7 +270,9 @@ public:
                 GCode::fatalError(PSTR("Delta calibration failed"));
                 return;
             }
-            corrections[i] = 0.0;
+            zBedProbePoints[i] = pos[Z_AXIS] - zBedProbePoints[i]; // swap sign
+            pos[Z_AXIS] = 0.0f;
+            corrections[i] = 0.0f;
 
             probeMotorPositions(i, 0) = deltaParams.transform(pos, 0);
             probeMotorPositions(i, 1) = deltaParams.transform(pos, 1);
@@ -270,7 +281,9 @@ public:
             initialSumOfSquares += RMath::sqr(zBedProbePoints[i]);
         }
         ZProbeHandler::deactivate();
-
+#ifdef DEBUG_CALIBRATE
+        probeMotorPositions.print(PSTR("MotorPositions"));
+#endif
         // Do 1 or more Newton-Raphson iterations
         int iteration = 0;
         float expectedRmsError;
@@ -279,29 +292,39 @@ public:
             RMatrix<NUM_DELTA_CALIB_POINTS, 7> derivativeMatrix;
             for (int i = 0; i < NUM_DELTA_CALIB_POINTS; ++i) {
                 for (int j = 0; j < numFactors; ++j) {
-                    derivativeMatrix(i, j) = deltaParams.computeDerivative(j, probeMotorPositions(i, 0), probeMotorPositions(i, 1), probeMotorPositions(i, 2));
+                    derivativeMatrix(i, j) = deltaParams.computeDerivative(j, probeMotorPositions(i, X_AXIS), probeMotorPositions(i, Y_AXIS), probeMotorPositions(i, Z_AXIS));
                 }
             }
+#ifdef DEBUG_CALIBRATE
+            derivativeMatrix.print(PSTR("derivativeMatrix"));
+#endif
 
             // Now build the normal equations for least squares fitting
-            RMatrix<NUM_DELTA_CALIB_POINTS, NUM_DELTA_CALIB_POINTS + 1> normalMatrix;
+            RMatrix<7, 8> normalMatrix; // max. data to store is 7x8 matrix
             for (int i = 0; i < numFactors; ++i) {
                 for (int j = 0; j < numFactors; ++j) {
-                    float temp = derivativeMatrix(0, i) * derivativeMatrix(0, j);
-                    for (int k = 1; k < NUM_DELTA_CALIB_POINTS; ++k) {
+                    float temp = 0.0;
+                    for (int k = 0; k < NUM_DELTA_CALIB_POINTS; ++k) {
                         temp += derivativeMatrix(k, i) * derivativeMatrix(k, j);
                     }
                     normalMatrix(i, j) = temp;
                 }
-                float temp = derivativeMatrix(0, i) * -(zBedProbePoints[0] + corrections[0]);
-                for (int k = 1; k < NUM_DELTA_CALIB_POINTS; ++k) {
+                float temp = 0;
+                for (int k = 0; k < NUM_DELTA_CALIB_POINTS; ++k) {
                     temp += derivativeMatrix(k, i) * -(zBedProbePoints[k] + corrections[k]);
                 }
-                normalMatrix(i, NUM_DELTA_CALIB_POINTS) = temp;
+                normalMatrix(i, numFactors) = temp;
             }
+#ifdef DEBUG_CALIBRATE
+            normalMatrix.print(PSTR("normalMatrix"));
+#endif
 
-            float solution[NUM_DELTA_CALIB_POINTS];
+            float solution[7];
             normalMatrix.gaussJordan(solution, numFactors);
+#ifdef DEBUG_CALIBRATE
+            normalMatrix.print(PSTR("solvedMatrix"));
+            Com::printArrayFLN(PSTR("Solution:"), solution, numFactors, 4);
+#endif
 
             for (int i = 0; i < numFactors; ++i) {
                 if (isnan(solution[i])) {
@@ -482,17 +505,26 @@ void PrinterType::closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], flo
     float offsets[2] = { offX, offY };
     float tOffMin, tOffMax;
     float tPos[2], t2Pos[2];
-    for (int loop = 0; loop < 2; loop++) { // can need 2 iterations to be valid!
-        float dist = 0, dist2 = 0;
+    for (int loop = 0; loop < 3; loop++) { // can need 2 iterations to be valid!
+        float dist = 0, dist2 = 0, distbed = 0;
         for (fast8_t i = 0; i < Z_AXIS; i++) {
             tPos[i] = pos[i] - offsets[i];
             t2Pos[i] = pos[i] + Motion1::toolOffset[i];
             dist += tPos[i] * tPos[i];
             dist2 += t2Pos[i] * t2Pos[i]; // current tool offset
+            distbed += pos[i] * pos[i];
         }
-        if (dist > dist2) {
-            dist = sqrtf(dist);
+        if (distbed > dist && distbed > dist2 && (bedRadius - safety) / sqrt(distbed) < 1.001) {
+            dist = sqrtf(distbed);
             float fac = (bedRadius - safety) / dist;
+            if (fac >= 1.0f) { // inside bed, nothing to do
+                return;
+            }
+            pos[X_AXIS] = tPos[X_AXIS] * fac;
+            pos[Y_AXIS] = tPos[Y_AXIS] * fac;
+        } else if (dist > dist2 && (printRadius - safety) / sqrt(dist) < 1.001) {
+            dist = sqrtf(dist);
+            float fac = (printRadius - safety) / dist;
             if (fac >= 1.0f) { // inside bed, nothing to do
                 return;
             }
@@ -502,7 +534,7 @@ void PrinterType::closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], flo
             pos[Y_AXIS] = tPos[Y_AXIS] + offY;
         } else {
             dist2 = sqrtf(dist2);
-            float fac = (bedRadius - safety) / dist2;
+            float fac = (printRadius - safety) / dist2;
             if (fac >= 1.0f) { // inside bed, nothing to do
                 return;
             }
@@ -608,21 +640,21 @@ void PrinterType::activatedTool(fast8_t id) { }
 void PrinterType::eepromHandle() {
     EEPROM::handlePrefix(PSTR("Delta"));
     EEPROM::handleFloat(eeprom + 0, PSTR("Diagonal [mm]"), 2, diagonal);
-    EEPROM::handleFloat(eeprom + 4, PSTR("Horizontal Radius [mm]"), 2, horizontalRadius);
+    EEPROM::handleFloat(eeprom + 4, PSTR("Horizontal Radius [mm]"), 3, horizontalRadius);
     EEPROM::handleFloat(eeprom + 8, PSTR("Printable Radius [mm]"), 2, printRadius);
     EEPROM::handleFloat(eeprom + 60, PSTR("Bed Radius [mm]"), 2, bedRadius);
-    EEPROM::handleFloat(eeprom + 12, PSTR("Angle A [mm]"), 2, angleA);
-    EEPROM::handleFloat(eeprom + 16, PSTR("Angle B [mm]"), 2, angleB);
-    EEPROM::handleFloat(eeprom + 20, PSTR("Angle C [mm]"), 2, angleC);
+    EEPROM::handleFloat(eeprom + 12, PSTR("Angle A [mm]"), 3, angleA);
+    EEPROM::handleFloat(eeprom + 16, PSTR("Angle B [mm]"), 3, angleB);
+    EEPROM::handleFloat(eeprom + 20, PSTR("Angle C [mm]"), 3, angleC);
     EEPROM::handleFloat(eeprom + 24, PSTR("Diagonal Correction A [mm]"), 2, correctionA);
     EEPROM::handleFloat(eeprom + 28, PSTR("Diagonal Correction B [mm]"), 2, correctionB);
     EEPROM::handleFloat(eeprom + 32, PSTR("Diagonal Correction C [mm]"), 2, correctionC);
     EEPROM::handleFloat(eeprom + 36, PSTR("Horiz. Radius A [mm]"), 2, radiusCorrectionA);
     EEPROM::handleFloat(eeprom + 40, PSTR("Horiz. Radius B [mm]"), 2, radiusCorrectionB);
     EEPROM::handleFloat(eeprom + 44, PSTR("Horiz. Radius C [mm]"), 2, radiusCorrectionC);
-    EEPROM::handleFloat(eeprom + 48, PSTR("Home Offset A [mm]"), 2, homeOffsetA);
-    EEPROM::handleFloat(eeprom + 52, PSTR("Home Offset B [mm]"), 2, homeOffsetB);
-    EEPROM::handleFloat(eeprom + 56, PSTR("Home Offset C [mm]"), 2, homeOffsetC);
+    EEPROM::handleFloat(eeprom + 48, PSTR("Home Offset A [mm]"), 3, homeOffsetA);
+    EEPROM::handleFloat(eeprom + 52, PSTR("Home Offset B [mm]"), 3, homeOffsetB);
+    EEPROM::handleFloat(eeprom + 56, PSTR("Home Offset C [mm]"), 3, homeOffsetC);
     EEPROM::removePrefix();
 }
 
@@ -662,8 +694,8 @@ void PrinterType::updateDerived() {
     CPosX = radiusC * cos(degToRad(angleC));
     CPosY = radiusC * sin(degToRad(angleC));
     diagonalSquaredA = RMath::sqr(diagonal + correctionA);
-    diagonalSquaredB = RMath::sqr(diagonal + correctionA);
-    diagonalSquaredC = RMath::sqr(diagonal + correctionA);
+    diagonalSquaredB = RMath::sqr(diagonal + correctionB);
+    diagonalSquaredC = RMath::sqr(diagonal + correctionC);
     printRadiusSquared = printRadius * printRadius;
     Motion1::minPos[X_AXIS] = Motion1::minPos[Y_AXIS] = -printRadius;
     Motion1::maxPos[X_AXIS] = Motion1::maxPos[Y_AXIS] = printRadius;
@@ -740,6 +772,45 @@ bool PrinterType::runMCode(GCode* com) {
     case 360:
         M360();
         return false;
+    case 665: {
+        if (com->hasL()) {
+            diagonal = fabsf(com->L);
+        }
+        if (com->hasR()) {
+            horizontalRadius = fabsf(com->R);
+        }
+        if (com->hasA()) {
+            correctionA = com->A;
+        }
+        if (com->hasB()) {
+            correctionB = com->B;
+        }
+        if (com->hasC()) {
+            correctionC = com->C;
+        }
+        if (com->hasX()) {
+            angleA = DELTA_ANGLE_A + com->X;
+        }
+        if (com->hasY()) {
+            angleB = DELTA_ANGLE_A + com->Y;
+        }
+        if (com->hasZ()) {
+            angleC = DELTA_ANGLE_A + com->Z;
+        }
+        EEPROM::markChanged();
+    } break;
+    case 666: {
+        if (com->hasX()) {
+            homeOffsetA = fabsf(com->X);
+        }
+        if (com->hasY()) {
+            homeOffsetB = fabsf(com->Y);
+        }
+        if (com->hasZ()) {
+            homeOffsetC = fabsf(com->Z);
+        }
+        EEPROM::markChanged();
+    } break;
     }
     return true;
 }

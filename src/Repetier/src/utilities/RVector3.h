@@ -168,6 +168,21 @@ public:
         }
     }
 
+    void print(FSTRINGPARAM(name)) {
+        Com::printF("Matrix ");
+        Com::printFLN(name);
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                Com::printF(Com::tEmpty, data[r][c], 4);
+                if (c < cols - 1) {
+                    Com::printF(PSTR(", "));
+                } else {
+                    Com::println();
+                }
+            }
+        }
+    }
+
     void swapRows(int i, int j) {
         for (int c = 0; c < cols; c++) {
             float tmp = data[i][c];
@@ -180,7 +195,7 @@ public:
         int i, j, k;
         for (i = 0; i < numRows; i++) {
             float vmax = fabs(data[i][i]);
-            for (j = i + 1; j < numRows; j++) {
+            for (j = i + 1; j < numRows; j++) { // ensure biggest diagonal entry for stability
                 float rmax = fabs(data[j][i]);
                 if (rmax > vmax) {
                     swapRows(i, j);
@@ -191,14 +206,14 @@ public:
             for (j = 0; j < i; j++) {
                 float factor = data[j][i] / v;
                 data[j][i] = 0.0;
-                for (k = i + 1; k < cols; k++) {
-                    data[j][k] = -data[i][k] * factor;
+                for (k = i + 1; k <= numRows; k++) {
+                    data[j][k] -= data[i][k] * factor;
                 }
             }
             for (j = i + 1; j < numRows; j++) {
                 float factor = data[j][i] / v;
                 data[j][i] = 0.0;
-                for (k = i + 1; k < cols; k++) {
+                for (k = i + 1; k <= numRows; k++) {
                     data[j][k] -= data[i][k] * factor;
                 }
             }

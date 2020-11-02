@@ -192,5 +192,5 @@ void __attribute__((weak)) ToolCNC<dirPin, enabledPin, activePin>::menuRPM(GUIAc
 }
 
 #undef IO_TARGET
-#define IO_TARGET IO_TARGET_TOOLS_TEMPLATES
+#define IO_TARGET IO_TARGET_TEMPLATES
 #include "../io/redefine.h"

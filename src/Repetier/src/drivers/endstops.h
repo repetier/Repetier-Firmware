@@ -25,13 +25,13 @@ public:
     // Returns true if this is a real endstop
     virtual bool implemented() = 0;
     // Special case for drivers that sense endstop to set state instead of using update
-    virtual void set(bool triggered) {}
+    virtual void set(bool triggered) { }
     virtual void report() {
         Com::printF(update() ? Com::tHSpace : Com::tLSpace);
     }
-    virtual void setParent(EndstopDriver* p) {}
+    virtual void setParent(EndstopDriver* p) { }
     // Called from dependent end stops
-    virtual void updateMaster() {}
+    virtual void updateMaster() { }
 };
 
 class EndstopNoneDriver : public EndstopDriver {
@@ -59,10 +59,8 @@ class EndstopSwitchDriver : public EndstopDriver {
 public:
     EndstopSwitchDriver()
         : state(false)
-        , parent(nullptr) {}
-    inline virtual bool update() final {
-        return (state = inp::get());
-    }
+        , parent(nullptr) { }
+    virtual bool update() final;
     inline virtual bool triggered() final {
         return state;
     }
@@ -82,20 +80,8 @@ class EndstopSwitchHardwareDriver : public EndstopDriver {
 public:
     EndstopSwitchHardwareDriver()
         : state(false)
-        , parent(nullptr) {}
-    inline void updateReal() {
-        fast8_t newState = inp::get();
-        if (state != newState) {
-            state = newState;
-            if (axis >= 0 && newState) { // tell motion planner
-                endstopTriggered(axis, dir);
-            }
-            if (parent != nullptr) {
-                parent->updateMaster();
-            }
-            // Com::printFLN(PSTR("HWState:"), (int)state); // TEST
-        }
-    }
+        , parent(nullptr) { }
+    void updateReal();
 
     inline virtual bool update() final {
         return state;
@@ -117,17 +103,8 @@ class EndstopSwitchDebounceDriver : public EndstopDriver {
 
 public:
     EndstopSwitchDebounceDriver()
-        : state(0) {}
-    inline virtual bool update() final {
-        if (inp::get()) {
-            if (state < level) {
-                state++;
-            }
-        } else {
-            state = 0;
-        }
-        return state;
-    }
+        : state(0) { }
+    inline virtual bool update() final;
     inline virtual bool triggert() final {
         return state == level;
     }
@@ -145,7 +122,7 @@ class EndstopStepperControlledDriver : public EndstopDriver {
 
 public:
     EndstopStepperControlledDriver()
-        : state(false) {}
+        : state(false) { }
     inline virtual bool update() final {
         return state;
     }
@@ -155,9 +132,7 @@ public:
     inline virtual bool implemented() final {
         return true;
     }
-    inline virtual void set(bool triggered) final {
-        state = triggered;
-    }
+    virtual void set(bool triggered) final;
 };
 
 /** Merge 2 endstops into 1. Returns only true if both endstops are triggered. */

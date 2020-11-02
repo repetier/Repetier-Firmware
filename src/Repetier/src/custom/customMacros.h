@@ -72,7 +72,7 @@ Hints:
 #elif IO_TARGET == IO_TARGET_RESTORE_FROM_CONFIG  // restore from config
 #elif IO_TARGET == IO_TARGET_ANALOG_INPUT_LOOP    // analog input loop
 #elif IO_TARGET == IO_TARGET_500MS                // 500ms timer
-#elif IO_TARGET == IO_TARGET_TOOLS_TEMPLATES      // ools.cpp template definitions
+#elif IO_TARGET == IO_TARGET_TEMPLATES            // ools.cpp template definitions
 #elif IO_TARGET == IO_TARGET_FIRMWARE_EVENTS      // Solve firmware events
 #elif IO_TARGET == IO_TARGET_PERIODICAL_ACTIONS   // Periodical actions
 #elif IO_TARGET == IO_TARGET_GUI_CONTROLS         // Controls menu (prepare, printer is idle)

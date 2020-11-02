@@ -194,7 +194,7 @@
 #define STEPPER_TMC2209_SW_UART(name, stepPin, dirPin, enablePin, rxPin, txPin, rsense, microsteps, currentMillis, stealth, hybridSpeed, slaveAddr, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.reset(microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity);
 
-#elif IO_TARGET == IO_TARGET_TOOLS_TEMPLATES
+#elif IO_TARGET == IO_TARGET_TEMPLATES
 
 #define STEPPER_ADJUST_RESOLUTION(name, driver, from, to) \
     template class AdjustResolutionStepperDriver<driver##Type>;

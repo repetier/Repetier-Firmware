@@ -81,19 +81,19 @@ IO_INPUT_DUMMY(ControllerReset, false)
 
 // Define your endstops inputs
 
-IO_INPUT_INVERTED(IOEndstopXMax, ORIG_X_MAX_PIN)
+IO_INPUT_INVERTED(IOEndstopXMax, ORIG_X_MIN_PIN)
 IO_INPUT_INVERTED(IOEndstopYMax, ORIG_Y_MAX_PIN)
 IO_INPUT_INVERTED(IOEndstopZMax, ORIG_Z_MAX_PIN)
-IO_INPUT_INVERTED_PULLUP(IOEndstopYMin, ORIG_Y_MIN_PIN)
-IO_INPUT_PULLUP(IOEndstopZProbe, ORIG_Z_MIN_PIN)
+// IO_INPUT_INVERTED_PULLUP(IOEndstopYMin, ORIG_Y_MIN_PIN)
+IO_INPUT_PULLUP(IOEndstopZProbe, PD13) // EXP3 left back pin
 
 // Define our endstops solutions
 // You need to define all min and max endstops for all
 // axes except E even if you have none!
 
-ENDSTOP_SWITCH_HW(endstopMotorXMax, IOEndstopXMax, -1, true)
-ENDSTOP_SWITCH_HW(endstopMotorYMax, IOEndstopYMax, -1, true)
-ENDSTOP_SWITCH_HW(endstopMotorZMax, IOEndstopZMax, -1, true)
+ENDSTOP_SWITCH_HW(endstopMotorXMax, IOEndstopXMax, NO_AXIS, true)
+ENDSTOP_SWITCH_HW(endstopMotorYMax, IOEndstopYMax, NO_AXIS, true)
+ENDSTOP_SWITCH_HW(endstopMotorZMax, IOEndstopZMax, NO_AXIS, true)
 ENDSTOP_NONE(endstopXMin)
 ENDSTOP_NONE(endstopYMin)
 ENDSTOP_NONE(endstopZMin)

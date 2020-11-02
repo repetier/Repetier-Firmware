@@ -2,7 +2,7 @@
 
 class ZProbeHandler {
 public:
-    static void activate() { }
+    static bool activate() { return true; }
     static void deactivate() { }
     static float runProbe() { return 0; }
     static bool probingPossible() { return false; }
@@ -55,7 +55,7 @@ class ZProbeHandler {
     static bool pauseHeaters;
 
 public:
-    static void activate();
+    static bool activate();
     static void deactivate();
     static float runProbe();
     static bool probingPossible();
@@ -111,7 +111,7 @@ class ZProbeHandler {
     static bool pauseHeaters;
 
 public:
-    static void activate();
+    static bool activate();
     static void deactivate();
     static float runProbe();
     static bool probingPossible();
@@ -170,7 +170,7 @@ class ZProbeHandler {
     static void disableAlarmIfOn();
 
 public:
-    static void activate();
+    static bool activate();
     static void deactivate();
     static float runProbe();
     static bool probingPossible();

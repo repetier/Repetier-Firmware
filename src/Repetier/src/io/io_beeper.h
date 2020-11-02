@@ -80,7 +80,7 @@ public:
         , curConditionStep(0)
         , curValidCondition(nullptr)
         , lastValidCondition(nullptr) { }
-    virtual ~BeeperSourceBase() { };
+    virtual ~BeeperSourceBase() {};
     inline fast8_t getHeadDist() {
         return !isPlaying() ? 0 : (toneHead >= toneTail ? (toneHead - toneTail) : (beepBufSize - toneTail + toneHead));
     }
@@ -113,7 +113,7 @@ protected:
     virtual void finishPlaying();
     bool playing;
     bool halted; // Special state between beeps/duration only beeps.
-    bool muted;           // eeprom etc
+    bool muted;  // eeprom etc
     bool blocking;
     fast8_t toneHead;
     fast8_t toneTail;
@@ -172,7 +172,7 @@ public:
     };
     inline ufast8_t getOutputType() final { return 2; }
     inline ufast8_t getFreqDiv() final { return 0; }
-    inline void setFreqDiv(ufast8_t div) final {}
+    inline void setFreqDiv(ufast8_t div) final { }
 
 private:
     void refreshBeepFreq() final;
@@ -253,7 +253,7 @@ Printer::toneVolume = constrain(DEFAULT_TONE_VOLUME, 0, 100);
 BeeperSourceBase::muteAll((Printer::toneVolume <= MINIMUM_TONE_VOLUME));
 #endif
 
-#elif IO_TARGET == IO_TARGET_TOOLS_TEMPLATES
+#elif IO_TARGET == IO_TARGET_TEMPLATES
 
 #define BEEPER_SOURCE_IO(name, IOPin) \
     template class BeeperSourceIO<IOPin>;

@@ -47,8 +47,10 @@ Early stage version for Stacke X2 printer - use with care
 
 // The follwing variables are required early to decide on the right modules.
 
-#define DEBUG_MOTION_ERRORS // extra loads but shows message on motion errors
-                            // detected from wrong math
+#define DEBUG_MOTION_ERRORS // extra loads but shows message on motion errors detected from wrong math
+// #define DEBUG_MOVES 1
+// #define DEBUG_CALIBRATE 1
+
 #define SLOW_DIRECTION_CHANGE 1 // maybe reason for lost steps
 #define HOST_RESCUE 1
 
@@ -56,7 +58,7 @@ Early stage version for Stacke X2 printer - use with care
 
 #define NUM_SERVOS 1
 #define NUM_TOOLS 2
-#define MOTHERBOARD MOTHERBOARD_RUMBA32 // 412 // Stacker 3d Superboard
+#define MOTHERBOARD MOTHERBOARD_RUMBA32
 #define EEPROM_MODE 1
 #define RFSERIAL SerialUSB
 #define BLUETOOTH_SERIAL -1
@@ -68,26 +70,26 @@ Early stage version for Stacke X2 printer - use with care
 #define PRINTLINE_CACHE_SIZE 32 // Number of moves we can cache
 
 #define STEPPER_FREQUENCY 192000 // Maximum stepper frequency.
-#define PREPARE_FREQUENCY                                                      \
-  2000 // Update frequency for new blocks. Must be higher then
-       // PREPARE_FREQUENCY.
-#define BLOCK_FREQUENCY                                                        \
-  1000 // Number of blocks with constant stepper rate per second.
-#define VELOCITY_PROFILE 2 // 0 = linear, 1 = cubic, 2 = quintic velocity shape
-#define SMALL_SEGMENT_SIZE                                                     \
-  0.4 // Smaller segments reduce join speed to prevent vibrations causing lost
-      // steps
-#define Z_SPEED 100  // Z positioning speed
-#define XY_SPEED 200 // XY positioning speed for normal operations
-#define G0_FEEDRATE                                                            \
-  0 // Speed for G0 moves. Independent from set F value! Set 0 to use F value.
+// Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
+#define PREPARE_FREQUENCY 2000
+// Number of blocks with constant stepper rate per second.
+#define BLOCK_FREQUENCY 1000
+// 0 = linear, 1 = cubic, 2 = quintic velocity shape
+#define VELOCITY_PROFILE 2
+// Smaller segments reduce join speed to prevent vibrations causing lost steps
+#define SMALL_SEGMENT_SIZE 0.4
+// Z positioning speed
+#define Z_SPEED 100
+// XY positioning speed for normal operations
+// Speed for G0 moves. Independent from set F value! Set 0 to use F value.
+#define XY_SPEED 200
+#define G0_FEEDRATE 0
 #define MAX_ROOM_TEMPERATURE 25 // No heating below this temperature!
-#define TEMPERATURE_CONTROL_RANGE                                              \
-  20 // Start with controlling if temperature is +/- this value to target
-     // temperature
+// Start with controlling if temperature is +/- this value to target temperature
+#define TEMPERATURE_CONTROL_RANGE 20
 #define LEVELING_METHOD 1
 #define ENABLE_BUMP_CORRECTION 1
-#define MAX_GRID_SIZE 5                   // Maximum grid size allocation in memory, imported grid can be smaller
+#define MAX_GRID_SIZE 5 // Maximum grid size allocation in memory, imported grid can be smaller
 #define BUMP_CORRECTION_START_DEGRADE 0.5
 #define BUMP_CORRECTION_END_HEIGHT 1.5
 #define BUMP_LIMIT_TO 0
@@ -96,8 +98,8 @@ Early stage version for Stacke X2 printer - use with care
 #define PRINTER_TYPE PRINTER_TYPE_DELTA
 // steps to include as babysteps per 1/BLOCK_FREQUENCY seconds. Must be lower
 // then STEPPER_FREQUENCY/BLOCK_FREQUENCY and be low enough to not loose steps.
-#define BABYSTEPS_PER_BLOCK                                                    \
-  { 1, 1, 1, 1 }
+#define BABYSTEPS_PER_BLOCK \
+    { 1, 1, 1, 1 }
 // If all axis end stops are hardware based we can skip the time consuming tests
 // each step
 #define NO_SOFTWARE_AXIS_ENDSTOPS
@@ -155,8 +157,8 @@ to the position. 0 = no contribution. */
 */
 #define DELTA_DIAGONAL 444.800f
 #define DELTA_HORIZONTAL_RADIUS 209.900f
-#define DELTA_PRINT_RADIUS 209.0f
-#define BED_RADIUS 200.0f
+#define DELTA_PRINT_RADIUS 172.0f
+#define BED_RADIUS 180.0f
 #define DELTA_ANGLE_A 210.0f
 #define DELTA_ANGLE_B 330.0f
 #define DELTA_ANGLE_C 90.123f
@@ -209,15 +211,13 @@ to the position. 0 = no contribution. */
 #define Z_PROBE_X_OFFSET 0      // x offset relative to extruder 0,0 offset
 #define Z_PROBE_Y_OFFSET 26     // y offset relative to extruder 0,0 offset
 #define Z_PROBE_COATING 0       // Coating thickness if not detected by probe
-#define Z_PROBE_DELAY                                                          \
-  0 // Extra delay before starting again. Only needed on electronic probes
-    // keeping state for a while
+// Extra delay before starting again. Only needed on electronic probes  keeping state for a while
+#define Z_PROBE_DELAY 0
 #define Z_PROBE_REPETITIONS 1 // How often should we probe, 1 is minimum
-#define Z_PROBE_USE_MEDIAN                                                     \
-  1 // 0 = use average, 1 = use middle value after ordering z
-#define Z_PROBE_SWITCHING_DISTANCE                                             \
-  2 // Minimum distance required to safely untrigger probe - used for faster
-    // repeated measurement
+// 0 = use average, 1 = use middle value after ordering z
+#define Z_PROBE_USE_MEDIAN 1
+// Minimum distance required to safely untrigger probe - used for faster repeated measurement
+#define Z_PROBE_SWITCHING_DISTANCE 2
 #define Z_PROBE_BORDER 2 // Safety border to ensure position is allowed
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
@@ -233,46 +233,46 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 // All fans in this list list become controllable with M106/M107
 // by selecteing the fan number with P0..P<NUM_FANS-1>
 #define NUM_FANS 1
-#define FAN_LIST                                                               \
-  { &Fan1PWM }
+#define FAN_LIST \
+    { &Fan1PWM }
 
 #define NUM_HEATED_BEDS 1
-#define HEATED_BED_LIST                                                        \
-  { &HeatedBed1 }
+#define HEATED_BED_LIST \
+    { &HeatedBed1 }
 
 #define NUM_HEATED_CHAMBERS 0
-#define HEATED_CHAMBER_LIST                                                    \
-  {}
+#define HEATED_CHAMBER_LIST \
+    { }
 
-#define SERVO_LIST                                                             \
-  { &ZProbeServo }
-#define TOOLS                                                                  \
-  { &ToolExtruder1, &ToolExtruder2 }
+#define SERVO_LIST \
+    { &ZProbeServo }
+#define TOOLS \
+    { &ToolExtruder1, &ToolExtruder2 }
 
 // Heaters enumerate all heaters, so we can loop over them
 // or call commands on a specific heater number.
 // Suggested order: extruder heaters, heated beds, heated chambers, additional
 // heaters
 #define NUM_HEATERS 3
-#define HEATERS                                                                \
-  { &HeaterExtruder1, &HeaterExtruder2, &HeatedBed1 }
+#define HEATERS \
+    { &HeaterExtruder1, &HeaterExtruder2, &HeatedBed1 }
 
 // Array to call motor related commands like microstepping/current if supported.
 // Id's start at 0 and depend on position in this array.
 #define NUM_MOTORS 5
-#define MOTORS                                                                 \
-  { &XMotor, &YMotor, &ZMotor, &E1Motor, &E2Motor }
-#define MOTOR_NAMES                                                            \
-  { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("E0"), PSTR("E1") }
+#define MOTORS \
+    { &XMotor, &YMotor, &ZMotor, &E1Motor, &E2Motor }
+#define MOTOR_NAMES \
+    { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("E0"), PSTR("E1") }
 // Define beeper list
 #if BEEPER_PIN > -1
 #define NUM_BEEPERS 1
-#define BEEPER_LIST                                                            \
-  { &MainBeeper }
+#define BEEPER_LIST \
+    { &MainBeeper }
 #else
 #define NUM_BEEPERS 0
-#define BEEPER_LIST                                                            \
-  {}
+#define BEEPER_LIST \
+    { }
 #endif
 
 // Some common settings for trinamic driver settings
@@ -442,16 +442,16 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define AXISCOMP_TANYZ 0
 #define AXISCOMP_TANXZ 0
 
-#ifndef SDSUPPORT // Some boards have sd support on board. These define the
-                  // values already in pins.h
+// Some boards have sd support on board. These define the values already in pins.h
+#ifndef SDSUPPORT
 #define SDSUPPORT 1
 #undef SDCARDDETECT
 #define SDCARDDETECT ORIG_SDCARDDETECT
 #define SDCARDDETECTINVERTED 0
 #endif
-#define SD_EXTENDED_DIR                                                        \
-  1 /** Show extended directory including file length. Don't use this with     \
-       Pronterface! */
+#define SD_EXTENDED_DIR \
+    1 /** Show extended directory including file length. Don't use this with \
+         Pronterface! */
 #define SD_RUN_ON_STOP ""
 #define SD_STOP_HEATER_AND_MOTORS_ON_STOP 1
 #define ARC_SUPPORT 1

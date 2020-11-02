@@ -82,6 +82,12 @@ void Commands::commandLoop() {
 void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     Printer::handleInterruptEvent();
     FirmwareEvent::handleEvents();
+    if (Printer::reportFlag) {
+        if (Printer::isReportFlag(PRINTER_REPORT_FLAG_ENDSTOPS)) {
+            MCode_119(nullptr);
+            Printer::reportFlagReset(PRINTER_REPORT_FLAG_ENDSTOPS);
+        }
+    }
 #if EMERGENCY_PARSER
     GCodeSource::prefetchAll();
 #endif
@@ -397,7 +403,8 @@ void Commands::processMCode(GCode* com) {
         return;
     }
     bool unknown = false;
-    switch (com->M) {
+    uint16_t mCode = com->isPriorityM() ? com->getPriorityM() : com->M;
+    switch (mCode) {
     case 0:
         // HAL::reportHALDebug();
         break;
@@ -730,6 +737,10 @@ void Commands::processMCode(GCode* com) {
     case 606: // Park extruder
         MCode_606(com);
         break;
+    case 665:
+    case 666:
+        PrinterType::runMCode(com);
+        break;
     case 669: // Measure lcd refresh time
         MCode_669(com);
         break;
@@ -827,7 +838,9 @@ void Commands::executeGCode(GCode* com) {
     if (com->hasG()) {
         processGCode(com);
     } else if (com->hasM()) {
-        processMCode(com);
+        if (!com->isPriorityM()) {
+            processMCode(com);
+        }
     } else if (com->hasT()) { // Process T code
         if (!Printer::failedMode) {
             Motion1::waitForEndOfMoves();

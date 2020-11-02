@@ -231,7 +231,7 @@ void GCode::checkAndPushCommand() {
             Commands::emergencyStop();
         }
 #ifdef DEBUG_COM_ERRORS
-        if (M == 666) // force an communication error
+        if (M == 667) // force an communication error
         {
             GCodeSource::activeSource->lastLineNumber++;
             return;
@@ -273,7 +273,7 @@ void GCode::checkAndPushCommand() {
 		requestResend();
 		return;
 	}*/
-    if (GCode::hasFatalError() && !(hasM() && (M == 999 || M == 0))) {
+    if (GCode::hasFatalError() && (!(hasM() || (M == 104 || M == 109 || M == 190 || M == 140 || M == 141 || M == 600 || M == 601)))) {
         GCode::reportFatalError();
     } else {
         pushCommand();
@@ -1310,6 +1310,8 @@ void SerialGCodeSource::testEmergency(GCode& gcode) {
             Printer::handlePowerLoss();
         } else if (gcode.M == 205) {
             EEPROM::writeSettings();
+        } else if (gcode.isPriorityM()) {
+            Commands::processMCode(&gcode);
         }
     }
 }

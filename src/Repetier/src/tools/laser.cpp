@@ -290,5 +290,5 @@ void ToolLaser<enabledPin, activePin>::moveFinished() {
 }
 
 #undef IO_TARGET
-#define IO_TARGET IO_TARGET_TOOLS_TEMPLATES
+#define IO_TARGET IO_TARGET_TEMPLATES
 #include "../io/redefine.h"

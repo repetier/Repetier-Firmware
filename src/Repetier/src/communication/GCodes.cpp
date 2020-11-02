@@ -446,7 +446,9 @@ void __attribute__((weak)) GCode_30(GCode* com) {
     // G30 H<height> R<offset> Make probe define new Z and z offset (R) at trigger point assuming z-probe measured an object of H height.
     uint8_t p = (com->hasP() ? (uint8_t)com->P : 3);
     if (p & 1) {
-        ZProbeHandler::activate();
+        if (!ZProbeHandler::activate()) {
+            return;
+        }
     }
     if (com->hasS()) {
         float curHeight = (com->hasZ() ? com->Z : Motion1::currentPosition[Z_AXIS]);
@@ -517,7 +519,9 @@ void __attribute__((weak)) GCode_32(GCode* com) {
                                    (Motion1::minPosOff[Y_AXIS] + Motion1::maxPosOff[Y_AXIS]) * 0.5, zTheroetical);
         ok = Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
         if (ok) {
-            ZProbeHandler::activate();
+            ok &= ZProbeHandler::activate();
+        }
+        if (ok) {
             zMeasured = ZProbeHandler::runProbe();
             ZProbeHandler::deactivate();
             ok = zMeasured != ILLEGAL_Z_PROBE;

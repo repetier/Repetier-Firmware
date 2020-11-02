@@ -1644,7 +1644,9 @@ void Motion1::homeAxes(fast8_t axes) {
                     moveByOfficial(tmpPosition, maxFeedrate[X_AXIS], false);
 #endif
                     if (ZProbe != nullptr && homeDir[Z_AXIS] < 0) { // activate z probe
-                        ZProbeHandler::activate();
+                        if (!ZProbeHandler::activate()) {
+                            return;
+                        }
                     }
                 }
                 PrinterType::homeAxis(i);
@@ -1729,6 +1731,11 @@ void Motion1::homeAxes(fast8_t axes) {
     }
 #endif
 */
+#if PRINTER_TYPE == PRINTER_TYPE_DELTA
+    if (axes & axisBits[Z_AXIS]) {
+        oldCoordinates[X_AXIS] = oldCoordinates[Y_AXIS] = 0;
+    }
+#endif
     oldCoordinates[E_AXIS] = currentPosition[E_AXIS];
     moveByOfficial(oldCoordinates, moveFeedrate[X_AXIS], false);     // make official pos = homing pos reagrdless of transformation
     if (Tool::getActiveTool() != nullptr && ok && (axes & 7) != 0) { // select only if all is homed or we get unwanted moves! Also only do it if position has changed allowing homing of non position axis in extruder selection.
