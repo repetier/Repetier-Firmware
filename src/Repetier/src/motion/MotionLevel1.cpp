@@ -1608,7 +1608,7 @@ void Motion1::homeAxes(fast8_t axes) {
 #endif
     // We measure in printer coordinates, so deactivate all corrections
     bool isAL = isAutolevelActive();
-    setAutolevelActive(false);
+    setAutolevelActive(false, true);
     bool bcActive = Leveling::isDistortionEnabled();
     Leveling::setDistortionEnabled(false);
     updatePositionsFromCurrent();
@@ -1678,7 +1678,7 @@ void Motion1::homeAxes(fast8_t axes) {
     }
     Printer::setHomedAll(ok);
     // Reactivate corrections
-    setAutolevelActive(isAL);
+    setAutolevelActive(isAL, true);
     Leveling::setDistortionEnabled(bcActive);
 
     if (axes & axisBits[Z_AXIS]) {
