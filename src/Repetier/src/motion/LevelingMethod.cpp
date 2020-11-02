@@ -772,9 +772,12 @@ void Leveling::importBumpMatrix(char* filename) {
     } else {
         Motion1::setAutolevelActive(true);
     }
-    Com::printArrayFLN(Com::tTransformationMatrix, Motion1::autolevelTransformation, 9, 6);
 
+    Motion1::waitForEndOfMoves();
     setDistortionEnabled(true);
+    Motion1::waitForEndOfMoves();
+
+    Com::printArrayFLN(Com::tTransformationMatrix, Motion1::autolevelTransformation, 9, 6);
     reportDistortionStatus();
 
     Com::printFLN(PSTR("Bump matrix succesfully imported."));
