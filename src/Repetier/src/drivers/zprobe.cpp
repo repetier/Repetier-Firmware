@@ -64,6 +64,7 @@ bool ZProbeHandler::activate() {
     GCode::executeFString(Com::tZProbeStartScript);
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Motion1::setToolOffset(-offsetX, -offsetY, 0);
+    Motion1::setHardwareEndstopsAttached(true, ZProbe);
     activated = true;
     if (pauseHeaters) {
         bool set = false;
@@ -87,6 +88,7 @@ void ZProbeHandler::deactivate() {
     if (!activated) {
         return;
     }
+    Motion1::setHardwareEndstopsAttached(false, ZProbe);
     float cPos[NUM_AXES];
     Tool* tool = Tool::getActiveTool();
     Motion1::copyCurrentOfficial(cPos);
@@ -423,6 +425,7 @@ bool ZProbeHandler::activate() {
     GCode::executeFString(Com::tZProbeStartScript);
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
+    Motion1::setHardwareEndstopsAttached(true, ZProbe);
     Tool* t = Tool::getActiveTool();
     HeatManager* hm = t->getHeater();
     if (hm != nullptr) {
@@ -458,6 +461,7 @@ void ZProbeHandler::deactivate() {
     if (!activated) {
         return;
     }
+    Motion1::setHardwareEndstopsAttached(false, ZProbe);
     float cPos[NUM_AXES];
     Motion1::copyCurrentOfficial(cPos);
     Tool* tool = Tool::getActiveTool();
@@ -790,6 +794,7 @@ bool ZProbeHandler::activate() {
     GCode::executeFString(Com::tZProbeStartScript);
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Motion1::setToolOffset(-offsetX, -offsetY, 0);
+    Motion1::setHardwareEndstopsAttached(true, ZProbe);
     ZProbeServo.setPosition(647, 0);     // deploy pin
     HAL::delayMilliseconds(deployDelay); // give time to deploy
     if (isAlarmOn()) {                   // to close to bed, alarm triggered already from deploy, so raise 5mm
@@ -801,9 +806,10 @@ bool ZProbeHandler::activate() {
         ZProbeServo.setPosition(647, 0);     // deploy pin
         HAL::delayMilliseconds(deployDelay); // give time to deploy
         if (isAlarmOn()) {
+            Motion1::setHardwareEndstopsAttached(false, ZProbe);
             // if BLTouch gives Alarm again, needle is blocked, stop printer
             Motion1::waitForEndOfMoves();                                                                              // this avoids hard moves with very high feedrates and lost steps (where do they come from? only happens in case distortion correction is active.
-            GCode::fatalError(PSTR("Z-Probe again triggered before probing! Printer Stopped for avoiding Bed crash")); // Z is raised to Z=30, probably by the fatalError
+            GCode::fatalError(PSTR("Z-Probe alarm triggered again before probing! Printer stopped to avoid a bed crash!")); // Z is raised to Z=30, probably by the fatalError
             return false;
         }
     }
@@ -831,6 +837,7 @@ void ZProbeHandler::deactivate() {
         return;
     }
     ZProbeServo.setPosition(1473, 0); // stow pin
+    Motion1::setHardwareEndstopsAttached(false, ZProbe);
     float cPos[NUM_AXES];
     Tool* tool = Tool::getActiveTool();
     Motion1::copyCurrentOfficial(cPos);
@@ -1115,11 +1122,14 @@ bool ZProbeHandler::isAlarmOn() {
 }
 
 void ZProbeHandler::disableAlarmIfOn() {
+    bool startAttach = ZProbe->isAttached();
+    Motion1::setHardwareEndstopsAttached(true, ZProbe);
     millis_t startTime = HAL::timeInMilliseconds();
     while (isAlarmOn() && (HAL::timeInMilliseconds() - startTime) < 1500) {
         ZProbeServo.setPosition(2194, 0);
     }
     ZProbeServo.setPosition(1473, 0); // pin up
+    Motion1::setHardwareEndstopsAttached(startAttach, ZProbe);
 }
 
 void menuProbeOffset(GUIAction action, void* data) {

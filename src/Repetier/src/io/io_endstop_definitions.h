@@ -44,8 +44,9 @@
 #define ENDSTOP_SWITCH(name, pin)
 
 #define ENDSTOP_SWITCH_HW(name, _pin, axis, dir) \
-    attachInterrupt((CPU_ARCH != ARCH_AVR) ? _pin::pin() : digitalPinToInterrupt(_pin::pin()), name##_cb, CHANGE); \
-    name.updateReal();
+    name.setCallback(name##_cb); \
+    name.setAttached(true); \
+    name.setAttached(ALWAYS_CHECK_ENDSTOPS);
 
 #define ENDSTOP_SWITCH_DEBOUNCE(name, pin, level)
 #define ENDSTOP_STEPPER(name)

@@ -16,6 +16,10 @@
 
 */
 
+#ifndef ALWAYS_CHECK_ENDSTOPS
+#define ALWAYS_CHECK_ENDSTOPS 0
+#endif
+
 class EndstopDriver {
 public:
     // Called by stepper driver before each step to update state
@@ -32,6 +36,8 @@ public:
     virtual void setParent(EndstopDriver* p) { }
     // Called from dependent end stops
     virtual void updateMaster() { }
+    virtual void setAttached(bool attach) { }
+    virtual bool isAttached() { return true; } // SW Endstops always "attached".
 };
 
 class EndstopNoneDriver : public EndstopDriver {
@@ -76,11 +82,17 @@ template <class inp, int axis, bool dir>
 class EndstopSwitchHardwareDriver : public EndstopDriver {
     fast8_t state;
     EndstopDriver* parent;
+    void (*callbackFunction)(void);
+    uint8_t attachPin;
+    bool attached;
 
 public:
     EndstopSwitchHardwareDriver()
         : state(false)
-        , parent(nullptr) { }
+        , parent(nullptr)
+        , callbackFunction(nullptr)
+        , attachPin((CPU_ARCH != ARCH_AVR) ? inp::pin() : digitalPinToInterrupt(inp::pin()))
+        , attached(false) { }
     void updateReal();
 
     inline virtual bool update() final {
@@ -92,8 +104,23 @@ public:
     inline virtual bool implemented() final {
         return true;
     }
-    virtual void setParent(EndstopDriver* p) final {
+    inline virtual void setParent(EndstopDriver* p) final {
         parent = p;
+    }
+    virtual void setAttached(bool attach) final {
+        if (attach && !attached) {
+            attachInterrupt(attachPin, callbackFunction, CHANGE);
+            updateReal();
+        } else if (!attach && attached) {
+            detachInterrupt(attachPin);
+        }
+        attached = attach ? (callbackFunction != nullptr) : false;
+    }
+    inline virtual bool isAttached() final {
+        return attached;
+    }
+    inline void setCallback(void (*callback)(void)) {
+        callbackFunction = callback;
     }
 };
 
@@ -105,7 +132,7 @@ public:
     EndstopSwitchDebounceDriver()
         : state(0) { }
     inline virtual bool update() final;
-    inline virtual bool triggert() final {
+    inline virtual bool triggered() final {
         return state == level;
     }
     inline virtual bool implemented() final {
@@ -161,6 +188,13 @@ public:
     inline virtual bool implemented() final {
         return true;
     }
+    inline virtual void setAttached(bool attach) final {
+        e1->setAttached(attach);
+        e2->setAttached(attach);
+    }
+    inline virtual bool isAttached() final {
+        return (e1->isAttached() && e2->isAttached());
+    }
     virtual void report() final {
         Com::printF(update() ? Com::tHSpace : Com::tLSpace);
         Com::print('(');
@@ -208,6 +242,14 @@ public:
     }
     inline virtual bool implemented() final {
         return true;
+    }
+    inline virtual void setAttached(bool attach) final {
+        e1->setAttached(attach);
+        e2->setAttached(attach);
+        e3->setAttached(attach);
+    }
+    inline virtual bool isAttached() final {
+        return (e1->isAttached() && e2->isAttached() && e3->isAttached());
     }
     virtual void report() final {
         Com::printF(update() ? Com::tHSpace : Com::tLSpace);
@@ -260,6 +302,15 @@ public:
     }
     inline virtual bool implemented() final {
         return true;
+    }
+    inline virtual void setAttached(bool attach) final {
+        e1->setAttached(attach);
+        e2->setAttached(attach);
+        e3->setAttached(attach);
+        e4->setAttached(attach);
+    }
+    inline virtual bool isAttached() final {
+        return (e1->isAttached() && e2->isAttached() && e3->isAttached() && e4->isAttached());
     }
     virtual void report() final {
         Com::printF(update() ? Com::tHSpace : Com::tLSpace);

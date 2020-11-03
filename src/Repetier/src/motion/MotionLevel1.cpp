@@ -1746,7 +1746,7 @@ void Motion1::homeAxes(fast8_t axes) {
     GUI::popBusy();
 }
 
-EndstopDriver& Motion1::endstopFoxAxisDir(fast8_t axis, bool maxDir) {
+EndstopDriver& Motion1::endstopForAxisDir(fast8_t axis, bool maxDir) {
     if (maxDir) {
         switch (axis) {
         case X_AXIS:
@@ -1809,6 +1809,25 @@ EndstopDriver& Motion1::endstopFoxAxisDir(fast8_t axis, bool maxDir) {
     return endstopNone;
 }
 
+void Motion1::setHardwareEndstopsAttached(bool attach, EndstopDriver* specificDriver) {
+    attach = alwaysCheckEndstops ? true : attach;
+    if (specificDriver) {
+        specificDriver->setAttached(attach);
+    } else {
+        if (ZProbe) {
+            ZProbe->setAttached(attach);
+        }
+        FOR_ALL_AXES(i) {
+            if (Motion1::maxAxisEndstops[i]) {
+                Motion1::maxAxisEndstops[i]->setAttached(attach);
+            }
+            if (Motion1::minAxisEndstops[i]) {
+                Motion1::minAxisEndstops[i]->setAttached(attach);
+            }
+        }
+    }
+}
+
 bool Motion1::simpleHome(fast8_t axis) {
     if (homeDir[axis] == 0) { // nothing to do, just set to min
         setAxisHomed(axis, true);
@@ -1818,7 +1837,7 @@ bool Motion1::simpleHome(fast8_t axis) {
         return true;
     }
     bool ok = true;
-    EndstopDriver& eStop = endstopFoxAxisDir(axis, homeDir[axis] > 0);
+    EndstopDriver& eStop = endstopForAxisDir(axis, homeDir[axis] > 0);
     const float secureDistance = (maxPosOff[axis] - minPosOff[axis]) * 1.5f;
     const EndstopMode oldMode = endstopMode;
     const EndstopMode newMode = axis == Z_AXIS && ZProbe != nullptr && homeDir[Z_AXIS] < 0 ? EndstopMode::PROBING : EndstopMode::STOP_HIT_AXES;
@@ -1828,6 +1847,7 @@ bool Motion1::simpleHome(fast8_t axis) {
     FOR_ALL_AXES(i) {
         dest[i] = IGNORE_COORDINATE;
     }
+    setHardwareEndstopsAttached(true, &eStop);
     waitForEndOfMoves(); // defined starting condition
 
     // First test
@@ -1901,6 +1921,7 @@ bool Motion1::simpleHome(fast8_t axis) {
         }
     }
     endstopMode = EndstopMode::DISABLED;
+    setHardwareEndstopsAttached(false, &eStop);
     moveRelativeByOfficial(dest, homingFeedrate[axis], false); // also adds toolOffset!
     waitForEndOfMoves();
     currentPosition[axis] = curPos;
@@ -1998,6 +2019,7 @@ void Motion1::eepromHandle(bool firstImport) {
     EEPROM::handleFloat(eprStart + EPR_M1_PARK_Z, PSTR("Park position Z raise [mm]"), 2, parkPosition[Z_AXIS]);
 #endif
     EEPROM::handleByte(eprStart + EPR_M1_ALWAYS_CHECK_ENDSTOPS, PSTR("Always check endstops"), alwaysCheckEndstops);
+    Motion1::setHardwareEndstopsAttached((alwaysCheckEndstops || Printer::isHoming() || Printer::isZProbingActive())); // Probing/homing checks just in case.
     EEPROM::handleByte(eprStart + EPR_M1_VELOCITY_PROFILE, PSTR("Velocity Profile [0-2]"), Motion2::velocityProfileIndex);
     EEPROM::handleByte(eprStart + EPR_M1_AUTOLEVEL, PSTR("Auto level active [0-1]"), Motion1::autolevelActive);
 
