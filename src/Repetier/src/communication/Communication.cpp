@@ -416,6 +416,7 @@ FSTRINGVALUE(Com::tFileSelected, "File selected")
 FSTRINGVALUE(Com::tFileOpenFailed, "file.open failed")
 FSTRINGVALUE(Com::tSDPrintingByte, "SD printing byte ")
 FSTRINGVALUE(Com::tNotSDPrinting, "Not SD printing")
+FSTRINGVALUE(Com::tCurrentOpenFile, "Current file: ") // Compat with hosts that use M27 C
 FSTRINGVALUE(Com::tOpenFailedFile, "open failed, File: ")
 FSTRINGVALUE(Com::tWritingToFile, "Writing to file: ")
 FSTRINGVALUE(Com::tDoneSavingFile, "Done saving file.")
@@ -591,8 +592,9 @@ void Com::printFLN(FSTRINGPARAM(text), const char* msg) {
 
 void Com::printF(FSTRINGPARAM(ptr)) {
     char c;
-    while ((c = HAL::readFlashByte(ptr++)) != 0)
+    while ((c = HAL::readFlashByte(ptr++)) != 0) {
         GCodeSource::writeToAll(c);
+    }
 }
 
 void Com::printF(FSTRINGPARAM(text), const char* msg) {

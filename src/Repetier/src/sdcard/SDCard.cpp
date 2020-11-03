@@ -113,7 +113,7 @@ void SDCard::initsd() {
         }
         return;
     }
-    Com::printFLN(PSTR("SD card ok")); // Specific string needed for some hosts! 
+    Com::printFLN(PSTR("SD card ok")); // Specific string needed for some hosts!
     sdactive = true;
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED, true);
     HAL::pingWatchdog();
@@ -617,12 +617,21 @@ bool SDCard::selectFile(const char* filename, bool silent) {
     }
 }
 
-void SDCard::printStatus() {
-    if (sdactive) {
-        Com::printF(Com::tSDPrintingByte, sdpos);
-        Com::printFLN(Com::tSlash, filesize);
+void SDCard::printStatus(bool getFilename) {
+    if (getFilename) {
+        Com::printF(Com::tCurrentOpenFile);
+        if (sdactive && file.getName(tempLongFilename, sizeof(tempLongFilename))) {
+            Com::printFLN(tempLongFilename);
+        } else {
+            Com::printFLN(PSTR("(no file)"));
+        }
     } else {
-        Com::printFLN(Com::tNotSDPrinting);
+        if (sdactive && (sdmode == 1 || sdmode == 2)) {
+            Com::printF(Com::tSDPrintingByte, sdpos);
+            Com::printFLN(Com::tSlash, filesize);
+        } else {
+            Com::printFLN(Com::tNotSDPrinting);
+        }
     }
 }
 

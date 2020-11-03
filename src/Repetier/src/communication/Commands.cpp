@@ -123,12 +123,21 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     // Report temperatures every autoReportPeriodMS (default 1000ms), so we do not need to send M105
     if (Printer::isAutoreportTemp()) {
         millis_t now = HAL::timeInMilliseconds();
-        if (now - Printer::lastTempReport > Printer::autoReportPeriodMS) {
+        if (now - Printer::lastTempReport > Printer::autoTempReportPeriodMS) {
             Printer::lastTempReport = now;
             Commands::printTemperatures();
         }
     }
-
+#if SDSUPPORT
+    // Reports the sd file byte position every autoSDReportPeriodMS if set, and only if printing. 
+    if (Printer::isAutoreportSD() && sd.sdactive && (sd.sdmode == 1 || sd.sdmode == 2)) {
+        millis_t now = HAL::timeInMilliseconds();
+        if (now - Printer::lastSDReport > Printer::autoSDReportPeriodMS) {
+            Printer::lastSDReport = now;
+            sd.printStatus();
+        }
+    }
+#endif
     EVENT_TIMER_100MS;
     // Extruder::manageTemperatures();
     if (--counter500ms == 0) {
