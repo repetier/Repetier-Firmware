@@ -45,10 +45,12 @@
 #include <Wire.h>
 #endif
 
+#if (FEATURE_CONTROLLER != CONTROLLER_NONE)
 #define UI_SPI_SCK UI_DISPLAY_D4_PIN
 #define UI_SPI_MOSI UI_DISPLAY_ENABLE_PIN
 #define UI_SPI_CS UI_DISPLAY_RS_PIN
 #define UI_SPI_DC UI_DISPLAY_D5_PIN
+#endif
 
 /*=============================================*/
 
@@ -463,7 +465,7 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
     return 1;
 }
 
-#elif defined(__SAM3X8E__) || defined(STM32F1)
+#elif (defined(__SAM3X8E__) || defined(STM32F1)) && (FEATURE_CONTROLLER != CONTROLLER_NONE)
 inline void u8g2_spi_wait_short() {
     asm volatile("nop" ::); // 11.9ns
     asm volatile("nop" ::); // 11.9ns
@@ -571,7 +573,7 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
     constexpr ufast8_t filterShift = 8; // lowpass filter shift/average applied to overhead cycles
                                         // gathered between successive byte sends.
 
-    constexpr uint32_t clocksPerByte = 1600; // approx clock cycles for a byte + wait
+    constexpr uint32_t clocksPerByte = 1100; // approx clock cycles for a byte + wait
 
     constexpr ufast8_t itOvrheadMult = 16; // multiplier "strength" applied to our overhead cycles
                                            // before subtracting them from clocks per byte
