@@ -322,7 +322,8 @@ public:
     static bool simpleHome(fast8_t axis);
     static void correctBumpOffset(); // Adjust position to offset
     static PGM_P getAxisString(fast8_t axis);
-    static EndstopDriver& endstopFoxAxisDir(fast8_t axis, bool maxDir);
+    static EndstopDriver& endstopForAxisDir(fast8_t axis, bool maxDir);
+    static void setHardwareEndstopsAttached(bool attach, EndstopDriver* specificDriver = nullptr);
     static void resetTransformationMatrix(bool silent);
 #if LEVELING_METHOD > 0 || defined(DOXYGEN)
     //static void buildTransformationMatrix(float h1,float h2,float h3);
