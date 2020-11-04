@@ -53,10 +53,11 @@ void SDCard::automount() {
         }
     } else {
         if (!sdactive && sdmode != 100) {
-            UI_STATUS_UPD("SD Card inserted");
             mount();
-            if (sdmode != 100)                           // send message only if we have success
+            if (sdmode != 100) { // send message only if we have success
+                UI_STATUS_UPD("SD Card inserted");
                 Com::printFLN(PSTR("SD card inserted")); // Not translatable or host will not understand signal
+            }
 #if UI_DISPLAY_TYPE != NO_DISPLAY
             if (sdactive && !uid.isWizardActive()) { // Wizards have priority
                 Printer::setAutomount(true);
@@ -90,6 +91,7 @@ void SDCard::initsd() {
     if (!fat.begin(SDSS, SD_SCK_MHZ(constrain(SD_SPI_SPEED_MHZ, 1, 50)))) {
         Com::printFLN(Com::tSDInitFail);
         sdmode = 100; // prevent automount loop!
+        UI_STATUS_UPD("SD Card read error!");
         if (fat.card()->errorCode()) {
             Com::printFLN(PSTR(
                 "\nSD initialization failed.\n"
@@ -111,7 +113,7 @@ void SDCard::initsd() {
         }
         return;
     }
-    Com::printFLN(PSTR("Card successfully initialized."));
+    Com::printFLN(PSTR("SD card ok")); // Specific string needed for some hosts! 
     sdactive = true;
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED, true);
     HAL::pingWatchdog();
@@ -237,10 +239,12 @@ void SDCard::continuePrint(bool intern) {
 }
 
 void SDCard::stopPrint() {
-    if (!sd.sdactive)
+    if (!sd.sdactive) {
         return;
-    if (sdmode)
+    }
+    if (sdmode) {
         Com::printFLN(PSTR("SD print stopped by user."));
+    }
     sdmode = 21;
     Printer::setMenuMode(MENU_MODE_SD_PRINTING, false);
     Printer::setMenuMode(MENU_MODE_PAUSED, false);

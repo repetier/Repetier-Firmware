@@ -199,8 +199,9 @@ void __attribute__((weak)) MCode_25(GCode* com) {
 
 void __attribute__((weak)) MCode_26(GCode* com) {
 #if SDSUPPORT
-    if (com->hasS())
+    if (com->hasS()) {
         sd.setIndex(com->S);
+    }
 #endif
 }
 
@@ -212,8 +213,9 @@ void __attribute__((weak)) MCode_27(GCode* com) {
 
 void __attribute__((weak)) MCode_28(GCode* com) {
 #if SDSUPPORT
-    if (com->hasString())
+    if (com->hasString()) {
         sd.startWrite(com->text);
+    }
 #endif
 }
 
@@ -597,6 +599,11 @@ void __attribute__((weak)) MCode_115(GCode* com) {
     Com::cap(PSTR("PROGRESS:0"));
 #endif
     Com::cap(PSTR("AUTOREPORT_TEMP:1"));
+#if SDSUPPORT
+    Com::cap(PSTR("SDCARD:1"));
+#else
+    Com::cap(PSTR("SDCARD:0"));
+#endif
 #if ENABLED(HOST_RESCUE)
     Com::cap(PSTR("HOST_RESCUE:1"));
 #else
