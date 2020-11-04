@@ -126,6 +126,7 @@ public:
 #define PRINTER_FLAG2_JAMCONTROL_DISABLED 32
 #define PRINTER_FLAG2_HOMING 64
 #define PRINTER_FLAG2_ALL_E_MOTORS 128 // Set all e motors flag
+#define PRINTER_FLAG3_AUTOREPORT_SD 4  // auto reports current file byte pos
 #define PRINTER_FLAG3_PRINTING 8       // set explicitly with M530
 #define PRINTER_FLAG3_AUTOREPORT_TEMP 16
 #define PRINTER_FLAG3_SUPPORTS_STARTSTOP 32
@@ -265,8 +266,10 @@ public:
     static uint32_t interval;            ///< Last step duration in ticks.
     static uint32_t timer;               ///< used for acceleration/deceleration timing
     static uint32_t stepNumber;          ///< Step number in current move.
-    static millis_t lastTempReport;      ///< Time of last temperature report for autoreport temperatures
-    static millis_t autoReportPeriodMS;  ///< Configurable delay between autoreports in ms. Default 1000ms.
+    static millis_t lastTempReport;      ///< Time of last temperature report for autoreporting temperatures
+    static millis_t autoTempReportPeriodMS;  ///< Configurable delay between autoreports in ms. Default 1000ms.
+    static millis_t lastSDReport;        ///< Time of last SD read position report for autoreporting SD position
+    static millis_t autoSDReportPeriodMS;///< Configurable delay between SD autoreports in ms. Default off. 
     static int32_t printingTime;         ///< Printing time in seconds
     static float extrudeMultiplyError;   ///< Accumulated error during extrusion
     static float extrusionFactor;        ///< Extrusion multiply factor
@@ -409,6 +412,14 @@ public:
 
     static INLINE void setAutoreportTemp(uint8_t b) {
         flag3 = (b ? flag3 | PRINTER_FLAG3_AUTOREPORT_TEMP : flag3 & ~PRINTER_FLAG3_AUTOREPORT_TEMP);
+    }
+
+    static INLINE uint8_t isAutoreportSD() {
+        return flag3 & PRINTER_FLAG3_AUTOREPORT_SD;
+    }
+
+    static INLINE void setAutoreportSD(uint8_t b) {
+        flag3 = (b ? flag3 | PRINTER_FLAG3_AUTOREPORT_SD : flag3 & ~PRINTER_FLAG3_AUTOREPORT_SD);
     }
 
     static INLINE uint8_t isAllKilled() {

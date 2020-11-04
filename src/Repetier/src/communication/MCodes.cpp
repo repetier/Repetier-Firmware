@@ -207,7 +207,15 @@ void __attribute__((weak)) MCode_26(GCode* com) {
 
 void __attribute__((weak)) MCode_27(GCode* com) {
 #if SDSUPPORT
-    sd.printStatus();
+    if (com->hasP() || com->hasS()) {
+        Printer::setAutoreportSD((com->getS(0) || com->getP(0)));
+        millis_t period = constrain((com->getS(0) * 1000u) + com->getP(0), 0, 60000);
+        Printer::autoSDReportPeriodMS = (period <= 100) ? 0 : period;
+        // Can't autoreport faster than 100ms, just set to 0 to use periodical's 100ms tick.
+    } else {
+        Printer::lastSDReport = HAL::timeInMilliseconds();
+        sd.printStatus(com->hasC());
+    }
 #endif
 }
 
@@ -601,8 +609,10 @@ void __attribute__((weak)) MCode_115(GCode* com) {
     Com::cap(PSTR("AUTOREPORT_TEMP:1"));
 #if SDSUPPORT
     Com::cap(PSTR("SDCARD:1"));
+    Com::cap(PSTR("AUTOREPORT_SD_STATUS:1"));
 #else
     Com::cap(PSTR("SDCARD:0"));
+    Com::cap(PSTR("AUTOREPORT_SD_STATUS:0"));
 #endif
 #if ENABLED(HOST_RESCUE)
     Com::cap(PSTR("HOST_RESCUE:1"));
@@ -786,16 +796,16 @@ void __attribute__((weak)) MCode_141(GCode* com) {
     }
 #endif
 }
-
 void __attribute__((weak)) MCode_155(GCode* com) {
-    Printer::setAutoreportTemp((com->hasS() && com->S != 0) || !com->hasS());
-    Printer::lastTempReport = HAL::timeInMilliseconds();
-    if (com->hasP()) {
-        millis_t period = constrain(com->P, 0, 10000);
-        Printer::autoReportPeriodMS = (period <= 100) ? 0 : period;
+    if (com->hasP() || com->hasS()) {
+        Printer::setAutoreportTemp((com->getS(0) || com->getP(0)));
+        Printer::lastTempReport = HAL::timeInMilliseconds();
+        millis_t period = constrain((com->getS(0) * 1000u) + com->getP(0), 0, 60000);
+        Printer::autoTempReportPeriodMS = (period <= 100) ? 0 : period;
         // Can't autoreport faster than 100ms, just set to 0 to use periodical's 100ms tick.
-    } else { // Reset period to 1000ms if P is omitted.
-        Printer::autoReportPeriodMS = 1000;
+    } else { // Reset period to 1000ms if P and S are omitted.
+        Printer::setAutoreportTemp(true);
+        Printer::autoTempReportPeriodMS = 1000;
     }
 }
 

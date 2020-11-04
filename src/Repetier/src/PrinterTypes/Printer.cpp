@@ -62,8 +62,12 @@ int Printer::currentLayer = 0;
 int Printer::maxLayer = -1;       // -1 = unknown
 char Printer::printName[21] = ""; // max. 20 chars + 0
 float Printer::progress = 0;
+
 millis_t Printer::lastTempReport = 0;
-millis_t Printer::autoReportPeriodMS = 1000;
+millis_t Printer::autoTempReportPeriodMS = 1000;
+millis_t Printer::lastSDReport = 0;
+millis_t Printer::autoSDReportPeriodMS = 0;
+
 int32_t Printer::printingTime = 0;
 
 uint32_t Printer::interval = 30000;      ///< Last step duration in ticks.

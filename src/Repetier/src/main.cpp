@@ -91,8 +91,9 @@ Custom M Codes
 - M23  - Select SD file (M23 filename.g)
 - M24  - Start/resume SD print
 - M25  - Pause SD print
-- M26  - Set SD position in bytes (M26 S12345)
-- M27  - Report SD print status
+- M26  - Set SD position in bytes (M26 S12345) 
+- M27 C0 S<seconds/off> P<milliseconds/off> - Report SD print status. 
+        Set S<sec> P<ms> to enable autoreporting while printing, set P or S to 0 to disable. Set C without P or S to report the current open filename.
 - M28  - Start SD write (M28 filename.g)
 - M29  - Stop SD write
 - M30 <filename> - Delete file on sd card
@@ -120,7 +121,8 @@ Custom M Codes
 - M118 <message> - Write message to host
 - M119 - Report endstop status
 - M140 S<temp> H1 O<offset> F1 - Set bed target temp, F1 makes a beep when temperature is reached the first time
-- M155 S<1/0> P<milliseconds> Enable/disable auto report temperatures. When enabled firmware will emit temperatures every second by default. Set P<ms> to change the autoreport frequency (100ms - 10s), resets to 1000ms if P is omitted.
+- M155 S<seconds/off> P<milliseconds/off> - Enable/disable autoreport temperatures. 
+        Temperatures reported every second by default. Set S<sec> P<ms> to change the frequency (100ms - 60s), resets to 1000ms if P and S are omitted. Set P or S to 0 to disable autoreporting.
 - M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive
 - M164 S<virtNum> P<0 = dont store eeprom,1 = store to eeprom> - Store weights as virtual extruder S
 - M170 B<bedtemp> T<extruderid> S<extrudertemp> L0 - Set preset temperatures for extruder (T+S) or bed (B) or list settings (L0)
