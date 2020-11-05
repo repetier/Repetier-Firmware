@@ -226,6 +226,10 @@ enum class BootReason {
 #error The minimum NUM_AXES allowed is 4!
 #endif
 
+#ifndef ALWAYS_CHECK_ENDSTOPS
+#define ALWAYS_CHECK_ENDSTOPS 0
+#endif
+
 #ifndef WAITING_IDENTIFIER
 #define WAITING_IDENTIFIER "wait"
 #endif

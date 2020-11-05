@@ -16,9 +16,6 @@
 
 */
 
-#ifndef ALWAYS_CHECK_ENDSTOPS
-#define ALWAYS_CHECK_ENDSTOPS 0
-#endif
 
 class EndstopDriver {
 public:
