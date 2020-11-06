@@ -136,7 +136,7 @@ Custom M Codes
 - M206 T[type] P[pos] Sint(long] [Xfloat] - Set EEPROM value
 - M207 X<XY jerk> Z<Z Jerk> E<ExtruderJerk> - Changes current jerk values, but do not store them in eeprom.
 - M209 S<0/1> - Enable/disable auto retraction
-- M218 T<toolid> X<offsetX> Y<offsetY> Z<offsetZ> - Store new tool offsets
+- M218 T<toolid> X<offsetX> Y<offsetY> Z<offsetZ> - Store new tool offsets. Without XYZ all offsets are shown
 - M220 S<Feedrate multiplier in percent> - Increase/decrease given feedrate
 - M221 S<Extrusion flow multiplier in percent> - Increase/decrease given flow rate
 - M226 P<pin> S<state 0/1> - Wait for pin getting state S. Add X0 to init as input without pull-up and X1 for input with pull-up.

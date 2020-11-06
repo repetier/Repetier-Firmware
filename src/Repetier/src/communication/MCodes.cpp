@@ -1095,6 +1095,15 @@ void __attribute__((weak)) MCode_218(GCode* com) {
     }
     if (!com->hasNoXYZ()) {
         EEPROM::markChanged();
+    } else {
+        Com::printF(PSTR("Hotend offsets:"));
+        for (int i = 0; i < NUM_TOOLS; i++) {
+            tool = Tool::getTool(i);
+            Com::printF(Com::tSpace, tool->getOffsetX(), 2);
+            Com::printF(Com::tComma, tool->getOffsetY(), 2);
+            Com::printF(Com::tComma, tool->getOffsetZ(), 3);
+        }
+        Com::println();
     }
 }
 
