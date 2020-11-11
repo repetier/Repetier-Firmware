@@ -49,7 +49,7 @@ class GCodeSource {
 
 public:
     static GCodeSource* activeSource;
-    static GCodeSource* usbHostSource; 
+    static GCodeSource* usbHostSource;
     static void registerSource(GCodeSource* newSource);
     static void removeSource(GCodeSource* delSource);
     static void rotateSource();           ///< Move active to next source
@@ -577,6 +577,10 @@ public:
         GCodeSource::writeToAll('\r');
         GCodeSource::writeToAll('\n');
     }
+
+    template <typename T>
+    static void printBinaryFLN(FSTRINGPARAM(text), T n, bool grouping = false);
+
     static bool writeToAll;
 #if FEATURE_CONTROLLER != NO_CONTROLLER
     static const char* translatedF(int textId);
@@ -586,6 +590,19 @@ public:
 protected:
 private:
 };
+
+template <typename T>
+void Com::printBinaryFLN(FSTRINGPARAM(text), T n, bool grouping) {
+    printF(text);
+    size_t i = (sizeof(n) * 8u) - 1u; 
+    do {
+        print(((1u << i) & n) ? '1' : '0');
+        if (grouping && i && !(i % 8u)) {
+            print(' ');
+        }
+    } while (i--);
+    println();
+}
 
 #ifdef DEBUG
 #define SHOW(x) \
