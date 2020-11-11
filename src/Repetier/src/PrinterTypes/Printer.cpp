@@ -476,17 +476,27 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
         p = convertToMM(com->E);
         HeatManager* heater = Tool::getActiveTool()->getHeater();
         if (relativeCoordinateMode || relativeExtruderCoordinateMode) {
-            if (fabs(com->E) * extrusionFactor > EXTRUDE_MAXLENGTH) {
+            if (fabsf(com->E) * extrusionFactor > EXTRUDE_MAXLENGTH) {
                 Com::printWarningF(PSTR("Max. extrusion distance per move exceeded - ignoring move."));
-                p = 0;
+                p = 0.0f;
             }
             coords[E_AXIS] = Motion1::currentPosition[E_AXIS] + p;
         } else {
-            if (fabs(p - Motion1::currentPosition[E_AXIS]) * extrusionFactor > EXTRUDE_MAXLENGTH) {
+            if (fabsf(p - Motion1::currentPosition[E_AXIS]) * extrusionFactor > EXTRUDE_MAXLENGTH) {
                 p = Motion1::currentPosition[E_AXIS];
             }
             coords[E_AXIS] = p;
         }
+#if FEATURE_RETRACTION
+        if (com->hasNoXYZ() && isAutoretract()) { // Lone E moves.
+            if (relativeCoordinateMode || relativeExtruderCoordinateMode) {
+                Tool::getActiveTool()->retract(com->E < 0.0f, false);
+            } else {
+                Tool::getActiveTool()->retract(p < Motion1::currentPosition[E_AXIS], false);
+            }
+            return;
+        }
+#endif
         secondaryMove = Tool::getActiveTool()->isSecondaryMove(com->hasG() && com->G == 0, true);
     } else {
         coords[E_AXIS] = Motion1::currentPosition[E_AXIS];

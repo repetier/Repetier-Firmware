@@ -433,6 +433,29 @@ extern ServoInterface* servos[];
 #define EXTRUDER_JAM_CONTROL 0
 #endif
 
+// Firmware retraction settings 
+#ifndef RETRACTION_LENGTH 
+#define RETRACTION_LENGTH 0.0
+#endif
+#ifndef RETRACTION_SPEED 
+#define RETRACTION_SPEED 0
+#endif
+#ifndef RETRACTION_UNDO_SPEED 
+#define RETRACTION_UNDO_SPEED 0
+#endif
+#ifndef RETRACTION_Z_LIFT 
+#define RETRACTION_Z_LIFT 0.0
+#endif
+#ifndef RETRACTION_UNDO_EXTRA_LENGTH 
+#define RETRACTION_UNDO_EXTRA_LENGTH 0.0
+#endif
+#ifndef RETRACTION_UNDO_EXTRA_LONG_LENGTH 
+#define RETRACTION_UNDO_EXTRA_LONG_LENGTH 0.0
+#endif
+#ifndef RETRACTION_LONG_LENGTH 
+#define RETRACTION_LONG_LENGTH 0.0
+#endif
+
 #ifndef DEBUG_FREE_MEMORY
 #define DEBUG_MEMORY
 #else
