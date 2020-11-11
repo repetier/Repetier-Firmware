@@ -139,6 +139,10 @@ void ToolExtruder::retract(bool backwards, bool longRetract) {
     }
 
     float prevSpeed = Printer::feedrate;
+    if (Motion1::retractZLift && Motion1::isAxisHomed(Z_AXIS)) {
+        float offset = (backwards ? -Motion1::retractZLift : 0.0f);
+        Motion1::setToolOffset(-getOffsetX(), -getOffsetY(), -(getOffsetZ() + offset));
+    }
     float amount = 0.0f;
     if (!longRetract) {
         amount = backwards ? -Motion1::retractLength
@@ -148,25 +152,19 @@ void ToolExtruder::retract(bool backwards, bool longRetract) {
                            : (Motion1::retractLongLength + Motion1::retractUndoExtraLongLength);
     }
 
-    float coords[NUM_AXES] = { 0.0f };
-    Motion1::copyCurrentOfficial(coords);
-    if (Motion1::retractZLift) {
-        if (Motion1::homeDir[Z_AXIS] > 0) {
-            coords[Z_AXIS] -= (backwards ? Motion1::retractZLift : -Motion1::retractZLift);
-        } else {
-            coords[Z_AXIS] += (backwards ? Motion1::retractZLift : -Motion1::retractZLift);
-        }
-        Motion1::moveByOfficial(coords, Motion1::maxFeedrate[Z_AXIS], false);
-        coords[Z_AXIS] = IGNORE_COORDINATE;
-    }
+    amount *= Printer::extrusionFactor;
 
     float speed = Motion1::retractSpeed;
     if (backwards && Motion1::retractUndoSpeed) {
         speed = Motion1::retractUndoSpeed;
     }
 
-    coords[E_AXIS] = Motion1::currentPosition[E_AXIS] + amount;
-    Motion1::moveByOfficial(coords, speed, false);
+    float prevE = Motion1::currentPositionTransformed[E_AXIS];
+    Motion1::setTmpPositionXYZE(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, amount);
+    Motion1::moveRelativeByPrinter(Motion1::tmpPosition, speed, false);
+    Motion1::currentPositionTransformed[E_AXIS] = prevE;
+    Motion1::updatePositionsFromCurrentTransformed();
+
     Printer::feedrate = prevSpeed;
     Motion1::retracted = backwards;
 }

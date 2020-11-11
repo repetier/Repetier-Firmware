@@ -1631,9 +1631,6 @@ void Motion1::homeAxes(fast8_t axes) {
     // We measure in printer coordinates, so deactivate all corrections
     bool isAL = isAutolevelActive();
     setAutolevelActive(false, true);
-#if FEATURE_RETRACTION
-    Motion1::retracted = false;
-#endif
     bool bcActive = Leveling::isDistortionEnabled();
     Leveling::setDistortionEnabled(false);
     updatePositionsFromCurrent();

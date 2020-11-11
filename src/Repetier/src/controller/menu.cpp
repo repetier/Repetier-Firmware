@@ -206,7 +206,7 @@ void __attribute__((weak)) menuConfigAxis(GUIAction action, void* data) {
 void __attribute__((weak)) menuRetractLength(GUIAction action, void* data) {
     GUI::flashToString(GUI::tmpString, PSTR("Retract Length:"));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::retractLength, 2);
-    if (GUI::handleFloatValueAction(action, v, 0.0f, 20.0f, 0.01f)) {
+    if (GUI::handleFloatValueAction(action, v, 0.0f, 20.0f, 0.05f)) {
         Motion1::retractLength = v;
     }
 }
@@ -227,14 +227,14 @@ void __attribute__((weak)) menuRetractUndoSpeed(GUIAction action, void* data) {
 void __attribute__((weak)) menuRetractZLift(GUIAction action, void* data) {
     GUI::flashToString(GUI::tmpString, PSTR("Retract zLift:"));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::retractZLift, 2);
-    if (GUI::handleFloatValueAction(action, v, 0.0f, 5.0f, 0.01f)) {
+    if (GUI::handleFloatValueAction(action, v, 0.0f, 5.0f, 0.05f)) {
         Motion1::retractZLift = v;
     }
 }
 void __attribute__((weak)) menuRetractUndoExtraLength(GUIAction action, void* data) {
     GUI::flashToString(GUI::tmpString, PSTR("Extra Unretract:"));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::retractUndoExtraLength, 2);
-    if (GUI::handleFloatValueAction(action, v, -20.0f, 20.0f, 0.01f)) {
+    if (GUI::handleFloatValueAction(action, v, -20.0f, 20.0f, 0.05f)) {
         Motion1::retractUndoExtraLength = v; // Can be negative
     }
 }
@@ -243,14 +243,14 @@ void __attribute__((weak)) menuRetractUndoExtraLength(GUIAction action, void* da
 void __attribute__((weak)) menuRetractLongLength(GUIAction action, void* data) {
     GUI::flashToString(GUI::tmpString, PSTR("Long Retract Length:"));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::retractLongLength, 2);
-    if (GUI::handleFloatValueAction(action, v, 0.0f, 20.0f, 0.01f)) {
+    if (GUI::handleFloatValueAction(action, v, 0.0f, 20.0f, 0.05f)) {
         Motion1::retractLongLength = v;
     }
 }
 void __attribute__((weak)) menuRetractUndoExtraLongLength(GUIAction action, void* data) {
     GUI::flashToString(GUI::tmpString, PSTR("Long Extra Unretract:"));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::retractUndoExtraLongLength, 2);
-    if (GUI::handleFloatValueAction(action, v, -20.0f, 20.0f, 0.01f)) {
+    if (GUI::handleFloatValueAction(action, v, -20.0f, 20.0f, 0.05f)) {
         Motion1::retractUndoExtraLongLength = v; // Can be negative
     }
 }
@@ -262,7 +262,7 @@ void __attribute__((weak)) menuConfigRetraction(GUIAction action, void* data) {
     GUI::menuBack(action);
 
     if (!Motion1::retractLength) {
-        GUI::menuSelectableP(action, PSTR("Length: Off"), menuRetractLength, nullptr, GUIPageType::FIXED_CONTENT);
+        GUI::menuSelectableP(action, PSTR("Length:Off"), menuRetractLength, nullptr, GUIPageType::FIXED_CONTENT);
     } else {
         GUI::menuFloatP(action, PSTR("Length:"), Motion1::retractLength, 2, menuRetractLength, nullptr, GUIPageType::FIXED_CONTENT);
 
@@ -270,7 +270,7 @@ void __attribute__((weak)) menuConfigRetraction(GUIAction action, void* data) {
 
         GUI::menuFloatP(action, PSTR("Undo Speed:"), Motion1::retractUndoSpeed, 2, menuRetractUndoSpeed, nullptr, GUIPageType::FIXED_CONTENT);
 
-        GUI::menuFloatP(action, PSTR("Extra Length:"), Motion1::retractUndoExtraLength, 2, menuRetractUndoExtraLength, nullptr, GUIPageType::FIXED_CONTENT);
+        GUI::menuFloatP(action, PSTR("Extra Undo:"), Motion1::retractUndoExtraLength, 2, menuRetractUndoExtraLength, nullptr, GUIPageType::FIXED_CONTENT);
 
         GUI::menuFloatP(action, PSTR("ZLift:"), Motion1::retractZLift, 2, menuRetractZLift, nullptr, GUIPageType::FIXED_CONTENT);
 
@@ -279,7 +279,7 @@ void __attribute__((weak)) menuConfigRetraction(GUIAction action, void* data) {
 #if NUM_TOOLS > 1
         GUI::menuFloatP(action, PSTR("Long Length:"), Motion1::retractLongLength, 2, menuRetractLongLength, nullptr, GUIPageType::FIXED_CONTENT);
 
-        GUI::menuFloatP(action, PSTR("Extra Long Length:"), Motion1::retractUndoExtraLongLength, 2, menuRetractUndoExtraLongLength, nullptr, GUIPageType::FIXED_CONTENT);
+        GUI::menuFloatP(action, PSTR("Extra Long Undo:"), Motion1::retractUndoExtraLongLength, 2, menuRetractUndoExtraLongLength, nullptr, GUIPageType::FIXED_CONTENT);
 #endif
     }
     GUI::menuEnd(action);
