@@ -38,6 +38,13 @@ void __attribute__((weak)) GCode_0_1(GCode* com) {
     }
     Tool::getActiveTool()->extractG1(com);
     Printer::setDestinationStepsFromGCode(com); // For X Y Z E F
+    
+#if FEATURE_RETRACTION
+    if (com->hasZ()) { // Reset any retraction state if the Z changes.
+        Motion1::retracted = false;
+    }
+#endif
+
 #if defined(G0_FEEDRATE) && G0_FEEDRATE > 0
     if (com->G == 0 && G0_FEEDRATE > 0) {
         // if (!(com->hasF() && com->F > 0.1)) {

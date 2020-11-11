@@ -192,7 +192,23 @@ public:
 #define EPR_M1_PARK_Z EPR_M1_AXIS_COMP_END + 8
 #define EPR_M1_VELOCITY_PROFILE EPR_M1_AXIS_COMP_END + 12
 #define EPR_M1_AUTOLEVEL EPR_M1_AXIS_COMP_END + 13
-#define EPR_M1_TOTAL EPR_M1_AXIS_COMP_END + 14
+
+
+#if FEATURE_RETRACTION
+#define EPR_M1_AUTORETRACT                    EPR_M1_AXIS_COMP_END                  + 14
+#define EPR_M1_RETRACT_LENGTH                 EPR_M1_AUTORETRACT                    + 1
+#define EPR_M1_RETRACT_LONG_LENGTH            EPR_M1_RETRACT_LENGTH                 + 4
+#define EPR_M1_RETRACT_SPEED                  EPR_M1_RETRACT_LONG_LENGTH            + 4
+#define EPR_M1_RETRACT_ZLIFT                  EPR_M1_RETRACT_SPEED                  + 4
+#define EPR_M1_RETRACT_UNDO_SPEED             EPR_M1_RETRACT_ZLIFT                  + 4
+#define EPR_M1_RETRACT_UNDO_EXTRA_LENGTH      EPR_M1_RETRACT_UNDO_SPEED             + 4
+#define EPR_M1_RETRACT_UNDO_EXTRA_LONG_LENGTH EPR_M1_RETRACT_UNDO_EXTRA_LENGTH      + 4
+#define EPR_M1_RETRACT_END                    EPR_M1_RETRACT_UNDO_EXTRA_LONG_LENGTH + 4
+#else 
+#define EPR_M1_RETRACT_END EPR_M1_AXIS_COMP_END + 14
+#endif
+
+#define EPR_M1_TOTAL EPR_M1_RETRACT_END
 
 class Motion2;
 class EndstopDriver;
@@ -239,6 +255,16 @@ public:
     static float totalBabystepZ;         // Sum since homing for z helper functions
 #if FEATURE_AXISCOMP
     static float axisCompTanXY, axisCompTanXZ, axisCompTanYZ;
+#endif
+#if FEATURE_RETRACTION
+    static bool retracted;
+    static float retractLength;
+    static float retractLongLength;
+    static float retractSpeed;
+    static float retractZLift;
+    static float retractUndoSpeed;
+    static float retractUndoExtraLength;
+    static float retractUndoExtraLongLength; 
 #endif
     static bool wasLastSecondary; ///< true if last move had secondary flag
     static fast8_t homeDir[NUM_AXES];

@@ -201,6 +201,94 @@ void __attribute__((weak)) menuConfigAxis(GUIAction action, void* data) {
     GUI::menuEnd(action);
 }
 
+// RETRACT MENUS
+
+void __attribute__((weak)) menuRetractLength(GUIAction action, void* data) {
+    GUI::flashToString(GUI::tmpString, PSTR("Retract Length:"));
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::retractLength, 2);
+    if (GUI::handleFloatValueAction(action, v, 0.0f, 20.0f, 0.01f)) {
+        Motion1::retractLength = v;
+    }
+}
+void __attribute__((weak)) menuRetractSpeed(GUIAction action, void* data) {
+    GUI::flashToString(GUI::tmpString, PSTR("Retract Speed:"));
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS, Motion1::retractSpeed, 2);
+    if (GUI::handleFloatValueAction(action, v, 0.1f, 100.0f, 2.5f)) {
+        Motion1::retractSpeed = v;
+    }
+}
+void __attribute__((weak)) menuRetractUndoSpeed(GUIAction action, void* data) {
+    GUI::flashToString(GUI::tmpString, PSTR("Unretract Speed:"));
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS, Motion1::retractUndoSpeed, 2);
+    if (GUI::handleFloatValueAction(action, v, 0.1f, 100.0f, 2.5f)) {
+        Motion1::retractUndoSpeed = v;
+    }
+}
+void __attribute__((weak)) menuRetractZLift(GUIAction action, void* data) {
+    GUI::flashToString(GUI::tmpString, PSTR("Retract zLift:"));
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::retractZLift, 2);
+    if (GUI::handleFloatValueAction(action, v, 0.0f, 5.0f, 0.01f)) {
+        Motion1::retractZLift = v;
+    }
+}
+void __attribute__((weak)) menuRetractUndoExtraLength(GUIAction action, void* data) {
+    GUI::flashToString(GUI::tmpString, PSTR("Extra Unretract:"));
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::retractUndoExtraLength, 2);
+    if (GUI::handleFloatValueAction(action, v, -20.0f, 20.0f, 0.01f)) {
+        Motion1::retractUndoExtraLength = v; // Can be negative
+    }
+}
+
+// FOR TOOLS
+void __attribute__((weak)) menuRetractLongLength(GUIAction action, void* data) {
+    GUI::flashToString(GUI::tmpString, PSTR("Long Retract Length:"));
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::retractLongLength, 2);
+    if (GUI::handleFloatValueAction(action, v, 0.0f, 20.0f, 0.01f)) {
+        Motion1::retractLongLength = v;
+    }
+}
+void __attribute__((weak)) menuRetractUndoExtraLongLength(GUIAction action, void* data) {
+    GUI::flashToString(GUI::tmpString, PSTR("Long Extra Unretract:"));
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::retractUndoExtraLongLength, 2);
+    if (GUI::handleFloatValueAction(action, v, -20.0f, 20.0f, 0.01f)) {
+        Motion1::retractUndoExtraLongLength = v; // Can be negative
+    }
+}
+
+void __attribute__((weak)) menuConfigRetraction(GUIAction action, void* data) {
+#if FEATURE_RETRACTION
+    GUI::menuStart(action);
+    GUI::menuTextP(action, PSTR("= Config Retractions ="), true);
+    GUI::menuBack(action);
+
+    if (!Motion1::retractLength) {
+        GUI::menuSelectableP(action, PSTR("Length: Off"), menuRetractLength, nullptr, GUIPageType::FIXED_CONTENT);
+    } else {
+        GUI::menuFloatP(action, PSTR("Length:"), Motion1::retractLength, 2, menuRetractLength, nullptr, GUIPageType::FIXED_CONTENT);
+
+        GUI::menuFloatP(action, PSTR("Speed:"), Motion1::retractSpeed, 2, menuRetractSpeed, nullptr, GUIPageType::FIXED_CONTENT);
+
+        GUI::menuFloatP(action, PSTR("Undo Speed:"), Motion1::retractUndoSpeed, 2, menuRetractUndoSpeed, nullptr, GUIPageType::FIXED_CONTENT);
+
+        GUI::menuFloatP(action, PSTR("Extra Length:"), Motion1::retractUndoExtraLength, 2, menuRetractUndoExtraLength, nullptr, GUIPageType::FIXED_CONTENT);
+
+        GUI::menuFloatP(action, PSTR("ZLift:"), Motion1::retractZLift, 2, menuRetractZLift, nullptr, GUIPageType::FIXED_CONTENT);
+
+        GUI::menuOnOffP(action, PSTR("Autoretract:"), Printer::isAutoretract(), directAction, reinterpret_cast<void*>(GUI_DIRECT_ACTION_TOGGLE_AUTORETRACTIONS), GUIPageType::ACTION);
+
+#if NUM_TOOLS > 1
+        GUI::menuFloatP(action, PSTR("Long Length:"), Motion1::retractLongLength, 2, menuRetractLongLength, nullptr, GUIPageType::FIXED_CONTENT);
+
+        GUI::menuFloatP(action, PSTR("Extra Long Length:"), Motion1::retractUndoExtraLongLength, 2, menuRetractUndoExtraLongLength, nullptr, GUIPageType::FIXED_CONTENT);
+#endif
+    }
+    GUI::menuEnd(action);
+#endif
+}
+
+// END RETRACT MENUS
+
+// PROBE MENUS
 void __attribute__((weak)) menuProbeSpeed(GUIAction action, void* data) {
     GUI::flashToString(GUI::tmpString, PSTR("Probing Speed:"));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS, ZProbeHandler::getSpeed(), 1);
@@ -810,6 +898,9 @@ void __attribute__((weak)) menuConfig(GUIAction action, void* data) {
     }
 #if Z_PROBE_TYPE != Z_PROBE_TYPE_NONE
     GUI::menuSelectableP(action, PSTR("Z-Probe"), menuConfigProbe, nullptr, GUIPageType::MENU);
+#endif
+#if FEATURE_RETRACTION
+    GUI::menuSelectableP(action, PSTR("Retraction"), menuConfigRetraction, nullptr, GUIPageType::MENU);
 #endif
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_GUI_CONFIG

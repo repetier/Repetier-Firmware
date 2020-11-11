@@ -819,14 +819,13 @@ void Printer::showConfiguration() {
     Com::config(PSTR("JerkZ:"), Motion1::maxYank[Z_AXIS]);
 #endif
 #if FEATURE_RETRACTION
-    // TODO: Report retraction
-    /* Com::config(PSTR("RetractionLength:"), EEPROM_FLOAT(RETRACTION_LENGTH));
-    Com::config(PSTR("RetractionLongLength:"), EEPROM_FLOAT(RETRACTION_LONG_LENGTH));
-    Com::config(PSTR("RetractionSpeed:"), EEPROM_FLOAT(RETRACTION_SPEED));
-    Com::config(PSTR("RetractionZLift:"), EEPROM_FLOAT(RETRACTION_Z_LIFT));
-    Com::config(PSTR("RetractionUndoExtraLength:"), EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LENGTH));
-    Com::config(PSTR("RetractionUndoExtraLongLength:"), EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LONG_LENGTH));
-    Com::config(PSTR("RetractionUndoSpeed:"), EEPROM_FLOAT(RETRACTION_UNDO_SPEED));*/
+    Com::config(PSTR("RetractionLength:"), Motion1::retractLength);
+    Com::config(PSTR("RetractionLongLength:"), Motion1::retractLongLength);
+    Com::config(PSTR("RetractionSpeed:"), Motion1::retractSpeed);
+    Com::config(PSTR("RetractionZLift:"), Motion1::retractZLift);
+    Com::config(PSTR("RetractionUndoExtraLength:"), Motion1::retractUndoExtraLength);
+    Com::config(PSTR("RetractionUndoExtraLongLength:"), Motion1::retractUndoExtraLongLength);
+    Com::config(PSTR("RetractionUndoSpeed:"), Motion1::retractUndoSpeed);
 #endif // FEATURE_RETRACTION
     Com::config(PSTR("XMin:"), Motion1::minPos[X_AXIS]);
     Com::config(PSTR("YMin:"), Motion1::minPos[Y_AXIS]);

@@ -126,6 +126,52 @@ void ToolExtruder::directionMotor(bool dir) {
     stepper->dir(dir);
 }
 
+void ToolExtruder::retract(bool backwards, bool longRetract) {
+    if (!Motion1::retractSpeed
+        || (!Motion1::retractLength && !longRetract)
+        || (!Motion1::retractLongLength && longRetract)) {
+        // invalid settings
+        return;
+    }
+
+    if ((Motion1::retracted && backwards) || (!Motion1::retracted && !backwards)) {
+        return;
+    }
+
+    float prevSpeed = Printer::feedrate;
+    float amount = 0.0f;
+    if (!longRetract) {
+        amount = backwards ? -Motion1::retractLength
+                           : (Motion1::retractLength + Motion1::retractUndoExtraLength);
+    } else {
+        amount = backwards ? -Motion1::retractLongLength
+                           : (Motion1::retractLongLength + Motion1::retractUndoExtraLongLength);
+    }
+
+    float coords[NUM_AXES] = { 0.0f };
+    Motion1::copyCurrentOfficial(coords);
+    if (Motion1::retractZLift) {
+        if (Motion1::homeDir[Z_AXIS] > 0) {
+            coords[Z_AXIS] -= (backwards ? Motion1::retractZLift : -Motion1::retractZLift);
+        } else {
+            coords[Z_AXIS] += (backwards ? Motion1::retractZLift : -Motion1::retractZLift);
+        }
+        Motion1::moveByOfficial(coords, Motion1::maxFeedrate[Z_AXIS], false);
+        coords[Z_AXIS] = IGNORE_COORDINATE;
+    }
+
+    float speed = Motion1::retractSpeed;
+    if (backwards && Motion1::retractUndoSpeed) {
+        speed = Motion1::retractUndoSpeed;
+    }
+
+    coords[E_AXIS] = Motion1::currentPosition[E_AXIS] + amount;
+    Motion1::moveByOfficial(coords, speed, false);
+    Printer::feedrate = prevSpeed;
+    Motion1::retracted = backwards;
+}
+
+
 // ------------ JamDetectorHW ------------
 
 template <class inputPin, class ObserverType>

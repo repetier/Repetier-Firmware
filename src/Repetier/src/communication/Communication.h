@@ -462,10 +462,10 @@ public:
 #if FEATURE_RETRACTION
     FSTRINGVAR(tEPRAutoretractEnabled)
     FSTRINGVAR(tEPRRetractionLength)
-    FSTRINGVAR(tEPRRetractionLongLength)
     FSTRINGVAR(tEPRRetractionSpeed)
     FSTRINGVAR(tEPRRetractionZLift)
     FSTRINGVAR(tEPRRetractionUndoExtraLength)
+    FSTRINGVAR(tEPRRetractionLongLength)
     FSTRINGVAR(tEPRRetractionUndoExtraLongLength)
     FSTRINGVAR(tEPRRetractionUndoSpeed)
 #endif
