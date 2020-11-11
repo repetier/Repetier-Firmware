@@ -586,10 +586,10 @@ void Commands::processMCode(GCode* com) {
     case 200: // M200 T<extruder> D<diameter>
         MCode_200(com);
         break;
-    case 201: // M201
+    case 201: // M201 <XYZE> Set temporary axis print accelerations in units/s^2
         MCode_201(com);
         break;
-    case 202: // M202 travel acceleration, but no difference atm
+    case 202: // M202 <XYZE> Set temporary axis travel accelerations in units/s^2
         MCode_202(com);
         break;
     case 203: // M203
