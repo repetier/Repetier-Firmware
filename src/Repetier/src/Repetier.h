@@ -434,6 +434,9 @@ extern ServoInterface* servos[];
 #endif
 
 // Firmware retraction settings 
+#ifndef AUTORETRACT_ENABLED
+#define AUTORETRACT_ENABLED 0
+#endif
 #ifndef RETRACTION_LENGTH 
 #define RETRACTION_LENGTH 0.0
 #endif

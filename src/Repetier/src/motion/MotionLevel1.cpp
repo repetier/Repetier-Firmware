@@ -290,6 +290,7 @@ void Motion1::setFromConfig() {
 #endif
 
 #if FEATURE_RETRACTION
+    Printer::setAutoretract(AUTORETRACT_ENABLED, true);
     retractLength = RETRACTION_LENGTH;
     retractLongLength = RETRACTION_LONG_LENGTH;
     retractSpeed = RETRACTION_SPEED;
