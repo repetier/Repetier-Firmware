@@ -105,10 +105,20 @@ typedef char prog_char;
 #define FSTRINGVAR(var) static const char var[] PROGMEM;
 #define FSTRINGPARAM(var) PGM_P var
 
+#define PWM_CLOCK_FREQ 10000
+#define PWM_COUNTER_100MS PWM_CLOCK_FREQ / 10
+
+// Manipulate the SAM3X8E's real time timer for motion2
+// instead of using a valuable PWM-capable timer 
+// Only really good for < 8000Hz
+#define MOTION2_USE_REALTIME_TIMER 1 
+#if (DISABLED(MOTION2_USE_REALTIME_TIMER) || PREPARE_FREQUENCY > (PWM_CLOCK_FREQ / 2))
 #define MOTION2_TIMER TC0
 #define MOTION2_TIMER_CHANNEL 0
 #define MOTION2_TIMER_IRQ ID_TC0
 #define MOTION2_TIMER_VECTOR TC0_Handler
+#endif
+
 #define PWM_TIMER TC0
 #define PWM_TIMER_CHANNEL 1
 #define PWM_TIMER_IRQ ID_TC1
@@ -134,13 +144,6 @@ typedef char prog_char;
 // TWI1 if SDA pin = 20  TWI0 for pin = 70
 #define TWI_INTERFACE TWI1
 #define TWI_ID ID_TWI1
-
-// #define PWM_CLOCK_FREQ          3906
-// #define PWM_COUNTER_100MS       390
-#define PWM_CLOCK_FREQ 10000
-#define PWM_COUNTER_100MS 1000
-//#define MOTION3_CLOCK_FREQ       244
-//#define MOTION3_PRESCALE         2
 
 #define SERVO_CLOCK_FREQ 1000
 #define SERVO_PRESCALE 2 // Using TCLOCK1 therefore 2
