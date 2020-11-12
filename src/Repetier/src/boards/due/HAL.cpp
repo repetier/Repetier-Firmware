@@ -87,6 +87,7 @@ void HAL::setupTimer() {
     //NVIC_SetPriorityGrouping(4);
 
     // Timer for extruder control
+#if (DISABLED(MOTION2_USE_REALTIME_TIMER) || PREPARE_FREQUENCY > (PWM_CLOCK_FREQ / 2))
     pmc_enable_periph_clk(MOTION2_TIMER_IRQ); // enable power to timer
     //NVIC_SetPriority((IRQn_Type)EXTRUDER_TIMER_IRQ, NVIC_EncodePriority(4, 4, 1));
     NVIC_SetPriority((IRQn_Type)MOTION2_TIMER_IRQ, 2);
@@ -104,6 +105,12 @@ void HAL::setupTimer() {
 
     // allow interrupts on timer
     NVIC_EnableIRQ((IRQn_Type)MOTION2_TIMER_IRQ);
+#else
+    RTT_SetPrescaler(RTT, (32768 / PREPARE_FREQUENCY) - 1);
+    RTT_EnableIT(RTT, RTT_MR_RTTINCIEN);
+    NVIC_SetPriority(RTT_IRQn, 2);
+    NVIC_EnableIRQ(RTT_IRQn);
+#endif
 
     // Regular interrupts for heater control etc
     pmc_enable_periph_clk(PWM_TIMER_IRQ);
@@ -1137,11 +1144,20 @@ void PWM_TIMER_VECTOR() {
         HAL::wdPinged = false;
     }
 #endif
+
+#if (ENABLED(MOTION2_USE_REALTIME_TIMER) && PREPARE_FREQUENCY <= (PWM_CLOCK_FREQ / 2))
+    // Asynchronously reenable the RTT in here.
+    // otherwise we'd need a busy loop to wait the 40us needed, or something.
+    if (!(RTT->RTT_SR) && !(RTT->RTT_MR & RTT_MR_RTTINCIEN)) {
+        RTT->RTT_MR |= RTT_MR_RTTINCIEN;
+    }
+#endif
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_TEMP_PIN, 0);
 #endif
 }
 
+#if (DISABLED(MOTION2_USE_REALTIME_TIMER) || PREPARE_FREQUENCY > (PWM_CLOCK_FREQ / 2))
 TcChannel* motion2Channel = (MOTION2_TIMER->TC_CHANNEL + MOTION2_TIMER_CHANNEL);
 
 // MOTION2_TIMER IRQ handler
@@ -1149,18 +1165,28 @@ void MOTION2_TIMER_VECTOR() {
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_MOTION_PIN, 1);
 #endif
-    static bool inside = false; // prevent double call when not finished
-    motion2Channel->TC_SR;      // faster replacement for above line!
-    if (inside) {
-        return;
-    }
-    inside = true;
+    motion2Channel->TC_SR; // faster replacement for above line!
     Motion2::timer();
-    inside = false;
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_MOTION_PIN, 0);
 #endif
 }
+#else
+extern "C" void RTT_Handler() {
+#if DEBUG_TIMING
+    WRITE(DEBUG_ISR_MOTION_PIN, 1);
+#endif
+    // It's possible for the RTT interrupt to actually preempt itself
+    // unless you disable it and reenable it once the status is clear.
+    // It takes two slow clock cycles (32.768kHz so 40-50us~) to clear. 
+    RTT->RTT_SR;
+    RTT->RTT_MR &= ~RTT_MR_RTTINCIEN;
+    Motion2::timer(); 
+#if DEBUG_TIMING
+    WRITE(DEBUG_ISR_MOTION_PIN, 0);
+#endif
+}
+#endif
 
 #if NUM_BEEPERS > 0
 // IRQ handler for tone generator
