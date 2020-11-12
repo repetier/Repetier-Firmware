@@ -79,6 +79,17 @@ float Motion1::totalBabystepZ = 0.0f; // Sum since homing for z helper functions
 float Motion1::axisCompTanXY, Motion1::axisCompTanXZ, Motion1::axisCompTanYZ;
 #endif
 
+#if FEATURE_RETRACTION
+bool Motion1::retracted;
+float Motion1::retractLength;
+float Motion1::retractLongLength;
+float Motion1::retractSpeed;
+float Motion1::retractZLift;
+float Motion1::retractUndoSpeed;
+float Motion1::retractUndoExtraLength;
+float Motion1::retractUndoExtraLongLength;
+#endif
+
 volatile fast8_t Motion1::last;    /// newest entry
 volatile fast8_t Motion1::first;   /// first entry
 volatile fast8_t Motion1::process; /// being processed
@@ -276,6 +287,17 @@ void Motion1::setFromConfig() {
     axisCompTanXY = AXISCOMP_TANXY;
     axisCompTanXZ = AXISCOMP_TANXZ;
     axisCompTanYZ = AXISCOMP_TANYZ;
+#endif
+
+#if FEATURE_RETRACTION
+    Printer::setAutoretract(AUTORETRACT_ENABLED, true);
+    retractLength = RETRACTION_LENGTH;
+    retractLongLength = RETRACTION_LONG_LENGTH;
+    retractSpeed = RETRACTION_SPEED;
+    retractZLift = RETRACTION_Z_LIFT;
+    retractUndoSpeed = RETRACTION_UNDO_SPEED;
+    retractUndoExtraLength = RETRACTION_UNDO_EXTRA_LENGTH;
+    retractUndoExtraLongLength = RETRACTION_UNDO_EXTRA_LONG_LENGTH;
 #endif
 
     FOR_ALL_AXES(i) {
@@ -2028,6 +2050,25 @@ void Motion1::eepromHandle(bool firstImport) {
     EEPROM::handleFloat(eprStart + EPR_M1_AXIS_COMP_XZ, Com::tAxisCompTanYZ, 6, axisCompTanYZ);
     EEPROM::handleFloat(eprStart + EPR_M1_AXIS_COMP_YZ, Com::tAxisCompTanXZ, 6, axisCompTanXZ);
 #endif
+
+#if FEATURE_RETRACTION
+
+    bool autoRetract = Printer::isAutoretract();
+    EEPROM::handleByte(eprStart + EPR_M1_AUTORETRACT, Com::tEPRAutoretractEnabled, autoRetract);
+    Printer::setAutoretract(autoRetract, true);
+
+    EEPROM::handleFloat(eprStart + EPR_M1_RETRACT_LENGTH, Com::tEPRRetractionLength, 2, retractLength);
+    EEPROM::handleFloat(eprStart + EPR_M1_RETRACT_SPEED, Com::tEPRRetractionSpeed, 2, retractSpeed);
+    EEPROM::handleFloat(eprStart + EPR_M1_RETRACT_ZLIFT, Com::tEPRRetractionZLift, 2, retractZLift);
+    EEPROM::handleFloat(eprStart + EPR_M1_RETRACT_UNDO_SPEED, Com::tEPRRetractionUndoSpeed, 2, retractUndoSpeed);
+    EEPROM::handleFloat(eprStart + EPR_M1_RETRACT_UNDO_EXTRA_LENGTH, Com::tEPRRetractionUndoExtraLength, 2, retractUndoExtraLength);
+
+    EEPROM::setSilent(NUM_TOOLS < 2);
+    EEPROM::handleFloat(eprStart + EPR_M1_RETRACT_UNDO_EXTRA_LONG_LENGTH, Com::tEPRRetractionUndoExtraLongLength, 2, retractUndoExtraLongLength);
+    EEPROM::handleFloat(eprStart + EPR_M1_RETRACT_LONG_LENGTH, Com::tEPRRetractionLongLength, 2, retractLongLength);
+    EEPROM::setSilent(0);
+#endif
+
     // Rotation matrix is only read/written but not shown
     if (EEPROM::mode != EEPROMMode::REPORT) {
         for (fast8_t i = 0; i < 9; i++) {

@@ -126,6 +126,59 @@ void ToolExtruder::directionMotor(bool dir) {
     stepper->dir(dir);
 }
 
+void ToolExtruder::retract(bool backwards, bool longRetract) {
+    if (!Motion1::retractSpeed
+        || (!Motion1::retractLength && !longRetract)
+        || (!Motion1::retractLongLength && longRetract)) {
+        // invalid settings
+        return;
+    }
+
+    if ((Motion1::retracted && backwards) || (!Motion1::retracted && !backwards)) {
+        return;
+    }
+
+    float prevSpeed = Printer::feedrate;
+    if (Motion1::retractZLift && Motion1::isAxisHomed(Z_AXIS)) {
+        float offset = -(getOffsetZ() + (backwards ? -Motion1::retractZLift : 0.0f));
+
+        Motion1::setTmpPositionXYZ(IGNORE_COORDINATE,
+                                   IGNORE_COORDINATE,
+                                   Motion1::currentPosition[Z_AXIS] + offset - Motion1::toolOffset[Z_AXIS]);
+        Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[Z_AXIS], true); // Z-Hops are G1's.
+        Motion1::toolOffset[Z_AXIS] = offset;
+        Motion1::updatePositionsFromCurrentTransformed();
+
+        //Motion1::setToolOffset(-getOffsetX(), -getOffsetY(), -(getOffsetZ() + offset));
+    }
+    float amount = 0.0f;
+    if (!longRetract) {
+        amount = backwards ? -Motion1::retractLength
+                           : (Motion1::retractLength + Motion1::retractUndoExtraLength);
+    } else {
+        amount = backwards ? -Motion1::retractLongLength
+                           : (Motion1::retractLongLength + Motion1::retractUndoExtraLongLength);
+    }
+
+    amount *= Printer::extrusionFactor;
+
+    float speed = Motion1::retractSpeed;
+    if (backwards && Motion1::retractUndoSpeed) {
+        speed = Motion1::retractUndoSpeed;
+    }
+    speed *= 0.01f * static_cast<float>(Printer::feedrateMultiply);
+
+    float prevE = Motion1::currentPositionTransformed[E_AXIS];
+    Motion1::setTmpPositionXYZE(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, amount);
+    Motion1::moveRelativeByPrinter(Motion1::tmpPosition, speed, false);
+    Motion1::currentPositionTransformed[E_AXIS] = prevE;
+    Motion1::updatePositionsFromCurrentTransformed();
+
+    Printer::feedrate = prevSpeed;
+    Motion1::retracted = backwards;
+}
+
+
 // ------------ JamDetectorHW ------------
 
 template <class inputPin, class ObserverType>

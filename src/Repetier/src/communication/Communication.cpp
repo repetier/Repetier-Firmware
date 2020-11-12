@@ -430,12 +430,12 @@ FSTRINGVALUE(Com::tHeaterDecoupledWarning, "One heater seems decoupled from ther
 #if FEATURE_RETRACTION
 FSTRINGVALUE(Com::tEPRAutoretractEnabled, "Enable retraction conversion [0/1]")
 FSTRINGVALUE(Com::tEPRRetractionLength, "Retraction length [mm]")
-FSTRINGVALUE(Com::tEPRRetractionLongLength, "Retraction length extruder switch [mm]")
 FSTRINGVALUE(Com::tEPRRetractionSpeed, "Retraction speed [mm/s]")
 FSTRINGVALUE(Com::tEPRRetractionZLift, "Retraction z-lift [mm]")
 FSTRINGVALUE(Com::tEPRRetractionUndoExtraLength, "Extra extrusion on undo retract [mm]")
+FSTRINGVALUE(Com::tEPRRetractionLongLength, "Retraction length extruder switch [mm]")
 FSTRINGVALUE(Com::tEPRRetractionUndoExtraLongLength, "Extra extrusion on undo switch retract [mm]")
-FSTRINGVALUE(Com::tEPRRetractionUndoSpeed, "Retraction undo speed")
+FSTRINGVALUE(Com::tEPRRetractionUndoSpeed, "Retraction undo speed [mm/s]")
 #endif
 FSTRINGVALUE(Com::tConfig, "Config:")
 FSTRINGVALUE(Com::tExtrDot, "Extr.")

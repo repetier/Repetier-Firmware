@@ -478,17 +478,27 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
         p = convertToMM(com->E);
         HeatManager* heater = Tool::getActiveTool()->getHeater();
         if (relativeCoordinateMode || relativeExtruderCoordinateMode) {
-            if (fabs(com->E) * extrusionFactor > EXTRUDE_MAXLENGTH) {
+            if (fabsf(com->E) * extrusionFactor > EXTRUDE_MAXLENGTH) {
                 Com::printWarningF(PSTR("Max. extrusion distance per move exceeded - ignoring move."));
-                p = 0;
+                p = 0.0f;
             }
             coords[E_AXIS] = Motion1::currentPosition[E_AXIS] + p;
         } else {
-            if (fabs(p - Motion1::currentPosition[E_AXIS]) * extrusionFactor > EXTRUDE_MAXLENGTH) {
+            if (fabsf(p - Motion1::currentPosition[E_AXIS]) * extrusionFactor > EXTRUDE_MAXLENGTH) {
                 p = Motion1::currentPosition[E_AXIS];
             }
             coords[E_AXIS] = p;
         }
+#if FEATURE_RETRACTION
+        if (com->hasNoXYZ() && isAutoretract()) { // Lone E moves.
+            if (relativeCoordinateMode || relativeExtruderCoordinateMode) {
+                Tool::getActiveTool()->retract(com->E < 0.0f, false);
+            } else {
+                Tool::getActiveTool()->retract(p < Motion1::currentPosition[E_AXIS], false);
+            }
+            return;
+        }
+#endif
         secondaryMove = Tool::getActiveTool()->isSecondaryMove(com->hasG() && com->G == 0, true);
     } else {
         coords[E_AXIS] = Motion1::currentPosition[E_AXIS];
@@ -821,14 +831,13 @@ void Printer::showConfiguration() {
     Com::config(PSTR("JerkZ:"), Motion1::maxYank[Z_AXIS]);
 #endif
 #if FEATURE_RETRACTION
-    // TODO: Report retraction
-    /* Com::config(PSTR("RetractionLength:"), EEPROM_FLOAT(RETRACTION_LENGTH));
-    Com::config(PSTR("RetractionLongLength:"), EEPROM_FLOAT(RETRACTION_LONG_LENGTH));
-    Com::config(PSTR("RetractionSpeed:"), EEPROM_FLOAT(RETRACTION_SPEED));
-    Com::config(PSTR("RetractionZLift:"), EEPROM_FLOAT(RETRACTION_Z_LIFT));
-    Com::config(PSTR("RetractionUndoExtraLength:"), EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LENGTH));
-    Com::config(PSTR("RetractionUndoExtraLongLength:"), EEPROM_FLOAT(RETRACTION_UNDO_EXTRA_LONG_LENGTH));
-    Com::config(PSTR("RetractionUndoSpeed:"), EEPROM_FLOAT(RETRACTION_UNDO_SPEED));*/
+    Com::config(PSTR("RetractionLength:"), Motion1::retractLength);
+    Com::config(PSTR("RetractionLongLength:"), Motion1::retractLongLength);
+    Com::config(PSTR("RetractionSpeed:"), Motion1::retractSpeed);
+    Com::config(PSTR("RetractionZLift:"), Motion1::retractZLift);
+    Com::config(PSTR("RetractionUndoExtraLength:"), Motion1::retractUndoExtraLength);
+    Com::config(PSTR("RetractionUndoExtraLongLength:"), Motion1::retractUndoExtraLongLength);
+    Com::config(PSTR("RetractionUndoSpeed:"), Motion1::retractUndoSpeed);
 #endif // FEATURE_RETRACTION
     Com::config(PSTR("XMin:"), Motion1::minPos[X_AXIS]);
     Com::config(PSTR("YMin:"), Motion1::minPos[Y_AXIS]);

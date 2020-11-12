@@ -497,9 +497,11 @@ public:
         return flag2 & PRINTER_FLAG2_AUTORETRACT;
     }
 
-    static INLINE void setAutoretract(uint8_t b) {
-        flag2 = (b ? flag2 | PRINTER_FLAG2_AUTORETRACT : flag2 & ~PRINTER_FLAG2_AUTORETRACT);
-        Com::printFLN(PSTR("Autoretract:"), b);
+    static INLINE void setAutoretract(uint8_t b, bool silent = false) {
+        flag2 = (b ? flag2 | PRINTER_FLAG2_AUTORETRACT : flag2 & ~PRINTER_FLAG2_AUTORETRACT); 
+        if (!silent) {
+            Com::printFLN(PSTR("Autoretract:"), b);
+        }
     }
 
     static INLINE uint8_t isPrinting() {

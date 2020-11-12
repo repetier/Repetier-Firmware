@@ -462,10 +462,10 @@ public:
 #if FEATURE_RETRACTION
     FSTRINGVAR(tEPRAutoretractEnabled)
     FSTRINGVAR(tEPRRetractionLength)
-    FSTRINGVAR(tEPRRetractionLongLength)
     FSTRINGVAR(tEPRRetractionSpeed)
     FSTRINGVAR(tEPRRetractionZLift)
     FSTRINGVAR(tEPRRetractionUndoExtraLength)
+    FSTRINGVAR(tEPRRetractionLongLength)
     FSTRINGVAR(tEPRRetractionUndoExtraLongLength)
     FSTRINGVAR(tEPRRetractionUndoSpeed)
 #endif
@@ -584,6 +584,10 @@ public:
     static void promptEnd(bool blocking = true);
     static void promptButton(FSTRINGPARAM(text));
     static void promptShow();
+
+    template <typename T>
+    static void printBinaryFLN(FSTRINGPARAM(text), T n, bool grouping = false);
+
     static bool writeToAll;
 #if FEATURE_CONTROLLER != NO_CONTROLLER
     static const char* translatedF(int textId);
@@ -593,6 +597,19 @@ public:
 protected:
 private:
 };
+
+template <typename T>
+void Com::printBinaryFLN(FSTRINGPARAM(text), T n, bool grouping) {
+    printF(text);
+    size_t i = (sizeof(n) * 8u) - 1u;
+    do {
+        print(((1u << i) & n) ? '1' : '0');
+        if (grouping && i && !(i % 8u)) {
+            print(' ');
+        }
+    } while (i--);
+    println();
+}
 
 #ifdef DEBUG
 #define SHOW(x) \
