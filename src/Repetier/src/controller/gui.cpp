@@ -137,6 +137,10 @@ void GUI::pop() {
     }
 }
 
+void pop(int selection) {
+    GUI::pop();
+}
+
 void GUI::popBusy() {
     if (level > 0 && pageType[level] == GUIPageType::BUSY) {
         status[0] = 0;
@@ -649,10 +653,16 @@ void GUI::setStatusP(FSTRINGPARAM(text), GUIStatusLevel lvl) {
         if (lvl == GUIStatusLevel::WARNING) {
             Printer::playDefaultSound(DefaultSounds::WARNING);
             push(warningScreen, status, GUIPageType::STATUS);
+            Com::promptStart(GUI::pop, Com::tWarning, status, false);
+            Com::promptButton(Com::tOk);
+            Com::promptShow();
         }
         if (lvl == GUIStatusLevel::ERROR) {
             Printer::playDefaultSound(DefaultSounds::ERROR);
             push(errorScreen, status, GUIPageType::STATUS);
+            Com::promptStart(GUI::pop, Com::tError, status, false);
+            Com::promptButton(Com::tOk);
+            Com::promptShow();
         }
     }
 }
@@ -677,9 +687,17 @@ void GUI::setStatus(char* text, GUIStatusLevel lvl) {
         }
         if (lvl == GUIStatusLevel::WARNING) {
             push(warningScreen, status, GUIPageType::STATUS);
+            Printer::playDefaultSound(DefaultSounds::WARNING);
+            push(warningScreen, status, GUIPageType::STATUS);
+            Com::promptStart(GUI::pop, Com::tWarning, status, false);
+            Com::promptButton(Com::tOk);
+            Com::promptShow();
         }
         if (lvl == GUIStatusLevel::ERROR) {
             push(errorScreen, status, GUIPageType::STATUS);
+            Com::promptStart(GUI::pop, Com::tError, status, false);
+            Com::promptButton(Com::tOk);
+            Com::promptShow();
         }
     }
 }

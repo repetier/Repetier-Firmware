@@ -47,6 +47,8 @@ uint8_t Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
 uint8_t Printer::relativeCoordinateMode = false;         ///< Determines absolute (false) or relative Coordinates (true).
 uint8_t Printer::relativeExtruderCoordinateMode = false; ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
+PromptDialogCallback Printer::activePromptDialog = nullptr; ///< Dialog ID that is active
+bool Printer::promptSupported = false;                      ///< At least one connecte dhost supports host prompts
 uint8_t Printer::flag0 = 0;
 uint8_t Printer::flag1 = 0;
 uint8_t Printer::flag2 = 0;

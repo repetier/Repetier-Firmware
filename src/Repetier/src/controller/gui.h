@@ -184,13 +184,14 @@ public:
     static void setStatusP(FSTRINGPARAM(text), GUIStatusLevel lvl);
     static void setStatus(char* text, GUIStatusLevel lvl);
 
-    static void resetMenu();   ///< Go to start page
-    static void init();        ///< Initialize display
-    static void processInit(); ///< Continue initializing display if not ready
-    static void refresh();     ///< Refresh display
-    static void update();      ///< Calls refresh, checks buttons
-    static void pop();         ///< Go 1 level higher if possible
-    static void popBusy();     ///< Pop if waiting is on top
+    static void resetMenu();        ///< Go to start page
+    static void init();             ///< Initialize display
+    static void processInit();      ///< Continue initializing display if not ready
+    static void refresh();          ///< Refresh display
+    static void update();           ///< Calls refresh, checks buttons
+    static void pop();              ///< Go 1 level higher if possible
+    static void pop(int selection); // For prompt callbacks!
+    static void popBusy();          ///< Pop if waiting is on top
     static void push(GuiCallback cb, void* cData, GUIPageType tp);
     static void replace(GuiCallback cb, void* cData, GUIPageType tp);
     static bool isStickyPageType(GUIPageType t);

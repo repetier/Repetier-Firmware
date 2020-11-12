@@ -257,32 +257,34 @@ public:
     static uint8_t relativeCoordinateMode;         ///< Determines absolute (false) or relative Coordinates (true).
     static uint8_t relativeExtruderCoordinateMode; ///< Determines Absolute or Relative E Codes while in Absolute Coordinates mode. E is always relative in Relative Coordinates mode.
 
-    static bool failedMode;              // In failed mode only M110 and M999 is working
-    static uint8_t unitIsInches;         ///< true if we compute in inces and not mm
-    static uint8_t rescueOn;             // 1 is rescue is enabled
-    static uint8_t flag0, flag1;         // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
-    static uint8_t flag2, flag3;         // Some more flags
-    static uint8_t reportFlag;           ///< Report several staus infos on next loop
-    static uint32_t interval;            ///< Last step duration in ticks.
-    static uint32_t timer;               ///< used for acceleration/deceleration timing
-    static uint32_t stepNumber;          ///< Step number in current move.
-    static millis_t lastTempReport;      ///< Time of last temperature report for autoreporting temperatures
-    static millis_t autoTempReportPeriodMS;  ///< Configurable delay between autoreports in ms. Default 1000ms.
-    static millis_t lastSDReport;        ///< Time of last SD read position report for autoreporting SD position
-    static millis_t autoSDReportPeriodMS;///< Configurable delay between SD autoreports in ms. Default off. 
-    static int32_t printingTime;         ///< Printing time in seconds
-    static float extrudeMultiplyError;   ///< Accumulated error during extrusion
-    static float extrusionFactor;        ///< Extrusion multiply factor
-    static uint16_t rescuePos;           // EEPROM address for rescue
-    static fast8_t safetyParked;         /// True if moved to a safety position to protect print
-    static float feedrate;               ///< Last requested feedrate.
-    static int feedrateMultiply;         ///< Multiplier for feedrate in percent (factor 1 = 100)
-    static unsigned int extrudeMultiply; ///< Flow multiplier in percent (factor 1 = 100)
-    static uint8_t interruptEvent;       ///< Event generated in interrupts that should/could be handled in main thread
-    static speed_t vMaxReached;          ///< Maximum reached speed
-    static uint32_t msecondsPrinting;    ///< Milliseconds of printing time (means time with heated extruder)
-    static float filamentPrinted;        ///< mm of filament printed since counting started
-    static float filamentPrintedTotal;   ///< Total amount of filament printed in meter
+    static bool failedMode;                         // In failed mode only M110 and M999 is working
+    static PromptDialogCallback activePromptDialog; ///< Dialog ID that is active
+    static bool promptSupported;                    ///< At least one connecte dhost supports host prompts
+    static uint8_t unitIsInches;                    ///< true if we compute in inces and not mm
+    static uint8_t rescueOn;                        // 1 is rescue is enabled
+    static uint8_t flag0, flag1;                    // 1 = stepper disabled, 2 = use external extruder interrupt, 4 = temp Sensor defect, 8 = homed
+    static uint8_t flag2, flag3;                    // Some more flags
+    static uint8_t reportFlag;                      ///< Report several staus infos on next loop
+    static uint32_t interval;                       ///< Last step duration in ticks.
+    static uint32_t timer;                          ///< used for acceleration/deceleration timing
+    static uint32_t stepNumber;                     ///< Step number in current move.
+    static millis_t lastTempReport;                 ///< Time of last temperature report for autoreporting temperatures
+    static millis_t autoTempReportPeriodMS;         ///< Configurable delay between autoreports in ms. Default 1000ms.
+    static millis_t lastSDReport;                   ///< Time of last SD read position report for autoreporting SD position
+    static millis_t autoSDReportPeriodMS;           ///< Configurable delay between SD autoreports in ms. Default off.
+    static int32_t printingTime;                    ///< Printing time in seconds
+    static float extrudeMultiplyError;              ///< Accumulated error during extrusion
+    static float extrusionFactor;                   ///< Extrusion multiply factor
+    static uint16_t rescuePos;                      // EEPROM address for rescue
+    static fast8_t safetyParked;                    /// True if moved to a safety position to protect print
+    static float feedrate;                          ///< Last requested feedrate.
+    static int feedrateMultiply;                    ///< Multiplier for feedrate in percent (factor 1 = 100)
+    static unsigned int extrudeMultiply;            ///< Flow multiplier in percent (factor 1 = 100)
+    static uint8_t interruptEvent;                  ///< Event generated in interrupts that should/could be handled in main thread
+    static speed_t vMaxReached;                     ///< Maximum reached speed
+    static uint32_t msecondsPrinting;               ///< Milliseconds of printing time (means time with heated extruder)
+    static float filamentPrinted;                   ///< mm of filament printed since counting started
+    static float filamentPrintedTotal;              ///< Total amount of filament printed in meter
 #if ENABLE_BACKLASH_COMPENSATION || defined(DOXYGEN)
     static float backlashX;
     static float backlashY;

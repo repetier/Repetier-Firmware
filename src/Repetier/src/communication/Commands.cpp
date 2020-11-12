@@ -129,7 +129,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
         }
     }
 #if SDSUPPORT
-    // Reports the sd file byte position every autoSDReportPeriodMS if set, and only if printing. 
+    // Reports the sd file byte position every autoSDReportPeriodMS if set, and only if printing.
     if (Printer::isAutoreportSD() && sd.sdactive && (sd.sdmode == 1 || sd.sdmode == 2)) {
         millis_t now = HAL::timeInMilliseconds();
         if (now - Printer::lastSDReport > Printer::autoSDReportPeriodMS) {
@@ -728,6 +728,9 @@ void Commands::processMCode(GCode* com) {
     case 540: // report motion buffers
         MCode_540(com);
         break;
+    case 576: // M576 S1 enables out of order execution
+        MCode_576(com);
+        break;
     case 569: // Set stealthchop
         MCode_Stepper(com);
         break;
@@ -783,6 +786,9 @@ void Commands::processMCode(GCode* com) {
             EEPROM::setVersion(com->S);
         break;
 #endif
+    case 876:
+        MCode_876(com);
+        break;
     case 890:
         MCode_890(com);
         break;

@@ -1346,7 +1346,7 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
 void __attribute__((weak)) warningScreen(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         GUI::bufClear();
-        GUI::bufAddStringP(PSTR("Warning"));
+        GUI::bufAddStringP(Com::tWarning);
         printRow(0, GUI::buf);
         char* text = static_cast<char*>(data);
         printRowCentered(1, text);

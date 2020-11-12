@@ -106,73 +106,104 @@ uint8_t GCode::computeBinarySize(char* ptr) // unsigned int bitfield) {
 {
     uint8_t s = 4; // include checksum and bitfield
     uint16_t bitfield = *(uint16_t*)ptr;
-    if (bitfield & 1)
+    if (bitfield & 1) {
         s += 2;
-    if (bitfield & 8)
+    }
+    if (bitfield & 8) {
         s += 4;
-    if (bitfield & 16)
+    }
+    if (bitfield & 16) {
         s += 4;
-    if (bitfield & 32)
+    }
+    if (bitfield & 32) {
         s += 4;
-    if (bitfield & 64)
+    }
+    if (bitfield & 64) {
         s += 4;
-    if (bitfield & 256)
+    }
+    if (bitfield & 256) {
         s += 4;
-    if (bitfield & 512)
+    }
+    if (bitfield & 512) {
         s += 1;
-    if (bitfield & 1024)
+    }
+    if (bitfield & 1024) {
         s += 4;
-    if (bitfield & 2048)
+    }
+    if (bitfield & 2048) {
         s += 4;
+    }
     if (bitfield & 4096) // Version 2 or later
     {
         s += 2; // for bitfield 2
         uint16_t bitfield2 = *(uint16_t*)(ptr + 2);
-        if (bitfield & 2)
+        if (bitfield & 2) {
             s += 2;
-        if (bitfield & 4)
+        }
+        if (bitfield & 4) {
             s += 2;
-        if (bitfield2 & 1)
+        }
+        if (bitfield2 & 1) {
             s += 4;
-        if (bitfield2 & 2)
+        }
+        if (bitfield2 & 2) {
             s += 4;
-        if (bitfield2 & 4)
+        }
+        if (bitfield2 & 4) {
             s += 4;
-        if (bitfield2 & 8)
+        }
+        if (bitfield2 & 8) {
             s += 4;
-        if (bitfield2 & 16)
+        }
+        if (bitfield2 & 16) {
             s += 4;
-        if (bitfield2 & 32)
+        }
+        if (bitfield2 & 32) {
             s += 4;
-        if (bitfield2 & 64)
+        }
+        if (bitfield2 & 64) {
             s += 4;
-        if (bitfield2 & 128)
+        }
+        if (bitfield2 & 128) {
             s += 4;
-        if (bitfield2 & 256)
+        }
+        if (bitfield2 & 256) {
             s += 4;
-        if (bitfield2 & 512)
+        }
+        if (bitfield2 & 512) {
             s += 4;
-        if (bitfield2 & 1024)
+        }
+        if (bitfield2 & 1024) {
             s += 4;
-        if (bitfield2 & 2048)
+        }
+        if (bitfield2 & 2048) {
             s += 4;
-        if (bitfield2 & 4096)
+        }
+        if (bitfield2 & 4096) {
             s += 4;
-        if (bitfield2 & 8192)
+        }
+        if (bitfield2 & 8192) {
             s += 4;
-        if (bitfield2 & 16384)
+        }
+        if (bitfield2 & 16384) {
             s += 4;
-        if (bitfield2 & 32768)
+        }
+        if (bitfield2 & 32768) {
             s += 4;
-        if (bitfield & 32768)
+        }
+        if (bitfield & 32768) {
             s += RMath::min(80, (uint8_t)ptr[4] + 1);
+        }
     } else {
-        if (bitfield & 2)
+        if (bitfield & 2) {
             s += 1;
-        if (bitfield & 4)
+        }
+        if (bitfield & 4) {
             s += 1;
-        if (bitfield & 32768)
+        }
+        if (bitfield & 32768) {
             s += 16;
+        }
     }
     return s;
 }
@@ -330,6 +361,18 @@ void GCode::echoCommand() {
     }
 }
 
+void GCode::ackOutOfOrder() {
+    Com::printF(PSTR("ooo "));
+    if (hasM()) {
+        Com::print('M');
+        Com::print(M);
+    } else if (hasG()) {
+        Com::print('G');
+        Com::print(G);
+    }
+    Com::println();
+}
+
 void GCode::debugCommandBuffer() {
     Com::printF(PSTR("CommandBuffer"));
     for (int i = 0; i < commandsReceivingWritePosition; i++)
@@ -460,10 +503,12 @@ void GCode::readFromSerial() {
             sendAsBinary = (commandReceiving[0] & 128) != 0;
         } // first byte detection
         if (sendAsBinary) {
-            if (commandsReceivingWritePosition < 2)
+            if (commandsReceivingWritePosition < 2) {
                 continue;
-            if (commandsReceivingWritePosition == 5 || commandsReceivingWritePosition == 4)
+            }
+            if (commandsReceivingWritePosition == 5 || commandsReceivingWritePosition == 4) {
                 binaryCommandSize = computeBinarySize((char*)commandReceiving);
+            }
             if (commandsReceivingWritePosition == binaryCommandSize) {
                 GCode* act = &commandsBuffered[bufferWriteIndex];
                 act->source = GCodeSource::activeSource;                           // we need to know where to write answers to
@@ -1175,6 +1220,7 @@ void GCodeSource::printAllFLN(FSTRINGPARAM(text), int32_t v) {
 GCodeSource::GCodeSource() {
     lastLineNumber = 0;
     wasLastCommandReceivedAsBinary = false;
+    outOfOrder = false;
     waitingForResend = -1;
 }
 
@@ -1194,7 +1240,7 @@ bool GCodeSource::hasBaudSources() {
 SerialGCodeSource::SerialGCodeSource(Stream* p) {
     stream = p;
 #if EMERGENCY_PARSER
-    bufReadPos = bufLength = bufWritePos = 0;
+    bufReadPos = bufLength = bufLengthRead = bufWritePos = 0;
     commandsReceivingWritePosition = 0;
     commentDetected = false;
 #endif
@@ -1237,14 +1283,17 @@ int SerialGCodeSource::readByte() {
     return stream->read();
 #endif
 }
+
 void SerialGCodeSource::writeByte(uint8_t byte) {
     stream->write(byte);
 }
+
 void SerialGCodeSource::close() {
 }
+
 void SerialGCodeSource::prefetchContent() {
 #if EMERGENCY_PARSER
-    while (stream->available() && bufLength < SERIAL_IN_BUFFER) {
+    while (stream->available() && bufLength + bufLengthRead < SERIAL_IN_BUFFER) {
         commandReceiving[commandsReceivingWritePosition++] = buffer[bufWritePos] = stream->read();
         bufWritePos++;
         if (bufWritePos == SERIAL_IN_BUFFER) {
@@ -1257,29 +1306,54 @@ void SerialGCodeSource::prefetchContent() {
         if (sendAsBinary) {
             if (commandsReceivingWritePosition >= 2) {
 
-                if (commandsReceivingWritePosition == 5 || commandsReceivingWritePosition == 4)
+                if (commandsReceivingWritePosition == 5 || commandsReceivingWritePosition == 4) {
                     binaryCommandSize = GCode::computeBinarySize((char*)commandReceiving);
+                }
                 if (commandsReceivingWritePosition == binaryCommandSize) {
                     GCode act;
+                    bool ignoreCommand = false;
                     if (act.parseBinary(commandReceiving, binaryCommandSize, false)) { // Success
-                        testEmergency(act);
+                        if (testEmergency(act)) {
+                            if (outOfOrder) {
+                                act.ackOutOfOrder();
+                                ignoreCommand = true;
+                            }
+                        }
                     }
+                    if (ignoreCommand) { // skip this nonsense, free early
+                        bufWritePos = (bufWritePos > bufLengthRead ? bufWritePos - bufLengthRead : bufWritePos + SERIAL_IN_BUFFER - bufLengthRead);
+                    } else { // flush data to be read in main thread
+                        bufLength += bufLengthRead;
+                    }
+                    bufLengthRead = 0;
                     commandsReceivingWritePosition = 0;
                 }
             }
-        } else // ASCII command
-        {
+        } else { // ASCII command
             char ch = commandReceiving[commandsReceivingWritePosition - 1];
             if (ch == 0 || ch == '\n' || ch == '\r' || !isOpen()) //!GCodeSource::activeSource->isOpen() /*|| (!commentDetected && ch == ':')*/) // complete line read
             {
                 commandReceiving[commandsReceivingWritePosition - 1] = 0;
                 commentDetected = false;
+                bool ignoreCommand = false;
                 if (commandsReceivingWritePosition > 1) { // empty line ignore
                     GCode act;
                     if (act.parseAscii((char*)commandReceiving, false)) { // Success
-                        testEmergency(act);
+                        if (testEmergency(act)) {
+                            if (outOfOrder) {
+                                act.ackOutOfOrder();
+                                ignoreCommand = true;
+                            }
+                        }
                     }
                 }
+                // empty lines are pushed through so the lower reader can recover from errors!
+                if (ignoreCommand) { // skip this nonsense, free early
+                    bufWritePos = (bufWritePos > bufLengthRead ? bufWritePos - bufLengthRead : bufWritePos + SERIAL_IN_BUFFER - bufLengthRead);
+                } else { // flush data to be read in main thread
+                    bufLength += bufLengthRead;
+                }
+                bufLengthRead = 0;
                 commandsReceivingWritePosition = 0;
             } else {
                 if (ch == ';') {
@@ -1292,28 +1366,40 @@ void SerialGCodeSource::prefetchContent() {
         }
         if (commandsReceivingWritePosition >= MAX_CMD_SIZE - 1) {
             commandsReceivingWritePosition = 0;
+            bufLength += bufLengthRead;
+            bufLengthRead = 0;
         }
-        bufLength++;
+        bufLengthRead++;
     }
 #endif
 }
 
-void SerialGCodeSource::testEmergency(GCode& gcode) {
+bool SerialGCodeSource::testEmergency(GCode& gcode) {
     if (gcode.hasM()) {
         if (gcode.M == 108) {
             Printer::breakLongCommand = true;
+            return true;
         } else if (gcode.M == 112) {
             Commands::emergencyStop();
+            return true;
         } else if (gcode.M == 290) { // speed up babystepping
             PrinterType::M290(&gcode);
+            return true;
+        } else if (gcode.M == 876) { // speed up babystepping
+            MCode_876(&gcode);
+            return true;
         } else if (gcode.M == 416) {
             Printer::handlePowerLoss();
+            return true;
         } else if (gcode.M == 205) {
             EEPROM::writeSettings();
+            return true;
         } else if (gcode.isPriorityM()) {
             Commands::processMCode(&gcode);
+            return false; // these are not registered as out of order!
         }
     }
+    return false;
 }
 
 // ----- SD card source -----

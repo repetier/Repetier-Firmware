@@ -53,7 +53,7 @@ class SerialGCodeSource : public GCodeSource {
     uint8_t sendAsBinary;                   ///< Flags the command as binary input.
     uint8_t commentDetected;                ///< Flags true if we are reading the comment part of a command.
     uint8_t binaryCommandSize;              ///< Expected size of the incoming binary command.
-    ufast8_t bufWritePos, bufReadPos, bufLength;
+    ufast8_t bufWritePos, bufReadPos, bufLength, bufLengthRead;
 #endif
 public:
     SerialGCodeSource(Stream* p);
@@ -65,8 +65,9 @@ public:
     virtual void writeByte(uint8_t byte);
     virtual void close();
     virtual void prefetchContent();
-    void testEmergency(GCode& gcode);
+    bool testEmergency(GCode& gcode); // Returns true when gcode was handled
 };
+
 //#pragma message "Sd support: " XSTR(SDSUPPORT)
 #if SDSUPPORT
 class SDCardGCodeSource : public GCodeSource {
@@ -384,7 +385,7 @@ public:
     inline bool isPriorityM() {
 #if HOST_PRIORITY_CONTROLS
         return (M >= 10000 && M < 19999);
-#else 
+#else
         return false;
 #endif
     }
@@ -396,6 +397,7 @@ public:
     bool parseAscii(char* line, bool fromSerial);
     void popCurrentCommand();
     void echoCommand();
+    void ackOutOfOrder();
     /** Get next command in command buffer. After the command is processed, call gcode_command_finished() */
     static GCode* peekCurrentCommand();
     /** Frees the cache used by the last command fetched. */

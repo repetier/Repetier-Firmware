@@ -757,3 +757,74 @@ void Com::printFloat(float number, uint8_t digits) {
         remainder -= toPrint;
     }
 }
+
+void Com::promptStart(PromptDialogCallback cb, FSTRINGPARAM(text), bool blocking) {
+    if (blocking) {
+        Com::printFLN(PSTR("//action:paused"));
+    }
+    if (Printer::promptSupported) {
+        Com::printF(PSTR("//action:prompt_begin "));
+        Com::printFLN(text);
+    }
+    Printer::activePromptDialog = cb;
+}
+
+void Com::promptStart(PromptDialogCallback cb, char* text, bool blocking) {
+    if (blocking) {
+        Com::printFLN(PSTR("//action:paused"));
+    }
+    if (Printer::promptSupported) {
+        Com::printFLN(PSTR("//action:prompt_begin "), text);
+    }
+    Printer::activePromptDialog = cb;
+}
+
+void Com::promptStart(PromptDialogCallback cb, FSTRINGPARAM(prefix), FSTRINGPARAM(text), bool blocking) {
+    if (blocking) {
+        Com::printFLN(PSTR("//action:paused"));
+    }
+    if (Printer::promptSupported) {
+        Com::printF(PSTR("//action:prompt_begin "));
+        Com::printF(prefix);
+        Com::print(' ');
+        Com::printFLN(text);
+    }
+    Printer::activePromptDialog = cb;
+}
+
+void Com::promptStart(PromptDialogCallback cb, FSTRINGPARAM(prefix), char* text, bool blocking) {
+    if (blocking) {
+        Com::printFLN(PSTR("//action:paused"));
+    }
+    if (Printer::promptSupported) {
+        Com::printF(PSTR("//action:prompt_begin "));
+        Com::printF(prefix);
+        Com::print(' ');
+        Com::print(text);
+        Com::println();
+    }
+    Printer::activePromptDialog = cb;
+}
+
+void Com::promptEnd(bool blocking) {
+    if (blocking) {
+        Com::printFLN(PSTR("//action:resumed"));
+    }
+    if (Printer::promptSupported) {
+        Com::printFLN(PSTR("//action:prompt_end"));
+    }
+    Printer::activePromptDialog = nullptr;
+}
+
+void Com::promptButton(FSTRINGPARAM(text)) {
+    if (Printer::promptSupported) {
+        Com::printF(PSTR("//action:prompt_button "));
+        Com::printFLN(text);
+    }
+}
+
+void Com::promptShow() {
+    if (Printer::promptSupported) {
+        Com::printFLN(PSTR("//action:prompt_show"));
+    }
+}

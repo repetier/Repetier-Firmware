@@ -19,13 +19,13 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
-#ifndef COMMUNICATION_H
-#define COMMUNICATION_H
+#pragma once
 
 #ifndef MAX_DATA_SOURCES
 #define MAX_DATA_SOURCES 4
 #endif
 
+typedef void (*PromptDialogCallback)(int selection);
 enum class BoolFormat { TRUEFALSE,
                         ONOFF,
                         YESNO };
@@ -49,7 +49,7 @@ class GCodeSource {
 
 public:
     static GCodeSource* activeSource;
-    static GCodeSource* usbHostSource; 
+    static GCodeSource* usbHostSource;
     static void registerSource(GCodeSource* newSource);
     static void removeSource(GCodeSource* delSource);
     static void rotateSource();           ///< Move active to next source
@@ -62,7 +62,7 @@ public:
     uint8_t wasLastCommandReceivedAsBinary; ///< Was the last successful command in binary mode?
     millis_t timeOfLastDataPacket;
     int8_t waitingForResend; ///< Waiting for line to be resend. -1 = no wait.
-
+    bool outOfOrder;         ///< True if out of order execution is allowed
     GCodeSource();
     virtual ~GCodeSource() { }
     virtual bool isOpen() = 0;
@@ -577,6 +577,13 @@ public:
         GCodeSource::writeToAll('\r');
         GCodeSource::writeToAll('\n');
     }
+    static void promptStart(PromptDialogCallback cb, FSTRINGPARAM(text), bool blocking = true);
+    static void promptStart(PromptDialogCallback cb, char* text, bool blocking = true);
+    static void promptStart(PromptDialogCallback cb, FSTRINGPARAM(prefix), FSTRINGPARAM(text), bool blocking = true);
+    static void promptStart(PromptDialogCallback cb, FSTRINGPARAM(prefix), char* text, bool blocking = true);
+    static void promptEnd(bool blocking = true);
+    static void promptButton(FSTRINGPARAM(text));
+    static void promptShow();
     static bool writeToAll;
 #if FEATURE_CONTROLLER != NO_CONTROLLER
     static const char* translatedF(int textId);
@@ -632,5 +639,3 @@ private:
 #define SHOWA(t, a, n)
 #define SHOWAM(t, a, n)
 #endif
-
-#endif // COMMUNICATION_H
