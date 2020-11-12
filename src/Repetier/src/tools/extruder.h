@@ -92,9 +92,7 @@ public:
     void directionMotor(bool dir) final;
     void setResolution(float stepspermm) { stepsPerMM = stepspermm; }
     float getResolution() { return stepsPerMM; }
-    void retract(bool backwards, bool longRetract) {
-        // TODO: Add retract handling
-    }
+    void retract(bool backwards, bool longRetract);
     /// Computes intensity based on speed
     virtual int computeIntensity(float v, bool activeSecondary, int intensity, float intensityPerMM) { return intensity; }
     virtual bool secondaryIsFan() final override { return true; }

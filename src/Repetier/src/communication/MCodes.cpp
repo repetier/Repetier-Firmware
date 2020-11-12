@@ -1070,8 +1070,9 @@ void __attribute__((weak)) MCode_207(GCode* com) {
 }
 
 void __attribute__((weak)) MCode_209(GCode* com) {
-    if (com->hasS())
+    if (com->hasS()) {
         Printer::setAutoretract(com->S != 0);
+    }
 }
 
 void __attribute__((weak)) MCode_218(GCode* com) {
