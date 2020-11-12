@@ -738,7 +738,7 @@ bool GUI::handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, 
     int32_t orig = value;
     if (action == GUIAction::NEXT) {
         int32_t calc = value + (nextActionRepeat * increment);
-        value = (value == min) ? increment * (calc / increment) : calc;
+        value = (value == min) ? increment * ((calc - std::signbit(calc) * (increment - 1)) / increment) : calc;
         contentChanged = true;
     } else if (action == GUIAction::PREVIOUS) {
         int32_t calc = value - (nextActionRepeat * increment);
