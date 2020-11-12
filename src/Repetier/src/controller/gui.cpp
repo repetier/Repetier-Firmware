@@ -691,18 +691,20 @@ bool GUI::handleFloatValueAction(GUIAction& action, float& value, float min, flo
     }
     float orig = value;
     if (action == GUIAction::NEXT) {
-        value += nextActionRepeat * increment;
+        float calc = (nextActionRepeat * increment);
+        value = (value == min) ? increment * ::floorf((value + calc) / increment) : (value + calc);
         contentChanged = true;
-    }
-    if (action == GUIAction::PREVIOUS) {
-        value -= nextActionRepeat * increment;
+    } else if (action == GUIAction::PREVIOUS) {
+        float calc = (nextActionRepeat * increment);
+        value = (value == max) ? increment * ::ceilf((value - calc) / increment) : (value - calc);
         contentChanged = true;
     }
     if (value < min) {
         value = min;
-    }
-    if (value > max) {
+    } else if (value > max) {
         value = max;
+    } else if (std::signbit(orig) != std::signbit(value)) {
+        value = increment * std::roundf(value / increment);
     }
     return orig != value;
 }
@@ -714,12 +716,16 @@ bool GUI::handleFloatValueAction(GUIAction& action, float& value, float incremen
     }
     float orig = value;
     if (action == GUIAction::NEXT) {
-        value += nextActionRepeat * increment;
+        float calc = (nextActionRepeat * increment);
+        value = increment * ::floorf((value + calc) / increment);
+        contentChanged = true;
+    } else if (action == GUIAction::PREVIOUS) {
+        float calc = (nextActionRepeat * increment);
+        value = increment * ::ceilf((value - calc) / increment);
         contentChanged = true;
     }
-    if (action == GUIAction::PREVIOUS) {
-        value -= nextActionRepeat * increment;
-        contentChanged = true;
+    if (std::signbit(orig) != std::signbit(value)) {
+        value = increment * std::roundf(value / increment);
     }
     return orig != value;
 }
@@ -731,18 +737,21 @@ bool GUI::handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, 
     }
     int32_t orig = value;
     if (action == GUIAction::NEXT) {
-        value += nextActionRepeat * increment;
+        int32_t calc = value + (nextActionRepeat * increment);
+        value = (value == min) ? increment * ((calc - std::signbit(calc) * (increment - 1)) / increment) : calc;
         contentChanged = true;
-    }
-    if (action == GUIAction::PREVIOUS) {
-        value -= nextActionRepeat * increment;
+    } else if (action == GUIAction::PREVIOUS) {
+        int32_t calc = value - (nextActionRepeat * increment);
+        value = (value == max) ? increment * ((calc + !std::signbit(calc) * (increment - 1)) / increment) : calc;
         contentChanged = true;
     }
     if (value < min) {
         value = min;
-    }
-    if (value > max) {
+    } else if (value > max) {
         value = max;
+    } else if (std::signbit(orig) != std::signbit(value)) {
+        int32_t calc = (std::labs(value) + (increment / 2));
+        value = (calc - (calc % increment)) * (std::signbit(value) ? -1 : 1);
     }
     return orig != value;
 }
@@ -853,7 +862,7 @@ void directAction(GUIAction action, void* data) {
     case GUI_DIRECT_ACTION_TOGGLE_PROBE_PAUSE:
         ZProbeHandler::setHeaterPause(!ZProbeHandler::getHeaterPause());
         break;
-    case GUI_DIRECT_ACTION_TOGGLE_AUTORETRACTIONS: 
+    case GUI_DIRECT_ACTION_TOGGLE_AUTORETRACTIONS:
         Printer::setAutoretract(!Printer::isAutoretract(), true);
         break;
     }

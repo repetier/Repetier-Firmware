@@ -167,7 +167,7 @@ void __attribute__((weak)) menuMaxTravelAcceleration(GUIAction action, void* dat
 void __attribute__((weak)) menuMaxYank(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
     GUI::flashToStringFlash(GUI::tmpString, PSTR("Max @ Jerk:"), axisNames[axis]);
-    DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS, Motion1::maxYank[axis], 0);
+    DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS, Motion1::maxYank[axis], 1);
     if (GUI::handleFloatValueAction(action, v, 0.1, 100, 0.1)) {
         Motion1::maxYank[axis] = v;
     }
@@ -336,10 +336,7 @@ void __attribute__((weak)) menuRunProbeOnce(GUIAction action, void* data) {
     if (!Printer::isHoming() && !Printer::isZProbingActive()) {
         Printer::setZProbingActive(true);
         GCode innerCode;
-        innerCode.source = GCodeSource::activeSource;
-        innerCode.internalCommand = true;
-        innerCode.setG(30); // G30
-        Commands::executeGCode(&innerCode);
+        GCode_30(&innerCode);
     }
 #endif
 }
@@ -348,10 +345,7 @@ void __attribute__((weak)) menuRunAutolevel(GUIAction action, void* data) {
     if (!Printer::isHoming() && !Printer::isZProbingActive()) {
         Printer::setZProbingActive(true);
         GCode innerCode;
-        innerCode.source = GCodeSource::activeSource;
-        innerCode.internalCommand = true;
-        innerCode.setG(32); // G32
-        Commands::executeGCode(&innerCode);
+        GCode_32(&innerCode);
     }
 #endif
 }
