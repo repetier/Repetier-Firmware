@@ -737,12 +737,12 @@ bool GUI::handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, 
     }
     int32_t orig = value;
     if (action == GUIAction::NEXT) {
-        int calc = (nextActionRepeat * increment);
-        value = (value == max) ? increment * ::floorf((value + calc) / increment) : (value + calc);
+        int32_t calc = value + (nextActionRepeat * increment);
+        value = (value == min) ? increment * (calc / increment) : calc;
         contentChanged = true;
     } else if (action == GUIAction::PREVIOUS) {
-        int calc = (nextActionRepeat * increment);
-        value = (value == max) ? increment * ::ceilf((value - calc) / increment) : (value - calc);
+        int32_t calc = value - (nextActionRepeat * increment);
+        value = (value == max) ? increment * ((calc + !std::signbit(calc) * (increment - 1)) / increment) : calc;
         contentChanged = true;
     }
     if (value < min) {
@@ -750,7 +750,8 @@ bool GUI::handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, 
     } else if (value > max) {
         value = max;
     } else if (std::signbit(orig) != std::signbit(value)) {
-        value = increment * std::roundf(value / increment);
+        int32_t calc = (std::labs(value) + (increment / 2));
+        value = (calc - (calc % increment)) * (std::signbit(value) ? -1 : 1);
     }
     return orig != value;
 }
