@@ -1000,7 +1000,7 @@ void __attribute__((weak)) MCode_201(GCode* com) {
 }
 
 void __attribute__((weak)) MCode_202(GCode* com) {
-    Motion1::fillPosFromGCode(*com, Motion1::maxAcceleration, Motion1::maxAcceleration);
+    Motion1::fillPosFromGCode(*com, Motion1::maxTravelAcceleration, Motion1::maxTravelAcceleration);
     Printer::updateDerivedParameter();
 }
 
