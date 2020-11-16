@@ -1,0 +1,18 @@
+# Implementation Notes
+
+This document contains important information on HAL related topics. Intention isto help understand 
+why some things are implemented the way they are.
+
+
+## Timer priorities
+
+Order of timer priority if possible:
+
+0 Motion3 timer highest priority
+1 Serial communication second highest priority so we loose no data
+2 Beeper for good quality but not blocking critical interrupts
+3 Servos are quite fast and need precision or the jitter, so higher then motion2
+4 Motion2 needs frequent calls also not that sensitive due to caching of buffers.
+5 PWM is not that relevant - it's only software pwm and can be slow.
+
+For arm based system these are the priorities that should be set. 

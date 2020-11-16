@@ -174,7 +174,7 @@ void reportTMC2130(TMC2130Stepper* driver, ProgrammableStepperBase* b, int level
         } else {
             Com::printFLN(Com::tMax);
         }
-        Com::printFLN(Com::tMotorTPWMTHRS);
+        Com::printFLN(Com::tMotorTPWMTHRS, driver->TPWMTHRS());
         Com::printFLN(Com::tMotorTPOWERDOWN, (int)driver->TPOWERDOWN());
         Com::printF(Com::tMotorIRUN, driver->irun());
         Com::printFLN(Com::tMotorSlash31);
@@ -266,36 +266,38 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
     if (debug != -1) {
         reportTMC2130(driver, this, debug);
     }
-    // Access of bits results in reading register again, so we buffer result
-    TMC2130_n::DRV_STATUS_t status { driver->DRV_STATUS() };
-    if (status.sr == 0xFFFFFFFF || status.sr == 0x0) { // not in working state
-        return;
-    }
-    if (status.ot) { // over temperature
-        printMotorNumberAndName(false);
-        Com::printFLN(Com::tMotorDriverOvertempCurrent, currentMillis);
-    }
-    if (status.otpw) { // over temperature prewarn
-        if (otpwCount < 255) {
-            otpwCount++;
+    if (isEnabled) { // test only when enabled to prevent false messages. Disabled motors should not overheat anyway
+        // Access of bits results in reading register again, so we buffer result
+        TMC2130_n::DRV_STATUS_t status { driver->DRV_STATUS() };
+        if (status.sr == 0xFFFFFFFF || status.sr == 0x0) { // not in working state
+            return;
         }
-        if (otpwCount == 1) {
+        if (status.ot) { // over temperature
             printMotorNumberAndName(false);
-            Com::printFLN(Com::tMotorDriverOvertempWarningCurrent, currentMillis);
+            Com::printFLN(Com::tMotorDriverOvertempCurrent, currentMillis);
         }
-#if TMC_CURRENT_STEP_DOWN > 0
-        if (otpwCount > 4 && driver->isEnabled()) {
-            if (currentMillis > 100) {
-                currentMillis -= TMC_CURRENT_STEP_DOWN;
-                driver->rms_current(currentMillis);
-                printMotorNumberAndName(false);
-                Com::printFLN(Com::tMotorCurrentDecreasedTo, currentMillis);
+        if (status.otpw) { // over temperature prewarn
+            if (otpwCount < 255) {
+                otpwCount++;
             }
-        }
+            if (otpwCount == 1) {
+                printMotorNumberAndName(false);
+                Com::printFLN(Com::tMotorDriverOvertempWarningCurrent, currentMillis);
+            }
+#if TMC_CURRENT_STEP_DOWN > 0
+            if (otpwCount > 4 && driver->isEnabled()) {
+                if (currentMillis > 100) {
+                    currentMillis -= TMC_CURRENT_STEP_DOWN;
+                    driver->rms_current(currentMillis);
+                    printMotorNumberAndName(false);
+                    Com::printFLN(Com::tMotorCurrentDecreasedTo, currentMillis);
+                }
+            }
 #endif
-        otpw = true;
-    } else {
-        otpwCount = 0;
+            otpw = true;
+        } else {
+            otpwCount = 0;
+        }
     }
 }
 
@@ -525,36 +527,38 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
     if (debug != -1) {
         reportTMC5160(driver, this, debug);
     }
-    // Access of bits results in reading register again, so we buffer result
-    TMC2130_n::DRV_STATUS_t status { driver->DRV_STATUS() };
-    if (status.sr == 0xFFFFFFFF || status.sr == 0x0) { // not in working state
-        return;
-    }
-    if (status.ot) { // over temperature
-        printMotorNumberAndName(false);
-        Com::printFLN(Com::tMotorDriverOvertempCurrent, currentMillis);
-    }
-    if (status.otpw) { // over temperature prewarn
-        if (otpwCount < 255) {
-            otpwCount++;
+    if (isEnabled) { // test only when enabled to prevent false messages. Disabled motors should not overheat anyway
+        // Access of bits results in reading register again, so we buffer result
+        TMC2130_n::DRV_STATUS_t status { driver->DRV_STATUS() };
+        if (status.sr == 0xFFFFFFFF || status.sr == 0x0) { // not in working state
+            return;
         }
-        if (otpwCount == 1) {
+        if (status.ot) { // over temperature
             printMotorNumberAndName(false);
-            Com::printFLN(Com::tMotorDriverOvertempWarningCurrent, currentMillis);
+            Com::printFLN(Com::tMotorDriverOvertempCurrent, currentMillis);
         }
-#if TMC_CURRENT_STEP_DOWN > 0
-        if (otpwCount > 4 && driver->isEnabled()) {
-            if (currentMillis > 100) {
-                currentMillis -= TMC_CURRENT_STEP_DOWN;
-                driver->rms_current(currentMillis);
-                printMotorNumberAndName(false);
-                Com::printFLN(Com::tMotorCurrentDecreasedTo, currentMillis);
+        if (status.otpw) { // over temperature prewarn
+            if (otpwCount < 255) {
+                otpwCount++;
             }
-        }
+            if (otpwCount == 1) {
+                printMotorNumberAndName(false);
+                Com::printFLN(Com::tMotorDriverOvertempWarningCurrent, currentMillis);
+            }
+#if TMC_CURRENT_STEP_DOWN > 0
+            if (otpwCount > 4 && driver->isEnabled()) {
+                if (currentMillis > 100) {
+                    currentMillis -= TMC_CURRENT_STEP_DOWN;
+                    driver->rms_current(currentMillis);
+                    printMotorNumberAndName(false);
+                    Com::printFLN(Com::tMotorCurrentDecreasedTo, currentMillis);
+                }
+            }
 #endif
-        otpw = true;
-    } else {
-        otpwCount = 0;
+            otpw = true;
+        } else {
+            otpwCount = 0;
+        }
     }
 }
 
@@ -786,36 +790,38 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
     if (debug != -1) {
         reportTMC2208(driver, this, debug);
     }
-    // Access of bits results in reading register again, so we buffer result
-    TMC2208_n::DRV_STATUS_t status { driver->DRV_STATUS() };
-    if (status.sr == 0xFFFFFFFF || status.sr == 0x0) { // not in working state
-        return;
-    }
-    if (status.ot) { // over temperature
-        printMotorNumberAndName(false);
-        Com::printFLN(Com::tMotorDriverOvertempCurrent, currentMillis);
-    }
-    if (status.otpw) { // over temperature prewarn
-        if (otpwCount < 255) {
-            otpwCount++;
+    if (isEnabled) { // test only when enabled to prevent false messages. Disabled motors should not overheat anyway
+        // Access of bits results in reading register again, so we buffer result
+        TMC2208_n::DRV_STATUS_t status { driver->DRV_STATUS() };
+        if (status.sr == 0xFFFFFFFF || status.sr == 0x0) { // not in working state
+            return;
         }
-        if (otpwCount == 1) {
+        if (status.ot) { // over temperature
             printMotorNumberAndName(false);
-            Com::printFLN(Com::tMotorDriverOvertempWarningCurrent, currentMillis);
+            Com::printFLN(Com::tMotorDriverOvertempCurrent, currentMillis);
         }
-#if TMC_CURRENT_STEP_DOWN > 0
-        if (otpwCount > 4 && driver->isEnabled()) {
-            if (currentMillis > 100) {
-                currentMillis -= TMC_CURRENT_STEP_DOWN;
-                driver->rms_current(currentMillis);
-                printMotorNumberAndName(false);
-                Com::printFLN(Com::tMotorCurrentDecreasedTo, currentMillis);
+        if (status.otpw) { // over temperature prewarn
+            if (otpwCount < 255) {
+                otpwCount++;
             }
-        }
+            if (otpwCount == 1) {
+                printMotorNumberAndName(false);
+                Com::printFLN(Com::tMotorDriverOvertempWarningCurrent, currentMillis);
+            }
+#if TMC_CURRENT_STEP_DOWN > 0
+            if (otpwCount > 4 && driver->isEnabled()) {
+                if (currentMillis > 100) {
+                    currentMillis -= TMC_CURRENT_STEP_DOWN;
+                    driver->rms_current(currentMillis);
+                    printMotorNumberAndName(false);
+                    Com::printFLN(Com::tMotorCurrentDecreasedTo, currentMillis);
+                }
+            }
 #endif
-        otpw = true;
-    } else {
-        otpwCount = 0;
+            otpw = true;
+        } else {
+            otpwCount = 0;
+        }
     }
 #endif
 }
@@ -1047,44 +1053,46 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
     if (debug != -1) {
         reportTMC2209(driver, this, debug);
     }
-    // Access of bits results in reading register again, so we buffer result
-    TMC2208_n::DRV_STATUS_t status { driver->DRV_STATUS() };
-    if (status.sr == 0xFFFFFFFF || status.sr == 0x0) { // not in working state
-        return;
-    }
-    if (status.ot) { // over temperature
-        printMotorNumberAndName(false);
-        Com::printFLN(Com::tMotorDriverOvertempCurrent, currentMillis);
-    }
-    if (status.otpw) { // over temperature prewarn
-        if (otpwCount < 255) {
-            otpwCount++;
+    if (isEnabled) { // test only when enabled to prevent false messages. Disabled motors should not overheat anyway
+        // Access of bits results in reading register again, so we buffer result
+        TMC2208_n::DRV_STATUS_t status { driver->DRV_STATUS() };
+        if (status.sr == 0xFFFFFFFF || status.sr == 0x0) { // not in working state
+            return;
         }
-        if (otpwCount == 1) {
+        if (status.ot) { // over temperature
             printMotorNumberAndName(false);
-            Com::printFLN(Com::tMotorDriverOvertempWarningCurrent, currentMillis);
+            Com::printFLN(Com::tMotorDriverOvertempCurrent, currentMillis);
         }
-#if TMC_CURRENT_STEP_DOWN > 0
-        if (otpwCount > 4 && driver->isEnabled()) {
-            if (currentMillis > 100) {
-                currentMillis -= TMC_CURRENT_STEP_DOWN;
-                driver->rms_current(currentMillis);
-                printMotorNumberAndName(false);
-                Com::printFLN(Com::tMotorCurrentDecreasedTo, currentMillis);
+        if (status.otpw) { // over temperature prewarn
+            if (otpwCount < 255) {
+                otpwCount++;
             }
-        }
+            if (otpwCount == 1) {
+                printMotorNumberAndName(false);
+                Com::printFLN(Com::tMotorDriverOvertempWarningCurrent, currentMillis);
+            }
+#if TMC_CURRENT_STEP_DOWN > 0
+            if (otpwCount > 4 && driver->isEnabled()) {
+                if (currentMillis > 100) {
+                    currentMillis -= TMC_CURRENT_STEP_DOWN;
+                    driver->rms_current(currentMillis);
+                    printMotorNumberAndName(false);
+                    Com::printFLN(Com::tMotorCurrentDecreasedTo, currentMillis);
+                }
+            }
 #endif
-        otpw = true;
-    } else {
-        otpwCount = 0;
-    }
-    if (status.s2ga || status.s2gb || status.s2vsa || status.s2vsb) {
-        printMotorNumberAndName(false);
-        Com::printF(Com::tMotorDriverShort, (status.s2ga || status.s2gb) ? PSTR("to ground!") : PSTR("to low-side MOSFET!"));
-        if (status.s2ga || status.s2vsa) {
-            Com::printFLN(PSTR(" (Phase A)"));
+            otpw = true;
         } else {
-            Com::printFLN(PSTR(" (Phase B)"));
+            otpwCount = 0;
+        }
+        if (status.s2ga || status.s2gb || status.s2vsa || status.s2vsb) {
+            printMotorNumberAndName(false);
+            Com::printF(Com::tMotorDriverShort, (status.s2ga || status.s2gb) ? PSTR("to ground!") : PSTR("to low-side MOSFET!"));
+            if (status.s2ga || status.s2vsa) {
+                Com::printFLN(PSTR(" (Phase A)"));
+            } else {
+                Com::printFLN(PSTR(" (Phase B)"));
+            }
         }
     }
 #endif

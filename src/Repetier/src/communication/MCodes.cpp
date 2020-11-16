@@ -648,7 +648,7 @@ void __attribute__((weak)) MCode_115(GCode* com) {
 #endif
 #if EMERGENCY_PARSER
     Com::cap(PSTR("EMERGENCY_PARSER:1"));
-    Com::cap(PSTR("OUT_OF_ORDER:0"));
+    Com::cap(PSTR("OUT_OF_ORDER:1"));
 #else
     Com::cap(PSTR("EMERGENCY_PARSER:0"));
     Com::cap(PSTR("OUT_OF_ORDER:0"));
@@ -1446,7 +1446,7 @@ void __attribute__((weak)) MCode_576(GCode* com) {
     if (com->hasS() && com->source) {
         com->source->outOfOrder = com->S != 0;
     }
-    Com::printFLN(PSTR("out_of_order:M112 M290 M416 M205 M876"));
+    Com::printFLN(PSTR("out_of_order:M108 M112 M205 M290 M416 M876"));
 #endif
 }
 
@@ -1538,7 +1538,7 @@ void __attribute__((weak)) MCode_876(GCode* com) {
     }
     if (com->hasS()) {
         Com::printFLN(PSTR("DialogChoice:"), (int32_t)com->S);
-        if(Printer::activePromptDialog) {
+        if (Printer::activePromptDialog) {
             Printer::activePromptDialog(static_cast<int>(com->S));
         }
     }

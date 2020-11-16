@@ -358,7 +358,7 @@ void HAL::setupTimer() {
     motion2->timer->setOverflow(PREPARE_FREQUENCY, HERTZ_FORMAT);
     motion2->timer->attachInterrupt(TIMER_VECTOR_NAME(MOTION2_TIMER_NUM));
     motion2->timer->resume();
-    HAL_NVIC_SetPriority(TIMER_IRQ(MOTION2_TIMER_NUM), 2, 0);
+    HAL_NVIC_SetPriority(TIMER_IRQ(MOTION2_TIMER_NUM), 4, 0);
 
     // Regular interrupts for heater control etc
 
@@ -368,7 +368,7 @@ void HAL::setupTimer() {
     pwm->timer->setOverflow(PWM_CLOCK_FREQ, HERTZ_FORMAT);
     pwm->timer->attachInterrupt(TIMER_VECTOR_NAME(PWM_TIMER_NUM));
     pwm->timer->resume();
-    HAL_NVIC_SetPriority(TIMER_IRQ(PWM_TIMER_NUM), 6, 0);
+    HAL_NVIC_SetPriority(TIMER_IRQ(PWM_TIMER_NUM), 5, 0);
 
     // Timer for stepper motor control
 
@@ -388,11 +388,11 @@ void HAL::setupTimer() {
             toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
             toneTimer->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
             toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
-            toneTimer->timer->attachInterrupt(1, [] {});
+            toneTimer->timer->attachInterrupt(2, [] {});
             // Not on by default for output_compare
             LL_TIM_OC_EnablePreload(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
             LL_TIM_OC_EnableFast(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
-            toneTimer->timer->setInterruptPriority(1, 0);
+            toneTimer->timer->setInterruptPriority(2, 0);
             toneTimer->timer->refresh();
             toneTimer->timer->resume();
             break;
@@ -1074,9 +1074,9 @@ void HAL::tone(uint32_t frequency) {
     if (frequency < 1) {
         return;
     }
-    
+
     // Faster timer reconfigurations to remove small gap between tone frequency changes
-    uint32_t autoReload = (F_CPU_TRUE / frequency); 
+    uint32_t autoReload = (F_CPU_TRUE / frequency);
     uint32_t prescale = (autoReload / 0x10000) + 1;
     LL_TIM_SetPrescaler(TIMER(TONE_TIMER_NUM), prescale - 1);
     autoReload /= prescale;

@@ -276,15 +276,15 @@ void HAL::hwSetup(void) {
 
     LL_TIM_OC_EnableFast(TIMER(SERVO_TIMER_NUM), servo->timer->getLLChannel(1));
     LL_TIM_OC_EnablePreload(TIMER(SERVO_TIMER_NUM), servo->timer->getLLChannel(1));
-    
+
     servo->timer->attachInterrupt(TIMER_VECTOR_NAME(SERVO_TIMER_NUM));
     servo->timer->attachInterrupt(1, &servoOffTimer);
     servo->timer->refresh();
     servo->timer->resume();
-    
-    ServoPrescalerfactor = (LL_TIM_GetPrescaler(servo->tim) + 1); 
+
+    ServoPrescalerfactor = (LL_TIM_GetPrescaler(servo->tim) + 1);
     Servo2500 = ((2500 * (servo->timer->getTimerClkFreq() / 1000000)) / ServoPrescalerfactor) - 1;
-    HAL_NVIC_SetPriority(TIMER_IRQ(SERVO_TIMER_NUM), 1, 0);
+    HAL_NVIC_SetPriority(TIMER_IRQ(SERVO_TIMER_NUM), 3, 0);
 #endif
 
 #if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
@@ -318,7 +318,7 @@ void HAL::setupTimer() {
     motion2->timer->setOverflow(PREPARE_FREQUENCY, HERTZ_FORMAT);
     motion2->timer->attachInterrupt(TIMER_VECTOR_NAME(MOTION2_TIMER_NUM));
     motion2->timer->resume();
-    HAL_NVIC_SetPriority(TIMER_IRQ(MOTION2_TIMER_NUM), 2, 0);
+    HAL_NVIC_SetPriority(TIMER_IRQ(MOTION2_TIMER_NUM), 4, 0);
 
     // Regular interrupts for heater control etc
 
@@ -353,7 +353,7 @@ void HAL::setupTimer() {
             // Not on by default for output_compare
             LL_TIM_OC_EnablePreload(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
             LL_TIM_OC_EnableFast(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
-            toneTimer->timer->setInterruptPriority(1, 0);
+            toneTimer->timer->setInterruptPriority(2, 0);
             toneTimer->timer->refresh();
             toneTimer->timer->resume();
             break;
@@ -541,7 +541,7 @@ void HAL::analogStart(void) {
         += HAL_DMA_Init(&hdma_adc);
     dmaInitState = hdma_adc.State;
     dmaInitError = hdma_adc.ErrorCode;
-    __HAL_LINKDMA(&AdcHandle, DMA_Handle, hdma_adc); 
+    __HAL_LINKDMA(&AdcHandle, DMA_Handle, hdma_adc);
     dmaerror += HAL_ADC_Start_DMA(&AdcHandle, (uint32_t*)&adcData, numAnalogInputs);
     // Just in case.
     __HAL_DMA_DISABLE_IT(&hdma_adc, DMA_IT_HT | DMA_IT_TE | DMA_IT_TC);
@@ -906,10 +906,10 @@ void TIMER_VECTOR(PWM_TIMER_NUM) {
     pwm_count3 += 8;
     pwm_count4 += 16;
 
-    if (__HAL_DMA_GET_FLAG(&hdma_adc, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc))) { 
+    if (__HAL_DMA_GET_FLAG(&hdma_adc, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc))) {
 #ifdef DEBUG_TIMING
-    WRITE(DEBUG_ISR_ANALOG_PIN, 1);
-#endif 
+        WRITE(DEBUG_ISR_ANALOG_PIN, 1);
+#endif
         for (int i = 0; i < numAnalogInputs; i++) {
             analogValues[i].lastValue = adcData[i];
         }
@@ -918,7 +918,7 @@ void TIMER_VECTOR(PWM_TIMER_NUM) {
 #include "io/redefine.h"
         __HAL_DMA_CLEAR_FLAG(&hdma_adc, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc));
 #ifdef DEBUG_TIMING
-    WRITE(DEBUG_ISR_ANALOG_PIN, 0);
+        WRITE(DEBUG_ISR_ANALOG_PIN, 0);
 #endif
     }
 
@@ -1015,12 +1015,12 @@ void HAL::tone(uint32_t frequency) {
     if (frequency < 1) {
         return;
     }
-    
-    uint32_t autoReload = (F_CPU_TRUE / frequency); 
+
+    uint32_t autoReload = (F_CPU_TRUE / frequency);
     uint32_t prescale = (autoReload / 0x10000) + 1;
-    LL_TIM_SetPrescaler(TIMER(TONE_TIMER_NUM), prescale - 1); 
+    LL_TIM_SetPrescaler(TIMER(TONE_TIMER_NUM), prescale - 1);
     autoReload /= prescale;
-    LL_TIM_SetAutoReload(TIMER(TONE_TIMER_NUM), autoReload);  
+    LL_TIM_SetAutoReload(TIMER(TONE_TIMER_NUM), autoReload);
     LL_TIM_OC_SetCompareCH1(TIMER(TONE_TIMER_NUM), ((autoReload + 1) * (Printer::toneVolume * 50)) / 10000);
     if (toneStopped) { // Only generate updates if the timer's dead.
         LL_TIM_GenerateEvent_UPDATE(TIMER(TONE_TIMER_NUM));

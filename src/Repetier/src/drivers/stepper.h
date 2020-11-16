@@ -328,12 +328,16 @@ template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 class TMCStepper2130Driver : public StepperDriverBase, public ProgrammableStepperBase {
     TMC2130Stepper* driver;
 
+protected:
+    bool isEnabled;
+
 public:
     TMCStepper2130Driver(EndstopDriver* minES, EndstopDriver* maxES,
                          TMC2130Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity)
         : StepperDriverBase(minES, maxES)
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
-        , driver(_driver) { }
+        , driver(_driver)
+        , isEnabled(false) { }
     virtual void init();
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity);
     inline void step() final {
@@ -348,9 +352,11 @@ public:
     }
     inline void enable() final {
         enableCls::on();
+        isEnabled = true;
     }
     inline void disable() final {
         enableCls::off();
+        isEnabled = false;
     }
     void eepromHandle();
     void eepromReserve();
@@ -374,12 +380,16 @@ template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 class TMCStepper5160Driver : public StepperDriverBase, public ProgrammableStepperBase {
     TMC5160Stepper* driver;
 
+protected:
+    bool isEnabled;
+
 public:
     TMCStepper5160Driver(EndstopDriver* minES, EndstopDriver* maxES,
                          TMC5160Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity)
         : StepperDriverBase(minES, maxES)
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
-        , driver(_driver) { }
+        , driver(_driver)
+        , isEnabled(false) { }
     virtual void init();
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity);
     inline void step() final {
@@ -394,9 +404,11 @@ public:
     }
     inline void enable() final {
         enableCls::on();
+        isEnabled = true;
     }
     inline void disable() final {
         enableCls::off();
+        isEnabled = false;
     }
     virtual void eepromHandle() final;
     void eepromReserve();
@@ -421,12 +433,16 @@ template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 class TMCStepper2208Driver : public StepperDriverBase, public ProgrammableStepperBase {
     TMC2208Stepper* driver;
 
+protected:
+    bool isEnabled;
+
 public:
     TMCStepper2208Driver(EndstopDriver* minES, EndstopDriver* maxES,
                          TMC2208Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs)
         : StepperDriverBase(minES, maxES)
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, -128)
-        , driver(_driver) { }
+        , driver(_driver)
+        , isEnabled(false) { }
     virtual void init();
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs);
     inline void step() final {
@@ -441,9 +457,11 @@ public:
     }
     inline void enable() final {
         enableCls::on();
+        isEnabled = true;
     }
     inline void disable() final {
         enableCls::off();
+        isEnabled = false;
     }
     virtual void eepromHandle() final;
     void eepromReserve();
@@ -469,13 +487,17 @@ class TMCStepper2209Driver : public StepperDriverBase, public ProgrammableSteppe
     TMC2209Stepper* driver;
     bool usesSoftwareSerial;
 
+protected:
+    bool isEnabled;
+
 public:
     TMCStepper2209Driver(EndstopDriver* minES, EndstopDriver* maxES,
                          TMC2209Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int16_t _stallSensitivity, bool _isSoftware)
         : StepperDriverBase(minES, maxES)
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
         , driver(_driver)
-        , usesSoftwareSerial(_isSoftware) {
+        , usesSoftwareSerial(_isSoftware)
+        , isEnabled(false) {
 #if SW_CAPABLE_PLATFORM
         if (usesSoftwareSerial && driver != nullptr) {
             // Need to do this before ANY sort of serial commands or we'll get a infinite loop in the serial library
@@ -497,9 +519,11 @@ public:
     }
     inline void enable() final {
         enableCls::on();
+        isEnabled = true;
     }
     inline void disable() final {
         enableCls::off();
+        isEnabled = false;
     }
     virtual void eepromHandle() final;
     void eepromReserve();
