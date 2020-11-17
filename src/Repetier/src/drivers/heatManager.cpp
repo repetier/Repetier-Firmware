@@ -20,7 +20,11 @@ void menuDisableTemperature(GUIAction action, void* data) {
 #if FEATURE_CONTROLLER != NO_CONTROLLER
     HeatManager* hm = reinterpret_cast<HeatManager*>(data);
     hm->setTargetTemperature(hm->getMinTemperature());
+    // Now remove the Disable button & move the display up if needed.
     GUI::cursorRow[GUI::level]--;
+    if (GUI::topRow[GUI::level]) {
+        GUI::topRow[GUI::level]--;
+    }
 #endif
 }
 
