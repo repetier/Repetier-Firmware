@@ -29,8 +29,8 @@
 millis_t previousMillisCmd = 0;
 millis_t maxInactiveTime = MAX_INACTIVE_TIME * 1000L;
 millis_t stepperInactiveTime = STEPPER_INACTIVE_TIME * 1000L;
-long baudrate = BAUDRATE;   ///< Communication speed rate.
-volatile int waitRelax = 0; // Delay filament relax at the end of print, could be a simple timeout
+int32_t baudrate = BAUDRATE; ///< Communication speed rate.
+volatile int waitRelax = 0;  // Delay filament relax at the end of print, could be a simple timeout
 
 ServoInterface* servos[] = SERVO_LIST;
 constexpr int numServos = std::extent<decltype(servos)>::value;

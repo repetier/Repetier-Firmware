@@ -214,6 +214,16 @@ void EEPROM::initBaudrate() {
     }
 #endif
 }
+
+void EEPROM::setBaudrate(int32_t val) {
+    storePos = EPR_BAUDRATE;
+    mode = EEPROMMode::SET_VAR;
+    storeVar.l = val;
+    storeType = EEPROMType::LONG;
+    callHandle();
+    storeDataIntoEEPROM();
+}
+
 void EEPROM::updateVariation(fast8_t data) {
     variation1 += data;
     if (variation1 >= 255) {

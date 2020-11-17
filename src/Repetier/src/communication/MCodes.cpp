@@ -1442,8 +1442,11 @@ void __attribute__((weak)) MCode_575(GCode* com) {
         int32_t curBaud = 0l;
         for (size_t i = 0ul; (curBaud = pgm_read_dword(&(baudrates[i]))); i++) {
             if (static_cast<int32_t>(com->B) == curBaud) {
-                HAL::serialFlush();
-                HAL::serialSetBaudrate((baudrate = curBaud));
+                if (curBaud != baudrate) {
+                    EEPROM::setBaudrate(curBaud);
+                    HAL::serialFlush();
+                    HAL::serialSetBaudrate((baudrate = curBaud));
+                }
                 return;
             }
         }

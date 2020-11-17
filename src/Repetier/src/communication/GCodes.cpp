@@ -289,8 +289,9 @@ void __attribute__((weak)) GCode_4(GCode* com) {
     codenum = 0;
     if (com->hasS()) {
         codenum = com->S * 1000; // seconds to wait
-    } else if (com->hasP()) {
-        codenum = com->P; // milliseconds to wait
+    }
+    if (com->hasP()) {
+        codenum += com->P; // milliseconds to wait
     }
 
     codenum += HAL::timeInMilliseconds(); // keep track of when we started waiting

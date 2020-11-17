@@ -95,6 +95,7 @@ public:
     static void init();
     static void markChanged();
     static void initBaudrate();
+    static void setBaudrate(int32_t val);
     static void updateDerived();
     static void timerHandler(); // gets aclled every 100ms
     /** Reserve memory in eeprom to store data. sig and version
