@@ -153,7 +153,7 @@ void __attribute__((weak)) GCode_2_3(GCode* com) {
         HeatManager* heater = Tool::getActiveTool()->getHeater();
         if (Printer::relativeCoordinateMode || Printer::relativeExtruderCoordinateMode) {
             if (fabs(com->E) * Printer::extrusionFactor > EXTRUDE_MAXLENGTH) {
-                Com::printWarningF(PSTR("MAx. extrusion distance per move exceeded - ignoring move."));
+                Com::printWarningF(PSTR("Max. extrusion distance per move exceeded - ignoring move."));
                 p = 0;
             }
             target[E_AXIS] = Motion1::currentPosition[E_AXIS] + p;
@@ -287,10 +287,11 @@ void __attribute__((weak)) GCode_4(GCode* com) {
     int32_t codenum;
     Motion1::waitForEndOfMoves();
     codenum = 0;
-    if (com->hasP())
-        codenum = com->P; // milliseconds to wait
-    if (com->hasS())
+    if (com->hasS()) {
         codenum = com->S * 1000; // seconds to wait
+    } else if (com->hasP()) {
+        codenum = com->P; // milliseconds to wait
+    }
 
     codenum += HAL::timeInMilliseconds(); // keep track of when we started waiting
     while ((uint32_t)(codenum - HAL::timeInMilliseconds()) < 2000000000) {
