@@ -504,7 +504,7 @@ void Commands::processMCode(GCode* com) {
     case 84: // M84
         MCode_84(com);
         break;
-    case 85: // M85
+    case 85: // M85 S<seconds> - Set an inactivity shutdown timer. (maxInactiveTime)
         MCode_85(com);
         break;
     case 92: // M92
@@ -733,6 +733,9 @@ void Commands::processMCode(GCode* com) {
         break;
     case 569: // Set stealthchop
         MCode_Stepper(com);
+        break;
+    case 575: // Update all serial baudrates 
+        MCode_575(com);
         break;
     case 600:
         MCode_600(com);

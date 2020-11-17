@@ -4,6 +4,10 @@ const char* const axisNames[] PROGMEM = {
     "X", "Y", "Z", "E", "A", "B", "C"
 };
 
+const int32_t baudrates[] PROGMEM = {
+    38400, 56000, 57600, 76800, 115200, 128000, 230400, 250000, 256000, 460800, 500000, 0
+};
+
 void __attribute__((weak)) menuBabystepZ(GUIAction action, void* data) {
     DRAW_FLOAT_P(PSTR("Babystep Z:"), Com::tUnitMM, Motion1::totalBabystepZ, 2);
     if (GUI::handleFloatValueAction(action, v, 0.01f)) {
@@ -366,9 +370,6 @@ void __attribute__((weak)) menuControlProbe(GUIAction action, void* data) {
     GUI::menuEnd(action);
 #endif
 }
-
-const long baudrates[] PROGMEM = { 38400, 56000, 57600, 76800, 115200, 128000, 230400, 250000, 256000,
-                                   460800, 500000, 0 };
 
 void __attribute__((weak)) menuBaudrate(GUIAction action, void* data) {
     int32_t v = baudrate;

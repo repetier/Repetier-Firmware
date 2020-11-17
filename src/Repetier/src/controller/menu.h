@@ -3,6 +3,7 @@
 
 enum class GUIAction;
 extern const char* const axisNames[] PROGMEM;
+extern const int32_t baudrates[] PROGMEM;
 
 extern void menuMove(GUIAction action, void* data);
 extern void menuHome(GUIAction action, void* data);

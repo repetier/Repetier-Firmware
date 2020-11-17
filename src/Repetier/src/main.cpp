@@ -106,7 +106,7 @@ Custom M Codes
 - M83  - Set E codes relative while in Absolute Coordinates (G90) mode
 - M84  - Disable steppers until next move,
         or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
-- M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
+- M85 S<seconds> - Set an inactivity shutdown timer. To disable set 0. Default is MAX_INACTIVE_TIME.
 - M92  - Set axisStepsPerMM - same syntax as G92
 - M99 S<delayInSec> X0 Y0 Z0 - Disable motors for S seconds (default 10) for given axis.
 - M104 S<temp> T<extruder> P1 F1 H1 O<offset>- Set temperature without wait. P1 = wait for moves to finish, F1 = beep when temp. reached first time
@@ -181,6 +181,7 @@ Custom M Codes
 - M531 filename - Define filename being printed
 - M532 X<percent> L<curLayer> - update current print state progress (X=0..100) and layer L
 - M539 S<supportStartStop> P<paused> - S1 Tells firmware that host will use the feature. P1/0 signals paused/running state.
+- M575 B<Baudrate> - Update all available serial port baudrates to one of the permitted rates (38400, 56000, 57600, 76800, 115200, 128000, 230400, 250000, 256000, 460800, 500000)
 - M600 Change filament
 - M601 S<1/0> B<1/0> P<1/0> - Pause extruders. B1 also pauses heated bed. Paused extrudes disable heaters and motor. Continue (S0) reheats extruder to old temp. P0 does not wait for target temperature.
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
