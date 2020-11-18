@@ -1328,14 +1328,49 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
 
 void __attribute__((weak)) printProgress(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
+#if SDSUPPORT
+        if (sd.sdactive && sd.sdmode) { // print from sd card
+            Printer::progress = (static_cast<float>(sd.sdpos) * 100.0) / static_cast<float>(sd.filesize);
+        }
+#endif
+        static bool cycle = false;
+        uint8_t row = 0u;
         GUI::bufClear();
-        GUI::bufAddStringP(PSTR("Progress:"));
-        GUI::bufAddFloat(Printer::progress, 3, 1);
-        GUI::bufAddStringP(PSTR(" %"));
-        printRow(0, GUI::buf);
+        // Cycle name if not sd printing every 3 sec
+        if ((Printer::maxLayer != -1) && !(refresh_counter % 3)) {
+            cycle = !cycle;
+        }
+
+        if (!cycle) {
+            GUI::bufAddStringP(PSTR("Progress: "));
+            GUI::bufAddFloat(Printer::progress, 3, 1);
+            GUI::bufAddStringP(Com::tUnitPercent);
+        } else {
+            GUI::bufAddString(Printer::printName);
+        }
+
+        printRow(row++, GUI::buf);
         GUI::bufClear();
-        printRow(1, GUI::buf);
-        printRow(2, GUI::buf);
+        if (Printer::maxLayer != -1) {
+            GUI::bufAddStringP(PSTR("Layer: "));
+            GUI::bufAddInt(Printer::currentLayer, 3);
+            GUI::bufAddStringP(Com::tSlash);
+            GUI::bufAddInt(Printer::maxLayer, 3);
+            printRow(row++, GUI::buf);
+            GUI::bufClear();
+        }
+        GUI::bufAddStringP(PSTR("Height: "));
+        GUI::bufAddFloat(Motion1::getShowPosition(Z_AXIS), 3, 2);
+        GUI::bufAddStringP(Com::tUnitMM);
+
+        if (Printer::maxLayer == -1) { // SD Printing, always show name
+            printRow(row++, GUI::buf);
+            GUI::bufClear();
+            GUI::bufAddString(Printer::printName);
+        }
+
+        printRow(row++, GUI::buf);
+        GUI::bufClear();
         printRow(3, GUI::status);
     }
     GUI::replaceOn(GUIAction::NEXT, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
