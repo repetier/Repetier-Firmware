@@ -490,6 +490,7 @@ public:
     FSTRINGVAR(tMotorResolutionSteps)
     FSTRINGVAR(tMotorMicrosteps)
     FSTRINGVAR(tMotorRMSCurrentMA)
+    FSTRINGVAR(tMotorRMSCurrentMAColon)
     FSTRINGVAR(tMotorHybridTresholdMMS)
     FSTRINGVAR(tMotorStealthOnOff)
     FSTRINGVAR(tMotorStallSensitivity255)

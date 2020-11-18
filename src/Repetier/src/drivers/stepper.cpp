@@ -153,7 +153,7 @@ void reportTMC2130(TMC2130Stepper* driver, ProgrammableStepperBase* b, int level
         break;
     }
     Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(Com::tMotorRMSCurrentMA, driver->rms_current());
+    Com::printF(Com::tMotorRMSCurrentMAColon, driver->rms_current());
     Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
     Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142 * driver->rms_current(), 0);
     Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
@@ -412,7 +412,7 @@ void reportTMC5160(TMC5160Stepper* driver, ProgrammableStepperBase* b, int level
         break;
     }
     Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(Com::tMotorRMSCurrentMA, driver->rms_current());
+    Com::printF(Com::tMotorRMSCurrentMAColon, driver->rms_current());
     Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
     Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142 * driver->rms_current(), 0);
     Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
@@ -674,7 +674,7 @@ void reportTMC2208(TMC2208Stepper* driver, ProgrammableStepperBase* b, int level
         break;
     }
     Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(Com::tMotorRMSCurrentMA, driver->rms_current());
+    Com::printF(Com::tMotorRMSCurrentMAColon, driver->rms_current());
     Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
     Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142 * driver->rms_current(), 0);
     Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
@@ -922,7 +922,7 @@ void reportTMC2209(TMC2209Stepper* driver, ProgrammableStepperBase* b, int level
         break;
     }
     Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(Com::tMotorRMSCurrentMA, driver->rms_current());
+    Com::printF(Com::tMotorRMSCurrentMAColon, driver->rms_current());
     Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
     Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142 * driver->rms_current(), 0);
     Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
