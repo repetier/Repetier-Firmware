@@ -132,7 +132,7 @@ void ProgrammableStepperBase::processEEPROM(uint8_t flags) {
 #endif
 #if STORE_MOTOR_STALL_SENSITIVITY
     //Note, flag 32 is stallguard 4, we don't use that flag for anything else yet, other than a small change in eeprom text.
-    if (flags & 16 && stallguardSensitivity != -128) {
+    if (flags & 16 && hasStallguard()) {
         EEPROM::handleInt(eprStart + PSB_STALL_SENSITIVITY_POS, (flags & 32) ? Com::tMotorStallSensitivity255 : Com::tMotorStallSensitivity64, stallguardSensitivity);
     }
 #endif
@@ -147,15 +147,16 @@ void reportTMC2130(TMC2130Stepper* driver, ProgrammableStepperBase* b, int level
         break;
     case 1:
         Com::printFLN(Com::tMotorNoConnection);
-        break;
+        return;
     case 2:
         Com::printFLN(Com::tMotorNoPower);
         break;
     }
     Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(Com::tMotorRMSCurrentMA, driver->rms_current());
+    Com::printF(Com::tMotorRMSCurrentMA, Com::tColonSpace);
+    Com::printNumber(driver->rms_current());
     Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
-    Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142 * driver->rms_current(), 0);
+    Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142f * driver->rms_current(), 0);
     Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
     Com::printFLN(Com::tMotorSpaceMresColon, (int)driver->mres());
     Com::printFLN(Com::tMotorStealthChopColon, driver->en_pwm_mode(), BoolFormat::ONOFF);
@@ -231,7 +232,7 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::init() {
         driver->TPWMTHRS(0); // Only stealthChop or spreadCycle
     }
 
-    if (stallguardSensitivity != -128) {
+    if (hasStallguard()) {
         stallguardSensitivity = constrain(stallguardSensitivity, -64, 63);
         driver->sgt(stallguardSensitivity);
     }
@@ -383,11 +384,9 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
         if (hasStallguard()) {
             if (com.hasS()) {
                 if (com.S >= -64 && com.S <= 63) {
-                    stallguardSensitivity = static_cast<int8_t>(com.S);
-                } else {
-                    stallguardSensitivity = -128;
+                    stallguardSensitivity = static_cast<int16_t>(com.S);
+                    init();
                 }
-                init();
             }
             printMotorNumberAndName(false);
             Com::printFLN(Com::tMotorSpaceStallguardSensitivityColon, stallguardSensitivity);
@@ -406,15 +405,16 @@ void reportTMC5160(TMC5160Stepper* driver, ProgrammableStepperBase* b, int level
         break;
     case 1:
         Com::printFLN(Com::tMotorNoConnection);
-        break;
+        return;
     case 2:
         Com::printFLN(Com::tMotorNoPower);
         break;
     }
     Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(Com::tMotorRMSCurrentMA, driver->rms_current());
+    Com::printF(Com::tMotorRMSCurrentMA, Com::tColonSpace);
+    Com::printNumber(driver->rms_current());
     Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
-    Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142 * driver->rms_current(), 0);
+    Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142f * driver->rms_current(), 0);
     Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
     Com::printFLN(Com::tMotorSpaceMresColon, (int)driver->mres());
     Com::printFLN(Com::tMotorStealthChopColon, driver->en_pwm_mode(), BoolFormat::ONOFF);
@@ -492,7 +492,7 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::init() {
         driver->TPWMTHRS(0); // Only stealthChop or spreadCycle
     }
 
-    if (stallguardSensitivity != -128) {
+    if (hasStallguard()) {
         stallguardSensitivity = constrain(stallguardSensitivity, -64, 63);
         driver->sgt(stallguardSensitivity);
     }
@@ -644,11 +644,9 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
         if (hasStallguard()) {
             if (com.hasS()) {
                 if (com.S >= -64 && com.S <= 63) {
-                    stallguardSensitivity = static_cast<int8_t>(com.S);
-                } else {
-                    stallguardSensitivity = -128;
+                    stallguardSensitivity = static_cast<int16_t>(com.S);
+                    init();
                 }
-                init();
             }
             printMotorNumberAndName(false);
             Com::printFLN(Com::tMotorSpaceStallguardSensitivityColon, stallguardSensitivity);
@@ -668,15 +666,16 @@ void reportTMC2208(TMC2208Stepper* driver, ProgrammableStepperBase* b, int level
         break;
     case 1:
         Com::printFLN(Com::tMotorNoConnection);
-        break;
+        return;
     case 2:
         Com::printFLN(Com::tMotorNoPower);
         break;
     }
     Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(Com::tMotorRMSCurrentMA, driver->rms_current());
+    Com::printF(Com::tMotorRMSCurrentMA, Com::tColonSpace);
+    Com::printNumber(driver->rms_current());
     Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
-    Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142 * driver->rms_current(), 0);
+    Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142f * driver->rms_current(), 0);
     Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
     Com::printFLN(Com::tMotorSpaceMresColon, (int)driver->mres());
     Com::printFLN(Com::tMotorStealthChopColon, b->getStealthChop(), BoolFormat::ONOFF);
@@ -780,7 +779,6 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::reset(uint16_t _mic
     currentMillis = _currentMillis;
     stealthChop = _stealthChop;
     hybridSpeed = _hybridThrs;
-    stallguardSensitivity = 8;
     init();
 }
 
@@ -916,15 +914,16 @@ void reportTMC2209(TMC2209Stepper* driver, ProgrammableStepperBase* b, int level
         break;
     case 1:
         Com::printFLN(Com::tMotorNoConnection);
-        break;
+        return;
     case 2:
         Com::printFLN(Com::tMotorNoPower);
         break;
     }
     Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(Com::tMotorRMSCurrentMA, driver->rms_current());
+    Com::printF(Com::tMotorRMSCurrentMA, Com::tColonSpace);
+    Com::printNumber(driver->rms_current());
     Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
-    Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142 * driver->rms_current(), 0);
+    Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142f * driver->rms_current(), 0);
     Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
     Com::printFLN(Com::tMotorSpaceMresColon, (int)driver->mres());
     Com::printFLN(Com::tMotorStealthChopColon, b->getStealthChop(), BoolFormat::ONOFF);
@@ -978,14 +977,14 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::init() {
     // We're meant to use the 2208's.
     // However, it does have it's own IOIN_t, COOLCONF_t, SG_RESULT_t, and SGTHRS_t tables!
 
-    TMC2208_n::GCONF_t gconf { 0 };
+    TMC2208_n::GCONF_t gconf = { 0 };
     gconf.pdn_disable = true;      // Use UART
     gconf.mstep_reg_select = true; // Select microsteps with UART
     gconf.i_scale_analog = false;
     gconf.en_spreadcycle = !stealthChop;
     driver->GCONF(gconf.sr);
 
-    TMC2208_n::CHOPCONF_t chopconf { 0 };
+    TMC2208_n::CHOPCONF_t chopconf = { 0 };
     chopconf.tbl = 1;
     chopconf.toff = tmcChopperTiming.toff;
     chopconf.intpol = TMC_INTERPOLATE;
@@ -1001,7 +1000,7 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::init() {
     driver->iholddelay(10);
     driver->TPOWERDOWN(128); // ~2s until driver lowers to hold current
 
-    TMC2208_n::PWMCONF_t pwmconf { 0 };
+    TMC2208_n::PWMCONF_t pwmconf = { 0 };
     pwmconf.pwm_lim = 12;
     pwmconf.pwm_reg = 8;
     pwmconf.pwm_autograd = true;
@@ -1017,7 +1016,7 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::init() {
         driver->TPWMTHRS(0); // Only stealthChop or spreadCycle
     }
 
-    if (stallguardSensitivity != -128) {
+    if (hasStallguard()) {
         stallguardSensitivity = constrain(stallguardSensitivity, 0, 255);
         driver->SGTHRS(stallguardSensitivity);
     }
@@ -1177,10 +1176,8 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
             if (com.hasS()) {
                 if (com.S >= 0 && com.S <= 255) {
                     stallguardSensitivity = static_cast<int16_t>(com.S);
-                } else {
-                    stallguardSensitivity = -128;
+                    init();
                 }
-                init();
             }
             printMotorNumberAndName(false);
             Com::printFLN(Com::tMotorSpaceStallguardSensitivityColon, stallguardSensitivity);

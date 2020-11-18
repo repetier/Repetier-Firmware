@@ -314,10 +314,10 @@ public:
         , otpw(false)
         , otpwCount(0)
         , stallguardSensitivity(_stallguardSensitivity) { }
-    int16_t getMicrosteps() { return microsteps; }
-    int16_t getCurrentMillis() { return currentMillis; }
-    bool getStealthChop() { return stealthChop; }
-    float getHybridSpeed() { return hybridSpeed; }
+    inline int16_t getMicrosteps() { return microsteps; }
+    inline int16_t getCurrentMillis() { return currentMillis; }
+    inline bool getStealthChop() { return stealthChop; }
+    inline float getHybridSpeed() { return hybridSpeed; }
     inline bool hasStallguard() { return stallguardSensitivity != -128; }
     void reserveEEPROM(uint16_t extraBytes);
     void processEEPROM(uint8_t flags);
@@ -338,7 +338,7 @@ public:
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
         , driver(_driver)
         , isEnabled(false) { }
-    virtual void init();
+    virtual void init() final;
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity);
     inline void step() final {
         stepCls::on();
@@ -390,7 +390,7 @@ public:
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
         , driver(_driver)
         , isEnabled(false) { }
-    virtual void init();
+    virtual void init() final;
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity);
     inline void step() final {
         stepCls::on();
@@ -443,7 +443,7 @@ public:
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, -128)
         , driver(_driver)
         , isEnabled(false) { }
-    virtual void init();
+    virtual void init() final;
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs);
     inline void step() final {
         stepCls::on();
@@ -505,7 +505,7 @@ public:
         }
 #endif
     }
-    virtual void init();
+    virtual void init() final;
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int16_t _stallSensitivity);
     inline void step() final {
         stepCls::on();
