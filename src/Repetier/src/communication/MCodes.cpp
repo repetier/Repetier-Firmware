@@ -1407,14 +1407,19 @@ void __attribute__((weak)) MCode_531(GCode* com) {
 }
 
 void __attribute__((weak)) MCode_532(GCode* com) {
-    if (com->hasX())
+    if (com->hasX()) {
         Printer::progress = com->X;
-    if (Printer::progress > 100.0)
+    }
+    if (Printer::progress > 100.0) {
         Printer::progress = 100.0;
-    else if (Printer::progress < 0)
+    } else if (Printer::progress < 0) {
         Printer::progress = 0;
-    if (com->hasL())
+    }
+    if (com->hasL()) {
         Printer::currentLayer = static_cast<int>(com->L);
+    } else {
+        Com::printFLN(PSTR("M532 L:"), Motion1::currentPosition[Z_AXIS], 2);
+    }
 }
 
 void __attribute__((weak)) MCode_539(GCode* com) {
