@@ -132,7 +132,7 @@ void ProgrammableStepperBase::processEEPROM(uint8_t flags) {
 #endif
 #if STORE_MOTOR_STALL_SENSITIVITY
     //Note, flag 32 is stallguard 4, we don't use that flag for anything else yet, other than a small change in eeprom text.
-    if (flags & 16) {
+    if (flags & 16 && hasStallguard()) {
         EEPROM::handleInt(eprStart + PSB_STALL_SENSITIVITY_POS, (flags & 32) ? Com::tMotorStallSensitivity255 : Com::tMotorStallSensitivity64, stallguardSensitivity);
     }
 #endif
@@ -232,8 +232,10 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::init() {
         driver->TPWMTHRS(0); // Only stealthChop or spreadCycle
     }
 
-    stallguardSensitivity = constrain(stallguardSensitivity, -64, 63);
-    driver->sgt(stallguardSensitivity);
+    if (hasStallguard()) {
+        stallguardSensitivity = constrain(stallguardSensitivity, -64, 63);
+        driver->sgt(stallguardSensitivity);
+    }
     driver->GSTAT(); // Clear GSTAT
 }
 
@@ -320,7 +322,7 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::setMaxCurrent(int m
 // or otherwise prepare for endstop detection.
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::beforeHoming() {
-    if (stallguardSensitivity != 63) {
+    if (hasStallguard()) {
         driver->TCOOLTHRS(0xFFFFF);
         driver->en_pwm_mode(false);
         driver->diag1_stall(true);
@@ -329,7 +331,7 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::beforeHoming() {
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::afterHoming() {
-    if (stallguardSensitivity != 63) {
+    if (hasStallguard()) {
         driver->TCOOLTHRS(0);
         driver->en_pwm_mode(stealthChop);
         driver->diag1_stall(false);
@@ -379,14 +381,16 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
         Com::printFLN(Com::tMotorSpaceHybridTresholdColor, hybridSpeed, 1);
         break;
     case 914: // sensorless homing sensitivity
-        if (com.hasS()) {
-            if (com.S >= -64 && com.S <= 63) {
-                stallguardSensitivity = static_cast<int16_t>(com.S);
-                init();
+        if (hasStallguard()) {
+            if (com.hasS()) {
+                if (com.S >= -64 && com.S <= 63) {
+                    stallguardSensitivity = static_cast<int16_t>(com.S);
+                    init();
+                }
             }
+            printMotorNumberAndName(false);
+            Com::printFLN(Com::tMotorSpaceStallguardSensitivityColon, stallguardSensitivity);
         }
-        printMotorNumberAndName(false);
-        Com::printFLN(Com::tMotorSpaceStallguardSensitivityColon, stallguardSensitivity);
         break;
     }
 }
@@ -488,8 +492,10 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::init() {
         driver->TPWMTHRS(0); // Only stealthChop or spreadCycle
     }
 
-    stallguardSensitivity = constrain(stallguardSensitivity, -64, 63);
-    driver->sgt(stallguardSensitivity);
+    if (hasStallguard()) {
+        stallguardSensitivity = constrain(stallguardSensitivity, -64, 63);
+        driver->sgt(stallguardSensitivity);
+    }
     driver->GSTAT(); // Clear GSTAT
 }
 
@@ -576,7 +582,7 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::setMaxCurrent(int m
 // or otherwise prepare for endstop detection.
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::beforeHoming() {
-    if (stallguardSensitivity != 63) {
+    if (hasStallguard()) {
         driver->TCOOLTHRS(0xFFFFF);
         driver->en_pwm_mode(false);
         driver->diag1_stall(true);
@@ -585,7 +591,7 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::beforeHoming() {
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::afterHoming() {
-    if (stallguardSensitivity != 63) {
+    if (hasStallguard()) {
         driver->TCOOLTHRS(0);
         driver->en_pwm_mode(stealthChop);
         driver->diag1_stall(false);
@@ -635,14 +641,16 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
         Com::printFLN(Com::tMotorSpaceHybridTresholdColor, hybridSpeed, 1);
         break;
     case 914: // sensorless homing sensitivity
-        if (com.hasS()) {
-            if (com.S >= -64 && com.S <= 63) {
-                stallguardSensitivity = static_cast<int16_t>(com.S);
-                init();
+        if (hasStallguard()) {
+            if (com.hasS()) {
+                if (com.S >= -64 && com.S <= 63) {
+                    stallguardSensitivity = static_cast<int16_t>(com.S);
+                    init();
+                }
             }
+            printMotorNumberAndName(false);
+            Com::printFLN(Com::tMotorSpaceStallguardSensitivityColon, stallguardSensitivity);
         }
-        printMotorNumberAndName(false);
-        Com::printFLN(Com::tMotorSpaceStallguardSensitivityColon, stallguardSensitivity);
         break;
     }
 }
@@ -1008,8 +1016,10 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::init() {
         driver->TPWMTHRS(0); // Only stealthChop or spreadCycle
     }
 
-    stallguardSensitivity = constrain(stallguardSensitivity, 0, 255);
-    driver->SGTHRS(stallguardSensitivity);
+    if (hasStallguard()) {
+        stallguardSensitivity = constrain(stallguardSensitivity, 0, 255);
+        driver->SGTHRS(stallguardSensitivity);
+    }
     driver->GSTAT(); // Clear GSTAT
 }
 
@@ -1162,14 +1172,16 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
         break;
 
     case 914: // sensorless homing sensitivity
-        if (com.hasS()) {
-            if (com.S >= 0 && com.S <= 255) {
-                stallguardSensitivity = static_cast<int16_t>(com.S);
-                init();
+        if (hasStallguard()) {
+            if (com.hasS()) {
+                if (com.S >= 0 && com.S <= 255) {
+                    stallguardSensitivity = static_cast<int16_t>(com.S);
+                    init();
+                }
             }
+            printMotorNumberAndName(false);
+            Com::printFLN(Com::tMotorSpaceStallguardSensitivityColon, stallguardSensitivity);
         }
-        printMotorNumberAndName(false);
-        Com::printFLN(Com::tMotorSpaceStallguardSensitivityColon, stallguardSensitivity);
         break;
     }
 }

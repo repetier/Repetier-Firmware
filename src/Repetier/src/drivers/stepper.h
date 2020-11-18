@@ -318,6 +318,7 @@ public:
     inline int16_t getCurrentMillis() { return currentMillis; }
     inline bool getStealthChop() { return stealthChop; }
     inline float getHybridSpeed() { return hybridSpeed; }
+    inline bool hasStallguard() { return stallguardSensitivity != -128; }
     void reserveEEPROM(uint16_t extraBytes);
     void processEEPROM(uint8_t flags);
 };
