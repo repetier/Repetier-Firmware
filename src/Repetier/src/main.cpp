@@ -193,7 +193,9 @@ Custom M Codes
 - M668 - set line number 0 without notice to simulate error
 - M669 - Measure time for a LCD display refresh
 - M900 K<advance> R<ratio> W<extrusion width> H<layer height> D<filament diameter> - set advance parameter.
-- M908 P<address> S<value> : Set stepper current for digipot (RAMBO board)
+- M908 P<address> S<value> - Set stepper current for digipot (RAMBO board)
+- M914 P<motorId> S<value> - Set TMC sensorless homing sensitivity. 
+        Value range of -64 - 63 (Range of 0 - 255 for TMC2209 series)
 - M999 - Continue from fatal error. M999 S1 will create a fatal error for testing.
 */
 
