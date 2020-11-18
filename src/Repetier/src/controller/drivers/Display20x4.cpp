@@ -1336,8 +1336,8 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
         static bool cycle = false;
         uint8_t row = 0u;
         GUI::bufClear();
-        // Cycle name if not sd printing every 3 sec
-        if ((Printer::maxLayer != -1) && !(refresh_counter % 3)) {
+        // Cycle name if not sd printing every 4 sec
+        if ((Printer::maxLayer != -1) && !(refresh_counter % 4)) {
             cycle = !cycle;
         }
 
