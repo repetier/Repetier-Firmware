@@ -35,6 +35,7 @@ public:
     virtual void updateMaster() { }
     virtual void setAttached(bool attach) { }
     virtual bool isAttached() { return true; } // SW Endstops always "attached".
+    virtual ~EndstopDriver() {}
 };
 
 class EndstopNoneDriver : public EndstopDriver {
@@ -79,17 +80,12 @@ template <class inp, int axis, bool dir>
 class EndstopSwitchHardwareDriver : public EndstopDriver {
     fast8_t state;
     EndstopDriver* parent;
-    void (*callbackFunction)(void);
+    void_fn_t callbackFunc;
     uint8_t attachPin;
     bool attached;
 
 public:
-    EndstopSwitchHardwareDriver()
-        : state(false)
-        , parent(nullptr)
-        , callbackFunction(nullptr)
-        , attachPin((CPU_ARCH != ARCH_AVR) ? inp::pin() : digitalPinToInterrupt(inp::pin()))
-        , attached(false) { }
+    EndstopSwitchHardwareDriver(void_fn_t cb);
     void updateReal();
 
     inline virtual bool update() final {
@@ -104,20 +100,9 @@ public:
     inline virtual void setParent(EndstopDriver* p) final {
         parent = p;
     }
-    virtual void setAttached(bool attach) final {
-        if (attach && !attached) {
-            attachInterrupt(attachPin, callbackFunction, CHANGE);
-            updateReal();
-        } else if (!attach && attached) {
-            detachInterrupt(attachPin);
-        }
-        attached = attach ? (callbackFunction != nullptr) : false;
-    }
+    virtual void setAttached(bool attach) final;
     inline virtual bool isAttached() final {
         return attached;
-    }
-    inline void setCallback(void (*callback)(void)) {
-        callbackFunction = callback;
     }
 };
 

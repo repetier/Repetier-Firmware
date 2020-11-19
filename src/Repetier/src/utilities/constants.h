@@ -182,3 +182,4 @@
 #define XSTR(s) STR(s)
 
 typedef unsigned int uint;
+typedef void (*void_fn_t)();

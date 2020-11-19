@@ -33,6 +33,28 @@ inline bool EndstopSwitchDriver<inp>::update() {
 }
 
 template <class inp, int axis, bool dir>
+EndstopSwitchHardwareDriver<inp, axis, dir>::EndstopSwitchHardwareDriver(void_fn_t cb)
+    : state(false)
+    , parent(nullptr)
+    , callbackFunc(cb)
+    , attachPin((CPU_ARCH != ARCH_AVR) ? inp::pin() : digitalPinToInterrupt(inp::pin()))
+    , attached(false) {
+    setAttached(true);
+    setAttached(ALWAYS_CHECK_ENDSTOPS);
+}
+
+template <class inp, int axis, bool dir>
+void EndstopSwitchHardwareDriver<inp, axis, dir>::setAttached(bool attach) {
+    if (attach && !attached) {
+        attachInterrupt(attachPin, callbackFunc, CHANGE);
+        updateReal();
+    } else if (!attach && attached) {
+        detachInterrupt(attachPin);
+    }
+    attached = attach;
+}
+
+template <class inp, int axis, bool dir>
 inline void EndstopSwitchHardwareDriver<inp, axis, dir>::updateReal() {
     fast8_t newState = inp::get();
     if (state != newState) {
