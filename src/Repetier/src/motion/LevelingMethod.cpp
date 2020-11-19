@@ -159,7 +159,7 @@ void Leveling::init() {
 }
 
 void Leveling::handleEeprom() {
-    EEPROM::handleByte(eprStart + 20, PSTR("Bump Correction enabled"), distortionEnabled);
+    EEPROM::handleByte(eprStart + 20, PSTR("Bump Correction enabled [0/1]"), distortionEnabled);
     EEPROM::handleFloat(eprStart + 21, PSTR("100% Bump Correction until [mm]"), 2, startDegrade);
     EEPROM::handleFloat(eprStart + 25, PSTR("0% Bump Correction from [mm]"), 2, endDegrade);
     EEPROM::handleFloat(eprStart + 16, PSTR("Bump Correction temp. [deg C]"), 1, gridTemp);

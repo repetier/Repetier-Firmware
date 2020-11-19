@@ -2007,7 +2007,7 @@ void Motion1::eepromHandle(bool firstImport) {
             continue;
         }
         EEPROM::handlePrefix(getAxisString(i));
-        EEPROM::handleFloat(eprStart + p + EPR_M1_RESOLUTION, PSTR("steps per mm"), 3, resolution[i]);
+        EEPROM::handleFloat(eprStart + p + EPR_M1_RESOLUTION, Com::tEPRStepsPerMM, 3, resolution[i]);
 #if PRINTER_TYPE == PRINTER_TYPE_DUAL_X
         if (i != A_AXIS) {
 #endif
@@ -2040,10 +2040,10 @@ void Motion1::eepromHandle(bool firstImport) {
 #if PRINTER_TYPE != PRINTER_TYPE_DUAL_X
     EEPROM::handleFloat(eprStart + EPR_M1_PARK_Z, PSTR("Park position Z raise [mm]"), 2, parkPosition[Z_AXIS]);
 #endif
-    EEPROM::handleByte(eprStart + EPR_M1_ALWAYS_CHECK_ENDSTOPS, PSTR("Always check endstops"), alwaysCheckEndstops);
+    EEPROM::handleByte(eprStart + EPR_M1_ALWAYS_CHECK_ENDSTOPS, PSTR("Always check endstops [0/1]"), alwaysCheckEndstops);
     Motion1::setHardwareEndstopsAttached((alwaysCheckEndstops || Printer::isHoming() || Printer::isZProbingActive())); // Probing/homing checks just in case.
     EEPROM::handleByte(eprStart + EPR_M1_VELOCITY_PROFILE, PSTR("Velocity Profile [0-2]"), Motion2::velocityProfileIndex);
-    EEPROM::handleByte(eprStart + EPR_M1_AUTOLEVEL, PSTR("Auto level active [0-1]"), Motion1::autolevelActive);
+    EEPROM::handleByte(eprStart + EPR_M1_AUTOLEVEL, PSTR("Auto level active [0/1]"), Motion1::autolevelActive);
 
 #if FEATURE_AXISCOMP
     EEPROM::handleFloat(eprStart + EPR_M1_AXIS_COMP_XY, Com::tAxisCompTanXY, 6, axisCompTanXY);
