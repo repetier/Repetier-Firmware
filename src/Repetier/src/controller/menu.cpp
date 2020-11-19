@@ -738,6 +738,11 @@ static struct menuSDCacheStruct {
 
 void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
     GUI::menuStart(action);
+    if (!sd.sdactive) { // User was still inside the menu when their sdcard ejected.
+        GUI::pop(); 
+        GUI::refresh(); 
+        return;
+    }
 
     if (GUI::folderLevel > 0) {
         GUI::menuText(action, GUI::cwd, true);

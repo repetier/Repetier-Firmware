@@ -37,18 +37,29 @@ SDCard::SDCard() {
     sdactive = false;
     savetosd = false;
     Printer::setAutomount(false);
+#if SDCARDDETECT > -1
+    lastReadState = READ(SDCARDDETECT);
+    userUnmountDebounce = false;
+#endif
 }
 
 void SDCard::automount() {
 #if SDCARDDETECT > -1
-    if (READ(SDCARDDETECT) != SDCARDDETECTINVERTED) {
-        if (sdactive || sdmode == 100) // Card removed
-        {
+    bool pinLevel = READ(SDCARDDETECT);
+    if (lastReadState == pinLevel) {
+        return;
+    } else if (userUnmountDebounce) {
+        userUnmountDebounce = false;
+        lastReadState = !lastReadState;
+        return;
+    }
+    if (pinLevel != SDCARDDETECTINVERTED) {
+        if (sdactive || sdmode == 100) {
             Com::printFLN(PSTR("SD card removed"));
 #if UI_DISPLAY_TYPE != NO_DISPLAY
             uid.executeAction(UI_ACTION_TOP_MENU, true);
 #endif
-            unmount();
+            unmount(false);
             UI_STATUS_UPD("SD Card removed");
         }
     } else {
@@ -73,9 +84,12 @@ void SDCard::initsd() {
     sdactive = false;
 #if SDSS > -1
 #if SDCARDDETECT > -1
-    if (READ(SDCARDDETECT) != SDCARDDETECTINVERTED) {
+    bool pinLevel = READ(SDCARDDETECT);
+    if (pinLevel != SDCARDDETECTINVERTED) {
         return;
     }
+    lastReadState = pinLevel;
+    userUnmountDebounce = false;
 #endif
     HAL::pingWatchdog();
     HAL::delayMilliseconds(50); // wait for stabilization of contacts, bootup ...
@@ -135,16 +149,25 @@ void SDCard::mount() {
     initsd();
 }
 
-void SDCard::unmount() {
-    sdmode = 0;
+void SDCard::unmount(bool manual) {
+    if (!sdactive && sdmode != 100u) { // Prevent repeated unmounts
+        return;
+    }
+#if SDCARDDETECT > -1
+    if (manual) {
+        userUnmountDebounce = true;
+    }
+    lastReadState = READ(SDCARDDETECT);
+#endif
+    sdmode = 0u;
     sdactive = false;
     savetosd = false;
     Printer::setAutomount(false);
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED + MENU_MODE_PAUSED + MENU_MODE_SD_PRINTING, false);
-#if UI_DISPLAY_TYPE != NO_DISPLAY && SDSUPPORT
-    uid.cwd[0] = '/';
-    uid.cwd[1] = 0;
-    uid.folderLevel = 0;
+#if FEATURE_CONTROLLER != CONTROLLER_NONE
+    GUI::cwd[0] = '/';
+    GUI::cwd[1] = 0;
+    GUI::folderLevel = 0;
 #endif
     Com::printFLN(PSTR("Card unmounted"));
 }

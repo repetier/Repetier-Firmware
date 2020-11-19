@@ -172,7 +172,7 @@ void __attribute__((weak)) MCode_21(GCode* com) {
 
 void __attribute__((weak)) MCode_22(GCode* com) {
 #if SDSUPPORT
-    sd.unmount();
+    sd.unmount(true);
 #endif
 }
 
