@@ -561,6 +561,9 @@ public:
     bool sdactive;
     //int16_t n;
     bool savetosd;
+    bool userUnmountDebounce;
+    bool lastReadState;
+    
     SdBaseFile parentFound;
 
     SDCard();
@@ -568,7 +571,7 @@ public:
     void writeCommand(GCode* code);
     bool selectFile(const char* filename, bool silent = false);
     void mount();
-    void unmount();
+    void unmount(bool manual);
     void startPrint();
     void pausePrint(bool intern = false);
     void pausePrintPart2();
