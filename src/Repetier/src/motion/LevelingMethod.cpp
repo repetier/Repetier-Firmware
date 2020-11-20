@@ -273,6 +273,21 @@ bool Leveling::measure(uint8_t gridSize) {
     if (!ZProbeHandler::activate()) {
         return false;
     }
+
+    constexpr uint16_t probePoints = GRID_SIZE * GRID_SIZE;
+    Com::printF(PSTR("Beginning autolevel with "), probePoints);
+    Com::printFLN(PSTR(" grid points..."));
+
+    // Living dangerously.
+    struct {
+        float pointHeight = IGNORE_COORDINATE;
+        ufast8_t posX = 0;
+        ufast8_t posY = 0;
+        ufast8_t pointNum = 0;
+    } guiData;
+    guiData.posX = px;
+    guiData.posY = py;
+    GUI::push(probeProgress, static_cast<void*>(&guiData), GUIPageType::BUSY);
     Motion1::copyCurrentPrinter(pos);
     bool ok = true;
     float tempDx = (xMax - xMin) / (gridSize - 1);
@@ -303,6 +318,13 @@ bool Leveling::measure(uint8_t gridSize) {
                     ok &= h != ILLEGAL_Z_PROBE;
                     grid[xx][y] = h;
                     if (ok) {
+                        uint16_t count = ((y * GRID_SIZE) + x) + 1;
+                        float diff = ZProbeHandler::getBedDistance() - h;
+                        guiData.pointHeight = diff;
+                        guiData.posX = px;
+                        guiData.posY = py;
+                        guiData.pointNum = count;
+                        GUI::contentChanged = true;
                         builder.addPoint(px, py, h);
                     }
                 }
@@ -321,6 +343,7 @@ bool Leveling::measure(uint8_t gridSize) {
 #endif
     ZProbeHandler::deactivate();
     if (ok && !Printer::breakLongCommand) {
+        GUI::setStatusP(PSTR("Autolevel complete!"), GUIStatusLevel::INFO);
 #if NUM_HEATED_BEDS
         gridTemp = heatedBeds[0]->getTargetTemperature();
 #endif
@@ -341,8 +364,13 @@ bool Leveling::measure(uint8_t gridSize) {
         setDistortionEnabled(true); // if we support it we should use it by default
         reportDistortionStatus();
 #endif
-    } else if (!ok) {
-        resetEeprom();
+    } else {
+        GUI::pop();
+        GUI::setStatusP(Com::tEmpty, GUIStatusLevel::REGULAR);
+        GUI::contentChanged = true;
+        if (!ok) {
+            resetEeprom();
+        }
     }
     Motion1::printCurrentPosition();
     return ok;

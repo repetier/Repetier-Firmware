@@ -1378,6 +1378,78 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
     GUI::pushOn(GUIAction::CLICK, mainMenu, nullptr, GUIPageType::MENU);
 }
 
+void __attribute__((weak)) probeProgress(GUIAction action, void* data) {
+    if (action == GUIAction::DRAW) { 
+        GUI::bufClear();
+        GUI::bufAddStringP(PSTR("Probing"));
+        // Using our own counter instead of refresh_counter 
+        // since this screen might get updated faster than usual 
+        static ufast8_t dotCounter = 0;
+        static millis_t lastDotTime = 0;
+        if(HAL::timeInMilliseconds() - lastDotTime >= 1000) {
+            dotCounter++;
+            lastDotTime = HAL::timeInMilliseconds();
+        }
+
+        //...  
+        fast8_t len = dotCounter % 4; 
+        for (fast8_t i = 0; i < 3; i++) {
+            GUI::bufAddChar(i < len ? '.' : ' ');
+        } 
+
+        if (data != nullptr) {
+            struct pack {
+                float pointHeight;
+                ufast8_t posX;
+                ufast8_t posY;
+                ufast8_t pointNum;
+            };
+            pack* probeData = reinterpret_cast<pack*>(data);
+            GUI::bufAddChar(' ');
+            GUI::bufAddChar(' ');
+            GUI::bufAddChar(' ');
+            
+            GUI::bufAddChar(' ');
+            GUI::bufAddChar(' ');
+            GUI::bufAddChar(' ');
+ 
+            GUI::bufAddLong((probeData->pointNum * 100) / (GRID_SIZE * GRID_SIZE), 3);
+            GUI::bufAddChar('%');
+            printRow(0, GUI::buf);
+            GUI::bufClear();
+            // Xmm x Ymm
+            GUI::bufAddStringP(Com::tXColon);
+            GUI::bufAddLong(probeData->posX, 3);
+            GUI::bufAddStringP(Com::tUnitMM);
+            GUI::bufAddChar(' ');
+            GUI::bufAddStringP(Com::tYColon);
+            GUI::bufAddLong(probeData->posY, 3);
+            GUI::bufAddStringP(Com::tUnitMM);
+            printRowCentered(1, GUI::buf);
+            GUI::bufClear();
+            // (+0.000mm)
+            if (probeData->pointHeight != IGNORE_COORDINATE) {
+                GUI::bufAddChar('(');
+                if(probeData->pointHeight >= 0) {
+                    GUI::bufAddChar('+');
+                }   
+                GUI::bufAddFloat(probeData->pointHeight, 0, 3);
+                GUI::bufAddStringP(Com::tUnitMM);
+                GUI::bufAddChar(')');
+            }
+            printRowCentered(2, GUI::buf); 
+        } else { 
+            printRow(0, GUI::buf);
+            printRow(1, GUI::buf);
+            printRow(2, GUI::buf);
+        } 
+        printRow(3, GUI::status);
+    }
+    // Can't return back to this menu atm.
+    GUI::replaceOn(GUIAction::NEXT, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::replaceOn(GUIAction::PREVIOUS, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::pushOn(GUIAction::CLICK, mainMenu, nullptr, GUIPageType::MENU);
+}
 void __attribute__((weak)) warningScreen(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         GUI::bufClear();

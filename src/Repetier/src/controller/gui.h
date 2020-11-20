@@ -83,6 +83,7 @@ typedef void (*GuiCallback)(GUIAction action, void* data);
 
 extern void startScreen(GUIAction action, void* data);
 extern void printProgress(GUIAction action, void* data);
+extern void probeProgress(GUIAction action, void* data);
 extern void mainMenu(GUIAction action, void* data);
 extern void startScreen(GUIAction action, void* data);
 extern void warningScreen(GUIAction action, void* data);
