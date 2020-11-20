@@ -263,7 +263,7 @@ void GUI::menuTextP(GUIAction& action, PGM_P text, bool highlight) {
                 guiY += 10;
                 if (guiLine == cursorRow[level]) {
                     lcd.drawBox(0, guiY - 8, 128, 10);
-                    lcd.setDrawColor(0); 
+                    lcd.setDrawColor(0);
                     scrollSelectedText(1, guiY);
                     lcd.setDrawColor(1);
                 } else {
@@ -705,6 +705,142 @@ void GUI::showValue(char* text, PGM_P unit, char* value) {
     lcd.setDrawColor(1);
 }
 
+void __attribute__((weak)) probeProgress(GUIAction action, void* data) {
+
+    if (action == GUIAction::DRAW) {
+        if (Printer::isZProbingActive() && data) {
+            probeProgInfo* progInfo = static_cast<probeProgInfo*>(data);
+            drawStatusLine();
+
+            static ufast8_t dotCounter = 0;
+            static millis_t lastDotTime = 0;
+            if ((HAL::timeInMilliseconds() - lastDotTime) >= 1000ul) {
+                dotCounter++;
+                lastDotTime = HAL::timeInMilliseconds();
+            }
+
+            constexpr size_t barWidth = 116u;                   // width across entire screen left/right
+            constexpr size_t barLeft = (64u - (barWidth / 2u)); // margin from left in order to center the bar
+            constexpr size_t barTop = 21u;                      // margin from top of screen
+            constexpr size_t barHeight = 14u;                   // height amount expanded downwards
+
+            constexpr size_t probeTxtBase = 3u; // margin above bar
+            constexpr size_t probeTxtLeft = 2u; // margin from bar left
+
+            constexpr size_t percentTxtRight = 5u; // margin from bar right
+
+            constexpr size_t countTxtBase = 2u;  // margin above bar
+            constexpr size_t countTxtRight = 3u; // margin from bar right
+
+            constexpr size_t zHitTxtBase = 6u;  // margin under bar
+            constexpr size_t zHitTxtRight = 4u; // margin from bar right
+
+            constexpr size_t coordTxtBase = 2u; // margin under bar
+            constexpr size_t coordTxtLeft = 4u; // margin from bar left
+            constexpr size_t coordTxtGap = 3u;  // margin vertical gap between X/Y coords strings
+
+            constexpr size_t vLineSeperatorLeft = 10u; // margin away from coordtxt. (from final coord char)
+
+            const float progress = ((static_cast<float>(progInfo->num) * 100.0f) / static_cast<float>(progInfo->maxNum));
+
+            // DRAW PROBING TITLE & ANIM
+            GUI::bufClear();
+            GUI::bufAddStringP(Com::tProbing);
+            size_t len = dotCounter % 4u;
+            for (size_t i = 0u; i < 3u; i++) {
+                GUI::bufAddChar(i < len ? '.' : ' ');
+            }
+            lcd.drawUTF8(barLeft + probeTxtLeft, barTop - probeTxtBase, GUI::buf);
+            // END DRAW PROBING TITLE & ANIM
+
+            // DRAW FRAME & BOX
+            lcd.drawFrame(barLeft, barTop, barWidth, barHeight);
+            lcd.drawBox(barLeft, barTop, static_cast<u8g2_uint_t>(barWidth * progress * 0.01f), barHeight);
+            // END DRAW FRAME & BOX
+
+            // DRAW POINTS OUT OF POINTS REMAINING
+            GUI::bufClear();
+            GUI::bufAddInt(progInfo->num, 3);
+            GUI::bufAddStringP(Com::tSlash);
+            GUI::bufAddInt(progInfo->maxNum, 3);
+
+            len = (GUI::bufPos * 5u);
+            lcd.drawUTF8(((barLeft + barWidth) - len) - countTxtRight, barTop - countTxtBase, GUI::buf);
+            // END DRAW POINTS OUT OF POINTS REMAINING
+
+            // DRAW X AND Y COORDINATES
+            GUI::bufClear();
+            lcd.setFontPosTop(); // Must offset by -1 to the font height from now on.
+            constexpr u8g2_uint_t yPx = barTop + barHeight + coordTxtBase;
+
+            GUI::bufAddStringP(Com::tXColon);
+            GUI::bufAddLong(progInfo->x, 3);
+            GUI::bufAddStringP(Com::tUnitMM);
+
+            len = (GUI::bufPos * 5u);
+            lcd.drawUTF8(barLeft + coordTxtLeft, yPx, GUI::buf);
+
+            // DRAW V SEPERATOR
+            lcd.drawVLine((barLeft + coordTxtLeft) + len + vLineSeperatorLeft, yPx + 1u, (((7u - 1u) * 2u) + coordTxtGap));
+            // END DRAW V SEPERATOR
+
+            GUI::bufClear();
+            GUI::bufAddStringP(Com::tYColon);
+            GUI::bufAddLong(progInfo->y, 3);
+            GUI::bufAddStringP(Com::tUnitMM);
+            lcd.drawUTF8(barLeft + coordTxtLeft, (yPx + (7u - 1u)) + coordTxtGap, GUI::buf);
+            // END DRAW X AND Y COORDINATES
+
+            // DRAW STATUS EARLY
+            GUI::bufClear();
+            lcd.drawUTF8(1u, 61u - (7u - 1u), GUI::status);
+            // END DRAW STATUS EARLY
+
+            // Reduce font changes, process these after everything else:
+            // DRAW PROGRESS PERCENTAGE - CHANGE TO 6x10
+            lcd.setFont(u8g2_font_6x10_mf);
+            lcd.setFontMode(1u);
+            lcd.setDrawColor(2u);
+            GUI::bufClear();
+
+            GUI::bufAddFloat(progress, 3, 1);
+            GUI::bufAddStringP(Com::tUnitPercent);
+            len = (GUI::bufPos * 6u);
+
+            constexpr u8g2_uint_t center = barTop + ((barHeight - (10u - 1u)) / 2u);
+            lcd.drawUTF8(((barLeft + barWidth) - len) - percentTxtRight, center, GUI::buf);
+            lcd.setDrawColor(1u);
+            lcd.setFontMode(0u);
+            // END DRAW PROGRESS PERCENTAGE
+
+            // DRAW PROBE HIT POINT
+            GUI::bufClear();
+            GUI::bufAddChar('(');
+            if (progInfo->z != ILLEGAL_Z_PROBE) {
+                if (progInfo->z >= 0.0f) {
+                    GUI::bufAddChar('+');
+                }
+                GUI::bufAddFloat(progInfo->z, 1, 2);
+                GUI::bufAddStringP(Com::tUnitMM);
+            } else {
+                GUI::bufAddStringP(PSTR("Illegal"));
+            }
+            GUI::bufAddChar(')');
+
+            len = (GUI::bufPos * 6u);
+            lcd.drawUTF8(((barLeft + barWidth) - len) - zHitTxtRight, (barTop + barHeight) + zHitTxtBase, GUI::buf);
+            // END DRAW PROBE HIT POINT
+
+            lcd.setFontPosBaseline(); // Revert font pos to default, otherwise it affects all other gui calls.
+        } else {
+            lcd.setFontPosBaseline();
+            startScreen(action, data);
+        }
+    }
+    GUI::replaceOn(GUIAction::NEXT, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::replaceOn(GUIAction::PREVIOUS, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::pushOn(GUIAction::CLICK, mainMenu, nullptr, GUIPageType::MENU);
+}
 //extern void __attribute__((weak)) startScreen(GUIAction action, void* data);
 //extern void __attribute__((weak)) printProgress(GUIAction action, void* data);
 // extern void __attribute__((weak)) mainMenu(GUIAction action, void* data);
@@ -844,7 +980,7 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
                 lcd.drawUTF8(1, 42, GUI::buf);
                 GUI::bufClear();
                 GUI::bufAddInt(Printer::currentLayer, 5);
-                GUI::bufAddStringP(PSTR("/"));
+                GUI::bufAddStringP(Com::tSlash);
                 GUI::bufAddInt(Printer::maxLayer, 5);
                 lcd.drawUTF8(1, 50, GUI::buf);
             }

@@ -52,7 +52,7 @@ void __attribute__((weak)) errorScreenP(GUIAction action, void* data) { }
 #if DISPLAY_DRIVER != DRIVER_NONE
 void GUI::resetMenu() { ///< Go to start page
     level = 0;
-    replace(Printer::isPrinting() ? printProgress : startScreen, nullptr, GUIPageType::TOPLEVEL);
+    replace(Printer::isPrinting() ? printProgress : Printer::isZProbingActive() ? probeProgress : startScreen, nullptr, GUIPageType::TOPLEVEL);
 }
 #endif
 

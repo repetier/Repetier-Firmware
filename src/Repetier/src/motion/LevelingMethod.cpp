@@ -319,6 +319,8 @@ bool Leveling::measure(uint8_t gridSize) {
                         dispZ = diff;
                         GUI::contentChanged = true;
                         builder.addPoint(px, py, h);
+                    } else if (h == ILLEGAL_Z_PROBE) {
+                        dispZ = ILLEGAL_Z_PROBE;
                     }
                 }
             } else {
