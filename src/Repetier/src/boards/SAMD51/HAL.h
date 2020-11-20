@@ -291,8 +291,7 @@ extern Uart Serial3;
 extern Uart Serial4;
 
 #ifndef RFSERIAL
-#define RFSERIAL Serial // Programming port of the due
-//#define RFSERIAL SerialUSB  // Native USB Port of the due
+#define RFSERIAL Serial
 #endif
 
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
@@ -304,10 +303,6 @@ extern Uart Serial4;
 #define BT_SERIAL Serial3
 #elif BLUETOOTH_SERIAL == 4
 #define BT_SERIAL Serial4
-#elif BLUETOOTH_SERIAL == 100
-#define BT_SERIAL Serial
-#elif BLUETOOTH_SERIAL == 101
-#define BT_SERIAL SerialUSB
 #else
 #error Unsupported value for BLUETOOTH_SERIAL
 #endif
