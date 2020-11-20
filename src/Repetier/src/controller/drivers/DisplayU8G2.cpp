@@ -708,8 +708,7 @@ void GUI::showValue(char* text, PGM_P unit, char* value) {
 void __attribute__((weak)) probeProgress(GUIAction action, void* data) {
 
     if (action == GUIAction::DRAW) {
-        if (Printer::isZProbingActive() && data) {
-            probeProgInfo* progInfo = static_cast<probeProgInfo*>(data);
+        if (Printer::isZProbingActive() && GUI::curProbingProgress) {
             drawStatusLine();
 
             static ufast8_t dotCounter = 0;
@@ -741,7 +740,7 @@ void __attribute__((weak)) probeProgress(GUIAction action, void* data) {
 
             constexpr size_t vLineSeperatorLeft = 10u; // margin away from coordtxt. (from final coord char)
 
-            const float progress = ((static_cast<float>(progInfo->num) * 100.0f) / static_cast<float>(progInfo->maxNum));
+            const float progress = ((static_cast<float>(GUI::curProbingProgress->num) * 100.0f) / static_cast<float>(GUI::curProbingProgress->maxNum));
 
             // DRAW PROBING TITLE & ANIM
             GUI::bufClear();
@@ -760,9 +759,9 @@ void __attribute__((weak)) probeProgress(GUIAction action, void* data) {
 
             // DRAW POINTS OUT OF POINTS REMAINING
             GUI::bufClear();
-            GUI::bufAddInt(progInfo->num, 3);
+            GUI::bufAddInt(GUI::curProbingProgress->num, 3);
             GUI::bufAddStringP(Com::tSlash);
-            GUI::bufAddInt(progInfo->maxNum, 3);
+            GUI::bufAddInt(GUI::curProbingProgress->maxNum, 3);
 
             len = (GUI::bufPos * 5u);
             lcd.drawUTF8(((barLeft + barWidth) - len) - countTxtRight, barTop - countTxtBase, GUI::buf);
@@ -774,7 +773,7 @@ void __attribute__((weak)) probeProgress(GUIAction action, void* data) {
             constexpr u8g2_uint_t yPx = barTop + barHeight + coordTxtBase;
 
             GUI::bufAddStringP(Com::tXColon);
-            GUI::bufAddLong(progInfo->x, 3);
+            GUI::bufAddLong(GUI::curProbingProgress->x, 3);
             GUI::bufAddStringP(Com::tUnitMM);
 
             len = (GUI::bufPos * 5u);
@@ -786,7 +785,7 @@ void __attribute__((weak)) probeProgress(GUIAction action, void* data) {
 
             GUI::bufClear();
             GUI::bufAddStringP(Com::tYColon);
-            GUI::bufAddLong(progInfo->y, 3);
+            GUI::bufAddLong(GUI::curProbingProgress->y, 3);
             GUI::bufAddStringP(Com::tUnitMM);
             lcd.drawUTF8(barLeft + coordTxtLeft, (yPx + (7u - 1u)) + coordTxtGap, GUI::buf);
             // END DRAW X AND Y COORDINATES
@@ -815,20 +814,22 @@ void __attribute__((weak)) probeProgress(GUIAction action, void* data) {
 
             // DRAW PROBE HIT POINT
             GUI::bufClear();
-            GUI::bufAddChar('(');
-            if (progInfo->z != ILLEGAL_Z_PROBE) {
-                if (progInfo->z >= 0.0f) {
-                    GUI::bufAddChar('+');
+            if (GUI::curProbingProgress->z != IGNORE_COORDINATE) {
+                GUI::bufAddChar('(');
+                if (GUI::curProbingProgress->z != ILLEGAL_Z_PROBE) {
+                    if (GUI::curProbingProgress->z >= 0.0f) {
+                        GUI::bufAddChar('+');
+                    }
+                    GUI::bufAddFloat(GUI::curProbingProgress->z, 1, 2);
+                    GUI::bufAddStringP(Com::tUnitMM);
+                } else {
+                    GUI::bufAddStringP(PSTR("Illegal"));
                 }
-                GUI::bufAddFloat(progInfo->z, 1, 2);
-                GUI::bufAddStringP(Com::tUnitMM);
-            } else {
-                GUI::bufAddStringP(PSTR("Illegal"));
-            }
-            GUI::bufAddChar(')');
+                GUI::bufAddChar(')');
 
-            len = (GUI::bufPos * 6u);
-            lcd.drawUTF8(((barLeft + barWidth) - len) - zHitTxtRight, (barTop + barHeight) + zHitTxtBase, GUI::buf);
+                len = (GUI::bufPos * 6u);
+                lcd.drawUTF8(((barLeft + barWidth) - len) - zHitTxtRight, (barTop + barHeight) + zHitTxtBase, GUI::buf);
+            }
             // END DRAW PROBE HIT POINT
 
             lcd.setFontPosBaseline(); // Revert font pos to default, otherwise it affects all other gui calls.
@@ -943,9 +944,10 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
         lcd.setFont(u8g2_font_6x10_mf);
         lcd.drawUTF8(1, 61, GUI::status);
     }
-    if (Printer::isPrinting()) {
-        GUI::replaceOn(GUIAction::NEXT, printProgress, nullptr, GUIPageType::FIXED_CONTENT);
-        GUI::replaceOn(GUIAction::PREVIOUS, printProgress, nullptr, GUIPageType::FIXED_CONTENT);
+    if (Printer::isPrinting() || Printer::isZProbingActive()) {
+        GuiCallback cb = Printer::isPrinting() ? printProgress : probeProgress;
+        GUI::replaceOn(GUIAction::NEXT, cb, nullptr, GUIPageType::FIXED_CONTENT);
+        GUI::replaceOn(GUIAction::PREVIOUS, cb, nullptr, GUIPageType::FIXED_CONTENT);
     }
     GUI::pushOn(GUIAction::CLICK, mainMenu, nullptr, GUIPageType::MENU);
 }

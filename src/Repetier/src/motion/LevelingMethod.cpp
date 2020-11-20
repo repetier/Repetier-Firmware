@@ -281,7 +281,7 @@ bool Leveling::measure(uint8_t gridSize) {
     uint16_t curNum = 0;
     float dispZ = IGNORE_COORDINATE;
     probeProgInfo dat(px, py, dispZ, curNum, probePoints);
-    GUI::push(probeProgress, &dat, GUIPageType::BUSY);
+    GUI::push(probeProgress, nullptr, GUIPageType::BUSY);
 
     Motion1::copyCurrentPrinter(pos);
     bool ok = true;

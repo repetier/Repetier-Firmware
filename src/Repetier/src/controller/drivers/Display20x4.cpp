@@ -1319,9 +1319,10 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
         // status info
         printRow(3, GUI::status);
     }
-    if (Printer::isPrinting()) {
-        GUI::replaceOn(GUIAction::NEXT, printProgress, nullptr, GUIPageType::FIXED_CONTENT);
-        GUI::replaceOn(GUIAction::PREVIOUS, printProgress, nullptr, GUIPageType::FIXED_CONTENT);
+    if (Printer::isPrinting() || Printer::isZProbingActive()) {
+        GuiCallback cb = Printer::isPrinting() ? printProgress : probeProgress;
+        GUI::replaceOn(GUIAction::NEXT, cb, nullptr, GUIPageType::FIXED_CONTENT);
+        GUI::replaceOn(GUIAction::PREVIOUS, cb, nullptr, GUIPageType::FIXED_CONTENT);
     }
     GUI::pushOn(GUIAction::CLICK, mainMenu, nullptr, GUIPageType::MENU);
 }
@@ -1397,27 +1398,26 @@ void __attribute__((weak)) probeProgress(GUIAction action, void* data) {
             for (fast8_t i = 0; i < 3; i++) {
                 GUI::bufAddChar(i < len ? '.' : ' ');
             }
-            if (data != nullptr) {
-                probeProgInfo* progInfo = static_cast<probeProgInfo*>(data);
+            if (GUI::curProbingProgress) {
 
                 GUI::bufAddChar(' ');
                 GUI::bufAddChar(' ');
-                GUI::bufAddLong((progInfo->num * 100u) / (progInfo->maxNum), 3);
+                GUI::bufAddLong((GUI::curProbingProgress->num * 100u) / (GUI::curProbingProgress->maxNum), 3);
                 GUI::bufAddChar('%');
                 printRow(0, GUI::buf);
                 GUI::bufClear();
                 // Xmm x Ymm
                 GUI::bufAddStringP(Com::tXColon);
-                GUI::bufAddLong(progInfo->x, 3);
+                GUI::bufAddLong(GUI::curProbingProgress->x, 3);
                 GUI::bufAddStringP(Com::tUnitMM);
                 GUI::bufAddChar(' ');
                 GUI::bufAddStringP(Com::tYColon);
-                GUI::bufAddLong(progInfo->y, 3);
+                GUI::bufAddLong(GUI::curProbingProgress->y, 3);
                 GUI::bufAddStringP(Com::tUnitMM);
                 printRowCentered(1, GUI::buf);
                 GUI::bufClear();
                 // (+0.000mm)
-                float z = progInfo->z;
+                float z = GUI::curProbingProgress->z;
                 if (z != IGNORE_COORDINATE && z != ILLEGAL_Z_PROBE) {
                     GUI::bufAddChar('(');
                     if (z >= 0) {

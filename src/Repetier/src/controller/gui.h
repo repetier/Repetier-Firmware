@@ -78,18 +78,6 @@ enum class GUIStatusLevel {
     WARNING = 3, // Popup warning
     ERROR = 4    // Popup error
 };
-
-struct probeProgInfo { 
-    explicit probeProgInfo(const float& _x, const float& _y, const float& _z, const uint16_t& _num, const uint16_t _maxNum)
-        : x(_x)
-        , y(_y)
-        , z(_z)
-        , num(_num)
-        , maxNum(_maxNum) { }
-    const float &x, &y, &z;
-    const uint16_t &num, maxNum;
-};
-
 typedef void (*GuiCallback)(GUIAction action, void* data);
 
 extern void startScreen(GUIAction action, void* data);
@@ -149,6 +137,7 @@ extern void selectToolAction(GUIAction action, void* data);
         GUI::clearStatus(); \
     }
 
+struct probeProgInfo;
 class GUI {
 public:
     static int level;                            // Menu level for back handling
@@ -171,6 +160,7 @@ public:
     static int nextActionRepeat;                 ///< Increment for next/previous
     static GUIStatusLevel statusLevel;
     static bool textIsScrolling;
+    static probeProgInfo* curProbingProgress;    ///< Pointer to a valid current probing datastruct
 #if SDSUPPORT
     static char cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2];
     static uint8_t folderLevel;
@@ -245,6 +235,22 @@ public:
     static bool handleFloatValueAction(GUIAction& action, float& value, float min, float max, float increment);
     static bool handleFloatValueAction(GUIAction& action, float& value, float increment);
     static bool handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, int32_t max, int32_t increment);
+};
+
+struct probeProgInfo {
+    explicit probeProgInfo(const float& _x, const float& _y, const float& _z, const uint16_t& _num, const uint16_t _maxNum)
+        : x(_x)
+        , y(_y)
+        , z(_z)
+        , num(_num)
+        , maxNum(_maxNum) {
+        GUI::curProbingProgress = this;
+    }
+    const float &x, &y, &z;
+    const uint16_t &num, maxNum;
+    ~probeProgInfo() {
+        GUI::curProbingProgress = nullptr;
+    }
 };
 
 #define DRAW_FLOAT_P(text, unit, val, prec) \
