@@ -440,6 +440,7 @@ public:
         RFSERIAL.flush();
     }
     static void setupTimer();
+    static void handlePeriodical();
     static void updateStartReason();
     static void showStartReason();
     static int getFreeRam();

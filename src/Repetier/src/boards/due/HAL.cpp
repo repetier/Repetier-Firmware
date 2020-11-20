@@ -178,6 +178,12 @@ void HAL::setupTimer() {
 #endif
 }
 
+// Called within checkForPeriodicalActions (main loop, more or less) 
+// as fast as possible
+void HAL::handlePeriodical() {
+
+}
+
 struct TimerPWMPin {
     TimerPWMPin(int _pin, Pio* _pio, uint32_t _pio_pin, byte _tc_channel, bool _peripheral_A)
         : pin(_pin)

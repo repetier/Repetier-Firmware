@@ -82,6 +82,7 @@ void Commands::commandLoop() {
 void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     Printer::handleInterruptEvent();
     FirmwareEvent::handleEvents();
+    HAL::handlePeriodical();
     if (Printer::reportFlag) {
         if (Printer::isReportFlag(PRINTER_REPORT_FLAG_ENDSTOPS)) {
             MCode_119(nullptr);

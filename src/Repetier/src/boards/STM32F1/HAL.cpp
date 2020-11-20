@@ -401,6 +401,11 @@ void HAL::setupTimer() {
 #endif
 }
 
+// Called within checkForPeriodicalActions (main loop, more or less) 
+// as fast as possible
+void HAL::handlePeriodical() {
+
+}
 // Try to initialize pinNumber as hardware PWM. Returns internal
 // id if it succeeds or -1 if it fails. Typical reasons to fail
 // are no pwm support for that pin or an other pin uses same PWM

@@ -258,6 +258,11 @@ void HAL::setupTimer() {
 #endif
 }
 
+// Called within checkForPeriodicalActions (main loop, more or less) 
+// as fast as possible
+void HAL::handlePeriodical() {
+
+}
 struct PWMChannel {
     bool used;
     const PinDescription* pwm; // timer
