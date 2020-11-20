@@ -79,6 +79,17 @@ enum class GUIStatusLevel {
     ERROR = 4    // Popup error
 };
 
+struct probeProgInfo { 
+    explicit probeProgInfo(const float& _x, const float& _y, const float& _z, const uint16_t& _num, const uint16_t _maxNum)
+        : x(_x)
+        , y(_y)
+        , z(_z)
+        , num(_num)
+        , maxNum(_maxNum) { }
+    const float &x, &y, &z;
+    const uint16_t &num, maxNum;
+};
+
 typedef void (*GuiCallback)(GUIAction action, void* data);
 
 extern void startScreen(GUIAction action, void* data);

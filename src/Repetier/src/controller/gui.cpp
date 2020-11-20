@@ -37,6 +37,7 @@ void GUI::refresh() {
 
 void GUI::resetMenu() { } ///< Go to start page
 
+void __attribute__((weak)) probeProgress(GUIAction action, void* data) { }
 void __attribute__((weak)) startScreen(GUIAction action, void* data) { }
 void __attribute__((weak)) waitScreen(GUIAction action, void* data) { }
 void __attribute__((weak)) infoScreen(GUIAction action, void* data) { }
