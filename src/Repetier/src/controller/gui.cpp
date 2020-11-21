@@ -20,6 +20,7 @@ char GUI::tmpString[MAX_COLS + 1];           ///< Buffer to build strings
 fast8_t GUI::bufPos;                         ///< Pos for appending data
 GUIBootState GUI::curBootState = GUIBootState::DISPLAY_INIT;
 bool GUI::textIsScrolling = false; ///< Our selected row/text is now scrolling/anim
+probeProgInfo* GUI::curProbingProgress = nullptr;
 #if SDSUPPORT
 char GUI::cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2] = { '/', 0 };
 uint8_t GUI::folderLevel = 0;
@@ -37,6 +38,7 @@ void GUI::refresh() {
 
 void GUI::resetMenu() { } ///< Go to start page
 
+void __attribute__((weak)) probeProgress(GUIAction action, void* data) { }
 void __attribute__((weak)) startScreen(GUIAction action, void* data) { }
 void __attribute__((weak)) waitScreen(GUIAction action, void* data) { }
 void __attribute__((weak)) infoScreen(GUIAction action, void* data) { }
@@ -51,7 +53,7 @@ void __attribute__((weak)) errorScreenP(GUIAction action, void* data) { }
 #if DISPLAY_DRIVER != DRIVER_NONE
 void GUI::resetMenu() { ///< Go to start page
     level = 0;
-    replace(Printer::isPrinting() ? printProgress : startScreen, nullptr, GUIPageType::TOPLEVEL);
+    replace(Printer::isPrinting() ? printProgress : Printer::isZProbingActive() ? probeProgress : startScreen, nullptr, GUIPageType::TOPLEVEL);
 }
 #endif
 

@@ -277,6 +277,7 @@ FSTRINGVALUE(Com::tDBGDeltaVirtualAxisSteps, "Virtual axis steps:")
 #ifdef DEBUG_STEPCOUNT
 FSTRINGVALUE(Com::tDBGMissedSteps, "Missed steps:")
 #endif // DEBUG_STEPCOUNT
+FSTRINGVALUE(Com::tProbing, "Probing")
 FSTRINGVALUE(Com::tZProbe, "Z-probe:")
 FSTRINGVALUE(Com::tZProbeAverage, "Z-probe average height:")
 FSTRINGVALUE(Com::tZProbeZReset, "Reset Z height")

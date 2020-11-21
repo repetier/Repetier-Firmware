@@ -1319,9 +1319,10 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
         // status info
         printRow(3, GUI::status);
     }
-    if (Printer::isPrinting()) {
-        GUI::replaceOn(GUIAction::NEXT, printProgress, nullptr, GUIPageType::FIXED_CONTENT);
-        GUI::replaceOn(GUIAction::PREVIOUS, printProgress, nullptr, GUIPageType::FIXED_CONTENT);
+    if (Printer::isPrinting() || Printer::isZProbingActive()) {
+        GuiCallback cb = Printer::isPrinting() ? printProgress : probeProgress;
+        GUI::replaceOn(GUIAction::NEXT, cb, nullptr, GUIPageType::FIXED_CONTENT);
+        GUI::replaceOn(GUIAction::PREVIOUS, cb, nullptr, GUIPageType::FIXED_CONTENT);
     }
     GUI::pushOn(GUIAction::CLICK, mainMenu, nullptr, GUIPageType::MENU);
 }
@@ -1378,6 +1379,68 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
     GUI::pushOn(GUIAction::CLICK, mainMenu, nullptr, GUIPageType::MENU);
 }
 
+void __attribute__((weak)) probeProgress(GUIAction action, void* data) {
+    if (action == GUIAction::DRAW) {
+        if (Printer::isZProbingActive()) {
+            GUI::bufClear();
+            GUI::bufAddStringP(Com::tProbing);
+            // Using our own counter instead of refresh_counter
+            // since this screen might get updated faster than usual
+            static ufast8_t dotCounter = 0;
+            static millis_t lastDotTime = 0;
+            if ((HAL::timeInMilliseconds() - lastDotTime) >= 1000ul) {
+                dotCounter++;
+                lastDotTime = HAL::timeInMilliseconds();
+            }
+
+            //...
+            fast8_t len = dotCounter % 4;
+            for (fast8_t i = 0; i < 3; i++) {
+                GUI::bufAddChar(i < len ? '.' : ' ');
+            }
+            if (GUI::curProbingProgress) {
+
+                GUI::bufAddChar(' ');
+                GUI::bufAddChar(' ');
+                GUI::bufAddLong((GUI::curProbingProgress->num * 100u) / (GUI::curProbingProgress->maxNum), 3);
+                GUI::bufAddChar('%');
+                printRow(0, GUI::buf);
+                GUI::bufClear();
+                // Xmm x Ymm
+                GUI::bufAddStringP(Com::tXColon);
+                GUI::bufAddLong(GUI::curProbingProgress->x, 3);
+                GUI::bufAddStringP(Com::tUnitMM);
+                GUI::bufAddChar(' ');
+                GUI::bufAddStringP(Com::tYColon);
+                GUI::bufAddLong(GUI::curProbingProgress->y, 3);
+                GUI::bufAddStringP(Com::tUnitMM);
+                printRowCentered(1, GUI::buf);
+                GUI::bufClear();
+                // (+0.000mm)
+                float z = GUI::curProbingProgress->z;
+                if (z != IGNORE_COORDINATE && z != ILLEGAL_Z_PROBE) {
+                    GUI::bufAddChar('(');
+                    if (z >= 0) {
+                        GUI::bufAddChar('+');
+                    }
+                    GUI::bufAddFloat(z, 0, 3);
+                    GUI::bufAddStringP(Com::tUnitMM);
+                    GUI::bufAddChar(')');
+                }
+                printRowCentered(2, GUI::buf);
+            } else {
+                GUI::bufClear();
+                printRow(0, GUI::buf);
+                printRow(1, GUI::buf);
+                printRow(2, GUI::buf);
+            }
+            printRow(3, GUI::status);
+        }
+    }
+    GUI::replaceOn(GUIAction::NEXT, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::replaceOn(GUIAction::PREVIOUS, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::pushOn(GUIAction::CLICK, mainMenu, nullptr, GUIPageType::MENU);
+}
 void __attribute__((weak)) warningScreen(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         GUI::bufClear();

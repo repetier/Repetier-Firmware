@@ -273,6 +273,16 @@ bool Leveling::measure(uint8_t gridSize) {
     if (!ZProbeHandler::activate()) {
         return false;
     }
+
+    uint16_t probePoints = gridSize * gridSize;
+    Com::printF(PSTR("Autoleveling with "), probePoints);
+    Com::printFLN(PSTR(" grid points..."));
+
+    uint16_t curNum = 0;
+    float dispZ = IGNORE_COORDINATE;
+    probeProgInfo dat(px, py, dispZ, curNum, probePoints);
+    GUI::push(probeProgress, nullptr, GUIPageType::BUSY);
+
     Motion1::copyCurrentPrinter(pos);
     bool ok = true;
     float tempDx = (xMax - xMin) / (gridSize - 1);
@@ -298,12 +308,19 @@ bool Leveling::measure(uint8_t gridSize) {
             float bedPos[2] = { px, py };
             if (PrinterType::positionOnBed(bedPos) && PrinterType::positionAllowed(pos, pos[Z_AXIS])) {
                 if (ok) {
+                    //Todo handle probe min bed temp (if disable heaters is on) over long durations
                     Motion1::moveByPrinter(pos, Motion1::moveFeedrate[X_AXIS], false);
                     float h = ZProbeHandler::runProbe();
                     ok &= h != ILLEGAL_Z_PROBE;
                     grid[xx][y] = h;
                     if (ok) {
+                        curNum = ((y * gridSize) + x) + 1;
+                        float diff = ZProbeHandler::getBedDistance() - h;
+                        dispZ = diff;
+                        GUI::contentChanged = true;
                         builder.addPoint(px, py, h);
+                    } else if (h == ILLEGAL_Z_PROBE) {
+                        dispZ = ILLEGAL_Z_PROBE;
                     }
                 }
             } else {
@@ -321,6 +338,7 @@ bool Leveling::measure(uint8_t gridSize) {
 #endif
     ZProbeHandler::deactivate();
     if (ok && !Printer::breakLongCommand) {
+        GUI::setStatusP(PSTR("Autolevel complete!"), GUIStatusLevel::INFO);
 #if NUM_HEATED_BEDS
         gridTemp = heatedBeds[0]->getTargetTemperature();
 #endif
@@ -341,8 +359,13 @@ bool Leveling::measure(uint8_t gridSize) {
         setDistortionEnabled(true); // if we support it we should use it by default
         reportDistortionStatus();
 #endif
-    } else if (!ok) {
-        resetEeprom();
+    } else {
+        GUI::pop();
+        GUI::setStatusP(Com::tEmpty, GUIStatusLevel::REGULAR);
+        GUI::contentChanged = true;
+        if (!ok) {
+            resetEeprom();
+        }
     }
     Motion1::printCurrentPosition();
     return ok;
