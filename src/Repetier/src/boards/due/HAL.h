@@ -374,6 +374,8 @@ public:
 #if EEPROM_AVAILABLE == EEPROM_FLASH && EEPROM_MODE != EEPROM_NONE
         FEInit();
 #endif
+        trng_enable(TRNG);
+        randomSeed(trng_read_output_data(TRNG));
     }
     static inline void digitalWrite(uint8_t pin, uint8_t value) {
         WRITE_VAR(pin, value);
@@ -566,6 +568,7 @@ public:
 #endif
     }
     static void setupTimer();
+    static void handlePeriodical();
     static void updateStartReason();
     static void showStartReason();
     static int getFreeRam();
