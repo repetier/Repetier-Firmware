@@ -223,7 +223,7 @@ void JamDetectorHW<inputPin, ObserverType>::testForJam() {
             EVENT_JAM_DETECTED;
             Com::printFLN(PSTR("important:Extruder jam detected"));
 #if SDSUPPORT
-            if (sd.sdmode == 2) {
+            if (sd.state == SDState::SD_PRINTING) {
                 sd.pausePrint(true);
                 EVENT_JAM_DETECTED_END;
                 return;
@@ -313,7 +313,7 @@ void FilamentDetector<inputPin>::testFilament() {
             EVENT_JAM_DETECTED;
             Com::printFLN(PSTR("important:No Filament detected"));
 #if SDSUPPORT
-            if (sd.sdmode == 2) {
+            if (sd.state == SDState::SD_PRINTING) {
                 sd.pausePrint(true);
                 EVENT_JAM_DETECTED_END;
                 return;

@@ -415,6 +415,7 @@ FSTRINGVALUE(Com::tFileOpened, "File opened:")
 FSTRINGVALUE(Com::tSpaceSizeColon, " Size:")
 FSTRINGVALUE(Com::tFileSelected, "File selected")
 FSTRINGVALUE(Com::tFileOpenFailed, "file.open failed")
+FSTRINGVALUE(Com::tInvalidFiletype, "Invalid file type")
 FSTRINGVALUE(Com::tSDPrintingByte, "SD printing byte ")
 FSTRINGVALUE(Com::tNotSDPrinting, "Not SD printing")
 FSTRINGVALUE(Com::tCurrentOpenFile, "Current file: ") // Compat with hosts that use M27 C

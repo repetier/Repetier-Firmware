@@ -673,37 +673,35 @@ void __attribute__((weak)) menuTune(GUIAction action, void* data) {
 void menuSDPrint(GUIAction action, void* dat);
 void __attribute__((weak)) menuSDStartPrint(GUIAction action, void* data) {
     int pos = reinterpret_cast<int>(data);
-    dir_t* p = nullptr;
-    FatFile* root = sd.fat.vwd();
-    FatFile file;
+    sd_file_t file;
     if (pos == -1) {
         if (GUI::folderLevel == 0) {
             return;
         }
         char* p = GUI::cwd;
-        while (*p)
+        while (*p) {
             p++;
+        }
         p--;
         p--;
         while (*p != '/') {
             p--;
         }
-        p++;
-        *p = 0;
-        //todo: GUI::cwd doesn't get reset on sd ejections
+        *(++p) = '\0';
         GUI::folderLevel--;
-        sd.fat.chdir(GUI::cwd);
+        sd.fileSystem.chdir(GUI::cwd);
         GUI::replace(menuSDPrint, data, GUIPageType::MENU);
         return;
     }
-    if (file.open(root, pos, O_READ)) {
+    if (file.open(sd.fileSystem.cwv(), pos, O_RDONLY)) {
         file.getName(tempLongFilename, LONG_FILENAME_LENGTH);
         if (file.isDir()) {
             file.close();
             char* name = tempLongFilename;
             char* p = GUI::cwd;
-            while (*p)
+            while (*p) {
                 p++;
+            }
             if (GUI::folderLevel >= SD_MAX_FOLDER_DEPTH) {
                 return;
             }
@@ -711,21 +709,24 @@ void __attribute__((weak)) menuSDStartPrint(GUIAction action, void* data) {
                 *p++ = *name++;
             }
             *p++ = '/';
-            *p = 0;
+            *p = '\0';
             GUI::folderLevel++;
-            sd.fat.chdir(GUI::cwd);
+            sd.fileSystem.chdir(GUI::cwd);
             GUI::replace(menuSDPrint, data, GUIPageType::MENU);
         } else { // File for print selected instead
             file.close();
-            sd.file.close();
-            sd.fat.chdir(GUI::cwd);
-            if (sd.selectFile(tempLongFilename, false)) {
-                sd.startPrint();
+            if (!strstr(tempLongFilename, PSTR(".gcode"))) {
+                GUI::replace(menuSDReadTextFile, data, GUIPageType::MENU);
+            } else {
+                sd.fileSystem.chdir(GUI::cwd);
+                if (sd.selectFile(tempLongFilename, false)) {
+                    sd.startPrint();
+                }
             }
         }
     }
 }
-static bool menuSDFilterName(FatFile* file, char* tempFilename, size_t size) {
+static bool menuSDFilterName(sd_file_t* file, char* tempFilename, size_t size) {
 #if DISABLED(SD_MENU_SHOW_HIDDEN_FILES)
     if (file->isHidden()) {
         return false;
@@ -755,13 +756,14 @@ static struct menuSDCacheStruct {
 
 void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
     GUI::menuStart(action);
-    if (!sd.sdactive) { // User was still inside the menu when their sdcard ejected.
-        GUI::pop(); 
-        GUI::refresh(); 
+    if (sd.state != SDState::SD_MOUNTED) {
+        // User was still inside the menu when their sdcard ejected.
+        GUI::pop();
+        GUI::refresh();
         return;
     }
 
-    if (GUI::folderLevel > 0) {
+    if (GUI::folderLevel > 0u) {
         GUI::menuText(action, GUI::cwd, true);
         GUI::menuSelectableP(action, PSTR("# Parent Directory"), menuSDStartPrint, reinterpret_cast<void*>(-1), GUIPageType::ACTION);
     } else {
@@ -770,17 +772,18 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
     }
 
     static bool reversedDir = false;
-    static int lastRow = 0;
+    static uint8_t lastRow = 0u;
+    sd.fileSystem.chdir(GUI::cwd);
+    sd_file_t curDir = sd.fileSystem.open(GUI::cwd);
+    sd_file_t file;
 
-    FatFile* root = sd.fat.vwd();
-    SdFile file;
     if (action == GUIAction::ANALYSE) {
-        root->rewind();
-        lastRow = 0;
-        size_t renderedRows = 0;
+        curDir.rewind();
+        lastRow = 0u;
+        size_t renderedRows = 0u;
         reversedDir = false;
-        memset(menuSDNameCache, 0, sizeof(menuSDNameCache));
-        while (renderedRows < menuSDCacheRows && file.openNext(root, O_READ)) {
+        memset(menuSDNameCache, 0u, sizeof(menuSDNameCache));
+        while (renderedRows < menuSDCacheRows && file.openNext(&curDir, O_RDONLY)) {
             file.getName(tempLongFilename, menuSDCacheNameLen);
             if (menuSDFilterName(&file, tempLongFilename, menuSDCacheNameLen)) {
                 memcpy(menuSDNameCache[renderedRows].name, tempLongFilename, menuSDCacheNameLen);
@@ -788,61 +791,55 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
             }
             file.close();
         }
-        menuSDCacheLastIndexPos = menuSDNameCache[menuSDCacheRows - 1].dirIndexPos;
+        menuSDCacheLastIndexPos = menuSDNameCache[menuSDCacheRows - 1u].dirIndexPos;
     }
-    for (size_t i = 0; i < menuSDCacheRows; i++) {
-        if (menuSDNameCache[i].name[0] != '\0') { // just in case.
+    for (size_t i = 0u; i < menuSDCacheRows; i++) {
+        if (menuSDNameCache[i].name[0u] != '\0') { // just in case.
             GUI::menuSelectable(action, menuSDNameCache[i].name, menuSDStartPrint,
                                 reinterpret_cast<void*>(menuSDNameCache[i].dirIndexPos), GUIPageType::ACTION);
         }
     }
-    int curRow = GUI::cursorRow[GUI::level];
+    uint8_t curRow = GUI::cursorRow[GUI::level];
     if (GUI::length[GUI::level] > menuSDCacheRows + 1) {
         if (action == GUIAction::NEXT
             && curRow == lastRow
             && menuSDCacheLastIndexPos != UINT16_MAX
             && curRow >= GUI::maxCursorRow[GUI::level]) {
             if (reversedDir) {
-                menuSDCacheLastIndexPos = menuSDNameCache[menuSDCacheRows - 1].dirIndexPos;
+                menuSDCacheLastIndexPos = menuSDNameCache[menuSDCacheRows - 1u].dirIndexPos;
             }
             reversedDir = false;
-
-            file.close();
-
             bool hit = false;
             uint16_t startDirIndex = menuSDCacheLastIndexPos; // caps scan max
-            while (!hit && (menuSDCacheLastIndexPos - startDirIndex) < 256 && menuSDCacheLastIndexPos < UINT16_MAX) {
-                if (file.open(root, ++menuSDCacheLastIndexPos, O_READ)) {
+            while (!hit && ((menuSDCacheLastIndexPos - startDirIndex) < 0xff) && menuSDCacheLastIndexPos < UINT16_MAX) {
+                if (file.open(&curDir, ++menuSDCacheLastIndexPos, O_RDONLY)) {
                     file.getName(tempLongFilename, menuSDCacheNameLen);
                     if (menuSDFilterName(&file, tempLongFilename, menuSDCacheNameLen)) {
-                        memmove(&menuSDNameCache[0], &menuSDNameCache[1], (menuSDCacheRows - 1) * sizeof(menuSDNameCache[0]));
-                        memcpy(menuSDNameCache[menuSDCacheRows - 1].name, tempLongFilename, menuSDCacheNameLen);
-                        menuSDNameCache[menuSDCacheRows - 1].dirIndexPos = file.dirIndex();
+                        memmove(&menuSDNameCache[0u], &menuSDNameCache[1u], (menuSDCacheRows - 1u) * sizeof(menuSDNameCache[0u]));
+                        memcpy(menuSDNameCache[menuSDCacheRows - 1u].name, tempLongFilename, menuSDCacheNameLen);
+                        menuSDNameCache[menuSDCacheRows - 1u].dirIndexPos = file.dirIndex();
                         hit = true;
-                    }
+                    } 
                     file.close();
                 }
             }
-            dir_t fileDir = { 0 };
-            if (root->readDir(&fileDir) == 0) { // No more items
+            if (curDir.peek() == -1) { // No more items
                 menuSDCacheLastIndexPos = UINT16_MAX;
             }
         } else if (curRow <= GUI::topRow[GUI::level]) {
             if (GUI::nextAction == GUIAction::PREVIOUS && menuSDCacheLastIndexPos) {
                 if (!reversedDir) {
-                    menuSDCacheLastIndexPos = menuSDNameCache[0].dirIndexPos;
+                    menuSDCacheLastIndexPos = menuSDNameCache[0u].dirIndexPos;
                 }
                 reversedDir = true;
-
-                file.close();
                 bool hit = false;
                 while (!hit && menuSDCacheLastIndexPos) {
-                    if (file.open(root, --menuSDCacheLastIndexPos, O_READ)) {
+                    if (file.open(&curDir, --menuSDCacheLastIndexPos, O_RDONLY)) {
                         file.getName(tempLongFilename, menuSDCacheNameLen);
                         if (menuSDFilterName(&file, tempLongFilename, menuSDCacheNameLen)) {
-                            memmove(&menuSDNameCache[1], &menuSDNameCache[0], (menuSDCacheRows - 1) * sizeof(menuSDNameCache[0]));
-                            memcpy(menuSDNameCache[0].name, tempLongFilename, menuSDCacheNameLen);
-                            menuSDNameCache[0].dirIndexPos = file.dirIndex();
+                            memmove(&menuSDNameCache[1u], &menuSDNameCache[0u], (menuSDCacheRows - 1u) * sizeof(menuSDNameCache[0u]));
+                            memcpy(menuSDNameCache[0u].name, tempLongFilename, menuSDCacheNameLen);
+                            menuSDNameCache[0u].dirIndexPos = file.dirIndex();
                             hit = true;
                         }
                         file.close();
@@ -854,6 +851,8 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
             }
         }
     }
+    file.close();
+    curDir.close();
     lastRow = curRow; // For scrolling to the last row without doing a scan/moving the list.
     GUI::menuEnd(action);
 }
@@ -861,7 +860,7 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
 void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
     GUI::menuStart(action);
 
-    if (GUI::folderLevel > 0) {
+    if (GUI::folderLevel > 0u) {
         GUI::menuText(action, GUI::cwd, true);
         GUI::menuSelectableP(action, PSTR("# Parent Directory"), menuSDStartPrint, reinterpret_cast<void*>(-1), GUIPageType::ACTION);
     } else {
@@ -869,12 +868,12 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
         GUI::menuBack(action);
     }
 
-    int count = 0;
-    dir_t* p = nullptr;
-    FatFile* root = sd.fat.vwd();
-    FatFile file;
-    root->rewind();
-    while (file.openNext(root, O_READ)) {
+    sd.fileSystem.chdir(GUI::cwd);
+    sd_file_t curDir = sd.fileSystem.open(GUI::cwd);
+    sd_file_t file;
+    curDir.rewind();
+    int count = 0; 
+    while (file.openNext(&curDir, O_RDONLY)) {
         HAL::pingWatchdog();
         file.getName(tempLongFilename, LONG_FILENAME_LENGTH);
         if (!menuSDFilterName(&file, tempLongFilename, LONG_FILENAME_LENGTH)) {
@@ -888,6 +887,8 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
         }
     }
 
+    file.close();
+    curDir.close();
     GUI::menuEnd(action);
 }
 #endif
@@ -965,13 +966,13 @@ void __attribute__((weak)) mainMenu(GUIAction action, void* data) {
         GUI::menuSelectableP(action, PSTR("Stop Print"), directAction, (void*)GUI_DIRECT_ACTION_STOP_PRINT, GUIPageType::ACTION);
     } else {
 #if SDSUPPORT
-        if (sd.sdactive && sd.sdmode == 0) {
+        if (sd.state == SDState::SD_MOUNTED) {
             GUI::menuSelectableP(action, PSTR("SD Print"), menuSDPrint, nullptr, GUIPageType::MENU);
         }
 #endif
     }
 #if SDSUPPORT && SDCARDDETECT < 0 // Offer mount option
-    if (!sd.sdactive) {
+    if (sd.state == SDState::SD_UNMOUNTED) {
         GUI::menuSelectableP(action, PSTR("Mount SD Card"), directAction, (void*)GUI_DIRECT_ACTION_MOUNT_SD_CARD, GUIPageType::ACTION);
     }
 #endif

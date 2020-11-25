@@ -534,44 +534,32 @@ extern char fullName[LONG_FILENAME_LENGTH * SD_MAX_FOLDER_DEPTH + SD_MAX_FOLDER_
 #if SDSUPPORT
 #define SHORT_FILENAME_LENGTH 14
 
-/* enum LsAction { LS_SerialPrint,
-                LS_Count,
-                LS_GetFilename }; */
+typedef SdFs sd_fsys_t;
+typedef SdBaseFile sd_file_t;
+
+enum class SDState {
+    SD_UNMOUNTED = 0,
+    SD_HAS_ERROR,
+    SD_MOUNTED,
+    SD_PRINTING,
+    SD_WRITING
+};
 class SDCard {
 public:
-#if ENABLE_SOFTWARE_SPI_CLASS
-    SdFatSoftSpi<SD_SOFT_MISO_PIN, SD_SOFT_MOSI_PIN, SD_SOFT_SCK_PIN> fat;
-#else
-    SdFat fat;
+#if (ENABLE_SOFTWARE_SPI_CLASS || (SPI_DRIVER_SELECT == 2))
+    SoftSpiDriver<SD_SOFT_MISO_PIN, SD_SOFT_MOSI_PIN, SD_SOFT_SCK_PIN> softSpi;
 #endif
-    //Sd2Card card; // ~14 Byte
-    //SdVolume volume;
-    //SdFile root;
-    //SdFile dir[SD_MAX_FOLDER_DEPTH+1];
-    SdFile file;
+ 
 #if JSON_OUTPUT
     GCodeFileInfo fileInfo;
 #endif
     uint32_t filesize;
-    uint32_t sdpos;
-    //char fullName[13*SD_MAX_FOLDER_DEPTH+13]; // Fill name
-    // char* shortname; // Pointer to start of filename itself
-    // char* pathend;   // File to char where pathname in fullname ends
-    uint8_t sdmode; // 1 if we are printing from sd card, 2 = stop accepting new commands
-    bool sdactive;
-    //int16_t n;
-    bool savetosd;
+    uint32_t sdpos;  
     bool userUnmountDebounce;
     bool lastReadState;
-    
-    SdBaseFile parentFound;
 
     SDCard();
-    void initsd();
     void writeCommand(GCode* code);
-    bool selectFile(const char* filename, bool silent = false);
-    void mount();
-    void unmount(bool manual);
     void startPrint();
     void pausePrint(bool intern = false);
     void pausePrintPart2();
@@ -579,31 +567,39 @@ public:
     void stopPrint();
     void stopPrintPart2();
     inline void setIndex(uint32_t newpos) {
-        if (!sdactive)
+        if (state != SDState::SD_MOUNTED) {
             return;
+        }
         sdpos = newpos;
-        file.seekSet(sdpos);
+        selectedFile.seekSet(sdpos);
     }
     void printStatus(bool getFilename = false);
-    void ls();
 #if JSON_OUTPUT
     void lsJSON(const char* filename);
     void JSONFileInfo(const char* filename);
     static void printEscapeChars(const char* s);
 #endif
-    void startWrite(char* filename);
-    void deleteFile(char* filename);
+    void ls();
+    void mount();
+    void unmount(bool manual);
+    bool selectFile(const char* filename, bool silent = false);
+    void startWrite(const char* filename);
+    void deleteFile(const char* filename);
+    template <typename T>
+    bool doForDirectory(sd_file_t& dir, T&& action, const bool recursive = false);
+    void makeDirectory(const char* filename);  
+    
+    bool getCardInfo(uint32_t* volumeSizeBytes = nullptr, uint32_t* usageBytes = nullptr, uint16_t* fileCount = nullptr, uint8_t* folderCount = nullptr);
     void finishWrite();
-    char* createFilename(char* buffer, const dir_t& p);
-    void makeDirectory(char* filename);
-    bool showFilename(const uint8_t* name);
+    sd_file_t selectedFile;
+    sd_fsys_t fileSystem;
+
+    millis_t mountDebounceTime;
+    SDState state;
     void automount();
 #ifdef GLENN_DEBUG
     void writeToFile();
 #endif
-private:
-    uint8_t lsRecursive(SdBaseFile* parent, uint8_t level, char* findFilename);
-    // SdFile *getDirectory(char* name);
 };
 
 extern SDCard sd;

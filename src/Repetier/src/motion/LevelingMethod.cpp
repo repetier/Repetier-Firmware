@@ -604,14 +604,13 @@ void Leveling::execute_M323(GCode* com) {
                 return;
             }
 
-            if (!sd.fat.exists(autoImportDir)) {
+            if (!sd.fileSystem.exists(autoImportDir)) {
                 Com::printF(Com::tErrorImportBump);
                 Com::printFLN(PSTR(" Auto-import directory not found!"));
                 return;
             }
 
-            sd.fat.chdir(autoImportDir);
-            sd.fat.vwd()->rewind();
+            sd.fileSystem.chdir(autoImportDir); 
 
             bool isRoot = (autoImportDir[0] == '/' && autoImportDir[1] == '\0');
 
@@ -622,8 +621,9 @@ void Leveling::execute_M323(GCode* com) {
             float maxDif = com->hasD() ? com->D : 10.0f;
             float lowestTemp = 9999.0f;
 
-            SdFile file;
-            while (file.openNext(sd.fat.vwd(), O_READ)) {
+            sd_file_t file;
+            sd_file_t root = sd.fileSystem.open(autoImportDir); 
+            while (file.openNext(&root, O_READ)) {
                 if (!file.isDir()
                     && file.getName(tempLongFilename, sizeof(tempLongFilename))
                     && strstr_P(tempLongFilename, PSTR(".csv"))) {
@@ -662,7 +662,7 @@ void Leveling::execute_M323(GCode* com) {
                 Com::printFLN(PSTR(" found in "), isRoot ? PSTR("root") : autoImportDir);
             }
             if (!isRoot) {
-                sd.fat.chdir();
+                sd.fileSystem.chdir();
             }
             return;
         }
@@ -679,7 +679,7 @@ void Leveling::execute_M323(GCode* com) {
 }
 void Leveling::importBumpMatrix(char* filename) {
 #if SDSUPPORT
-    if (!sd.sdactive) {
+    if (sd.state != SDState::SD_MOUNTED) {
         Com::printF(Com::tErrorImportBump);
         Com::printFLN(PSTR(" No SD Card mounted."));
         return;
@@ -687,10 +687,15 @@ void Leveling::importBumpMatrix(char* filename) {
 
     // Handle auto import directory changes
     if (filename[strlen(filename) - 1] == '/') {
-        SdFile dir(filename, O_READ);
+        sd_file_t dir;
+        dir.open(filename);
         if (dir.isDir()) {
-            memcpy(autoImportDir, dir.isRoot() ? "/" : filename, LONG_FILENAME_LENGTH + 1);
-            Com::printFLN(PSTR("Bump matrix auto-import directory set to "), dir.isRoot() ? PSTR("root") : filename);
+            char nameTest[2] = { 0 };
+            dir.getName(nameTest, sizeof(nameTest));
+            bool isRoot = (nameTest[0] == '/' && nameTest[1] == '\0');
+
+            memcpy(autoImportDir, isRoot ? "/" : filename, sizeof(autoImportDir));
+            Com::printFLN(PSTR("Bump matrix auto-import directory set to "), isRoot ? PSTR("root") : filename);
             dir.close();
             return;
         }
@@ -704,7 +709,7 @@ void Leveling::importBumpMatrix(char* filename) {
         return;
     }
 
-    SdFile tempFile;
+    sd_file_t tempFile;
     if (!tempFile.open(filename, O_RDWR) || !tempFile.fileSize()) {
         Com::printF(Com::tErrorImportBump);
         Com::printFLN(PSTR(" Can't open/read bump matrix file!"));
@@ -818,7 +823,7 @@ void Leveling::importBumpMatrix(char* filename) {
 }
 void Leveling::exportBumpMatrix(char* filename) {
 #if SDSUPPORT
-    if (!sd.sdactive) {
+    if (sd.state != SDState::SD_MOUNTED) {
         Com::printF(Com::tErrorExportBump);
         Com::printFLN(PSTR(" No SD Card mounted."));
         return;
@@ -836,7 +841,7 @@ void Leveling::exportBumpMatrix(char* filename) {
         return;
     }
 
-    SdFile tempFile;
+    sd_file_t tempFile;
     if (!tempFile.open(filename, O_RDWR | O_CREAT | O_TRUNC)) {
         Com::printF(Com::tErrorExportBump);
         Com::printFLN(PSTR(" Can't open/create bump matrix file!"));
@@ -855,11 +860,11 @@ void Leveling::exportBumpMatrix(char* filename) {
     constexpr char metaDataCols[] = PSTR("xMin,xMax,yMin,yMax,Autolevel,GridSize,BedTemp,TrigHeight,MaxPosZ");
     constexpr float bumpMatrixVers = 0.1f;
 
-    tempFile.write(Com::tBumpCSVHeader);
+    tempFile.write(reinterpret_cast<const uint8_t*>(Com::tBumpCSVHeader), strlen(Com::tBumpCSVHeader));
     tempFile.write(',');
     tempFile.printField(bumpMatrixVers, '\n');
 
-    tempFile.write(metaDataCols);
+    tempFile.write(reinterpret_cast<const uint8_t*>(metaDataCols), sizeof(metaDataCols));
     tempFile.write('\n');
 
     tempFile.printField(xMin, ',', 2);

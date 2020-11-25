@@ -723,14 +723,14 @@ void HAL::importEEPROM() {
 #endif
 
 millis_t eprSyncTime = 0; // in sync
-SdFile eepromFile;
+sd_file_t eepromFile;
 void HAL::syncEEPROM() { // store to disk if changed
     millis_t time = millis();
 
     if (eprSyncTime && (time - eprSyncTime > 15000)) { // Buffer writes only every 15 seconds to pool writes
         eprSyncTime = 0;
         bool failed = false;
-        if (!sd.sdactive) { // not mounted
+        if (sd.state != SDState::SD_MOUNTED) { // not mounted
             if (eepromFile.isOpen())
                 eepromFile.close();
             Com::printErrorF("Could not write eeprom to sd card - no sd card mounted");

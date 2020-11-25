@@ -1141,8 +1141,9 @@ void GCodeSource::registerSource(GCodeSource* newSource) {
     }
     //printAllFLN(PSTR("AddSource:"),numSources);
     sources[numSources++] = newSource;
-    if (newSource->supportsWrite())
+    if (newSource->supportsWrite()) {
         writeableSources[numWriteSources++] = newSource;
+    }
 }
 
 void GCodeSource::removeSource(GCodeSource* delSource) {
@@ -1420,7 +1421,7 @@ bool SerialGCodeSource::testEmergency(GCode& gcode) {
 
 #if SDSUPPORT
 bool SDCardGCodeSource::isOpen() {
-    return (sd.sdmode > 0 && sd.sdmode < 100);
+    return (sd.state == SDState::SD_PRINTING);
 }
 
 bool SDCardGCodeSource::supportsWrite() { ///< true if write is a non dummy function
@@ -1432,7 +1433,7 @@ bool SDCardGCodeSource::closeOnError() { // return true if the channel can not i
 }
 
 bool SDCardGCodeSource::dataAvailable() { // would read return a new byte?
-    if (sd.sdmode == 1) {
+    if (sd.state == SDState::SD_PRINTING) {
         if (sd.sdpos == sd.filesize) {
             close();
             return false;
@@ -1443,14 +1444,14 @@ bool SDCardGCodeSource::dataAvailable() { // would read return a new byte?
 }
 
 int SDCardGCodeSource::readByte() {
-    int n = sd.file.read();
+    int n = sd.selectedFile.read();
     if (n == -1) {
         Com::printFLN(Com::tSDReadError);
         UI_ERROR("SD Read Error");
 
         // Second try in case of recoverable errors
-        sd.file.seekSet(sd.sdpos);
-        n = sd.file.read();
+        sd.selectedFile.seekSet(sd.sdpos);
+        n = sd.selectedFile.read();
         if (n == -1) {
             Com::printErrorFLN(PSTR("SD error did not recover!"));
             close();
@@ -1467,18 +1468,20 @@ void SDCardGCodeSource::writeByte(uint8_t byte) {
 }
 
 void SDCardGCodeSource::close() {
-    sd.sdmode = 0;
-    GCodeSource::removeSource(this);
-    Printer::setPrinting(false);
-    Printer::setMenuMode(MENU_MODE_SD_PRINTING, false);
-    Printer::setMenuMode(MENU_MODE_PAUSED, false);
-    Com::printFLN(Com::tDonePrinting);
+    if (sd.state == SDState::SD_PRINTING) {
+        sd.state = SDState::SD_MOUNTED;
+        GCodeSource::removeSource(this);
+        Printer::setPrinting(false);
+        Printer::setMenuMode(MENU_MODE_SD_PRINTING, false);
+        Printer::setMenuMode(MENU_MODE_PAUSED, false);
+        Com::printFLN(Com::tDonePrinting);
+    }
 }
 #endif
 
 FlashGCodeSource::FlashGCodeSource()
-    : GCodeSource() {
-    finished = true;
+    : GCodeSource()
+    , finished(true) {
 }
 
 bool FlashGCodeSource::isOpen() {

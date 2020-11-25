@@ -181,8 +181,8 @@ inline void memcopy4(void* dest, void* source) {
 #endif
 
 #include "communication/gcode.h"
-#if SDSUPPORT
-#include "SdFat/SdFat.h"
+#if SDSUPPORT  
+#include "SdFat/src/SdFat.h"
 #endif
 
 #endif

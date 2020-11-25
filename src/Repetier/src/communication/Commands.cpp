@@ -36,6 +36,7 @@ void Commands::commandLoop() {
     Printer::breakLongCommand = false; // block is now finished
     if (!Printer::isBlockingReceive()) {
 #if SDSUPPORT
+        /* // MOSES TODO
         if (sd.sdmode == 20) {
             if (Motion1::buffersUsed() == 0) {
                 sd.pausePrintPart2();
@@ -46,16 +47,18 @@ void Commands::commandLoop() {
                 sd.stopPrintPart2();
             }
         }
+        */
 #endif
         GCode::readFromSerial();
         GCode* code = GCode::peekCurrentCommand();
         if (code) {
 #if SDSUPPORT
-            if (sd.savetosd) {
-                if (!(code->hasM() && code->M == 29)) // still writing to file
+            if (sd.state == SDState::SD_WRITING) {
+                if (!(code->hasM() && code->M == 29)) { // still writing to file
                     sd.writeCommand(code);
-                else
+                } else {
                     sd.finishWrite();
+                }
 #if ECHO_ON_EXECUTE
                 code->echoCommand();
 #endif
@@ -131,7 +134,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
     }
 #if SDSUPPORT
     // Reports the sd file byte position every autoSDReportPeriodMS if set, and only if printing.
-    if (Printer::isAutoreportSD() && sd.sdactive && (sd.sdmode == 1 || sd.sdmode == 2)) {
+    if (Printer::isAutoreportSD() && sd.state == SDState::SD_PRINTING) {
         millis_t now = HAL::timeInMilliseconds();
         if (now - Printer::lastSDReport > Printer::autoSDReportPeriodMS) {
             Printer::lastSDReport = now;
@@ -194,7 +197,7 @@ void Commands::waitUntilEndOfAllBuffers() {
         code = GCode::peekCurrentCommand();
         if (code) {
 #if SDSUPPORT
-            if (sd.savetosd) {
+            if (sd.state == SDState::SD_WRITING) {
                 if (!(code->hasM() && code->M == 29)) // still writing to file
                     sd.writeCommand(code);
                 else

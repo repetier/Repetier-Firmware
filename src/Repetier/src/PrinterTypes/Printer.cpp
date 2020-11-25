@@ -689,7 +689,9 @@ void Printer::defaultLoopActions() {
         }
     }
 #if SDCARDDETECT > -1 && SDSUPPORT
-    sd.automount();
+    if(Printer::isAutomount()) {
+        sd.automount();
+    }
 #endif
 #if defined(EEPROM_AVAILABLE) && (EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH)
     HAL::syncEEPROM();
@@ -732,7 +734,7 @@ void Printer::handleInterruptEvent() {
 #endif
 #elif JAM_ACTION == 2 // pause host/print
 #if SDSUPPORT
-        if (sd.sdmode == 2) {
+        if (sd.state == SDState::SD_PRINTING) {
             sd.pausePrint(true);
             break;
         }
@@ -881,7 +883,7 @@ void Printer::showJSONStatus(int type) {
     if (Motion1::length == 0) {
         Com::print('I'); // IDLING
 #if SDSUPPORT
-    } else if (sd.sdactive) {
+    } else if (sd.state == SDState::SD_PRINTING) {
         Com::print('P'); // SD PRINTING
 #endif
     } else {
@@ -1155,7 +1157,7 @@ void Printer::showJSONStatus(int type) {
     case 3:
         Com::printF(PSTR(",\"currentLayer\":"));
 #if SDSUPPORT
-        if (sd.sdactive && sd.fileInfo.layerHeight > 0) { // ONLY CAN TELL WHEN SD IS PRINTING
+        if (sd.state == SDState::SD_PRINTING && sd.fileInfo.layerHeight > 0) { // ONLY CAN TELL WHEN SD IS PRINTING
             Com::print((int)(Motion1::currentPosition[Z_AXIS] / sd.fileInfo.layerHeight));
         } else
             Com::print('0');
@@ -1172,7 +1174,7 @@ void Printer::showJSONStatus(int type) {
         }
         Com::printF(PSTR("],"));
 #if SDSUPPORT
-        if (sd.sdactive) {
+        if (sd.state == SDState::SD_PRINTING) {
             Com::printF(PSTR("\"fractionPrinted\":"));
             float fraction;
             if (sd.filesize < 2000000)
@@ -1185,7 +1187,7 @@ void Printer::showJSONStatus(int type) {
 #endif
         Com::printF(PSTR("\"firstLayerHeight\":"));
 #if SDSUPPORT
-        if (sd.sdactive) {
+        if (sd.state == SDState::SD_PRINTING) {
             Com::print(sd.fileInfo.layerHeight);
         } else
             Com::print('0');
