@@ -49,7 +49,7 @@ public:
     inline static float distortionAt(float xp, float yp) { return 0; }
     static void importBumpMatrix(char* filename) {}
     static void exportBumpMatrix(char* filename) {}
-    inline static bool measure() { return true; }
+    inline static bool measure(GCode* com) { return true; }
     inline static void init() {}
     inline static void handleEeprom() {}
     inline static void resetEeprom() {}
@@ -119,7 +119,7 @@ public:
     static void exportBumpMatrix(char* filename) {}
 #endif
     static void reportDistortionStatus();
-    static bool measure(uint8_t gridSize);
+    static bool measure(GCode* com);
     static void init();
     static void handleEeprom();
     static void resetEeprom();
@@ -137,7 +137,7 @@ public:
     inline static void setDistortionEnabled(bool newState) {}
     inline static bool isDistortionEnabled() { return false; }
     inline static float distortionAt(float xp, float yp) { return 0; }
-    static bool measure();
+    static bool measure(GCode* com);
     static void importBumpMatrix(char* filename) {}
     static void exportBumpMatrix(char* filename) {}
     inline static void init() {}
@@ -157,7 +157,7 @@ public:
     inline static void setDistortionEnabled(bool newState) {}
     inline static bool isDistortionEnabled() { return false; }
     inline static float distortionAt(float xp, float yp) { return 0; }
-    static bool measure();
+    static bool measure(GCode* com);
     static void importBumpMatrix(char* filename) {}
     static void exportBumpMatrix(char* filename) {}
     inline static void init() {}

@@ -51,7 +51,12 @@ Implemented Codes
 - G30 P<0..3> - Single z-probe at current position P = 1 first measurement, P = 2 Last measurement P = 0 or 3 first and last measurement
 - G30 H<height> R<offset> Make probe define new Z and z offset (R) at trigger point assuming z-probe measured an object of H height.
 - G31 - Write signal of probe sensor
-- G32 S<0/1> P<gridsize> - Run LEVELING_METHOD on print bed. S = 1 Save to eeprom, P = Grid size points to probe if using LEVELING_METHOD_GRID. Min = 3, Max = MAX_GRID_SIZE, default if omitted = MAX_GRID_SIZE
+- G32 S<0/1> P<gridsize> R<repetitions> A<0/1> - Run LEVELING_METHOD on print bed. 
+        S = 1 Save to eeprom 
+        P = Grid size points to probe if using LEVELING_METHOD_GRID. 
+                Min = 3, Max = MAX_GRID_SIZE, default if omitted = MAX_GRID_SIZE
+        R = Probe repetitions (in-place), Z_PROBE_REPETITIONS if omitted.
+        A = Use median value of all probe repetition readings. Z_PROBE_USE_MEDIAN if omitted.
 - G33 R0 - Delete distortion map
 - G33 L0 - List distortion map
 - G33 X<xpos> Y<ypos> Z<newdistortioncorrection> - Set new distortion for nearest distortion point.

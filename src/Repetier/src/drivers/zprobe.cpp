@@ -60,6 +60,7 @@ bool ZProbeHandler::activate() {
     float cPos[NUM_AXES];
     Motion1::copyCurrentOfficial(cPos);
     PrinterType::closestAllowedPositionWithNewXYOffset(cPos, offsetX, offsetY, Z_PROBE_BORDER);
+    cPos[E_AXIS] = IGNORE_COORDINATE;
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     GCode::executeFString(Com::tZProbeStartScript);
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
@@ -94,6 +95,7 @@ void ZProbeHandler::deactivate() {
     Motion1::copyCurrentOfficial(cPos);
     PrinterType::closestAllowedPositionWithNewXYOffset(cPos, tool->getOffsetX(), tool->getOffsetY(), Z_PROBE_BORDER);
     GCode::executeFString(Com::tZProbeEndScript);
+    cPos[E_AXIS] = IGNORE_COORDINATE;
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
@@ -110,12 +112,9 @@ void ZProbeHandler::deactivate() {
     }
 }
 
-float ZProbeHandler::runProbe() {
+float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
     Motion1::callBeforeHomingOnSteppers();
-    float zCorr = 0;
-#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
-    float measurements[Z_PROBE_REPETITIONS];
-#endif
+    float measurements[repetitions = constrain(repetitions, 1u, 10u)] = { 0.0f };
     if (ZProbe->update()) {
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
         Motion1::callAfterHomingOnSteppers();
@@ -123,9 +122,6 @@ float ZProbeHandler::runProbe() {
     }
     if (Leveling::isDistortionEnabled()) {
         Com::printWarningFLN(PSTR("z-probe with distortion enabled can return unexpected results!"));
-        // Com::printErrorFLN(PSTR("z-probe stopped because bump correction is active. This will influence the result."));
-        // Motion1::callAfterHomingOnSteppers();
-        // return ILLEGAL_Z_PROBE;
     }
     bool wasActivated = activated;
     if (!activated) {
@@ -136,7 +132,7 @@ float ZProbeHandler::runProbe() {
     EndstopMode oldMode = Motion1::endstopMode;
     Motion1::endstopMode = EndstopMode::PROBING;
     Motion1::waitForEndOfMoves(); // defined starting condition
-    Motion1::stopMask = 4;        // z trigger is finished
+    Motion1::stopMask = 4u;       // z trigger is finished
     float cPos[NUM_AXES], tPos[NUM_AXES];
     int32_t cPosSteps[NUM_AXES], tPosSteps[NUM_AXES], corSteps[NUM_AXES];
     Motion1::copyCurrentPrinter(cPos);
@@ -144,7 +140,7 @@ float ZProbeHandler::runProbe() {
     Motion1::copyCurrentPrinter(tPos);
 
     float secureDistance = (Motion1::maxPos[Z_AXIS] - Motion1::minPos[Z_AXIS]) * 1.5f;
-    if (Motion1::currentPosition[Z_AXIS] > 0.5 * ZProbeHandler::optimumProbingHeight() + 0.1 && fabsf(Motion1::currentPosition[Z_AXIS] - ZProbeHandler::optimumProbingHeight()) < 1.0f) {
+    if (Motion1::currentPosition[Z_AXIS] > 0.5f * ZProbeHandler::optimumProbingHeight() + 0.1f && fabsf(Motion1::currentPosition[Z_AXIS] - ZProbeHandler::optimumProbingHeight()) < 1.0f) {
         secureDistance = getBedDistance() * 1.5f;
     }
     tPos[Z_AXIS] -= secureDistance;
@@ -154,6 +150,7 @@ float ZProbeHandler::runProbe() {
     HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
     Motion1::stepsRemaining[Z_AXIS] = 0;
+    tPos[E_AXIS] = IGNORE_COORDINATE;
     Motion1::moveByPrinter(tPos, speed, false);
     Motion1::waitForEndOfMoves();
     Motion1::endstopMode = EndstopMode::DISABLED;
@@ -164,107 +161,101 @@ float ZProbeHandler::runProbe() {
         return ILLEGAL_Z_PROBE;
     }
     float z = secureDistance * ((fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]));
-#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
-    measurements[0] = z;
-#endif
+    measurements[0u] = z;
     FOR_ALL_AXES(i) {
         int32_t df = cPosSteps[i] - tPosSteps[i];
         corSteps[i] = ((df > 0) ? 1 : ((df < 0) ? -1 : 0)) * (labs(df) - Motion1::stepsRemaining[i]);
     }
     float zr = 0.0f;
-#if Z_PROBE_REPETITIONS > 1
-    // We are now at z=0 do repetitions and assume correct them 100%
-    float cPos2[NUM_AXES], tPos2[NUM_AXES], tPos3[NUM_AXES];
-    FOR_ALL_AXES(i) {
-        cPos2[i] = cPos[i];
-        tPos2[i] = cPos[i];
-        tPos3[i] = cPos[i];
-    }
-    // Go up to start position for repeated tests
-    cPos2[Z_AXIS] = 0;
-    FOR_ALL_AXES(i) {
-        Motion1::currentPositionTransformed[i] = cPos2[i];
-    }
-    Motion1::updatePositionsFromCurrentTransformed();
-    Motion2::setMotorPositionFromTransformed();
-    Motion1::endstopMode = EndstopMode::DISABLED;
-    tPos2[Z_AXIS] = Z_PROBE_SWITCHING_DISTANCE;
-    tPos3[Z_AXIS] = -1.0f;
-    int32_t cPosSteps2[NUM_AXES], tPosSteps2[NUM_AXES], tPosSteps3[NUM_AXES], corSteps2[NUM_AXES];
-    PrinterType::transform(cPos2, cPosSteps2);
-    PrinterType::transform(tPos2, tPosSteps2);
-    PrinterType::transform(tPos3, tPosSteps3);
-    Motion1::moveByPrinter(tPos2, Motion1::moveFeedrate[Z_AXIS], false);
-    Motion1::waitForEndOfMoves();
-#ifdef Z_PROBE_RUN_AFTER_EVERY_PROBE
-    GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));
-#endif
-
-    for (fast8_t r = 1; r < Z_PROBE_REPETITIONS; r++) {
-        // Go down
-#if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
-        HAL::delayMilliseconds(Z_PROBE_DELAY);
-#endif
-        Motion1::stepsRemaining[Z_AXIS] = 0;
-        Motion1::endstopMode = EndstopMode::PROBING;
-        Motion1::moveByPrinter(tPos3, speed, false);
-        Motion1::waitForEndOfMoves();
-        Motion1::endstopMode = EndstopMode::DISABLED;
-
-        if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
-            Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
-            Motion1::callAfterHomingOnSteppers();
-            return ILLEGAL_Z_PROBE;
-        }
-
-#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
-        measurements[r] = z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
-#else
-        zr += z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
-#endif
-        // Go up to tPos2
+    if (repetitions > 1u) {
+        // We are now at z=0 do repetitions and assume correct them 100%
+        float cPos2[NUM_AXES], tPos2[NUM_AXES], tPos3[NUM_AXES];
         FOR_ALL_AXES(i) {
-            int32_t df = tPosSteps2[i] - tPosSteps3[i];
-            corSteps2[i] = ((df > 0) ? 1 : ((df < 0) ? -1 : 0)) * (labs(df) - Motion1::stepsRemaining[i]);
+            cPos2[i] = cPos[i];
+            tPos2[i] = cPos[i];
+            tPos3[i] = cPos[i];
         }
-        Motion1::moveRelativeBySteps(corSteps2);
-        Motion1::waitForEndOfMoves();
+        // Go up to start position for repeated tests
+        cPos2[Z_AXIS] = 0.0f;
         FOR_ALL_AXES(i) {
-            Motion1::currentPositionTransformed[i] = tPos2[i];
+            Motion1::currentPositionTransformed[i] = cPos2[i];
         }
         Motion1::updatePositionsFromCurrentTransformed();
         Motion2::setMotorPositionFromTransformed();
-    }
-#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
-    // bubble sort the measurements
-    float tmp;
-    for (fast8_t i = 0; i < Z_PROBE_REPETITIONS - 1; i++) {         // n numbers require at most n-1 rounds of swapping
-        for (fast8_t j = 0; j < Z_PROBE_REPETITIONS - i - 1; j++) { //
-            if (measurements[j] > measurements[j + 1]) {            // out of order?
-                tmp = measurements[j];                              // swap them:
-                measurements[j] = measurements[j + 1];
-                measurements[j + 1] = tmp;
+        Motion1::endstopMode = EndstopMode::DISABLED;
+        tPos2[Z_AXIS] = Z_PROBE_SWITCHING_DISTANCE;
+        tPos3[Z_AXIS] = -1.0f;
+        int32_t cPosSteps2[NUM_AXES], tPosSteps2[NUM_AXES], tPosSteps3[NUM_AXES], corSteps2[NUM_AXES] = { 0 };
+        PrinterType::transform(cPos2, cPosSteps2);
+        PrinterType::transform(tPos2, tPosSteps2);
+        PrinterType::transform(tPos3, tPosSteps3);
+        tPos2[E_AXIS] = IGNORE_COORDINATE;
+        Motion1::moveByPrinter(tPos2, Motion1::maxFeedrate[X_AXIS], false);
+        Motion1::waitForEndOfMoves();
+#ifdef Z_PROBE_RUN_AFTER_EVERY_PROBE
+        GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));
+#endif
+
+        for (fast8_t r = 1; r < repetitions && !Printer::breakLongCommand; r++) {
+            // Go down
+#if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
+            HAL::delayMilliseconds(Z_PROBE_DELAY);
+#endif
+            Motion1::stepsRemaining[Z_AXIS] = 0;
+            Motion1::endstopMode = EndstopMode::PROBING;
+            tPos3[E_AXIS] = IGNORE_COORDINATE;
+            Motion1::moveByPrinter(tPos3, speed, false);
+            Motion1::waitForEndOfMoves();
+            Motion1::endstopMode = EndstopMode::DISABLED;
+
+            if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+                Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+                Motion1::callAfterHomingOnSteppers();
+                return ILLEGAL_Z_PROBE;
             }
+
+            if (useMedian) {
+                measurements[r] = z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0f) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
+            } else {
+                zr += z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0f) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
+            }
+            // Go up to tPos2
+            FOR_ALL_AXES(i) {
+                int32_t df = tPosSteps2[i] - tPosSteps3[i];
+                corSteps2[i] = ((df > 0) ? 1 : ((df < 0) ? -1 : 0)) * (labs(df) - Motion1::stepsRemaining[i]);
+            }
+            Motion1::moveRelativeBySteps(corSteps2);
+            Motion1::waitForEndOfMoves();
+            FOR_ALL_AXES(i) {
+                Motion1::currentPositionTransformed[i] = tPos2[i];
+            }
+            Motion1::updatePositionsFromCurrentTransformed();
+            Motion2::setMotorPositionFromTransformed();
+        }
+        if (useMedian) {
+            //Com::printArrayFLN("measure: ", measurements, ARRAY_SIZE(measurements), 4);
+            float tmp;
+            for (fast8_t i = 0; i < repetitions - 1; i++) {         // n numbers require at most n-1 rounds of swapping
+                for (fast8_t j = 0; j < repetitions - i - 1; j++) { //
+                    if (measurements[j] > measurements[j + 1]) {    // out of order?
+                        tmp = measurements[j];                      // swap them:
+                        measurements[j] = measurements[j + 1];
+                        measurements[j + 1] = tmp;
+                    }
+                }
+            }
+            // Take median result
+            z = static_cast<float>(measurements[repetitions >> 1u]);
+        } else {
+            z = (z + zr) / static_cast<float>(repetitions);
+        }
+        // Fix last correction
+        FOR_ALL_AXES(i) {
+            corSteps[i] -= corSteps2[i];
         }
     }
-    // Take median result
-    z = static_cast<float>(measurements[Z_PROBE_REPETITIONS >> 1]);
-#else
-    z = (z + zr) / static_cast<float>(Z_PROBE_REPETITIONS);
-#endif
-    // Fix last correction
-    FOR_ALL_AXES(i) {
-        corSteps[i] -= corSteps2[i];
-    }
-#endif
-#if ENABLE_BUMP_CORRECTION
-    // if (Leveling::isDistortionEnabled()) {
-    // zCorr = Leveling::distortionAt(Motion1::currentPosition[X_AXIS], Motion1::currentPosition[Y_AXIS]);
-    // }
-#endif
     z += height;
     z -= coating;
-    z -= zCorr;
     /* DEBUG_MSG2_FAST("StartSteps", cPosSteps[Z_AXIS]);
     DEBUG_MSG2_FAST("EndSteps", tPosSteps[Z_AXIS]);
     DEBUG_MSG2_FAST("CorSteps", corSteps[Z_AXIS]);
@@ -291,7 +282,8 @@ float ZProbeHandler::runProbe() {
     }
     if (ZProbe->update()) {
         millis_t startTime = HAL::timeInMilliseconds();
-        while (ZProbe->update() && ((HAL::timeInMilliseconds() - startTime) < 200)) {
+        // wait up to 200ms to be sure signal stays
+        while (ZProbe->update() && ((HAL::timeInMilliseconds() - startTime) < 200ul)) {
             Commands::checkForPeriodicalActions(false);
         }
 
@@ -301,18 +293,10 @@ float ZProbeHandler::runProbe() {
             return ILLEGAL_Z_PROBE;
         }
     }
+    Motion1::waitForEndOfMoves();
     Com::printF(Com::tZProbe, z, 3);
     Com::printF(Com::tSpaceXColon, Motion1::currentPosition[X_AXIS]);
-#if ENABLE_BUMP_CORRECTION
-    if (Leveling::isDistortionEnabled()) {
-        Com::printF(Com::tSpaceYColon, Motion1::currentPosition[Y_AXIS]);
-        Com::printFLN(PSTR(" zCorr:"), zCorr, 3);
-    } else {
-        Com::printFLN(Com::tSpaceYColon, Motion1::currentPosition[Y_AXIS]);
-    }
-#else
     Com::printFLN(Com::tSpaceYColon, Motion1::currentPosition[Y_AXIS]);
-#endif
     Motion1::callAfterHomingOnSteppers();
     return z;
 }
@@ -421,6 +405,7 @@ bool ZProbeHandler::activate() {
     Tool* tool = Tool::getActiveTool();
     Motion1::copyCurrentOfficial(cPos);
     PrinterType::closestAllowedPositionWithNewXYOffset(cPos, tool->getOffsetX(), tool->getOffsetY(), Z_PROBE_BORDER);
+    cPos[E_AXIS] = IGNORE_COORDINATE;
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     GCode::executeFString(Com::tZProbeStartScript);
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
@@ -468,6 +453,7 @@ void ZProbeHandler::deactivate() {
     Motion1::copyCurrentOfficial(cPos);
     PrinterType::closestAllowedPositionWithNewXYOffset(cPos, tool->getOffsetX(), tool->getOffsetY(), Z_PROBE_BORDER);
     GCode::executeFString(Com::tZProbeEndScript);
+    cPos[E_AXIS] = IGNORE_COORDINATE;
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
@@ -488,12 +474,9 @@ void ZProbeHandler::deactivate() {
     }
 }
 
-float ZProbeHandler::runProbe() {
-    float zCorr = 0;
+float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
     Motion1::callBeforeHomingOnSteppers();
-#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN && Z_PROBE_REPETITIONS > 1
-    float measurements[Z_PROBE_REPETITIONS];
-#endif
+    float measurements[repetitions = constrain(repetitions, 1u, 10u)] = { 0.0f };
     if (ZProbe->update()) {
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
         Motion1::callAfterHomingOnSteppers();
@@ -501,9 +484,6 @@ float ZProbeHandler::runProbe() {
     }
     if (Leveling::isDistortionEnabled()) {
         Com::printWarningFLN(PSTR("z-probe with distortion enabled can return unexpected results!"));
-        // Com::printErrorFLN(PSTR("z-probe stopped because bump correction is active. This will influence the result."));
-        // Motion1::callAfterHomingOnSteppers();
-        // return ILLEGAL_Z_PROBE;
     }
     bool wasActivated = activated;
     if (!activated) {
@@ -511,11 +491,10 @@ float ZProbeHandler::runProbe() {
     }
     bool alActive = Motion1::isAutolevelActive();
     Motion1::setAutolevelActive(false, true);
-    // bool bcActive = Leveling::isDistortionEnabled();
     EndstopMode oldMode = Motion1::endstopMode;
     Motion1::endstopMode = EndstopMode::PROBING;
     Motion1::waitForEndOfMoves(); // defined starting condition
-    Motion1::stopMask = 4;        // z trigger is finished
+    Motion1::stopMask = 4u;       // z trigger is finished
     float cPos[NUM_AXES], tPos[NUM_AXES];
     int32_t cPosSteps[NUM_AXES], tPosSteps[NUM_AXES], corSteps[NUM_AXES];
     Motion1::copyCurrentPrinter(cPos);
@@ -523,7 +502,7 @@ float ZProbeHandler::runProbe() {
     Motion1::copyCurrentPrinter(tPos);
 
     float secureDistance = (Motion1::maxPos[Z_AXIS] - Motion1::minPos[Z_AXIS]) * 1.5f;
-    if (Motion1::currentPosition[Z_AXIS] > 0.5 * ZProbeHandler::optimumProbingHeight() + 0.1 && fabsf(Motion1::currentPosition[Z_AXIS] - ZProbeHandler::optimumProbingHeight()) < 1.0f) {
+    if (Motion1::currentPosition[Z_AXIS] > 0.5f * ZProbeHandler::optimumProbingHeight() + 0.1f && fabsf(Motion1::currentPosition[Z_AXIS] - ZProbeHandler::optimumProbingHeight()) < 1.0f) {
         secureDistance = getBedDistance() * 1.5f;
     }
     tPos[Z_AXIS] -= secureDistance;
@@ -533,6 +512,7 @@ float ZProbeHandler::runProbe() {
     HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
     Motion1::stepsRemaining[Z_AXIS] = 0;
+    tPos[E_AXIS] = IGNORE_COORDINATE;
     Motion1::moveByPrinter(tPos, speed, false);
     Motion1::waitForEndOfMoves();
     Motion1::endstopMode = EndstopMode::DISABLED;
@@ -544,106 +524,100 @@ float ZProbeHandler::runProbe() {
     }
 
     float z = secureDistance * ((fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]));
-#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN && Z_PROBE_REPETITIONS > 1
-    measurements[0] = z;
-#endif
+    measurements[0u] = z;
     FOR_ALL_AXES(i) {
         int32_t df = cPosSteps[i] - tPosSteps[i];
         corSteps[i] = ((df > 0) ? 1 : ((df < 0) ? -1 : 0)) * (labs(df) - Motion1::stepsRemaining[i]);
     }
     float zr = 0.0f;
-#if Z_PROBE_REPETITIONS > 1
-    // We are now at z=0 do repetitions and assume correct them 100%
-    float cPos2[NUM_AXES], tPos2[NUM_AXES], tPos3[NUM_AXES];
-    FOR_ALL_AXES(i) {
-        cPos2[i] = cPos[i];
-        tPos2[i] = cPos[i];
-        tPos3[i] = cPos[i];
-    }
-    // Go up to start position for repeated tests
-    cPos2[Z_AXIS] = 0;
-    FOR_ALL_AXES(i) {
-        Motion1::currentPositionTransformed[i] = cPos2[i];
-    }
-    Motion1::updatePositionsFromCurrentTransformed();
-    Motion2::setMotorPositionFromTransformed();
-    Motion1::endstopMode = EndstopMode::DISABLED;
-    tPos2[Z_AXIS] = Z_PROBE_SWITCHING_DISTANCE;
-    tPos3[Z_AXIS] = -1.0f;
-    int32_t cPosSteps2[NUM_AXES], tPosSteps2[NUM_AXES], tPosSteps3[NUM_AXES], corSteps2[NUM_AXES];
-    PrinterType::transform(cPos2, cPosSteps2);
-    PrinterType::transform(tPos2, tPosSteps2);
-    PrinterType::transform(tPos3, tPosSteps3);
-    Motion1::moveByPrinter(tPos2, Motion1::moveFeedrate[Z_AXIS], false);
-    Motion1::waitForEndOfMoves();
-#ifdef Z_PROBE_RUN_AFTER_EVERY_PROBE
-    GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));
-#endif
-
-    for (fast8_t r = 1; r < Z_PROBE_REPETITIONS; r++) {
-        // Go down
-#if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
-        HAL::delayMilliseconds(Z_PROBE_DELAY);
-#endif
-        Motion1::stepsRemaining[Z_AXIS] = 0;
-        Motion1::endstopMode = EndstopMode::PROBING;
-        Motion1::moveByPrinter(tPos3, speed, false);
-        Motion1::waitForEndOfMoves();
-        Motion1::endstopMode = EndstopMode::DISABLED;
-
-        if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
-            Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
-            Motion1::callAfterHomingOnSteppers();
-            return ILLEGAL_Z_PROBE;
-        }
-
-#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
-        measurements[r] = z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
-#else
-        zr += z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
-#endif
-        // Go up to tPos2
+    if (repetitions > 1u) {
+        // We are now at z=0 do repetitions and assume correct them 100%
+        float cPos2[NUM_AXES], tPos2[NUM_AXES], tPos3[NUM_AXES];
         FOR_ALL_AXES(i) {
-            int32_t df = tPosSteps2[i] - tPosSteps3[i];
-            corSteps2[i] = ((df > 0) ? 1 : ((df < 0) ? -1 : 0)) * (labs(df) - Motion1::stepsRemaining[i]);
+            cPos2[i] = cPos[i];
+            tPos2[i] = cPos[i];
+            tPos3[i] = cPos[i];
         }
-        Motion1::moveRelativeBySteps(corSteps2);
-        Motion1::waitForEndOfMoves();
+        // Go up to start position for repeated tests
+        cPos2[Z_AXIS] = 0.0f;
         FOR_ALL_AXES(i) {
-            Motion1::currentPositionTransformed[i] = tPos2[i];
+            Motion1::currentPositionTransformed[i] = cPos2[i];
         }
         Motion1::updatePositionsFromCurrentTransformed();
         Motion2::setMotorPositionFromTransformed();
-    }
-#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
-    // bubble sort the measurements
-    float tmp;
-    for (fast8_t i = 0; i < Z_PROBE_REPETITIONS - 1; i++) {         // n numbers require at most n-1 rounds of swapping
-        for (fast8_t j = 0; j < Z_PROBE_REPETITIONS - i - 1; j++) { //
-            if (measurements[j] > measurements[j + 1]) {            // out of order?
-                tmp = measurements[j];                              // swap them:
-                measurements[j] = measurements[j + 1];
-                measurements[j + 1] = tmp;
+        Motion1::endstopMode = EndstopMode::DISABLED;
+        tPos2[Z_AXIS] = Z_PROBE_SWITCHING_DISTANCE;
+        tPos3[Z_AXIS] = -1.0f;
+        int32_t cPosSteps2[NUM_AXES], tPosSteps2[NUM_AXES], tPosSteps3[NUM_AXES], corSteps2[NUM_AXES] = { 0 };
+        PrinterType::transform(cPos2, cPosSteps2);
+        PrinterType::transform(tPos2, tPosSteps2);
+        PrinterType::transform(tPos3, tPosSteps3);
+        tPos2[E_AXIS] = IGNORE_COORDINATE;
+        Motion1::moveByPrinter(tPos2, Motion1::maxFeedrate[X_AXIS], false);
+        Motion1::waitForEndOfMoves();
+#ifdef Z_PROBE_RUN_AFTER_EVERY_PROBE
+        GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));
+#endif
+
+        for (fast8_t r = 1; r < repetitions && !Printer::breakLongCommand; r++) {
+            // Go down
+#if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
+            HAL::delayMilliseconds(Z_PROBE_DELAY);
+#endif
+            Motion1::stepsRemaining[Z_AXIS] = 0;
+            Motion1::endstopMode = EndstopMode::PROBING;
+            tPos3[E_AXIS] = IGNORE_COORDINATE;
+            Motion1::moveByPrinter(tPos3, speed, false);
+            Motion1::waitForEndOfMoves();
+            Motion1::endstopMode = EndstopMode::DISABLED;
+
+            if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+                Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+                Motion1::callAfterHomingOnSteppers();
+                return ILLEGAL_Z_PROBE;
             }
+
+            if (useMedian) {
+                measurements[r] = z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0f) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
+            } else {
+                zr += z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0f) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
+            }
+            // Go up to tPos2
+            FOR_ALL_AXES(i) {
+                int32_t df = tPosSteps2[i] - tPosSteps3[i];
+                corSteps2[i] = ((df > 0) ? 1 : ((df < 0) ? -1 : 0)) * (labs(df) - Motion1::stepsRemaining[i]);
+            }
+            Motion1::moveRelativeBySteps(corSteps2);
+            Motion1::waitForEndOfMoves();
+            FOR_ALL_AXES(i) {
+                Motion1::currentPositionTransformed[i] = tPos2[i];
+            }
+            Motion1::updatePositionsFromCurrentTransformed();
+            Motion2::setMotorPositionFromTransformed();
+        }
+        if (useMedian) {
+            //Com::printArrayFLN("measure: ", measurements, ARRAY_SIZE(measurements), 4);
+            float tmp;
+            for (fast8_t i = 0; i < repetitions - 1; i++) {         // n numbers require at most n-1 rounds of swapping
+                for (fast8_t j = 0; j < repetitions - i - 1; j++) { //
+                    if (measurements[j] > measurements[j + 1]) {    // out of order?
+                        tmp = measurements[j];                      // swap them:
+                        measurements[j] = measurements[j + 1];
+                        measurements[j + 1] = tmp;
+                    }
+                }
+            }
+            // Take median result
+            z = static_cast<float>(measurements[repetitions >> 1u]);
+        } else {
+            z = (z + zr) / static_cast<float>(repetitions);
+        }
+        // Fix last correction
+        FOR_ALL_AXES(i) {
+            corSteps[i] -= corSteps2[i];
         }
     }
-    // Take median result
-    z = static_cast<float>(measurements[Z_PROBE_REPETITIONS >> 1]);
-#else
-    z = (z + zr) / static_cast<float>(Z_PROBE_REPETITIONS);
-#endif
-    // Fix last correction
-    FOR_ALL_AXES(i) {
-        corSteps[i] -= corSteps2[i];
-    }
-#endif
-#if ENABLE_BUMP_CORRECTION
-    // if (Leveling::isDistortionEnabled()) {
-    // zCorr = Leveling::distortionAt(Motion1::currentPosition[X_AXIS], Motion1::currentPosition[Y_AXIS]);
-    // }
-#endif
     z += height;
-    z -= zCorr;
     /* DEBUG_MSG2_FAST("StartSteps", cPosSteps[Z_AXIS]);
     DEBUG_MSG2_FAST("EndSteps", tPosSteps[Z_AXIS]);
     DEBUG_MSG2_FAST("CorSteps", corSteps[Z_AXIS]);
@@ -670,7 +644,8 @@ float ZProbeHandler::runProbe() {
     }
     if (ZProbe->update()) {
         millis_t startTime = HAL::timeInMilliseconds();
-        while (ZProbe->update() && ((HAL::timeInMilliseconds() - startTime) < 200)) {
+        // wait up to 200ms to be sure signal stays
+        while (ZProbe->update() && ((HAL::timeInMilliseconds() - startTime) < 200ul)) {
             Commands::checkForPeriodicalActions(false);
         }
 
@@ -680,18 +655,10 @@ float ZProbeHandler::runProbe() {
             return ILLEGAL_Z_PROBE;
         }
     }
+    Motion1::waitForEndOfMoves();
     Com::printF(Com::tZProbe, z, 3);
     Com::printF(Com::tSpaceXColon, Motion1::currentPosition[X_AXIS]);
-#if ENABLE_BUMP_CORRECTION
-    if (Leveling::isDistortionEnabled()) {
-        Com::printF(Com::tSpaceYColon, Motion1::currentPosition[Y_AXIS]);
-        Com::printFLN(PSTR(" zCorr:"), zCorr, 3);
-    } else {
-        Com::printFLN(Com::tSpaceYColon, Motion1::currentPosition[Y_AXIS]);
-    }
-#else
     Com::printFLN(Com::tSpaceYColon, Motion1::currentPosition[Y_AXIS]);
-#endif
     Motion1::callAfterHomingOnSteppers();
     return z;
 }
@@ -790,6 +757,7 @@ bool ZProbeHandler::activate() {
     float cPos[NUM_AXES];
     Motion1::copyCurrentOfficial(cPos);
     PrinterType::closestAllowedPositionWithNewXYOffset(cPos, offsetX, offsetY, Z_PROBE_BORDER);
+    cPos[E_AXIS] = IGNORE_COORDINATE;
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     GCode::executeFString(Com::tZProbeStartScript);
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
@@ -808,7 +776,7 @@ bool ZProbeHandler::activate() {
         if (isAlarmOn()) {
             Motion1::setHardwareEndstopsAttached(false, ZProbe);
             // if BLTouch gives Alarm again, needle is blocked, stop printer
-            Motion1::waitForEndOfMoves();                                                                              // this avoids hard moves with very high feedrates and lost steps (where do they come from? only happens in case distortion correction is active.
+            Motion1::waitForEndOfMoves();                                                                                   // this avoids hard moves with very high feedrates and lost steps (where do they come from? only happens in case distortion correction is active.
             GCode::fatalError(PSTR("Z-Probe alarm triggered again before probing! Printer stopped to avoid a bed crash!")); // Z is raised to Z=30, probably by the fatalError
             return false;
         }
@@ -843,6 +811,7 @@ void ZProbeHandler::deactivate() {
     Motion1::copyCurrentOfficial(cPos);
     PrinterType::closestAllowedPositionWithNewXYOffset(cPos, tool->getOffsetX(), tool->getOffsetY(), Z_PROBE_BORDER);
     GCode::executeFString(Com::tZProbeEndScript);
+    cPos[E_AXIS] = IGNORE_COORDINATE;
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
     Motion1::setToolOffset(-tool->getOffsetX(), -tool->getOffsetY(), -tool->getOffsetZ());
     Motion1::moveByOfficial(cPos, Motion1::moveFeedrate[X_AXIS], false);
@@ -859,12 +828,9 @@ void ZProbeHandler::deactivate() {
     }
 }
 
-float ZProbeHandler::runProbe() {
+float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
     Motion1::callBeforeHomingOnSteppers();
-    float zCorr = 0;
-#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN && Z_PROBE_REPETITIONS > 1
-    float measurements[Z_PROBE_REPETITIONS];
-#endif
+    float measurements[repetitions = constrain(repetitions, 1u, 10u)] = { 0.0f };
     if (ZProbe->update()) {
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
         Motion1::callAfterHomingOnSteppers();
@@ -872,9 +838,6 @@ float ZProbeHandler::runProbe() {
     }
     if (Leveling::isDistortionEnabled()) {
         Com::printWarningFLN(PSTR("z-probe with distortion enabled can return unexpected results!"));
-        // Com::printErrorFLN(PSTR("z-probe stopped because bump correction is active. This will influence the result."));
-        // Motion1::callAfterHomingOnSteppers();
-        // return ILLEGAL_Z_PROBE;
     }
     bool wasActivated = activated;
     if (!activated) {
@@ -885,7 +848,7 @@ float ZProbeHandler::runProbe() {
     EndstopMode oldMode = Motion1::endstopMode;
     Motion1::endstopMode = EndstopMode::PROBING;
     Motion1::waitForEndOfMoves(); // defined starting condition
-    Motion1::stopMask = 4;        // z trigger is finished
+    Motion1::stopMask = 4u;       // z trigger is finished
     float cPos[NUM_AXES], tPos[NUM_AXES];
     int32_t cPosSteps[NUM_AXES], tPosSteps[NUM_AXES], corSteps[NUM_AXES];
     Motion1::copyCurrentPrinter(cPos);
@@ -893,7 +856,7 @@ float ZProbeHandler::runProbe() {
     Motion1::copyCurrentPrinter(tPos);
 
     float secureDistance = (Motion1::maxPos[Z_AXIS] - Motion1::minPos[Z_AXIS]) * 1.5f;
-    if (Motion1::currentPosition[Z_AXIS] > 0.5 * ZProbeHandler::optimumProbingHeight() + 0.1 && fabsf(Motion1::currentPosition[Z_AXIS] - ZProbeHandler::optimumProbingHeight()) < 1.0f) {
+    if (Motion1::currentPosition[Z_AXIS] > 0.5f * ZProbeHandler::optimumProbingHeight() + 0.1f && fabsf(Motion1::currentPosition[Z_AXIS] - ZProbeHandler::optimumProbingHeight()) < 1.0f) {
         secureDistance = getBedDistance() * 1.5f;
     }
     tPos[Z_AXIS] -= secureDistance;
@@ -903,6 +866,7 @@ float ZProbeHandler::runProbe() {
     HAL::delayMilliseconds(Z_PROBE_DELAY);
 #endif
     Motion1::stepsRemaining[Z_AXIS] = 0;
+    tPos[E_AXIS] = IGNORE_COORDINATE;
     Motion1::moveByPrinter(tPos, speed, false);
     Motion1::waitForEndOfMoves();
     Motion1::endstopMode = EndstopMode::DISABLED;
@@ -914,106 +878,102 @@ float ZProbeHandler::runProbe() {
     }
 
     float z = secureDistance * ((fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps[Z_AXIS] - cPosSteps[Z_AXIS]));
-#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN && Z_PROBE_REPETITIONS > 1
-    measurements[0] = z;
-#endif
+    measurements[0u] = z;
     FOR_ALL_AXES(i) {
         int32_t df = cPosSteps[i] - tPosSteps[i];
         corSteps[i] = ((df > 0) ? 1 : ((df < 0) ? -1 : 0)) * (labs(df) - Motion1::stepsRemaining[i]);
     }
     float zr = 0.0f;
-#if Z_PROBE_REPETITIONS > 1
-    // We are now at z=0 do repetitions and assume correct them 100%
-    float cPos2[NUM_AXES], tPos2[NUM_AXES], tPos3[NUM_AXES];
-    FOR_ALL_AXES(i) {
-        cPos2[i] = cPos[i];
-        tPos2[i] = cPos[i];
-        tPos3[i] = cPos[i];
-    }
-    // Go up to start position for repeated tests
-    cPos2[Z_AXIS] = 0;
-    FOR_ALL_AXES(i) {
-        Motion1::currentPositionTransformed[i] = cPos2[i];
-    }
-    Motion1::updatePositionsFromCurrentTransformed();
-    Motion2::setMotorPositionFromTransformed();
-    Motion1::endstopMode = EndstopMode::DISABLED;
-    tPos2[Z_AXIS] = Z_PROBE_SWITCHING_DISTANCE;
-    tPos3[Z_AXIS] = -1.0f;
-    int32_t cPosSteps2[NUM_AXES], tPosSteps2[NUM_AXES], tPosSteps3[NUM_AXES], corSteps2[NUM_AXES];
-    PrinterType::transform(cPos2, cPosSteps2);
-    PrinterType::transform(tPos2, tPosSteps2);
-    PrinterType::transform(tPos3, tPosSteps3);
-    Motion1::moveByPrinter(tPos2, Motion1::moveFeedrate[Z_AXIS], false);
-    Motion1::waitForEndOfMoves();
-#ifdef Z_PROBE_RUN_AFTER_EVERY_PROBE
-    GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));
-#endif
-
-    for (fast8_t r = 1; r < Z_PROBE_REPETITIONS; r++) {
-        // Go down
-#if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
-        HAL::delayMilliseconds(Z_PROBE_DELAY);
-#endif
-        Motion1::stepsRemaining[Z_AXIS] = 0;
-        Motion1::endstopMode = EndstopMode::PROBING;
-        Motion1::moveByPrinter(tPos3, speed, false);
-        Motion1::waitForEndOfMoves();
-        Motion1::endstopMode = EndstopMode::DISABLED;
-
-        if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
-            Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
-            Motion1::callAfterHomingOnSteppers();
-            return ILLEGAL_Z_PROBE;
-        }
-
-#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
-        measurements[r] = z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
-#else
-        zr += z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
-#endif
-        // Go up to tPos2
+    if (repetitions > 1u) {
+        // We are now at z=0 do repetitions and assume correct them 100%
+        float cPos2[NUM_AXES], tPos2[NUM_AXES], tPos3[NUM_AXES];
         FOR_ALL_AXES(i) {
-            int32_t df = tPosSteps2[i] - tPosSteps3[i];
-            corSteps2[i] = ((df > 0) ? 1 : ((df < 0) ? -1 : 0)) * (labs(df) - Motion1::stepsRemaining[i]);
+            cPos2[i] = cPos[i];
+            tPos2[i] = cPos[i];
+            tPos3[i] = cPos[i];
         }
-        Motion1::moveRelativeBySteps(corSteps2);
-        Motion1::waitForEndOfMoves();
+        // Go up to start position for repeated tests
+        cPos2[Z_AXIS] = 0.0f;
         FOR_ALL_AXES(i) {
-            Motion1::currentPositionTransformed[i] = tPos2[i];
+            Motion1::currentPositionTransformed[i] = cPos2[i];
         }
         Motion1::updatePositionsFromCurrentTransformed();
         Motion2::setMotorPositionFromTransformed();
-    }
-#if defined(Z_PROBE_USE_MEDIAN) && Z_PROBE_USE_MEDIAN
-    // bubble sort the measurements
-    float tmp;
-    for (fast8_t i = 0; i < Z_PROBE_REPETITIONS - 1; i++) {         // n numbers require at most n-1 rounds of swapping
-        for (fast8_t j = 0; j < Z_PROBE_REPETITIONS - i - 1; j++) { //
-            if (measurements[j] > measurements[j + 1]) {            // out of order?
-                tmp = measurements[j];                              // swap them:
-                measurements[j] = measurements[j + 1];
-                measurements[j + 1] = tmp;
+
+        Motion1::endstopMode = EndstopMode::DISABLED;
+        tPos2[Z_AXIS] = Z_PROBE_SWITCHING_DISTANCE;
+        tPos3[Z_AXIS] = -1.0f;
+        int32_t cPosSteps2[NUM_AXES], tPosSteps2[NUM_AXES], tPosSteps3[NUM_AXES], corSteps2[NUM_AXES] = { 0 };
+
+        PrinterType::transform(cPos2, cPosSteps2);
+        PrinterType::transform(tPos2, tPosSteps2);
+        PrinterType::transform(tPos3, tPosSteps3);
+        tPos2[E_AXIS] = IGNORE_COORDINATE;
+        Motion1::moveByPrinter(tPos2, Motion1::maxFeedrate[X_AXIS], false);
+        Motion1::waitForEndOfMoves();
+#ifdef Z_PROBE_RUN_AFTER_EVERY_PROBE
+        GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));
+#endif
+
+        for (fast8_t r = 1; r < repetitions && !Printer::breakLongCommand; r++) {
+            // Go down
+#if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
+            HAL::delayMilliseconds(Z_PROBE_DELAY);
+#endif
+            Motion1::stepsRemaining[Z_AXIS] = 0;
+            Motion1::endstopMode = EndstopMode::PROBING;
+            tPos3[E_AXIS] = IGNORE_COORDINATE;
+            Motion1::moveByPrinter(tPos3, speed, false);
+            Motion1::waitForEndOfMoves();
+            Motion1::endstopMode = EndstopMode::DISABLED;
+
+            if (Motion1::stepsRemaining[Z_AXIS] < Z_CRASH_THRESHOLD_STEPS) {
+                Com::printErrorFLN(PSTR("Failed to trigger probe endstop! Bed crash?"));
+                Motion1::callAfterHomingOnSteppers();
+                return ILLEGAL_Z_PROBE;
             }
+
+            if (useMedian) {
+                measurements[r] = z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0f) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
+            } else {
+                zr += z - 1.0f + (Z_PROBE_SWITCHING_DISTANCE + 1.0f) * ((fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]) - Motion1::stepsRemaining[Z_AXIS]) / fabsf(tPosSteps3[Z_AXIS] - tPosSteps2[Z_AXIS]));
+            }
+            // Go up to tPos2
+            FOR_ALL_AXES(i) {
+                int32_t df = tPosSteps2[i] - tPosSteps3[i];
+                corSteps2[i] = ((df > 0) ? 1 : ((df < 0) ? -1 : 0)) * (labs(df) - Motion1::stepsRemaining[i]);
+            }
+            Motion1::moveRelativeBySteps(corSteps2);
+            Motion1::waitForEndOfMoves();
+            FOR_ALL_AXES(i) {
+                Motion1::currentPositionTransformed[i] = tPos2[i];
+            }
+            Motion1::updatePositionsFromCurrentTransformed();
+            Motion2::setMotorPositionFromTransformed();
+        }
+        if (useMedian) {
+            //Com::printArrayFLN("measure: ", measurements, ARRAY_SIZE(measurements), 4);
+            float tmp;
+            for (fast8_t i = 0; i < repetitions - 1; i++) {         // n numbers require at most n-1 rounds of swapping
+                for (fast8_t j = 0; j < repetitions - i - 1; j++) { //
+                    if (measurements[j] > measurements[j + 1]) {    // out of order?
+                        tmp = measurements[j];                      // swap them:
+                        measurements[j] = measurements[j + 1];
+                        measurements[j + 1] = tmp;
+                    }
+                }
+            }
+            // Take median result
+            z = static_cast<float>(measurements[repetitions >> 1u]);
+        } else {
+            z = (z + zr) / static_cast<float>(repetitions);
+        }
+        // Fix last correction
+        FOR_ALL_AXES(i) {
+            corSteps[i] -= corSteps2[i];
         }
     }
-    // Take median result
-    z = static_cast<float>(measurements[Z_PROBE_REPETITIONS >> 1]);
-#else
-    z = (z + zr) / static_cast<float>(Z_PROBE_REPETITIONS);
-#endif
-    // Fix last correction
-    FOR_ALL_AXES(i) {
-        corSteps[i] -= corSteps2[i];
-    }
-#endif
-#if ENABLE_BUMP_CORRECTION
-    // if (Leveling::isDistortionEnabled()) {
-    // zCorr = Leveling::distortionAt(Motion1::currentPosition[X_AXIS], Motion1::currentPosition[Y_AXIS]);
-    // }
-#endif
     z += height;
-    z -= zCorr;
     /* DEBUG_MSG2_FAST("StartSteps", cPosSteps[Z_AXIS]);
     DEBUG_MSG2_FAST("EndSteps", tPosSteps[Z_AXIS]);
     DEBUG_MSG2_FAST("CorSteps", corSteps[Z_AXIS]);
@@ -1051,19 +1011,11 @@ float ZProbeHandler::runProbe() {
             return ILLEGAL_Z_PROBE;
         }
     }
+    Motion1::waitForEndOfMoves();
     Com::printF(Com::tZProbe, z, 3);
     Com::printF(PSTR(" err:"), z - cPos[Z_AXIS], 3);
     Com::printF(Com::tSpaceXColon, Motion1::currentPosition[X_AXIS]);
-#if ENABLE_BUMP_CORRECTION
-    if (Leveling::isDistortionEnabled()) {
-        Com::printF(Com::tSpaceYColon, Motion1::currentPosition[Y_AXIS]);
-        Com::printFLN(PSTR(" zCorr:"), zCorr, 3);
-    } else {
-        Com::printFLN(Com::tSpaceYColon, Motion1::currentPosition[Y_AXIS]);
-    }
-#else
     Com::printFLN(Com::tSpaceYColon, Motion1::currentPosition[Y_AXIS]);
-#endif
     Motion1::callAfterHomingOnSteppers();
     return z;
 }

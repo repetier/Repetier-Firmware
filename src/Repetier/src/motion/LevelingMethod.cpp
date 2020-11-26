@@ -232,7 +232,7 @@ void Leveling::setDistortionEnabled(bool newState) {
     Motion1::correctBumpOffset();
 }
 
-bool Leveling::measure(uint8_t gridSize) {
+bool Leveling::measure(GCode* com) {
     float pos[NUM_AXES];
     float tOffMinX, tOffMaxX, tOffMinY, tOffMaxY;
     Plane plane;
@@ -240,10 +240,16 @@ bool Leveling::measure(uint8_t gridSize) {
 
     builder.reset();
     PrinterType::getBedRectangle(xMin, xMax, yMin, yMax);
+    uint16_t gridSize = com->getP(MAX_GRID_SIZE);
+    uint8_t repetitions = com->hasR() ? static_cast<uint8_t>(com->R) : Z_PROBE_REPETITIONS;
+    bool useMedian = com->hasA() ? static_cast<bool>(com->A) : Z_PROBE_USE_MEDIAN;
     // Sanity check for bad eeprom config
     // Todo: triggers a fatal error right now
     if (xMin == xMax || yMin == yMax || gridSize > MAX_GRID_SIZE || gridSize < 3) {
         return false;
+    }
+    if (repetitions < 1u) {
+        repetitions = 1u;
     }
     xMin += Z_PROBE_BORDER; // Safety border from config
     xMax -= Z_PROBE_BORDER;
@@ -305,12 +311,13 @@ bool Leveling::measure(uint8_t gridSize) {
             pos[X_AXIS] = px - ZProbeHandler::xOffset();
             pos[Y_AXIS] = py - ZProbeHandler::yOffset();
             pos[Z_AXIS] = ZProbeHandler::optimumProbingHeight();
+            pos[E_AXIS] = IGNORE_COORDINATE;
             float bedPos[2] = { px, py };
             if (PrinterType::positionOnBed(bedPos) && PrinterType::positionAllowed(pos, pos[Z_AXIS])) {
                 if (ok) {
                     //Todo handle probe min bed temp (if disable heaters is on) over long durations
                     Motion1::moveByPrinter(pos, Motion1::moveFeedrate[X_AXIS], false);
-                    float h = ZProbeHandler::runProbe();
+                    float h = ZProbeHandler::runProbe(repetitions, useMedian);
                     ok &= h != ILLEGAL_Z_PROBE;
                     grid[xx][y] = h;
                     if (ok) {
@@ -906,7 +913,7 @@ void Leveling::reportDistortionStatus() {
 #endif
 
 bool Leveling::execute_G32(GCode* com) {
-    bool ok = measure(com->hasP() ? com->P : MAX_GRID_SIZE);
+    bool ok = measure(com);
     if (com->hasS() && com->S > 0) {
         EEPROM::markChanged();
     }
@@ -954,7 +961,12 @@ void Leveling::execute_G33(GCode* com) {
 
 #if LEVELING_METHOD == LEVELING_METHOD_4_POINT_SYMMETRIC // 4 points
 
-bool Leveling::measure() {
+bool Leveling::measure(GCode* com) {
+    uint8_t repetitions = com->hasR() ? static_cast<uint8_t>(com->R) : Z_PROBE_REPETITIONS;
+    bool useMedian = com->hasA() ? static_cast<bool>(com->A) : Z_PROBE_USE_MEDIAN;
+    if (repetitions < 1u) {
+        repetitions = 1u;
+    }
     Plane plane;
     PlaneBuilder builder;
     builder.reset();
@@ -979,25 +991,25 @@ bool Leveling::measure() {
         if (!ZProbeHandler::activate()) {
             return false;
         }
-        h1 = ZProbeHandler::runProbe();
+        h1 = ZProbeHandler::runProbe(repetitions, useMedian);
         ok &= h1 != ILLEGAL_Z_PROBE;
     }
     if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(L_P2_X, L_P2_Y, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
-        h2 = ZProbeHandler::runProbe();
+        h2 = ZProbeHandler::runProbe(repetitions, useMedian);
         ok &= h2 != ILLEGAL_Z_PROBE;
     }
     if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(L_P3_X, L_P3_Y, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
-        h3 = ZProbeHandler::runProbe();
+        h3 = ZProbeHandler::runProbe(repetitions, useMedian);
         ok &= h3 != ILLEGAL_Z_PROBE;
     }
     if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(x1Mirror, y1Mirror, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
-        h4 = ZProbeHandler::runProbe();
+        h4 = ZProbeHandler::runProbe(repetitions, useMedian);
         ok &= h4 != ILLEGAL_Z_PROBE;
     }
     ZProbeHandler::deactivate();
@@ -1017,7 +1029,7 @@ bool Leveling::measure() {
 }
 
 bool Leveling::execute_G32(GCode* com) {
-    bool ok = measure();
+    bool ok = measure(com);
     if (com->hasS() && com->S > 0) {
         EEPROM::markChanged();
     }
@@ -1028,7 +1040,12 @@ bool Leveling::execute_G32(GCode* com) {
 
 #if LEVELING_METHOD == LEVELING_METHOD_3_POINTS // 3 points
 
-bool Leveling::measure() {
+bool Leveling::measure(GCode* com) {
+    uint8_t repetitions = com->hasR() ? static_cast<uint8_t>(com->R) : Z_PROBE_REPETITIONS;
+    bool useMedian = com->hasA() ? static_cast<bool>(com->A) : Z_PROBE_USE_MEDIAN;
+    if (repetitions < 1u) {
+        repetitions = 1u;
+    }
     Plane plane;
     PlaneBuilder builder;
     builder.reset();
@@ -1042,19 +1059,19 @@ bool Leveling::measure() {
         if (!ZProbeHandler::activate()) {
             return false;
         }
-        h1 = ZProbeHandler::runProbe();
+        h1 = ZProbeHandler::runProbe(repetitions, useMedian);
         ok &= h1 != ILLEGAL_Z_PROBE;
     }
     if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(L_P2_X, L_P2_Y, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
-        h2 = ZProbeHandler::runProbe();
+        h2 = ZProbeHandler::runProbe(repetitions, useMedian);
         ok &= h2 != ILLEGAL_Z_PROBE;
     }
     if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(L_P3_X, L_P3_Y, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
-        h3 = ZProbeHandler::runProbe();
+        h3 = ZProbeHandler::runProbe(repetitions, useMedian);
         ok &= h3 != ILLEGAL_Z_PROBE;
     }
     ZProbeHandler::deactivate();
@@ -1072,7 +1089,7 @@ bool Leveling::measure() {
 }
 
 bool Leveling::execute_G32(GCode* com) {
-    bool ok = measure();
+    bool ok = measure(com);
     if (com->hasS() && com->S > 0) {
         EEPROM::markChanged();
     }
