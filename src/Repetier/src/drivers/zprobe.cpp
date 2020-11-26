@@ -114,7 +114,7 @@ void ZProbeHandler::deactivate() {
 
 float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
     Motion1::callBeforeHomingOnSteppers();
-    float measurements[constrain(repetitions, 1u, 10u)] = { 0.0f };
+    float measurements[repetitions = constrain(repetitions, 1u, 10u)] = { 0.0f };
     if (ZProbe->update()) {
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
         Motion1::callAfterHomingOnSteppers();
@@ -476,7 +476,7 @@ void ZProbeHandler::deactivate() {
 
 float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
     Motion1::callBeforeHomingOnSteppers();
-    float measurements[constrain(repetitions, 1u, 10u)] = { 0.0f };
+    float measurements[repetitions = constrain(repetitions, 1u, 10u)] = { 0.0f };
     if (ZProbe->update()) {
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
         Motion1::callAfterHomingOnSteppers();
@@ -830,7 +830,7 @@ void ZProbeHandler::deactivate() {
 
 float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
     Motion1::callBeforeHomingOnSteppers();
-    float measurements[constrain(repetitions, 1u, 10u)] = { 0.0f };
+    float measurements[repetitions = constrain(repetitions, 1u, 10u)] = { 0.0f };
     if (ZProbe->update()) {
         Com::printErrorFLN(PSTR("z-probe triggered before starting probing."));
         Motion1::callAfterHomingOnSteppers();

@@ -241,15 +241,15 @@ bool Leveling::measure(GCode* com) {
     builder.reset();
     PrinterType::getBedRectangle(xMin, xMax, yMin, yMax);
     uint16_t gridSize = com->getP(MAX_GRID_SIZE);
-    uint8_t repetitons = com->hasR() ? static_cast<uint8_t>(com->R) : Z_PROBE_REPETITIONS;
+    uint8_t repetitions = com->hasR() ? static_cast<uint8_t>(com->R) : Z_PROBE_REPETITIONS;
     bool useMedian = com->hasA() ? static_cast<bool>(com->A) : Z_PROBE_USE_MEDIAN;
     // Sanity check for bad eeprom config
     // Todo: triggers a fatal error right now
     if (xMin == xMax || yMin == yMax || gridSize > MAX_GRID_SIZE || gridSize < 3) {
         return false;
     }
-    if (repetitons < 1) {
-        repetitons = 1;
+    if (repetitions < 1u) {
+        repetitions = 1u;
     }
     xMin += Z_PROBE_BORDER; // Safety border from config
     xMax -= Z_PROBE_BORDER;
@@ -317,7 +317,7 @@ bool Leveling::measure(GCode* com) {
                 if (ok) {
                     //Todo handle probe min bed temp (if disable heaters is on) over long durations
                     Motion1::moveByPrinter(pos, Motion1::moveFeedrate[X_AXIS], false);
-                    float h = ZProbeHandler::runProbe(repetitons, useMedian);
+                    float h = ZProbeHandler::runProbe(repetitions, useMedian);
                     ok &= h != ILLEGAL_Z_PROBE;
                     grid[xx][y] = h;
                     if (ok) {
@@ -962,10 +962,10 @@ void Leveling::execute_G33(GCode* com) {
 #if LEVELING_METHOD == LEVELING_METHOD_4_POINT_SYMMETRIC // 4 points
 
 bool Leveling::measure(GCode* com) {
-    uint8_t repetitons = com->hasR() ? static_cast<uint8_t>(com->R) : Z_PROBE_REPETITIONS;
+    uint8_t repetitions = com->hasR() ? static_cast<uint8_t>(com->R) : Z_PROBE_REPETITIONS;
     bool useMedian = com->hasA() ? static_cast<bool>(com->A) : Z_PROBE_USE_MEDIAN;
-    if (repetitons < 1) {
-        repetitons = 1;
+    if (repetitions < 1u) {
+        repetitions = 1u;
     }
     Plane plane;
     PlaneBuilder builder;
@@ -991,25 +991,25 @@ bool Leveling::measure(GCode* com) {
         if (!ZProbeHandler::activate()) {
             return false;
         }
-        h1 = ZProbeHandler::runProbe(repetitons, useMedian);
+        h1 = ZProbeHandler::runProbe(repetitions, useMedian);
         ok &= h1 != ILLEGAL_Z_PROBE;
     }
     if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(L_P2_X, L_P2_Y, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
-        h2 = ZProbeHandler::runProbe(repetitons, useMedian);
+        h2 = ZProbeHandler::runProbe(repetitions, useMedian);
         ok &= h2 != ILLEGAL_Z_PROBE;
     }
     if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(L_P3_X, L_P3_Y, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
-        h3 = ZProbeHandler::runProbe(repetitons, useMedian);
+        h3 = ZProbeHandler::runProbe(repetitions, useMedian);
         ok &= h3 != ILLEGAL_Z_PROBE;
     }
     if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(x1Mirror, y1Mirror, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
-        h4 = ZProbeHandler::runProbe(repetitons, useMedian);
+        h4 = ZProbeHandler::runProbe(repetitions, useMedian);
         ok &= h4 != ILLEGAL_Z_PROBE;
     }
     ZProbeHandler::deactivate();
@@ -1041,10 +1041,10 @@ bool Leveling::execute_G32(GCode* com) {
 #if LEVELING_METHOD == LEVELING_METHOD_3_POINTS // 3 points
 
 bool Leveling::measure(GCode* com) {
-    uint8_t repetitons = com->hasR() ? static_cast<uint8_t>(com->R) : Z_PROBE_REPETITIONS;
+    uint8_t repetitions = com->hasR() ? static_cast<uint8_t>(com->R) : Z_PROBE_REPETITIONS;
     bool useMedian = com->hasA() ? static_cast<bool>(com->A) : Z_PROBE_USE_MEDIAN;
-    if (repetitons < 1) {
-        repetitons = 1;
+    if (repetitions < 1u) {
+        repetitions = 1u;
     }
     Plane plane;
     PlaneBuilder builder;
@@ -1059,19 +1059,19 @@ bool Leveling::measure(GCode* com) {
         if (!ZProbeHandler::activate()) {
             return false;
         }
-        h1 = ZProbeHandler::runProbe(repetitons, useMedian);
+        h1 = ZProbeHandler::runProbe(repetitions, useMedian);
         ok &= h1 != ILLEGAL_Z_PROBE;
     }
     if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(L_P2_X, L_P2_Y, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
-        h2 = ZProbeHandler::runProbe(repetitons, useMedian);
+        h2 = ZProbeHandler::runProbe(repetitions, useMedian);
         ok &= h2 != ILLEGAL_Z_PROBE;
     }
     if (ok && !Printer::breakLongCommand) {
         Motion1::setTmpPositionXYZ(L_P3_X, L_P3_Y, ZProbeHandler::optimumProbingHeight());
         ok &= Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
-        h3 = ZProbeHandler::runProbe(repetitons, useMedian);
+        h3 = ZProbeHandler::runProbe(repetitions, useMedian);
         ok &= h3 != ILLEGAL_Z_PROBE;
     }
     ZProbeHandler::deactivate();
