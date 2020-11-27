@@ -98,7 +98,7 @@
         if (stepper.overridesResolution()) { \
             stepper.menuConfig(action, data); \
         } else { \
-            GUI::menuFloatP(action, PSTR("Resolution:"), name.getResolution(), 2, menuExtruderStepsPerMM, &name, GUIPageType::FIXED_CONTENT); \
+            GUI::menuFloatP(action, PSTR("Resolution :"), name.getResolution(), 2, menuExtruderStepsPerMM, &name, GUIPageType::FIXED_CONTENT); \
         } \
         GUI::menuFloatP(action, PSTR("Max Speed  :"), name.getMaxSpeed(), 0, menuExtruderMaxSpeed, &name, GUIPageType::FIXED_CONTENT); \
         GUI::menuFloatP(action, PSTR("Max Accel. :"), name.getAcceleration(), 0, menuExtruderMaxAcceleration, &name, GUIPageType::FIXED_CONTENT); \
