@@ -197,7 +197,6 @@ void EEPROM::storeDataIntoEEPROM(uint8_t corrupted) {
 
 void EEPROM::readDataFromEEPROM() {
 #if EEPROM_MODE != 0
-    Com::printFLN(PSTR("Reading data from eeprom"));
     mode = EEPROMMode::READ;
     callHandle();
     uint8_t version = HAL::eprGetByte(EPR_VERSION); // This is the saved version. Don't copy data nor set it to older versions!

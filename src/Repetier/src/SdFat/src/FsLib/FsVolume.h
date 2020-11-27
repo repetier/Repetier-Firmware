@@ -83,6 +83,28 @@ public:
     // Use sectorsPerCluster(). blocksPerCluster() will be removed in the future.
     uint32_t blocksPerCluster() __attribute__((deprecated)) { return sectorsPerCluster(); } //NOLINT
 #endif                                                                                      // DOXYGEN_SHOULD_SKIP_THIS
+    /** Moses: 
+     * \return The volume label obtained from the boot sector */
+    size_t getVolumeLabel(char* name, size_t len) const { 
+        return m_fVol ? m_fVol->getVolumeLabel(name, len) : 0; // TODO exFAT
+    }
+    /** Moses: 
+     * \return The logical sector number for the root directory. */
+    uint32_t rootDirStartSector() const { 
+        if (m_fVol) { 
+            if (fatType() == 16) {
+                return m_fVol->rootDirStart();
+            } else if (fatType() == 32) {
+                return m_fVol->dataStartSector()
+                    + ((m_fVol->rootDirStart() - 2) << m_fVol->sectorsPerClusterShift());
+            }
+            return 0;
+        } else if (m_xVol) {
+            return m_xVol->clusterHeapStartSector()
+                + ((m_xVol->rootDirectoryCluster() - 2) << m_xVol->sectorsPerClusterShift());
+        }
+        return 0;
+    }
     /**
    * Set volume working directory to root.
    * \return true for success or false for failure.

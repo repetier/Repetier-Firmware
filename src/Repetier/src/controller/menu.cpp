@@ -732,13 +732,17 @@ static bool menuSDFilterName(sd_file_t* file, char* tempFilename, size_t size) {
         return false;
     }
 #endif
-    if (tempFilename[0] == '.' && tempFilename[1] != '.') {
-        return false; // MAC CRAP
+    if (tempFilename) {
+        if (tempFilename[0] == '.' && tempFilename[1] != '.') {
+            return false; // MAC CRAP
+        }
     }
     if (file->isDir()) {
         if (GUI::folderLevel < SD_MAX_FOLDER_DEPTH) {
-            GUI::flashToStringString(GUI::tmpString, PSTR("# @"), tempFilename);
-            memcpy(tempFilename, GUI::tmpString, size);
+            if (tempFilename) {
+                GUI::flashToStringString(GUI::tmpString, PSTR("# @"), tempFilename);
+                memcpy(tempFilename, GUI::tmpString, size);
+            }
         } else {
             return false; // Hide any more folders since we can't go deeper.
         }
@@ -767,7 +771,11 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
         GUI::menuText(action, GUI::cwd, true);
         GUI::menuSelectableP(action, PSTR("# Parent Directory"), menuSDStartPrint, reinterpret_cast<void*>(-1), GUIPageType::ACTION);
     } else {
-        GUI::menuTextP(action, PSTR("= SD Print ="), true);
+        if (sd.volumeLabel[0u] == '\0') {
+            GUI::menuTextP(action, PSTR("= SD Print ="), true);
+        } else {
+            GUI::menuText(action, sd.volumeLabel, true);
+        }
         GUI::menuBack(action);
     }
 
@@ -872,7 +880,7 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
     sd_file_t curDir = sd.fileSystem.open(GUI::cwd);
     sd_file_t file;
     curDir.rewind();
-    int count = 0; 
+    int count = 0;
     while (file.openNext(&curDir, O_RDONLY)) {
         HAL::pingWatchdog();
         file.getName(tempLongFilename, LONG_FILENAME_LENGTH);
@@ -967,12 +975,18 @@ void __attribute__((weak)) mainMenu(GUIAction action, void* data) {
     } else {
 #if SDSUPPORT
         if (sd.state == SDState::SD_MOUNTED) {
-            GUI::menuSelectableP(action, PSTR("SD Print"), menuSDPrint, nullptr, GUIPageType::MENU);
+            if (sd.volumeLabel[0u] == '\0') {
+                GUI::menuSelectableP(action, PSTR("SD Print"), menuSDPrint, nullptr, GUIPageType::MENU);
+            } else {
+                GUI::flashToStringString(GUI::tmpString, PSTR("Media: @"), sd.volumeLabel);
+                GUI::menuSelectable(action, GUI::tmpString, menuSDPrint, nullptr, GUIPageType::MENU);
+            }
         }
 #endif
     }
 #if SDSUPPORT && SDCARDDETECT < 0 // Offer mount option
-    if (sd.state == SDState::SD_UNMOUNTED) {
+    if (sd.state == SDState::SD_UNMOUNTED
+        || sd.state == SDState::SD_SAFE_EJECTED) {
         GUI::menuSelectableP(action, PSTR("Mount SD Card"), directAction, (void*)GUI_DIRECT_ACTION_MOUNT_SD_CARD, GUIPageType::ACTION);
     }
 #endif

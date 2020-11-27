@@ -233,6 +233,23 @@ class FatPartition {
   uint32_t volumeSectorCount() const {
     return sectorsPerCluster()*clusterCount();
   }
+  /**
+   * Moses: Get the volume partition's label (name).
+   * Note: This is NOT what MS Windows displays.
+   * This label is only created/changed through formats.
+   * Windows instead manipulates a special file found within the
+   * root directory of the volume.
+   *
+   * \param[out] name An array of characters for the label's name.
+   * \param[in] len The size of the array in bytes. The array
+   *             must be at least 11 bytes long.
+   * \return amount of bytes copied.
+   */
+  size_t getVolumeLabel(char* name, size_t len) const {
+    *name = 0;
+    memcpy(name , m_volumeLabel, len = ((len > 11u) ? 11u : len));
+    return len;
+  }
   /** Debug access to FAT table
    *
    * \param[in] n cluster number.
@@ -272,6 +289,7 @@ class FatPartition {
   uint32_t m_fatStartSector;          // Start sector for first FAT.
   uint32_t m_lastCluster;             // Last cluster number in FAT.
   uint32_t m_rootDirStart;            // Start sector FAT16, cluster FAT32.
+  uint8_t  m_volumeLabel[11];         // Moses: True boot sector volume label.
   //----------------------------------------------------------------------------
   // sector I/O functions.
   bool readSector(uint32_t sector, uint8_t* dst) {

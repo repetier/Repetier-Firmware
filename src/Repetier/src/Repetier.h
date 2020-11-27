@@ -542,21 +542,20 @@ enum class SDState {
     SD_HAS_ERROR,
     SD_MOUNTED,
     SD_PRINTING,
-    SD_WRITING
+    SD_WRITING,
+    SD_SAFE_EJECTED
 };
 class SDCard {
 public:
 #if (ENABLE_SOFTWARE_SPI_CLASS || (SPI_DRIVER_SELECT == 2))
     SoftSpiDriver<SD_SOFT_MISO_PIN, SD_SOFT_MOSI_PIN, SD_SOFT_SCK_PIN> softSpi;
 #endif
- 
+
 #if JSON_OUTPUT
     GCodeFileInfo fileInfo;
 #endif
-    uint32_t filesize;
-    uint32_t sdpos;  
-    bool userUnmountDebounce;
-    bool lastReadState;
+    uint32_t selectedFileSize;
+    uint32_t selectedFilePos;
 
     SDCard();
     void writeCommand(GCode* code);
@@ -567,11 +566,11 @@ public:
     void stopPrint();
     void stopPrintPart2();
     inline void setIndex(uint32_t newpos) {
-        if (state != SDState::SD_MOUNTED) {
+        if (state != SDState::SD_MOUNTED || !selectedFile.isOpen()) {
             return;
         }
-        sdpos = newpos;
-        selectedFile.seekSet(sdpos);
+        selectedFilePos = newpos;
+        selectedFile.seekSet(selectedFilePos);
     }
     void printStatus(bool getFilename = false);
 #if JSON_OUTPUT
@@ -585,21 +584,73 @@ public:
     bool selectFile(const char* filename, bool silent = false);
     void startWrite(const char* filename);
     void deleteFile(const char* filename);
-    template <typename T>
-    bool doForDirectory(sd_file_t& dir, T&& action, const bool recursive = false);
-    void makeDirectory(const char* filename);  
-    
-    bool getCardInfo(uint32_t* volumeSizeBytes = nullptr, uint32_t* usageBytes = nullptr, uint16_t* fileCount = nullptr, uint8_t* folderCount = nullptr);
+    void makeDirectory(const char* filename);
     void finishWrite();
+    void automount();
+
     sd_file_t selectedFile;
     sd_fsys_t fileSystem;
-
-    millis_t mountDebounceTime;
     SDState state;
-    void automount();
+
+    char volumeLabel[sizeof(tempLongFilename)]; // exFat can have long label names
+
+    bool getCardInfo(char* volumeLabelBuf = nullptr, uint8_t volumeLabelSize = 0, uint32_t* volumeSizeBytes = nullptr, uint32_t* usageBytes = nullptr, uint16_t* fileCount = nullptr, uint8_t* folderCount = nullptr);
+
+    template <typename T>
+    bool doForDirectory(sd_file_t& dir, T&& action, const bool recursive = false) {
+        if (!dir.isDir()) {
+            return false;
+        }
+        static size_t depth = 0;
+        sd_file_t file;
+        dir.rewind();
+        while (file.openNext(&dir)) {
+            if (recursive && file.isDir()) {
+                depth++;
+                if (!doForDirectory(file, action, true)) {
+                    file.close();
+                    depth = 0;
+                    return false;
+                }
+                depth--;
+            }
+            action(file, dir, depth);
+            file.close();
+        }
+        file.close();
+        return true;
+    }
+    // Fast get file name.
+    template <size_t N>
+    inline char* getFn(sd_file_t* file, char (&buf)[N]) {
+        file->getName(buf, N);
+        return buf;
+    }
+    template <size_t N>
+    inline char* getFn(sd_file_t& file, char (&buf)[N]) {
+        file.getName(buf, N);
+        return buf;
+    }
+    inline char* getFn(sd_file_t* file, char* buf, uint8_t size) {
+        file->getName(buf, size);
+        return buf;
+    }
+    inline char* getFn(sd_file_t& file, char* buf, uint8_t size) {
+        file.getName(buf, size);
+        return buf;
+    }
+    inline char* getFn(sd_file_t* file) {
+        return getFn(file, tempLongFilename);
+    }
+    inline char* getFn(sd_file_t& file) {
+        return getFn(file, tempLongFilename);
+    }
 #ifdef GLENN_DEBUG
     void writeToFile();
 #endif
+private:
+    size_t mountRetries;
+    millis_t mountDebounceTime;
 };
 
 extern SDCard sd;

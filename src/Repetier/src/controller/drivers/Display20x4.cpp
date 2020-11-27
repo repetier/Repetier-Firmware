@@ -1331,7 +1331,7 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
 #if SDSUPPORT
         if (sd.state == SDState::SD_PRINTING) { // print from sd card
-            Printer::progress = (static_cast<float>(sd.sdpos) * 100.0) / static_cast<float>(sd.filesize);
+            Printer::progress = (static_cast<float>(sd.selectedFilePos) * 100.0) / static_cast<float>(sd.selectedFileSize);
         }
 #endif
         static bool cycle = false;

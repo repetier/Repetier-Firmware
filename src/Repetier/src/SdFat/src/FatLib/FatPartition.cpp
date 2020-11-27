@@ -527,9 +527,11 @@ bool FatPartition::init(BlockDevice* dev, uint8_t part) {
     }
   } else if (clusterCount < 65525) {
     m_fatType = 16;
+    memcpy(m_volumeLabel, reinterpret_cast<BpbFat16_t*>(pbs->bpb)->volumeLabel, 11u);
   } else {
     m_rootDirStart = getLe32(bpb->fat32RootCluster);
     m_fatType = 32;
+    memcpy(m_volumeLabel, bpb->volumeLabel, 11u);
   }
   return true;
 

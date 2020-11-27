@@ -1434,7 +1434,7 @@ bool SDCardGCodeSource::closeOnError() { // return true if the channel can not i
 
 bool SDCardGCodeSource::dataAvailable() { // would read return a new byte?
     if (sd.state == SDState::SD_PRINTING) {
-        if (sd.sdpos == sd.filesize) {
+        if (sd.selectedFilePos == sd.selectedFileSize) {
             close();
             return false;
         }
@@ -1450,7 +1450,7 @@ int SDCardGCodeSource::readByte() {
         UI_ERROR("SD Read Error");
 
         // Second try in case of recoverable errors
-        sd.selectedFile.seekSet(sd.sdpos);
+        sd.selectedFile.seekSet(sd.selectedFilePos);
         n = sd.selectedFile.read();
         if (n == -1) {
             Com::printErrorFLN(PSTR("SD error did not recover!"));
@@ -1459,7 +1459,7 @@ int SDCardGCodeSource::readByte() {
         }
         UI_ERROR("SD error fixed");
     }
-    sd.sdpos++; // = file.curPosition();
+    ++sd.selectedFilePos; // = file.curPosition();
     return n;
 }
 

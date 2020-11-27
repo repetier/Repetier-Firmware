@@ -1177,10 +1177,10 @@ void Printer::showJSONStatus(int type) {
         if (sd.state == SDState::SD_PRINTING) {
             Com::printF(PSTR("\"fractionPrinted\":"));
             float fraction;
-            if (sd.filesize < 2000000)
-                fraction = sd.sdpos / sd.filesize;
+            if (sd.selectedFileSize < 2000000)
+                fraction = sd.selectedFilePos / sd.selectedFileSize;
             else
-                fraction = (sd.sdpos >> 8) / (sd.filesize >> 8);
+                fraction = (sd.selectedFilePos >> 8) / (sd.selectedFileSize >> 8);
             Com::print((float)floor(fraction * 1000) / 1000); // ONE DECIMAL, COULD BE DONE BY SHIFTING, BUT MEH
             Com::print(',');
         }

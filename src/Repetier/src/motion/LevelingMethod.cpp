@@ -595,82 +595,83 @@ void Leveling::set(float x, float y, float z) {
 }
 
 void Leveling::execute_M323(GCode* com) {
-    if (com->hasS() && com->hasS() > 0) {
+    if (com->hasS() && com->S > 0l) {
 // Auto import bed mesh
 #if NUM_HEATED_BEDS > 0 && SDSUPPORT
-        if (com->S == 2) {
+        if (com->S == 2l) {
             if (!com->hasX() || com->X < 1.0f) {
-                Com::printFLN(PSTR("Matrix auto-import requires a valid X<temp> parameter!"));
                 return;
             }
 
+            sd.fileSystem.chdir();
             if (!sd.fileSystem.exists(autoImportDir)) {
                 Com::printF(Com::tErrorImportBump);
                 Com::printFLN(PSTR(" Auto-import directory not found!"));
                 return;
             }
 
-            sd.fileSystem.chdir(autoImportDir); 
-
-            bool isRoot = (autoImportDir[0] == '/' && autoImportDir[1] == '\0');
-
-            Com::printF(PSTR("Scanning for matrixes in "), isRoot ? PSTR("root") : autoImportDir);
-            Com::printFLN(PSTR(" directory..."));
-
-            char lowestTempFile[sizeof(tempLongFilename)] = { 0 };
             float maxDif = com->hasD() ? com->D : 10.0f;
-            float lowestTemp = 9999.0f;
+            float lowestTemp = IGNORE_COORDINATE;
+            uint32_t lowestTempFileIndex = 0ul;
+            sd_file_t root = sd.fileSystem.open(autoImportDir);
+            sd.doForDirectory(
+                root, [&](sd_file_t& file, sd_file_t& dir, size_t depth) {
+                    if (!file.isDir()
+                        && file.getName(tempLongFilename, sizeof(tempLongFilename))
+                        && strstr_P(tempLongFilename, PSTR(".csv"))
+                        && lowestTemp != 0.0f) {
+                        CSVParser csv(&file);
+                        float version = 0.0f, temp = 0.0f;
+                        uint8_t gridSize = 0u;
 
-            sd_file_t file;
-            sd_file_t root = sd.fileSystem.open(autoImportDir); 
-            while (file.openNext(&root, O_READ)) {
-                if (!file.isDir()
-                    && file.getName(tempLongFilename, sizeof(tempLongFilename))
-                    && strstr_P(tempLongFilename, PSTR(".csv"))) {
-                    CSVParser csv(&file);
-                    float version = 0.0f, temp = 0.0f;
-                    uint8_t gridSize = 0;
-                    if (csv.getField(Com::tBumpCSVHeader, version, CSVDir::NEXT)
-                        && csv.getField(PSTR("GridSize"), gridSize, CSVDir::BELOW)
-                        && csv.getField(PSTR("BedTemp"), temp, CSVDir::BELOW)
-                        && gridSize <= MAX_GRID_SIZE) {
-                        float diff = fabs((com->X) - temp);
-                        if (diff < 0.5f) { // Found exact one, just use it.
-                            lowestTemp = 0.0f;
-                            memcpy(lowestTempFile, tempLongFilename, sizeof(tempLongFilename));
-                            break;
-                        } else if (diff <= maxDif) {
-                            if (diff < lowestTemp) {
-                                lowestTemp = diff;
-                                memcpy(lowestTempFile, tempLongFilename, sizeof(tempLongFilename));
+                        if (csv.getField(Com::tBumpCSVHeader, version, CSVDir::NEXT)
+                            && csv.getField(PSTR("GridSize"), gridSize, CSVDir::BELOW)
+                            && csv.getField(PSTR("BedTemp"), temp, CSVDir::BELOW)
+                            && gridSize <= MAX_GRID_SIZE) {
+                            float diff = fabsf((com->X) - temp);
+                            if (diff < 0.5f) { // Found exact one, just use it.
+                                lowestTemp = 0.0f;
+                                lowestTempFileIndex = file.dirIndex();
+                            } else if (diff <= maxDif) {
+                                if (diff < lowestTemp) {
+                                    lowestTemp = diff;
+                                    lowestTempFileIndex = file.dirIndex();
+                                }
                             }
                         }
                     }
-                }
-                file.close();
-            }
-            if (lowestTemp < 9999.0f) {
-                file.close();
-                importBumpMatrix(lowestTempFile);
-                if (com->hasP() && com->P != 0) {
-                    EEPROM::markChanged();
+                },
+                false);
+
+            root.rewind();
+            if (lowestTemp < IGNORE_COORDINATE
+                && lowestTempFileIndex) {
+                sd_file_t file;
+                if (file.open(&root, lowestTempFileIndex, O_RDONLY)
+                    && file.getName(tempLongFilename, sizeof(tempLongFilename))) {
+                    sd.fileSystem.chdir(autoImportDir);
+                    importBumpMatrix(tempLongFilename);
+                    file.close();
+                    if (com->hasP() && com->P != 0l) {
+                        EEPROM::markChanged();
+                    }
                 }
             } else {
                 Com::printF(Com::tErrorImportBump);
-                Com::printF(PSTR(" No valid matrix file for "), com->X, 0);
+                Com::printF(PSTR(" No valid matrix file for "), com->X, 0u);
                 Com::printF(Com::tUnitDegCelsius);
+                bool isRoot = (autoImportDir[0u] == '/' && autoImportDir[1u] == '\0');
                 Com::printFLN(PSTR(" found in "), isRoot ? PSTR("root") : autoImportDir);
             }
-            if (!isRoot) {
-                sd.fileSystem.chdir();
-            }
+            sd.fileSystem.chdir();
+            root.close();
             return;
         }
 #endif
         // End auto import bed mesh
-        if (distortionEnabled != (com->S != 0)) {
+        if (distortionEnabled != (com->S != 0l)) {
             setDistortionEnabled(!distortionEnabled);
-            if (com->hasP() && com->P != 0) {
+            if (com->hasP() && com->P != 0l) {
                 EEPROM::markChanged();
             }
         }
@@ -686,14 +687,11 @@ void Leveling::importBumpMatrix(char* filename) {
     }
 
     // Handle auto import directory changes
-    if (filename[strlen(filename) - 1] == '/') {
+    if (filename[strlen(filename) - 1u] == '/') {
         sd_file_t dir;
         dir.open(filename);
         if (dir.isDir()) {
-            char nameTest[2] = { 0 };
-            dir.getName(nameTest, sizeof(nameTest));
-            bool isRoot = (nameTest[0] == '/' && nameTest[1] == '\0');
-
+            bool isRoot = (filename[0u] == '/' && filename[1u] == '\0');
             memcpy(autoImportDir, isRoot ? "/" : filename, sizeof(autoImportDir));
             Com::printFLN(PSTR("Bump matrix auto-import directory set to "), isRoot ? PSTR("root") : filename);
             dir.close();
@@ -730,9 +728,9 @@ void Leveling::importBumpMatrix(char* filename) {
         ok = false;
     }
 
-    uint8_t newSize = 0;
+    uint8_t newSize = 0u;
     if (ok && (!csv.getField(PSTR("GridSize"), newSize, CSVDir::BELOW) || newSize > MAX_GRID_SIZE)) {
-        if (newSize > 0) {
+        if (newSize > 0u) {
             // Handle a grid mismatch error on it's own to inform the user about it.
             tempFile.close();
             Com::printF(Com::tErrorImportBump);
@@ -840,6 +838,7 @@ void Leveling::exportBumpMatrix(char* filename) {
         Com::printFLN(PSTR(" Invalid filename: "), filename);
         return;
     }
+    sd.fileSystem.chdir();
 
     sd_file_t tempFile;
     if (!tempFile.open(filename, O_RDWR | O_CREAT | O_TRUNC)) {
@@ -851,8 +850,6 @@ void Leveling::exportBumpMatrix(char* filename) {
 
     Com::printF(PSTR("Exporting bump matrix to "), filename);
     Com::printFLN(PSTR("..."));
-
-    millis_t startTime = HAL::timeInMilliseconds();
 
     // As of version 0.1,
     // Autolevel, TrigHeight fields are meta data exposed to the user, but unused on import.
@@ -888,20 +885,15 @@ void Leveling::exportBumpMatrix(char* filename) {
         }
     }
 
-    constexpr ufast8_t autoLevelSize = (sizeof(Motion1::autolevelTransformation) / sizeof(Motion1::autolevelTransformation[0]));
-    for (size_t i = 0; i < autoLevelSize; i++) {
-        if (i == (autoLevelSize - 1)) {
-            tempFile.printField(Motion1::autolevelTransformation[i], '\n', 6);
-        } else {
-            tempFile.printField(Motion1::autolevelTransformation[i], ',', 6);
-        }
+    constexpr ufast8_t autoLevelSize = (sizeof(Motion1::autolevelTransformation) / sizeof(Motion1::autolevelTransformation[0u]));
+    for (size_t i = 0ul; i < autoLevelSize; i++) {
+        tempFile.printField(Motion1::autolevelTransformation[i], (i == (autoLevelSize - 1ul)) ? '\n' : ',', 6u);
     }
 
-    if (tempFile.close()) {
-        Com::printF(PSTR("Bump matrix succesfully written to SD Card. ("), filename);
+    if (tempFile.sync() && tempFile.close()) {
+        Com::printF(PSTR("Bump matrix written to SD Card. ("), filename);
         Com::printF(PSTR(" / "), tempFile.fileSize() / 1000.0f, 2);
-        Com::printF(PSTR(" kB / "), (HAL::timeInMilliseconds() - startTime) / 1000.0f, 2);
-        Com::printFLN(PSTR(" secs.)"));
+        Com::printFLN(PSTR(" kB) "));
     } else {
         Com::printF(Com::tErrorExportBump);
         Com::printFLN(PSTR(" Unable to export Bump matrix!"));

@@ -110,7 +110,7 @@ const uint16_t SD_CMD_TIMEOUT = 300;
 /** erase timeout ms */
 const uint16_t SD_ERASE_TIMEOUT = 10000;
 /** init timeout ms */
-const uint16_t SD_INIT_TIMEOUT = 2000;
+const uint16_t SD_INIT_TIMEOUT = 500;
 /** read timeout ms */
 const uint16_t SD_READ_TIMEOUT = 300;
 /** write time out ms */

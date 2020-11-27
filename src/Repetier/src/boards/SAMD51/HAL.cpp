@@ -724,29 +724,21 @@ void HAL::importEEPROM() {
 
 millis_t eprSyncTime = 0; // in sync
 sd_file_t eepromFile;
-void HAL::syncEEPROM() { // store to disk if changed
-    millis_t time = millis();
-
-    if (eprSyncTime && (time - eprSyncTime > 15000)) { // Buffer writes only every 15 seconds to pool writes
-        eprSyncTime = 0;
-        bool failed = false;
+void HAL::syncEEPROM() {                                   // store to disk if changed
+    if (eprSyncTime && (millis() - eprSyncTime > 15000ul)) { // Buffer writes only every 15 seconds to pool writes
+        eprSyncTime = 0ul;
         if (sd.state != SDState::SD_MOUNTED) { // not mounted
-            if (eepromFile.isOpen())
+            if (eepromFile.isOpen()) {
                 eepromFile.close();
-            Com::printErrorF("Could not write eeprom to sd card - no sd card mounted");
-            Com::println();
+            }
+            Com::printErrorFLN(PSTR("Could not write eeprom to sd card - no sd card mounted"));
             return;
         }
 
-        if (!eepromFile.seekSet(0))
-            failed = true;
-
-        if (!failed && eepromFile.write(virtualEeprom, EEPROM_BYTES) != EEPROM_BYTES)
-            failed = true;
-
-        if (failed) {
-            Com::printErrorF("Could not write eeprom to sd card");
-            Com::println();
+        eepromFile.rewind();
+        if ((eepromFile.write(virtualEeprom, EEPROM_BYTES) != EEPROM_BYTES
+             || !eepromFile.sync())) { // exFAT ignores the sync flag
+            Com::printErrorFLN(PSTR("Could not write eeprom to sd card"));
         }
     }
 }

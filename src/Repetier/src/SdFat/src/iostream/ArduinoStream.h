@@ -28,7 +28,7 @@
  * \file
  * \brief ArduinoInStream and ArduinoOutStream classes
  */
-#include "../SdFatConfig.h"
+#include "SdFatConfig.h"
 #include "bufstream.h"
 //==============================================================================
 /**
