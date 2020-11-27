@@ -29,8 +29,6 @@
 #define KNOWN_BOARD
 #define CPU_ARCH ARCH_ARM
 
-#define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_MANUAL
-
 /*****************************************************************
 * Arduino Due Pin Assignments
 ******************************************************************/

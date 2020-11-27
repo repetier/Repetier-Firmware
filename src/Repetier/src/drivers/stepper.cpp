@@ -361,6 +361,16 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
         printMotorNumberAndName(false);
         Com::printFLN(Com::tMotorSpaceStealthChopColon, stealthChop, BoolFormat::ONOFF);
         break;
+    case 906: // Report Motor current
+        if (com.hasS()) {
+            currentMillis = com.S;
+            driver->rms_current(com.S);
+            reportTMC2130(driver, this, 0);
+            init();
+        }
+        printMotorNumberAndName(false);
+        Com::printFLN(Com::tMotorSpaceRMSCurrentMAColon, currentMillis);
+        break;
     case 911: // Report TMC prewarn
         printMotorNumberAndName(false);
         Com::printFLN(Com::tMotorTempPrewarnTriggered, otpw, BoolFormat::TRUEFALSE);
@@ -620,6 +630,16 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
         printMotorNumberAndName(false);
         Com::printFLN(Com::tMotorSpaceStealthChopColon, stealthChop, BoolFormat::ONOFF);
         break;
+    case 906: // Report Motor current
+        if (com.hasS()) {
+            currentMillis = com.S;
+            driver->rms_current(com.S);
+            reportTMC5160(driver, this, 0);
+            init();
+        }
+        printMotorNumberAndName(false);
+        Com::printFLN(Com::tMotorSpaceRMSCurrentMAColon, currentMillis);
+        break;
     case 911: // Report TMC prewarn
         printMotorNumberAndName(false);
         Com::printFLN(Com::tMotorTempPrewarnTriggered, otpw, BoolFormat::TRUEFALSE);
@@ -875,6 +895,16 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
         }
         printMotorNumberAndName(false);
         Com::printFLN(Com::tMotorSpaceStealthChopColon, stealthChop, BoolFormat::ONOFF);
+        break;
+    case 906: // Report Motor current
+        if (com.hasS()) {
+            currentMillis = com.S;
+            driver->rms_current(com.S);
+            reportTMC2208(driver, this, 0);
+            init();
+        }
+        printMotorNumberAndName(false);
+        Com::printFLN(Com::tMotorSpaceRMSCurrentMAColon, currentMillis);
         break;
     case 911: // Report TMC prewarn
         printMotorNumberAndName(false);
@@ -1147,6 +1177,16 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& 
         }
         printMotorNumberAndName(false);
         Com::printFLN(Com::tMotorSpaceStealthChopColon, stealthChop, BoolFormat::ONOFF);
+        break;
+    case 906: // Report Motor current
+        if (com.hasS()) {
+            currentMillis = com.S;
+            driver->rms_current(com.S);
+            reportTMC2209(driver, this, 0);
+            init();
+        }
+        printMotorNumberAndName(false);
+        Com::printFLN(Com::tMotorSpaceRMSCurrentMAColon, currentMillis);
         break;
     case 911: // Report TMC prewarn
         printMotorNumberAndName(false);

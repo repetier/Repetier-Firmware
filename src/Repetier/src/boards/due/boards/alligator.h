@@ -29,7 +29,7 @@
 #define KNOWN_BOARD
 #define CPU_ARCH ARCH_ARM
 #define SPI_CHAN_DAC 1
-#define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_ALLIGATOR
+// #define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_ALLIGATOR
 /*****************************************************************
  * Arduino Due Pin Assignments
  ******************************************************************/
@@ -219,7 +219,7 @@
 #define KNOWN_BOARD
 #define CPU_ARCH ARCH_ARM
 #define SPI_CHAN_DAC 1
-#define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_ALLIGATOR
+// #define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_ALLIGATOR
 /*****************************************************************
  * Arduino Due Pin Assignments
  ******************************************************************/
@@ -410,7 +410,7 @@
 #define KNOWN_BOARD
 #define CPU_ARCH ARCH_ARM
 #define SPI_CHAN_DAC 1
-#define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_DAC
+// #define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_DAC
 /*****************************************************************
 * Arduino Due Pin Assignments
 ******************************************************************/

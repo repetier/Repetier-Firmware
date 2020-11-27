@@ -473,10 +473,6 @@ public:
     FSTRINGVAR(tConfig)
     FSTRINGVAR(tExtrDot)
 
-#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
-    FSTRINGVAR(tMCPEpromSettings)
-    FSTRINGVAR(tMCPCurrentSettings)
-#endif
     FSTRINGVAR(tPrinterModeFFF)
     FSTRINGVAR(tPrinterModeLaser)
     FSTRINGVAR(tPrinterModeCNC)
@@ -534,6 +530,7 @@ public:
     FSTRINGVAR(tMotorSpaceHybridTresholdColor)
     FSTRINGVAR(tMotorSpaceStallguardSensitivityColon)
     FSTRINGVAR(tMotorStallguardResult)
+    FSTRINGVAR(tMotorSpaceRMSCurrentMAColon)
 
     static void cap(FSTRINGPARAM(text));
     static void config(FSTRINGPARAM(text));

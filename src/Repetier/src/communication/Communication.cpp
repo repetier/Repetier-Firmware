@@ -441,10 +441,6 @@ FSTRINGVALUE(Com::tEPRRetractionUndoSpeed, "Retraction undo speed [mm/s]")
 FSTRINGVALUE(Com::tConfig, "Config:")
 FSTRINGVALUE(Com::tExtrDot, "Extr.")
 
-#if STEPPER_CURRENT_CONTROL == CURRENT_CONTROL_MCP4728
-FSTRINGVALUE(Com::tMCPEpromSettings, "MCP4728 DAC EEPROM Settings:")
-FSTRINGVALUE(Com::tMCPCurrentSettings, "MCP4728 DAC Current Settings:")
-#endif
 FSTRINGVALUE(Com::tPrinterModeFFF, "PrinterMode:FFF")
 FSTRINGVALUE(Com::tPrinterModeLaser, "PrinterMode:Laser")
 FSTRINGVALUE(Com::tPrinterModeCNC, "PrinterMode:CNC")
@@ -501,6 +497,7 @@ FSTRINGVALUE(Com::tMotorPrewarnFlagCleared, " prewarn flag cleared")
 FSTRINGVALUE(Com::tMotorSpaceHybridTresholdColor, " hybrid treshold: ")
 FSTRINGVALUE(Com::tMotorSpaceStallguardSensitivityColon, " stallguard sensitivity: ")
 FSTRINGVALUE(Com::tMotorStallguardResult, "StallGuard Result: ")
+FSTRINGVALUE(Com::tMotorSpaceRMSCurrentMAColon, " RMS Current [mA]: ")
 
 bool Com::writeToAll = true; // transmit start messages to all devices!
 
@@ -809,6 +806,7 @@ void Com::promptStart(PromptDialogCallback cb, FSTRINGPARAM(prefix), char* text,
 }
 
 void Com::promptEnd(bool blocking) {
+    writeToAll = true;
     if (blocking) {
         Com::printFLN(PSTR("//action:resumed"));
     }

@@ -157,10 +157,6 @@
 #define SDSSORIG -1
 #endif
 
-#ifndef STEPPER_CURRENT_CONTROL // Set default stepper current control if not set yet.
-#define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_MANUAL
-#endif
-
 #ifndef FAN_BOARD_PIN
 #define FAN_BOARD_PIN -1
 #endif

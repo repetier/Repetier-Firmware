@@ -1054,7 +1054,7 @@ STEPPER_CURRENT_CONTROL
 #define KNOWN_BOARD 1
 
 // Definition for current control
-#define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_MCP4728
+// #define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_MCP4728
 
 #define MCP4728_I2C_ADDRESS 0x60           // Base Address (0x60);
 #define MCP4728_GENERALCALL_ADDRESS 0x00   // General Call Address. Weird, but OK...
@@ -1194,13 +1194,14 @@ STEPPER_CURRENT_CONTROL
 #endif
 
 // Definition for current control
-#define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_LTC2600
+/* #define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_LTC2600
 #define LTC2600_CHANNELS \
     { 0x30, 0x31, 0x32, 0x33, 0x34 }
 #define LTC2600_NUM_CHANNELS 5
 #define LTC2600_CS_PIN 92  // PIND.4, 47, DA_CS
 #define LTC2600_SCK_PIN 93 // PIND.5, 48, DA_SCK
 #define LTC2600_SDI_PIN 94 // PIND.6, 49, DA_SDI
+*/
 
 // On board beeper, so define values already here
 #define BEEPER_PIN 23
@@ -1681,10 +1682,6 @@ STEPPER_CURRENT_CONTROL
 
 #ifndef SDSSORIG
 #define SDSSORIG -1
-#endif
-
-#ifndef STEPPER_CURRENT_CONTROL // Set default stepper current control if not set yet.
-#define STEPPER_CURRENT_CONTROL CURRENT_CONTROL_MANUAL
 #endif
 
 #ifndef FAN_BOARD_PIN

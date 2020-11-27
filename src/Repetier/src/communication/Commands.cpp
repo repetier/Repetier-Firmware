@@ -711,7 +711,10 @@ void Commands::processMCode(GCode* com) {
     case 513:
         MCode_513(com);
         break;
-    //- M530 S<printing> L<layer> - Enables explicit printing mode (S1) or disables it (S0). L can set layer count
+    case 524: // Abort SD printing
+        MCode_524(com);
+        break;
+        //- M530 S<printing> L<layer> - Enables explicit printing mode (S1) or disables it (S0). L can set layer count
     case 530:
         MCode_530(com);
         break;
@@ -735,7 +738,7 @@ void Commands::processMCode(GCode* com) {
     case 569: // Set stealthchop
         MCode_Stepper(com);
         break;
-    case 575: // Update all serial baudrates 
+    case 575: // Update all serial baudrates
         MCode_575(com);
         break;
     case 600:
@@ -762,6 +765,9 @@ void Commands::processMCode(GCode* com) {
         break;
     case 900: // M233 now use M900 like Marlin
         MCode_900(com);
+        break;
+    case 906: // Report TMC current
+        MCode_Stepper(com);
         break;
     case 907: // M907 Set digital trimpot/DAC motor current using axis codes.
         MCode_907(com);

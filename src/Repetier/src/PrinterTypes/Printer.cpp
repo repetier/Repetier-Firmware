@@ -615,9 +615,6 @@ void Printer::setup() {
     WRITE(BLUE_STATUS_LED, HIGH);
     WRITE(RED_STATUS_LED, LOW);
 #endif // RED_BLUE_STATUS_LEDS
-#if STEPPER_CURRENT_CONTROL != CURRENT_CONTROL_MANUAL
-    motorCurrentControlInit(); // Set current if it is firmware controlled
-#endif
 #if defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS > 0
     initializeAllMotorDrivers();
 #endif // defined
