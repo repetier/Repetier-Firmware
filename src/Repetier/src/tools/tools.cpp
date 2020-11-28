@@ -140,7 +140,7 @@ void ToolChangeLink::deactivate(Tool* tool) {
 
 void __attribute__((weak)) menuToolOffsetXFine(GUIAction action, void* data) {
     Tool* ext = reinterpret_cast<Tool*>(data);
-    DRAW_FLOAT_P(PSTR("Offset X (0.01mm):"), Com::tUnitStepsPerMM, ext->getOffsetX(), 2);
+    DRAW_FLOAT_P(PSTR("Offset X (0.01mm):"), Com::tUnitMM, ext->getOffsetX(), 2);
     if (GUI::handleFloatValueAction(action, v, 0, 100000, 0.01)) {
         ext->setOffsetForAxis(X_AXIS, v);
         Tool::updateDerivedTools();
@@ -149,7 +149,7 @@ void __attribute__((weak)) menuToolOffsetXFine(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuToolOffsetX(GUIAction action, void* data) {
     Tool* ext = reinterpret_cast<Tool*>(data);
-    DRAW_FLOAT_P(PSTR("Offset X (1mm):"), Com::tUnitStepsPerMM, ext->getOffsetX(), 2);
+    DRAW_FLOAT_P(PSTR("Offset X (1mm):"), Com::tUnitMM, ext->getOffsetX(), 2);
     if (action == GUIAction::CLICK) { // catch default action
         GUI::replace(menuToolOffsetXFine, data, GUIPageType::FIXED_CONTENT);
         return;
@@ -162,7 +162,7 @@ void __attribute__((weak)) menuToolOffsetX(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuToolOffsetYFine(GUIAction action, void* data) {
     Tool* ext = reinterpret_cast<Tool*>(data);
-    DRAW_FLOAT_P(PSTR("Offset Y (0.01mm):"), Com::tUnitStepsPerMM, ext->getOffsetY(), 2);
+    DRAW_FLOAT_P(PSTR("Offset Y (0.01mm):"), Com::tUnitMM, ext->getOffsetY(), 2);
     if (GUI::handleFloatValueAction(action, v, 0, 100000, 0.01)) {
         ext->setOffsetForAxis(Y_AXIS, v);
         Tool::updateDerivedTools();
@@ -171,7 +171,7 @@ void __attribute__((weak)) menuToolOffsetYFine(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuToolOffsetY(GUIAction action, void* data) {
     Tool* ext = reinterpret_cast<Tool*>(data);
-    DRAW_FLOAT_P(PSTR("Offset Y (1mm):"), Com::tUnitStepsPerMM, ext->getOffsetY(), 2);
+    DRAW_FLOAT_P(PSTR("Offset Y (1mm):"), Com::tUnitMM, ext->getOffsetY(), 2);
     if (action == GUIAction::CLICK) { // catch default action
         GUI::replace(menuToolOffsetYFine, data, GUIPageType::FIXED_CONTENT);
         return;
@@ -184,7 +184,7 @@ void __attribute__((weak)) menuToolOffsetY(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuToolOffsetZFine(GUIAction action, void* data) {
     Tool* ext = reinterpret_cast<Tool*>(data);
-    DRAW_FLOAT_P(PSTR("Offset Z (0.01mm):"), Com::tUnitStepsPerMM, ext->getOffsetZ(), 2);
+    DRAW_FLOAT_P(PSTR("Offset Z (0.01mm):"), Com::tUnitMM, ext->getOffsetZ(), 2);
     if (GUI::handleFloatValueAction(action, v, 0, 100000, 0.01)) {
         ext->setOffsetForAxis(Z_AXIS, v);
         Tool::updateDerivedTools();
@@ -193,7 +193,7 @@ void __attribute__((weak)) menuToolOffsetZFine(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuToolOffsetZ(GUIAction action, void* data) {
     Tool* ext = reinterpret_cast<Tool*>(data);
-    DRAW_FLOAT_P(PSTR("Offset Z (1mm):"), Com::tUnitStepsPerMM, ext->getOffsetZ(), 2);
+    DRAW_FLOAT_P(PSTR("Offset Z (1mm):"), Com::tUnitMM, ext->getOffsetZ(), 2);
     if (action == GUIAction::CLICK) { // catch default action
         GUI::replace(menuToolOffsetZFine, data, GUIPageType::FIXED_CONTENT);
         return;
@@ -204,10 +204,23 @@ void __attribute__((weak)) menuToolOffsetZ(GUIAction action, void* data) {
     }
 }
 
+void __attribute__((weak)) menuExtruderStepsPerMMFine(GUIAction action, void* data) {
+    ToolExtruder* ext = reinterpret_cast<ToolExtruder*>(data);
+    DRAW_FLOAT_P(PSTR("Resolution Fine:"), Com::tUnitStepsPerMM, ext->getResolution(), 2);
+    if (GUI::handleFloatValueAction(action, v, 0.0f, 100000.0f, 0.01f)) {
+        ext->setResolution(v);
+        Tool::updateDerivedTools();
+    }
+}
+
 void __attribute__((weak)) menuExtruderStepsPerMM(GUIAction action, void* data) {
     ToolExtruder* ext = reinterpret_cast<ToolExtruder*>(data);
-    DRAW_FLOAT_P(PSTR("Resolution:"), Com::tUnitStepsPerMM, ext->getResolution(), 2);
-    if (GUI::handleFloatValueAction(action, v, 0, 100000, 0.1)) {
+    DRAW_FLOAT_P(PSTR("Resolution Coarse:"), Com::tUnitStepsPerMM, ext->getResolution(), 2);
+    if (action == GUIAction::CLICK) { // catch default action
+        GUI::replace(menuExtruderStepsPerMMFine, data, GUIPageType::FIXED_CONTENT);
+        return;
+    }
+    if (GUI::handleFloatValueAction(action, v, 0.0f, 100000.0f, 1.0f)) {
         ext->setResolution(v);
         Tool::updateDerivedTools();
     }
@@ -233,7 +246,7 @@ void __attribute__((weak)) menuExtruderMaxAcceleration(GUIAction action, void* d
 
 void __attribute__((weak)) menuExtruderMaxYank(GUIAction action, void* data) {
     ToolExtruder* ext = reinterpret_cast<ToolExtruder*>(data);
-    DRAW_FLOAT_P(PSTR("Max. Jerk"), Com::tUnitMMPS, ext->getMaxYank(), 0);
+    DRAW_FLOAT_P(PSTR("Max. Jerk"), Com::tUnitMMPS, ext->getMaxYank(), 1);
     if (GUI::handleFloatValueAction(action, v, 0.1, 100, 0.1)) {
         ext->setMaxYank(v);
         Tool::updateDerivedTools();

@@ -10,7 +10,7 @@ void menuSetTemperature(GUIAction action, void* data) {
     HeatManager* hm = reinterpret_cast<HeatManager*>(data);
     float value = hm->getTargetTemperature();
     DRAW_FLOAT_P(PSTR("Target Temperature:"), Com::tUnitDegCelsius, value, 0);
-    if (GUI::handleFloatValueAction(action, value, hm->getMinTemperature(), hm->getMaxTemperature(), 1)) {
+    if (GUI::handleFloatValueAction(action, value, hm->getMinTemperature(), hm->getMaxTemperature(), (ENCODER_SPEED == 2) ? 5 : 1)) {
         hm->setTargetTemperature(value);
     }
 #endif
@@ -32,7 +32,7 @@ void menuHMMaxPWM(GUIAction action, void* data) {
 #if FEATURE_CONTROLLER != NO_CONTROLLER
     HeatManager* hm = reinterpret_cast<HeatManager*>(data);
     float value = hm->getMaxPWM();
-    DRAW_FLOAT_P(PSTR("Max. PWM:"), Com::tUnitDegCelsius, value, 0);
+    DRAW_FLOAT_P(PSTR("Max. PWM:"), Com::tUnitPWM, value, 0);
     if (GUI::handleFloatValueAction(action, value, 1, 255, 1)) {
         hm->setMaxPWM(static_cast<uint8_t>(value));
     }
@@ -344,7 +344,7 @@ void HeatManager::showBaseConfigMenu(GUIAction action) {
 #ifndef PREVENT_CHANGE_MAX_PWM
     GUI::menuLongP(action, PSTR("Max. PWM:"), maxPWM, menuHMMaxPWM, this, GUIPageType::FIXED_CONTENT);
 #endif
-    GUI::menuFloatP(action, PSTR("Decouple var.:"), decoupleVariance, 1, menuHMDecoupleVariance, this, GUIPageType::FIXED_CONTENT);
+    GUI::menuFloatP(action, PSTR("Decouple var.:"), decoupleVariance, 0, menuHMDecoupleVariance, this, GUIPageType::FIXED_CONTENT);
     GUI::menuLongP(action, PSTR("Decouple per.:"), decouplePeriod, menuHMDecouplePeriod, this, GUIPageType::FIXED_CONTENT);
     GUI::menuFloatP(action, PSTR("Hyster. temp.:"), hysteresisTemperature, 1, menuHMSetHysteresisTemperature, this, GUIPageType::FIXED_CONTENT);
     GUI::menuLongP(action, PSTR("Hyster. time:"), hysteresisTime, menuHMSetHysteresisTime, this, GUIPageType::FIXED_CONTENT);
