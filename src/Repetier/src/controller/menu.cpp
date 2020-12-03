@@ -651,6 +651,21 @@ void __attribute__((weak)) menuTune(GUIAction action, void* data) {
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_GUI_TUNE
 #include "../io/redefine.h"
+    // Bed and chamber have no own entry so add it and point to temperature manager
+    for (ufast8_t i = 0; i < NUM_HEATED_BEDS; i++) {
+#if NUM_HEATED_BEDS > 1
+        GUI::menuLongP(action, PSTR("Bed "), i + 1, menuTempControl, heatedBeds[i], GUIPageType::MENU);
+#else
+        GUI::menuSelectableP(action, PSTR("Bed "), menuTempControl, heatedBeds[i], GUIPageType::MENU);
+#endif
+    }
+    for (ufast8_t i = 0; i < NUM_HEATED_CHAMBERS; i++) {
+#if NUM_HEATED_CHAMBERS > 1
+        GUI::menuLongP(action, PSTR("Chamber "), i + 1, menuTempControl, heatedChambers[i], GUIPageType::MENU);
+#else
+        GUI::menuSelectableP(action, PSTR("Chamber"), menuTempControl, heatedChambers[i], GUIPageType::MENU);
+#endif
+    }
     GUI::menuEnd(action);
 }
 
