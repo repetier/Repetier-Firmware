@@ -36,25 +36,23 @@ void Commands::commandLoop() {
     Printer::breakLongCommand = false; // block is now finished
     if (!Printer::isBlockingReceive()) {
 #if SDSUPPORT
-        /* // MOSES TODO
-        if (sd.sdmode == 20) {
+        if (sd.scheduledPause) {
             if (Motion1::buffersUsed() == 0) {
-                sd.pausePrintPart2();
+                sd.printFullyPaused();
+            }
+        } else if (sd.scheduledStop) {
+            if (Motion1::buffersUsed() == 0) {
+                sd.printFullyStopped();
             }
         }
-        if (sd.sdmode == 21) {
-            if (Motion1::buffersUsed() == 0) {
-                sd.stopPrintPart2();
-            }
-        }
-        */
 #endif
         GCode::readFromSerial();
         GCode* code = GCode::peekCurrentCommand();
+        millis_t curTime = HAL::timeInMilliseconds();
         if (code) {
 #if SDSUPPORT
             if (sd.state == SDState::SD_WRITING) {
-                if (!(code->hasM() && code->M == 29)) { // still writing to file
+                if (!(code->hasM() && code->M == 29u)) { // still writing to file
                     sd.writeCommand(code);
                 } else {
                     sd.finishWrite();
@@ -66,15 +64,24 @@ void Commands::commandLoop() {
 #endif
                 Commands::executeGCode(code);
             code->popCurrentCommand();
-            lastCommandReceived = HAL::timeInMilliseconds();
+            lastCommandReceived = curTime;
         } else {
             if (Motion1::buffersUsed() > 0) { // if printing no need to reset
-                lastCommandReceived = HAL::timeInMilliseconds();
+                lastCommandReceived = curTime;
             }
-            if (HAL::timeInMilliseconds() - lastCommandReceived > 2000) {
-                lastCommandReceived = HAL::timeInMilliseconds();
+            if ((curTime - lastCommandReceived) > 2000ul) {
+                lastCommandReceived = curTime;
                 Printer::parkSafety(); // will handle allowed conditions it self
             }
+#if SDSUPPORT
+            // 5 minute timeout if we never receive anything.
+            if (sd.state == SDState::SD_WRITING) {
+                if ((curTime - sd.lastWriteTimeMS) > (5ul * 60000ul)) {
+                    GUI::setStatusP(PSTR("Receive timeout!"), GUIStatusLevel::WARNING);
+                    sd.finishWrite();
+                }
+            }
+#endif
         }
     } else {
         GCode::keepAlive(FirmwareState::Paused);
@@ -198,10 +205,11 @@ void Commands::waitUntilEndOfAllBuffers() {
         if (code) {
 #if SDSUPPORT
             if (sd.state == SDState::SD_WRITING) {
-                if (!(code->hasM() && code->M == 29)) // still writing to file
+                if (!(code->hasM() && code->M == 29)) {
                     sd.writeCommand(code);
-                else
+                } else {
                     sd.finishWrite();
+                }
 #if ECHO_ON_EXECUTE
                 code->echoCommand();
 #endif

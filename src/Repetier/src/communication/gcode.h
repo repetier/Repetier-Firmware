@@ -458,12 +458,12 @@ public:
 };
 
 #if JSON_OUTPUT
-#include "../SdFat/SdFat.h"
+#include "SdFat/src/SdFat.h"
 // Struct to hold Gcode file information 32 bytes
 #define GENBY_SIZE 16
 class GCodeFileInfo {
 public:
-    void init(SdFile& file);
+    void init(SdBaseFile& file);
 
     unsigned long fileSize;
     float objectHeight;

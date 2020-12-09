@@ -676,12 +676,12 @@ void HAL::importEEPROM() {
 #error EEPROM using sd card requires SDCARDSUPPORT
 #endif
 
-millis_t eprSyncTime = 0; // in sync
+millis_t eprSyncTime = 0ul; // in sync
 sd_file_t eepromFile;
-void HAL::syncEEPROM() {                                   // store to disk if changed
-    if (eprSyncTime && (millis() - eprSyncTime > 15000)) { // Buffer writes only every 15 seconds to pool writes
-        eprSyncTime = 0;
-        if (sd.state != SDState::SD_MOUNTED) { // not mounted
+void HAL::syncEEPROM() {                                     // store to disk if changed
+    if (eprSyncTime && (millis() - eprSyncTime > 15000ul)) { // Buffer writes only every 15 seconds to pool writes
+        eprSyncTime = 0ul;
+        if (sd.state < SDState::SD_MOUNTED) { // not mounted
             if (eepromFile.isOpen()) {
                 eepromFile.close();
             }
@@ -691,8 +691,9 @@ void HAL::syncEEPROM() {                                   // store to disk if c
 
         eepromFile.rewind();
         if ((eepromFile.write(virtualEeprom, EEPROM_BYTES) != EEPROM_BYTES
-             || !eepromFile.sync())) { // exFAT ignores the sync flag
+             || !eepromFile.sync())) {
             Com::printErrorFLN(PSTR("Could not write eeprom to sd card"));
+            sd.printIfCardErrCode();
         }
     }
 }
@@ -703,9 +704,6 @@ void HAL::importEEPROM() {
         || ((readBytes = eepromFile.read(virtualEeprom, EEPROM_BYTES)) != EEPROM_BYTES
             && readBytes)) { // Sometimes we have a 0 byte eeprom.bin
         Com::printFLN(Com::tOpenFailedFile, PSTR("eeprom.bin"));
-    }
-    if (!readBytes) { // May as well if it's a new file.
-        eepromFile.preAllocate(EEPROM_BYTES);
     }
     EEPROM::readDataFromEEPROM();
     if (eprSyncTime) {

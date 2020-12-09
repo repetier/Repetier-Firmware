@@ -994,7 +994,7 @@ void Printer::showJSONStatus(int type) {
     Com::printF(PSTR("],\"tool\":"), Tool::getActiveToolId());
     //"probe": "4",
     Com::printF(PSTR(",\"probe\":"));
-    if (ZProbe->triggered()) {
+    if (ZProbe && ZProbe->triggered()) {
         Com::print((int)0);
     } else {
         Com::print((int)1000);
@@ -1189,8 +1189,9 @@ void Printer::showJSONStatus(int type) {
 #if SDSUPPORT
         if (sd.state == SDState::SD_PRINTING) {
             Com::print(sd.fileInfo.layerHeight);
-        } else
+        } else {
             Com::print('0');
+        }
 #else
         Com::print('0');
 #endif

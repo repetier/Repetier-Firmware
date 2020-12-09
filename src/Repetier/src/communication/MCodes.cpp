@@ -229,7 +229,6 @@ void __attribute__((weak)) MCode_28(GCode* com) {
 void __attribute__((weak)) MCode_29(GCode* com) {
 #if SDSUPPORT
 //processed in write to file routine above
-//savetosd = false;
 #endif
 }
 
