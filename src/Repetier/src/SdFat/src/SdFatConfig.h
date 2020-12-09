@@ -75,7 +75,9 @@
 #define SDFAT_FILE_TYPE 1
 #else  // defined(__AVR__) && FLASHEND < 0X8000
 // All other boards.
+#ifndef SDFAT_FILE_TYPE 
 #define SDFAT_FILE_TYPE 3
+#endif
 #endif  // defined(__AVR__) && FLASHEND < 0X8000
 //------------------------------------------------------------------------------
 /**
@@ -91,7 +93,9 @@
 #define ENABLE_DEDICATED_SPI 1
 #else  // defined(__AVR__) && FLASHEND < 0X8000
 // All other boards.
+#ifndef ENABLE_DEDICATED_SPI
 #define ENABLE_DEDICATED_SPI 1
+#endif
 #endif  // defined(__AVR__) && FLASHEND < 0X8000
 //-----------------------------------------------------------------------------
 /**
@@ -108,7 +112,11 @@
  */
  
 #ifndef SPI_DRIVER_SELECT
+#if defined(ENABLE_SOFTWARE_SPI_CLASS) && ENABLE_SOFTWARE_SPI_CLASS
 #define SPI_DRIVER_SELECT 2
+#else
+#define SPI_DRIVER_SELECT 0
+#endif
 #endif
 //------------------------------------------------------------------------------
 /**
@@ -153,7 +161,9 @@ typedef uint8_t SdCsPin_t;
  *  * (asterisk)
  *
  */
+#ifndef USE_LONG_FILE_NAMES
 #define USE_LONG_FILE_NAMES 1
+#endif
 //------------------------------------------------------------------------------
 /**
  * If CHECK_FLASH_PROGRAMMING is zero, overlap of single sector flash
@@ -163,7 +173,7 @@ typedef uint8_t SdCsPin_t;
  * Some cards will not sleep in low power mode unless CHECK_FLASH_PROGRAMMING
  * is non-zero.
  */
-#define CHECK_FLASH_PROGRAMMING 1
+#define CHECK_FLASH_PROGRAMMING 0
 //------------------------------------------------------------------------------
 /**
  * Set MAINTAIN_FREE_CLUSTER_COUNT nonzero to keep the count of free clusters
@@ -324,7 +334,9 @@ typedef uint8_t SdCsPin_t;
 #define SD_HAS_CUSTOM_SPI 1
 #else  // SD_HAS_CUSTOM_SPI
 // Use standard SPI library.
+#ifndef SD_HAS_CUSTOM_SPI
 #define SD_HAS_CUSTOM_SPI 0
+#endif
 #endif  // SD_HAS_CUSTOM_SPI
 //------------------------------------------------------------------------------
 #ifndef HAS_SDIO_CLASS

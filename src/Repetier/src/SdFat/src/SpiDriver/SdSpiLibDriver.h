@@ -30,50 +30,44 @@
 #define SdSpiLibDriver_h
 //------------------------------------------------------------------------------
 inline void SdSpiArduinoDriver::activate() {
-    m_spi->beginTransaction(m_spiSettings);
+  m_spi->beginTransaction(m_spiSettings);
 }
 //------------------------------------------------------------------------------
 inline void SdSpiArduinoDriver::begin(SdSpiConfig spiConfig) {
-    if (spiConfig.spiPort) {
-        m_spi = spiConfig.spiPort;
+  if (spiConfig.spiPort) {
+    m_spi = spiConfig.spiPort;
 #if defined(SDCARD_SPI) && defined(SDCARD_SS_PIN)
-    } else if (spiConfig.csPin == SDCARD_SS_PIN) {
-        m_spi = &SDCARD_SPI;
-#endif // defined(SDCARD_SPI) && defined(SDCARD_SS_PIN)
-    } else {
-        m_spi = &SPI;
-    }
-    m_spi->begin();
+  } else if (spiConfig.csPin == SDCARD_SS_PIN) {
+    m_spi = &SDCARD_SPI;
+#endif  // defined(SDCARD_SPI) && defined(SDCARD_SS_PIN)
+  } else {
+    m_spi = &SPI;
+  }
+  m_spi->begin();
 }
 //------------------------------------------------------------------------------
 inline void SdSpiArduinoDriver::deactivate() {
-    m_spi->endTransaction();
+  m_spi->endTransaction();
 }
 //------------------------------------------------------------------------------
 inline uint8_t SdSpiArduinoDriver::receive() {
-    return m_spi->transfer(0XFF);
+  return m_spi->transfer( 0XFF);
 }
 //------------------------------------------------------------------------------
 inline uint8_t SdSpiArduinoDriver::receive(uint8_t* buf, size_t count) {
-    do {
-        *buf++ = m_spi->transfer(0xff);
-    } while (--count);
-    return 0;
+  for (size_t i = 0; i < count; i++) {
+    buf[i] = m_spi->transfer(0XFF);
+  }
+  return 0;
 }
 //------------------------------------------------------------------------------
 inline void SdSpiArduinoDriver::send(uint8_t data) {
-    m_spi->transfer(data);
+  m_spi->transfer(data);
 }
 //------------------------------------------------------------------------------
 inline void SdSpiArduinoDriver::send(const uint8_t* buf, size_t count) {
-    /*if(!(count & 1)) {
-    for (size_t i = 0; i < count; i+=2) {
-      m_spi->transfer16(static_cast<uint16_t>((buf[i + 1u] << 8u) | buf[i]));
-    }
-  } else {*/
-    do {
-        m_spi->transfer(*buf++);
-    } while (--count);
-    //}
+  for (size_t i = 0; i < count; i++) {
+    m_spi->transfer(buf[i]);
+  }
 }
-#endif // SdSpiLibDriver_h
+#endif  // SdSpiLibDriver_h

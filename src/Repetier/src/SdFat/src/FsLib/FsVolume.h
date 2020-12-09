@@ -83,6 +83,14 @@ public:
     // Use sectorsPerCluster(). blocksPerCluster() will be removed in the future.
     uint32_t blocksPerCluster() __attribute__((deprecated)) { return sectorsPerCluster(); } //NOLINT
 #endif                                                                                      // DOXYGEN_SHOULD_SKIP_THIS
+    // Moses - returns pointer to fat mbr from cache, or nullptr
+    MbrSector_t* fatMbrSector() {
+        return m_fVol ? m_fVol->fatMbrSector() : m_xVol ? m_xVol->fatMbrSector() : nullptr;
+    }
+    // Moses - returns pointer to partiton boot sector from cache, or nullptr
+    PbsFat_t* fatPartBootSector() {
+        return m_fVol ? m_fVol->fatPartBootSector() : m_xVol ? m_xVol->fatPartBootSector() : nullptr;
+    }
     /** Moses: 
      * \return The volume label obtained from the boot sector */
     size_t getVolumeLabel(char* name, size_t len) const { 

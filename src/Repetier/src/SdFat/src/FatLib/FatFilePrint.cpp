@@ -22,6 +22,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#include "Repetier.h"
 #include <math.h>
 #define DBG_FILE "FatFilePrint.cpp"
 #include "../common/DebugMacros.h"

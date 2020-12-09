@@ -31,7 +31,11 @@ void sdCsInit(SdCsPin_t pin) {
 }
 //------------------------------------------------------------------------------
 void sdCsWrite(SdCsPin_t pin, bool level) {
+  #if defined(STM32F1xx)
+  digitalWriteFast(static_cast<PinName>(pin), level);
+  #else
   digitalWrite(pin, level);
+  #endif
 }
 #elif SD_CHIP_SELECT_MODE == 1
 //------------------------------------------------------------------------------

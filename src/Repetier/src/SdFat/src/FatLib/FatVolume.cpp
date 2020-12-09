@@ -22,6 +22,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#include "Repetier.h"
 #include "FatVolume.h"
 FatVolume* FatVolume::m_cwv = nullptr;
 //----------------------------------------------------------------------------

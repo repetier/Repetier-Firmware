@@ -22,10 +22,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#include "Repetier.h"
 #define DBG_FILE "ExFatPartition.cpp"
 #include "../common/DebugMacros.h"
 #include "ExFatVolume.h"
-#include "../common/FsStructs.h"
 //-----------------------------------------------------------------------------
 void FsCache::invalidate() {
   m_status = 0;
@@ -373,4 +373,17 @@ uint32_t ExFatPartition::freeClusterCount() {
 uint32_t ExFatPartition::rootLength() {
   uint32_t nc = chainSize(m_rootDirectoryCluster);
   return nc << bytesPerClusterShift();
+}
+ 
+
+MbrSector_t* ExFatPartition::fatMbrSector() {
+    return reinterpret_cast<MbrSector_t*>(dataCacheGet(0, FsCache::CACHE_FOR_READ));
+}
+
+PbsFat_t* ExFatPartition::fatPartBootSector() {
+    MbrSector_t* mbr = fatMbrSector();
+    if (!mbr) {
+        return nullptr;
+    } 
+    return reinterpret_cast<PbsFat_t*>(dataCacheGet(getLe32(mbr->part->relativeSectors), FsCache::CACHE_FOR_READ));
 }

@@ -234,22 +234,22 @@ class FatPartition {
     return sectorsPerCluster()*clusterCount();
   }
   /**
-   * Moses: Get the volume partition's label (name).
-   * Note: This is NOT what MS Windows displays.
+   * Moses: Get the mbr volume label.
    * This label is only created/changed through formats.
-   * Windows instead manipulates a special file found within the
-   * root directory of the volume.
    *
    * \param[out] name An array of characters for the label's name.
    * \param[in] len The size of the array in bytes. The array
    *             must be at least 11 bytes long.
    * \return amount of bytes copied.
    */
-  size_t getVolumeLabel(char* name, size_t len) const {
+  size_t getVolumeLabel(char* name, size_t len) {
     *name = 0;
     memcpy(name , m_volumeLabel, len = ((len > 11u) ? 11u : len));
     return len;
   }
+  MbrSector_t* fatMbrSector();
+  PbsFat_t* fatPartBootSector();
+  
   /** Debug access to FAT table
    *
    * \param[in] n cluster number.

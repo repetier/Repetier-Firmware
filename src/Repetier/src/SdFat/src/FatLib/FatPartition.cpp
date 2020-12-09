@@ -22,6 +22,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#include "Repetier.h"
 #include <string.h>
 #define DBG_FILE "FatPartition.cpp"
 #include "../common/DebugMacros.h"
@@ -537,4 +538,14 @@ bool FatPartition::init(BlockDevice* dev, uint8_t part) {
 
 fail:
   return false;
+}
+MbrSector_t* FatPartition::fatMbrSector() {
+    return reinterpret_cast<MbrSector_t*>(cacheFetchData(0, FsCache::CACHE_FOR_READ)->data);
+}
+PbsFat_t* FatPartition::fatPartBootSector() {
+    MbrSector_t* mbr = fatMbrSector();
+    if (!mbr) {
+        return nullptr;
+    } 
+    return reinterpret_cast<PbsFat_t*>(cacheFetchData(getLe32(mbr->part->relativeSectors), FsCache::CACHE_FOR_READ)->data);
 }
