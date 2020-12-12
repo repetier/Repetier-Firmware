@@ -540,12 +540,12 @@ fail:
   return false;
 }
 MbrSector_t* FatPartition::fatMbrSector() {
-    return reinterpret_cast<MbrSector_t*>(cacheFetchData(0, FsCache::CACHE_FOR_READ)->data);
+    return reinterpret_cast<MbrSector_t*>(cacheFetchData(0, FatCache::CACHE_FOR_READ)->data);
 }
 PbsFat_t* FatPartition::fatPartBootSector() {
     MbrSector_t* mbr = fatMbrSector();
     if (!mbr) {
         return nullptr;
     } 
-    return reinterpret_cast<PbsFat_t*>(cacheFetchData(getLe32(mbr->part->relativeSectors), FsCache::CACHE_FOR_READ)->data);
+    return reinterpret_cast<PbsFat_t*>(cacheFetchData(getLe32(mbr->part->relativeSectors), FatCache::CACHE_FOR_READ)->data);
 }
