@@ -1,0 +1,47 @@
+Any special Repetier Firmware V2 specific changes made to the SdFat library:
+
+-11/10/20:
+    - added variant of open to FsFile/FatFile/ExFatFile: 
+    open(FsVolume* vol, uint32_t index, oflag_t oflag) 
+    to open by dirIndexes using only a volume pointer.
+    - Lowered SdCardInfo.h's SD_INIT_TIMEOUT from 2 seconds
+    to 1500ms.
+
+-11/25/20: 
+    - Replaced the digitalRead/Write functions with digitalWriteFast's inside DigitalPin.h for STM32F1 boards and STM32Duino.
+    (And also SdSpiChipSelect.cpp's.)
+
+-11/26/20: 
+    - added getVolumeLabel to FAT16/32 to easily obtain the mbr's label.
+    (label saved in FatPartition.h at first init.) 
+    - supported through FSVolume, though not for exFat yet (returns nothing).
+
+-11/27/20:
+    Repetier.h include added to 23 files:
+    ExFatDbg.cpp
+    ExFatFile.cpp
+    ExFatFilePrint.cpp
+    ExFatFileWrite.cpp
+    ExFatFormatter.cpp
+    ExFatPartition.cpp
+    ExFatVolume.cpp
+    upcase.cpp
+    FatDbg.cpp
+    FatFile.cpp 
+    FatFileLFN.cpp 
+    FatFilePrint.cpp
+    FatFileSFN.cpp
+    FatFormatter.cpp
+    FatPartition.cpp
+    FatVolume.cpp
+    FsFile.cpp 
+    FsVolume.cpp
+    istream.cpp
+    ostream.cpp
+    StdioStream.cpp
+    StreamBaseClass.cpp
+    SdSpiCard.cpp
+
+-12/7/20
+    - Created new fatMbrSector & fatPartBootSector functions to pull this data from the cache in exFat and FAT16/32 modes. supported through FSVolume. 
+    - Included missing FsStructs.h in ExFatPartition.h for certain types.

@@ -40,7 +40,7 @@ private:
     ufast8_t nextDelimType = 0; // 1 = new line 0 = comma
     uint32_t nextDelimPos = 0;  // Used to also tell if we already have a valid cell buffed
 
-    SdFile* csvFile;
+    sd_file_t* csvFile;
 
     /**
      * \brief Internal use.
@@ -213,7 +213,7 @@ public:
      * 
      * \param[in] file CSV File to parse.
      */
-    CSVParser(SdFile* file)
+    CSVParser(sd_file_t* file)
         : csvFile(file) {}
     ~CSVParser() {};
 

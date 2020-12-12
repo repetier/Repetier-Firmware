@@ -179,7 +179,6 @@ void __attribute__((weak)) MCode_22(GCode* com) {
 void __attribute__((weak)) MCode_23(GCode* com) {
 #if SDSUPPORT
     if (com->hasString()) {
-        sd.fat.chdir();
         sd.selectFile(com->text);
     }
 #endif
@@ -230,14 +229,12 @@ void __attribute__((weak)) MCode_28(GCode* com) {
 void __attribute__((weak)) MCode_29(GCode* com) {
 #if SDSUPPORT
 //processed in write to file routine above
-//savetosd = false;
 #endif
 }
 
 void __attribute__((weak)) MCode_30(GCode* com) {
 #if SDSUPPORT
     if (com->hasString()) {
-        sd.fat.chdir();
         sd.deleteFile(com->text);
     }
 #endif
@@ -246,7 +243,6 @@ void __attribute__((weak)) MCode_30(GCode* com) {
 void __attribute__((weak)) MCode_32(GCode* com) {
 #if SDSUPPORT
     if (com->hasString()) {
-        sd.fat.chdir();
         sd.makeDirectory(com->text);
     }
 #endif

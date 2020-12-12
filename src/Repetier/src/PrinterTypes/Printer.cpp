@@ -689,7 +689,9 @@ void Printer::defaultLoopActions() {
         }
     }
 #if SDCARDDETECT > -1 && SDSUPPORT
-    sd.automount();
+    if(Printer::isAutomount()) {
+        sd.automount();
+    }
 #endif
 #if defined(EEPROM_AVAILABLE) && (EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH)
     HAL::syncEEPROM();
@@ -732,7 +734,7 @@ void Printer::handleInterruptEvent() {
 #endif
 #elif JAM_ACTION == 2 // pause host/print
 #if SDSUPPORT
-        if (sd.sdmode == 2) {
+        if (sd.state == SDState::SD_PRINTING) {
             sd.pausePrint(true);
             break;
         }
@@ -881,7 +883,7 @@ void Printer::showJSONStatus(int type) {
     if (Motion1::length == 0) {
         Com::print('I'); // IDLING
 #if SDSUPPORT
-    } else if (sd.sdactive) {
+    } else if (sd.state == SDState::SD_PRINTING) {
         Com::print('P'); // SD PRINTING
 #endif
     } else {
@@ -992,7 +994,7 @@ void Printer::showJSONStatus(int type) {
     Com::printF(PSTR("],\"tool\":"), Tool::getActiveToolId());
     //"probe": "4",
     Com::printF(PSTR(",\"probe\":"));
-    if (ZProbe->triggered()) {
+    if (ZProbe && ZProbe->triggered()) {
         Com::print((int)0);
     } else {
         Com::print((int)1000);
@@ -1155,7 +1157,7 @@ void Printer::showJSONStatus(int type) {
     case 3:
         Com::printF(PSTR(",\"currentLayer\":"));
 #if SDSUPPORT
-        if (sd.sdactive && sd.fileInfo.layerHeight > 0) { // ONLY CAN TELL WHEN SD IS PRINTING
+        if (sd.state == SDState::SD_PRINTING && sd.fileInfo.layerHeight > 0) { // ONLY CAN TELL WHEN SD IS PRINTING
             Com::print((int)(Motion1::currentPosition[Z_AXIS] / sd.fileInfo.layerHeight));
         } else
             Com::print('0');
@@ -1172,23 +1174,24 @@ void Printer::showJSONStatus(int type) {
         }
         Com::printF(PSTR("],"));
 #if SDSUPPORT
-        if (sd.sdactive) {
+        if (sd.state == SDState::SD_PRINTING) {
             Com::printF(PSTR("\"fractionPrinted\":"));
             float fraction;
-            if (sd.filesize < 2000000)
-                fraction = sd.sdpos / sd.filesize;
+            if (sd.selectedFileSize < 2000000)
+                fraction = sd.selectedFilePos / sd.selectedFileSize;
             else
-                fraction = (sd.sdpos >> 8) / (sd.filesize >> 8);
+                fraction = (sd.selectedFilePos >> 8) / (sd.selectedFileSize >> 8);
             Com::print((float)floor(fraction * 1000) / 1000); // ONE DECIMAL, COULD BE DONE BY SHIFTING, BUT MEH
             Com::print(',');
         }
 #endif
         Com::printF(PSTR("\"firstLayerHeight\":"));
 #if SDSUPPORT
-        if (sd.sdactive) {
+        if (sd.state == SDState::SD_PRINTING) {
             Com::print(sd.fileInfo.layerHeight);
-        } else
+        } else {
             Com::print('0');
+        }
 #else
         Com::print('0');
 #endif

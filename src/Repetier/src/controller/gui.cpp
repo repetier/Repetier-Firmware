@@ -845,7 +845,10 @@ void directAction(GUIAction action, void* data) {
         Printer::kill(true);
         break;
     case GUI_DIRECT_ACTION_MOUNT_SD_CARD:
-#if SDSUPPORT
+#if SDSUPPORT  
+        if (sd.state == SDState::SD_HAS_ERROR) { 
+            sd.unmount(true);
+        } 
         sd.mount();
 #endif
         break;
