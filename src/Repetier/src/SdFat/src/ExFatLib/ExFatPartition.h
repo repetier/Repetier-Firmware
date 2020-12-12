@@ -30,7 +30,7 @@
  */
 #include "../common/SysCall.h"
 #include "../common/BlockDevice.h"
-#include "../common/FsStructs.h" // Moses added missing FsStructs
+#include "../common/FsStructs.h" // M - added missing FsStructs
 #include "ExFatConfig.h"
 #include "ExFatTypes.h"
 /** Type for exFAT partition */
@@ -134,7 +134,7 @@ class ExFatPartition {
   PbsFat_t* fatPartBootSector();
 
   size_t getVolumeLabel(char* name, size_t len) {
-      return 0; // Moses - TODO
+      return 0; // M - TODO
   }
   /** Clear the cache and returns a pointer to the cache.  Not for normal apps.
    * \return A pointer to the cache buffer or zero if an error occurs.

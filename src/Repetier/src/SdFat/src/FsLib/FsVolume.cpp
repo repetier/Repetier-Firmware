@@ -57,6 +57,23 @@ FsFile FsVolume::open(const char *path, oflag_t oflag) {
   tmpFile.open(this, path, oflag);
   return tmpFile;
 }
+//------------------------------------------------------------------------------
+/** M - 
+ * \return The logical sector number for the root directory. */
+uint32_t FsVolume::rootDirStartSector() const {
+    if (m_fVol) {
+        if (fatType() == FAT_TYPE_FAT16) {
+            return m_fVol->rootDirStart();
+        } else if (fatType() == FAT_TYPE_FAT32) {
+            return m_fVol->dataStartSector()
+                + ((m_fVol->rootDirStart() - 2ul) << m_fVol->sectorsPerClusterShift());
+        }
+    } else if (m_xVol) {
+        return m_xVol->clusterHeapStartSector()
+            + ((m_xVol->rootDirectoryCluster() - 2ul) << m_xVol->sectorsPerClusterShift());
+    }
+    return 0ul;
+}
 #if ENABLE_ARDUINO_STRING
 //------------------------------------------------------------------------------
 FsFile FsVolume::open(const String &path, oflag_t oflag) {

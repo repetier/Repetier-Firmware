@@ -5,7 +5,7 @@ Any special Repetier Firmware V2 specific changes made to the SdFat library:
     open(FsVolume* vol, uint32_t index, oflag_t oflag) 
     to open by dirIndexes using only a volume pointer.
     - Lowered SdCardInfo.h's SD_INIT_TIMEOUT from 2 seconds
-    to 750ms.
+    to 1500ms.
 
 -11/25/20: 
     - Replaced the digitalRead/Write functions with digitalWriteFast's inside DigitalPin.h for STM32F1 boards and STM32Duino.

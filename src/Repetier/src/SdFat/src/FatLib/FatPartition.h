@@ -234,7 +234,7 @@ class FatPartition {
     return sectorsPerCluster()*clusterCount();
   }
   /**
-   * Moses: Get the mbr volume label.
+   * M - Get the mbr volume label.
    * This label is only created/changed through formats.
    *
    * \param[out] name An array of characters for the label's name.
@@ -289,7 +289,7 @@ class FatPartition {
   uint32_t m_fatStartSector;          // Start sector for first FAT.
   uint32_t m_lastCluster;             // Last cluster number in FAT.
   uint32_t m_rootDirStart;            // Start sector FAT16, cluster FAT32.
-  uint8_t  m_volumeLabel[11];         // Moses: True boot sector volume label.
+  uint8_t  m_volumeLabel[11];         // M - Boot sector volume label.
   //----------------------------------------------------------------------------
   // sector I/O functions.
   bool readSector(uint32_t sector, uint8_t* dst) {

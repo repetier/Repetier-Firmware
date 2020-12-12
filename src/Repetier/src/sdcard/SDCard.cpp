@@ -79,6 +79,7 @@ void SDCard::automount() {
 #endif
 }
 void SDCard::mount() {
+#if SDSS > -1
     if (state > SDState::SD_SAFE_EJECTED) {
         return;
     }
@@ -106,9 +107,12 @@ void SDCard::mount() {
         Com::printFLN(Com::tSDInitFail);
         UI_STATUS_UPD("SD Card read error.");
         if (printIfCardErrCode()) {
+            if (fileSystem.card()->errorCode() == SD_CARD_ERROR_CMD0) {
+                Com::printFLN(PSTR("Card reset failed, check chip select pin (SDSS)."));
+            }
 #if SDCARDDETECT > -1
             HAL::delayMilliseconds(35ul); // wait a little more before reporting the pin state
-            Com::printFLN(PSTR("SD Card detect pin:"),
+            Com::printFLN(PSTR("Card detect pin:"),
                           HAL::digitalRead(SDCARDDETECT) ? Com::tH : Com::tL);
 #endif
         } else if (!fileSystem.vol()->fatType()) {
@@ -128,7 +132,7 @@ void SDCard::mount() {
     mountRetries = 0ul;
     state = SDState::SD_MOUNTED;
     Com::printFLN(PSTR("SD card ok"));
-    Com::printFLN(PSTR("SD card inserted")); // TODO: can we remove one of these?
+    Com::printFLN(PSTR("SD card inserted"));
 
     printCardStats(); // <- collects our volumeLabel too.
 
@@ -143,6 +147,7 @@ void SDCard::mount() {
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED, true);
 #if defined(EEPROM_AVAILABLE) && EEPROM_AVAILABLE == EEPROM_SDCARD
     HAL::importEEPROM();
+#endif
 #endif
 }
 void SDCard::printCardStats() {
@@ -165,19 +170,17 @@ void SDCard::printCardStats() {
     }
 
     Com::printF(PSTR(" SD"));
-    switch (fileSystem.card()->type()) {
-    case 0u:
-        Com::printF(PSTR(" V1"));
-        break;
-    case 1u:
-        Com::printF(PSTR(" V2"));
-        break;
-    case 2u:
-        Com::printF(PSTR("HC"));
-        break;
-    default:
-        Com::printF(PSTR("XC"));
-        break;
+    uint8_t type = fileSystem.card()->type();
+    if (type == SD_CARD_TYPE_SD1) {
+        Com::printF(PSTR("V1"));
+    } else if (type == SD_CARD_TYPE_SD2) {
+        Com::printF(PSTR("V2"));
+    } else if (type == SD_CARD_TYPE_SDHC) {
+        if (fileSystem.sectorsPerCluster() > 64ul) {
+            Com::printF(PSTR("XC")); // Cards > 32gb are XC.
+        } else {
+            Com::printF(PSTR("HC"));
+        }
     }
 
     // Print out volume size
@@ -204,18 +207,19 @@ void SDCard::printCardStats() {
 
 void SDCard::unmount(const bool manual) {
     if (state <= SDState::SD_SAFE_EJECTED) {
+        // in case we're unmounting manually due to sd error
         return;
     }
     mountRetries = 0u;
-    if (state != SDState::SD_HAS_ERROR) {
-        if (!volumeLabel[0u]) {
-            UI_STATUS_UPD("SD Card removed.");
-        } else {
-            GUI::flashToStringString(GUI::tmpString, PSTR("@ removed."), volumeLabel);
-            UI_STATUS_UPD_RAM(GUI::tmpString);
-        }
-        Com::printFLN(PSTR("Card unmounted"));
+    //if (state != SDState::SD_HAS_ERROR) {
+    if (!volumeLabel[0u]) {
+        UI_STATUS_UPD("SD Card removed.");
+    } else {
+        GUI::flashToStringString(GUI::tmpString, PSTR("@ removed."), volumeLabel);
+        UI_STATUS_UPD_RAM(GUI::tmpString);
     }
+    Com::printFLN(PSTR("SD card removed")); // Needed for hosts
+    //}
 
 #if defined(EEPROM_AVAILABLE) && EEPROM_AVAILABLE == EEPROM_SDCARD
     eepromFile.close();
@@ -235,7 +239,7 @@ void SDCard::unmount(const bool manual) {
 
     if (state == SDState::SD_PRINTING) { // unmounted while printing!
         stopPrint(true);
-        GUI::setStatusP(PSTR("Card unmounted!"), GUIStatusLevel::ERROR);
+        GUI::setStatusP(PSTR("SD Card removed!"), GUIStatusLevel::ERROR);
     }
 
     scheduledPause = false; // cancel any scheduled pauses. only scheduled stops survive
@@ -301,8 +305,7 @@ bool SDCard::getCardInfo(char* volumeLabelBuf, uint8_t volumeLabelSize, uint64_t
                         ? exFatDir->labelLength + 1u
                         : volumeLabelSize;
                     for (size_t i = 0u; i < volumeLabelSize; i++) {
-                        const char c = static_cast<const char>(exFatDir->unicode[i * 2u]);
-                        volumeLabelBuf[i] = c;
+                        volumeLabelBuf[i] = static_cast<const char>(exFatDir->unicode[i * 2u]);
                     }
                     break;
                 }
