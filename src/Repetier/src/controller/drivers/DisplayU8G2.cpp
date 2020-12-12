@@ -973,8 +973,8 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
             GUI::bufAddFloat(Printer::progress, 3, 1);
             GUI::bufAddStringP(PSTR(" %"));
             lcd.drawUTF8(1, y0 + 1, GUI::buf);
-            lcd.drawFrame(0, y0 + 5, 62, 9);
-            lcd.drawBox(0, y0 + 6, static_cast<u8g2_uint_t>(62.0 * Printer::progress * 0.01), 7);
+            lcd.drawFrame(1, y0 + 5, 62, 9);
+            lcd.drawBox(1, y0 + 6, static_cast<u8g2_uint_t>(62.0 * Printer::progress * 0.01), 7);
 
             if (Printer::maxLayer > 0) {
                 GUI::bufClear();
