@@ -166,6 +166,9 @@ void __attribute__((weak)) MCode_20(GCode* com) {
 
 void __attribute__((weak)) MCode_21(GCode* com) {
 #if SDSUPPORT
+    if (sd.state >= SDState::SD_MOUNTED) { // Some hosts (BTT TFT's) require a response after M21 or will hang.
+        Com::printFLN(PSTR("SD card ok"));
+    }
     sd.mount();
 #endif
 }
