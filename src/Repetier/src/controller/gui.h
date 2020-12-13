@@ -227,6 +227,9 @@ public:
     static void menuSelectable(GUIAction& action, char* text, GuiCallback cb, void* cData, GUIPageType tp);
     static void menuBack(GUIAction& action);
 
+    static void showScrollbar(GUIAction& action);
+    static void showScrollbar(GUIAction& action, float percent, uint16_t min, uint16_t max);
+
     // Value modifyer display
 
     // Draw display with content for a value given as string

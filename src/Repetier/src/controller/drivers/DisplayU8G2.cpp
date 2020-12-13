@@ -705,6 +705,39 @@ void GUI::showValue(char* text, PGM_P unit, char* value) {
     lcd.setDrawColor(1);
 }
 
+void GUI::showScrollbar(GUIAction& action, float percent, uint16_t min, uint16_t max) {
+    if (action == GUIAction::DRAW) {
+        if (min == max) {
+            return;
+        }
+        static float lastPos = 0.0f;
+        static millis_t lastUpdate = 0ul;
+        uint16_t pxSize = static_cast<uint16_t>((static_cast<float>(min) / static_cast<float>(max)) * 35.0f);
+        if (pxSize < 5.0f) {
+            pxSize = 5.0f;
+        }
+        uint16_t pxPos = static_cast<uint16_t>(percent * (63.0f - pxSize - 10.0f));
+        if (percent != lastPos) {
+            lastUpdate = HAL::timeInMilliseconds();
+        } else if ((HAL::timeInMilliseconds() - lastUpdate) > 750ul) {
+            return;
+        }
+        lastPos = percent;
+        lcd.setDrawColor(0u);
+        lcd.drawBox(128u - 8u + 3u, 9u, 8u, 64u - 9u);
+        lcd.setDrawColor(1u);
+        lcd.drawVLine(128u - 9u + 3u, 9u, 64u - 9u);
+        lcd.drawBox(128u - 7u + 3u, 10u + pxPos, 3u, pxSize);
+    }
+}
+void GUI::showScrollbar(GUIAction& action) {
+    if (action == GUIAction::DRAW) {
+        if (length[level] > 5) {
+            float percent = static_cast<float>(topRow[level]) / static_cast<float>(length[level] - 5);
+            showScrollbar(action, percent, 5u, static_cast<uint16_t>(length[level]));
+        }
+    }
+}
 void __attribute__((weak)) probeProgress(GUIAction action, void* data) {
 
     if (action == GUIAction::DRAW) {
