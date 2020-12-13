@@ -10,6 +10,7 @@ enum class GUIAction;
 
 class StepperDriverBase {
 protected:
+    StepperDriverBase* parent;
     EndstopDriver* minEndstop;
     EndstopDriver* maxEndstop;
     bool direction;
@@ -18,12 +19,14 @@ protected:
 
 public:
     StepperDriverBase(EndstopDriver* minES, EndstopDriver* maxES)
-        : minEndstop(minES)
+        : parent(nullptr)
+        , minEndstop(minES)
         , maxEndstop(maxES)
         , direction(true)
         , axisBit(8)
         , axis(E_AXIS) { }
     virtual ~StepperDriverBase() { }
+    inline void setParent(StepperDriverBase* ptr) { parent = ptr; }
     inline EndstopDriver* getMinEndstop() { return minEndstop; }
     inline EndstopDriver* getMaxEndstop() { return maxEndstop; }
     inline bool updateEndstop() {
@@ -139,7 +142,10 @@ public:
     uint32_t position;
     ObservableStepperDriver(driver* _stepper)
         : StepperDriverBase(_stepper->getMinEndstop(), _stepper->getMaxEndstop())
-        , stepper(_stepper) { position = 0; }
+        , stepper(_stepper) {
+        stepper->setParent(this);
+        position = 0;
+    }
     virtual ~ObservableStepperDriver() { }
     inline EndstopDriver* getMinEndstop() { return minEndstop; }
     inline EndstopDriver* getMaxEndstop() { return maxEndstop; }
@@ -184,6 +190,9 @@ public:
     // Configuration in GUI
     virtual void menuConfig(GUIAction action, void* data) {
         stepper->menuConfig(action, data);
+    }
+    virtual void eepromHandle() final {
+        stepper->eepromHandle();
     }
 };
 
