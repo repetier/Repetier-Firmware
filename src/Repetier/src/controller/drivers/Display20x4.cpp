@@ -1208,6 +1208,11 @@ void GUI::showValue(char* text, PGM_P unit, char* value) {
     printRowCentered(3, GUI::buf);
 }
 
+// No scrollbars for the 20x4's 
+void GUI::showScrollbar(GUIAction& action) {
+}
+void GUI::showScrollbar(GUIAction& action, float percent, uint16_t min, uint16_t max) {
+}
 //extern void __attribute__((weak)) startScreen(GUIAction action, void* data);
 //extern void __attribute__((weak)) printProgress(GUIAction action, void* data);
 // extern void __attribute__((weak)) mainMenu(GUIAction action, void* data);

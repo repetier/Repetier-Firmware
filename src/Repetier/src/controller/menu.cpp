@@ -783,7 +783,7 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
     }
 
     static bool reversedDir = false;
-    static uint16_t dirMaxIndex = 0u;
+    static uint16_t lastRowDirItem = 0u, dirItemCount = 0u, dirMaxIndex = 0u;
     static uint8_t lastRow = 0u;
     sd.fileSystem.chdir(GUI::cwd);
     sd_file_t curDir = sd.fileSystem.open(GUI::cwd);
@@ -791,6 +791,8 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
     if (action == GUIAction::ANALYSE) {
         curDir.rewind();
         lastRow = 0u;
+        lastRowDirItem = 0u;
+        dirItemCount = 0u;
         dirMaxIndex = 0u;
         size_t renderedRows = 0u;
         reversedDir = false;
@@ -804,6 +806,7 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
                 if (file.dirIndex() > dirMaxIndex) {
                     dirMaxIndex = file.dirIndex();
                 }
+                dirItemCount++;
             }
             return true;
         });
@@ -836,6 +839,7 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
                     memcpy(menuSDNameCache[menuSDCacheRows - 1u].name, tempLongFilename, menuSDCacheNameLen);
                     menuSDNameCache[menuSDCacheRows - 1u].dirIndexPos = file.dirIndex();
                     hit = true;
+                    lastRowDirItem++;
                 }
             }
             file.close();
@@ -854,6 +858,7 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
                         memcpy(menuSDNameCache[0u].name, tempLongFilename, menuSDCacheNameLen);
                         menuSDNameCache[0u].dirIndexPos = file.dirIndex();
                         hit = true;
+                        lastRowDirItem--;
                     }
                 }
                 file.close();
@@ -862,6 +867,9 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
                 }
             }
         }
+        uint16_t curScrollPos = lastRowDirItem;
+        curScrollPos += !lastRowDirItem ? (GUI::topRow[GUI::level] + 1u) : 3u; 
+        GUI::showScrollbar(action, static_cast<float>(curScrollPos - 1u) / static_cast<float>(dirItemCount - 3u), 5u, dirItemCount);
     }
     curDir.close();
     lastRow = curRow; // For scrolling to the last row without doing a scan/moving the list.
@@ -870,6 +878,12 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
 #else
 void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
     GUI::menuStart(action);
+    if (sd.state < SDState::SD_MOUNTED) {
+        // User was still inside the menu when their sdcard ejected.
+        GUI::pop();
+        GUI::refresh();
+        return;
+    }
 
     if (GUI::folderLevel > 0u) {
         GUI::menuText(action, GUI::cwd, true);
@@ -895,6 +909,9 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
         }
         return true;
     });
+    if (count > 3u) {
+        GUI::showScrollbar(action);
+    }
     curDir.close();
     GUI::menuEnd(action);
 }
