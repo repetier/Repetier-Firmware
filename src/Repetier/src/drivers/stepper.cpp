@@ -17,7 +17,8 @@ static_assert(numMotorNames == NUM_MOTORS, "NUM_MOTORS not defined correctly");
 
 int StepperDriverBase::motorIndex() {
     for (fast8_t i = 0; i < NUM_MOTORS; i++) {
-        if (this == Motion1::drivers[i]) {
+        if (this == Motion1::drivers[i]
+            || (this->parent == Motion1::drivers[i])) {
             return i;
         }
     }
@@ -609,8 +610,7 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::afterHoming() {
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& com) {
     switch (com.M) {
-    case 122: // print debug informations
-    {
+    case 122: { // print debug informations
         Com::println();
         printMotorNumberAndName();
         reportTMC5160(driver, this, com.hasD() ? static_cast<int>(com.D) : 0);
@@ -734,14 +734,14 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::init() {
     disable();
     driver->begin();
 
-    TMC2208_n::GCONF_t gconf { 0 };
+    TMC2208_n::GCONF_t gconf = { 0 };
     gconf.pdn_disable = true;      // Use UART
     gconf.mstep_reg_select = true; // Select microsteps with UART
     gconf.i_scale_analog = false;
     gconf.en_spreadcycle = !stealthChop;
     driver->GCONF(gconf.sr);
 
-    TMC2208_n::CHOPCONF_t chopconf { 0 };
+    TMC2208_n::CHOPCONF_t chopconf = { 0 };
     chopconf.tbl = 1;
     chopconf.toff = tmcChopperTiming.toff;
     chopconf.intpol = TMC_INTERPOLATE;
@@ -870,8 +870,7 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::afterHoming() {
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& com) {
     switch (com.M) {
-    case 122: // print debug informations
-    {
+    case 122: { // print debug informations
         Com::println();
         printMotorNumberAndName();
         reportTMC2208(driver, this, com.hasD() ? static_cast<int>(com.D) : 0);
@@ -1152,8 +1151,7 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::afterHoming() {
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::handleMCode(GCode& com) {
     switch (com.M) {
-    case 122: // print debug informations
-    {
+    case 122: { // print debug informations
         Com::println();
         printMotorNumberAndName();
         reportTMC2209(driver, this, com.hasD() ? static_cast<int>(com.D) : 0);
