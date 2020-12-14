@@ -1258,13 +1258,23 @@ void waitScreen(GUIAction action, void* data) {
             refresh_counter = 8;
             break;
         }
-        int len = strlen(static_cast<char*>(data));
+        char* str = static_cast<char*>(data); 
+        int len = strlen(str);
         if (len <= 10) {
             lcd.setFont(u8g2_font_10x20_mf);
-            lcd.drawUTF8(73 - len * 5, SPIN_CENTER_Y + 7, static_cast<char*>(data));
-        } else {
+            lcd.drawUTF8(73 - len * 5, SPIN_CENTER_Y + 7, str);
+        } else { 
+            char* newLine = strchr(str, '\n');
             lcd.setFont(u8g2_font_6x10_mf);
-            lcd.drawUTF8(73 - len * 3, SPIN_CENTER_Y + 3, static_cast<char*>(data));
+            if (newLine) { 
+                *newLine = '\0';
+                uint8_t newLineLen = (newLine - str);
+                lcd.drawUTF8(73 - newLineLen * 3, (SPIN_CENTER_Y + 3) - 5, str);
+                *newLine = '\n';
+                lcd.drawUTF8(73 - (len - newLineLen) * 3, (SPIN_CENTER_Y + 3) + 5, str + newLineLen + 1);
+            } else {
+                lcd.drawUTF8(73 - len * 3, SPIN_CENTER_Y + 3, str); 
+            }
         }
     }
 }
@@ -1303,14 +1313,23 @@ void waitScreenP(GUIAction action, void* data) {
             break;
         }
         GUI::bufClear();
-        GUI::bufAddStringP((const char*)data);
-        int len = strlen(static_cast<char*>(GUI::buf));
+        GUI::bufAddStringP(static_cast<const char*>(data));
+        int len = GUI::bufPos;
         if (len <= 10) {
             lcd.setFont(u8g2_font_10x20_mf);
             lcd.drawUTF8(73 - len * 5, SPIN_CENTER_Y + 7, static_cast<char*>(GUI::buf));
         } else {
+            char* newLine = strchr(GUI::buf, '\n');
             lcd.setFont(u8g2_font_6x10_mf);
-            lcd.drawUTF8(73 - len * 3, SPIN_CENTER_Y + 3, static_cast<char*>(GUI::buf));
+            if (newLine) { 
+                *newLine = '\0';
+                uint8_t newLineLen = (newLine - GUI::buf);
+                lcd.drawUTF8(73 - newLineLen * 3, (SPIN_CENTER_Y + 3) - 5, GUI::buf);
+                *newLine = '\n';
+                lcd.drawUTF8(73 - (len - newLineLen) * 3, (SPIN_CENTER_Y + 3) + 5, GUI::buf + newLineLen + 1);
+            } else {
+                lcd.drawUTF8(73 - len * 3, SPIN_CENTER_Y + 3, GUI::buf); 
+            }
         }
     }
 }
