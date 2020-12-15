@@ -78,6 +78,7 @@ void SDCard::automount() {
     }
 #endif
 }
+
 void SDCard::mount() {
 #if SDSS > -1
     if (state > SDState::SD_SAFE_EJECTED) {
@@ -150,6 +151,7 @@ void SDCard::mount() {
 #endif
 #endif
 }
+
 void SDCard::printCardStats() {
     if (state < SDState::SD_MOUNTED) {
         return;
@@ -368,12 +370,14 @@ bool SDCard::validGCodeExtension(const char* filename) {
             && (!rfstrncasecmp_P(extPtr, PSTR(".gcode"), 7u)
                 || !rfstrncasecmp_P(extPtr, PSTR(".gco"), 5u)
                 || !rfstrncasecmp_P(extPtr, PSTR(".gc"), 4u)
-                || !rfstrncasecmp_P(extPtr, PSTR(".g"), 3u))) {
+                || !rfstrncasecmp_P(extPtr, PSTR(".g"), 3u)
+                || !rfstrncasecmp_P(extPtr, PSTR(".nc"), 4u))) {
             return true;
         }
     }
     return false;
 }
+
 bool SDCard::selectFile(const char* filename, const bool silent) {
     if (state != SDState::SD_MOUNTED || Printer::failedMode) {
         if (!silent && (state < SDState::SD_MOUNTED)) {
@@ -410,6 +414,7 @@ bool SDCard::selectFile(const char* filename, const bool silent) {
     }
     return false;
 }
+
 bool SDCard::printIfCardErrCode() {
     if (fileSystem.card()->errorCode()) {
         Com::printF(Com::tSDErrorCode, "0X");
@@ -421,6 +426,7 @@ bool SDCard::printIfCardErrCode() {
     }
     return false;
 }
+
 void SDCard::startPrint() {
     if (state != SDState::SD_MOUNTED
         || !selectedFile.isOpen()
@@ -478,6 +484,7 @@ void SDCard::printFullyPaused() {
     }
     EVENT_SD_PAUSE_END(internal);
 }
+
 void SDCard::continuePrint(const bool internal) {
     if (state != SDState::SD_PRINTING
         && Printer::isMenuMode(MENU_MODE_PAUSED)) {
@@ -701,10 +708,12 @@ void SDCard::writeCommand(GCode* code) {
         Com::printFLN(Com::tErrorWritingToFile);
     }
 }
+
 void SDCard::ls(const char* lsDir, const bool json) {
     fileSystem.chdir();
     ls(fileSystem.open(lsDir), json);
 }
+
 void SDCard::ls(sd_file_t rootDir, const bool json) {
     if (state < SDState::SD_MOUNTED || !rootDir.isDir()) {
         return;
