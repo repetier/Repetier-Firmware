@@ -213,7 +213,7 @@ void SDCard::unmount(const bool manual) {
         return;
     }
     mountRetries = 0u;
-    //if (state != SDState::SD_HAS_ERROR) {
+
     if (!volumeLabel[0u]) {
         UI_STATUS_UPD("SD Card removed.");
     } else {
@@ -221,7 +221,6 @@ void SDCard::unmount(const bool manual) {
         UI_STATUS_UPD_RAM(GUI::tmpString);
     }
     Com::printFLN(PSTR("SD card removed")); // Needed for hosts
-    //}
 
 #if defined(EEPROM_AVAILABLE) && EEPROM_AVAILABLE == EEPROM_SDCARD
     eepromFile.close();
@@ -552,8 +551,7 @@ void SDCard::printFullyStopped() {
 }
 
 void SDCard::writeCommand(GCode* code) {
-    lastWriteTimeMS = HAL::timeInMilliseconds(); // Reset the timeout
-    unsigned int sum1 = 0u, sum2 = 0u;           // for fletcher-16 checksum
+    unsigned int sum1 = 0u, sum2 = 0u; // for fletcher-16 checksum
     uint8_t buf[100u];
     uint8_t p = 2u;
     selectedFile.clearWriteError();
@@ -703,6 +701,23 @@ void SDCard::writeCommand(GCode* code) {
         Com::printErrorFLN(Com::tAPIDFinished);
     } else {
         writtenBytes += selectedFile.write(buf, p);
+
+        if ((HAL::timeInMilliseconds() - lastWriteTimeMS) > 1000ul && writtenBytes) {
+            if (GUI::statusLevel == GUIStatusLevel::BUSY) {
+                float kB = writtenBytes / 1000.0f;
+                GUI::flashToStringFloat(GUI::status, PSTR("Received @ B"), kB > 1000.0f ? kB / 1000.0f : kB, 1);
+                size_t len = strlen(GUI::status); 
+                GUI::status[len - 2] = kB > 1000.0f ? 'M' : 'k';
+                static float lastKBytes = 0.0f;
+                if (!lastWriteTimeMS) {
+                    lastKBytes = 0.0f;
+                }
+                GUI::flashToStringFloat(GUI::tmpString, PSTR("\n @kB/s"), kB - lastKBytes, 1);
+                lastKBytes = kB;
+                strncat(GUI::status, GUI::tmpString, sizeof(GUI::status) - len);
+            }
+            lastWriteTimeMS = HAL::timeInMilliseconds();
+        }
     }
     if (selectedFile.getWriteError()) {
         Com::printFLN(Com::tErrorWritingToFile);
@@ -808,15 +823,10 @@ void SDCard::startWrite(const char* filename) {
     if (!selectedFile.open(filename, O_CREAT | O_APPEND | O_WRONLY | O_TRUNC)) {
         Com::printFLN(Com::tOpenFailedFile, filename);
     } else {
-#if defined(__AVR__)
-        selectedFile.preAllocate(1024ul * 2ul); // 2kb for AVR?
-#else
-        selectedFile.preAllocate((1024ul * 4ul) * 2ul);
-#endif
         writtenBytes = 0ul;
-        GUI::setStatusP(PSTR("Receiving file..."), GUIStatusLevel::INFO);
+        GUI::setStatusP(PSTR("Receiving file..."), GUIStatusLevel::BUSY);
         Com::printFLN(Com::tWritingToFile, filename);
-        lastWriteTimeMS = HAL::timeInMilliseconds();
+        lastWriteTimeMS = 0ul;
         state = SDState::SD_WRITING;
     }
 }

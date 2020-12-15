@@ -1547,9 +1547,18 @@ void waitScreen(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         char* text = static_cast<char*>(data);
 
-        printRowCentered(0, text);
-        GUI::bufClear();
-        printRow(1, GUI::buf);
+        char* newLine = strchr(text, '\n');
+        if (newLine) {
+            *newLine = '\0';
+            printRowCentered(0, text);
+            *newLine = '\n';
+            printRowCentered(1, newLine + 1);
+            GUI::bufClear();
+        } else {
+            printRowCentered(0, text);
+            GUI::bufClear();
+            printRow(1, GUI::buf);
+        }
         printRow(2, GUI::buf);
         fast8_t len = refresh_counter % UI_COLS;
         for (fast8_t i = 0; i < len; i++) {
@@ -1561,13 +1570,20 @@ void waitScreen(GUIAction action, void* data) {
 
 void waitScreenP(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
-        char* text = static_cast<char*>(data);
-
         GUI::bufClear();
         GUI::bufAddStringP((const char*)data);
-        printRowCentered(0, GUI::buf);
-        GUI::bufClear();
-        printRow(1, GUI::buf);
+        char* newLine = strchr(GUI::buf, '\n');
+        if (newLine) {
+            *newLine = '\0';
+            printRowCentered(0, GUI::buf);
+            *newLine = '\n';
+            printRowCentered(1, newLine + 1);
+            GUI::bufClear();
+        } else {
+            printRowCentered(0, GUI::buf);
+            GUI::bufClear();
+            printRow(1, GUI::buf);
+        }
         printRow(2, GUI::buf);
         fast8_t len = refresh_counter % UI_COLS;
         for (fast8_t i = 0; i < len; i++) {
