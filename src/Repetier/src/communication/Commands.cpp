@@ -136,6 +136,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
         millis_t now = HAL::timeInMilliseconds();
         if (now - Printer::lastTempReport > Printer::autoTempReportPeriodMS) {
             Printer::lastTempReport = now;
+            Com::writeToAll = true; // need to be sure to receive correct receipient
             Commands::printTemperatures();
         }
     }
@@ -145,6 +146,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
         millis_t now = HAL::timeInMilliseconds();
         if (now - Printer::lastSDReport > Printer::autoSDReportPeriodMS) {
             Printer::lastSDReport = now;
+            Com::writeToAll = true; // need to be sure to receive correct receipient
             sd.printStatus();
         }
     }

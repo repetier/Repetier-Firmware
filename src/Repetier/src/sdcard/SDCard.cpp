@@ -706,7 +706,7 @@ void SDCard::writeCommand(GCode* code) {
             if (GUI::statusLevel == GUIStatusLevel::BUSY) {
                 float kB = writtenBytes / 1000.0f;
                 GUI::flashToStringFloat(GUI::status, PSTR("Received @ B"), kB > 1000.0f ? kB / 1000.0f : kB, 1);
-                size_t len = strlen(GUI::status); 
+                size_t len = strlen(GUI::status);
                 GUI::status[len - 2] = kB > 1000.0f ? 'M' : 'k';
                 static float lastKBytes = 0.0f;
                 if (!lastWriteTimeMS) {
@@ -842,6 +842,7 @@ void SDCard::finishWrite() {
     Com::printFLN(Com::tDoneSavingFile);
     GUI::pop();
 }
+
 void SDCard::finishPrint() {
     if (sd.state != SDState::SD_PRINTING) {
         return;
@@ -853,6 +854,7 @@ void SDCard::finishPrint() {
     Printer::setMenuMode(MENU_MODE_SD_PRINTING, false);
     Printer::setMenuMode(MENU_MODE_PAUSED, false);
     if (!printingSilent) {
+        Com::writeToAll = true; // tell all listeners that we are finished
         Com::printFLN(Com::tDonePrinting);
     }
     printingSilent = false;
