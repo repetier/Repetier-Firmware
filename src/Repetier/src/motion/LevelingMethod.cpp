@@ -310,28 +310,27 @@ bool Leveling::measure(GCode* com) {
             py = yMin + (y * tempDy);
             pos[X_AXIS] = px - ZProbeHandler::xOffset();
             pos[Y_AXIS] = py - ZProbeHandler::yOffset();
+            pos[Z_AXIS] = ZProbeHandler::optimumProbingHeight();
             pos[E_AXIS] = IGNORE_COORDINATE;
 
-#if NUM_HEATED_BEDS
-            if (ZProbeHandler::getHeaterPause() && heatedBeds[0u]->isPaused()) {
-                if (fabs(heatedBeds[0u]->getCurrentTemperature() - heatedBeds[0u]->getTargetTemperature()) > 5.0f) {
-                    heatedBeds[0u]->unpause();
-                    Motion1::waitForEndOfMoves();
-                    GUI::setStatusP(PSTR("Reheating bed..."), GUIStatusLevel::REGULAR);
-                    pos[Z_AXIS] = ZProbeHandler::optimumProbingHeight() + 5.0f;
-                    Motion1::moveByPrinter(pos, Motion1::moveFeedrate[X_AXIS], false);
-                    Motion1::waitForEndOfMoves();
-                    heatedBeds[0u]->waitForTargetTemperature();
-                    GUI::clearStatus();
-                    heatedBeds[0u]->pause();
-                    HAL::delayMilliseconds(150ul);
-                }
-            }
-#endif
-            pos[Z_AXIS] = ZProbeHandler::optimumProbingHeight();
             float bedPos[2] = { px, py };
             if (PrinterType::positionOnBed(bedPos) && PrinterType::positionAllowed(pos, pos[Z_AXIS])) {
                 if (ok) {
+#if NUM_HEATED_BEDS
+                    if (ZProbeHandler::getHeaterPause() && heatedBeds[0u]->isPaused()) {
+                        if (fabs(heatedBeds[0u]->getCurrentTemperature() - heatedBeds[0u]->getTargetTemperature()) > 5.0f) {
+                            heatedBeds[0u]->unpause();
+                            Motion1::waitForEndOfMoves();
+                            GUI::setStatusP(PSTR("Reheating bed..."), GUIStatusLevel::REGULAR);
+                            Motion1::moveByPrinter(pos, Motion1::moveFeedrate[X_AXIS], false);
+                            Motion1::waitForEndOfMoves();
+                            heatedBeds[0u]->waitForTargetTemperature();
+                            GUI::clearStatus();
+                            heatedBeds[0u]->pause();
+                            HAL::delayMilliseconds(150ul);
+                        }
+                    }
+#endif
                     //Todo handle probe min bed temp (if disable heaters is on) over long durations
                     Motion1::moveByPrinter(pos, Motion1::moveFeedrate[X_AXIS], false);
                     float h = ZProbeHandler::runProbe(repetitions, useMedian);
