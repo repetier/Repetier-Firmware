@@ -14,7 +14,7 @@ void menuSetTemperature(GUIAction action, void* data) {
     HeatManager* hm = reinterpret_cast<HeatManager*>(data);
     float value = hm->getTargetTemperature();
     DRAW_FLOAT_P(PSTR("Target Temperature:"), Com::tUnitDegCelsius, value, 0);
-    if (GUI::handleFloatValueAction(action, value, hm->getMinTemperature(), hm->getMaxTemperature(), (ENCODER_SPEED == 2) ? 5 : 1)) {
+    if (GUI::handleFloatValueAction(action, value, hm->getMinTemperature(), hm->getMaxTemperature(), 1.0f)) {
         hm->setTargetTemperature(value);
     }
 #endif
