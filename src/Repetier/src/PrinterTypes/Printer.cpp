@@ -642,16 +642,18 @@ void Printer::setup() {
     // Extruder::initExtruder();
     // sets auto leveling in eeprom init
     GUI::init();
-    //Commands::printCurrentPosition();
 
+#if SDSUPPORT // Try mounting the SDCard first in case it has an eeprom file.
+    sd.mount(true);
+#endif
+
+    EEPROM::init(); // Read settings from eeprom if wanted, run after initialization!
     updateDerivedParameter();
     Commands::checkFreeMemory();
     Commands::writeLowestFreeRAM();
     HAL::setupTimer();
 
-#if SDSUPPORT
-    sd.mount();
-#endif
+
 #if FEATURE_WATCHDOG
     HAL::startWatchdog();
 #endif
