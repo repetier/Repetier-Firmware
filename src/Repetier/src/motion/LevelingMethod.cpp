@@ -316,15 +316,17 @@ bool Leveling::measure(GCode* com) {
             float bedPos[2] = { px, py };
             if (PrinterType::positionOnBed(bedPos) && PrinterType::positionAllowed(pos, pos[Z_AXIS])) {
                 if (ok) {
-#if NUM_HEATED_BEDS
-                    if (ZProbeHandler::getHeaterPause() && heatedBeds[0u]->isPaused()) {
-                        if (fabs(heatedBeds[0u]->getCurrentTemperature() - heatedBeds[0u]->getTargetTemperature()) > 5.0f) {
+#if NUM_HEATED_BEDS && Z_PROBE_PAUSE_BED_REHEAT_TEMP
+                    if (x && ZProbeHandler::getHeaterPause() && heatedBeds[0u]->isPaused()) {
+                        if (fabs(heatedBeds[0u]->getCurrentTemperature() - heatedBeds[0u]->getTargetTemperature()) > Z_PROBE_PAUSE_BED_REHEAT_TEMP) {
                             heatedBeds[0u]->unpause();
                             Motion1::waitForEndOfMoves();
                             GUI::setStatusP(PSTR("Reheating bed..."), GUIStatusLevel::REGULAR);
+                            pos[Z_AXIS] += 3.0f;
                             Motion1::moveByPrinter(pos, Motion1::moveFeedrate[X_AXIS], false);
                             Motion1::waitForEndOfMoves();
                             heatedBeds[0u]->waitForTargetTemperature();
+                            pos[Z_AXIS] -= 3.0f;
                             GUI::clearStatus();
                             heatedBeds[0u]->pause();
                             HAL::delayMilliseconds(150ul);
