@@ -219,11 +219,25 @@ enum class BootReason {
     UNKNOWN = -1
 };
 
+#define DEFAULT_MATERIAL(name, extr, bed, chamber) showTemperature(action, name, extr, bed, chamber);
+
 #include "io/temperature_tables.h"
 #include "Configuration.h"
 
 #if NUM_AXES < 4
 #error The minimum NUM_AXES allowed is 4!
+#endif
+
+#ifndef DEFAULT_MATERIALS
+#define DEFAULT_MATERIALS \
+    DEFAULT_MATERIAL(Com::tMatPLA, 215, 60, 0) \
+    DEFAULT_MATERIAL(Com::tMatPET, 230, 55, 0) \
+    DEFAULT_MATERIAL(Com::tMatASA, 260, 105, 0) \
+    DEFAULT_MATERIAL(Com::tMatPC, 275, 110, 0) \
+    DEFAULT_MATERIAL(Com::tMatABS, 255, 100, 0) \
+    DEFAULT_MATERIAL(Com::tMatHIPS, 220, 100, 0) \
+    DEFAULT_MATERIAL(Com::tMatPP, 254, 100, 0) \
+    DEFAULT_MATERIAL(Com::tMatFLEX, 240, 50, 0)
 #endif
 
 #ifndef ALWAYS_CHECK_ENDSTOPS
@@ -437,29 +451,29 @@ extern ServoInterface* servos[];
 #define EXTRUDER_JAM_CONTROL 0
 #endif
 
-// Firmware retraction settings 
+// Firmware retraction settings
 #ifndef AUTORETRACT_ENABLED
 #define AUTORETRACT_ENABLED 0
 #endif
-#ifndef RETRACTION_LENGTH 
+#ifndef RETRACTION_LENGTH
 #define RETRACTION_LENGTH 0.0
 #endif
-#ifndef RETRACTION_SPEED 
+#ifndef RETRACTION_SPEED
 #define RETRACTION_SPEED 0
 #endif
-#ifndef RETRACTION_UNDO_SPEED 
+#ifndef RETRACTION_UNDO_SPEED
 #define RETRACTION_UNDO_SPEED 0
 #endif
-#ifndef RETRACTION_Z_LIFT 
+#ifndef RETRACTION_Z_LIFT
 #define RETRACTION_Z_LIFT 0.0
 #endif
-#ifndef RETRACTION_UNDO_EXTRA_LENGTH 
+#ifndef RETRACTION_UNDO_EXTRA_LENGTH
 #define RETRACTION_UNDO_EXTRA_LENGTH 0.0
 #endif
-#ifndef RETRACTION_UNDO_EXTRA_LONG_LENGTH 
+#ifndef RETRACTION_UNDO_EXTRA_LONG_LENGTH
 #define RETRACTION_UNDO_EXTRA_LONG_LENGTH 0.0
 #endif
-#ifndef RETRACTION_LONG_LENGTH 
+#ifndef RETRACTION_LONG_LENGTH
 #define RETRACTION_LONG_LENGTH 0.0
 #endif
 
@@ -551,7 +565,6 @@ enum class SDState {
 };
 class SDCard {
 public:
-
     SDCard();
     void writeCommand(GCode* code);
     void startPrint();
