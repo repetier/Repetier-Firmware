@@ -160,7 +160,7 @@ public:
     static int nextActionRepeat;                 ///< Increment for next/previous
     static GUIStatusLevel statusLevel;
     static bool textIsScrolling;
-    static probeProgInfo* curProbingProgress;    ///< Pointer to a valid current probing datastruct
+    static probeProgInfo* curProbingProgress; ///< Pointer to a valid current probing datastruct
 #if SDSUPPORT
     static char cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2];
     static uint8_t folderLevel;
@@ -204,8 +204,7 @@ public:
     static void nextKey();
     static void previousKey();
     static void okKey();
-    static void setEncoderA(fast8_t state);
-    static void setEncoderB(fast8_t state);
+    static void setEncoder();
     static void handleKeypress();
     static void replaceOn(GUIAction a, GuiCallback cb, void* cData, GUIPageType tp);
     static void pushOn(GUIAction a, GuiCallback cb, void* cData, GUIPageType tp);
@@ -227,6 +226,7 @@ public:
     static void menuSelectable(GUIAction& action, char* text, GuiCallback cb, void* cData, GUIPageType tp);
     static void menuBack(GUIAction& action);
 
+    static void resetScrollbarTimer();
     static void showScrollbar(GUIAction& action);
     static void showScrollbar(GUIAction& action, float percent, uint16_t min, uint16_t max);
 

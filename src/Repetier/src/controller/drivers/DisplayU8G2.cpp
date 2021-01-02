@@ -229,6 +229,8 @@ void GUI::menuEnd(GUIAction action) {
         if (cursorRow[level] < 0) {
             cursorRow[level] = 0;
         }
+    } else if(action == GUIAction::DRAW) {
+        GUI::showScrollbar(action);
     }
 }
 
@@ -705,21 +707,26 @@ void GUI::showValue(char* text, PGM_P unit, char* value) {
     lcd.setDrawColor(1);
 }
 
+static millis_t lastScrollUpdate = 0ul;
+void GUI::resetScrollbarTimer() {
+    lastScrollUpdate = HAL::timeInMilliseconds();
+}
+
 void GUI::showScrollbar(GUIAction& action, float percent, uint16_t min, uint16_t max) {
     if (action == GUIAction::DRAW) {
         if (min == max) {
             return;
         }
         static float lastPos = 0.0f;
-        static millis_t lastUpdate = 0ul;
+        
         uint16_t pxSize = static_cast<uint16_t>((static_cast<float>(min) / static_cast<float>(max)) * 35.0f);
         if (pxSize < 5.0f) {
             pxSize = 5.0f;
         }
         uint16_t pxPos = static_cast<uint16_t>(percent * (63.0f - pxSize - 10.0f));
         if (percent != lastPos) {
-            lastUpdate = HAL::timeInMilliseconds();
-        } else if ((HAL::timeInMilliseconds() - lastUpdate) > 750ul) {
+            lastScrollUpdate = HAL::timeInMilliseconds();
+        } else if ((HAL::timeInMilliseconds() - lastScrollUpdate) > 750ul) {
             return;
         }
         lastPos = percent;
@@ -730,6 +737,7 @@ void GUI::showScrollbar(GUIAction& action, float percent, uint16_t min, uint16_t
         lcd.drawBox(128u - 7u + 3u, 10u + pxPos, 3u, pxSize);
     }
 }
+
 void GUI::showScrollbar(GUIAction& action) {
     if (action == GUIAction::DRAW) {
         if (length[level] > 5) {
@@ -738,6 +746,7 @@ void GUI::showScrollbar(GUIAction& action) {
         }
     }
 }
+
 void __attribute__((weak)) probeProgress(GUIAction action, void* data) {
 
     if (action == GUIAction::DRAW) {

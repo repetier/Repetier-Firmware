@@ -28,6 +28,17 @@ void menuDisableTemperature(GUIAction action, void* data) {
 #endif
 }
 
+static int newTemp = 0;
+void menuSetTemperatureFixed(GUIAction action, void* data) {
+#if FEATURE_CONTROLLER != NO_CONTROLLER
+    HeatManager* hm = reinterpret_cast<HeatManager*>(data);
+    hm->setTargetTemperature(newTemp);
+    // Now remove the Disable button & move the display up if needed.
+    GUI::cursorRow[GUI::level] = 1;
+    GUI::topRow[GUI::level] = 0;
+#endif
+}
+
 void menuHMMaxPWM(GUIAction action, void* data) {
 #if FEATURE_CONTROLLER != NO_CONTROLLER
     HeatManager* hm = reinterpret_cast<HeatManager*>(data);
@@ -417,12 +428,35 @@ void HeatManager::showControlMenu(GUIAction action) {
 #if FEATURE_CONTROLLER != NO_CONTROLLER
     if (isOff()) {
         GUI::menuSelectableP(action, PSTR("Set Temp: Off"), menuSetTemperature, this, GUIPageType::FIXED_CONTENT);
+        DEFAULT_MATERIALS
     } else {
         GUI::flashToStringLong(GUI::tmpString, PSTR("Set Temp: @°C"), static_cast<int32_t>(lroundf(targetTemperature)));
         GUI::menuSelectable(action, GUI::tmpString, menuSetTemperature, this, GUIPageType::FIXED_CONTENT);
         GUI::menuSelectableP(action, PSTR("Disable"), menuDisableTemperature, this, GUIPageType::ACTION);
     }
 #endif
+}
+
+void HeatManager::showTemperature(GUIAction action, FSTRINGPARAM(name), int extTemp, int bedTemp, int chamberTemp) {
+    newTemp = 0;
+    if (heaterType == 'E') {
+        newTemp = extTemp;
+    }
+    if (heaterType == 'B') {
+        newTemp = bedTemp;
+    }
+    if (heaterType == 'C') {
+        newTemp = chamberTemp;
+    }
+    if (newTemp == 0 || newTemp > maxTemperature || newTemp < getMinTemperature()) {
+        return;
+    }
+    GUI::bufClear();
+    GUI::bufAddStringP(name);
+    GUI::bufAddChar(' ');
+    GUI::bufAddInt(newTemp, 3);
+    strcpy(GUI::tmpString, GUI::buf);
+    GUI::menuSelectable(action, GUI::tmpString, menuSetTemperatureFixed, this, GUIPageType::ACTION);
 }
 
 void HeatManager::printName() {

@@ -99,6 +99,7 @@ public:
         }
         targetTemperature = temp;
     }
+    void showTemperature(GUIAction action, FSTRINGPARAM(name), int extTemp, int bedTemp, int chamberTemp);
     inline bool isEnabled() {
         return decoupleMode != DecoupleMode::PAUSED && targetTemperature > MAX_ROOM_TEMPERATURE;
     }

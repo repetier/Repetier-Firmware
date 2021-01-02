@@ -137,11 +137,13 @@ Timer 1 (PE13, PE14), 2 (PB8, PB9), 3 (PB0, PC6, PC7), 4 (PD12), 9 (PE5, PE6)
 #define ORIG_PS_ON_PIN -1
 #define KILL_PIN -1
 
+#undef SDSUPPORT
+#define SDSUPPORT 1
 #ifndef SDSS
-#define SDSS PC10
+#define SDSS PC10 // CS1
 #endif
 #define SDPOWER -1
-#define ORIG_SDCARDDETECT
+#define ORIG_SDCARDDETECT PC9 // CD
 
 // LCD / Controller
 #ifndef CUSTOM_CONTROLLER_PINS

@@ -91,7 +91,7 @@ Early stage version for Stacke X2 printer - use with care
 #define ENABLE_BUMP_CORRECTION 1
 #define MAX_GRID_SIZE 5 // Maximum grid size allocation in memory, imported grid can be smaller
 #define BUMP_CORRECTION_START_DEGRADE 0.5
-#define BUMP_CORRECTION_END_HEIGHT 1.5
+#define BUMP_CORRECTION_END_HEIGHT 2.5
 #define BUMP_LIMIT_TO 0
 
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta, 3 = Dual X-Axis
@@ -111,6 +111,18 @@ Early stage version for Stacke X2 printer - use with care
 #define DISPLAY_FULL_BUFFER 1
 // Direction 1 or -1
 #define ENCODER_DIRECTION -1
+
+// List of default materials for temperature dialogs. Values are extruder temperature, bed temeprature and chamber temperature
+#define DEFAULT_MATERIALS \
+    DEFAULT_MATERIAL(Com::tMatPLA, 215, 60, 0) \
+    DEFAULT_MATERIAL(Com::tMatPET, 230, 55, 0) \
+    DEFAULT_MATERIAL(Com::tMatASA, 260, 105, 0) \
+    DEFAULT_MATERIAL(Com::tMatPC, 275, 110, 0) \
+    DEFAULT_MATERIAL(Com::tMatABS, 255, 100, 0) \
+    DEFAULT_MATERIAL(Com::tMatHIPS, 220, 100, 0) \
+    DEFAULT_MATERIAL(Com::tMatPP, 254, 100, 0) \
+    DEFAULT_MATERIAL(Com::tMatFLEX, 240, 50, 0)
+
 // Uncomment to hide toogle light menu entry in controls
 // #define NO_LIGHT_CONTROL
 // Encoder speed 0 = fastest, 1 or 2 = slowest - set so 1 click is one menu move
@@ -156,11 +168,11 @@ to the position. 0 = no contribution. */
     "Standard" positions: alpha_A = 210, alpha_B = 330, alpha_C = 90
 */
 #define DELTA_DIAGONAL 444.800f
-#define DELTA_HORIZONTAL_RADIUS 209.900f
+#define DELTA_HORIZONTAL_RADIUS 209.893f
 #define DELTA_PRINT_RADIUS 172.0f
 #define BED_RADIUS 180.0f
-#define DELTA_ANGLE_A 210.0f
-#define DELTA_ANGLE_B 330.0f
+#define DELTA_ANGLE_A 209.637f
+#define DELTA_ANGLE_B 329.857f
 #define DELTA_ANGLE_C 90.123f
 #define DELTA_CORRECTION_A 0.0f
 #define DELTA_CORRECTION_B 0.0f
@@ -168,9 +180,9 @@ to the position. 0 = no contribution. */
 #define DELTA_RADIUS_CORRECTION_A 0.0f
 #define DELTA_RADIUS_CORRECTION_B 0.0f
 #define DELTA_RADIUS_CORRECTION_C -0.05f
-#define DELTA_HOME_OFFSET_A 2.9f
-#define DELTA_HOME_OFFSET_B 0.0f
-#define DELTA_HOME_OFFSET_C 0.85f
+#define DELTA_HOME_OFFSET_A 0.501f
+#define DELTA_HOME_OFFSET_B 0.067f
+#define DELTA_HOME_OFFSET_C 0.0f
 
 // Extra parameter in case you have a dual x axis
 #define DUAL_X_LEFT_OFFSET -64
@@ -205,7 +217,7 @@ to the position. 0 = no contribution. */
 #include "io/redefine.h"
 
 #define Z_PROBE_TYPE Z_PROBE_TYPE_BLTOUCH
-#define Z_PROBE_HEIGHT 3        // Distance bed-nozzle when trigger switches
+#define Z_PROBE_HEIGHT 0.42     // Distance bed-nozzle when trigger switches
 #define Z_PROBE_BED_DISTANCE 10 // Optimal starting distance
 #define Z_PROBE_SPEED 5         // Speed fo z testing
 #define Z_PROBE_X_OFFSET 0      // x offset relative to extruder 0,0 offset
@@ -222,6 +234,11 @@ to the position. 0 = no contribution. */
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
 #define Z_PROBE_RUN_AFTER_EVERY_PROBE ""
+#define Z_PROBE_REQUIRES_HEATING 0
+#define Z_PROBE_MIN_TEMPERATURE 150
+#define Z_PROBE_PAUSE_HEATERS 0         // Pause all heaters when probing to reduce EMI artifacts
+#define Z_PROBE_PAUSE_BED_REHEAT_TEMP 5 // Stop and reheat the bed if we leave the target temp by this much.
+
 // Define ZProbe by referencing a endstop defined
 CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
@@ -305,7 +322,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
 #define X_MAX_LENGTH 420
 #define Y_MAX_LENGTH 420
-#define Z_MAX_LENGTH 595.596
+#define Z_MAX_LENGTH 596.057
 #define X_MIN_POS -210
 #define Y_MIN_POS -210
 #define Z_MIN_POS 0
@@ -384,7 +401,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define ENDSTOP_X_BACK_ON_HOME 0.5
 #define ENDSTOP_Y_BACK_ON_HOME 0.5
 #define ENDSTOP_Z_BACK_ON_HOME 20
-#define ALWAYS_CHECK_ENDSTOPS 0
+#define ALWAYS_CHECK_ENDSTOPS 1
 #define X_HOME_DIR 0
 #define Y_HOME_DIR 0
 #define Z_HOME_DIR 1

@@ -198,6 +198,7 @@ void GUI::pushOn(GUIAction a, GuiCallback cb, void* cData, GUIPageType tp) {
 void GUI::backKey() {
     nextAction = GUIAction::BACK;
     contentChanged = true;
+    resetScrollbarTimer();
 }
 
 void GUI::nextKey() {
@@ -207,6 +208,7 @@ void GUI::nextKey() {
     nextAction = GUIAction::NEXT;
     nextActionRepeat++;
     contentChanged = true;
+    resetScrollbarTimer();
 }
 
 void GUI::previousKey() {
@@ -216,18 +218,21 @@ void GUI::previousKey() {
     nextAction = GUIAction::PREVIOUS;
     nextActionRepeat++;
     contentChanged = true;
+    resetScrollbarTimer();
 }
 
 void GUI::okKey() {
     nextAction = GUIAction::CLICK;
     contentChanged = true;
+    resetScrollbarTimer();
 }
 
 /** Check for button and store result in nextAction. */
 void GUI::handleKeypress() {
     if (!ControllerClick::get()) {
-        setEncoderA(ControllerEncA::get());
-        setEncoderB(ControllerEncB::get());
+        setEncoder();
+        // setEncoderA(ControllerEncA::get());
+        // setEncoderB(ControllerEncB::get());
     }
     // debounce clicks
     if (nextAction == GUIAction::CLICK_PROCESSED || nextAction == GUIAction::BACK_PROCESSED) {
@@ -256,57 +261,47 @@ void GUI::handleKeypress() {
 #endif
 }
 
-#if ENCODER_SPEED == 0
+static uint16_t encoderCurrent = 0;
+static fast8_t encCounter = 0;
 const int8_t encoder_table[16] PROGMEM = { 0, 1, -1, 0, -1, 0, 0, 1, 1, 0, 0, -1, 0, -1, 1, 0 }; // Full speed
+#if ENCODER_SPEED == 0
+#define ENCODER_CHANGES 1
 #elif ENCODER_SPEED == 1
-const int8_t encoder_table[16] PROGMEM = { 0, 0, -1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, -1, 0, 0 }; // Half speed
+#define ENCODER_CHANGES 2
 #else
-//const int8_t encoder_table[16] PROGMEM = {0,0,0,0,0,0,0,0,1,0,0,0,0,-1,0,0}; // Quart speed
-//const int8_t encoder_table[16] PROGMEM = {0,1,0,0,-1,0,0,0,0,0,0,0,0,0,0,0}; // Quart speed
-const int8_t encoder_table[16] PROGMEM = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0 }; // Quart speed
+#define ENCODER_CHANGES 4
 #endif
 
-static fast8_t aEnc = 0;
-static fast8_t bEnc = 0;
-static fast8_t encoderLast = 0;
-
-void GUI::setEncoderA(fast8_t state) {
-    if (state == aEnc) {
+void GUI::setEncoder() {
+    uint16_t newBits = 0;
+    if (ControllerEncA::get()) {
+        newBits |= 0x02;
+    }
+    if (ControllerEncB::get()) {
+        newBits |= 0x01;
+    }
+    if (newBits == (encoderCurrent & 3)) { // nothing changed
         return;
     }
-    aEnc = state;
-    encoderLast = (encoderLast << 2) & 0x0F;
-    if (aEnc) {
-        encoderLast += 2;
-    }
-    if (bEnc) {
-        encoderLast++;
-    }
-    int8_t mod = pgm_read_byte(&encoder_table[encoderLast]) * ENCODER_DIRECTION;
-    if (mod > 0) {
-        nextKey();
-    } else if (mod < 0) {
-        previousKey();
-    }
-}
-
-void GUI::setEncoderB(fast8_t state) {
-    if (state == bEnc) {
-        return;
-    }
-    bEnc = state;
-    encoderLast = (encoderLast << 2) & 0x0F;
-    if (aEnc) {
-        encoderLast += 2;
-    }
-    if (bEnc) {
-        encoderLast++;
-    }
-    int8_t mod = pgm_read_byte(&encoder_table[encoderLast]) * ENCODER_DIRECTION;
-    if (mod > 0) {
-        nextKey();
-    } else if (mod < 0) {
-        previousKey();
+    newBits = ((encoderCurrent << 2) + newBits) & 0xf;
+    int8_t move = pgm_read_byte(&encoder_table[newBits]);
+    encoderCurrent = newBits;
+    encCounter += move;
+    uint8_t val = newBits & 0xf; //0x3f;
+    if (encCounter >= ENCODER_CHANGES) {
+        encCounter = 0;
+        if (ENCODER_DIRECTION == 1) {
+            GUI::nextKey();
+        } else {
+            GUI::previousKey();
+        }
+    } else if (encCounter <= -ENCODER_CHANGES) {
+        encCounter = 0;
+        if (ENCODER_DIRECTION == 1) {
+            GUI::previousKey();
+        } else {
+            GUI::nextKey();
+        }
     }
 }
 
@@ -845,8 +840,8 @@ void directAction(GUIAction action, void* data) {
         Printer::kill(true);
         break;
     case GUI_DIRECT_ACTION_MOUNT_SD_CARD:
-#if SDSUPPORT  
-        if (sd.state == SDState::SD_HAS_ERROR) { 
+#if SDSUPPORT
+        if (sd.state == SDState::SD_HAS_ERROR) {
             sd.unmount(true);
         }
         sd.mount(true);

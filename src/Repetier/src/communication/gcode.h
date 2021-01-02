@@ -457,7 +457,7 @@ public:
     GCodeSource* source;
 };
 
-#if JSON_OUTPUT
+#if JSON_OUTPUT && SDSUPPORT
 #include "SdFat/src/SdFat.h"
 // Struct to hold Gcode file information 32 bytes
 #define GENBY_SIZE 16

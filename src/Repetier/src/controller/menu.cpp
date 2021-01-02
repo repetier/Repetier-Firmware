@@ -909,9 +909,9 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
         }
         return true;
     });
-    if (count > 3u) {
+    /* if (count > 3u) {
         GUI::showScrollbar(action);
-    }
+    } */
     curDir.close();
     GUI::menuEnd(action);
 }
