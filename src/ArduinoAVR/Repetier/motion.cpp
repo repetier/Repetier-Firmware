@@ -569,27 +569,31 @@ void PrintLine::calculateMove(float axisDistanceMM[], uint8_t pathOptimize, fast
 #if !NONLINEAR_SYSTEM || defined(FAST_COREXYZ)
         limitInterval = RMath::max(axisInterval[X_AXIS], limitInterval);
 #endif
-    } else
+    } else {
         axisInterval[X_AXIS] = 0;
+    }
     if (isYMove()) {
         axisInterval[Y_AXIS] = axisDistanceMM[Y_AXIS] * toTicks / Printer::maxFeedrate[Y_AXIS];
 #if !NONLINEAR_SYSTEM || defined(FAST_COREXYZ)
         limitInterval = RMath::max(axisInterval[Y_AXIS], limitInterval);
 #endif
-    } else
+    } else {
         axisInterval[Y_AXIS] = 0;
+    }
     if (isZMove()) {                                                                            // normally no move in z direction
         axisInterval[Z_AXIS] = axisDistanceMM[Z_AXIS] * toTicks / Printer::maxFeedrate[Z_AXIS]; // must prevent overflow!
 #if !NONLINEAR_SYSTEM || defined(FAST_COREXYZ)
         limitInterval = RMath::max(axisInterval[Z_AXIS], limitInterval);
 #endif
-    } else
+    } else {
         axisInterval[Z_AXIS] = 0;
+    }
     if (isEMove()) {
         axisInterval[E_AXIS] = axisDistanceMM[E_AXIS] * toTicks / Printer::maxFeedrate[E_AXIS];
         limitInterval = RMath::max(axisInterval[E_AXIS], limitInterval);
-    } else
+    } else {
         axisInterval[E_AXIS] = 0;
+    }
 #if DRIVE_SYSTEM == DELTA
     if (axisDistanceMM[VIRTUAL_AXIS] >= 0) { // only for deltas all speeds in all directions have same limit
         axisInterval[VIRTUAL_AXIS] = axisDistanceMM[VIRTUAL_AXIS] * toTicks / (Printer::maxFeedrate[Z_AXIS]);

@@ -869,8 +869,9 @@ void Extruder::selectExtruderById(uint8_t extruderId) {
         Printer::maxExtruderSpeed = 15;
 #endif
     float fmax = ((float)HAL::maxExtruderTimerFrequency() / ((float)Printer::maxExtruderSpeed * Printer::axisStepsPerMM[E_AXIS])); // Limit feedrate to interrupt speed
-    if (fmax < Printer::maxFeedrate[E_AXIS])
+    if (fmax < Printer::maxFeedrate[E_AXIS]) {
         Printer::maxFeedrate[E_AXIS] = fmax;
+    }
 #endif // USE_ADVANCE
     Extruder::current->tempControl.updateTempControlVars();
 #if DUAL_X_AXIS

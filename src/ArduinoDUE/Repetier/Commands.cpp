@@ -2810,10 +2810,11 @@ void Commands::processMCode(GCode* com) {
         if (com->hasE()) {
             Printer::maxFeedrate[E_AXIS] = com->E / 60.0f;
         }
-        if (com->hasS())
+        if (com->hasS()) {
             manageMonitor = com->S != 255;
-        else
+        } else {
             manageMonitor = 0;
+        }
         break;
     case 204: { // M204
         TemperatureController* temp = &Extruder::current->tempControl;

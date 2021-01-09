@@ -1796,7 +1796,7 @@ void Commands::processGCode(GCode* com) {
         }
         if (!com->hasX() && !com->hasY() && !com->hasZ() && !com->hasE()) {
             Printer::setOrigin(0, 0, 0);
-            Com::printFLN(PSTR(" RESET X Y Y origin"));
+            Com::printFLN(PSTR("RESET X Y Z origin"));
         }
         Com::printF(PSTR("X_OFFSET:"), Printer::coordinateOffset[X_AXIS], 3);
         Com::printF(PSTR(" Y_OFFSET:"), Printer::coordinateOffset[Y_AXIS], 3);
@@ -2810,10 +2810,11 @@ void Commands::processMCode(GCode* com) {
         if (com->hasE()) {
             Printer::maxFeedrate[E_AXIS] = com->E / 60.0f;
         }
-        if (com->hasS())
+        if (com->hasS()) {
             manageMonitor = com->S != 255;
-        else
+        } else {
             manageMonitor = 0;
+        }
         break;
     case 204: { // M204
         TemperatureController* temp = &Extruder::current->tempControl;
