@@ -1546,6 +1546,15 @@ void Printer::GoToMemoryPosition(bool x, bool y, bool z, bool e, float feed) {
     feedrate = memoryF;
     updateCurrentPosition(false);
 }
+#if SAFE_HOMING
+#define SAFE_HOMING_CALL(x) \
+    if (!x) { \
+        GCode::fatalError(Com::tHomingFailed); \
+        return; \
+    }
+#else
+#define SAFE_HOMING_CALL(x) x;
+#endif
 
 #if DRIVE_SYSTEM == DELTA
 void Printer::deltaMoveToTopEndstops(float feedrate) {
@@ -1560,19 +1569,23 @@ void Printer::deltaMoveToTopEndstops(float feedrate) {
     offsetX = offsetY = offsetZ = offsetZ2 = 0;
     setHoming(false);
 }
-void Printer::homeXAxis() {
+bool Printer::homeXAxis() {
     destinationSteps[X_AXIS] = 0;
     if (!PrintLine::queueNonlinearMove(true, false, false)) {
         Com::printWarningFLN(PSTR("homeXAxis / queueDeltaMove returns error"));
+        return false;
     }
+    return true;
 }
-void Printer::homeYAxis() {
+bool Printer::homeYAxis() {
     Printer::destinationSteps[Y_AXIS] = 0;
     if (!PrintLine::queueNonlinearMove(true, false, false)) {
         Com::printWarningFLN(PSTR("homeYAxis / queueDeltaMove returns error"));
+        return false;
     }
+    return true;
 }
-void Printer::homeZAxis() { // Delta z homing
+bool Printer::homeZAxis() { // Delta z homing
     bool homingSuccess = false;
     Endstops::resetAccumulator();
     deltaMoveToTopEndstops(Printer::homingFeedrate[Z_AXIS]);
@@ -1617,6 +1630,7 @@ void Printer::homeZAxis() { // Delta z homing
         setYHomed(false);
         setZHomed(false);
         GCodeSource::printAllFLN(PSTR("RequestPause:Homing failed!"));
+        return false;
     } else {
         setXHomed(true);
         setYHomed(true);
@@ -1663,6 +1677,7 @@ void Printer::homeZAxis() { // Delta z homing
 #if FEATURE_BABYSTEPPING
     Printer::zBabysteps = 0;
 #endif
+    return true;
 }
 // This home axis is for delta
 void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // Delta homing code
@@ -1686,7 +1701,7 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // Delta homing cod
     UI_STATUS_UPD_F(Com::translatedF(UI_TEXT_HOME_DELTA_ID));
     // Homing Z axis means that you must home X and Y
     EVENT_BEFORE_Z_HOME;
-    homeZAxis();
+    SAFE_HOMING_CALL(homeZAxis())
     moveToReal(0, 0, Printer::zLength - zBedOffset, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]); // Move to designed coordinates including translation
     updateCurrentPosition(true);
     updateHomedAll();
@@ -1701,7 +1716,7 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // Delta homing cod
 }
 #else
 #if DRIVE_SYSTEM == TUGA // Tuga printer homing
-void Printer::homeXAxis() {
+bool Printer::homeXAxis() {
     long steps;
     if ((MIN_HARDWARE_ENDSTOP_X && X_MIN_PIN > -1 && X_HOME_DIR == -1 && MIN_HARDWARE_ENDSTOP_Y && Y_MIN_PIN > -1 && Y_HOME_DIR == -1) || (MAX_HARDWARE_ENDSTOP_X && X_MAX_PIN > -1 && X_HOME_DIR == 1 && MAX_HARDWARE_ENDSTOP_Y && Y_MAX_PIN > -1 && Y_HOME_DIR == 1)) {
         long offX = 0, offY = 0;
@@ -1747,12 +1762,13 @@ void Printer::homeXAxis() {
         setXHomed(true);
         setYHomed(true);
     }
+    return true;
 }
 void Printer::homeYAxis() {
     // Dummy function x and y homing must occur together
 }
 #else // Cartesian printer
-void Printer::homeXAxis() {
+bool Printer::homeXAxis() {
 #if defined(SENSORLESS_HOMING) && TMC2130_ON_X
     while (!Printer::tmc_driver_x->stst())
         ; // Wait for motor stand-still
@@ -1775,6 +1791,17 @@ void Printer::homeXAxis() {
     PrintLine::moveRelativeDistanceInSteps(-3 * steps * -X_HOME_DIR / 2, 0, 0, 0, homingFeedrate[X_AXIS], true, true);                                                                        // first contact
     PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, false);                                         // back move
     PrintLine::moveRelativeDistanceInSteps(-axisStepsPerMM[X_AXIS] * 2 * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true); // final contact
+#if SAFE_HOMING
+    if (X_HOME_DIR < 0) {
+        if (!Endstops::xMin()) {
+            return false;
+        }
+    } else {
+        if (!Endstops::xMax()) {
+            return false;
+        }
+    }
+#endif
 #if defined(ENDSTOP_X_BACK_ON_HOME)
     if (ENDSTOP_X_BACK_ON_HOME > 0)
         PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_ON_HOME * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, false);
@@ -1784,6 +1811,17 @@ void Printer::homeXAxis() {
     PrintLine::moveRelativeDistanceInSteps(2 * steps * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
     PrintLine::moveRelativeDistanceInSteps(-axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, false); // back move
     PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * 2 * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true);
+#if SAFE_HOMING
+    if (X_HOME_DIR > 0) {
+        if (!Endstops::xMin()) {
+            return false;
+        }
+    } else {
+        if (!Endstops::xMax()) {
+            return false;
+        }
+    }
+#endif
 #if defined(ENDSTOP_X_BACK_ON_HOME)
     if (ENDSTOP_X_BACK_ON_HOME > 0)
         PrintLine::moveRelativeDistanceInSteps(-axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_ON_HOME * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, false);
@@ -1834,6 +1872,17 @@ void Printer::homeXAxis() {
 #endif
         PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * -ENDSTOP_X_BACK_MOVE * X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
         PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * 2 * ENDSTOP_X_BACK_MOVE * X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true);
+#if SAFE_HOMING
+        if (X_HOME_DIR < 0) {
+            if (!Endstops::xMin()) {
+                return false;
+            }
+        } else {
+            if (!Endstops::xMax()) {
+                return false;
+            }
+        }
+#endif
 #if defined(ENDSTOP_X_BACK_ON_HOME)
         if (ENDSTOP_X_BACK_ON_HOME > 0)
             PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * -ENDSTOP_X_BACK_ON_HOME * X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
@@ -1861,9 +1910,10 @@ void Printer::homeXAxis() {
     Printer::tmc_driver_x->stealth_max_speed(stealth_max_sp);
     Printer::tmc_driver_x->stealthChop(stealth_state);
 #endif
+    return true;
 }
 
-void Printer::homeYAxis() {
+bool Printer::homeYAxis() {
 #if defined(SENSORLESS_HOMING) && TMC2130_ON_Y
     while (!Printer::tmc_driver_y->stst())
         ; // Wait for motor stand-still
@@ -1900,6 +1950,17 @@ void Printer::homeYAxis() {
         PrintLine::moveRelativeDistanceInSteps(0, axisStepsPerMM[Y_AXIS] * -ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR, 0, 0, homingFeedrate[Y_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
         PrintLine::moveRelativeDistanceInSteps(0, axisStepsPerMM[Y_AXIS] * 2 * ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR, 0, 0, homingFeedrate[Y_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true);
         setHoming(false);
+#if SAFE_HOMING
+        if (Y_HOME_DIR < 0) {
+            if (!Endstops::yMin()) {
+                return false;
+            }
+        } else {
+            if (!Endstops::yMax()) {
+                return false;
+            }
+        }
+#endif
 #if defined(ENDSTOP_Y_BACK_ON_HOME)
         if (ENDSTOP_Y_BACK_ON_HOME > 0)
             PrintLine::moveRelativeDistanceInSteps(0, axisStepsPerMM[Y_AXIS] * -ENDSTOP_Y_BACK_ON_HOME * Y_HOME_DIR, 0, 0, homingFeedrate[Y_AXIS], true, false);
@@ -1924,6 +1985,7 @@ void Printer::homeYAxis() {
     Printer::tmc_driver_y->stealth_max_speed(stealth_max_sp);
     Printer::tmc_driver_y->stealthChop(stealth_state);
 #endif
+    return true;
 }
 #endif
 
@@ -1984,7 +2046,7 @@ this result is wrong and we need to correct by the z change between origin and c
 
 ## Step 11: Set babysteps to 0
 */
-void Printer::homeZAxis() { // Cartesian homing
+bool Printer::homeZAxis() { // Cartesian homing
 #if defined(SENSORLESS_HOMING) && TMC2130_ON_Z
     while (!Printer::tmc_driver_z->stst())
         ; // Wait for motor stand-still
@@ -1998,7 +2060,7 @@ void Printer::homeZAxis() { // Cartesian homing
         offsetZ2 = 0;
 #if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN && FEATURE_Z_PROBE
         if (!Printer::startProbing(true)) {
-            return;
+            return false;
         }
 #endif
         coordinateOffset[Z_AXIS] = 0; // G92 Z offset
@@ -2030,6 +2092,18 @@ void Printer::homeZAxis() { // Cartesian homing
 #endif
 #endif
         PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * 2 * ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR, 0, homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR, true, true);
+#if SAFE_HOMING
+        if (Z_HOME_DIR < 0) {
+            if (!Endstops::zMin()) {
+                return false;
+            }
+        } else {
+            if (!Endstops::zMax()) {
+                return false;
+            }
+        }
+#endif
+
 #if Z_HOME_DIR < 0 && Z_PROBE_PIN == Z_MIN_PIN && FEATURE_Z_PROBE
         Printer::finishProbing();
 #endif
@@ -2093,8 +2167,8 @@ void Printer::homeZAxis() { // Cartesian homing
     Printer::tmc_driver_z->stealth_max_speed(stealth_max_sp);
     Printer::tmc_driver_z->stealthChop(stealth_state);
 #endif
+    return true;
 }
-
 /** \brief Main function for all homing operations.
 
 For homing operations only this function should be used. It calls Printer::homeXAxis, Printer::homeYAxis and Printer::homeZAxis
@@ -2147,47 +2221,65 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
         EVENT_BEFORE_Z_HOME;
     }
 #if HOMING_ORDER == HOME_ORDER_XYZ
-    if (xaxis)
-        homeXAxis();
-    if (yaxis)
-        homeYAxis();
-    if (zaxis)
-        homeZAxis();
+    if (xaxis) {
+        SAFE_HOMING_CALL(homeXAxis())
+    }
+    if (yaxis) {
+        SAFE_HOMING_CALL(homeYAxis())
+    }
+    if (zaxis) {
+        SAFE_HOMING_CALL(homeZAxis())
+    }
 #elif HOMING_ORDER == HOME_ORDER_XZY
-    if (xaxis)
-        homeXAxis();
-    if (zaxis)
-        homeZAxis();
-    if (yaxis)
-        homeYAxis();
+    if (xaxis) {
+        SAFE_HOMING_CALL(homeXAxis())
+    }
+    if (zaxis) {
+        SAFE_HOMING_CALL(homeZAxis())
+    }
+    if (yaxis) {
+        SAFE_HOMING_CALL(homeYAxis())
+    }
 #elif HOMING_ORDER == HOME_ORDER_YXZ
-    if (yaxis)
-        homeYAxis();
-    if (xaxis)
-        homeXAxis();
-    if (zaxis)
-        homeZAxis();
+    if (yaxis) {
+        SAFE_HOMING_CALL(homeYAxis())
+    }
+    if (xaxis) {
+        SAFE_HOMING_CALL(homeXAxis())
+    }
+    if (zaxis) {
+        SAFE_HOMING_CALL(homeZAxis())
+    }
 #elif HOMING_ORDER == HOME_ORDER_YZX
-    if (yaxis)
-        homeYAxis();
-    if (zaxis)
-        homeZAxis();
-    if (xaxis)
-        homeXAxis();
+    if (yaxis) {
+        SAFE_HOMING_CALL(homeYAxis())
+    }
+    if (zaxis) {
+        SAFE_HOMING_CALL(homeZAxis())
+    }
+    if (xaxis) {
+        SAFE_HOMING_CALL(homeXAxis())
+    }
 #elif HOMING_ORDER == HOME_ORDER_ZXY
-    if (zaxis)
-        homeZAxis();
-    if (xaxis)
-        homeXAxis();
-    if (yaxis)
-        homeYAxis();
+    if (zaxis) {
+        SAFE_HOMING_CALL(homeZAxis())
+    }
+    if (xaxis) {
+        SAFE_HOMING_CALL(homeXAxis())
+    }
+    if (yaxis) {
+        SAFE_HOMING_CALL(homeYAxis())
+    }
 #elif HOMING_ORDER == HOME_ORDER_ZYX
-    if (zaxis)
-        homeZAxis();
-    if (yaxis)
-        homeYAxis();
-    if (xaxis)
-        homeXAxis();
+    if (zaxis) {
+        SAFE_HOMING_CALL(homeZAxis())
+    }
+    if (yaxis) {
+        SAFE_HOMING_CALL(homeYAxis())
+    }
+    if (xaxis) {
+        SAFE_HOMING_CALL(homeXAxis())
+    }
 #elif HOMING_ORDER == HOME_ORDER_ZXYTZ || HOMING_ORDER == HOME_ORDER_XYTZ
     {
 #if ZHOME_MIN_TEMPERATURE > 20
@@ -2197,7 +2289,7 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
 #endif
         if (zaxis) {
 #if HOMING_ORDER == HOME_ORDER_ZXYTZ
-            homeZAxis();
+            SAFE_HOMING_CALL(homeZAxis())
             Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]);
 #endif
             Commands::waitUntilEndOfAllMoves();
@@ -2222,12 +2314,13 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
         if (xaxis || zaxis)
 #endif
         {
-            homeXAxis();
+            SAFE_HOMING_CALL(homeXAxis())
             //#if ZHOME_X_POS == IGNORE_COORDINATE
-            if (X_HOME_DIR < 0)
+            if (X_HOME_DIR < 0) {
                 startX = Printer::xMin;
-            else
+            } else {
                 startX = Printer::xMin + Printer::xLength;
+            }
             //#else
             //        startX = ZHOME_X_POS;
             //#endif
@@ -2239,7 +2332,7 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
         if (yaxis || zaxis)
 #endif
         {
-            homeYAxis();
+            SAFE_HOMING_CALL(homeYAxis())
             //#if ZHOME_Y_POS == IGNORE_COORDINATE
             if (Y_HOME_DIR < 0)
                 startY = Printer::yMin;
@@ -2255,11 +2348,12 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
             moveToReal(ZHOME_X_POS, ZHOME_Y_POS, IGNORE_COORDINATE, IGNORE_COORDINATE, homingFeedrate[X_AXIS]); // correct rotation!
             Commands::waitUntilEndOfAllMoves();
 #endif
-            homeZAxis(); // real z distance at that point to zero
-            if (Z_HOME_DIR < 0)
+            SAFE_HOMING_CALL(homeZAxis()) // real z distance at that point to zero
+            if (Z_HOME_DIR < 0) {
                 startZ = Printer::zMin;
-            else
+            } else {
                 startZ = Printer::zMin + Printer::zLength - zBedOffset;
+            }
             moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT, IGNORE_COORDINATE, homingFeedrate[Z_AXIS]); // correct rotation!
             Commands::waitUntilEndOfAllMoves();
 #if ZHOME_MIN_TEMPERATURE > 20
@@ -2310,8 +2404,9 @@ void Printer::homeAxis(bool xaxis, bool yaxis, bool zaxis) { // home non-delta p
 #ifdef HOME_ZUP_FIRST
     PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * Z_UP_AFTER_HOME * Z_HOME_DIR, 0, homingFeedrate[Z_AXIS], true, false);
 #endif
-    if (zaxis)
+    if (zaxis) {
         startZ = Z_UP_AFTER_HOME;
+    }
 #endif
     moveToReal(startX, startY, startZ, IGNORE_COORDINATE, homingFeedrate[X_AXIS]);
 #if (DUAL_X_AXIS && LAZY_DUAL_X_AXIS)

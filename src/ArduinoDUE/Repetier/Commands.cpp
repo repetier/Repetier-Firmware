@@ -2207,7 +2207,11 @@ void Commands::processMCode(GCode* com) {
         }
         break;
     case 24: // M24 - Start SD print
-        sd.startPrint();
+        if (Printer::isMenuMode(MENU_MODE_PAUSED)) {
+            sd.continuePrint();
+        } else {
+            sd.startPrint();
+        }
         break;
     case 25: // M25 - Pause SD print
         sd.pausePrint();

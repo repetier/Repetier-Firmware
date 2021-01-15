@@ -63,7 +63,7 @@ public:
     int8_t waitingForResend; ///< Waiting for line to be resend. -1 = no wait.
 
     GCodeSource();
-    virtual ~GCodeSource() {}
+    virtual ~GCodeSource() { }
     virtual bool isOpen() = 0;
     virtual bool supportsWrite() = 0; ///< true if write is a non dummy function
     virtual bool closeOnError() = 0;  // return true if the channel can not
@@ -72,7 +72,7 @@ public:
     virtual int readByte() = 0;
     virtual void close() = 0;
     virtual void writeByte(uint8_t byte) = 0;
-    virtual void prefetchContent() {} // Used for emergency parsing to read ahaed
+    virtual void prefetchContent() { } // Used for emergency parsing to read ahaed
 };
 
 class Com {
@@ -132,6 +132,7 @@ public:
     FSTRINGVAR(tSpaceSlash)
     FSTRINGVAR(tFatal)
     FSTRINGVAR(tDoorOpen)
+    FSTRINGVAR(tHomingFailed)
 #if JSON_OUTPUT
     FSTRINGVAR(tJSONDir)
     FSTRINGVAR(tJSONFiles)

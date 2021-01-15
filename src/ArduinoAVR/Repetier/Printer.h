@@ -1325,9 +1325,9 @@ public:
 #if JSON_OUTPUT || defined(DOXYGEN)
     static void showJSONStatus(int type);
 #endif
-    static void homeXAxis();
-    static void homeYAxis();
-    static void homeZAxis();
+    static bool homeXAxis();
+    static bool homeYAxis();
+    static bool homeZAxis();
     static void pausePrint();
     static void continuePrint();
     static void stopPrint();

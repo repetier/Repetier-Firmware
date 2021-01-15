@@ -268,6 +268,10 @@ Switch it off for production, it costs execution time. */
 
 #include "Configuration.h"
 
+#ifndef SAFE_HOMING
+#define SAFE_HOMING 0
+#endif
+
 #ifndef EXT0_HARDWARE_PWM
 #define EXT0_HARDWARE_PWM 0
 #endif

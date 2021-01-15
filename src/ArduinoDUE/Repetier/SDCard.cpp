@@ -576,8 +576,9 @@ bool SDCard::selectFile(const char* filename, bool silent) {
         Com::printFLN(Com::tFileSelected);
         return true;
     } else {
-        if (!silent)
+        if (!silent) {
             Com::printFLN(Com::tFileOpenFailed);
+        }
         return false;
     }
 }
