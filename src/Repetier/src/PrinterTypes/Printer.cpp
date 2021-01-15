@@ -653,11 +653,9 @@ void Printer::setup() {
     Commands::writeLowestFreeRAM();
     HAL::setupTimer();
 
-
 #if FEATURE_WATCHDOG
     HAL::startWatchdog();
 #endif
-
     Tool::selectTool(rescueStartTool());
     // Extruder::selectExtruderById(0);
     HAL::delayMilliseconds(20);
@@ -691,7 +689,7 @@ void Printer::defaultLoopActions() {
         }
     }
 #if SDCARDDETECT > -1 && SDSUPPORT
-    if(Printer::isAutomount()) {
+    if (Printer::isAutomount()) {
         sd.automount();
     }
 #endif
@@ -855,6 +853,12 @@ void Printer::showConfiguration() {
     Com::config(PSTR("XTravelAccel:"), Motion1::maxTravelAccelerationEEPROM[X_AXIS]);
     Com::config(PSTR("YTravelAccel:"), Motion1::maxTravelAccelerationEEPROM[Y_AXIS]);
     Com::config(PSTR("ZTravelAccel:"), Motion1::maxTravelAccelerationEEPROM[Z_AXIS]);
+    Com::config(PSTR("XMaxFeedRate:"), Motion1::maxFeedrate[X_AXIS]);
+    Com::config(PSTR("YMaxFeedRate:"), Motion1::maxFeedrate[Y_AXIS]);
+    Com::config(PSTR("ZMaxFeedRate:"), Motion1::maxFeedrate[Z_AXIS]);
+    Com::config(PSTR("XSteps/mm:"), Motion1::resolution[X_AXIS]);
+    Com::config(PSTR("YSteps/mm:"), Motion1::resolution[Y_AXIS]);
+    Com::config(PSTR("ZSteps/mm:"), Motion1::resolution[Z_AXIS]);
     PrinterType::M360();
     if (NUM_HEATED_BEDS > 0) {
         Com::config(PSTR("MaxBedTemp:"), heatedBeds[0]->getMaxTemperature());

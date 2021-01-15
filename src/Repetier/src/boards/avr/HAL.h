@@ -21,8 +21,7 @@
   Functions in this file are used to communicate using ascii or repetier protocol.
 */
 
-#ifndef HAL_H
-#define HAL_H
+#pragma once
 
 /**
   This is the main Hardware Abstraction Layer (HAL).
@@ -34,7 +33,7 @@
 #include <avr/io.h>
 
 #define INLINE __attribute__((always_inline))
-
+#define CPU_ARCH ARCH_AVR
 #if CPU_ARCH == ARCH_AVR
 #include <avr/io.h>
 #else
@@ -133,8 +132,6 @@ public:
 #define bit_clear(x, y) x &= ~(1 << y) //cbi(x,y)
 #define bit_set(x, y) x |= (1 << y)    //sbi(x,y)
 
-#if NONLINEAR_SYSTEM
-
 typedef uint16_t speed_t;
 typedef uint32_t ticks_t;
 typedef uint32_t millis_t;
@@ -143,7 +140,8 @@ typedef int8_t fast8_t;
 typedef uint8_t ufast8_t;
 
 #define FAST_INTEGER_SQRT
-
+#define SERIAL_BUFFER_SIZE 128
+#if 0
 #ifndef EXTERNALSERIAL
 // Implement serial communication for one stream only!
 /*
@@ -250,6 +248,7 @@ extern RFHardwareSerial RFSerial;
 #endif
 #endif
 #endif
+#endif
 
 class HAL {
 public:
@@ -260,6 +259,16 @@ public:
 
     HAL();
     virtual ~HAL();
+
+    // Try to initialize pinNumber as hardware PWM. Returns internal
+    // id if it succeeds or -1 if it fails. Typical reasons to fail
+    // are no pwm support for that pin or an other pin uses same PWM
+    // channel.
+    static int initHardwarePWM(int pinNumber, uint32_t frequency);
+    // Set pwm output to value. id is id from initHardwarePWM.
+    static void setHardwarePWM(int id, int value);
+    // Set pwm frequency to value. id is id from initHardwarePWM.
+    static void setHardwareFrequency(int id, uint32_t frequency);
     static inline void hwSetup(void) { }
 
     static inline void digitalWrite(uint8_t pin, uint8_t value) {
@@ -287,11 +296,14 @@ public:
         ::noTone(BEEPER_PIN);
 #endif
     }
+#if EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH
+#error For AVR processors only real EEPROM is supported!
+#endif
     static inline void eprSetByte(unsigned int pos, uint8_t value) {
-        eeprom_write_byte((unsigned char*)(pos), value);
+        eeprom_write_byte((uint8_t*)(pos), value);
     }
     static inline void eprSetInt16(unsigned int pos, int16_t value) {
-        eeprom_write_word((unsigned int*)(pos), value);
+        eeprom_write_word((uint16_t*)(pos), value);
     }
     static inline void eprSetInt32(unsigned int pos, int32_t value) {
         eeprom_write_dword((uint32_t*)(pos), value);
@@ -303,10 +315,10 @@ public:
         return eeprom_read_byte((unsigned char*)(pos));
     }
     static inline int16_t eprGetInt16(unsigned int pos) {
-        return eeprom_read_word((uint16_t*)(pos));
+        return static_cast<int16_t>(eeprom_read_word((uint16_t*)(pos)));
     }
     static inline int32_t eprGetInt32(unsigned int pos) {
-        return eeprom_read_dword((uint32_t*)(pos));
+        return static_cast<int32_t>(eeprom_read_dword((uint32_t*)(pos)));
     }
     static inline float eprGetFloat(unsigned int pos) {
         float v;
@@ -352,103 +364,20 @@ public:
         RFSERIAL.flush();
     }
     static void setupTimer();
+    static void handlePeriodical();
+    static void updateStartReason();
     static void showStartReason();
     static int getFreeRam();
     static void resetHardware();
 
-    // SPI related functions
-    static void spiBegin(uint8_t ssPin = 0) {
-#if SDSS >= 0
-        SET_INPUT(MISO_PIN);
-        SET_OUTPUT(MOSI_PIN);
-        SET_OUTPUT(SCK_PIN);
-        // SS must be in output mode even it is not chip select
-        SET_OUTPUT(SDSS);
-#if SDSSORIG > -1
-        SET_OUTPUT(SDSSORIG);
+    static void spiInit(); // only called once to initialize for spi usage
+    static void spiBegin(uint32_t clock, uint8_t mode, uint8_t msbfirst);
+    static uint8_t spiTransfer(uint8_t);
+#ifndef USE_ARDUINO_SPI_LIB
+    static void spiEnd() { }
+#else
+    static void spiEnd();
 #endif
-        // set SS high - may be chip select for another SPI device
-#if defined(SET_SPI_SS_HIGH) && SET_SPI_SS_HIGH
-        WRITE(SDSS, HIGH);
-#endif // SET_SPI_SS_HIGH
-#endif
-    }
-    static inline void spiInit(uint8_t spiRate) {
-        uint8_t r = 0;
-        for (uint8_t b = 2; spiRate > b && r < 6; b <<= 1, r++)
-            ;
-        SET_OUTPUT(SS);
-        WRITE(SS, HIGH);
-        SET_OUTPUT(SCK);
-        SET_OUTPUT(MOSI_PIN);
-        SET_INPUT(MISO_PIN);
-#ifdef PRR
-        PRR &= ~(1 << PRSPI);
-#elif defined PRR0
-        PRR0 &= ~(1 << PRSPI);
-#endif
-        // See avr processor documentation
-        SPCR = (1 << SPE) | (1 << MSTR) | (r >> 1);
-        SPSR = (r & 1 || r == 6 ? 0 : 1) << SPI2X;
-    }
-    static inline uint8_t spiReceive(uint8_t send = 0xff) {
-        SPDR = send;
-        while (!(SPSR & (1 << SPIF))) {
-        }
-        return SPDR;
-    }
-    static inline void spiReadBlock(uint8_t* buf, size_t nbyte) {
-        if (nbyte-- == 0)
-            return;
-        SPDR = 0XFF;
-        for (size_t i = 0; i < nbyte; i++) {
-            while (!(SPSR & (1 << SPIF))) {
-            }
-            buf[i] = SPDR;
-            SPDR = 0XFF;
-        }
-        while (!(SPSR & (1 << SPIF))) {
-        }
-        buf[nbyte] = SPDR;
-    }
-    static inline void spiSend(uint8_t b) {
-        SPDR = b;
-        while (!(SPSR & (1 << SPIF))) {
-        }
-    }
-    static inline void spiSend(const uint8_t* buf, size_t n) {
-        if (n == 0)
-            return;
-        SPDR = buf[0];
-        if (n > 1) {
-            uint8_t b = buf[1];
-            size_t i = 2;
-            while (1) {
-                while (!(SPSR & (1 << SPIF))) {
-                }
-                SPDR = b;
-                if (i == n)
-                    break;
-                b = buf[i++];
-            }
-        }
-        while (!(SPSR & (1 << SPIF))) {
-        }
-    }
-
-    static inline __attribute__((always_inline)) void spiSendBlock(uint8_t token, const uint8_t* buf) {
-        SPDR = token;
-        for (uint16_t i = 0; i < 512; i += 2) {
-            while (!(SPSR & (1 << SPIF))) {
-            }
-            SPDR = buf[i];
-            while (!(SPSR & (1 << SPIF))) {
-            }
-            SPDR = buf[i + 1];
-        }
-        while (!(SPSR & (1 << SPIF))) {
-        }
-    }
 
     // I2C Support
 
@@ -484,26 +413,13 @@ public:
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);
 #endif
     static void analogStart();
+    static void analogEnable(int channel);
     static void reportHALDebug() { }
 
 protected:
 private:
 };
-/*#if MOTHERBOARD==6 || MOTHERBOARD==62 || MOTHERBOARD==7
-#if MOTHERBOARD!=7
-#define SIMULATE_PWM
-#endif
-#define MOTION2_TIMER_VECTOR TIMER2_COMPA_vect
-#define MOTION2_OCR OCR2A
-#define MOTION2_TCCR TCCR2A
-#define MOTION2_TIMSK TIMSK2
-#define MOTION2_OCIE OCIE2A
-#define PWM_TIMER_VECTOR TIMER2_COMPB_vect
-#define PWM_OCR OCR2B
-#define PWM_TCCR TCCR2B
-#define PWM_TIMSK TIMSK2
-#define PWM_OCIE OCIE2B
-#else*/
+
 #define MOTION2_TIMER_VECTOR TIMER0_COMPA_vect
 #define MOTION2_OCR OCR0A
 #define MOTION2_TCCR TCCR0A
@@ -514,5 +430,3 @@ private:
 #define PWM_TCCR TCCR0A
 #define PWM_TIMSK TIMSK0
 #define PWM_OCIE OCIE0B
-//#endif
-#endif // HAL_H

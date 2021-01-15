@@ -16,7 +16,6 @@
 
 */
 
-
 class EndstopDriver {
 public:
     // Called by stepper driver before each step to update state
@@ -35,7 +34,7 @@ public:
     virtual void updateMaster() { }
     virtual void setAttached(bool attach) { }
     virtual bool isAttached() { return true; } // SW Endstops always "attached".
-    virtual ~EndstopDriver() {}
+    virtual ~EndstopDriver() { }
 };
 
 class EndstopNoneDriver : public EndstopDriver {
@@ -78,10 +77,9 @@ public:
 
 template <class inp, int axis, bool dir>
 class EndstopSwitchHardwareDriver : public EndstopDriver {
-    fast8_t state;
     EndstopDriver* parent;
     void_fn_t callbackFunc;
-    uint8_t attachPin;
+    fast8_t state;
     bool attached;
 
 public:

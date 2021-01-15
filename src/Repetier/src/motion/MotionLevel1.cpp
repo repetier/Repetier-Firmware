@@ -1766,17 +1766,18 @@ void Motion1::homeAxes(fast8_t axes) {
 
     Motion1::printCurrentPosition();
     GUI::popBusy();
+    setHardwareEndstopsAttached(ALWAYS_CHECK_ENDSTOPS, nullptr);
 }
 
 EndstopDriver& Motion1::endstopForAxisDir(fast8_t axis, bool maxDir) {
     if (maxDir) {
         switch (axis) {
         case X_AXIS:
-            return endstopXMax;
+            return *maxAxisEndstops[X_AXIS];
         case Y_AXIS:
-            return endstopYMax;
+            return *maxAxisEndstops[Y_AXIS];
         case Z_AXIS:
-            return endstopZMax;
+            return *maxAxisEndstops[Z_AXIS];
         case E_AXIS:
             if (motors[E_AXIS] != nullptr) {
                 return *motors[E_AXIS]->getMaxEndstop();
@@ -1784,28 +1785,28 @@ EndstopDriver& Motion1::endstopForAxisDir(fast8_t axis, bool maxDir) {
             break;
 #if NUM_AXES > A_AXIS
         case A_AXIS:
-            return endstopAMax;
+            return *maxAxisEndstops[A_AXIS];
             break;
 #endif
 #if NUM_AXES > B_AXIS
         case B_AXIS:
-            return endstopBMax;
+            return *maxAxisEndstops[B_AXIS];
             break;
 #endif
 #if NUM_AXES > C_AXIS
         case C_AXIS:
-            return endstopCMax;
+            return *maxAxisEndstops[C_AXIS];
             break;
 #endif
         }
     } else {
         switch (axis) {
         case X_AXIS:
-            return endstopXMin;
+            return *minAxisEndstops[X_AXIS];
         case Y_AXIS:
-            return endstopYMin;
+            return *minAxisEndstops[Y_AXIS];
         case Z_AXIS:
-            return endstopZMin;
+            return *minAxisEndstops[Z_AXIS];
         case E_AXIS:
             if (motors[E_AXIS] != nullptr) {
                 return *motors[E_AXIS]->getMinEndstop();
@@ -1813,17 +1814,17 @@ EndstopDriver& Motion1::endstopForAxisDir(fast8_t axis, bool maxDir) {
             break;
 #if NUM_AXES > A_AXIS
         case A_AXIS:
-            return endstopAMin;
+            return *minAxisEndstops[A_AXIS];
             break;
 #endif
 #if NUM_AXES > B_AXIS
         case B_AXIS:
-            return endstopBMin;
+            return *minAxisEndstops[B_AXIS];
             break;
 #endif
 #if NUM_AXES > C_AXIS
         case C_AXIS:
-            return endstopCMin;
+            return *minAxisEndstops[C_AXIS];
             break;
 #endif
         }
@@ -2041,7 +2042,7 @@ void Motion1::eepromHandle(bool firstImport) {
     EEPROM::handleFloat(eprStart + EPR_M1_PARK_Z, PSTR("Park position Z raise [mm]"), 2, parkPosition[Z_AXIS]);
 #endif
     EEPROM::handleByte(eprStart + EPR_M1_ALWAYS_CHECK_ENDSTOPS, PSTR("Always check endstops [0/1]"), alwaysCheckEndstops);
-    Motion1::setHardwareEndstopsAttached((alwaysCheckEndstops || Printer::isHoming() || Printer::isZProbingActive())); // Probing/homing checks just in case.
+    Motion1::setHardwareEndstopsAttached(alwaysCheckEndstops || Printer::isHoming() || Printer::isZProbingActive(), nullptr); // Probing/homing checks just in case.
     EEPROM::handleByte(eprStart + EPR_M1_VELOCITY_PROFILE, PSTR("Velocity Profile [0-2]"), Motion2::velocityProfileIndex);
     EEPROM::handleByte(eprStart + EPR_M1_AUTOLEVEL, PSTR("Auto level active [0/1]"), Motion1::autolevelActive);
 

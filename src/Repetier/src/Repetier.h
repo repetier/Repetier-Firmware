@@ -24,7 +24,84 @@
 
 #include <math.h>
 #include <stdint.h>
+#if 1 || !(defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__))
 #include <type_traits>
+#else
+namespace std {
+/// integral_constant
+template <typename _Tp, _Tp __v>
+struct integral_constant {
+    static constexpr _Tp value = __v;
+    typedef _Tp value_type;
+    typedef integral_constant<_Tp, __v> type;
+    constexpr operator value_type() const { return value; }
+#if __cplusplus > 201103L
+
+#define __cpp_lib_integral_constant_callable 201304
+
+    constexpr value_type operator()() const { return value; }
+#endif
+};
+template <typename _Tp, _Tp __v>
+constexpr _Tp integral_constant<_Tp, __v>::value;
+/// The type used as a compile-time boolean with true value.
+typedef integral_constant<bool, true> true_type;
+
+/// The type used as a compile-time boolean with false value.
+typedef integral_constant<bool, false> false_type;
+template <typename...>
+struct __and_;
+
+template <>
+struct __and_<>
+    : public true_type { };
+
+template <typename>
+struct __is_void_helper
+    : public false_type { };
+
+template <>
+struct __is_void_helper<void>
+    : public true_type { };
+
+// Primary template.
+/// Define a member typedef @c type only if a boolean constant is true.
+template <bool, typename _Tp = void>
+struct enable_if { };
+
+// Partial specialization for true.
+template <typename _Tp>
+struct enable_if<true, _Tp> { typedef _Tp type; };
+
+template <typename... _Cond>
+using _Require = typename enable_if<__and_<_Cond...>::value>::type;
+
+/// is_integral
+template <typename _Tp>
+struct is_integral
+    : public __is_integral_helper<typename remove_cv<_Tp>::type>::type { };
+
+template <typename>
+struct __is_floating_point_helper
+    : public false_type { };
+
+template <>
+struct __is_floating_point_helper<float>
+    : public true_type { };
+
+template <>
+struct __is_floating_point_helper<double>
+    : public true_type { };
+
+template <>
+struct __is_floating_point_helper<long double>
+    : public true_type { };
+}
+/// is_floating_point
+template <typename _Tp>
+struct is_floating_point
+    : public __is_floating_point_helper<typename remove_cv<_Tp>::type>::type { };
+#endif
 
 #ifndef REPETIER_VERSION
 #define REPETIER_VERSION "2.0.0dev"

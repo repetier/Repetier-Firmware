@@ -427,6 +427,7 @@ FSTRINGVALUE(Com::tInvalidFiletype, "Invalid file type")
 FSTRINGVALUE(Com::tInvalidFilename, "Invalid file name")
 FSTRINGVALUE(Com::tNoMountedCard, "No SD card mounted")
 FSTRINGVALUE(Com::tSDPrintingByte, "SD printing byte ")
+FSTRINGVALUE(Com::tSDPrintingPaused, "SD printing paused")
 FSTRINGVALUE(Com::tNotSDPrinting, "Not SD printing")
 FSTRINGVALUE(Com::tCurrentOpenFile, "Current file: ") // Compat with hosts that use M27 C
 FSTRINGVALUE(Com::tOpenFailedFile, "open failed, File: ")

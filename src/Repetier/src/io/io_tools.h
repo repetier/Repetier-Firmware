@@ -69,7 +69,9 @@
 #elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES // define variables
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
-    ToolExtruder name(offx, offy, offz, &heater, &stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, PSTR(startScript), PSTR(endScript), fan); \
+    FSTRINGVALUE(name##_startScript, startScript); \
+    FSTRINGVALUE(name##_endScript, endScript); \
+    ToolExtruder name(offx, offy, offz, &heater, &stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, name##_startScript, name##_endScript, fan); \
     void __attribute__((weak)) menuControl##name(GUIAction action, void* data) { \
         GUI::menuStart(action); \
         char help[MAX_COLS]; \

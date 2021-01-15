@@ -166,7 +166,7 @@ void __attribute__((weak)) MCode_20(GCode* com) {
 
 void __attribute__((weak)) MCode_21(GCode* com) {
 #if SDSUPPORT
-    sd.mount(true); 
+    sd.mount(true);
 #endif
 }
 
@@ -186,7 +186,11 @@ void __attribute__((weak)) MCode_23(GCode* com) {
 
 void __attribute__((weak)) MCode_24(GCode* com) {
 #if SDSUPPORT
-    sd.startPrint();
+    if (Printer::isMenuMode(MENU_MODE_PAUSED)) {
+        sd.continuePrint();
+    } else {
+        sd.startPrint();
+    }
 #endif
 }
 
@@ -692,7 +696,6 @@ void __attribute__((weak)) MCode_119(GCode* com) {
     if (com) { // skip if internally used to write status or homing might fail
         Com::writeToAll = false;
         Motion1::waitForEndOfMoves();
-        updateEndstops();
         updateEndstops();
     } else {
         Com::writeToAll = true;

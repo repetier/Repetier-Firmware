@@ -125,7 +125,8 @@ Custom M Codes
 - M117 <message> - Write message in status row on lcd
 - M118 <message> - Write message to host
 - M119 - Report endstop status
-- M140 S<temp> H1 O<offset> F1 - Set bed target temp, F1 makes a beep when temperature is reached the first time
+- M140 S<temp> H<bed> O<offset> F1 - Set bed target temp, F1 makes a beep when temperature is reached the first time
+- M141 S<temp> H<chamber> O<offset> F1 - Set chamber target temp, F1 makes a beep when temperature is reached the first time
 - M155 S<seconds/off> P<milliseconds/off> - Enable/disable autoreport temperatures. 
         Temperatures reported every second by default. Set S<sec> P<ms> to change the frequency (100ms - 60s), resets to 1000ms if P and S are omitted. Set P or S to 0 to disable autoreporting.
 - M163 S<extruderNum> P<weight>  - Set weight for this mixing extruder drive

@@ -446,7 +446,6 @@ public:
     FSTRINGVAR(tEPRPreheatBedTemp)
     FSTRINGVAR(tEPRToneVolume)
 
-
     // SDCARD RELATED
     //FSTRINGVAR(tSDRemoved)
     //FSTRINGVAR(tSDInserted)
@@ -463,6 +462,7 @@ public:
     FSTRINGVAR(tNoMountedCard)
     FSTRINGVAR(tSDPrintingByte)
     FSTRINGVAR(tNotSDPrinting)
+    FSTRINGVAR(tSDPrintingPaused)
     FSTRINGVAR(tCurrentOpenFile)
     FSTRINGVAR(tOpenFailedFile)
     FSTRINGVAR(tWritingToFile)
@@ -473,7 +473,6 @@ public:
     FSTRINGVAR(tCreationFailed)
     FSTRINGVAR(tSDErrorCode)
     // END SDCARD RELATED
-
 
     FSTRINGVAR(tHeaterDecoupled)
     FSTRINGVAR(tHeaterDecoupledWarning)

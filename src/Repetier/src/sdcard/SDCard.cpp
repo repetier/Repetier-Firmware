@@ -817,6 +817,8 @@ void SDCard::printStatus(const bool getFilename) {
         if (state == SDState::SD_PRINTING) {
             Com::printF(Com::tSDPrintingByte, selectedFilePos);
             Com::printFLN(Com::tSlash, selectedFileSize);
+        } else if (Printer::isMenuMode(MENU_MODE_PAUSED)) {
+            Com::printFLN(Com::tSDPrintingPaused);
         } else {
             Com::printFLN(Com::tNotSDPrinting);
         }

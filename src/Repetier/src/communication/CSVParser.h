@@ -19,7 +19,6 @@
 #ifndef _CSVParser_H
 #define _CSVParser_H
 
-
 enum class CSVDir {
     ABOVE = 0,
     BELOW = 1,
@@ -214,7 +213,7 @@ public:
      * \param[in] file CSV File to parse.
      */
     CSVParser(sd_file_t* file)
-        : csvFile(file) {}
+        : csvFile(file) { }
     ~CSVParser() {};
 
     /**
@@ -288,7 +287,11 @@ public:
         if (!readCurCellPos()) {
             return false;
         }
+#if CPU_ARCH == ARCH_AVR
+        output = static_cast<T>(atof(cellBufRaw()));
+#else
         output = static_cast<T>(strtof(cellBufRaw(), nullptr));
+#endif
         return true;
     }
 
@@ -354,7 +357,11 @@ public:
         if (!getNextCellRaw()) {
             return false;
         }
+#if CPU_ARCH == ARCH_AVR
+        output = static_cast<T>(atof(cellBufRaw()));
+#else
         output = static_cast<T>(strtof(cellBufRaw(), nullptr));
+#endif
         return true;
     }
 
@@ -435,7 +442,11 @@ public:
         if (!getFieldRaw(key, dir)) {
             return false;
         }
+#if CPU_ARCH == ARCH_AVR
+        output = static_cast<T>(atof(cellBufRaw()));
+#else
         output = static_cast<T>(strtof(cellBufRaw(), nullptr));
+#endif
         return true;
     }
 
@@ -499,7 +510,7 @@ public:
      * \return false Invalid name 
      * (includes dot character but no csv extension)
      */
-    static bool validCSVExt(char* filename) { 
+    static bool validCSVExt(char* filename) {
         if (strchr(filename, '.') != nullptr) {
             if (strstr_P(filename, PSTR(".csv")) == nullptr) {
                 return false;
