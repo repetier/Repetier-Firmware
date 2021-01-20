@@ -477,7 +477,7 @@ bool runBedLeveling(int s) {
         float zMax = Printer::runZMaxProbe();
         if (zMax == ILLEGAL_Z_PROBE)
             return false;
-        zall += zMax - ENDSTOP_Z_BACK_ON_HOME;
+        zall += zMax - ENDSTOP_Z_BACK_ON_HOME + plane.z(Printer::currentPosition[X_AXIS], Printer::currentPosition[Y_AXIS]) - plane.z(0, 0);
         Printer::zLength = zall;
     }
 #endif

@@ -1788,7 +1788,7 @@ bool Printer::homeXAxis() {
     Extruder::current = &extruder[0];
     steps = (Printer::xMaxSteps - Printer::xMinSteps);
     currentPositionSteps[X_AXIS] = steps;
-    PrintLine::moveRelativeDistanceInSteps(-3 * steps * -X_HOME_DIR / 2, 0, 0, 0, homingFeedrate[X_AXIS], true, true);                                                                        // first contact
+    PrintLine::moveRelativeDistanceInSteps((5 * steps) / 4 * X_HOME_DIR / 2, 0, 0, 0, homingFeedrate[X_AXIS], true, true);                                                                    // first contact
     PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, false);                                         // back move
     PrintLine::moveRelativeDistanceInSteps(-axisStepsPerMM[X_AXIS] * 2 * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true); // final contact
 #if SAFE_HOMING
@@ -1808,7 +1808,7 @@ bool Printer::homeXAxis() {
 #endif
     Extruder::current = &extruder[1];
     currentPositionSteps[X_AXIS] = -steps;
-    PrintLine::moveRelativeDistanceInSteps(2 * steps * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
+    PrintLine::moveRelativeDistanceInSteps((5 * steps) / 4 * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
     PrintLine::moveRelativeDistanceInSteps(-axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, false); // back move
     PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * 2 * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true);
 #if SAFE_HOMING
@@ -1865,7 +1865,7 @@ bool Printer::homeXAxis() {
 #if NONLINEAR_SYSTEM
         transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
 #endif
-        PrintLine::moveRelativeDistanceInSteps(2 * steps, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
+        PrintLine::moveRelativeDistanceInSteps((5 * steps) / 4, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
         currentPositionSteps[X_AXIS] = (X_HOME_DIR == -1) ? xMinSteps - offX : xMaxSteps + offX;
 #if NONLINEAR_SYSTEM
         transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
@@ -1942,7 +1942,7 @@ bool Printer::homeYAxis() {
 #if NONLINEAR_SYSTEM
         transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
 #endif
-        PrintLine::moveRelativeDistanceInSteps(0, 2 * steps, 0, 0, homingFeedrate[Y_AXIS], true, true);
+        PrintLine::moveRelativeDistanceInSteps(0, (5 * steps) / 4, 0, 0, homingFeedrate[Y_AXIS], true, true);
         currentPositionSteps[Y_AXIS] = (Y_HOME_DIR == -1) ? yMinSteps - offY : yMaxSteps + offY;
 #if NONLINEAR_SYSTEM
         transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
@@ -2074,7 +2074,7 @@ bool Printer::homeZAxis() { // Cartesian homing
 #if NONLINEAR_SYSTEM
         transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
 #endif
-        PrintLine::moveRelativeDistanceInSteps(0, 0, 2 * steps, 0, homingFeedrate[Z_AXIS], true, true);
+        PrintLine::moveRelativeDistanceInSteps(0, 0, (5 * steps) / 4, 0, homingFeedrate[Z_AXIS], true, true);
         currentPositionSteps[Z_AXIS] = (Z_HOME_DIR == -1) ? zMinSteps : zMaxSteps;
 #if NONLINEAR_SYSTEM
         transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
