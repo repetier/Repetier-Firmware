@@ -1788,8 +1788,32 @@ bool Printer::homeXAxis() {
     Extruder::current = &extruder[0];
     steps = (Printer::xMaxSteps - Printer::xMinSteps);
     currentPositionSteps[X_AXIS] = steps;
-    PrintLine::moveRelativeDistanceInSteps((5 * steps) / 4 * X_HOME_DIR / 2, 0, 0, 0, homingFeedrate[X_AXIS], true, true);                                                                    // first contact
-    PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, false);                                         // back move
+    PrintLine::moveRelativeDistanceInSteps((5 * steps) / 4 * X_HOME_DIR / 2, 0, 0, 0, homingFeedrate[X_AXIS], true, true); // first contact
+#if SAFE_HOMING
+    if (X_HOME_DIR < 0) {
+        if (!Endstops::xMin()) {
+            return false;
+        }
+    } else {
+        if (!Endstops::xMax()) {
+            return false;
+        }
+    }
+#endif
+    PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, false); // back move
+#if SAFE_HOMING
+    Endstops::update();
+    Endstops::update();
+    if (X_HOME_DIR < 0) {
+        if (Endstops::xMin()) {
+            return false;
+        }
+    } else {
+        if (Endstops::xMax()) {
+            return false;
+        }
+    }
+#endif
     PrintLine::moveRelativeDistanceInSteps(-axisStepsPerMM[X_AXIS] * 2 * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true); // final contact
 #if SAFE_HOMING
     if (X_HOME_DIR < 0) {
@@ -1809,7 +1833,31 @@ bool Printer::homeXAxis() {
     Extruder::current = &extruder[1];
     currentPositionSteps[X_AXIS] = -steps;
     PrintLine::moveRelativeDistanceInSteps((5 * steps) / 4 * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, true);
+#if SAFE_HOMING
+    if (X_HOME_DIR > 0) {
+        if (!Endstops::xMin()) {
+            return false;
+        }
+    } else {
+        if (!Endstops::xMax()) {
+            return false;
+        }
+    }
+#endif
     PrintLine::moveRelativeDistanceInSteps(-axisStepsPerMM[X_AXIS] * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS], true, false); // back move
+#if SAFE_HOMING
+    Endstops::update();
+    Endstops::update();
+    if (X_HOME_DIR > 0) {
+        if (Endstops::xMin()) {
+            return false;
+        }
+    } else {
+        if (Endstops::xMax()) {
+            return false;
+        }
+    }
+#endif
     PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * 2 * ENDSTOP_X_BACK_MOVE * -X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true);
 #if SAFE_HOMING
     if (X_HOME_DIR > 0) {
@@ -1870,7 +1918,31 @@ bool Printer::homeXAxis() {
 #if NONLINEAR_SYSTEM
         transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
 #endif
+#if SAFE_HOMING
+        if (X_HOME_DIR < 0) {
+            if (!Endstops::xMin()) {
+                return false;
+            }
+        } else {
+            if (!Endstops::xMax()) {
+                return false;
+            }
+        }
+#endif
         PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * -ENDSTOP_X_BACK_MOVE * X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
+#if SAFE_HOMING
+        Endstops::update();
+        Endstops::update();
+        if (X_HOME_DIR < 0) {
+            if (Endstops::xMin()) {
+                return false;
+            }
+        } else {
+            if (Endstops::xMax()) {
+                return false;
+            }
+        }
+#endif
         PrintLine::moveRelativeDistanceInSteps(axisStepsPerMM[X_AXIS] * 2 * ENDSTOP_X_BACK_MOVE * X_HOME_DIR, 0, 0, 0, homingFeedrate[X_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true);
 #if SAFE_HOMING
         if (X_HOME_DIR < 0) {
@@ -1944,12 +2016,6 @@ bool Printer::homeYAxis() {
 #endif
         PrintLine::moveRelativeDistanceInSteps(0, (5 * steps) / 4, 0, 0, homingFeedrate[Y_AXIS], true, true);
         currentPositionSteps[Y_AXIS] = (Y_HOME_DIR == -1) ? yMinSteps - offY : yMaxSteps + offY;
-#if NONLINEAR_SYSTEM
-        transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
-#endif
-        PrintLine::moveRelativeDistanceInSteps(0, axisStepsPerMM[Y_AXIS] * -ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR, 0, 0, homingFeedrate[Y_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
-        PrintLine::moveRelativeDistanceInSteps(0, axisStepsPerMM[Y_AXIS] * 2 * ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR, 0, 0, homingFeedrate[Y_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true);
-        setHoming(false);
 #if SAFE_HOMING
         if (Y_HOME_DIR < 0) {
             if (!Endstops::yMin()) {
@@ -1961,9 +2027,40 @@ bool Printer::homeYAxis() {
             }
         }
 #endif
+#if NONLINEAR_SYSTEM
+        transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
+#endif
+        PrintLine::moveRelativeDistanceInSteps(0, axisStepsPerMM[Y_AXIS] * -ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR, 0, 0, homingFeedrate[Y_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, false);
+#if SAFE_HOMING
+        Endstops::update();
+        Endstops::update();
+        if (Y_HOME_DIR < 0) {
+            if (Endstops::yMin()) {
+                return false;
+            }
+        } else {
+            if (Endstops::yMax()) {
+                return false;
+            }
+        }
+#endif
+        PrintLine::moveRelativeDistanceInSteps(0, axisStepsPerMM[Y_AXIS] * 2 * ENDSTOP_Y_BACK_MOVE * Y_HOME_DIR, 0, 0, homingFeedrate[Y_AXIS] / ENDSTOP_X_RETEST_REDUCTION_FACTOR, true, true);
+#if SAFE_HOMING
+        if (Y_HOME_DIR < 0) {
+            if (!Endstops::yMin()) {
+                return false;
+            }
+        } else {
+            if (!Endstops::yMax()) {
+                return false;
+            }
+        }
+#endif
+        setHoming(false);
 #if defined(ENDSTOP_Y_BACK_ON_HOME)
-        if (ENDSTOP_Y_BACK_ON_HOME > 0)
+        if (ENDSTOP_Y_BACK_ON_HOME > 0) {
             PrintLine::moveRelativeDistanceInSteps(0, axisStepsPerMM[Y_AXIS] * -ENDSTOP_Y_BACK_ON_HOME * Y_HOME_DIR, 0, 0, homingFeedrate[Y_AXIS], true, false);
+        }
 #endif
         currentPositionSteps[Y_AXIS] = (Y_HOME_DIR == -1) ? yMinSteps - offY : yMaxSteps + offY;
 #if NONLINEAR_SYSTEM
@@ -2079,7 +2176,31 @@ bool Printer::homeZAxis() { // Cartesian homing
 #if NONLINEAR_SYSTEM
         transformCartesianStepsToDeltaSteps(currentPositionSteps, currentNonlinearPositionSteps);
 #endif
+#if SAFE_HOMING
+        if (Z_HOME_DIR < 0) {
+            if (!Endstops::zMin()) {
+                return false;
+            }
+        } else {
+            if (!Endstops::zMax()) {
+                return false;
+            }
+        }
+#endif
         PrintLine::moveRelativeDistanceInSteps(0, 0, axisStepsPerMM[Z_AXIS] * -ENDSTOP_Z_BACK_MOVE * Z_HOME_DIR, 0, homingFeedrate[Z_AXIS] / ENDSTOP_Z_RETEST_REDUCTION_FACTOR, true, false);
+#if SAFE_HOMING
+        Endstops::update();
+        Endstops::update();
+        if (Z_HOME_DIR < 0) {
+            if (Endstops::zMin()) {
+                return false;
+            }
+        } else {
+            if (Endstops::zMax()) {
+                return false;
+            }
+        }
+#endif
 #if defined(ZHOME_WAIT_UNSWING) && ZHOME_WAIT_UNSWING > 0
         HAL::delayMilliseconds(ZHOME_WAIT_UNSWING);
 #endif
