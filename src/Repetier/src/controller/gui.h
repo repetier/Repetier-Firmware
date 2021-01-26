@@ -38,6 +38,7 @@
 #define GUI_DIRECT_ACTION_DITTO_8 32
 #define GUI_DIRECT_ACTION_TOGGLE_PROBE_PAUSE 33
 #define GUI_DIRECT_ACTION_TOGGLE_AUTORETRACTIONS 34
+#define GUI_DIRECT_ACTION_TOGGLE_ENCODER_AFFECT_MENUS_BY_SPEED 35
 
 enum class GUIBootState {
     DISPLAY_INIT = 0,
@@ -158,9 +159,11 @@ public:
     static fast8_t bufPos;                       ///< Pos for appending data
     static GUIAction nextAction;                 ///< Next action to execute on opdate
     static int nextActionRepeat;                 ///< Increment for next/previous
+    static bool speedAffectMenus;                ///< Apply encoder step speed to menus
     static uint8_t maxActionRepeatStep;          ///< Max amount of extra encoder repeat steps inside value menus
     static uint16_t maxActionRepeatTimeMS;       ///< Clicks longer than this will not recieve any extra steps
     static uint16_t minActionRepeatTimeMS; 
+    static millis_t lastActionRepeatTimeMS;
 
     
     static uint16_t eprStart;
@@ -221,7 +224,7 @@ public:
     // Draw menu functions - driver specific
 
     static void menuStart(GUIAction action);
-    static void menuEnd(GUIAction action);
+    static void menuEnd(GUIAction action, bool scrollbar = true, bool affectedBySpeed = true);
     static void menuTextP(GUIAction& action, PGM_P text, bool highlight = false);
     static void menuFloatP(GUIAction& action, PGM_P text, float val, int precision, GuiCallback cb, void* cData, GUIPageType tp);
     static void menuLongP(GUIAction& action, PGM_P text, long val, GuiCallback cb, void* cData, GUIPageType tp);
@@ -247,6 +250,7 @@ public:
     static bool handleFloatValueAction(GUIAction& action, float& value, float min, float max, float increment);
     static bool handleFloatValueAction(GUIAction& action, float& value, float increment);
     static bool handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, int32_t max, int32_t increment);
+    static void menuAffectBySpeed(GUIAction& action);
 };
 
 struct probeProgInfo {

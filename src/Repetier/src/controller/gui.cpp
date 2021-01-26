@@ -13,10 +13,12 @@ millis_t GUI::lastAction = 0;              ///< Last action time for autoreturn 
 GUIStatusLevel GUI::statusLevel = GUIStatusLevel::REGULAR;
 bool GUI::contentChanged = false;            ///< set to true if forced refresh is wanted
 GUIAction GUI::nextAction = GUIAction::NONE; ///< Next action to execute on opdate
-int GUI::nextActionRepeat = 0;                                    ///< Increment for next/previous
+int GUI::nextActionRepeat = 0;               ///< Increment for next/previous
 uint8_t GUI::maxActionRepeatStep = ENCODER_MAX_REPEAT_STEPS;      ///< Max amount of extra encoder repeat steps inside value menus
 uint16_t GUI::maxActionRepeatTimeMS = ENCODER_MAX_REPEAT_TIME_MS; ///< Clicks longer than this will not recieve any extra steps
 uint16_t GUI::minActionRepeatTimeMS = ENCODER_MIN_REPEAT_TIME_MS;
+millis_t GUI::lastActionRepeatTimeMS;
+bool GUI::speedAffectMenus = ENCODER_APPLY_REPEAT_STEPS_IN_MENUS;
 
 uint16_t GUI::eprStart;
 
@@ -66,6 +68,7 @@ void GUI::resetMenu() { ///< Go to start page
     replace(Printer::isPrinting() ? printProgress : Printer::isZProbingActive() ? probeProgress : startScreen, nullptr, GUIPageType::TOPLEVEL);
 }
 void GUI::resetEeprom() {
+    speedAffectMenus = ENCODER_APPLY_REPEAT_STEPS_IN_MENUS;
     maxActionRepeatTimeMS = ENCODER_MAX_REPEAT_TIME_MS;
     minActionRepeatTimeMS = ENCODER_MIN_REPEAT_TIME_MS;
     maxActionRepeatStep = ENCODER_MAX_REPEAT_STEPS;
@@ -75,11 +78,12 @@ void GUI::eepromHandle() {
     EEPROM::handleByte(eprStart + 0, PSTR("max. extra repeat steps [steps/click]"), maxActionRepeatStep);
     EEPROM::handleInt(eprStart + 1, PSTR("max. repeat time [ms]"), maxActionRepeatTimeMS);
     EEPROM::handleInt(eprStart + 3, PSTR("min. repeat time [ms]"), minActionRepeatTimeMS);
+    EEPROM::handleByte(eprStart + 5, PSTR("affect speed in menus [0/1]"), speedAffectMenus);
     EEPROM::removePrefix();
 }
 void GUI::init() {
     resetEeprom();
-    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_GUI, 1, 5);
+    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_GUI, 1, 6);
     driverInit();
 }
 #endif
@@ -140,7 +144,7 @@ void GUI::update() {
     if (level > 0 && !isStickyPageType(pageType[level]) && (HAL::timeInMilliseconds() - lastAction) > UI_AUTORETURN_TO_MENU_AFTER) {
         level = 0;
     }
-    if ((statusLevel == GUIStatusLevel::BUSY || GUI::textIsScrolling) && timeDiff > 500) {
+    if ((statusLevel == GUIStatusLevel::BUSY || textIsScrolling) && timeDiff > 500) {
         contentChanged = true; // for faster spinning icon
     }
     if (timeDiff < 60000 && (timeDiff > 1000 || contentChanged)) {
@@ -229,42 +233,61 @@ void GUI::backKey() {
     resetScrollbarTimer();
 }
 
-static inline int calcRepeatSteps() {
-    static millis_t lastRepeatTime = 0ul;
-    millis_t curTime = HAL::timeInMilliseconds();
-    millis_t diffTime = curTime - lastRepeatTime;
-    int repeat = 1;
-    if (diffTime < GUI::maxActionRepeatTimeMS) {
-        if (diffTime < GUI::minActionRepeatTimeMS) {
-            diffTime = GUI::minActionRepeatTimeMS;
-        }
-        repeat = GUI::maxActionRepeatStep * (static_cast<float>(GUI::maxActionRepeatTimeMS - GUI::minActionRepeatTimeMS) / static_cast<float>(diffTime));
+static fast8_t calcRepeatSteps(bool changedDir) {
+    millis_t curDiffTime = HAL::timeInMilliseconds() - GUI::lastActionRepeatTimeMS;
+    if (curDiffTime <= 2ul) { // Noise
+        return 1;
+    }
+    if (changedDir) {
+        millis_t skip = GUI::maxActionRepeatTimeMS * 2u;
+        curDiffTime = curDiffTime > skip ? curDiffTime : skip;
+    } else if (curDiffTime >= UINT16_MAX) {
+        curDiffTime = UINT16_MAX;
+    }
+    static uint16_t lastDiffTimes[7u] = { 0ul };
+    static uint8_t avgIndex = 0u; 
+    if ((curDiffTime > GUI::maxActionRepeatTimeMS
+         && lastDiffTimes[avgIndex] <= GUI::maxActionRepeatTimeMS)) {
+        // Reset avgs if outside of maxRepeat
+        lastDiffTimes[0u]
+            = lastDiffTimes[1u] = lastDiffTimes[2u]
+            = lastDiffTimes[3u] = lastDiffTimes[4u]
+            = lastDiffTimes[5u] = lastDiffTimes[6u] = static_cast<uint16_t>(curDiffTime);
+    } else {
+        lastDiffTimes[++avgIndex > 6u ? (avgIndex = 0u) : avgIndex] = curDiffTime < GUI::minActionRepeatTimeMS ? GUI::minActionRepeatTimeMS : curDiffTime;
+    }
+
+    millis_t avgDiff = (lastDiffTimes[0u]
+                       + lastDiffTimes[1u] + lastDiffTimes[2u]
+                       + lastDiffTimes[3u] + lastDiffTimes[4u]
+                       + lastDiffTimes[5u] + lastDiffTimes[6u])
+        / 7u;
+    fast8_t repeat = 1;
+    if (avgDiff <= GUI::maxActionRepeatTimeMS) {
+        repeat = static_cast<float>(GUI::maxActionRepeatStep / static_cast<float>(GUI::maxActionRepeatTimeMS - GUI::minActionRepeatTimeMS)) * static_cast<float>(GUI::maxActionRepeatTimeMS - avgDiff);
         if (repeat < 1) {
             repeat = 1;
         } else if (repeat > GUI::maxActionRepeatStep) {
             repeat = GUI::maxActionRepeatStep;
         }
     }
-    lastRepeatTime = curTime;
+    GUI::lastActionRepeatTimeMS = HAL::timeInMilliseconds();
     return repeat;
 }
-void GUI::nextKey() {
-    if (nextAction != GUIAction::NEXT) {
-        nextActionRepeat = 0;
-    }
+static bool lastDir = false;
+void GUI::nextKey() { 
     nextAction = GUIAction::NEXT;
-    nextActionRepeat = (maxActionRepeatStep > 1) ? calcRepeatSteps() : 1;
+    nextActionRepeat = (maxActionRepeatStep > 1) ? calcRepeatSteps(!lastDir ? true : false) : 1;
     contentChanged = true;
+    lastDir = true;
     resetScrollbarTimer();
 }
 
-void GUI::previousKey() {
-    if (nextAction != GUIAction::PREVIOUS) {
-        nextActionRepeat = 0;
-    }
+void GUI::previousKey() { 
     nextAction = GUIAction::PREVIOUS;
-    nextActionRepeat = (maxActionRepeatStep > 1) ? calcRepeatSteps() : 1;
+    nextActionRepeat = (maxActionRepeatStep > 1) ? calcRepeatSteps(lastDir ? true : false) : 1;
     contentChanged = true;
+    lastDir = false;
     resetScrollbarTimer();
 }
 
@@ -817,6 +840,21 @@ bool GUI::handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, 
     }
     return orig != value;
 }
+void GUI::menuAffectBySpeed(GUIAction& action) {
+    if ((action == GUIAction::NEXT || action == GUIAction::PREVIOUS)
+        && nextActionRepeat > 1) {
+        if (action == GUIAction::NEXT) { // Menus already moved cursor once.
+            cursorRow[level] += nextActionRepeat - 1;
+        } else {
+            cursorRow[level] -= nextActionRepeat - 1;
+        }
+        if (cursorRow[level] >= length[level]) {
+            cursorRow[level] = length[level] - 1;
+        } else if (cursorRow[level] < 1) {
+            cursorRow[level] = 1;
+        }
+    }
+}
 
 void GUI::menuBack(GUIAction& action) {
 #if DISABLED(UI_HAS_BACK_KEY)
@@ -929,6 +967,9 @@ void directAction(GUIAction action, void* data) {
         break;
     case GUI_DIRECT_ACTION_TOGGLE_AUTORETRACTIONS:
         Printer::setAutoretract(!Printer::isAutoretract(), true);
+        break;
+    case GUI_DIRECT_ACTION_TOGGLE_ENCODER_AFFECT_MENUS_BY_SPEED:
+        GUI::speedAffectMenus = !GUI::speedAffectMenus;
         break;
     }
 }

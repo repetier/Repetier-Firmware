@@ -539,25 +539,28 @@ void __attribute__((weak)) menuEncoderMaxRepeatSteps(GUIAction action, void* dat
 }
 void __attribute__((weak)) menuEncoderMaxRepeatTime(GUIAction action, void* data) {
     DRAW_LONG_P(PSTR("Max. repeat time:"), Com::tUnitMilliSeconds, GUI::maxActionRepeatTimeMS);
-    if (GUI::handleLongValueAction(action, v, GUI::minActionRepeatTimeMS, 2000, 5)) {
+    if (GUI::handleLongValueAction(action, v, GUI::minActionRepeatTimeMS, 2000, 1)) {
         GUI::maxActionRepeatTimeMS = v;
     }
 }
 void __attribute__((weak)) menuEncoderMinRepeatTime(GUIAction action, void* data) {
     DRAW_LONG_P(PSTR("Min. repeat time:"), Com::tUnitMilliSeconds, GUI::minActionRepeatTimeMS);
-    if (GUI::handleLongValueAction(action, v, 1, GUI::maxActionRepeatTimeMS, 5)) {
+    if (GUI::handleLongValueAction(action, v, 3, GUI::maxActionRepeatTimeMS, 1)) {
         GUI::minActionRepeatTimeMS = v;
     }
 }
 void __attribute__((weak)) menuConfigEncoder(GUIAction action, void* data) {
     GUI::menuStart(action);
-    GUI::menuTextP(action, PSTR("= Encoder Config ="), true);
+    GUI::menuTextP(action, PSTR("= Config Encoder ="), true);
     GUI::menuBack(action);
- 
+    if ((action == GUIAction::NEXT || action == GUIAction::PREVIOUS || action == GUIAction::ANALYSE) || (HAL::timeInMilliseconds() - GUI::lastAction) > GUI::maxActionRepeatTimeMS) { // Display the current encoder speed to the user.
+        GUI::flashToStringLong(GUI::tmpString, PSTR("(Speed Now @)"), GUI::nextActionRepeat);
+    }
+    GUI::menuText(action, GUI::tmpString);
     GUI::menuLongP(action, PSTR("Max. steps:"), GUI::maxActionRepeatStep, menuEncoderMaxRepeatSteps, nullptr, GUIPageType::FIXED_CONTENT);
     GUI::menuLongP(action, PSTR("Max. time:"), GUI::maxActionRepeatTimeMS, menuEncoderMaxRepeatTime, nullptr, GUIPageType::FIXED_CONTENT);
     GUI::menuLongP(action, PSTR("Min. time:"), GUI::minActionRepeatTimeMS, menuEncoderMinRepeatTime, nullptr, GUIPageType::FIXED_CONTENT);
-
+    GUI::menuOnOffP(action, PSTR("Affect in menus:"), GUI::speedAffectMenus, directAction, (void*)GUI_DIRECT_ACTION_TOGGLE_ENCODER_AFFECT_MENUS_BY_SPEED, GUIPageType::ACTION);
     GUI::menuEnd(action);
 }
 #if NUM_TOOLS > 1
