@@ -138,7 +138,7 @@ void SDCard::mount(const bool manual) {
     Com::printFLN(PSTR("SD card ok"));
     Com::printFLN(PSTR("SD card inserted"));
 
-    printCardStats(); // <- collects our volumeLabel too.
+    printCardInfo(); // <- collects our volumeLabel too.
 
     if (!volumeLabel[0u] || strncmp_P(volumeLabel, PSTR("NO NAME"), sizeof(volumeLabel)) == 0u) {
         volumeLabel[0u] = '\0'; // There's no volume label at all.
@@ -155,8 +155,20 @@ void SDCard::mount(const bool manual) {
 #endif
 }
 
-void SDCard::printCardStats() {
+void SDCard::printCardInfo(bool json) {
     if (state < SDState::SD_MOUNTED) {
+        if (!json) {
+            if (state != SDState::SD_HAS_ERROR) {
+                Com::printFLN(Com::tNoMountedCard);
+            } else {
+                Com::printFLN(Com::tSDInitFail);
+            }
+        } else {
+#if JSON_OUTPUT
+            Com::printF(Com::tJSONSDInfo);
+            Com::printFLN(PSTR("{\"slot\":0,\"present\":0}}"));
+#endif
+        }
         return;
     }
     // Print out some basic statistics on successful mount. We also store the volume label.
@@ -165,6 +177,7 @@ void SDCard::printCardStats() {
     uint8_t folderCount = 0u;
     getCardInfo(volumeLabel, sizeof(volumeLabel), &volumeSectors, &usageBytes, &fileCount, &folderCount);
 
+    if (!json) {
     Com::printF(PSTR("Label: "), volumeLabel);
     Com::printF(PSTR(" | "));
 
@@ -208,6 +221,31 @@ void SDCard::printCardStats() {
     Com::printF(gb ? PSTR(" GB (") : PSTR(" MB ("), static_cast<int32_t>(fileCount));
     Com::printF(PSTR(" files, "), folderCount);
     Com::printFLN(PSTR(" folders found.)"));
+    } else {
+#if JSON_OUTPUT
+        //{"SDinfo":{"slot":0,"present":1,"capacity":4294967296,"free":2147485184,"speed":20971520,"clsize":32768}}
+
+        uint64_t sizeBytes = 512ull * volumeSectors;
+        Com::printF(Com::tJSONSDInfo);
+        Com::printF(PSTR("{\"slot\":0,\"present\":1,\"capacity\":"), sizeBytes);
+        Com::printF(PSTR(",\"free\":"), (sizeBytes - usageBytes));
+#if defined(ENABLE_SOFTWARE_SPI_CLASS) && ENABLE_SOFTWARE_SPI_CLASS
+        Com::printF(PSTR(",\"speed\":"), (SD_SCK_MHZ(4ul) / 8ul));
+#else
+        Com::printF(PSTR(",\"speed\":"), (SD_SCK_MHZ(constrain(SD_SPI_SPEED_MHZ, 1ul, 50ul)) / 8ul));
+#endif
+        Com::printF(PSTR(",\"clsize\":"), static_cast<uint32_t>(fileSystem.sectorsPerCluster() * 512ul)); // bytesPerCluster isn't working properly for some reason.
+        // Extra
+        if (volumeLabel[0]) {
+            Com::printF(PSTR(",\"label\":\""));
+            SDCard::printEscapeChars(volumeLabel);
+            Com::print('"');
+        }
+        Com::printF(PSTR(",\"files\":"), fileCount);
+        Com::printF(PSTR(",\"folders\":"), folderCount);
+        Com::printFLN(PSTR("}}"));
+#endif
+    }
 }
 
 void SDCard::unmount(const bool manual) {
@@ -230,14 +268,14 @@ void SDCard::unmount(const bool manual) {
 #endif
 
     selectedFile.close();
-    fileSystem.card()->spiStop();
-#if SDFAT_FILE_TYPE == 3 // When using FSVolume (ExFAT & FAT)
-    fileSystem.end();
-#endif
 
     GUI::cwd[0u] = '/';
     GUI::cwd[1u] = '\0';
     GUI::folderLevel = 0u;
+
+#if SDFAT_FILE_TYPE == 3 // When using FSVolume (ExFAT & FAT)
+    fileSystem.end();
+#endif
 
     Printer::setMenuMode(MENU_MODE_SD_MOUNTED + MENU_MODE_PAUSED + MENU_MODE_SD_PRINTING, false);
 
@@ -531,6 +569,7 @@ void SDCard::stopPrint(const bool silent) {
     state = SDState::SD_MOUNTED;
     Printer::setMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED, false);
     Printer::setPrinting(false);
+    selectedFile.close();
     if (!silent) {
         Com::printFLN(PSTR("SD print stopped by user."));
         GUI::clearStatus();
@@ -837,6 +876,7 @@ void SDCard::startWrite(const char* filename) {
         Com::printFLN(Com::tWritingToFile, filename);
         lastWriteTimeMS = HAL::timeInMilliseconds();
         state = SDState::SD_WRITING;
+        Com::printFLN(Com::tOk); // Needed for octoprint
     }
 }
 

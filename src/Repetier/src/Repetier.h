@@ -680,7 +680,7 @@ public:
     void finishWrite();
     void finishPrint();
 
-    void printCardStats();
+    void printCardInfo(bool json = false);
     bool printIfCardErrCode(); // Just prints a small hex errorcode for the lookup table
     bool getCardInfo(char* volumeLabelBuf = nullptr, uint8_t volumeLabelSize = 0, uint64_t* volumeSizeSectors = nullptr, uint64_t* usageBytes = nullptr, uint16_t* fileCount = nullptr, uint8_t* folderCount = nullptr);
 
@@ -692,6 +692,7 @@ public:
         sd_file_t file;
         dir.rewind();
         while (file.openNext(&dir)) {
+            HAL::pingWatchdog();
             if (!action(file, dir, depth)) {
                 file.close();
                 return false;
@@ -705,7 +706,6 @@ public:
                 depth--;
             }
             file.close();
-            HAL::pingWatchdog();
         }
         return true;
     }

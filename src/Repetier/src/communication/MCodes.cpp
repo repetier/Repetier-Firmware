@@ -260,6 +260,11 @@ void __attribute__((weak)) MCode_36(GCode* com) {
     }
 #endif
 }
+void __attribute__((weak)) MCode_39(GCode* com) {
+#if SDSUPPORT
+    sd.printCardInfo(JSON_OUTPUT && static_cast<bool>(com->getS(0l) == 2l));
+#endif
+}
 
 void __attribute__((weak)) MCode_42(GCode* com) {
     // Tool::getTool(com->T)->unstepMotor();

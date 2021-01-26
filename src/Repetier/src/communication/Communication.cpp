@@ -152,6 +152,7 @@ FSTRINGVALUE(Com::tTestM999, "Testing fatal error")
 FSTRINGVALUE(Com::tColdExtrusionPrevented, "Cold extrusion prevented")
 #if JSON_OUTPUT
 FSTRINGVALUE(Com::tJSONDir, "{\"dir\":\"")
+FSTRINGVALUE(Com::tJSONSDInfo, "{\"SDinfo\":")
 FSTRINGVALUE(Com::tJSONFiles, "\",\"files\":[")
 FSTRINGVALUE(Com::tJSONArrayEnd, "]}")
 FSTRINGVALUE(Com::tJSONErrorStart, "{\"err\":\"")
