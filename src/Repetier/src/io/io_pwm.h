@@ -46,6 +46,7 @@
 #undef IO_PWM_FAKE
 #undef IO_PWM_SWITCH
 #undef IO_PWM_HARDWARE
+#undef IO_PWM_DAC
 #undef IO_PWM_MIN_SPEED
 #undef IO_PWM_INVERTED
 #undef IO_PWM_REPORT
@@ -56,6 +57,10 @@
 #define IO_PWM_HARDWARE(name, pinid, frequency) \
     name.id = HAL::initHardwarePWM(pinid, frequency); \
     HAL::setHardwarePWM(name.id, name.pwm);
+
+#define IO_PWM_DAC(name, dacPin) \
+    name.id = HAL::initHardwareDAC(dacPin); \
+    HAL::setHardwareDAC(name.id, name.val);
 
 #elif IO_TARGET == IO_TARGET_PWM // PWM interrupt
 
@@ -186,6 +191,25 @@
             } \
         } \
         uint32_t getFreq() final { return freq; } \
+    }; \
+    extern name##Class name;
+
+#define IO_PWM_DAC(name, dacPin) \
+    class name##Class : public PWMHandler { \
+    public: \
+        fast8_t val, id; \
+        name##Class() \
+            : val(0) \
+            , id(-1) { } \
+        void set(fast8_t _val) final { \
+            if (_val != val) { \
+                val = _val; \
+                HAL::setHardwareDAC(id, val); \
+            } \
+        } \
+        fast8_t get() final { return val; } \
+        void setFreq(uint32_t _freq) final {}; \
+        uint32_t getFreq() final { return 0ul; } \
     }; \
     extern name##Class name;
 
@@ -339,6 +363,9 @@
 #define IO_PWM_HARDWARE(name, pinid, frequency) \
     name##Class name;
 
+#define IO_PWM_DAC(name, dacPin) \
+    name##Class name;
+
 #define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow) \
     name##Class name;
 
@@ -373,6 +400,9 @@
 #endif
 #ifndef IO_PWM_HARDWARE
 #define IO_PWM_HARDWARE(name, pinid, frequency)
+#endif
+#ifndef IO_PWM_DAC
+#define IO_PWM_DAC(name, dacPin)
 #endif
 #ifndef IO_PWM_MIN_SPEED
 #define IO_PWM_MIN_SPEED(name, pwmname, minValue, offBelow)
