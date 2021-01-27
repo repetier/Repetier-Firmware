@@ -443,6 +443,38 @@ static int pinPeripheral(uint32_t ulPin, EPioType ulPeripheral) {
     return 0l;
 }
 
+fast8_t HAL::initHardwareDAC(fast8_t dacPin) {
+    if (dacPin != DAC1 && dacPin != DAC0) {
+        return -1;
+    }
+    uint8_t channel = ((dacPin == DAC0) ? 0u : 1u);
+    pinPeripheral(dacPin, PIO_ANALOG);
+    while (DAC->SYNCBUSY.bit.ENABLE)
+        ; 
+    DAC->CTRLA.reg &= ~DAC_CTRLA_ENABLE;
+    while (DAC->SYNCBUSY.bit.ENABLE)
+        ;
+    DAC->DACCTRL[channel].reg |= DAC_DACCTRL_ENABLE;
+    DAC->CTRLA.reg |= DAC_CTRLA_ENABLE;
+    while (DAC->SYNCBUSY.bit.ENABLE || !(DAC->STATUS.vec.READY & (1 << channel)))
+        ;
+
+    setHardwareDAC(channel, 0u);
+    return channel;
+}
+
+void HAL::setHardwareDAC(fast8_t id, fast8_t value) {
+    if (id != 0 && id != 1) {
+        return;
+    }
+    if (value > 255) {
+        value = 255;
+    }
+    value = (static_cast<uint32_t>(value) * 4095ul) / 255ul;
+    DAC->DATA[id].reg = value;
+    while ((DAC->SYNCBUSY.vec.DATA & (1 << id)))
+        ;
+}
 // Try to initialize pinNumber as hardware PWM. Returns internal
 // id if it succeeds or -1 if it fails. Typical reasons to fail
 // are no pwm support for that pin or an other pin uses same PWM
