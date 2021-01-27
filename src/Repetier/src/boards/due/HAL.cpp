@@ -364,7 +364,7 @@ fast8_t HAL::initHardwareDAC(fast8_t dacPin) {
 }
 
 void HAL::setHardwareDAC(fast8_t id, fast8_t value) {
-    if (id == -1) {
+    if (id < 0) {
         return;
     }
     if (value > 255) {

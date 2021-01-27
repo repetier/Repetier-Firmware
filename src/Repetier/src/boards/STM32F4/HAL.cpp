@@ -436,6 +436,57 @@ void HAL::setHardwarePWM(int id, int value) {
     entry.ht->setCaptureCompare(STM_PIN_CHANNEL(entry.map->function), value, RESOLUTION_8B_COMPARE_FORMAT);
 }
 
+struct DACEntry {
+    DAC_HandleTypeDef handle;
+    uint8_t chan;
+};
+
+#define NUM_DACS 2u
+static DACEntry dacEntries[NUM_DACS] = { 0 };
+static uint8_t numDACEntries;
+
+fast8_t HAL::initHardwareDAC(fast8_t dacPin) {
+    if (numDACEntries > (NUM_DACS - 1u)) {
+        return -1;
+    }
+    PinName p = digitalPinToPinName(dacPin);
+    if (p != NC) {
+        const PinMap* map = PinMap_DAC;
+        while (map->pin != NC) {
+            if (map->pin == p) {
+                break;
+            }
+            map++;
+        }
+        if (map->pin != NC) {
+            dacEntries[numDACEntries].handle.Instance = (DAC_TypeDef*)map->peripheral;
+            uint8_t pinChan = STM_PIN_CHANNEL(map->function);
+            dacEntries[numDACEntries].chan = (pinChan == 1u) ? DAC_CHANNEL_1 : (pinChan == 2u) ? DAC_CHANNEL_2 : 0u;
+
+            DAC_ChannelConfTypeDef dummy = { 0ul };
+            if (HAL_DAC_Init(&dacEntries[numDACEntries].handle)
+                || HAL_DAC_ConfigChannel(&dacEntries[numDACEntries].handle, &dummy, dacEntries[numDACEntries].chan)) {
+                return -1;
+            }
+            setHardwareDAC(numDACEntries, 0);
+            return numDACEntries++;
+        }
+    }
+    return -1;
+}
+
+void HAL::setHardwareDAC(fast8_t id, fast8_t value) {
+    if (id < 0 || id > (NUM_DACS - 1)) {
+        return;
+    }
+    if (value > 255) {
+        value = 255;
+    }
+    if (HAL_DAC_SetValue(&dacEntries[id].handle, dacEntries[id].chan, DAC_ALIGN_12B_R, (static_cast<uint32_t>(value) * 4095ul) / 255ul) != HAL_OK) {
+        return;
+    }
+    HAL_DAC_Start(&dacEntries[id].handle, dacEntries[id].chan);
+}
 void HAL::setHardwareFrequency(int id, uint32_t frequency) {
     if (id < 0 || id >= 50 || !frequency) { // illegal id
         return;
