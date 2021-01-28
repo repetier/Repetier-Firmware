@@ -531,6 +531,35 @@ void __attribute__((weak)) menuTempConfig(GUIAction action, void* data) {
     GUI::menuEnd(action);
 }
 
+void __attribute__((weak)) menuEncoderMaxRepeatSteps(GUIAction action, void* data) {
+    DRAW_LONG_P(PSTR("Max. repeat steps:"), "steps/click", GUI::maxActionRepeatStep);
+    if (GUI::handleLongValueAction(action, v, 1, 15, 1)) {
+        GUI::maxActionRepeatStep = v;
+    }
+}
+void __attribute__((weak)) menuEncoderMaxRepeatTime(GUIAction action, void* data) {
+    DRAW_LONG_P(PSTR("Max. repeat time:"), Com::tUnitMilliSeconds, GUI::maxActionRepeatTimeMS);
+    if (GUI::handleLongValueAction(action, v, GUI::minActionRepeatTimeMS, 2000, 5)) {
+        GUI::maxActionRepeatTimeMS = v;
+    }
+}
+void __attribute__((weak)) menuEncoderMinRepeatTime(GUIAction action, void* data) {
+    DRAW_LONG_P(PSTR("Min. repeat time:"), Com::tUnitMilliSeconds, GUI::minActionRepeatTimeMS);
+    if (GUI::handleLongValueAction(action, v, 1, GUI::maxActionRepeatTimeMS, 5)) {
+        GUI::minActionRepeatTimeMS = v;
+    }
+}
+void __attribute__((weak)) menuConfigEncoder(GUIAction action, void* data) {
+    GUI::menuStart(action);
+    GUI::menuTextP(action, PSTR("= Encoder Config ="), true);
+    GUI::menuBack(action);
+ 
+    GUI::menuLongP(action, PSTR("Max. steps:"), GUI::maxActionRepeatStep, menuEncoderMaxRepeatSteps, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::menuLongP(action, PSTR("Max. time:"), GUI::maxActionRepeatTimeMS, menuEncoderMaxRepeatTime, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::menuLongP(action, PSTR("Min. time:"), GUI::minActionRepeatTimeMS, menuEncoderMinRepeatTime, nullptr, GUIPageType::FIXED_CONTENT);
+
+    GUI::menuEnd(action);
+}
 #if NUM_TOOLS > 1
 void dittoToTmpString(int32_t mode, bool mirror) {
     if (mode == 0) {
@@ -645,8 +674,6 @@ void __attribute__((weak)) menuTune(GUIAction action, void* data) {
     GUI::menuSelectable(action, GUI::tmpString, menuFlowMultiplier, nullptr, GUIPageType::FIXED_CONTENT);
     GUI::flashToStringFloat(GUI::tmpString, PSTR("Babystep Z: @mm"), Motion1::totalBabystepZ, 2);
     GUI::menuSelectable(action, GUI::tmpString, menuBabystepZ, nullptr, GUIPageType::FIXED_CONTENT);
-    GUI::menuSelectableP(action, PSTR("Home"), menuHome, nullptr, GUIPageType::MENU);
-    GUI::menuSelectableP(action, PSTR("Move"), menuMove, nullptr, GUIPageType::MENU);
 #if NUM_FANS > 0
     GUI::menuSelectableP(action, PSTR("Fans"), menuFans, nullptr, GUIPageType::MENU);
 #endif
@@ -969,6 +996,7 @@ void __attribute__((weak)) menuConfig(GUIAction action, void* data) {
 #endif
         }
     }
+    GUI::menuSelectableP(action, PSTR("Encoder"), menuConfigEncoder, nullptr, GUIPageType::MENU);
     GUI::menuSelectableP(action, PSTR("Store Settings"), directAction, (void*)GUI_DIRECT_ACTION_STORE_EEPROM, GUIPageType::ACTION);
     GUI::menuSelectableP(action, PSTR("Factory Reset"), directAction, (void*)GUI_DIRECT_ACTION_FACTORY_RESET, GUIPageType::ACTION);
     GUI::menuEnd(action);

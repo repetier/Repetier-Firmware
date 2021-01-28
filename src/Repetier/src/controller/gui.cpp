@@ -13,11 +13,17 @@ millis_t GUI::lastAction = 0;              ///< Last action time for autoreturn 
 GUIStatusLevel GUI::statusLevel = GUIStatusLevel::REGULAR;
 bool GUI::contentChanged = false;            ///< set to true if forced refresh is wanted
 GUIAction GUI::nextAction = GUIAction::NONE; ///< Next action to execute on opdate
-int GUI::nextActionRepeat = 0;               ///< Increment for next/previous
-char GUI::status[MAX_COLS + 1];              ///< Status Line
-char GUI::buf[MAX_COLS + 1];                 ///< Buffer to build strings
-char GUI::tmpString[MAX_COLS + 1];           ///< Buffer to build strings
-fast8_t GUI::bufPos;                         ///< Pos for appending data
+int GUI::nextActionRepeat = 0;                                    ///< Increment for next/previous
+uint8_t GUI::maxActionRepeatStep = ENCODER_MAX_REPEAT_STEPS;      ///< Max amount of extra encoder repeat steps inside value menus
+uint16_t GUI::maxActionRepeatTimeMS = ENCODER_MAX_REPEAT_TIME_MS; ///< Clicks longer than this will not recieve any extra steps
+uint16_t GUI::minActionRepeatTimeMS = ENCODER_MIN_REPEAT_TIME_MS;
+
+uint16_t GUI::eprStart;
+
+char GUI::status[MAX_COLS + 1];    ///< Status Line
+char GUI::buf[MAX_COLS + 1];       ///< Buffer to build strings
+char GUI::tmpString[MAX_COLS + 1]; ///< Buffer to build strings
+fast8_t GUI::bufPos;               ///< Pos for appending data
 GUIBootState GUI::curBootState = GUIBootState::DISPLAY_INIT;
 bool GUI::textIsScrolling = false; ///< Our selected row/text is now scrolling/anim
 probeProgInfo* GUI::curProbingProgress = nullptr;
@@ -27,6 +33,10 @@ uint8_t GUI::folderLevel = 0;
 #endif
 
 #if DISPLAY_DRIVER == DRIVER_NONE
+void GUI::resetEeprom() {
+}
+void GUI::eepromHandle() {
+}
 void GUI::init() { ///< Initialize display
     level = 0;
 }
@@ -50,14 +60,30 @@ void __attribute__((weak)) waitScreenP(GUIAction action, void* data) { }
 void __attribute__((weak)) infoScreenP(GUIAction action, void* data) { }
 void __attribute__((weak)) warningScreenP(GUIAction action, void* data) { }
 void __attribute__((weak)) errorScreenP(GUIAction action, void* data) { }
-#endif
-
-#if DISPLAY_DRIVER != DRIVER_NONE
+#else
 void GUI::resetMenu() { ///< Go to start page
     level = 0;
     replace(Printer::isPrinting() ? printProgress : Printer::isZProbingActive() ? probeProgress : startScreen, nullptr, GUIPageType::TOPLEVEL);
 }
+void GUI::resetEeprom() {
+    maxActionRepeatTimeMS = ENCODER_MAX_REPEAT_TIME_MS;
+    minActionRepeatTimeMS = ENCODER_MIN_REPEAT_TIME_MS;
+    maxActionRepeatStep = ENCODER_MAX_REPEAT_STEPS;
+}
+void GUI::eepromHandle() {
+    EEPROM::handlePrefix("Encoder");
+    EEPROM::handleByte(eprStart + 0, PSTR("max. extra repeat steps [steps/click]"), maxActionRepeatStep);
+    EEPROM::handleInt(eprStart + 1, PSTR("max. repeat time [ms]"), maxActionRepeatTimeMS);
+    EEPROM::handleInt(eprStart + 3, PSTR("min. repeat time [ms]"), minActionRepeatTimeMS);
+    EEPROM::removePrefix();
+}
+void GUI::init() {
+    resetEeprom();
+    eprStart = EEPROM::reserve(EEPROM_SIGNATURE_GUI, 1, 5);
+    driverInit();
+}
 #endif
+
 
 void GUI::update() {
 #if DISPLAY_DRIVER != DRIVER_NONE
@@ -203,12 +229,31 @@ void GUI::backKey() {
     resetScrollbarTimer();
 }
 
+static inline int calcRepeatSteps() {
+    static millis_t lastRepeatTime = 0ul;
+    millis_t curTime = HAL::timeInMilliseconds();
+    millis_t diffTime = curTime - lastRepeatTime;
+    int repeat = 1;
+    if (diffTime < GUI::maxActionRepeatTimeMS) {
+        if (diffTime < GUI::minActionRepeatTimeMS) {
+            diffTime = GUI::minActionRepeatTimeMS;
+        }
+        repeat = GUI::maxActionRepeatStep * (static_cast<float>(GUI::maxActionRepeatTimeMS - GUI::minActionRepeatTimeMS) / static_cast<float>(diffTime));
+        if (repeat < 1) {
+            repeat = 1;
+        } else if (repeat > GUI::maxActionRepeatStep) {
+            repeat = GUI::maxActionRepeatStep;
+        }
+    }
+    lastRepeatTime = curTime;
+    return repeat;
+}
 void GUI::nextKey() {
     if (nextAction != GUIAction::NEXT) {
         nextActionRepeat = 0;
     }
     nextAction = GUIAction::NEXT;
-    nextActionRepeat++;
+    nextActionRepeat = (maxActionRepeatStep > 1) ? calcRepeatSteps() : 1;
     contentChanged = true;
     resetScrollbarTimer();
 }
@@ -218,7 +263,7 @@ void GUI::previousKey() {
         nextActionRepeat = 0;
     }
     nextAction = GUIAction::PREVIOUS;
-    nextActionRepeat++;
+    nextActionRepeat = (maxActionRepeatStep > 1) ? calcRepeatSteps() : 1;
     contentChanged = true;
     resetScrollbarTimer();
 }

@@ -158,6 +158,12 @@ public:
     static fast8_t bufPos;                       ///< Pos for appending data
     static GUIAction nextAction;                 ///< Next action to execute on opdate
     static int nextActionRepeat;                 ///< Increment for next/previous
+    static uint8_t maxActionRepeatStep;          ///< Max amount of extra encoder repeat steps inside value menus
+    static uint16_t maxActionRepeatTimeMS;       ///< Clicks longer than this will not recieve any extra steps
+    static uint16_t minActionRepeatTimeMS; 
+
+    
+    static uint16_t eprStart;
     static GUIStatusLevel statusLevel;
     static bool textIsScrolling;
     static probeProgInfo* curProbingProgress; ///< Pointer to a valid current probing datastruct
@@ -188,7 +194,8 @@ public:
     static void setStatus(char* text, GUIStatusLevel lvl);
 
     static void resetMenu();        ///< Go to start page
-    static void init();             ///< Initialize display
+    static void init();             ///< Initialize GUI class (eeprom etc)
+    static void driverInit();       ///< Driver specific inits
     static void processInit();      ///< Continue initializing display if not ready
     static void refresh();          ///< Refresh display
     static void update();           ///< Calls refresh, checks buttons
@@ -198,6 +205,8 @@ public:
     static void push(GuiCallback cb, void* cData, GUIPageType tp);
     static void replace(GuiCallback cb, void* cData, GUIPageType tp);
     static bool isStickyPageType(GUIPageType t);
+    static void resetEeprom();
+    static void eepromHandle();
 
     // Run action for key press
     static void backKey();

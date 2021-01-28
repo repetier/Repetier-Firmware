@@ -102,6 +102,16 @@
 #endif
 #endif
 
+#ifndef ENCODER_MAX_REPEAT_STEPS
+#define ENCODER_MAX_REPEAT_STEPS 1
+#endif
+#ifndef ENCODER_MAX_REPEAT_TIME_MS
+#define ENCODER_MAX_REPEAT_TIME_MS 50
+#endif
+#ifndef ENCODER_MIN_REPEAT_TIME_MS
+#define ENCODER_MIN_REPEAT_TIME_MS 25
+#endif
+
 // It is always safe to assume there is no back key for a display
 #ifndef UI_HAS_BACK_KEY
 #define UI_HAS_BACK_KEY 0

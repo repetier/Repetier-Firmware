@@ -31,6 +31,7 @@
 #define EEPROM_SIGNATURE_CARTESIAN 10
 #define EEPROM_SIGNATURE_GRID_LEVELING 11
 #define EEPROM_SIGNATURE_STEPPER 12
+#define EEPROM_SIGNATURE_GUI 13
 
 #define EPR_MAGIC_BYTE 0
 #define EPR_INTEGRITY_BYTE 1         // Here the xored sum over eeprom is stored
