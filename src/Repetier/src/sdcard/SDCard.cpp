@@ -207,7 +207,7 @@ void SDCard::printCardStats() {
         size /= 1000.0f;
     }
     Com::printF(PSTR(" | Usage: "), size);
-    Com::printF(gb ? PSTR(" GB (") : PSTR(" MB ("), fileCount);
+    Com::printF(gb ? PSTR(" GB (") : PSTR(" MB ("), static_cast<int32_t>(fileCount));
     Com::printF(PSTR(" files, "), folderCount);
     Com::printFLN(PSTR(" folders found.)"));
 }
@@ -995,7 +995,7 @@ void SDCard::writeToFile() {
 
     strcpy(szName, "Testing\r\n");
     nbyte = file.write(szName, strlen(szName));
-    Com::print("L=");
+    Com::printF(PSTR("L="));
     Com::print((long)nbyte);
     Com::println();
 }

@@ -169,7 +169,7 @@ public:
     }
 
     void print(FSTRINGPARAM(name)) {
-        Com::printF("Matrix ");
+        Com::printF(PSTR("Matrix "));
         Com::printFLN(name);
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {

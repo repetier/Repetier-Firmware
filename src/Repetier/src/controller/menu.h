@@ -2,7 +2,8 @@
 #define _MENU_H
 
 enum class GUIAction;
-extern const char* const axisNames[] PROGMEM;
+//extern const char* const axisNames[] PROGMEM;
+extern const char* const axisNames[];
 extern const int32_t baudrates[] PROGMEM;
 
 extern void menuMove(GUIAction action, void* data);

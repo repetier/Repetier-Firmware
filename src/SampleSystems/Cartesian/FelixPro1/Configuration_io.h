@@ -2,7 +2,7 @@
 
 This file defines io solutions used. This is the lowest level and is the base
 for all higher level functions using io operations. At several places we need
-subsets of these list of operations. To make configuration easy and easy to 
+subsets of these list of operations. To make configuration easy and easy to
 understand, we use a technique called "x macros". This requires that only
 predefined macro names for IO are used here. Do NOT add anything else here
 or compilation/functionality will break.
@@ -11,7 +11,7 @@ Rules:
 1. Each definition will create a class that is named like the first parameter.
 This class is later used as input to templates building higher functions. By
 convention the names should start with IO followed by something that helps you
-identify the function. 
+identify the function.
 2. Do not use a semicolon at the end. Macro definition gets different meanings
 and will add the semicolon if required.
 
@@ -56,13 +56,13 @@ IO_OUTPUT_INVERTED(IOE2Enable, ORIG_E1_ENABLE_PIN)
 // Autolevel Motor 1
 
 IO_OUTPUT(IOAL1Step, 51)
-IO_OUTPUT(IOAL1Dir, 53)
+IO_OUTPUT_INVERTED(IOAL1Dir, 53)
 IO_OUTPUT_INVERTED(IOAL1Enable, 49)
 
 // Autolevel Motor 1
 
 IO_OUTPUT(IOAL2Step, 39)
-IO_OUTPUT(IOAL2Dir, 13)
+IO_OUTPUT_INVERTED(IOAL2Dir, 13)
 IO_OUTPUT_INVERTED(IOAL2Enable, 40)
 
 // Servo output
@@ -168,12 +168,16 @@ IO_PWM_SOFTWARE(PWMBed1, IOBed1, 1)
 STEPPER_SIMPLE(XMotor, IOX1Step, IOX1Dir, IOX1Enable, endstopNone, endstopNone)
 STEPPER_SIMPLE(YMotor, IOY1Step, IOY1Dir, IOY1Enable, endstopNone, endstopNone)
 STEPPER_SIMPLE(ZMotor, IOZ1Step, IOZ1Dir, IOZ1Enable, endstopNone, endstopNone)
-STEPPER_SIMPLE(E1MotorBase, IOE1Step, IOE1Dir, IOE1Enable, endstopNone, endstopNone)
+STEPPER_SIMPLE(E1MotorBase, IOE1Step, IOE1Dir, IOE1Enable, endstopNone,
+               endstopNone)
 STEPPER_OBSERVEABLE(E1Motor, E1MotorBase)
-STEPPER_SIMPLE(E2MotorBase, IOE2Step, IOE2Dir, IOE2Enable, endstopNone, endstopNone)
+STEPPER_SIMPLE(E2MotorBase, IOE2Step, IOE2Dir, IOE2Enable, endstopNone,
+               endstopNone)
 STEPPER_OBSERVEABLE(E2Motor, E2MotorBase)
-STEPPER_SIMPLE(AL1Motor, IOAL1Step, IOAL1Dir, IOAL1Enable, endstopNone, endstopNone)
-STEPPER_SIMPLE(AL2Motor, IOAL2Step, IOAL2Dir, IOAL2Enable, endstopNone, endstopNone)
+STEPPER_SIMPLE(AL1Motor, IOAL1Step, IOAL1Dir, IOAL1Enable, endstopNone,
+               endstopNone)
+STEPPER_SIMPLE(AL2Motor, IOAL2Step, IOAL2Dir, IOAL2Enable, endstopNone,
+               endstopNone)
 
 // Servos
 SERVO_ANALOG(Servo1, 0, Servo1Pin, 500, 2500, 1050)
@@ -182,12 +186,17 @@ SERVO_ANALOG(Servo1, 0, Servo1Pin, 500, 2500, 1050)
 // control temperature. Higher level classes take these as input
 // and simple heater like a heated bed use it directly.
 
-HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 120, 255, 1000, 5, 30000, 12.0, 33.0, 290.0, 80, 255, true)
-HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255, 1000, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
-HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 1000, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
+HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 120, 255, 1000, 5,
+                 30000, 12.0, 33.0, 290.0, 80, 255, true)
+HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255,
+                 1000, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
+HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255,
+                 1000, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
 
-// HEAT_MANAGER_DYN_DEAD_TIME(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255, 100, 10, 20000, 150, 7, 7, 200, 7, 7, false)
-// HEAT_MANAGER_DYN_DEAD_TIME(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 100, 10, 20000, 150, 7, 7, 200, 7, 7, false)
+// HEAT_MANAGER_DYN_DEAD_TIME(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1,
+// 260, 255, 100, 10, 20000, 150, 7, 7, 200, 7, 7, false)
+// HEAT_MANAGER_DYN_DEAD_TIME(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2,
+// 260, 255, 100, 10, 20000, 150, 7, 7, 200, 7, 7, false)
 
 // Coolers are stand alone functions that allow it to control
 // a fan with external sensors. Many extruders require a cooling
@@ -198,12 +207,17 @@ HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255, 1000
 
 // Define tools. They get inserted into a tool array in configuration.h
 // Typical tools are:
-// TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript)
+// TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, resolution, yank,
+// maxSpeed, acceleration, advance, startScript, endScript)
 
-TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, /*AL1Motor */ E1Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
-TOOL_EXTRUDER(ToolExtruder2, 16.775, 0.615, -0.97, HeaterExtruder2, /*AL2Motor */ E2Motor, 1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 2", "", &Fan1PWM)
-// TOOL_LASER(Laser3, 0, 0, 0, Fan1NoKSPWM, fakeOut, fakeOut, 3000, 1, 100, 150.0, 1.5, "", "")
-// TOOL_CNC(CNC4, 0, 0, 0, Fan1NoKSPWM, fakeOut, fakeOut, fakeOut, 7000, 3000, "", "")
+TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, /*AL1Motor */ E1Motor,
+              1.75, 147.0, 5, 30, 5000, 40, "M117 Extruder 1", "", &Fan1PWM)
+TOOL_EXTRUDER(ToolExtruder2, 16.775, 0.615, -0.97, HeaterExtruder2,
+              /*AL2Motor */ E2Motor, 1.75, 147.0, 5, 30, 5000, 40,
+              "M117 Extruder 2", "", &Fan1PWM)
+// TOOL_LASER(Laser3, 0, 0, 0, Fan1NoKSPWM, fakeOut, fakeOut, 3000, 1, 100,
+// 150.0, 1.5, "", "") TOOL_CNC(CNC4, 0, 0, 0, Fan1NoKSPWM, fakeOut, fakeOut,
+// fakeOut, 7000, 3000, "", "")
 
 // Use a signal that changes while extruder moves
 JAM_DETECTOR_HW(JamExtruder1, E1Motor, IOJam1, ToolExtruder1, 220, 10, 500)
@@ -214,5 +228,5 @@ TOOL_CHANGE_SERVO(ToolChange1, ToolExtruder1, Servo1, 800, 600)
 TOOL_CHANGE_SERVO(ToolChange2, ToolExtruder2, Servo1, 1500, 600)
 
 // Use a signal that is high, when filament is loaded
-//FILAMENT_DETECTOR(FilamentDetector1, IOJam1, ToolExtruder1)
-//FILAMENT_DETECTOR(FilamentDetector2, IOJam2, ToolExtruder2)
+// FILAMENT_DETECTOR(FilamentDetector1, IOJam1, ToolExtruder1)
+// FILAMENT_DETECTOR(FilamentDetector2, IOJam2, ToolExtruder2)

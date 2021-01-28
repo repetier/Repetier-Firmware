@@ -36,6 +36,8 @@ void GUI::processInit() { ///< Function repeatedly called if curBootState isn't 
 void GUI::refresh() {
 }
 
+void GUI::resetScrollbarTimer() { }
+
 void GUI::resetMenu() { } ///< Go to start page
 
 void __attribute__((weak)) probeProgress(GUIAction action, void* data) { }
@@ -718,8 +720,8 @@ bool GUI::handleFloatValueAction(GUIAction& action, float& value, float min, flo
         value = min;
     } else if (value > max) {
         value = max;
-    } else if (std::signbit(orig) != std::signbit(value)) {
-        value = increment * std::roundf(value / increment);
+    } else if (signbit(orig) != signbit(value)) {
+        value = increment * round(value / increment);
     }
     return orig != value;
 }
@@ -739,8 +741,8 @@ bool GUI::handleFloatValueAction(GUIAction& action, float& value, float incremen
         value = increment * ::ceilf((value - calc) / increment);
         contentChanged = true;
     }
-    if (std::signbit(orig) != std::signbit(value)) {
-        value = increment * std::roundf(value / increment);
+    if (signbit(orig) != signbit(value)) {
+        value = increment * roundf(value / increment);
     }
     return orig != value;
 }
@@ -753,20 +755,20 @@ bool GUI::handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, 
     int32_t orig = value;
     if (action == GUIAction::NEXT) {
         int32_t calc = value + (nextActionRepeat * increment);
-        value = (value == min) ? increment * ((calc - std::signbit(calc) * (increment - 1)) / increment) : calc;
+        value = (value == min) ? increment * ((calc - signbit(calc) * (increment - 1)) / increment) : calc;
         contentChanged = true;
     } else if (action == GUIAction::PREVIOUS) {
         int32_t calc = value - (nextActionRepeat * increment);
-        value = (value == max) ? increment * ((calc + !std::signbit(calc) * (increment - 1)) / increment) : calc;
+        value = (value == max) ? increment * ((calc + !signbit(calc) * (increment - 1)) / increment) : calc;
         contentChanged = true;
     }
     if (value < min) {
         value = min;
     } else if (value > max) {
         value = max;
-    } else if (std::signbit(orig) != std::signbit(value)) {
-        int32_t calc = (std::labs(value) + (increment / 2));
-        value = (calc - (calc % increment)) * (std::signbit(value) ? -1 : 1);
+    } else if (signbit(orig) != signbit(value)) {
+        int32_t calc = (labs(value) + (increment / 2));
+        value = (calc - (calc % increment)) * (signbit(value) ? -1 : 1);
     }
     return orig != value;
 }

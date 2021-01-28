@@ -1,8 +1,12 @@
 #include "Repetier.h"
 
 HeatManager* heaters[] = HEATERS;
+#if CPU_ARCH == ARCH_AVR
+constexpr int numHeaters = NUM_HEATERS;
+#else
 constexpr int numHeaters = std::extent<decltype(heaters)>::value;
 static_assert(numHeaters == NUM_HEATERS, "NUM_HEATERS not defined correctly");
+#endif
 
 // HeatManager instance pointer as data
 void menuSetTemperature(GUIAction action, void* data) {

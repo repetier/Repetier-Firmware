@@ -33,14 +33,22 @@ int32_t baudrate = BAUDRATE; ///< Communication speed rate.
 volatile int waitRelax = 0;  // Delay filament relax at the end of print, could be a simple timeout
 
 ServoInterface* servos[] = SERVO_LIST;
+#if CPU_ARCH == ARCH_AVR
+constexpr int numServos = NUM_SERVOS;
+#else
 constexpr int numServos = std::extent<decltype(servos)>::value;
 static_assert(numServos == NUM_SERVOS, "NUM_SERVOS not defined correctly");
+#endif
 
 FanController fans[NUM_FANS];
 
 BeeperSourceBase* beepers[] = BEEPER_LIST;
+#if CPU_ARCH == ARCH_AVR
+constexpr int numBeepers = NUM_BEEPERS;
+#else
 constexpr int numBeepers = std::extent<decltype(beepers)>::value;
 static_assert(numBeepers == NUM_BEEPERS, "NUM_BEEPERS not defined correctly");
+#endif
 
 uint8_t Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
 //Stepper Movement Variables
@@ -565,8 +573,12 @@ void Printer::setup() {
 #include "io/redefine.h"
 
     PWMHandler* tempFans[] = FAN_LIST;
+#if CPU_ARCH == ARCH_AVR
+    constexpr int numFans = NUM_FANS;
+#else
     constexpr int numFans = std::extent<decltype(tempFans)>::value;
     static_assert(numFans == NUM_FANS, "NUM_FANS not defined correctly");
+#endif
 
     for (fast8_t i = 0; i < NUM_FANS; i++) {
         fans[i].fan = tempFans[i];

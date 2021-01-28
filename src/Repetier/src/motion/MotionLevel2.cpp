@@ -194,7 +194,7 @@ __attribute__((optimize("unroll-loops"))) void Motion2::timer() {
                 m3->last = 1;
             }
         }
-        // Com::printFLN("sf:", sFactor, 4);
+        // Com::printFLN(PSTR("sf:"), sFactor, 4);
         // Convert float position to integer motor position
         // This step catches all nonlinear behaviour from
         // acceleration profile and printer geometry
@@ -283,11 +283,11 @@ __attribute__((optimize("unroll-loops"))) void Motion2::timer() {
                 // handle advance of E
                 int advTarget = velocityProfile->f * actM1->eAdv;
                 int advDiff = advTarget - advanceSteps;
-                /* Com::printF("adv:", advTarget);
-                Com::printF(" d:", *delta);
-                Com::printF(" as:", advanceSteps);
-                Com::printF(" f:", velocityProfile->f, 2);
-                Com::printFLN(" ea:", actM1->eAdv, 4); */
+                /* Com::printF(PSTR("adv:"), advTarget);
+                Com::printF(PSTR(" d:"), *delta);
+                Com::printF(PSTR(" as:"), advanceSteps);
+                Com::printF(PSTR(" f:"), velocityProfile->f, 2);
+                Com::printFLN(PSTR(" ea:"), actM1->eAdv, 4); */
 
                 *delta += advDiff;
                 if (*delta > 0) { // extruding

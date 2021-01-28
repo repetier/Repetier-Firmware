@@ -88,6 +88,13 @@ public:
     FSTRINGVAR(tAAxis)
     FSTRINGVAR(tBAxis)
     FSTRINGVAR(tCAxis)
+    FSTRINGVAR(tXLetter)
+    FSTRINGVAR(tYLetter)
+    FSTRINGVAR(tZLetter)
+    FSTRINGVAR(tELetter)
+    FSTRINGVAR(tALetter)
+    FSTRINGVAR(tBLetter)
+    FSTRINGVAR(tCLetter)
 
     FSTRINGVAR(tEmpty)
     FSTRINGVAR(tDebug)
@@ -637,7 +644,7 @@ void Com::printBinaryFLN(FSTRINGPARAM(text), T n, bool grouping) {
     { \
         Com::printF(PSTR(" " #x "=")); \
         Com::print(x); \
-        Com::print(" steps  "); \
+        Com::printF(PSTR(" steps  ")); \
         Com::print(x / 80); \
         Com::printFLN(PSTR(" mm")); \
     }
@@ -645,7 +652,7 @@ void Com::printBinaryFLN(FSTRINGPARAM(text), T n, bool grouping) {
     { \
         Com::printF(PSTR(" " #x "=")); \
         Com::print((long)x * 80); \
-        Com::print(" steps  "); \
+        Com::printF(PSTR(" steps  ")); \
         Com::print(x); \
         Com::printFLN(PSTR(" mm")); \
     }

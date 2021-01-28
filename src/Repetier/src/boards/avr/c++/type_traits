@@ -33,7 +33,7 @@
 #pragma GCC system_header
 
 #if __cplusplus < 201103L
-#include <bits/c++0x_warning.h>
+// #include <bits/c++0x_warning.h>
 #else
 
 // #include <bits/c++config.h>

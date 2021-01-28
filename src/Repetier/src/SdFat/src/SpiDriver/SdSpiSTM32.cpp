@@ -22,6 +22,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#include "Repetier.h"
 #include "SdSpiDriver.h"
 #if defined(SD_USE_CUSTOM_SPI)\
   && (defined(__STM32F1__) || defined(__STM32F4__))

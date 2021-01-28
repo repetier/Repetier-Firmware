@@ -23,61 +23,62 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
+#include "Repetier.h"
 #include "SdSpiDriver.h"
 #if defined(SD_USE_CUSTOM_SPI) && (defined(ESP8266) || defined(ESP32))
 #define ESP_UNALIGN_OK 1
 //------------------------------------------------------------------------------
 void SdSpiArduinoDriver::activate() {
-  SPI.beginTransaction(m_spiSettings);
+    SPI.beginTransaction(m_spiSettings);
 }
 //------------------------------------------------------------------------------
 void SdSpiArduinoDriver::begin(SdSpiConfig spiConfig) {
-  (void)spiConfig;
-  SPI.begin();
+    (void)spiConfig;
+    SPI.begin();
 }
 //------------------------------------------------------------------------------
 void SdSpiArduinoDriver::deactivate() {
-  SPI.endTransaction();
+    SPI.endTransaction();
 }
 //------------------------------------------------------------------------------
 uint8_t SdSpiArduinoDriver::receive() {
-  return SPI.transfer(0XFF);
+    return SPI.transfer(0XFF);
 }
 //------------------------------------------------------------------------------
 uint8_t SdSpiArduinoDriver::receive(uint8_t* buf, size_t count) {
 #if ESP_UNALIGN_OK
-  SPI.transferBytes(nullptr, buf, count);
+    SPI.transferBytes(nullptr, buf, count);
 #else  // ESP_UNALIGN_OK
-  // Adjust to 32-bit alignment.
-  while ((reinterpret_cast<uintptr_t>(buf) & 0X3) && count) {
-    *buf++ = SPI.transfer(0xff);
-    count--;
-  }
-  // Do multiple of four byte transfers.
-  size_t n4 = 4*(count/4);
-  if (n4) {
-    SPI.transferBytes(nullptr, buf, n4);
-  }
-  // Transfer up to three remaining bytes.
-  for (buf += n4, count -= n4; count; count--) {
-    *buf++ = SPI.transfer(0xff);
-  }
-#endif  // ESP_UNALIGN_OK
-  return 0;
+    // Adjust to 32-bit alignment.
+    while ((reinterpret_cast<uintptr_t>(buf) & 0X3) && count) {
+        *buf++ = SPI.transfer(0xff);
+        count--;
+    }
+    // Do multiple of four byte transfers.
+    size_t n4 = 4 * (count / 4);
+    if (n4) {
+        SPI.transferBytes(nullptr, buf, n4);
+    }
+    // Transfer up to three remaining bytes.
+    for (buf += n4, count -= n4; count; count--) {
+        *buf++ = SPI.transfer(0xff);
+    }
+#endif // ESP_UNALIGN_OK
+    return 0;
 }
 //------------------------------------------------------------------------------
 void SdSpiArduinoDriver::send(uint8_t data) {
-  SPI.transfer(data);
+    SPI.transfer(data);
 }
 //------------------------------------------------------------------------------
-void SdSpiArduinoDriver::send(const uint8_t* buf , size_t count) {
+void SdSpiArduinoDriver::send(const uint8_t* buf, size_t count) {
 #if !ESP_UNALIGN_OK
-  // Adjust to 32-bit alignment.
-  while ((reinterpret_cast<uintptr_t>(buf) & 0X3) && count) {
-    SPI.transfer(*buf++);
-    count--;
-  }
-#endif  // #if ESP_UNALIGN_OK
-  SPI.transferBytes(const_cast<uint8_t*>(buf), nullptr, count);
+    // Adjust to 32-bit alignment.
+    while ((reinterpret_cast<uintptr_t>(buf) & 0X3) && count) {
+        SPI.transfer(*buf++);
+        count--;
+    }
+#endif // #if ESP_UNALIGN_OK
+    SPI.transferBytes(const_cast<uint8_t*>(buf), nullptr, count);
 }
-#endif  // defined(SD_USE_CUSTOM_SPI) && defined(ESP8266)
+#endif // defined(SD_USE_CUSTOM_SPI) && defined(ESP8266)

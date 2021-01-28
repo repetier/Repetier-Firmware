@@ -892,7 +892,7 @@ void Commands::executeGCode(GCode* com) {
     }
 #ifdef DEBUG_DRYRUN_ERROR
     if (Printer::debugDryrun()) {
-        Com::printFLN("Dryrun was enabled");
+        Com::printFLN(PSTR("Dryrun was enabled"));
         com->printCommand();
         Printer::debugReset(8);
     }

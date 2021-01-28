@@ -39,19 +39,6 @@ extern "C" char* sbrk(int i);
 
 // New adc handling
 bool analogEnabled[MAX_ANALOG_INPUTS] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
-// end adc handling
-
-// #define NUM_ADC_SAMPLES 2 + (1 << ANALOG_INPUT_SAMPLE)
-/*
-#if ANALOG_INPUTS > 0
-int32_t osAnalogInputBuildup[ANALOG_INPUTS];
-int32_t osAnalogSamples[ANALOG_INPUTS][ANALOG_INPUT_MEDIAN];
-int32_t osAnalogSamplesSum[ANALOG_INPUTS];
-static int32_t adcSamplesMin[ANALOG_INPUTS];
-static int32_t adcSamplesMax[ANALOG_INPUTS];
-static int adcCounter = 0, adcSamplePos = 0;
-#endif
-*/
 
 static uint32_t adcEnable = 0;
 
@@ -178,10 +165,9 @@ void HAL::setupTimer() {
 #endif
 }
 
-// Called within checkForPeriodicalActions (main loop, more or less) 
+// Called within checkForPeriodicalActions (main loop, more or less)
 // as fast as possible
 void HAL::handlePeriodical() {
-
 }
 
 struct TimerPWMPin {
@@ -652,6 +638,7 @@ void HAL::showStartReason() {
         Com::printInfoFLN(PSTR("Unknown reset reason"));
     }
 }
+
 void HAL::updateStartReason() {
     int mcu = (RSTC->RSTC_SR & RSTC_SR_RSTTYP_Msk) >> RSTC_SR_RSTTYP_Pos;
     switch (mcu) {
@@ -1179,10 +1166,10 @@ extern "C" void RTT_Handler() {
 #endif
     // It's possible for the RTT interrupt to actually preempt itself
     // unless you disable it and reenable it once the status is clear.
-    // It takes two slow clock cycles (32.768kHz so 40-50us~) to clear. 
+    // It takes two slow clock cycles (32.768kHz so 40-50us~) to clear.
     RTT->RTT_SR;
     RTT->RTT_MR &= ~RTT_MR_RTTINCIEN;
-    Motion2::timer(); 
+    Motion2::timer();
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_MOTION_PIN, 0);
 #endif

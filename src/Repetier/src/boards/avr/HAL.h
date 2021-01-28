@@ -27,6 +27,12 @@
   This is the main Hardware Abstraction Layer (HAL).
   To make the firmware work with different processors and tool chains,
   all hardware related code should be packed into the hal files.
+
+  Timer usage Mega 2560:
+  Timer 0: Time measurement, software pwm 
+  Timer 1: Motion3 Stepper interrupt
+  Timer 2: Motion2 Stepper interrupt
+  Timer 3: Servos
 */
 
 #include <avr/pgmspace.h>
@@ -34,15 +40,7 @@
 
 #define INLINE __attribute__((always_inline))
 #define CPU_ARCH ARCH_AVR
-#if CPU_ARCH == ARCH_AVR
 #include <avr/io.h>
-#else
-#define PROGMEM
-#define PGM_P const char*
-#define PSTR(s) s
-#define pgm_read_byte_near(x) (*(uint8_t*)x)
-#define pgm_read_byte(x) (*(uint8_t*)x)
-#endif
 
 #define PACK
 
@@ -58,38 +56,26 @@
 #define WIRE_PORT Wire
 #endif
 
+#define PWM_CLOCK_FREQ 3000
+#define PWM_COUNTER_100MS PWM_CLOCK_FREQ / 10
+
 #define ANALOG_PRESCALER _BV(ADPS0) | _BV(ADPS1) | _BV(ADPS2)
 #define MAX_ANALOG_INPUTS 16
 extern bool analogEnabled[MAX_ANALOG_INPUTS];
+extern uint16_t analogValues[MAX_ANALOG_INPUTS];
 
-#if MOTHERBOARD == 8 || MOTHERBOARD == 88 || MOTHERBOARD == 9 || MOTHERBOARD == 92 || CPU_ARCH != ARCH_AVR
-#define EXTERNALSERIAL
-#endif
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-#undef EXTERNALSERIAL
-#define EXTERNALSERIAL
-#endif
-
-//#define EXTERNALSERIAL  // Force using Arduino serial
-#ifndef EXTERNALSERIAL
-#undef HardwareSerial_h
-#define HardwareSerial_h // Don't use standard serial console
-#endif
 #include <inttypes.h>
 #include "Stream.h"
-#ifdef EXTERNALSERIAL
+#ifndef SERIAL_RX_BUFFER_SIZE
 #define SERIAL_RX_BUFFER_SIZE 128
 #endif
+#ifndef SERIAL_TX_BUFFER_SIZE
+#define SERIAL_TX_BUFFER_SIZE 128
+#endif
+
 #include "Arduino.h"
 #include <Wire.h>
-#if CPU_ARCH == ARCH_AVR
 #include "fastio.h"
-#else
-#define READ(IO) digitalRead(IO)
-#define WRITE(IO, v) digitalWrite(IO, v)
-#define SET_INPUT(IO) pinMode(IO, INPUT)
-#define SET_OUTPUT(IO) pinMode(IO, OUTPUT)
-#endif
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #endif
@@ -111,8 +97,9 @@ public:
 
     inline InterruptProtectedBlock(bool later = false) {
         sreg = SREG;
-        if (!later)
+        if (!later) {
             cli();
+        }
     }
 
     inline ~InterruptProtectedBlock() {
@@ -121,11 +108,6 @@ public:
 };
 
 #define SECONDS_TO_TICKS(s) (unsigned long)(s * (float)F_CPU)
-#define ANALOG_INPUT_SAMPLE 5
-// Bits of the ADC converter
-#define ANALOG_INPUT_BITS 10
-#define ANALOG_REDUCE_BITS 0
-#define ANALOG_REDUCE_FACTOR 1
 
 #define MAX_RAM 32767
 
@@ -141,8 +123,6 @@ typedef uint8_t ufast8_t;
 
 #define FAST_INTEGER_SQRT
 #define SERIAL_BUFFER_SIZE 128
-#if 0
-#ifndef EXTERNALSERIAL
 // Implement serial communication for one stream only!
 /*
   HardwareSerial.h - Hardware serial library for Wiring
@@ -167,23 +147,12 @@ typedef uint8_t ufast8_t;
   Modified to use only 1 queue with fixed length by Repetier
 */
 
-#define SERIAL_BUFFER_SIZE 128
-#define SERIAL_BUFFER_MASK 127
-#undef SERIAL_TX_BUFFER_SIZE
-#undef SERIAL_TX_BUFFER_MASK
-#ifdef BIG_OUTPUT_BUFFER
-#define SERIAL_TX_BUFFER_SIZE 128
-#define SERIAL_TX_BUFFER_MASK 127
-#else
-#define SERIAL_TX_BUFFER_SIZE 64
-#define SERIAL_TX_BUFFER_MASK 63
-#endif
-
 struct ring_buffer {
-    uint8_t buffer[SERIAL_BUFFER_SIZE];
+    uint8_t buffer[SERIAL_RX_BUFFER_SIZE];
     volatile uint8_t head;
     volatile uint8_t tail;
 };
+
 struct ring_buffer_tx {
     uint8_t buffer[SERIAL_TX_BUFFER_SIZE];
     volatile uint8_t head;
@@ -192,8 +161,8 @@ struct ring_buffer_tx {
 
 class RFHardwareSerial : public Stream {
 public:
-    ring_buffer* _rx_buffer;
-    ring_buffer_tx* _tx_buffer;
+    ring_buffer _rx_buffer;
+    ring_buffer_tx _tx_buffer;
     volatile uint8_t* _ubrrh;
     volatile uint8_t* _ubrrl;
     volatile uint8_t* _ucsra;
@@ -206,8 +175,7 @@ public:
     uint8_t _u2x;
 
 public:
-    RFHardwareSerial(ring_buffer* rx_buffer, ring_buffer_tx* tx_buffer,
-                     volatile uint8_t* ubrrh, volatile uint8_t* ubrrl,
+    RFHardwareSerial(volatile uint8_t* ubrrh, volatile uint8_t* ubrrl,
                      volatile uint8_t* ucsra, volatile uint8_t* ucsrb,
                      volatile uint8_t* udr,
                      uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x);
@@ -226,27 +194,27 @@ public:
     operator bool();
     int outputUnused(void); // Used for output in interrupts
 };
-extern RFHardwareSerial RFSerial;
-#define RFSERIAL RFSerial
+extern RFHardwareSerial Serial;
+#ifndef RFSERIAL
+#define RFSERIAL Serial
+#endif
 //extern ring_buffer tx_buffer;
-#define WAIT_OUT_EMPTY \
-    while (tx_buffer.head != tx_buffer.tail) { \
-    }
-#else
 #define RFSERIAL Serial
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
 #if BLUETOOTH_SERIAL == 1
 #define RFSERIAL2 Serial1
+extern RFHardwareSerial Serial1;
 #elif BLUETOOTH_SERIAL == 2
 #define RFSERIAL2 Serial2
+extern RFHardwareSerial Serial2;
 #elif BLUETOOTH_SERIAL == 3
 #define RFSERIAL2 Serial3
+extern RFHardwareSerial Serial3;
 #elif BLUETOOTH_SERIAL == 4
 #define RFSERIAL2 Serial4
-#elif BLUETOOTH_SERIAL == 5
-#define RFSERIAL2 Serial5
-#endif
-#endif
+extern RFHardwareSerial Serial4;
+#else
+#error Unknown Serial class for BLUETOOTH_SERIAL selected!
 #endif
 #endif
 
@@ -256,6 +224,7 @@ public:
     static bool wdPinged;
 #endif
     static uint8_t i2cError;
+    static BootReason startReason;
 
     HAL();
     virtual ~HAL();
@@ -373,11 +342,7 @@ public:
     static void spiInit(); // only called once to initialize for spi usage
     static void spiBegin(uint32_t clock, uint8_t mode, uint8_t msbfirst);
     static uint8_t spiTransfer(uint8_t);
-#ifndef USE_ARDUINO_SPI_LIB
-    static void spiEnd() { }
-#else
     static void spiEnd();
-#endif
 
     // I2C Support
 
@@ -414,7 +379,9 @@ public:
 #endif
     static void analogStart();
     static void analogEnable(int channel);
+    static int analogRead(int channel) { return analogValues[channel]; }
     static void reportHALDebug() { }
+    static void switchToBootMode();
 
 protected:
 private:

@@ -1,7 +1,10 @@
 #include "Repetier.h"
 
-const char* const axisNames[] PROGMEM = {
-    "X", "Y", "Z", "E", "A", "B", "C"
+/*const char* const axisNames[] PROGMEM = {
+    Com::tXLetter, Com::tYLetter, Com::tZLetter, Com::tELetter, Com::tALetter, Com::tBLetter, Com::tCLetter
+};*/
+const char* const axisNames[] = {
+    Com::tXLetter, Com::tYLetter, Com::tZLetter, Com::tELetter, Com::tALetter, Com::tBLetter, Com::tCLetter
 };
 
 const int32_t baudrates[] PROGMEM = {
@@ -868,7 +871,7 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
             }
         }
         uint16_t curScrollPos = lastRowDirItem;
-        curScrollPos += !lastRowDirItem ? (GUI::topRow[GUI::level] + 1u) : 3u; 
+        curScrollPos += !lastRowDirItem ? (GUI::topRow[GUI::level] + 1u) : 3u;
         GUI::showScrollbar(action, static_cast<float>(curScrollPos - 1u) / static_cast<float>(dirItemCount - 3u), 5u, dirItemCount);
     }
     curDir.close();

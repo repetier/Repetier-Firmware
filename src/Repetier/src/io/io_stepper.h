@@ -196,6 +196,8 @@
 
 #elif IO_TARGET == IO_TARGET_TEMPLATES
 
+#define STEPPER_SIMPLE(name, stepPin, dirPin, enablePin, minEndstop, maxEndstop) \
+    template class SimpleStepperDriver<stepPin, dirPin, enablePin>;
 #define STEPPER_ADJUST_RESOLUTION(name, driver, from, to) \
     template class AdjustResolutionStepperDriver<driver##Type>;
 #define STEPPER_TMC2130_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \

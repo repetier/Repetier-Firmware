@@ -641,10 +641,12 @@ static fast8_t textScrollPos = 0;
 static fast8_t textScrollWaits = 0;
 static bool textScrollDir = false;
 
-static char scrollBuf[sizeof(GUI::buf) + 1] = { 0 };
+// moved inside scrollSelectedText to reduce ram usage
+// static char scrollBuf[sizeof(GUI::buf) + 1] = { 0 };
 static void scrollSelectedText(int* row) {
     fast8_t lastCharPos = GUI::bufPos;
     if (lastCharPos > UI_COLS) {
+        char scrollBuf[sizeof(GUI::buf) + 1];
         if (!GUI::textIsScrolling) {
             // Wait a few refresh ticks before starting scroll.
             textScrollWaits = 2;
@@ -1300,7 +1302,7 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
         GUI::bufClear();
         n = 0;
         if (tool->getToolType() == ToolTypes::EXTRUDER && tool->hasSecondary() && n < 2) {
-            GUI::bufAddStringP("Fan:");
+            GUI::bufAddStringP(PSTR("Fan:"));
             GUI::bufAddInt(tool->secondaryPercent(), 3);
             GUI::bufAddChar('%');
             GUI::bufAddChar(' ');
@@ -1308,13 +1310,13 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
         }
 
         if (n < 2 && Printer::areAllSteppersDisabled()) {
-            GUI::bufAddStringP("Motors off");
+            GUI::bufAddStringP(PSTR("Motors off"));
             GUI::bufAddChar(' ');
             n++;
         }
 
         if (tool->getToolType() == ToolTypes::EXTRUDER && n < 2) {
-            GUI::bufAddStringP("Flow:");
+            GUI::bufAddStringP(PSTR("Flow:"));
             GUI::bufAddInt(Printer::extrudeMultiply, 3);
             GUI::bufAddChar('%');
             GUI::bufAddChar(' ');

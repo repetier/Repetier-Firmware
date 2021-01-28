@@ -22,24 +22,32 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#include "Repetier.h"
 #include "SdCardInfo.h"
 //------------------------------------------------------------------------------
 #undef SD_CARD_ERROR
-#define SD_CARD_ERROR(e, m) case SD_CARD_ERROR_##e: pr->print(F(#e)); break;
+#define SD_CARD_ERROR(e, m) \
+    case SD_CARD_ERROR_##e: \
+        pr->print(F(#e)); \
+        break;
 void printSdErrorSymbol(print_t* pr, uint8_t code) {
-  pr->print(F("SD_CARD_ERROR_"));
-  switch (code) {
-    SD_ERROR_CODE_LIST
-    default: pr->print(F("UNKNOWN"));
-  }
+    pr->print(F("SD_CARD_ERROR_"));
+    switch (code) {
+        SD_ERROR_CODE_LIST
+    default:
+        pr->print(F("UNKNOWN"));
+    }
 }
 //------------------------------------------------------------------------------
 #undef SD_CARD_ERROR
-#define SD_CARD_ERROR(e, m) case SD_CARD_ERROR_##e: pr->print(F(m)); break;
+#define SD_CARD_ERROR(e, m) \
+    case SD_CARD_ERROR_##e: \
+        pr->print(F(m)); \
+        break;
 void printSdErrorText(print_t* pr, uint8_t code) {
-  switch
-  (code) {
-    SD_ERROR_CODE_LIST
-    default: pr->print(F("Unknown error"));
-  }
+    switch (code) {
+        SD_ERROR_CODE_LIST
+    default:
+        pr->print(F("Unknown error"));
+    }
 }

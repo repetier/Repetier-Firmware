@@ -55,7 +55,7 @@
 
 #elif IO_TARGET == IO_TARGET_TEMPLATES // template definitions in tools.cpp
 
-#define ENDSTOP_SWITCH(name, pin) extern EndstopSwitchDriver<pin> name;
+#define ENDSTOP_SWITCH(name, pin) template class EndstopSwitchDriver<pin>;
 #define ENDSTOP_SWITCH_HW(name, pin, axis, dir) \
     template class EndstopSwitchHardwareDriver<pin, axis, dir>;
 #define ENDSTOP_SWITCH_DEBOUNCE(name, pin, level) template class EndstopSwitchDebounceDriver<pin, level>;

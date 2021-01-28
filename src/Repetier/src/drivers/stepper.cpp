@@ -12,8 +12,12 @@ static constexpr int8_t TMCStallguardMin = -64,
 static TMCChopperTiming tmcChopperTiming = TMC_CHOPPER_TIMING;
 
 static PGM_P const motorNames[NUM_MOTORS] PROGMEM = MOTOR_NAMES;
+#if CPU_ARCH == ARCH_AVR
+constexpr int numMotorNames = NUM_MOTORS;
+#else
 constexpr int numMotorNames = std::extent<decltype(motorNames)>::value;
 static_assert(numMotorNames == NUM_MOTORS, "NUM_MOTORS not defined correctly");
+#endif
 
 int StepperDriverBase::motorIndex() {
     for (fast8_t i = 0; i < NUM_MOTORS; i++) {
@@ -154,10 +158,10 @@ void reportTMC2130(TMC2130Stepper* driver, ProgrammableStepperBase* b, int level
         break;
     }
     Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(Com::tMotorRMSCurrentMAColon, driver->rms_current());
+    Com::printF(Com::tMotorRMSCurrentMAColon, static_cast<int32_t>(driver->rms_current()));
     Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
     Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142f * driver->rms_current(), 0);
-    Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
+    Com::printF(Com::tMotorMicrostepsColon, static_cast<int32_t>(driver->microsteps()));
     Com::printFLN(Com::tMotorSpaceMresColon, (int)driver->mres());
     Com::printFLN(Com::tMotorStealthChopColon, driver->en_pwm_mode(), BoolFormat::ONOFF);
     if (b->getHybridSpeed() > 0) {
@@ -421,10 +425,10 @@ void reportTMC5160(TMC5160Stepper* driver, ProgrammableStepperBase* b, int level
         break;
     }
     Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(Com::tMotorRMSCurrentMAColon, driver->rms_current());
-    Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
+    Com::printF(Com::tMotorRMSCurrentMAColon, static_cast<int32_t>(driver->rms_current()));
+    Com::printFLN(Com::tMotorSpaceSetColonSpace, static_cast<int32_t>(b->getCurrentMillis()));
     Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142f * driver->rms_current(), 0);
-    Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
+    Com::printF(Com::tMotorMicrostepsColon, static_cast<int32_t>(driver->microsteps()));
     Com::printFLN(Com::tMotorSpaceMresColon, (int)driver->mres());
     Com::printFLN(Com::tMotorStealthChopColon, driver->en_pwm_mode(), BoolFormat::ONOFF);
     if (b->getHybridSpeed() > 0) {
@@ -690,10 +694,10 @@ void reportTMC2208(TMC2208Stepper* driver, ProgrammableStepperBase* b, int level
         break;
     }
     Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(Com::tMotorRMSCurrentMAColon, driver->rms_current());
-    Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
+    Com::printF(Com::tMotorRMSCurrentMAColon, static_cast<int32_t>(driver->rms_current()));
+    Com::printFLN(Com::tMotorSpaceSetColonSpace, static_cast<int32_t>(b->getCurrentMillis()));
     Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142f * driver->rms_current(), 0);
-    Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
+    Com::printF(Com::tMotorMicrostepsColon, static_cast<int32_t>(driver->microsteps()));
     Com::printFLN(Com::tMotorSpaceMresColon, (int)driver->mres());
     Com::printFLN(Com::tMotorStealthChopColon, b->getStealthChop(), BoolFormat::ONOFF);
     if (b->getHybridSpeed() > 0) {
@@ -716,7 +720,7 @@ void reportTMC2208(TMC2208Stepper* driver, ProgrammableStepperBase* b, int level
         Com::printFLN(Com::tMotorSlash31);
         Com::printF(Com::tMotorIHOLD, driver->ihold());
         Com::printFLN(Com::tMotorSlash31);
-        Com::printF(Com::tMotorCSActual, driver->cs_actual());
+        Com::printF(Com::tMotorCSActual, static_cast<int32_t>(driver->cs_actual()));
         Com::printFLN(Com::tMotorSlash31);
         // Com::printFLN(PSTR("vsense: "), driver->vsense());
         Com::printFLN(Com::tMotorTOff, (int)driver->toff());
@@ -946,10 +950,10 @@ void reportTMC2209(TMC2209Stepper* driver, ProgrammableStepperBase* b, int level
         break;
     }
     Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
-    Com::printF(Com::tMotorRMSCurrentMAColon, driver->rms_current());
+    Com::printF(Com::tMotorRMSCurrentMAColon, static_cast<int32_t>(driver->rms_current()));
     Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
     Com::printFLN(Com::tMotorMaxCurrentMA, 1.4142f * driver->rms_current(), 0);
-    Com::printF(Com::tMotorMicrostepsColon, driver->microsteps());
+    Com::printF(Com::tMotorMicrostepsColon, static_cast<int32_t>(driver->microsteps()));
     Com::printFLN(Com::tMotorSpaceMresColon, (int)driver->mres());
     Com::printFLN(Com::tMotorStealthChopColon, b->getStealthChop(), BoolFormat::ONOFF);
     if (b->getHybridSpeed() > 0) {
@@ -957,7 +961,7 @@ void reportTMC2209(TMC2209Stepper* driver, ProgrammableStepperBase* b, int level
     } else {
         Com::printFLN(Com::tMotorHybridModeDisabled);
     }
-    Com::printFLN(Com::tMotorStallguardResult, driver->SG_RESULT());
+    Com::printFLN(Com::tMotorStallguardResult, static_cast<int32_t>(driver->SG_RESULT()));
 
     if (level > 0) {
         const uint32_t tstep = driver->TSTEP();
@@ -974,7 +978,7 @@ void reportTMC2209(TMC2209Stepper* driver, ProgrammableStepperBase* b, int level
         Com::printFLN(Com::tMotorSlash31);
         Com::printF(Com::tMotorIHOLD, driver->ihold());
         Com::printFLN(Com::tMotorSlash31);
-        Com::printF(Com::tMotorCSActual, driver->cs_actual());
+        Com::printF(Com::tMotorCSActual, static_cast<int32_t>(driver->cs_actual()));
         Com::printFLN(Com::tMotorSlash31);
         // Com::printFLN(PSTR("vsense: "), driver->vsense());
         Com::printFLN(Com::tMotorTOff, (int)driver->toff());

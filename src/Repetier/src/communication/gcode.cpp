@@ -213,8 +213,9 @@ GCode::GCode() {
 }
 
 void GCode::keepAlive(enum FirmwareState state, int id) {
+    // Id is only for debugging to see where busy is hanging!
+    // Com::printFLN(PSTR("BusyCaller:"), static_cast<int32_t>(id));
     millis_t now = HAL::timeInMilliseconds();
-
     if (state != FirmwareState::NotBusy && keepAliveInterval != 0) {
         if (now - lastBusySignal < keepAliveInterval)
             return;
@@ -365,10 +366,10 @@ void GCode::ackOutOfOrder() {
     Com::printF(PSTR("ooo "));
     if (hasM()) {
         Com::print('M');
-        Com::print(M);
+        Com::print(static_cast<int32_t>(M));
     } else if (hasG()) {
         Com::print('G');
-        Com::print(G);
+        Com::print(static_cast<int32_t>(G));
     }
     Com::println();
 }

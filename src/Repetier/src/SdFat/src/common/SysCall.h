@@ -35,7 +35,7 @@
 #warning nullptr defined
 /** Define nullptr if not C++11 */
 #define nullptr NULL
-#endif  // __cplusplus < 201103
+#endif // __cplusplus < 201103
 //------------------------------------------------------------------------------
 /** Type for millis. */
 typedef uint16_t SdMillis_t;
@@ -45,17 +45,17 @@ typedef uint16_t SdMillis_t;
  * \brief SysCall - Class to wrap system calls.
  */
 class SysCall {
- public:
-  /** \return the time in milliseconds. */
-  static SdMillis_t curTimeMS();
-  /** Halt execution of this thread. */
-  static void halt() {
-    while (1) {
-      yield();
+public:
+    /** \return the time in milliseconds. */
+    static SdMillis_t curTimeMS();
+    /** Halt execution of this thread. */
+    static void halt() {
+        while (1) {
+            yield();
+        }
     }
-  }
-  /** Yield to other threads. */
-  static void yield();
+    /** Yield to other threads. */
+    static void yield();
 };
 #if ENABLE_ARDUINO_FEATURES
 #if defined(ARDUINO)
@@ -63,39 +63,39 @@ class SysCall {
 typedef Print print_t;
 /** Use Arduino Stream. */
 typedef Stream stream_t;
-#else  // defined(ARDUINO)
+#else // defined(ARDUINO)
 #error "Unknown system"
-#endif  // defined(ARDUINO)
+#endif // defined(ARDUINO)
 //------------------------------------------------------------------------------
 #ifndef F
 /** Define macro for strings stored in flash. */
 #define F(str) (str)
-#endif  // F
+#endif // F
 //------------------------------------------------------------------------------
 /** \return the time in milliseconds. */
 inline SdMillis_t SysCall::curTimeMS() {
-  return millis();
+    return millis();
 }
 //------------------------------------------------------------------------------
-#if defined(PLATFORM_ID)  // Only defined if a Particle device
+#if defined(PLATFORM_ID) // Only defined if a Particle device
 inline void SysCall::yield() {
-  Particle.process();
+    Particle.process();
 }
 #elif defined(ARDUINO)
 inline void SysCall::yield() {
-  // Use the external Arduino yield() function.
-  ::yield();
+    // Use the external Arduino yield() function.
+    ::yield();
 }
 #else  // defined(PLATFORM_ID)
-inline void SysCall::yield() {}
-#endif  // defined(PLATFORM_ID)
+inline void SysCall::yield() { }
+#endif // defined(PLATFORM_ID)
 //------------------------------------------------------------------------------
-#else  // ENABLE_ARDUINO_FEATURES
+#else // ENABLE_ARDUINO_FEATURES
 #include "PrintBasic.h"
 /** If not Arduino */
 typedef PrintBasic print_t;
 /** If not Arduino */
 typedef PrintBasic stream_t;
-inline void SysCall::yield() {}
-#endif  // ENABLE_ARDUINO_FEATURES
-#endif  // SysCall_h
+inline void SysCall::yield() { }
+#endif // ENABLE_ARDUINO_FEATURES
+#endif // SysCall_h
