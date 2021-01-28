@@ -289,6 +289,14 @@ public:
     static void setHardwarePWM(int id, int value);
     // Set pwm frequency to value. id is id from initHardwarePWM.
     static void setHardwareFrequency(int id, uint32_t frequency);
+
+    // No DAC on STM32F1's
+    // Initalize hardware DAC control on dacPin if supported.
+    // Returns internal id if it succeeds or -1 if it fails. 
+    static fast8_t initHardwareDAC(fast8_t dacPin) { return -1; }
+    // Set the DAC output to value. id is from initHardwareDAC.
+    static void setHardwareDAC(fast8_t id, fast8_t value) { }
+
     // do any hardware-specific initialization here
     static void hwSetup(void);
 

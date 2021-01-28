@@ -109,9 +109,9 @@ typedef char prog_char;
 #define PWM_COUNTER_100MS PWM_CLOCK_FREQ / 10
 
 // Manipulate the SAM3X8E's real time timer for motion2
-// instead of using a valuable PWM-capable timer 
+// instead of using a valuable PWM-capable timer
 // Only really good for < 8000Hz
-#define MOTION2_USE_REALTIME_TIMER 1 
+#define MOTION2_USE_REALTIME_TIMER 1
 #if (DISABLED(MOTION2_USE_REALTIME_TIMER) || PREPARE_FREQUENCY > (PWM_CLOCK_FREQ / 2))
 #define MOTION2_TIMER TC0
 #define MOTION2_TIMER_CHANNEL 0
@@ -339,6 +339,13 @@ public:
     static void setHardwarePWM(int id, int value);
     // Set pwm frequency to value. id is id from initHardwarePWM.
     static void setHardwareFrequency(int id, uint32_t frequency);
+
+    // Initalize hardware DAC control on dacPin if supported.
+    // Returns internal id if it succeeds or -1 if it fails.
+    static fast8_t initHardwareDAC(fast8_t dacPin);
+    // Set the DAC output to value. id is from initHardwareDAC.
+    static void setHardwareDAC(fast8_t id, fast8_t value);
+
     // do any hardware-specific initialization here
     static inline void hwSetup(void) {
         updateStartReason();
