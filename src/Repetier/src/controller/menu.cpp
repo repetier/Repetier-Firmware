@@ -539,22 +539,31 @@ void __attribute__((weak)) menuEncoderMaxRepeatSteps(GUIAction action, void* dat
 }
 void __attribute__((weak)) menuEncoderMaxRepeatTime(GUIAction action, void* data) {
     DRAW_LONG_P(PSTR("Max. repeat time:"), Com::tUnitMilliSeconds, GUI::maxActionRepeatTimeMS);
-    if (GUI::handleLongValueAction(action, v, GUI::minActionRepeatTimeMS, 2000, 1)) {
+    if (GUI::handleLongValueAction(action, v, GUI::minActionRepeatTimeMS + 1u, 700, 1)) {
         GUI::maxActionRepeatTimeMS = v;
     }
 }
 void __attribute__((weak)) menuEncoderMinRepeatTime(GUIAction action, void* data) {
     DRAW_LONG_P(PSTR("Min. repeat time:"), Com::tUnitMilliSeconds, GUI::minActionRepeatTimeMS);
-    if (GUI::handleLongValueAction(action, v, 3, GUI::maxActionRepeatTimeMS, 1)) {
+    if (GUI::handleLongValueAction(action, v, 1, GUI::maxActionRepeatTimeMS - 1u, 1)) {
         GUI::minActionRepeatTimeMS = v;
     }
-}
+} 
 void __attribute__((weak)) menuConfigEncoder(GUIAction action, void* data) {
     GUI::menuStart(action);
     GUI::menuTextP(action, PSTR("= Config Encoder ="), true);
     GUI::menuBack(action);
-    if ((action == GUIAction::NEXT || action == GUIAction::PREVIOUS || action == GUIAction::ANALYSE) || (HAL::timeInMilliseconds() - GUI::lastAction) > GUI::maxActionRepeatTimeMS) { // Display the current encoder speed to the user.
-        GUI::flashToStringLong(GUI::tmpString, PSTR("(Speed Now @)"), GUI::nextActionRepeat);
+    if ((action == GUIAction::NEXT || action == GUIAction::PREVIOUS || action == GUIAction::ANALYSE)
+        || ((HAL::timeInMilliseconds() - GUI::lastAction) > GUI::maxActionRepeatTimeMS)) {
+        // Display the current encoder speed to the user.
+        GUI::bufClear();
+        GUI::bufAddStringP(PSTR("(steps:"));
+        GUI::bufAddInt(GUI::nextActionRepeat, 0);
+        GUI::bufAddStringP(PSTR("/dif:"));
+        GUI::bufAddLong((GUI::nextActionRepeat ? GUI::lastActionRepeatDiffMS : 0u), 0);
+        GUI::bufAddStringP(PSTR("ms)"));
+        strncpy(GUI::tmpString, GUI::buf, GUI::bufPos);
+        GUI::tmpString[GUI::bufPos] = '\0';
     }
     GUI::menuText(action, GUI::tmpString);
     GUI::menuLongP(action, PSTR("Max. steps:"), GUI::maxActionRepeatStep, menuEncoderMaxRepeatSteps, nullptr, GUIPageType::FIXED_CONTENT);

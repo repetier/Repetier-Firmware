@@ -14,10 +14,10 @@ GUIStatusLevel GUI::statusLevel = GUIStatusLevel::REGULAR;
 bool GUI::contentChanged = false;            ///< set to true if forced refresh is wanted
 GUIAction GUI::nextAction = GUIAction::NONE; ///< Next action to execute on opdate
 int GUI::nextActionRepeat = 0;               ///< Increment for next/previous
-uint8_t GUI::maxActionRepeatStep = ENCODER_MAX_REPEAT_STEPS;      ///< Max amount of extra encoder repeat steps inside value menus
+uint8_t GUI::maxActionRepeatStep = ENCODER_MAX_REPEAT_STEPS;      ///< Max amount of extra encoder repeat steps
 uint16_t GUI::maxActionRepeatTimeMS = ENCODER_MAX_REPEAT_TIME_MS; ///< Clicks longer than this will not recieve any extra steps
-uint16_t GUI::minActionRepeatTimeMS = ENCODER_MIN_REPEAT_TIME_MS;
-millis_t GUI::lastActionRepeatTimeMS;
+uint16_t GUI::minActionRepeatTimeMS = ENCODER_MIN_REPEAT_TIME_MS; ///
+millis_t GUI::lastActionRepeatDiffMS;                             ///< Just used to display the time diff in the encoder speed menu
 bool GUI::speedAffectMenus = ENCODER_APPLY_REPEAT_STEPS_IN_MENUS;
 
 uint16_t GUI::eprStart;
@@ -234,60 +234,59 @@ void GUI::backKey() {
 }
 
 static fast8_t calcRepeatSteps(bool changedDir) {
-    millis_t curDiffTime = HAL::timeInMilliseconds() - GUI::lastActionRepeatTimeMS;
-    if (curDiffTime <= 2ul) { // Noise
+    static millis_t lastRepeatTimeMS;
+    millis_t curDiffTime = HAL::timeInMilliseconds() - lastRepeatTimeMS;
+    lastRepeatTimeMS = HAL::timeInMilliseconds();
+    if (!curDiffTime && !changedDir) {
         return 1;
     }
-    if (changedDir) {
-        millis_t skip = GUI::maxActionRepeatTimeMS * 2u;
-        curDiffTime = curDiffTime > skip ? curDiffTime : skip;
-    } else if (curDiffTime >= UINT16_MAX) {
-        curDiffTime = UINT16_MAX;
-    }
-    static uint16_t lastDiffTimes[7u] = { 0ul };
-    static uint8_t avgIndex = 0u; 
-    if ((curDiffTime > GUI::maxActionRepeatTimeMS
-         && lastDiffTimes[avgIndex] <= GUI::maxActionRepeatTimeMS)) {
+    constexpr uint8_t diffCnt = 12u;
+    static uint16_t lastDiffTimes[diffCnt] = { 0ul };
+    static uint8_t avgIndex;
+    if (curDiffTime > GUI::maxActionRepeatTimeMS || changedDir) {
         // Reset avgs if outside of maxRepeat
-        lastDiffTimes[0u]
-            = lastDiffTimes[1u] = lastDiffTimes[2u]
-            = lastDiffTimes[3u] = lastDiffTimes[4u]
-            = lastDiffTimes[5u] = lastDiffTimes[6u] = static_cast<uint16_t>(curDiffTime);
-    } else {
-        lastDiffTimes[++avgIndex > 6u ? (avgIndex = 0u) : avgIndex] = curDiffTime < GUI::minActionRepeatTimeMS ? GUI::minActionRepeatTimeMS : curDiffTime;
+        for (size_t i = 0u; i < diffCnt; i++) {
+            lastDiffTimes[i] = GUI::maxActionRepeatTimeMS;
+        }
+        curDiffTime = GUI::maxActionRepeatTimeMS;
+    } else if (curDiffTime < GUI::minActionRepeatTimeMS) {
+        curDiffTime = GUI::minActionRepeatTimeMS;
     }
 
-    millis_t avgDiff = (lastDiffTimes[0u]
-                       + lastDiffTimes[1u] + lastDiffTimes[2u]
-                       + lastDiffTimes[3u] + lastDiffTimes[4u]
-                       + lastDiffTimes[5u] + lastDiffTimes[6u])
-        / 7u;
-    fast8_t repeat = 1;
-    if (avgDiff <= GUI::maxActionRepeatTimeMS) {
-        repeat = static_cast<float>(GUI::maxActionRepeatStep / static_cast<float>(GUI::maxActionRepeatTimeMS - GUI::minActionRepeatTimeMS)) * static_cast<float>(GUI::maxActionRepeatTimeMS - avgDiff);
-        if (repeat < 1) {
-            repeat = 1;
-        } else if (repeat > GUI::maxActionRepeatStep) {
-            repeat = GUI::maxActionRepeatStep;
+    lastDiffTimes[(++avgIndex == diffCnt) ? (avgIndex = 0u) : avgIndex] = curDiffTime;
+    GUI::lastActionRepeatDiffMS = (lastDiffTimes[0u]
+                                   + lastDiffTimes[1u] + lastDiffTimes[2u]
+                                   + lastDiffTimes[3u] + lastDiffTimes[4u]
+                                   + lastDiffTimes[5u] + lastDiffTimes[6u]
+                                   + lastDiffTimes[7u] + lastDiffTimes[8u]
+                                   + lastDiffTimes[9u] + lastDiffTimes[10u]
+                                   + lastDiffTimes[11u])
+        / diffCnt;
+
+    float step = 1.0f;
+    if (GUI::lastActionRepeatDiffMS < GUI::maxActionRepeatTimeMS) {
+        uint16_t dif = GUI::maxActionRepeatTimeMS - GUI::minActionRepeatTimeMS;
+        uint16_t dt = (GUI::maxActionRepeatTimeMS - GUI::lastActionRepeatDiffMS);
+        step += (GUI::maxActionRepeatStep * static_cast<float>(dt * dt * dt)) / static_cast<float>(dif * dif * dif);
+        if (step < 1.0f) {
+            step = 1.0f;
+        } else if (step > GUI::maxActionRepeatStep) {
+            step = GUI::maxActionRepeatStep;
         }
     }
-    GUI::lastActionRepeatTimeMS = HAL::timeInMilliseconds();
-    return repeat;
+    return step;
 }
-static bool lastDir = false;
-void GUI::nextKey() { 
+void GUI::nextKey() {
     nextAction = GUIAction::NEXT;
-    nextActionRepeat = (maxActionRepeatStep > 1) ? calcRepeatSteps(!lastDir ? true : false) : 1;
+    nextActionRepeat = (maxActionRepeatStep > 1) ? calcRepeatSteps(false) : 1;
     contentChanged = true;
-    lastDir = true;
     resetScrollbarTimer();
 }
 
-void GUI::previousKey() { 
+void GUI::previousKey() {
     nextAction = GUIAction::PREVIOUS;
-    nextActionRepeat = (maxActionRepeatStep > 1) ? calcRepeatSteps(lastDir ? true : false) : 1;
+    nextActionRepeat = (maxActionRepeatStep > 1) ? calcRepeatSteps(false) : 1;
     contentChanged = true;
-    lastDir = false;
     resetScrollbarTimer();
 }
 
@@ -843,6 +842,10 @@ bool GUI::handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, 
 void GUI::menuAffectBySpeed(GUIAction& action) {
     if ((action == GUIAction::NEXT || action == GUIAction::PREVIOUS)
         && nextActionRepeat > 1) {
+        static GUIAction lastDir = action;
+        if (action != lastDir) {
+            nextActionRepeat = calcRepeatSteps(true);
+        }
         if (action == GUIAction::NEXT) { // Menus already moved cursor once.
             cursorRow[level] += nextActionRepeat - 1;
         } else {
@@ -853,6 +856,7 @@ void GUI::menuAffectBySpeed(GUIAction& action) {
         } else if (cursorRow[level] < 1) {
             cursorRow[level] = 1;
         }
+        lastDir = action;
     }
 }
 

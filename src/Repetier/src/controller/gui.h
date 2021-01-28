@@ -160,12 +160,12 @@ public:
     static GUIAction nextAction;                 ///< Next action to execute on opdate
     static int nextActionRepeat;                 ///< Increment for next/previous
     static bool speedAffectMenus;                ///< Apply encoder step speed to menus
-    static uint8_t maxActionRepeatStep;          ///< Max amount of extra encoder repeat steps inside value menus
+    static uint8_t maxActionRepeatStep;          ///< Max amount of extra encoder repeat steps
     static uint16_t maxActionRepeatTimeMS;       ///< Clicks longer than this will not recieve any extra steps
-    static uint16_t minActionRepeatTimeMS; 
-    static millis_t lastActionRepeatTimeMS;
+    static uint16_t minActionRepeatTimeMS;       ///
+    static millis_t lastActionRepeatDiffMS;      ///< Just used to display the time diff in the encoder speed menu
 
-    
+
     static uint16_t eprStart;
     static GUIStatusLevel statusLevel;
     static bool textIsScrolling;
