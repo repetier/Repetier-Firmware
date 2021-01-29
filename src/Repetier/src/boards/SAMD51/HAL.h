@@ -349,7 +349,7 @@ public:
     // Set pwm frequency to value. id is id from initHardwarePWM.
     static void setHardwareFrequency(int id, uint32_t frequency);
     // Initalize hardware DAC control on dacPin if supported.
-    // Returns internal id if it succeeds or -1 if it fails. 
+    // Returns internal id if it succeeds or -1 if it fails.
     static fast8_t initHardwareDAC(fast8_t dacPin);
     // Set the DAC output to value. id is from initHardwareDAC.
     static void setHardwareDAC(fast8_t id, fast8_t value);
@@ -610,7 +610,9 @@ public:
     static inline int16_t readFlashWord(PGM_P ptr) {
         return pgm_read_word(ptr);
     }
-
+    static inline const void* readFlashAddress(const void* adr) {
+        return (const void*)*(adr);
+    }
     static inline void serialSetBaudrate(long baud) {
         // Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0

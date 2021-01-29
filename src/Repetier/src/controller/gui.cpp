@@ -592,9 +592,10 @@ void GUI::flashToStringFlash(char* dest, FSTRINGPARAM(text), FSTRINGPARAM(val)) 
         }
         if (c == '@') {
             while (pos < MAX_COLS) {
-                uint8_t c = HAL::readFlashByte(val++);
-                if (c == 0)
+                c = HAL::readFlashByte(val++);
+                if (c == 0) {
                     break;
+                }
                 dest[pos++] = c;
             }
         } else {
@@ -884,6 +885,10 @@ void directAction(GUIAction action, void* data) {
         break;
     case GUI_DIRECT_ACTION_TOGGLE_AUTORETRACTIONS:
         Printer::setAutoretract(!Printer::isAutoretract(), true);
+        break;
+    case GUI_EXIT_FATAL:
+        Printer::failedMode = false;
+        GCode::resetFatalError();
         break;
     }
 }

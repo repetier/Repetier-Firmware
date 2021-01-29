@@ -11,7 +11,7 @@ static constexpr int8_t TMCStallguardMin = -64,
 
 static TMCChopperTiming tmcChopperTiming = TMC_CHOPPER_TIMING;
 
-static PGM_P const motorNames[NUM_MOTORS] PROGMEM = MOTOR_NAMES;
+const char* const motorNames[NUM_MOTORS] PROGMEM = MOTOR_NAMES;
 #if CPU_ARCH == ARCH_AVR
 constexpr int numMotorNames = NUM_MOTORS;
 #else
@@ -31,8 +31,8 @@ int StepperDriverBase::motorIndex() {
 
 void StepperDriverBase::printMotorName() {
     int idx = motorIndex();
-    PGM_P* adr = (PGM_P*)pgm_read_word(&motorNames);
-    Com::printF((const char*)pgm_read_word(&adr[idx]));
+    PGM_P adr = (PGM_P)HAL::readFlashAddress(&motorNames[idx]);
+    Com::printF(adr);
 }
 
 void StepperDriverBase::printMotorNumberAndName(bool newline) {
@@ -250,8 +250,8 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::eepromReserve() {
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::eepromHandle() {
-    PGM_P* adr = (PGM_P*)pgm_read_word(&motorNames);
-    EEPROM::handlePrefix(adr[motorIndex()]);
+    PGM_P adr = (PGM_P)HAL::readFlashAddress(&motorNames[motorIndex()]);
+    EEPROM::handlePrefix(adr]);
     processEEPROM(31);
     EEPROM::removePrefix();
 }
@@ -519,8 +519,8 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::eepromReserve() {
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::eepromHandle() {
-    PGM_P* adr = (PGM_P*)pgm_read_word(&motorNames);
-    EEPROM::handlePrefix(adr[motorIndex()]);
+    PGM_P adr = (PGM_P)HAL::readFlashAddress(&motorNames[motorIndex()]);
+    EEPROM::handlePrefix(adr);
     processEEPROM(31);
     EEPROM::removePrefix();
 }
@@ -783,8 +783,8 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::init() {
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::eepromHandle() {
-    PGM_P* adr = (PGM_P*)pgm_read_word(&motorNames);
-    EEPROM::handlePrefix(adr[motorIndex()]);
+    PGM_P adr = (PGM_P)HAL::readFlashAddress(&motorNames[motorIndex()]);
+    EEPROM::handlePrefix(adr);
     processEEPROM(15); // has no stallguard
     EEPROM::removePrefix();
 }
@@ -1054,8 +1054,8 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::init() {
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::eepromHandle() {
-    PGM_P* adr = (PGM_P*)pgm_read_word(&motorNames);
-    EEPROM::handlePrefix(adr[motorIndex()]);
+    PGM_P adr = (PGM_P)HAL::readFlashAddress(&motorNames[motorIndex()]);
+    EEPROM::handlePrefix(adr);
     processEEPROM(63); //StallGuard 4, flag 32
     EEPROM::removePrefix();
 }

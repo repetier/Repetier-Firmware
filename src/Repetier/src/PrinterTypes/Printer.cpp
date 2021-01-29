@@ -306,7 +306,7 @@ void Printer::enablePowerIfNeeded() {
 /**
   \brief Stop heater and stepper motors. Disable power,if possible.
 */
-void Printer::kill(uint8_t onlySteppers) {
+void Printer::kill(uint8_t onlySteppers, bool motors) {
     EVENT_KILL(onlySteppers);
     if (areAllSteppersDisabled() && onlySteppers) {
         return;
@@ -314,33 +314,35 @@ void Printer::kill(uint8_t onlySteppers) {
     if (Printer::isAllKilled()) {
         return;
     }
+    if (motors) {
 #if defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS > 0
-    disableAllMotorDrivers();
+        disableAllMotorDrivers();
 #endif // defined
-    XMotor.disable();
-    YMotor.disable();
+        XMotor.disable();
+        YMotor.disable();
 #if defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT) && PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT == 0
-    ZMotor.disable();
-#else
-    if (!onlySteppers) {
         ZMotor.disable();
-    }
-#endif
-    for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
-        Motion1::motors[i]->disable();
-    }
-    Tool::disableMotors();
-    setAllSteppersDisabled();
-
-    FOR_ALL_AXES(i) {
-#if defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT) && PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT == 1
-        if (i == Z_AXIS) {
-            continue;
+#else
+        if (!onlySteppers) {
+            ZMotor.disable();
         }
 #endif
-        Motion1::setAxisHomed(i, false);
+        for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
+            Motion1::motors[i]->disable();
+        }
+        Tool::disableMotors();
+        setAllSteppersDisabled();
+
+        FOR_ALL_AXES(i) {
+#if defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT) && PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT == 1
+            if (i == Z_AXIS) {
+                continue;
+            }
+#endif
+            Motion1::setAxisHomed(i, false);
+        }
+        unsetHomedAll();
     }
-    unsetHomedAll();
     if (!onlySteppers) {
         for (uint8_t i = 0; i < NUM_TOOLS; i++) {
             Tool::getTool(i)->shutdown();
@@ -355,7 +357,9 @@ void Printer::kill(uint8_t onlySteppers) {
         WRITE(PS_ON_PIN, (POWER_INVERTING ? LOW : HIGH));
         Printer::setPowerOn(false);
 #endif
-        Printer::setAllKilled(true);
+        if (!onlySteppers && motors) {
+            Printer::setAllKilled(true);
+        }
     } else {
         UI_STATUS_UPD("Motors disabled");
     }
@@ -1359,7 +1363,7 @@ void Printer::rescueReport() {
         FOR_ALL_AXES(i) {
             Com::print(' ');
             Com::print('L');
-            Com::printF(axisNames[i]);
+            Com::printF((const char*)HAL::readFlashAddress(&axisNames[i]));
             Com::printF(Com::tColon, EEPROM::getRecoverFloat(rescuePos + EPR_RESCUE_LAST_RECEIVED + sizeof(float) * i), 2);
         }
         Com::printF(PSTR(" LT:"), (int)EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_TOOL));
@@ -1367,7 +1371,7 @@ void Printer::rescueReport() {
     if (mode & 2) {
         FOR_ALL_AXES(i) {
             Com::print(' ');
-            Com::printF(axisNames[i]);
+            Com::printF((const char*)HAL::readFlashAddress(&axisNames[i]));
             Com::printF(Com::tColon, EEPROM::getRecoverFloat(rescuePos + EPR_RESCUE_LAST_POS + sizeof(float) * i), 2);
         }
     }

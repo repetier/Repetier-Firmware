@@ -65,7 +65,7 @@
 
 #define INLINE __attribute__((always_inline))
 
-#define FORCE_INLINE __attribute__((always_inline)) inline 
+#define FORCE_INLINE __attribute__((always_inline)) inline
 
 // do not use program space memory with Due
 #define PROGMEM
@@ -275,7 +275,7 @@ public:
     static char virtualEeprom[EEPROM_BYTES];
     static bool wdPinged;
     static uint8_t i2cError;
-    static BootReason startReason; 
+    static BootReason startReason;
 
     HAL();
     virtual ~HAL();
@@ -292,7 +292,7 @@ public:
 
     // No DAC on STM32F1's
     // Initalize hardware DAC control on dacPin if supported.
-    // Returns internal id if it succeeds or -1 if it fails. 
+    // Returns internal id if it succeeds or -1 if it fails.
     static fast8_t initHardwareDAC(fast8_t dacPin) { return -1; }
     // Set the DAC output to value. id is from initHardwareDAC.
     static void setHardwareDAC(fast8_t id, fast8_t value) { }
@@ -431,14 +431,16 @@ public:
     static inline int16_t readFlashWord(PGM_P ptr) {
         return pgm_read_word(ptr);
     }
-
+    static inline const void* readFlashAddress(const void* adr) {
+        return (const void*)*(adr);
+    }
     static inline void serialSetBaudrate(long baud) {
         // Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
         RFSERIAL2.end();
         RFSERIAL2.begin(baud);
 #endif
-#if defined(USBCON) && defined(USBD_USE_CDC) 
+#if defined(USBCON) && defined(USBD_USE_CDC)
         if (static_cast<Stream*>(&RFSERIAL) != &SerialUSB) { // When just updating the baudrate, don't restart USB.
             RFSERIAL.end();
         }

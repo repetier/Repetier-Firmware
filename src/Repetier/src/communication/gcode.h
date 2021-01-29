@@ -26,6 +26,11 @@
 #define GCODE_BUFFER_SIZE 1
 #endif
 
+#define FATAL_FLAG_POWER 1
+#define FATAL_FLAG_MOTORS 2
+#define FATAL_FLAG_HEATER 4
+#define FATAL_FLAG_SLOW_STOP 8
+
 enum class FirmwareState { NotBusy = 0,
                            Processing,
                            Paused,
@@ -405,7 +410,7 @@ public:
     static void pushCommand();
     static void executeFString(FSTRINGPARAM(cmd));
     static uint8_t computeBinarySize(char* ptr);
-    static void fatalError(FSTRINGPARAM(message));
+    static void fatalError(FSTRINGPARAM(message), uint8_t flags = 255);
     static void reportFatalError();
     static void resetFatalError();
     inline static bool hasFatalError() {

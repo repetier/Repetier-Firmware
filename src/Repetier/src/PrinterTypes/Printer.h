@@ -498,7 +498,7 @@ public:
     }
 
     static INLINE void setAutoretract(uint8_t b, bool silent = false) {
-        flag2 = (b ? flag2 | PRINTER_FLAG2_AUTORETRACT : flag2 & ~PRINTER_FLAG2_AUTORETRACT); 
+        flag2 = (b ? flag2 | PRINTER_FLAG2_AUTORETRACT : flag2 & ~PRINTER_FLAG2_AUTORETRACT);
         if (!silent) {
             Com::printFLN(PSTR("Autoretract:"), b);
         }
@@ -650,7 +650,7 @@ public:
     \return true if queuing was successful.
     */
     static uint8_t moveToReal(float x, float y, float z, float e, float f, bool pathOptimize = true);
-    static void kill(uint8_t only_steppers);
+    static void kill(uint8_t only_steppers, bool motors = true);
     static void setup();
     static void defaultLoopActions();
     static void setOrigin(float xOff, float yOff, float zOff);

@@ -1,9 +1,6 @@
 #include "Repetier.h"
 
-/*const char* const axisNames[] PROGMEM = {
-    Com::tXLetter, Com::tYLetter, Com::tZLetter, Com::tELetter, Com::tALetter, Com::tBLetter, Com::tCLetter
-};*/
-const char* const axisNames[] = {
+const char* const axisNames[] PROGMEM = {
     Com::tXLetter, Com::tYLetter, Com::tZLetter, Com::tELetter, Com::tALetter, Com::tBLetter, Com::tCLetter
 };
 
@@ -22,7 +19,7 @@ void __attribute__((weak)) menuBabystepZ(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuMoveAxisFine(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Move @-Axis (0.01mm):"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Move @-Axis (0.01mm):"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::getShowPosition(axis), 2);
     if (!Tool::getActiveTool()->showMachineCoordinates()) {
         v -= Motion1::g92Offsets[axis];
@@ -36,7 +33,7 @@ void __attribute__((weak)) menuMoveAxisFine(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuMoveAxis(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Move @-Axis (1mm):"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Move @-Axis (1mm):"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::getShowPosition(axis), 2);
     if (!Tool::getActiveTool()->showMachineCoordinates()) {
         v -= Motion1::g92Offsets[axis];
@@ -62,7 +59,7 @@ void __attribute__((weak)) menuMoveE(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuStepsPerMMFine(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Resolution @ Fine:"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Resolution @ Fine:"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitStepsPerMM, Motion1::resolution[axis], 2);
     if (GUI::handleFloatValueAction(action, v, 0, 100000, 0.01)) {
         Motion1::resolution[axis] = v;
@@ -71,7 +68,7 @@ void __attribute__((weak)) menuStepsPerMMFine(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuStepsPerMM(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Resolution @ Coarse:"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Resolution @ Coarse:"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitStepsPerMM, Motion1::resolution[axis], 2);
     if (action == GUIAction::CLICK) { // catch default action
         GUI::replace(menuStepsPerMMFine, data, GUIPageType::FIXED_CONTENT);
@@ -84,7 +81,7 @@ void __attribute__((weak)) menuStepsPerMM(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuMinPosFine(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Min Pos @ Fine:"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Min Pos @ Fine:"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::minPos[axis], 2);
     if (GUI::handleFloatValueAction(action, v, -2000, 2000, 0.01)) {
         Motion1::minPos[axis] = v;
@@ -93,7 +90,7 @@ void __attribute__((weak)) menuMinPosFine(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuMinPos(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Min Pos @ Coarse:"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Min Pos @ Coarse:"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::minPos[axis], 2);
     if (action == GUIAction::CLICK) { // catch default action
         GUI::replace(menuMinPosFine, data, GUIPageType::FIXED_CONTENT);
@@ -106,7 +103,7 @@ void __attribute__((weak)) menuMinPos(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuMaxPosFine(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max Pos @ Fine:"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max Pos @ Fine:"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::maxPos[axis], 2);
     if (GUI::handleFloatValueAction(action, v, -2000, 2000, 0.01)) {
         Motion1::maxPos[axis] = v;
@@ -115,7 +112,7 @@ void __attribute__((weak)) menuMaxPosFine(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuMaxPos(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max Pos @ Coarse:"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max Pos @ Coarse:"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::maxPos[axis], 2);
     if (action == GUIAction::CLICK) { // catch default action
         GUI::replace(menuMaxPosFine, data, GUIPageType::FIXED_CONTENT);
@@ -128,7 +125,7 @@ void __attribute__((weak)) menuMaxPos(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuHomingSpeed(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Homing @ Speed:"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Homing @ Speed:"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS, Motion1::homingFeedrate[axis], 0);
     if (GUI::handleFloatValueAction(action, v, 1, 300, 1)) {
         Motion1::homingFeedrate[axis] = v;
@@ -137,7 +134,7 @@ void __attribute__((weak)) menuHomingSpeed(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuMoveSpeed(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Move @ Speed:"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Move @ Speed:"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS, Motion1::moveFeedrate[axis], 0);
     if (GUI::handleFloatValueAction(action, v, 1, Motion1::maxFeedrate[axis], 1)) {
         Motion1::moveFeedrate[axis] = v;
@@ -146,7 +143,7 @@ void __attribute__((weak)) menuMoveSpeed(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuMaxSpeed(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max @ Speed:"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max @ Speed:"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS, Motion1::maxFeedrate[axis], 0);
     if (GUI::handleFloatValueAction(action, v, 1, 1000, 1)) {
         Motion1::maxFeedrate[axis] = v;
@@ -155,7 +152,7 @@ void __attribute__((weak)) menuMaxSpeed(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuMaxAcceleration(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max @ Print Accel.:"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max @ Print Accel.:"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS2, Motion1::maxAccelerationEEPROM[axis], 0);
     if (GUI::handleFloatValueAction(action, v, 50, 20000, 50)) {
         Motion1::maxAcceleration[axis] = Motion1::maxAccelerationEEPROM[axis] = v;
@@ -164,7 +161,7 @@ void __attribute__((weak)) menuMaxAcceleration(GUIAction action, void* data) {
 
 void __attribute__((weak)) menuMaxTravelAcceleration(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max @ Travel Accel.:"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max @ Travel Accel.:"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS2, Motion1::maxTravelAccelerationEEPROM[axis], 0);
     if (GUI::handleFloatValueAction(action, v, 50, 20000, 50)) {
         Motion1::maxTravelAcceleration[axis] = Motion1::maxTravelAccelerationEEPROM[axis] = v;
@@ -173,7 +170,7 @@ void __attribute__((weak)) menuMaxTravelAcceleration(GUIAction action, void* dat
 
 void __attribute__((weak)) menuMaxYank(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max @ Jerk:"), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("Max @ Jerk:"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMMPS, Motion1::maxYank[axis], 1);
     if (GUI::handleFloatValueAction(action, v, 0.1, 100, 0.1)) {
         Motion1::maxYank[axis] = v;
@@ -192,7 +189,7 @@ void __attribute__((weak)) menuConfigVolume(GUIAction action, void* data) {
 }
 void __attribute__((weak)) menuConfigAxis(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data);
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("= Config @-Axis ="), axisNames[axis]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("= Config @-Axis ="), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     GUI::menuStart(action);
     GUI::menuText(action, GUI::tmpString, true);
     GUI::menuBack(action);
@@ -210,6 +207,7 @@ void __attribute__((weak)) menuConfigAxis(GUIAction action, void* data) {
 
 // RETRACT MENUS
 
+#if FEATURE_RETRACTION
 void __attribute__((weak)) menuRetractLength(GUIAction action, void* data) {
     GUI::flashToString(GUI::tmpString, PSTR("Retract Length:"));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM, Motion1::retractLength, 2);
@@ -292,6 +290,7 @@ void __attribute__((weak)) menuConfigRetraction(GUIAction action, void* data) {
     GUI::menuEnd(action);
 #endif
 }
+#endif
 
 // END RETRACT MENUS
 
@@ -444,7 +443,7 @@ void __attribute__((weak)) menuMove(GUIAction action, void* data) {
         if (Motion1::motors[i] == nullptr) {
             continue;
         }
-        GUI::flashToStringFlash(GUI::tmpString, PSTR("Move @:"), axisNames[i]);
+        GUI::flashToStringFlash(GUI::tmpString, PSTR("Move @:"), (const char*)HAL::readFlashAddress(&axisNames[i]));
         if (i == E_AXIS) {
             GUI::menuFloat(action, GUI::tmpString, Motion1::getShowPosition(i), 2, menuMoveE, (void*)(int)i, GUIPageType::FIXED_CONTENT);
         } else {
@@ -463,7 +462,7 @@ void __attribute__((weak)) menuHome(GUIAction action, void* data) {
         if (i == E_AXIS || (i == A_AXIS && PRINTER_TYPE == PRINTER_TYPE_DUAL_X)) {
             continue;
         }
-        GUI::flashToStringFlash(GUI::tmpString, PSTR("Home @"), axisNames[i]);
+        GUI::flashToStringFlash(GUI::tmpString, PSTR("Home @"), (const char*)HAL::readFlashAddress(&axisNames[i]));
         GUI::menuSelectable(action, GUI::tmpString, directAction, (void*)(GUI_DIRECT_ACTION_HOME_X + i), GUIPageType::ACTION);
     }
     GUI::menuEnd(action);
@@ -938,7 +937,7 @@ void __attribute__((weak)) menuConfig(GUIAction action, void* data) {
         if (i == E_AXIS) {
             continue;
         }
-        GUI::flashToStringFlash(GUI::tmpString, PSTR("@-Axis"), axisNames[i]);
+        GUI::flashToStringFlash(GUI::tmpString, PSTR("@-Axis"), (const char*)HAL::readFlashAddress(&axisNames[i]));
         GUI::menuSelectable(action, GUI::tmpString, menuConfigAxis, (void*)((int)i), GUIPageType::MENU);
     }
 #if Z_PROBE_TYPE != Z_PROBE_TYPE_NONE

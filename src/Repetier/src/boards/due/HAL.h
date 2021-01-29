@@ -552,7 +552,9 @@ public:
     static inline int16_t readFlashWord(PGM_P ptr) {
         return pgm_read_word(ptr);
     }
-
+    static inline const void* readFlashAddress(const void* adr) {
+        return (const void*)*(adr);
+    }
     static inline void serialSetBaudrate(long baud) {
         static bool serialInitialized = false;
         Serial.setInterruptPriority(1);

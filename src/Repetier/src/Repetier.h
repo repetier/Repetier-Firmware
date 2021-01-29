@@ -459,6 +459,10 @@ enum class BootReason {
 
 extern ServoInterface* servos[];
 
+#ifndef SAFE_HOMING
+#define SAFE_HOMING 1
+#endif
+
 #ifndef LAZY_DUAL_X_AXIS
 #define LAZY_DUAL_X_AXIS 0
 #endif
@@ -583,13 +587,8 @@ struct FanController {
 };
 
 extern FanController fans[];
-// extern const uint8 osAnalogInputChannels[] PROGMEM;
-//extern uint8 osAnalogInputCounter[ANALOG_INPUTS];
-//extern uint osAnalogInputBuildup[ANALOG_INPUTS];
-//extern uint8 osAnalogInputPos; // Current sampling position
-//#if ANALOG_INPUTS > 0
-//extern volatile uint osAnalogInputValues[ANALOG_INPUTS];
-//#endif
+
+extern const char* const motorNames[] PROGMEM;
 
 extern BeeperSourceBase* beepers[];
 
