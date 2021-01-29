@@ -117,6 +117,7 @@ public:
     static void handleLong(uint pos, PGM_P text, int32_t& var);
     static void handleLong(uint pos, PGM_P text, uint32_t& var);
     static void handleInt(uint pos, PGM_P text, int16_t& var);
+    static void handleInt(uint pos, PGM_P text, uint16_t& var);
     static void handleByte(uint pos, PGM_P text, uint8_t& var);
     static void handleByte(uint pos, PGM_P text, int8_t& var);
     static void handleByte(uint pos, PGM_P text, int32_t& var);

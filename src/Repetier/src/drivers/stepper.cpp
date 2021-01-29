@@ -251,7 +251,7 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::eepromReserve() {
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::eepromHandle() {
     PGM_P adr = (PGM_P)HAL::readFlashAddress(&motorNames[motorIndex()]);
-    EEPROM::handlePrefix(adr]);
+    EEPROM::handlePrefix(adr);
     processEEPROM(31);
     EEPROM::removePrefix();
 }

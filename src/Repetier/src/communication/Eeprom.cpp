@@ -133,7 +133,7 @@ void EEPROM::callHandle() {
     PrinterType::eepromHandle();
     Tool::eepromHandleTools();
     GUI::eepromHandle();
-    
+
     // Add generic eepromHandle calls
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_EEPROM
@@ -471,6 +471,36 @@ void EEPROM::handleInt(uint pos, PGM_P text, int16_t& var) {
         Com::printF(Com::tEPR1, static_cast<int>(pos));
         Com::print(' ');
         Com::print(var);
+        Com::print(' ');
+        Com::print(prefix);
+        Com::printFLN(text);
+        HAL::delayMilliseconds(4); // reduces somehow transmission errors
+    } else if (mode == EEPROMMode::SET_VAR) {
+        if (pos == storePos) {
+            if (storeType != EEPROMType::INT) {
+                Com::printErrorFLN(PSTR("Storing variable called for wrong type int"));
+            } else {
+                if (var != storeVar.i) {
+                    var = storeVar.i;
+                    markChanged();
+                }
+            }
+        }
+    }
+#if EEPROM_MODE != 0
+    else if (mode == EEPROMMode::STORE) {
+        HAL::eprSetInt16(pos, var);
+    } else if (mode == EEPROMMode::READ) {
+        var = HAL::eprGetInt16(pos);
+    }
+#endif
+}
+
+void EEPROM::handleInt(uint pos, PGM_P text, uint16_t& var) {
+    if (mode == EEPROMMode::REPORT && !silent && text != nullptr) {
+        Com::printF(Com::tEPR1, static_cast<int>(pos));
+        Com::print(' ');
+        Com::print(static_cast<int32_t>(var));
         Com::print(' ');
         Com::print(prefix);
         Com::printFLN(text);
