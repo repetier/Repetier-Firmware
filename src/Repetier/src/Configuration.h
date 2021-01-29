@@ -90,6 +90,14 @@
 // Encoder speed 0 = fastest, 1 or 2 = slowest - set so 1 click is one menu move
 // Default is 2 if not set by controller. Us eonly to fix wrong setting
 #define ENCODER_SPEED 1
+
+// Dynamically increase the speed at which we step through the menus/change values.
+// Set ENCODER_MAX_REPEAT_STEPS to 1 to disable this. Also stored in EEPROM.
+#define ENCODER_MAX_REPEAT_STEPS 5            // Max. extra steps we can gain.
+#define ENCODER_MAX_REPEAT_TIME_MS 40         // Max. time we have before our extra steps reset.
+#define ENCODER_MIN_REPEAT_TIME_MS 15         // At this repeat rate we accumulate to the max step speed.
+#define ENCODER_APPLY_REPEAT_STEPS_IN_MENUS 1 // Set to 0 to only affect changing config values.
+
 // Default materials in temperature menus. First value is extruder temp, then bed and chamber temperature. 0 = do not show.
 #define DEFAULT_MATERIALS \
     DEFAULT_MATERIAL(Com::tMatPLA, 215, 60, 0) \

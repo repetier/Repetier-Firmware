@@ -716,7 +716,7 @@ void printRowCentered(uint8_t r, char* text) {
 }
 
 millis_t init100msTicks = 0;
-void GUI::init() {
+void GUI::driverInit() {
     // Function called immediately at bootup
     init100msTicks = 0;
 }
@@ -791,7 +791,10 @@ void GUI::menuStart(GUIAction action) {
     }
 }
 
-void GUI::menuEnd(GUIAction action) {
+void GUI::menuEnd(GUIAction action, bool scrollbar, bool affectedBySpeed) {
+    if (affectedBySpeed && GUI::speedAffectMenus) {
+        GUI::menuAffectBySpeed(action);
+    }
     if (action == GUIAction::NEXT) {
         if (cursorRow[level] - topRow[level] >= UI_ROWS) {
             topRow[level] = cursorRow[level] + 1 - UI_ROWS;
