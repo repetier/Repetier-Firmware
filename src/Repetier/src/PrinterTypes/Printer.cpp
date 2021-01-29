@@ -654,9 +654,6 @@ void Printer::setup() {
     SET_INPUT(MOTOR_FAULT_PIN);
     SET_INPUT(MOTOR_FAULT_PIGGY_PIN);
 #endif              //(MOTHERBOARD == 501) || (MOTHERBOARD == 502)
-    EEPROM::init(); // Read settings from eeprom if wanted, run after initialization!
-    // Extruder::initExtruder();
-    // sets auto leveling in eeprom init
     GUI::init();
 
 #if SDSUPPORT // Try mounting the SDCard first in case it has an eeprom file.

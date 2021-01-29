@@ -90,8 +90,8 @@ U8G2_KS0108_128X64_2 lcd(DISPLAY_ROTATION, UI_DISPLAY_D0_PIN, UI_DISPLAY_D1_PIN,
 #endif
 #endif
 
-millis_t init100msTicks = 0;
-void GUI::init() {
+static millis_t init100msTicks;
+void GUI::driverInit() {
     init100msTicks = 0;
 }
 void GUI::processInit() {
@@ -213,7 +213,10 @@ void GUI::menuStart(GUIAction action) {
     }
 }
 
-void GUI::menuEnd(GUIAction action) {
+void GUI::menuEnd(GUIAction action, bool scrollbar, bool affectedBySpeed) {
+    if (affectedBySpeed && GUI::speedAffectMenus) {
+        GUI::menuAffectBySpeed(action);
+    }
     if (action == GUIAction::NEXT) {
         if (cursorRow[level] - topRow[level] > 4) {
             topRow[level] = cursorRow[level] - 4;
@@ -229,7 +232,7 @@ void GUI::menuEnd(GUIAction action) {
         if (cursorRow[level] < 0) {
             cursorRow[level] = 0;
         }
-    } else if(action == GUIAction::DRAW) {
+    } else if(action == GUIAction::DRAW && scrollbar) {
         GUI::showScrollbar(action);
     }
 }

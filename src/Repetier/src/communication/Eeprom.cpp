@@ -132,6 +132,8 @@ void EEPROM::callHandle() {
     Leveling::handleEeprom();
     PrinterType::eepromHandle();
     Tool::eepromHandleTools();
+    GUI::eepromHandle();
+    
     // Add generic eepromHandle calls
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_EEPROM
@@ -178,6 +180,7 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration() {
     ZProbeHandler::eepromReset();
     LevelingCorrector::resetEeprom();
     Leveling::resetEeprom();
+    GUI::resetEeprom();
     markChanged();
 }
 

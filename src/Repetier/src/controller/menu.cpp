@@ -530,6 +530,47 @@ void __attribute__((weak)) menuTempConfig(GUIAction action, void* data) {
     GUI::menuEnd(action);
 }
 
+void __attribute__((weak)) menuEncoderMaxRepeatSteps(GUIAction action, void* data) {
+    DRAW_LONG_P(PSTR("Max. repeat steps:"), "steps/click", GUI::maxActionRepeatStep);
+    if (GUI::handleLongValueAction(action, v, 1, 15, 1)) {
+        GUI::maxActionRepeatStep = v;
+    }
+}
+void __attribute__((weak)) menuEncoderMaxRepeatTime(GUIAction action, void* data) {
+    DRAW_LONG_P(PSTR("Max. repeat time:"), Com::tUnitMilliSeconds, GUI::maxActionRepeatTimeMS);
+    if (GUI::handleLongValueAction(action, v, GUI::minActionRepeatTimeMS + 1u, 700, 1)) {
+        GUI::maxActionRepeatTimeMS = v;
+    }
+}
+void __attribute__((weak)) menuEncoderMinRepeatTime(GUIAction action, void* data) {
+    DRAW_LONG_P(PSTR("Min. repeat time:"), Com::tUnitMilliSeconds, GUI::minActionRepeatTimeMS);
+    if (GUI::handleLongValueAction(action, v, 1, GUI::maxActionRepeatTimeMS - 1u, 1)) {
+        GUI::minActionRepeatTimeMS = v;
+    }
+} 
+void __attribute__((weak)) menuConfigEncoder(GUIAction action, void* data) {
+    GUI::menuStart(action);
+    GUI::menuTextP(action, PSTR("= Config Encoder ="), true);
+    GUI::menuBack(action);
+    if ((action == GUIAction::NEXT || action == GUIAction::PREVIOUS || action == GUIAction::ANALYSE)
+        || ((HAL::timeInMilliseconds() - GUI::lastAction) > GUI::maxActionRepeatTimeMS)) {
+        // Display the current encoder speed to the user.
+        GUI::bufClear();
+        GUI::bufAddStringP(PSTR("(steps:"));
+        GUI::bufAddInt(GUI::nextActionRepeat, 0);
+        GUI::bufAddStringP(PSTR("/dif:"));
+        GUI::bufAddLong((GUI::nextActionRepeat ? GUI::lastActionRepeatDiffMS : 0u), 0);
+        GUI::bufAddStringP(PSTR("ms)"));
+        strncpy(GUI::tmpString, GUI::buf, GUI::bufPos);
+        GUI::tmpString[GUI::bufPos] = '\0';
+    }
+    GUI::menuText(action, GUI::tmpString);
+    GUI::menuLongP(action, PSTR("Max. steps:"), GUI::maxActionRepeatStep, menuEncoderMaxRepeatSteps, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::menuLongP(action, PSTR("Max. time:"), GUI::maxActionRepeatTimeMS, menuEncoderMaxRepeatTime, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::menuLongP(action, PSTR("Min. time:"), GUI::minActionRepeatTimeMS, menuEncoderMinRepeatTime, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::menuOnOffP(action, PSTR("Affect in menus:"), GUI::speedAffectMenus, directAction, (void*)GUI_DIRECT_ACTION_TOGGLE_ENCODER_AFFECT_MENUS_BY_SPEED, GUIPageType::ACTION);
+    GUI::menuEnd(action);
+}
 #if NUM_TOOLS > 1
 void dittoToTmpString(int32_t mode, bool mirror) {
     if (mode == 0) {
@@ -644,8 +685,6 @@ void __attribute__((weak)) menuTune(GUIAction action, void* data) {
     GUI::menuSelectable(action, GUI::tmpString, menuFlowMultiplier, nullptr, GUIPageType::FIXED_CONTENT);
     GUI::flashToStringFloat(GUI::tmpString, PSTR("Babystep Z: @mm"), Motion1::totalBabystepZ, 2);
     GUI::menuSelectable(action, GUI::tmpString, menuBabystepZ, nullptr, GUIPageType::FIXED_CONTENT);
-    GUI::menuSelectableP(action, PSTR("Home"), menuHome, nullptr, GUIPageType::MENU);
-    GUI::menuSelectableP(action, PSTR("Move"), menuMove, nullptr, GUIPageType::MENU);
 #if NUM_FANS > 0
     GUI::menuSelectableP(action, PSTR("Fans"), menuFans, nullptr, GUIPageType::MENU);
 #endif
@@ -968,6 +1007,7 @@ void __attribute__((weak)) menuConfig(GUIAction action, void* data) {
 #endif
         }
     }
+    GUI::menuSelectableP(action, PSTR("Encoder"), menuConfigEncoder, nullptr, GUIPageType::MENU);
     GUI::menuSelectableP(action, PSTR("Store Settings"), directAction, (void*)GUI_DIRECT_ACTION_STORE_EEPROM, GUIPageType::ACTION);
     GUI::menuSelectableP(action, PSTR("Factory Reset"), directAction, (void*)GUI_DIRECT_ACTION_FACTORY_RESET, GUIPageType::ACTION);
     GUI::menuEnd(action);
