@@ -102,6 +102,9 @@ correct positions when changing tools.
 \param pathOptimize If false start and end speeds get fixed to minimum values.
 */
 void PrintLine::moveRelativeDistanceInSteps(int32_t x, int32_t y, int32_t z, int32_t e, float feedrate, bool waitEnd, bool checkEndstop, bool pathOptimize) {
+    if (Printer::failedMode) {
+        return;
+    }
     Printer::unparkSafety();
 #if NUM_EXTRUDER > 0
     if (Printer::debugDryrun() || (MIN_EXTRUDER_TEMP > 30 && Extruder::current->tempControl.currentTemperatureC < MIN_EXTRUDER_TEMP && !Printer::isColdExtrusionAllowed() && Extruder::current->tempControl.sensorType != 0))
@@ -162,6 +165,9 @@ Will use Printer::isPositionAllowed to prevent illegal moves.
 \param pathOptimize If false start and end speeds get fixed to minimum values.
 */
 void PrintLine::moveRelativeDistanceInStepsReal(int32_t x, int32_t y, int32_t z, int32_t e, float feedrate, bool waitEnd, bool pathOptimize) {
+    if (Printer::failedMode) {
+        return;
+    }
     Printer::unparkSafety();
 #if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
     if (!Printer::isHoming() && !Printer::isNoDestinationCheck()) { // prevent movements when not homed

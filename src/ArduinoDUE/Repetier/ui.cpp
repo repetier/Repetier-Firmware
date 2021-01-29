@@ -132,11 +132,13 @@ void beep(uint8_t duration, uint8_t count) {
 bool UIMenuEntry::showEntry() const {
     bool ret = true;
     uint16_t f, f2;
-    f = HAL::readFlashByte((PGM_P)&filter);
-    if (f != 0)
+    f = HAL::readFlashWord(&filter);
+    if (f != 0) {
         ret = (f & Printer::menuMode) == f;
-    if (ret && (f2 = HAL::readFlashWord((PGM_P)&nofilter)) != 0)
+    }
+    if (ret && (f2 = HAL::readFlashWord(&nofilter)) != 0) {
         ret = (f2 & Printer::menuMode) == 0;
+    }
     return ret;
 }
 
@@ -4213,6 +4215,9 @@ int UIDisplay::executeAction(unsigned int action, bool allowMoves) {
                 Printer::distortion.enable(true);
             break;
 #endif
+        case UI_ACTION_FATAL_FIXED:
+            GCode::resetFatalError();
+            break;
         default:
             EVENT_UI_EXECUTE(action, allowMoves);
             break;

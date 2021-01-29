@@ -978,6 +978,9 @@ void Extruder::recomputeMixingExtruderSteps() {
 #endif
 
 void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t extr, bool beep, bool wait) {
+    if (Printer::failedMode && temperatureInCelsius > 0) {
+        return;
+    }
 #if NUM_EXTRUDER > 0
 #if MIXING_EXTRUDER || SHARED_EXTRUDER_HEATER
     extr = 0; // map any virtual extruder number to 0
@@ -1130,6 +1133,9 @@ void Extruder::setTemperatureForExtruder(float temperatureInCelsius, uint8_t ext
 }
 
 void Extruder::setHeatedBedTemperature(float temperatureInCelsius, bool beep) {
+    if (Printer::failedMode && temperatureInCelsius > 0) {
+        return;
+    }
 #if HAVE_HEATED_BED
     if (temperatureInCelsius > HEATED_BED_MAX_TEMP)
         temperatureInCelsius = HEATED_BED_MAX_TEMP;

@@ -98,7 +98,7 @@
 #define LANGUAGE_RU_ID 12
 
 #define NUM_LANGUAGES_KNOWN 13
-#define NUM_TRANSLATED_WORDS 314
+#define NUM_TRANSLATED_WORDS 315
 
 // For selectable translations we refer to each text by a id which gets
 // defined here. The list starts at 0 and defines the position in the
@@ -421,6 +421,7 @@
 #define UI_TEXT_RESET_EEPROM_ID 311
 #define UI_TEXT_EEPROM_RESETEDA_ID 312
 #define UI_TEXT_EEPROM_RESETEDB_ID 313
+#define UI_TEXT_ERROR_FIXED 314
 
 // Universal definitions
 
@@ -766,6 +767,7 @@
 #define UI_TEXT_MAINPAGE6_4_L_EN "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_EN "Mul: %om%%%    Spi:%opRPM "
 #define UI_TEXT_JAMCONTROL_EN "%ej Jam Control"
+#define UI_TEXT_ERROR_FIXED_EN "Error Fixed"
 
 // *************** German translation ****************
 
@@ -1104,6 +1106,7 @@
 #define UI_TEXT_MAINPAGE6_4_L_DE "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_DE "Mul: %om%%%    Spi:%opRPM"
 #define UI_TEXT_JAMCONTROL_DE "%ej Blockaden" STR_uuml "berw."
+#define UI_TEXT_ERROR_FIXED_DE "Fehler behoben"
 
 // Dutch translation
 
@@ -1443,6 +1446,7 @@
 #define UI_TEXT_MAINPAGE6_4_L_NL "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_NL "Mul: %om%%%    Spi:%opRPM "
 #define UI_TEXT_JAMCONTROL_NL "%ej Jam Control"
+#define UI_TEXT_ERROR_FIXED_NL "Error Fixed"
 
 // *************** Brazilian portuguese translation ****************
 
@@ -1783,6 +1787,7 @@
 #define UI_TEXT_MAINPAGE6_4_L_PT "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_PT "Mul: %om%%%    Spi:%opRPM "
 #define UI_TEXT_JAMCONTROL_PT "%ej Jam Control"
+#define UI_TEXT_ERROR_FIXED_PT "Error Fixed"
 
 // *************** Italian translation ****************
 
@@ -2121,6 +2126,7 @@
 #define UI_TEXT_MAINPAGE6_4_L_IT "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_IT "Mul: %om%%%    Spi:%opRPM "
 #define UI_TEXT_JAMCONTROL_IT "%ej Jam Control"
+#define UI_TEXT_ERROR_FIXED_IT "Error Fixed"
 
 // Spanish translation
 
@@ -2459,6 +2465,7 @@
 #define UI_TEXT_MAINPAGE6_4_L_ES "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_ES "Mul: %om%%%    Spi:%opRPM "
 #define UI_TEXT_JAMCONTROL_ES "%ej Jam Control"
+#define UI_TEXT_ERROR_FIXED_ES "Error Fixed"
 
 // *************** Swedish translation ****************
 // By Daniel Tedenljung 2013-08-21
@@ -2798,6 +2805,7 @@
 #define UI_TEXT_MAINPAGE6_4_L_SE "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_SE "Mul: %om%%%    Spi:%opRPM "
 #define UI_TEXT_JAMCONTROL_SE "%ej Jam Control"
+#define UI_TEXT_ERROR_FIXED_SE "Error Fixed"
 
 // *************** French translation ****************
 // ***************      By Doudou     ****************
@@ -3137,6 +3145,7 @@
 #define UI_TEXT_MAINPAGE6_4_L_FR "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_FR "Mul: %om%%%    Spi:%opRPM "
 #define UI_TEXT_JAMCONTROL_FR "%ej Jam Control"
+#define UI_TEXT_ERROR_FIXED_FR "Error Fixed"
 
 // *************** Czech translation ****************
 // ***************      By Majkl     ****************
@@ -3477,6 +3486,7 @@
 #define UI_TEXT_MAINPAGE6_4_L_CZ "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_CZ "Mul: %om%%%    Spi:%opRPM "
 #define UI_TEXT_JAMCONTROL_CZ "%ej Jam Control"
+#define UI_TEXT_ERROR_FIXED_CZ "Error Fixed"
 
 // *************** Polish translation ****************
 // ***************       By MIS       ****************
@@ -3816,6 +3826,7 @@
 #define UI_TEXT_MAINPAGE6_4_L_PL "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_PL "Mul: %om%%%    Spi:%opRPM "
 #define UI_TEXT_JAMCONTROL_PL "%ej Jam Control"
+#define UI_TEXT_ERROR_FIXED_PL "Error Fixed"
 
 // Türk
 
@@ -4152,6 +4163,7 @@
 #define UI_TEXT_MAINPAGE6_4_L_TR "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_TR "Mul: %om%%%    Spi:%opRPM "
 #define UI_TEXT_JAMCONTROL_TR "%ej Jam Control"
+#define UI_TEXT_ERROR_FIXED_TR "Error Fixed"
 
 // *************** Finnish translation ****************
 // ********** By Matti Granstedt 28.01.2016 ***********
@@ -4491,6 +4503,7 @@
 #define UI_TEXT_MAINPAGE6_4_L_FI "Mul: %om%%%    Las:%op W"
 #define UI_TEXT_MAINPAGE6_4_C_FI "Mul: %om%%%    Spi:%opRPM "
 #define UI_TEXT_JAMCONTROL_FI "%ej Jam Control"
+#define UI_TEXT_ERROR_FIXED_FI "Error Fixed"
 
 //******************* Russian****************************************************************************************************************//
 //*  Перевел Goodfeat (Vladimir Sokolov)  05.01.2018                                                                                        *//
@@ -4832,6 +4845,7 @@
 #define UI_TEXT_MAINPAGE6_4_L_RU "\302\325\334\337\72 %om%%%    Las:%op W"                          //  Темп:
 #define UI_TEXT_MAINPAGE6_4_C_RU "\302\325\334\337\72 %om%%%    Spi:%opRPM "                        //  Темп:
 #define UI_TEXT_JAMCONTROL_RU "%ej \272\336\335\342\340\336\333\354\40\327\320\334\357\342\330\357" //  Контроль замятия
+#define UI_TEXT_ERROR_FIXED_RU "Error Fixed"
 
 #define TRANS(x) UI_STRING(F##x, x)
 #ifdef CUSTOM_TRANSLATIONS

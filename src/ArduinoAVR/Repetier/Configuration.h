@@ -648,9 +648,8 @@ you should prefer the second method.
 */
 #define SCALE_PID_TO_MAX 0
 
-#define HEATER_PWM_SPEED \
-    1 // How fast ist pwm signal 0 = 15.25Hz, 1 = 30.51Hz, 2 = 61.03Hz, 3 = \
-        // 122.06Hz
+// How fast ist pwm signal 0 = 15.25Hz, 1 = 30.51Hz, 2 = 61.03Hz, 3 = 122.06Hz
+#define HEATER_PWM_SPEED 1
 
 /** Temperature range for target temperature to hold in M109 command. 5 means
 +/-5 degC
@@ -920,9 +919,9 @@ direction. It also can add a delay to wait for spindle to run on full speed.
 
 #define SUPPORT_CNC 0          // Set 1 for CNC support
 #define CNC_WAIT_ON_ENABLE 300 // wait x milliseconds after enabling
-#define CNC_WAIT_ON_DISABLE \
-    0                        // delay in milliseconds after disabling spindle. May be required for \
-        // direction changes.
+
+// delay in milliseconds after disabling spindle. May be required for  direction changes.
+#define CNC_WAIT_ON_DISABLE 0
 #define CNC_ENABLE_PIN -1    // Pin to enable mill
 #define CNC_ENABLE_WITH 1    // Set 0 if low enables spindle
 #define CNC_DIRECTION_PIN -1 // Set to pin if direction control is possible
@@ -1960,8 +1959,8 @@ case!
 #define CASE_LIGHT_DEFAULT_ON 1
 
 /** Set to false to disable SD support: */
-#ifndef SDSUPPORT // Some boards have SD support on board. These define the \
-                  // values already in pins.h
+// Some boards have SD support on board. These define the values already in pins.h
+#ifndef SDSUPPORT
 #define SDSUPPORT false
 // Uncomment to enable or change card detection pin. With card detection the
 // card is mounted on insertion.

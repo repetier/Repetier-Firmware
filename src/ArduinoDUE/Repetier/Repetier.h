@@ -707,6 +707,7 @@ inline void memcopy4(void* dest, void* source) {
 #define MENU_MODE_FDM 128
 #define MENU_MODE_LASER 256
 #define MENU_MODE_CNC 512
+#define MENU_MODE_FAILED 1024
 
 #ifndef BENDING_CORRECTION_A
 #define BENDING_CORRECTION_A 0

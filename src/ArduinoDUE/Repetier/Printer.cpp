@@ -718,6 +718,9 @@ void Printer::moveToParkPosition(bool zOnly) {
 
 // This is for untransformed move to coordinates in printers absolute Cartesian space
 uint8_t Printer::moveTo(float x, float y, float z, float e, float f) {
+    if (failedMode) {
+        return false;
+    }
     Printer::unparkSafety();
     if (x != IGNORE_COORDINATE) {
         destinationPositionTransformed[X_AXIS] = (x + Printer::offsetX);
@@ -772,6 +775,9 @@ void Printer::moveToCenter() {
 }
 
 uint8_t Printer::moveToReal(float x, float y, float z, float e, float f, bool pathOptimize) {
+    if (failedMode) {
+        return false;
+    }
     Printer::unparkSafety();
     // Com::printFLN(PSTR("MoveToReal X="),x,2);
     // Com::printArrayFLN(PSTR("CurPos:"), currentPositionTransformed);
@@ -877,6 +883,9 @@ position to destinationSteps including rotation and offsets, excluding distortio
  */
 
 uint8_t Printer::setDestinationStepsFromGCode(GCode* com) {
+    if (failedMode) {
+        return false;
+    }
     unparkSafety();
     register int32_t p;
     float x, y, z;
@@ -1629,7 +1638,11 @@ bool Printer::homeZAxis() { // Delta z homing
         setXHomed(false);
         setYHomed(false);
         setZHomed(false);
+#if SAFE_HOMING
+        GCode::fatalError(Com::tHomingFailed);
+#else
         GCodeSource::printAllFLN(PSTR("RequestPause:Homing failed!"));
+#endif
         return false;
     } else {
         setXHomed(true);
@@ -3367,12 +3380,14 @@ void Printer::unparkSafety() {
 }
 void Printer::enableFailedModeP(PGM_P msg) {
     failedMode = true;
+    Printer::setMenuMode(MENU_MODE_FAILED, true);
     UI_ERROR_P(msg);
     Com::printErrorFLN(msg);
     Com::printErrorFLN(Com::tM999);
 }
 void Printer::enableFailedMode(char* msg) {
     failedMode = true;
+    Printer::setMenuMode(MENU_MODE_FAILED, true);
     UI_ERROR_RAM(msg);
     Com::printErrorF(Com::tEmpty);
     Com::print(msg);

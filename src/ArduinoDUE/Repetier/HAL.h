@@ -668,7 +668,7 @@ public:
     }
     static inline unsigned long timeInMilliseconds() { return millis(); }
     static inline char readFlashByte(PGM_P ptr) { return pgm_read_byte(ptr); }
-    static inline int16_t readFlashWord(PGM_P ptr) { return pgm_read_word(ptr); }
+    static inline int16_t readFlashWord(const uint16_t* ptr) { return pgm_read_word(ptr); }
 
     static inline void serialSetBaudrate(long baud) {
         Serial.setInterruptPriority(1);

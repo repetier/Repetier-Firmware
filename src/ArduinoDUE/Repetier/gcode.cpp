@@ -1276,6 +1276,8 @@ void GCode::fatalError(FSTRINGPARAM(message)) {
     WRITE(PS_ON_PIN, (POWER_INVERTING ? LOW : HIGH));
     Printer::setPowerOn(false);
 #endif
+    Printer::setMenuMode(MENU_MODE_FAILED, true);
+    Printer::failedMode = true;
     reportFatalError();
 }
 
@@ -1291,6 +1293,7 @@ void GCode::reportFatalError() {
 void GCode::resetFatalError() {
     Com::writeToAll = true;
     Printer::failedMode = false;
+    Printer::setMenuMode(MENU_MODE_FAILED, false);
     TemperatureController::resetAllErrorStates();
     Printer::debugReset(8); // disable dry run
     fatalErrorMsg = NULL;

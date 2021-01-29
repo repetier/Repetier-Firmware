@@ -274,7 +274,7 @@ public:
 #endif
     HAL();
     virtual ~HAL();
-    static inline void hwSetup(void) {}
+    static inline void hwSetup(void) { }
     // return val*val
     static uint16_t integerSqrt(uint32_t a);
     /** \brief Optimized division
@@ -551,7 +551,7 @@ public:
     static inline void forbidInterrupts() { cli(); }
     static inline millis_t timeInMilliseconds() { return millis(); }
     static inline char readFlashByte(PGM_P ptr) { return pgm_read_byte(ptr); }
-    static inline int16_t readFlashWord(PGM_P ptr) { return pgm_read_word(ptr); }
+    static inline int16_t readFlashWord(const uint16_t* ptr) { return pgm_read_word((PGM_P)ptr); }
     static inline void serialSetBaudrate(long baud) {
         RFSERIAL.begin(baud);
 #if BLUETOOTH_SERIAL > 0 && defined(EXTERNALSERIAL)
