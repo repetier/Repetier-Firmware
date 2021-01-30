@@ -423,7 +423,7 @@ public:
         return pgm_read_word(ptr);
     }
     static inline const void* readFlashAddress(const void* adr) {
-        return (const void*)*(adr);
+        return (*((const void**)adr));
     }
     static inline void serialSetBaudrate(long baud) {
         // Serial.setInterruptPriority(1);

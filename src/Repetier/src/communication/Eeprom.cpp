@@ -510,7 +510,7 @@ void EEPROM::handleInt(uint pos, PGM_P text, uint16_t& var) {
             if (storeType != EEPROMType::INT) {
                 Com::printErrorFLN(PSTR("Storing variable called for wrong type int"));
             } else {
-                if (var != storeVar.i) {
+                if (var != static_cast<uint16_t>(storeVar.i)) {
                     var = storeVar.i;
                     markChanged();
                 }

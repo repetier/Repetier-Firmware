@@ -519,6 +519,7 @@ FSTRINGVALUE(Com::tMotorSpaceHybridTresholdColor, " hybrid treshold: ")
 FSTRINGVALUE(Com::tMotorSpaceStallguardSensitivityColon, " stallguard sensitivity: ")
 FSTRINGVALUE(Com::tMotorStallguardResult, "StallGuard Result: ")
 FSTRINGVALUE(Com::tMotorSpaceRMSCurrentMAColon, " RMS Current [mA]: ")
+FSTRINGVALUE(Com::tHomingFailed, "Homing failed!")
 
 bool Com::writeToAll = true; // transmit start messages to all devices!
 

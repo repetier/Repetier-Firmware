@@ -362,10 +362,9 @@ void HAL::setupTimer() {
 #endif
 }
 
-// Called within checkForPeriodicalActions (main loop, more or less) 
+// Called within checkForPeriodicalActions (main loop, more or less)
 // as fast as possible
 void HAL::handlePeriodical() {
-
 }
 
 // Try to initialize pinNumber as hardware PWM. Returns internal
@@ -476,7 +475,7 @@ fast8_t HAL::initHardwareDAC(fast8_t dacPin) {
 }
 
 void HAL::setHardwareDAC(fast8_t id, fast8_t value) {
-    if (id < 0 || id > (NUM_DACS - 1)) {
+    if (id < 0 || id > (static_cast<int>(NUM_DACS) - 1)) {
         return;
     }
     if (value > 255) {

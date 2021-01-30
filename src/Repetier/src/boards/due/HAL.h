@@ -553,7 +553,7 @@ public:
         return pgm_read_word(ptr);
     }
     static inline const void* readFlashAddress(const void* adr) {
-        return (const void*)*(adr);
+        return (*((const void**)adr));
     }
     static inline void serialSetBaudrate(long baud) {
         static bool serialInitialized = false;
