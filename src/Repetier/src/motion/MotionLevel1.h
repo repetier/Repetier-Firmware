@@ -193,18 +193,17 @@ public:
 #define EPR_M1_VELOCITY_PROFILE EPR_M1_AXIS_COMP_END + 12
 #define EPR_M1_AUTOLEVEL EPR_M1_AXIS_COMP_END + 13
 
-
 #if FEATURE_RETRACTION
-#define EPR_M1_AUTORETRACT                    EPR_M1_AXIS_COMP_END                  + 14
-#define EPR_M1_RETRACT_LENGTH                 EPR_M1_AUTORETRACT                    + 1
-#define EPR_M1_RETRACT_LONG_LENGTH            EPR_M1_RETRACT_LENGTH                 + 4
-#define EPR_M1_RETRACT_SPEED                  EPR_M1_RETRACT_LONG_LENGTH            + 4
-#define EPR_M1_RETRACT_ZLIFT                  EPR_M1_RETRACT_SPEED                  + 4
-#define EPR_M1_RETRACT_UNDO_SPEED             EPR_M1_RETRACT_ZLIFT                  + 4
-#define EPR_M1_RETRACT_UNDO_EXTRA_LENGTH      EPR_M1_RETRACT_UNDO_SPEED             + 4
-#define EPR_M1_RETRACT_UNDO_EXTRA_LONG_LENGTH EPR_M1_RETRACT_UNDO_EXTRA_LENGTH      + 4
-#define EPR_M1_RETRACT_END                    EPR_M1_RETRACT_UNDO_EXTRA_LONG_LENGTH + 4
-#else 
+#define EPR_M1_AUTORETRACT EPR_M1_AXIS_COMP_END + 14
+#define EPR_M1_RETRACT_LENGTH EPR_M1_AUTORETRACT + 1
+#define EPR_M1_RETRACT_LONG_LENGTH EPR_M1_RETRACT_LENGTH + 4
+#define EPR_M1_RETRACT_SPEED EPR_M1_RETRACT_LONG_LENGTH + 4
+#define EPR_M1_RETRACT_ZLIFT EPR_M1_RETRACT_SPEED + 4
+#define EPR_M1_RETRACT_UNDO_SPEED EPR_M1_RETRACT_ZLIFT + 4
+#define EPR_M1_RETRACT_UNDO_EXTRA_LENGTH EPR_M1_RETRACT_UNDO_SPEED + 4
+#define EPR_M1_RETRACT_UNDO_EXTRA_LONG_LENGTH EPR_M1_RETRACT_UNDO_EXTRA_LENGTH + 4
+#define EPR_M1_RETRACT_END EPR_M1_RETRACT_UNDO_EXTRA_LONG_LENGTH + 4
+#else
 #define EPR_M1_RETRACT_END EPR_M1_AXIS_COMP_END + 14
 #endif
 
@@ -264,7 +263,7 @@ public:
     static float retractZLift;
     static float retractUndoSpeed;
     static float retractUndoExtraLength;
-    static float retractUndoExtraLongLength; 
+    static float retractUndoExtraLongLength;
 #endif
     static bool wasLastSecondary; ///< true if last move had secondary flag
     static fast8_t homeDir[NUM_AXES];
@@ -298,6 +297,7 @@ public:
     static volatile fast8_t lengthUnprocessed;          /// Number of unprocessed entries
     // Initializes data structures
     static void init();
+    static void emergencyStop(); // clears all buffers so motors stop immediately
     static INLINE bool isAutolevelActive() { return autolevelActive; }
     // Set autoleveling, changes current position according to printer position
     static void setAutolevelActive(bool state, bool silent = false);
@@ -334,7 +334,7 @@ public:
     static void waitForEndOfMoves();
     static void waitForXFreeMoves(fast8_t, bool allowMoves = false);
     static fast8_t buffersUsed();
-    static void WarmUp(uint32_t wait, int second);
+    static void WarmUp(uint32_t waitUS, int second);
     static void reportBuffers();
     static void moveToParkPosition();
     /// Pushes current position to memory stack. Return true on success.

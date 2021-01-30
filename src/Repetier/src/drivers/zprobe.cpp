@@ -233,7 +233,7 @@ float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
             Motion2::setMotorPositionFromTransformed();
         }
         if (useMedian) {
-            //Com::printArrayFLN("measure: ", measurements, ARRAY_SIZE(measurements), 4);
+            //Com::printArrayFLN(PSTR("measure: "), measurements, ARRAY_SIZE(measurements), 4);
             float tmp;
             for (fast8_t i = 0; i < repetitions - 1; i++) {         // n numbers require at most n-1 rounds of swapping
                 for (fast8_t j = 0; j < repetitions - i - 1; j++) { //
@@ -354,7 +354,7 @@ void __attribute__((weak)) menuProbeCoating(GUIAction action, void* data) {
 }
 void __attribute__((weak)) menuProbeOffset(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data); // 0 = x, 1 = y
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("@ Offset:"), axis ? axisNames[Y_AXIS] : axisNames[X_AXIS]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("@ Offset:"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM,
                axis ? ZProbeHandler::yOffset() : ZProbeHandler::xOffset(), 1);
     if (GUI::handleFloatValueAction(action, v, -100.0f, 100.0f, 0.5f)) {
@@ -884,6 +884,7 @@ float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
         corSteps[i] = ((df > 0) ? 1 : ((df < 0) ? -1 : 0)) * (labs(df) - Motion1::stepsRemaining[i]);
     }
     float zr = 0.0f;
+    // corSteps contains steps required to go to start position
     if (repetitions > 1u) {
         // We are now at z=0 do repetitions and assume correct them 100%
         float cPos2[NUM_AXES], tPos2[NUM_AXES], tPos3[NUM_AXES];
@@ -898,7 +899,7 @@ float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
             Motion1::currentPositionTransformed[i] = cPos2[i];
         }
         Motion1::updatePositionsFromCurrentTransformed();
-        Motion2::setMotorPositionFromTransformed();
+        Motion2::setMotorPositionFromTransformed(); // now touch position is marked z = 0
 
         Motion1::endstopMode = EndstopMode::DISABLED;
         tPos2[Z_AXIS] = Z_PROBE_SWITCHING_DISTANCE;
@@ -909,12 +910,13 @@ float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
         PrinterType::transform(tPos2, tPosSteps2);
         PrinterType::transform(tPos3, tPosSteps3);
         tPos2[E_AXIS] = IGNORE_COORDINATE;
+        // Move Z_PROBE_SWITCHING_DISTANCE up
         Motion1::moveByPrinter(tPos2, Motion1::maxFeedrate[X_AXIS], false);
         Motion1::waitForEndOfMoves();
 #ifdef Z_PROBE_RUN_AFTER_EVERY_PROBE
         GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));
 #endif
-
+        // we start at Z_PROBE_SWITCHING_DISTANCE height
         for (fast8_t r = 1; r < repetitions && !Printer::breakLongCommand; r++) {
             // Go down
 #if defined(Z_PROBE_DELAY) && Z_PROBE_DELAY > 0
@@ -972,7 +974,7 @@ float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
         FOR_ALL_AXES(i) {
             corSteps[i] -= corSteps2[i];
         }
-    }
+    } // end more then 1 repetition
     z += height;
     /* DEBUG_MSG2_FAST("StartSteps", cPosSteps[Z_AXIS]);
     DEBUG_MSG2_FAST("EndSteps", tPosSteps[Z_AXIS]);
@@ -1086,7 +1088,7 @@ void ZProbeHandler::disableAlarmIfOn() {
 
 void menuProbeOffset(GUIAction action, void* data) {
     int axis = reinterpret_cast<int>(data); // 0 = x, 1 = y
-    GUI::flashToStringFlash(GUI::tmpString, PSTR("@ Offset:"), axis ? axisNames[Y_AXIS] : axisNames[X_AXIS]);
+    GUI::flashToStringFlash(GUI::tmpString, PSTR("@ Offset:"), (const char*)HAL::readFlashAddress(&axisNames[axis]));
     DRAW_FLOAT(GUI::tmpString, Com::tUnitMM,
                axis ? ZProbeHandler::yOffset() : ZProbeHandler::xOffset(), 1);
     if (GUI::handleFloatValueAction(action, v, -100.0f, 100.0f, 0.5f)) {

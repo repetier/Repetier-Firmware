@@ -39,19 +39,6 @@ extern "C" char* sbrk(int i);
 
 // New adc handling
 bool analogEnabled[MAX_ANALOG_INPUTS] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
-// end adc handling
-
-// #define NUM_ADC_SAMPLES 2 + (1 << ANALOG_INPUT_SAMPLE)
-/*
-#if ANALOG_INPUTS > 0
-int32_t osAnalogInputBuildup[ANALOG_INPUTS];
-int32_t osAnalogSamples[ANALOG_INPUTS][ANALOG_INPUT_MEDIAN];
-int32_t osAnalogSamplesSum[ANALOG_INPUTS];
-static int32_t adcSamplesMin[ANALOG_INPUTS];
-static int32_t adcSamplesMax[ANALOG_INPUTS];
-static int adcCounter = 0, adcSamplePos = 0;
-#endif
-*/
 
 static uint32_t adcEnable = 0;
 
@@ -178,10 +165,9 @@ void HAL::setupTimer() {
 #endif
 }
 
-// Called within checkForPeriodicalActions (main loop, more or less) 
+// Called within checkForPeriodicalActions (main loop, more or less)
 // as fast as possible
 void HAL::handlePeriodical() {
-
 }
 
 struct TimerPWMPin {
@@ -348,6 +334,33 @@ static void computePWMDivider(uint32_t frequency, uint32_t& div, uint32_t& scale
     }
 }
 
+fast8_t HAL::initHardwareDAC(fast8_t dacPin) {
+    if (dacPin != DAC1 && dacPin != DAC0) {
+        return -1;
+    }
+    if (!DACC->DACC_CHSR) {
+        pmc_enable_periph_clk(ID_DACC);
+        DACC->DACC_CR = DACC_CR_SWRST;
+        DACC->DACC_MR = DACC_MR_REFRESH(1ul) | DACC_MR_STARTUP_8;
+    }
+    DACC->DACC_CHER = ((dacPin == DAC0) ? DACC_CHER_CH0 : DACC_CHER_CH1);
+    fast8_t id = (dacPin == DAC0) ? DACC_MR_USER_SEL_CHANNEL0 : DACC_MR_USER_SEL_CHANNEL1;
+    setHardwareDAC(id, 0ul);
+    return id;
+}
+
+void HAL::setHardwareDAC(fast8_t id, fast8_t value) {
+    if (id < 0) {
+        return;
+    }
+    if (value > 255) {
+        value = 255;
+    }
+    DACC->DACC_MR = (DACC->DACC_MR & (~DACC_MR_USER_SEL_Msk)) | id;
+    DACC->DACC_CDR = (static_cast<uint32_t>(value) * 4095ul) / 255ul;
+    while (!(DACC->DACC_ISR & DACC_ISR_EOC))
+        ;
+}
 // Try to initialize pinNumber as hardware PWM. Returns internal
 // id if it succeeds or -1 if it fails. Typical reasons to fail
 // are no pwm support for that pin or an other pin uses same PWM
@@ -652,6 +665,7 @@ void HAL::showStartReason() {
         Com::printInfoFLN(PSTR("Unknown reset reason"));
     }
 }
+
 void HAL::updateStartReason() {
     int mcu = (RSTC->RSTC_SR & RSTC_SR_RSTTYP_Msk) >> RSTC_SR_RSTTYP_Pos;
     switch (mcu) {
@@ -1179,10 +1193,10 @@ extern "C" void RTT_Handler() {
 #endif
     // It's possible for the RTT interrupt to actually preempt itself
     // unless you disable it and reenable it once the status is clear.
-    // It takes two slow clock cycles (32.768kHz so 40-50us~) to clear. 
+    // It takes two slow clock cycles (32.768kHz so 40-50us~) to clear.
     RTT->RTT_SR;
     RTT->RTT_MR &= ~RTT_MR_RTTINCIEN;
-    Motion2::timer(); 
+    Motion2::timer();
 #if DEBUG_TIMING
     WRITE(DEBUG_ISR_MOTION_PIN, 0);
 #endif

@@ -122,6 +122,7 @@
 // UART Definitions
 #define SERIAL_UART_INSTANCE    1 // Connected to EXP3 header
 
+#define HAL_DAC_MODULE_ENABLED
 
 #define PIN_SERIAL_RX           PA10
 #define PIN_SERIAL_TX           PA9

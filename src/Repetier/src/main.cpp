@@ -183,6 +183,7 @@ Custom M Codes
 - M501 Load settings from EEPROM
 - M502 Reset settings to the one in configuration.h. Does not store values in EEPROM!
 - M513 - Clear all jam marker.
+- M524 - Abort SD Printing
 - M530 S<printing> L<layer> - Enables explicit printing mode (S1) or disables it (S0). L can set layer count
 - M531 filename - Define filename being printed
 - M532 X<percent> L<curLayer> - update current print state progress (X=0..100) and layer L

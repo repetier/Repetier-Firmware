@@ -36,17 +36,17 @@
 */
 
 // The follwing variables are required early to decide on the right modules.
-#define NUM_TOOLS 2
-#define NUM_EXTRUDER 2
-#define NUM_SERVOS 1                  // Number of serves available
-#define MOTHERBOARD MOTHERBOARD_RADDS // 405
+#define NUM_TOOLS 1
+#define NUM_EXTRUDER 1
+#define NUM_SERVOS 0                      // Number of serves available
+#define MOTHERBOARD MOTHERBOARD_RAMPS_1_4 // 405
 #define EEPROM_MODE 3
 #define RFSERIAL Serial
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
 // Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
 // If it is incompatible you will get compiler errors about write functions not being compatible!
 //#define COMPAT_PRE1
-#define BLUETOOTH_SERIAL 101
+// #define BLUETOOTH_SERIAL 1
 #define BLUETOOTH_BAUD 115200
 #define WAITING_IDENTIFIER "wait"
 #define JSON_OUTPUT 1
@@ -54,10 +54,10 @@
 #define FEATURE_RETRACTION 1
 #define NUM_AXES 4 // X,Y,Z and E for extruder A,B,C would be 5,6,7
 // #define STEPPER_FREQUENCY 153000     // Maximum stepper frequency.
-#define STEPPER_FREQUENCY 100000     // Maximum stepper frequency.
-#define PREPARE_FREQUENCY 1000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
-#define BLOCK_FREQUENCY 500          // Number of blocks with constant stepper rate per second.
-#define VELOCITY_PROFILE 2           // 0 = linear, 1 = cubic, 2 = quintic velocity shape
+#define STEPPER_FREQUENCY 10000      // Maximum stepper frequency.
+#define PREPARE_FREQUENCY 500        // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
+#define BLOCK_FREQUENCY 250          // Number of blocks with constant stepper rate per second.
+#define VELOCITY_PROFILE 0           // 0 = linear, 1 = cubic, 2 = quintic velocity shape
 #define Z_SPEED 10                   // Z positioning speed
 #define XY_SPEED 150                 // XY positioning speed for normal operations
 #define E_SPEED 2                    // Extrusion speed
@@ -68,29 +68,28 @@
 //#define DEBUG_RESCUE                 // Uncomment to add power loss entry in debug menu while printing
 #define POWERLOSS_LEVEL 2       // How much time do we have on powerloss, 0 = no move, 1 = short just raise Z, 2 = long full park move
 #define POWERLOSS_UP 5          // How much to move up if mode 1 is active
-#define Z_PROBE_TYPE 2          // 0 = no z probe, 1 = default z probe, 2 = Nozzle as probe
+#define Z_PROBE_TYPE 0          // 0 = no z probe, 1 = default z probe, 2 = Nozzle as probe
 #define Z_PROBE_BORDER 2        // Safety border to ensure position is allowed
 #define Z_PROBE_TEMPERATURE 170 // Temperature for type 2
 
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta, 3 = Dual X-Axis
-#define PRINTER_TYPE 0
+#define PRINTER_TYPE PRINTER_TYPE_CARTESIAN
 // steps to include as babysteps per 1/BLOCK_FREQUENCY seconds. Must be lower then STEPPER_FREQUENCY/BLOCK_FREQUENCY and be low enough to not loose steps.
 #define BABYSTEPS_PER_BLOCK \
-    { 10, 10, 10 }
+    { 1, 1, 1 }
 // If all axis end stops are hardware based we can skip the time consuming tests each step
-#define NO_SOFTWARE_AXIS_ENDSTOPS
+// #define NO_SOFTWARE_AXIS_ENDSTOPS
 // Normally only a delta has motor end stops required. Normally you trigger using axis endstops.
 #define NO_MOTOR_ENDSTOPS
 
-#define FEATURE_CONTROLLER CONTROLLER_SPARKLCD //  CONTROLLER_FELIX_DUE
+#define FEATURE_CONTROLLER CONTROLLER_SMARTRAMPS //  CONTROLLER_FELIX_DUE
 // Use more memory to speedup display updates
-#define DISPLAY_FULL_BUFFER 1
+#define DISPLAY_FULL_BUFFER 0
 // Direction 1 or -1
 // #define ENCODER_DIRECTION -1
 // Encoder speed 0 = fastest, 1 or 2 = slowest - set so 1 click is one menu move
 // Default is 2 if not set by controller. Us eonly to fix wrong setting
 #define ENCODER_SPEED 1
-
 // Dynamically increase the speed at which we step through the menus/change values.
 // Set ENCODER_MAX_REPEAT_STEPS to 1 to disable this. Also stored in EEPROM.
 #define ENCODER_MAX_REPEAT_STEPS 5            // Max. extra steps we can gain.
@@ -199,24 +198,25 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
     { }
 
 #define SERVO_LIST \
-    { &Servo1 }
+    { }
 #define TOOLS \
-    { &ToolExtruder1, &ToolExtruder2 }
+    { &ToolExtruder1 }
 
 // Heaters enumerate all heaters, so we can loop over them
 // or call commands on a specific heater number.
 // Suggested order: extruder heaters, heated beds, heated chambers, additional heaters
-#define NUM_HEATERS 3
+#define NUM_HEATERS 2
 #define HEATERS \
-    { &HeaterExtruder1, &HeaterExtruder2, &HeatedBed1 }
+    { &HeaterExtruder1, &HeatedBed1 }
 
 // Array to call motor related commands like microstepping/current if supported.
 // Id's start at 0 and depend on position in this array.
-#define NUM_MOTORS 5
+#define NUM_MOTORS 4
 #define MOTORS \
-    { &XMotor, &YMotor, &ZMotor }
+    { &XMotor, &YMotor, &ZMotor, &E1Motor }
+extern const char* const axisNames[] PROGMEM;
 #define MOTOR_NAMES \
-    { PSTR("X"), PSTR("Y"), PSTR("Z") }
+    { Com::tXLetter, Com::tYLetter, Com::tZLetter, Com::tELetter }
 
 // Some common settings for trinamic driver settings
 /**
@@ -245,11 +245,11 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define STORE_MOTOR_STALL_SENSITIVITY 1
 
 #define X_HOME_DIR -1
-#define Y_HOME_DIR 1
+#define Y_HOME_DIR -1
 #define Z_HOME_DIR -1
-#define X_MAX_LENGTH 235
-#define Y_MAX_LENGTH 240
-#define Z_MAX_LENGTH 225
+#define X_MAX_LENGTH 100
+#define Y_MAX_LENGTH 100
+#define Z_MAX_LENGTH 100
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
 #define Z_MIN_POS 0
@@ -274,9 +274,9 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 1100
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1100
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 100
-#define XAXIS_STEPS_PER_MM 610
-#define YAXIS_STEPS_PER_MM 610
-#define ZAXIS_STEPS_PER_MM 6400
+#define XAXIS_STEPS_PER_MM 100
+#define YAXIS_STEPS_PER_MM 100
+#define ZAXIS_STEPS_PER_MM 100
 
 // ################## EDIT THESE SETTINGS MANUALLY ################
 // ################ END MANUAL SETTINGS ##########################
@@ -384,7 +384,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define Z_BACKLASH 0
 #define MAX_JERK 5
 #define MAX_ZJERK 0.3
-#define PRINTLINE_CACHE_SIZE 32
+#define PRINTLINE_CACHE_SIZE 16
 #define MOVE_CACHE_LOW 10
 #define EXTRUDER_SWITCH_XY_SPEED 100
 #define FEATURE_DITTO_PRINTING 0
@@ -451,7 +451,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 
 // Leveling method
 // 0 = none, 3 = 3 points, 1 = grid, 2 = 4 point symmetric
-#define LEVELING_METHOD 2
+#define LEVELING_METHOD 0
 #define L_P1_X 60
 #define L_P1_Y 130
 #define L_P2_X 137
@@ -484,7 +484,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define UI_AUTORETURN_TO_MENU_AFTER 30000
 #define FEATURE_UI_KEYS 0
 #define UI_ENCODER_SPEED 2
-#define UI_REVERSE_ENCODER 0
+#define UI_REVERSE_ENCODER 1
 #define UI_KEY_BOUNCETIME 10
 #define UI_KEY_FIRST_REPEAT 500
 #define UI_KEY_REDUCE_REPEAT 50

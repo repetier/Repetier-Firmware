@@ -92,7 +92,7 @@ typedef char prog_char;
 #define MOTION2_TIMER_NUM 6
 #endif
 // Beware! On STM32F4's, TIM10's IRQHandler is shared with TIM1's!
-// Both timers will interrupt with the same function! 
+// Both timers will interrupt with the same function!
 #ifndef PWM_TIMER_NUM
 #define PWM_TIMER_NUM 10
 #endif
@@ -268,7 +268,7 @@ public:
     static char virtualEeprom[EEPROM_BYTES];
     static bool wdPinged;
     static uint8_t i2cError;
-    static BootReason startReason; 
+    static BootReason startReason;
 
     HAL();
     virtual ~HAL();
@@ -282,6 +282,11 @@ public:
     static void setHardwarePWM(int id, int value);
     // Set pwm frequency to value. id is id from initHardwarePWM.
     static void setHardwareFrequency(int id, uint32_t frequency);
+    // Initalize hardware DAC control on dacPin if supported.
+    // Returns internal id if it succeeds or -1 if it fails.
+    static fast8_t initHardwareDAC(fast8_t dacPin);
+    // Set the DAC output to value. id is from initHardwareDAC.
+    static void setHardwareDAC(fast8_t id, fast8_t value);
     // do any hardware-specific initialization here
     static void hwSetup(void);
 
@@ -417,14 +422,16 @@ public:
     static inline int16_t readFlashWord(PGM_P ptr) {
         return pgm_read_word(ptr);
     }
-
+    static inline const void* readFlashAddress(const void* adr) {
+        return (*((const void**)adr));
+    }
     static inline void serialSetBaudrate(long baud) {
         // Serial.setInterruptPriority(1);
 #if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
         RFSERIAL2.end();
         RFSERIAL2.begin(baud);
 #endif
-#if defined(USBCON) && defined(USBD_USE_CDC) 
+#if defined(USBCON) && defined(USBD_USE_CDC)
         if (static_cast<Stream*>(&RFSERIAL) != &SerialUSB) {
             RFSERIAL.end();
         }
@@ -477,7 +484,7 @@ public:
 #if NUM_SERVOS > 0
     static unsigned int servoTimings[4];
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);
-#else 
+#else
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff) { }
 #endif
 

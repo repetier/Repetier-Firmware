@@ -22,6 +22,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#include "Repetier.h"
 #include "SdSpiDriver.h"
 #if defined(SD_USE_CUSTOM_SPI) && defined(PLATFORM_ID)
 static volatile bool SPI_DMA_TransferCompleted = false;

@@ -126,6 +126,7 @@ void ToolExtruder::directionMotor(bool dir) {
     stepper->dir(dir);
 }
 
+#if FEATURE_RETRACTION
 void ToolExtruder::retract(bool backwards, bool longRetract) {
     if (!Motion1::retractSpeed
         || (!Motion1::retractLength && !longRetract)
@@ -177,7 +178,7 @@ void ToolExtruder::retract(bool backwards, bool longRetract) {
     Printer::feedrate = prevSpeed;
     Motion1::retracted = backwards;
 }
-
+#endif
 
 // ------------ JamDetectorHW ------------
 

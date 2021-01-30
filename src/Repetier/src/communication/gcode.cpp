@@ -213,8 +213,9 @@ GCode::GCode() {
 }
 
 void GCode::keepAlive(enum FirmwareState state, int id) {
+    // Id is only for debugging to see where busy is hanging!
+    // Com::printFLN(PSTR("BusyCaller:"), static_cast<int32_t>(id));
     millis_t now = HAL::timeInMilliseconds();
-
     if (state != FirmwareState::NotBusy && keepAliveInterval != 0) {
         if (now - lastBusySignal < keepAliveInterval)
             return;
@@ -365,10 +366,10 @@ void GCode::ackOutOfOrder() {
     Com::printF(PSTR("ooo "));
     if (hasM()) {
         Com::print('M');
-        Com::print(M);
+        Com::print(static_cast<int32_t>(M));
     } else if (hasG()) {
         Com::print('G');
-        Com::print(G);
+        Com::print(static_cast<int32_t>(G));
     }
     Com::println();
 }
@@ -1072,24 +1073,31 @@ void GCode::printCommand() {
     Com::println();
 }
 
-void GCode::fatalError(FSTRINGPARAM(message)) {
+void GCode::fatalError(FSTRINGPARAM(message), uint8_t flags) {
     fatalErrorMsg = message;
     Printer::stopPrint();
-    if (Motion1::isAxisHomed(Z_AXIS) && Motion1::currentPosition[Z_AXIS] < Motion1::maxPos[Z_AXIS] - 15) {
-        Motion1::setTmpPositionXYZ(0, 0, 10);
-        EndstopMode oldMode = Motion1::endstopMode;
-        Motion1::endstopMode = EndstopMode::STOP_HIT_AXES;
-        Motion1::moveRelativeByOfficial(Motion1::tmpPosition, Motion1::homingFeedrate[Z_AXIS], false);
-        Motion1::endstopMode = oldMode;
+    if (flags & FATAL_FLAG_SLOW_STOP) {
+        if (Motion1::isAxisHomed(Z_AXIS) && Motion1::currentPosition[Z_AXIS] < Motion1::maxPos[Z_AXIS] - 15) {
+            Motion1::setTmpPositionXYZ(0, 0, 10);
+            EndstopMode oldMode = Motion1::endstopMode;
+            Motion1::endstopMode = EndstopMode::STOP_HIT_AXES;
+            Motion1::moveRelativeByOfficial(Motion1::tmpPosition, Motion1::homingFeedrate[Z_AXIS], false);
+            Motion1::endstopMode = oldMode;
+        }
+        Commands::waitUntilEndOfAllMoves();
+    } else {
+        Motion1::emergencyStop();
     }
     EVENT_FATAL_ERROR_OCCURED
-    Commands::waitUntilEndOfAllMoves();
-    Printer::kill(false);
-#if defined(PS_ON_PIN) && PS_ON_PIN > -1
-    WRITE(PS_ON_PIN, (POWER_INVERTING ? LOW : HIGH));
-    Printer::setPowerOn(false);
-#endif
+    Printer::kill(flags & FATAL_FLAG_HEATER, flags & FATAL_FLAG_MOTORS);
+    Printer::failedMode = true;
     reportFatalError();
+#if defined(PS_ON_PIN) && PS_ON_PIN > -1
+    if (flags & FATAL_FLAG_HEATER) {
+        WRITE(PS_ON_PIN, (POWER_INVERTING ? LOW : HIGH));
+        Printer::setPowerOn(false);
+    }
+#endif
 }
 
 void GCode::reportFatalError() {
@@ -1098,6 +1106,7 @@ void GCode::reportFatalError() {
     Com::printF(fatalErrorMsg);
     Com::printFLN(PSTR(" - Printer stopped and heaters disabled due to this error. Fix error and restart with M999."));
     UI_ERROR_P(fatalErrorMsg)
+    GUI::push(errorScreenP, (void*)fatalErrorMsg, GUIPageType::STATUS);
     Printer::playDefaultSound(DefaultSounds::ERROR);
 }
 

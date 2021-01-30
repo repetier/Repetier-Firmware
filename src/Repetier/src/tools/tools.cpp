@@ -10,10 +10,15 @@
 
 HeatManager* heatedBeds[] = HEATED_BED_LIST;
 HeatManager* heatedChambers[] = HEATED_CHAMBER_LIST;
+#if CPU_ARCH == ARCH_AVR
+constexpr int numHeatedBeds = NUM_HEATED_BEDS;
+constexpr int numHeatedChambers = NUM_HEATED_CHAMBERS;
+#else
 constexpr int numHeatedBeds = std::extent<decltype(heatedBeds)>::value;
 static_assert(numHeatedBeds == NUM_HEATED_BEDS, "NUM_HEATED_BEDS not defined correctly");
 constexpr int numHeatedChambers = std::extent<decltype(heatedChambers)>::value;
 static_assert(numHeatedChambers == NUM_HEATED_CHAMBERS, "NUM_HEATED_CHAMBERS not defined correctly");
+#endif
 
 fast8_t Tool::activeToolId = 255;
 Tool* Tool::activeTool = nullptr;
@@ -352,8 +357,12 @@ void Tool::resetBase(float offX, float offY, float offZ) {
 } */
 
 void Tool::initTools() {
+#if CPU_ARCH == ARCH_AVR
+    constexpr int numTools = NUM_TOOLS;
+#else
     constexpr int numTools = std::extent<decltype(Tool::tools)>::value;
     static_assert(numTools == NUM_TOOLS, "NUM_TOOLS not defined correctly");
+#endif
 
     for (fast8_t i = 0; i < NUM_TOOLS; i++) {
         tools[i]->setToolId(i);

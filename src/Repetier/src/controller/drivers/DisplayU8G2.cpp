@@ -90,8 +90,8 @@ U8G2_KS0108_128X64_2 lcd(DISPLAY_ROTATION, UI_DISPLAY_D0_PIN, UI_DISPLAY_D1_PIN,
 #endif
 #endif
 
-millis_t init100msTicks = 0;
-void GUI::init() {
+static millis_t init100msTicks;
+void GUI::driverInit() {
     init100msTicks = 0;
 }
 void GUI::processInit() {
@@ -213,7 +213,10 @@ void GUI::menuStart(GUIAction action) {
     }
 }
 
-void GUI::menuEnd(GUIAction action) {
+void GUI::menuEnd(GUIAction action, bool scrollbar, bool affectedBySpeed) {
+    if (affectedBySpeed && GUI::speedAffectMenus) {
+        GUI::menuAffectBySpeed(action);
+    }
     if (action == GUIAction::NEXT) {
         if (cursorRow[level] - topRow[level] > 4) {
             topRow[level] = cursorRow[level] - 4;
@@ -229,7 +232,7 @@ void GUI::menuEnd(GUIAction action) {
         if (cursorRow[level] < 0) {
             cursorRow[level] = 0;
         }
-    } else if(action == GUIAction::DRAW) {
+    } else if(action == GUIAction::DRAW && scrollbar) {
         GUI::showScrollbar(action);
     }
 }
@@ -953,7 +956,7 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
         }
         if (NUM_TOOLS > 1 && tool->getToolType() == ToolTypes::EXTRUDER && tool->hasSecondary() && tool->secondaryIsFan() && n < 6) {
             GUI::bufClear();
-            GUI::bufAddStringP("Fan:");
+            GUI::bufAddStringP(PSTR("Fan:"));
             GUI::bufAddInt(tool->secondaryPercent(), 3);
             GUI::bufAddChar('%');
             lcd.drawUTF8(1, 16 + n * 7, GUI::buf);
@@ -961,7 +964,7 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
         }
         if (NUM_TOOLS > 1 && tool->getToolType() == ToolTypes::EXTRUDER && n < 6) {
             GUI::bufClear();
-            GUI::bufAddStringP("Ditto:");
+            GUI::bufAddStringP(PSTR("Ditto:"));
             GUI::bufAddInt(Motion1::dittoMode, 1);
             if (Motion1::dittoMirror) {
                 GUI::bufAddChar('M');
@@ -971,7 +974,7 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
         }
         if (NUM_TOOLS > 1 && tool->getToolType() == ToolTypes::EXTRUDER && n < 6) {
             GUI::bufClear();
-            GUI::bufAddStringP("Flow:");
+            GUI::bufAddStringP(PSTR("Flow:"));
             GUI::bufAddInt(Printer::extrudeMultiply, 3);
             GUI::bufAddChar('%');
             lcd.drawUTF8(1, 16 + n * 7, GUI::buf);
@@ -979,7 +982,7 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
         }
         if (n < 6 && Printer::areAllSteppersDisabled()) {
             GUI::bufClear();
-            GUI::bufAddStringP("Motors off");
+            GUI::bufAddStringP(PSTR("Motors off"));
             lcd.drawUTF8(1, 16 + n * 7, GUI::buf);
             n++;
         }
@@ -1068,7 +1071,7 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
             }
             if (NUM_TOOLS > 1 && tool->getToolType() == ToolTypes::EXTRUDER && tool->hasSecondary() && tool->secondaryIsFan() && n < 6) {
                 GUI::bufClear();
-                GUI::bufAddStringP("Fan:");
+                GUI::bufAddStringP(PSTR("Fan:"));
                 GUI::bufAddInt(tool->secondaryPercent(), 3);
                 GUI::bufAddChar('%');
                 lcd.drawUTF8(66, y0 + n * 7, GUI::buf);

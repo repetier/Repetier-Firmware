@@ -31,7 +31,7 @@
 #include <stdint.h>
 #ifdef __AVR__
 #include <avr/io.h>
-#endif  // __AVR__
+#endif // __AVR__
 /** For Debug - must be one */
 #define ENABLE_ARDUINO_FEATURES 1
 /** For Debug - must be one */
@@ -47,8 +47,8 @@
 #ifdef PLATFORM_ID
 // Only defined if a Particle device.
 #include "application.h"
-#endif  // PLATFORM_ID
-#endif  // ENABLE_ARDUINO_FEATURES
+#endif // PLATFORM_ID
+#endif // ENABLE_ARDUINO_FEATURES
 //------------------------------------------------------------------------------
 /**
  * Set INCLUDE_SDIOS nonzero to include sdios.h in SdFat.h.
@@ -73,12 +73,12 @@
 #if defined(__AVR__) && FLASHEND < 0X8000
 // 32K AVR boards.
 #define SDFAT_FILE_TYPE 1
-#else  // defined(__AVR__) && FLASHEND < 0X8000
+#else // defined(__AVR__) && FLASHEND < 0X8000
 // All other boards.
-#ifndef SDFAT_FILE_TYPE 
+#ifndef SDFAT_FILE_TYPE
 #define SDFAT_FILE_TYPE 3
 #endif
-#endif  // defined(__AVR__) && FLASHEND < 0X8000
+#endif // defined(__AVR__) && FLASHEND < 0X8000
 //------------------------------------------------------------------------------
 /**
  * Set ENABLE_DEDICATED_SPI to enable dedicated use of the SPI bus.
@@ -91,12 +91,12 @@
 #if defined(__AVR__) && FLASHEND < 0X8000
 // 32K AVR boards.
 #define ENABLE_DEDICATED_SPI 1
-#else  // defined(__AVR__) && FLASHEND < 0X8000
+#else // defined(__AVR__) && FLASHEND < 0X8000
 // All other boards.
 #ifndef ENABLE_DEDICATED_SPI
 #define ENABLE_DEDICATED_SPI 1
 #endif
-#endif  // defined(__AVR__) && FLASHEND < 0X8000
+#endif // defined(__AVR__) && FLASHEND < 0X8000
 //-----------------------------------------------------------------------------
 /**
  * If the symbol SPI_DRIVER_SELECT is:
@@ -110,7 +110,7 @@
  *
  * 3 - An external SPI driver derived from SdSpiBaseClass is always used.
  */
- 
+
 #ifndef SPI_DRIVER_SELECT
 #if defined(ENABLE_SOFTWARE_SPI_CLASS) && ENABLE_SOFTWARE_SPI_CLASS
 #define SPI_DRIVER_SELECT 2
@@ -208,9 +208,9 @@ typedef uint8_t SdCsPin_t;
 #define USE_FCNTL_H 1
 #elif defined(ESP32)
 #define USE_FCNTL_H 1
-#else  // defined(__AVR__)
+#else // defined(__AVR__)
 #define USE_FCNTL_H 0
-#endif  // defined(__AVR__)
+#endif // defined(__AVR__)
 //------------------------------------------------------------------------------
 /**
  * Handle Watchdog Timer for WiFi modules.
@@ -221,9 +221,9 @@ typedef uint8_t SdCsPin_t;
 #if defined(PLATFORM_ID) || defined(ESP8266)
 // If Particle device or ESP8266 call yield.
 #define WDT_YIELD_TIME_MILLIS 100
-#else  // defined(PLATFORM_ID) || defined(ESP8266)
+#else // defined(PLATFORM_ID) || defined(ESP8266)
 #define WDT_YIELD_TIME_MILLIS 0
-#endif  // defined(PLATFORM_ID) || defined(ESP8266)
+#endif // defined(PLATFORM_ID) || defined(ESP8266)
 //------------------------------------------------------------------------------
 /**
  * Set FAT12_SUPPORT nonzero to enable use if FAT12 volumes.
@@ -261,12 +261,12 @@ typedef uint8_t SdCsPin_t;
  * Set USE_SIMPLE_LITTLE_ENDIAN nonzero for little endian processors
  * with no memory alignment restrictions.
  */
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__ && !defined(__SAMD21G18A__)\
-  && !defined(__MKL26Z64__) && !defined(ESP8266)
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__ && !defined(__SAMD21G18A__) \
+    && !defined(__MKL26Z64__) && !defined(ESP8266)
 #define USE_SIMPLE_LITTLE_ENDIAN 1
-#else  // __BYTE_ORDER_
+#else // __BYTE_ORDER_
 #define USE_SIMPLE_LITTLE_ENDIAN 0
-#endif  // __BYTE_ORDER_
+#endif // __BYTE_ORDER_
 //------------------------------------------------------------------------------
 /**
  * Set USE_SEPARATE_FAT_CACHE nonzero to use a second 512 byte cache
@@ -275,9 +275,9 @@ typedef uint8_t SdCsPin_t;
  */
 #ifdef __arm__
 #define USE_SEPARATE_FAT_CACHE 1
-#else  // __arm__
+#else // __arm__
 #define USE_SEPARATE_FAT_CACHE 0
-#endif  // __arm__
+#endif // __arm__
 //------------------------------------------------------------------------------
 /**
  * Set USE_EXFAT_BITMAP_CACHE nonzero to use a second 512 byte cache
@@ -286,9 +286,9 @@ typedef uint8_t SdCsPin_t;
  */
 #ifdef __arm__
 #define USE_EXFAT_BITMAP_CACHE 1
-#else  // __arm__
+#else // __arm__
 #define USE_EXFAT_BITMAP_CACHE 0
-#endif  // __arm__
+#endif // __arm__
 //------------------------------------------------------------------------------
 /**
  * Set USE_MULTI_SECTOR_IO nonzero to use multi-sector SD read/write.
@@ -297,50 +297,50 @@ typedef uint8_t SdCsPin_t;
  */
 #if defined(RAMEND) && RAMEND < 3000
 #define USE_MULTI_SECTOR_IO 0
-#else  // RAMEND
+#else // RAMEND
 #define USE_MULTI_SECTOR_IO 1
-#endif  // RAMEND
+#endif // RAMEND
 //------------------------------------------------------------------------------
 /** Enable SDIO driver if available. */
 #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
 // Pseudo pin select for SDIO.
 #ifndef BUILTIN_SDCARD
 #define BUILTIN_SDCARD 254
-#endif  // BUILTIN_SDCARD
+#endif // BUILTIN_SDCARD
 // SPI for built-in card.
 #ifndef SDCARD_SPI
-#define SDCARD_SPI      SPI1
+#define SDCARD_SPI SPI1
 #define SDCARD_MISO_PIN 59
 #define SDCARD_MOSI_PIN 61
-#define SDCARD_SCK_PIN  60
-#define SDCARD_SS_PIN   62
-#endif  // SDCARD_SPI
+#define SDCARD_SCK_PIN 60
+#define SDCARD_SS_PIN 62
+#endif // SDCARD_SPI
 #define HAS_SDIO_CLASS 1
-#endif  // defined(__MK64FX512__) || defined(__MK66FX1M0__)
+#endif // defined(__MK64FX512__) || defined(__MK66FX1M0__)
 #if defined(__IMXRT1062__)
 #define HAS_SDIO_CLASS 1
-#endif  // defined(__IMXRT1062__)
+#endif // defined(__IMXRT1062__)
 //------------------------------------------------------------------------------
 /**
  * Determine the default SPI configuration.
  */
-#if defined(ARDUINO_ARCH_APOLLO3)\
-  || defined(__AVR__)\
-  || defined(ESP8266) || defined(ESP32)\
-  || defined(PLATFORM_ID)\
-  || defined(ARDUINO_SAM_DUE)\
-  || defined(__STM32F1__) || defined(__STM32F4__)\
-  || (defined(CORE_TEENSY) && defined(__arm__))
+#if defined(ARDUINO_ARCH_APOLLO3) \
+    || defined(__AVR__) \
+    || defined(ESP8266) || defined(ESP32) \
+    || defined(PLATFORM_ID) \
+    || defined(ARDUINO_SAM_DUE) \
+    || defined(__STM32F1__) || defined(__STM32F4__) \
+    || (defined(CORE_TEENSY) && defined(__arm__))
 #define SD_HAS_CUSTOM_SPI 1
-#else  // SD_HAS_CUSTOM_SPI
+#else // SD_HAS_CUSTOM_SPI
 // Use standard SPI library.
 #ifndef SD_HAS_CUSTOM_SPI
 #define SD_HAS_CUSTOM_SPI 0
 #endif
-#endif  // SD_HAS_CUSTOM_SPI
+#endif // SD_HAS_CUSTOM_SPI
 //------------------------------------------------------------------------------
 #ifndef HAS_SDIO_CLASS
 /** Default is no SDIO. */
 #define HAS_SDIO_CLASS 0
-#endif  // HAS_SDIO_CLASS
-#endif  // SdFatConfig_h
+#endif // HAS_SDIO_CLASS
+#endif // SdFatConfig_h

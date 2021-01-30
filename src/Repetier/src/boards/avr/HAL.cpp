@@ -5,19 +5,28 @@
 // New adc handling
 #if MAX_ANALOG_INPUTS == 16
 bool analogEnabled[MAX_ANALOG_INPUTS] = { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false };
+uint16_t analogValues[MAX_ANALOG_INPUTS] = { 0 };
+int8_t analogSamplePos = 15;
+int8_t analogInputCount = 0;
 #endif
 
 // end adc handling
 
-#if ANALOG_INPUTS > 0
-uint8 osAnalogInputCounter[ANALOG_INPUTS];
-uint osAnalogInputBuildup[ANALOG_INPUTS];
-uint8 osAnalogInputPos = 0; // Current sampling position
-#endif
 #if FEATURE_WATCHDOG
 bool HAL::wdPinged = false;
 #endif
 uint8_t HAL::i2cError = 0;
+BootReason HAL::startReason = BootReason::UNKNOWN;
+
+// Seems that under AVR these are missing, wonder why new is not missing?
+void operator delete(void* ptr, size_t size) {
+    free(ptr);
+}
+
+void operator delete[](void* ptr, size_t size) {
+    free(ptr);
+}
+
 //extern "C" void __cxa_pure_virtual() { }
 
 HAL::HAL() {
@@ -31,14 +40,24 @@ HAL::~HAL() {
 void HAL::setupTimer() {
     PWM_TCCR = 0; // Setup PWM interrupt
     PWM_OCR = 64;
-    PWM_TIMSK |= (1 << PWM_OCIE);
+    PWM_TIMSK |= _BV(PWM_OCIE);
 
     TCCR1A = 0; // Stepper timer 1 interrupt to no prescale CTC mode
+    TCCR1B = _BV(WGM12);
     TCCR1C = 0;
     TIMSK1 = 0;
     TCCR1B = (_BV(WGM12) | _BV(CS10)); // no prescaler == 0.0625 usec tick | 001 = clk/1
-    OCR1A = 65500;                     //start off with a slow frequency.
+    OCR1A = F_CPU / STEPPER_FREQUENCY; //start off with a slow frequency.
     TIMSK1 |= (1 << OCIE1A);           // Enable interrupt
+#if F_CPU / PREPARE_FREQUENCY / 128 > 255
+#error PREPARE_FREQUENCY is too low!
+#endif
+    uint8_t prepSteps = F_CPU / PREPARE_FREQUENCY / 128; // 250 for 500Hz
+    OCR2A = static_cast<uint8_t>(prepSteps);
+    TCCR2A = _BV(WGM21);            // CTC mode
+    TCCR2B = _BV(CS22) + _BV(CS20); // Prescaler 1/128
+    TIMSK2 |= _BV(OCIE2A);          // Enable interrupt
+
 #if NUM_SERVOS > 0
     TCCR3A = 0;         // normal counting mode
     TCCR3B = _BV(CS31); // set prescaler of 8
@@ -53,21 +72,45 @@ void HAL::setupTimer() {
 #endif
 }
 
+// Print apparent cause of start/restart
 void HAL::showStartReason() {
+    if (startReason == BootReason::BROWNOUT) {
+        Com::printInfoFLN(Com::tBrownOut);
+    } else if (startReason == BootReason::WATCHDOG_RESET) {
+        Com::printInfoFLN(Com::tWatchdog);
+    } else if (startReason == BootReason::SOFTWARE_RESET) {
+        Com::printInfoFLN(PSTR("Software reset"));
+    } else if (startReason == BootReason::POWER_UP) {
+        Com::printInfoFLN(Com::tPowerUp);
+    } else if (startReason == BootReason::EXTERNAL_PIN) {
+        Com::printInfoFLN(PSTR("External reset pin reset"));
+    } else {
+        Com::printInfoFLN(PSTR("Unknown reset reason"));
+    }
+}
+
+void HAL::updateStartReason() {
     // Check startup - does nothing if bootloader sets MCUSR to 0
     uint8_t mcu = MCUSR;
-    if (mcu & 1)
-        Com::printInfoFLN(Com::tPowerUp);
-    if (mcu & 2)
-        Com::printInfoFLN(Com::tExternalReset);
-    if (mcu & 4)
-        Com::printInfoFLN(Com::tBrownOut);
-    if (mcu & 8)
-        Com::printInfoFLN(Com::tWatchdog);
-    if (mcu & 32)
-        Com::printInfoFLN(Com::tSoftwareReset);
+    startReason = BootReason::UNKNOWN;
+    if (mcu & 1) {
+        startReason = BootReason::POWER_UP;
+    }
+    if (mcu & 2) {
+        startReason = BootReason::EXTERNAL_PIN;
+    }
+    if (mcu & 4) {
+        startReason = BootReason::BROWNOUT;
+    }
+    if (mcu & 8) {
+        startReason = BootReason::WATCHDOG_RESET;
+    }
+    if (mcu & 32) {
+        startReason = BootReason::SOFTWARE_RESET;
+    }
     MCUSR = 0;
 }
+
 int HAL::getFreeRam() {
     int freeram = 0;
     InterruptProtectedBlock noInts;
@@ -86,30 +129,29 @@ void HAL::resetHardware() {
 }
 
 void HAL::analogStart() {
-#if ANALOG_INPUTS > 0
-    ADMUX = ANALOG_REF; // refernce voltage
-    for (uint8_t i = 0; i < ANALOG_INPUTS; i++) {
-        osAnalogInputCounter[i] = 0;
-        osAnalogInputBuildup[i] = 0;
-        osAnalogInputValues[i] = 0;
-    }
-    ADCSRA = _BV(ADEN) | _BV(ADSC) | ANALOG_PRESCALER;
-    //ADCSRA |= _BV(ADSC);                  // start ADC-conversion
-    while (ADCSRA & _BV(ADSC)) { } // wait for conversion
-    /* ADCW must be read once, otherwise the next result is wrong. */
-    //uint dummyADCResult;
-    //dummyADCResult = ADCW;
-    // Enable interrupt driven conversion loop
-    uint8_t channel = pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]);
+    if (analogInputCount > 0) {
+        ADMUX = ANALOG_REF; // refernce voltage
+        ADCSRA = _BV(ADEN) | _BV(ADSC) | ANALOG_PRESCALER;
+        //ADCSRA |= _BV(ADSC);                  // start ADC-conversion
+        while (ADCSRA & _BV(ADSC)) { } // wait for conversion
+                                       /* ADCW must be read once, otherwise the next result is wrong. */
+                                       //uint dummyADCResult;
+                                       //dummyADCResult = ADCW;
+                                       // Enable interrupt driven conversion loop
+        analogSamplePos = 0;
+        while (!analogEnabled[analogSamplePos]) {
+            analogSamplePos++;
+        }
 #if defined(ADCSRB) && defined(MUX5)
-    if (channel & 8) // Reading channel 0-7 or 8-15?
-        ADCSRB |= _BV(MUX5);
-    else
-        ADCSRB &= ~_BV(MUX5);
+        if (analogSamplePos & 8) { // Reading channel 0-7 or 8-15?
+            ADCSRB |= _BV(MUX5);
+        } else {
+            ADCSRB &= ~_BV(MUX5);
+        }
 #endif
-    ADMUX = (ADMUX & ~(0x1F)) | (channel & 7);
-    ADCSRA |= _BV(ADSC); // start conversion without interrupt!
-#endif
+        ADMUX = (ADMUX & ~(0x1F)) | (analogSamplePos & 7);
+        ADCSRA |= _BV(ADSC); // start conversion without interrupt!
+    }
 }
 
 #if (__GNUC__ * 100 + __GNUC_MINOR__) < 304
@@ -154,7 +196,7 @@ void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
 
  Input:   address and transfer direction of I2C device, internal address
 *************************************************************************/
-void HAL::i2cStartAddr(unsigned char address, unsigned int pos, unsigned int readBytes) {
+void HAL::i2cStartAddr(unsigned char address, unsigned int pos, uint8_t readBytes) {
     if (!i2cError) {
         WIRE_PORT.beginTransmission(address);
         WIRE_PORT.write(pos >> 8);
@@ -301,433 +343,127 @@ inline void setTimer(uint32_t delay) {
       }*/
 }
 
+ISR(TIMER2_COMPA_vect) {
+    cbi(TIMSK2, OCIE2A); // prevent retrigger timer by disabling     static bool inside = false;
+    sei();               // allow interruption since it is a long operation
+    Motion2::timer();
+    sbi(TIMSK2, OCIE2A);
+}
+
 // volatile uint8_t insideTimer1 = 0;
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
-ISR(MOTION3_COMPA_vect) {
-    // if(insideTimer1) return;
-    uint8_t doExit;
-    __asm__ __volatile__(
-        "ldi %[ex],0 \n\t"
-        "lds r23,stepperWait+2 \n\t"
-        "tst r23 \n\t"     //if(stepperWait<65536) {
-        "brne else%= \n\t" // Still > 65535
-        "lds r23,stepperWait+1 \n\t"
-        "tst r23 \n\t"
-        "brne last%= \n\t" // Still not 0, go ahead
-        "lds r22,stepperWait \n\t"
-        "breq end%= \n\t" // stepperWait is 0, do your work
-        "last%=: \n\t"
-        "sts %[ocr]+1,r23 \n\t" //  OCR1A = stepper wait;
-        "sts %[ocr],r22 \n\t"
-        "sts stepperWait,r1 \n\t"
-        "sts stepperWait+1,r1 \n\t"
-        "rjmp end1%= \n\t"
-        "else%=: lds r22,stepperWait+1 \n\t" //} else { stepperWait = stepperWait-32768;
-        "subi	r22, 0x80 \n\t"
-        "sbci	r23, 0x00 \n\t"
-        "sts stepperWait+1,r22 \n\t" // ocr1a stays 32768
-        "sts stepperWait+2,r23 \n\t"
-        "end1%=: ldi %[ex],1 \n\t"
-        "end%=: \n\t"
-        : [ ex ] "=&d"(doExit)
-        : [ ocr ] "i"(_SFR_MEM_ADDR(OCR1A))
-        : "r22", "r23");
-    //        :[ex]"=&d"(doExit),[stepperWait]"=&d"(stepperWait):[ocr]"i" (_SFR_MEM_ADDR(OCR1A)):"r22","r23" );
-    if (doExit)
-        return;
-    cbi(TIMSK1, OCIE1A); // prevent retrigger timer by disabling timer interrupt. Should be faster the guarding with insideTimer1.
-    // insideTimer1 = 1;
-    OCR1A = 61000;
-    if (PrintLine::hasLines()) {
-        setTimer(PrintLine::bresenhamStep());
-    }
-#if FEATURE_BABYSTEPPING
-    else if (Printer::zBabystepsMissing) {
-        Printer::zBabystep();
-        setTimer(Printer::interval);
-    }
-#endif
-    else {
-        if (waitRelax == 0) {
-        } else
-            waitRelax--;
-        stepperWait = 0; // Important because of optimization in asm at begin
-        OCR1A = 65500;   // Wait for next move
-    }
-    DEBUG_MEMORY;
+// Motion3
+ISR(TIMER1_COMPA_vect) {
+    cbi(TIMSK1, OCIE1A); // prevent retrigger timer by disabling insideTimer1.
+    Motion3::timer();
     sbi(TIMSK1, OCIE1A);
-    //insideTimer1 = 0;
 }
 
-#if !defined(HEATER_PWM_SPEED)
-#define HEATER_PWM_SPEED 0
-#endif
-#if HEATER_PWM_SPEED < 0
-#define HEATER_PWM_SPEED 0
-#endif
-#if HEATER_PWM_SPEED > 4
-#define HEATER_PWM_SPEED 4
-#endif
+ufast8_t pwmSteps[] = { 1, 2, 4, 8, 16 };
+ufast8_t pwmMasks[] = { 255, 254, 252, 248, 240 };
 
-#if HEATER_PWM_SPEED == 0
-#define HEATER_PWM_STEP 1
-#define HEATER_PWM_MASK 255
-#elif HEATER_PWM_SPEED == 1
-#define HEATER_PWM_STEP 2
-#define HEATER_PWM_MASK 254
-#elif HEATER_PWM_SPEED == 2
-#define HEATER_PWM_STEP 4
-#define HEATER_PWM_MASK 252
-#elif HEATER_PWM_SPEED == 3
-#define HEATER_PWM_STEP 8
-#define HEATER_PWM_MASK 248
-#elif HEATER_PWM_SPEED == 4
-#define HEATER_PWM_STEP 16
-#define HEATER_PWM_MASK 240
-#endif
-
-#if !defined(COOLER_PWM_SPEED)
-#define COOLER_PWM_SPEED 0
-#endif
-#if COOLER_PWM_SPEED < 0
-#define COOLER_PWM_SPEED 0
-#endif
-#if COOLER_PWM_SPEED > 4
-#define COOLER_PWM_SPEED 4
-#endif
-
-#if COOLER_PWM_SPEED == 0
-#define COOLER_PWM_STEP 1
-#define COOLER_PWM_MASK 255
-#elif COOLER_PWM_SPEED == 1
-#define COOLER_PWM_STEP 2
-#define COOLER_PWM_MASK 254
-#elif COOLER_PWM_SPEED == 2
-#define COOLER_PWM_STEP 4
-#define COOLER_PWM_MASK 252
-#elif COOLER_PWM_SPEED == 3
-#define COOLER_PWM_STEP 8
-#define COOLER_PWM_MASK 248
-#elif COOLER_PWM_SPEED == 4
-#define COOLER_PWM_STEP 16
-#define COOLER_PWM_MASK 240
-#endif
-
-#define pulseDensityModulate(pin, density, error, invert) \
-    { \
-        uint8_t carry; \
-        carry = error + (invert ? 255 - density : density); \
-        WRITE(pin, (carry < error)); \
-        error = carry; \
-    }
 /**
 This timer is called 3906 timer per second. It is used to update pwm values for heater and some other frequent jobs.
 */
 ISR(PWM_TIMER_VECTOR) {
-    static uint8_t pwm_count_cooler = 0;
-    static uint8_t pwm_count_heater = 0;
-    static uint8_t pwm_pos_set[NUM_PWM];
-#if NUM_EXTRUDER > 0 && ((defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN > -1) || (NUM_EXTRUDER > 1 && EXT1_EXTRUDER_COOLER_PIN > -1 && EXT1_EXTRUDER_COOLER_PIN != EXT0_EXTRUDER_COOLER_PIN) || (NUM_EXTRUDER > 2 && EXT2_EXTRUDER_COOLER_PIN > -1 && EXT2_EXTRUDER_COOLER_PIN != EXT2_EXTRUDER_COOLER_PIN) || (NUM_EXTRUDER > 3 && EXT3_EXTRUDER_COOLER_PIN > -1 && EXT3_EXTRUDER_COOLER_PIN != EXT3_EXTRUDER_COOLER_PIN) || (NUM_EXTRUDER > 4 && EXT4_EXTRUDER_COOLER_PIN > -1 && EXT4_EXTRUDER_COOLER_PIN != EXT4_EXTRUDER_COOLER_PIN) || (NUM_EXTRUDER > 5 && EXT5_EXTRUDER_COOLER_PIN > -1 && EXT5_EXTRUDER_COOLER_PIN != EXT5_EXTRUDER_COOLER_PIN))
-    static uint8_t pwm_cooler_pos_set[NUM_EXTRUDER];
-#endif
-    PWM_OCR += 64;
-    if (pwm_count_heater == 0 && !PDM_FOR_EXTRUDER) {
-#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1
-        if ((pwm_pos_set[0] = (pwm_pos[0] & HEATER_PWM_MASK)) > 0)
-            WRITE(EXT0_HEATER_PIN, !HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1 && !MIXING_EXTRUDER
-        if ((pwm_pos_set[1] = (pwm_pos[1] & HEATER_PWM_MASK)) > 0)
-            WRITE(EXT1_HEATER_PIN, !HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2 && !MIXING_EXTRUDER
-        if ((pwm_pos_set[2] = (pwm_pos[2] & HEATER_PWM_MASK)) > 0)
-            WRITE(EXT2_HEATER_PIN, !HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3 && !MIXING_EXTRUDER
-        if ((pwm_pos_set[3] = (pwm_pos[3] & HEATER_PWM_MASK)) > 0)
-            WRITE(EXT3_HEATER_PIN, !HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4 && !MIXING_EXTRUDER
-        if ((pwm_pos_set[4] = (pwm_pos[4] & HEATER_PWM_MASK)) > 0)
-            WRITE(EXT4_HEATER_PIN, !HEATER_PINS_INVERTED);
-#endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5 && !MIXING_EXTRUDER
-        if ((pwm_pos_set[5] = (pwm_pos[5] & HEATER_PWM_MASK)) > 0)
-            WRITE(EXT5_HEATER_PIN, !HEATER_PINS_INVERTED);
-#endif
-#if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
-        if ((pwm_pos_set[NUM_EXTRUDER] = (pwm_pos[NUM_EXTRUDER] & HEATER_PWM_MASK)) > 0)
-            WRITE(HEATED_BED_HEATER_PIN, !HEATER_PINS_INVERTED);
-#endif
+    static uint8_t pwm_count0 = 0; // Used my IO_PWM_SOFTWARE!
+    static uint8_t pwm_count1 = 0;
+    static uint8_t pwm_count2 = 0;
+    static uint8_t pwm_count3 = 0;
+    static uint8_t pwm_count4 = 0;
+
+// Add all generated pwm handlers
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_PWM
+#include "io/redefine.h"
+
+    counterPeriodical++;                          // Approximate a 100ms timer
+    if (counterPeriodical >= PWM_COUNTER_100MS) { //  (int)(F_CPU/40960))
+        counterPeriodical = 0;
+        executePeriodical = 1;
     }
-    if (pwm_count_cooler == 0 && !PDM_FOR_COOLER) {
-#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1 && EXT0_EXTRUDER_COOLER_PIN > -1
-        if ((pwm_cooler_pos_set[0] = (extruder[0].coolerPWM & COOLER_PWM_MASK)) > 0)
-            WRITE(EXT0_EXTRUDER_COOLER_PIN, 1);
-#endif
-#if !SHARED_COOLER && defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1
-#if EXT1_EXTRUDER_COOLER_PIN > -1 && EXT1_EXTRUDER_COOLER_PIN != EXT0_EXTRUDER_COOLER_PIN
-        if ((pwm_cooler_pos_set[1] = (extruder[1].coolerPWM & COOLER_PWM_MASK)) > 0)
-            WRITE(EXT1_EXTRUDER_COOLER_PIN, 1);
-#endif
-#endif
-#if !SHARED_COOLER && defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2
-#if EXT2_EXTRUDER_COOLER_PIN > -1
-        if ((pwm_cooler_pos_set[2] = (extruder[2].coolerPWM & COOLER_PWM_MASK)) > 0)
-            WRITE(EXT2_EXTRUDER_COOLER_PIN, 1);
-#endif
-#endif
-#if !SHARED_COOLER && defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3
-#if EXT3_EXTRUDER_COOLER_PIN > -1
-        if ((pwm_cooler_pos_set[3] = (extruder[3].coolerPWM & COOLER_PWM_MASK)) > 0)
-            WRITE(EXT3_EXTRUDER_COOLER_PIN, 1);
-#endif
-#endif
-#if !SHARED_COOLER && defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4
-#if EXT4_EXTRUDER_COOLER_PIN > -1
-        if ((pwm_cooler_pos_set[4] = (extruder[4].coolerPWM & COOLER_PWM_MASK)) > 0)
-            WRITE(EXT4_EXTRUDER_COOLER_PIN, 1);
-#endif
-#endif
-#if !SHARED_COOLER && defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5
-#if EXT5_EXTRUDER_COOLER_PIN > -1
-        if ((pwm_cooler_pos_set[5] = (extruder[5].coolerPWM & COOLER_PWM_MASK)) > 0)
-            WRITE(EXT5_EXTRUDER_COOLER_PIN, 1);
-#endif
-#endif
-#if FAN_BOARD_PIN > -1 && SHARED_COOLER_BOARD_EXT == 0
-        if ((pwm_pos_set[PWM_BOARD_FAN] = (pwm_pos[PWM_BOARD_FAN] & COOLER_PWM_MASK)) > 0)
-            WRITE(FAN_BOARD_PIN, 1);
-#endif
-#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
-        if ((pwm_pos_set[PWM_FAN1] = (pwm_pos[PWM_FAN1] & COOLER_PWM_MASK)) > 0)
-            WRITE(FAN_PIN, 1);
-#endif
-#if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
-        if ((pwm_pos_set[PWM_FAN2] = (pwm_pos[PWM_FAN2] & COOLER_PWM_MASK)) > 0)
-            WRITE(FAN2_PIN, 1);
-#endif
-#if defined(FAN_THERMO_PIN) && FAN_THERMO_PIN > -1
-        if ((pwm_pos_set[PWM_FAN_THERMO] = (pwm_pos[PWM_FAN_THERMO] & COOLER_PWM_MASK)) > 0)
-            WRITE(FAN_THERMO_PIN, 1);
-#endif
-    }
-#if defined(EXT0_HEATER_PIN) && EXT0_HEATER_PIN > -1
-#if PDM_FOR_EXTRUDER
-    pulseDensityModulate(EXT0_HEATER_PIN, pwm_pos[0], pwm_pos_set[0], HEATER_PINS_INVERTED);
-#else
-    if (pwm_pos_set[0] == pwm_count_heater && pwm_pos_set[0] != HEATER_PWM_MASK)
-        WRITE(EXT0_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if EXT0_EXTRUDER_COOLER_PIN > -1
-#if PDM_FOR_COOLER
-    pulseDensityModulate(EXT0_EXTRUDER_COOLER_PIN, extruder[0].coolerPWM, pwm_cooler_pos_set[0], false);
-#else
-    if (pwm_cooler_pos_set[0] == pwm_count_cooler && pwm_cooler_pos_set[0] != COOLER_PWM_MASK)
-        WRITE(EXT0_EXTRUDER_COOLER_PIN, 0);
-#endif
-#endif
-#endif
-#if defined(EXT1_HEATER_PIN) && EXT1_HEATER_PIN > -1 && NUM_EXTRUDER > 1 && !MIXING_EXTRUDER
-#if PDM_FOR_EXTRUDER
-    pulseDensityModulate(EXT1_HEATER_PIN, pwm_pos[1], pwm_pos_set[1], HEATER_PINS_INVERTED);
-#else
-    if (pwm_pos_set[1] == pwm_count_heater && pwm_pos_set[1] != HEATER_PWM_MASK)
-        WRITE(EXT1_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if !SHARED_COOLER && defined(EXT1_EXTRUDER_COOLER_PIN) && EXT1_EXTRUDER_COOLER_PIN > -1 && EXT1_EXTRUDER_COOLER_PIN != EXT0_EXTRUDER_COOLER_PIN
-#if PDM_FOR_COOLER
-    pulseDensityModulate(EXT1_EXTRUDER_COOLER_PIN, extruder[1].coolerPWM, pwm_cooler_pos_set[1], false);
-#else
-    if (pwm_cooler_pos_set[1] == pwm_count_cooler && pwm_cooler_pos_set[1] != COOLER_PWM_MASK)
-        WRITE(EXT1_EXTRUDER_COOLER_PIN, 0);
-#endif
-#endif
-#endif
-#if defined(EXT2_HEATER_PIN) && EXT2_HEATER_PIN > -1 && NUM_EXTRUDER > 2 && !MIXING_EXTRUDER
-#if PDM_FOR_EXTRUDER
-    pulseDensityModulate(EXT2_HEATER_PIN, pwm_pos[2], pwm_pos_set[2], HEATER_PINS_INVERTED);
-#else
-    if (pwm_pos_set[2] == pwm_count_heater && pwm_pos_set[2] != HEATER_PWM_MASK)
-        WRITE(EXT2_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if !SHARED_COOLER && EXT2_EXTRUDER_COOLER_PIN > -1
-#if PDM_FOR_COOLER
-    pulseDensityModulate(EXT2_EXTRUDER_COOLER_PIN, extruder[2].coolerPWM, pwm_cooler_pos_set[2], false);
-#else
-    if (pwm_cooler_pos_set[2] == pwm_count_cooler && pwm_cooler_pos_set[2] != COOLER_PWM_MASK)
-        WRITE(EXT2_EXTRUDER_COOLER_PIN, 0);
-#endif
-#endif
-#endif
-#if defined(EXT3_HEATER_PIN) && EXT3_HEATER_PIN > -1 && NUM_EXTRUDER > 3 && !MIXING_EXTRUDER
-#if PDM_FOR_EXTRUDER
-    pulseDensityModulate(EXT3_HEATER_PIN, pwm_pos[3], pwm_pos_set[3], HEATER_PINS_INVERTED);
-#else
-    if (pwm_pos_set[3] == pwm_count_heater && pwm_pos_set[3] != HEATER_PWM_MASK)
-        WRITE(EXT3_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if !SHARED_COOLER && EXT3_EXTRUDER_COOLER_PIN > -1
-#if PDM_FOR_COOLER
-    pulseDensityModulate(EXT3_EXTRUDER_COOLER_PIN, extruder[3].coolerPWM, pwm_cooler_pos_set[3], false);
-#else
-    if (pwm_cooler_pos_set[3] == pwm_count_cooler && pwm_cooler_pos_set[3] != COOLER_PWM_MASK)
-        WRITE(EXT3_EXTRUDER_COOLER_PIN, 0);
-#endif
-#endif
-#endif
-#if defined(EXT4_HEATER_PIN) && EXT4_HEATER_PIN > -1 && NUM_EXTRUDER > 4 && !MIXING_EXTRUDER
-#if PDM_FOR_EXTRUDER
-    pulseDensityModulate(EXT4_HEATER_PIN, pwm_pos[4], pwm_pos_set[4], HEATER_PINS_INVERTED);
-#else
-    if (pwm_pos_set[4] == pwm_count_heater && pwm_pos_set[4] != HEATER_PWM_MASK)
-        WRITE(EXT4_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if !SHARED_COOLER && EXT4_EXTRUDER_COOLER_PIN > -1
-#if PDM_FOR_COOLER
-    pulseDensityModulate(EXT4_EXTRUDER_COOLER_PIN, extruder[4].coolerPWM, pwm_cooler_pos_set[4], false);
-#else
-    if (pwm_cooler_pos_set[4] == pwm_count_cooler && pwm_cooler_pos_set[4] != COOLER_PWM_MASK)
-        WRITE(EXT4_EXTRUDER_COOLER_PIN, 0);
-#endif
-#endif
-#endif
-#if defined(EXT5_HEATER_PIN) && EXT5_HEATER_PIN > -1 && NUM_EXTRUDER > 5 && !MIXING_EXTRUDER
-#if PDM_FOR_EXTRUDER
-    pulseDensityModulate(EXT5_HEATER_PIN, pwm_pos[5], pwm_pos_set[5], HEATER_PINS_INVERTED);
-#else
-    if (pwm_pos_set[5] == pwm_count_heater && pwm_pos_set[5] != HEATER_PWM_MASK)
-        WRITE(EXT5_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#if !SHARED_COOLER && EXT5_EXTRUDER_COOLER_PIN > -1
-#if PDM_FOR_COOLER
-    pulseDensityModulate(EXT5_EXTRUDER_COOLER_PIN, extruder[5].coolerPWM, pwm_cooler_pos_set[5], false);
-#else
-    if (pwm_cooler_pos_set[5] == pwm_count_cooler && pwm_cooler_pos_set[5] != COOLER_PWM_MASK)
-        WRITE(EXT5_EXTRUDER_COOLER_PIN, 0);
-#endif
-#endif
-#endif
-#if FAN_BOARD_PIN > -1 && SHARED_COOLER_BOARD_EXT == 0
-#if PDM_FOR_COOLER
-    pulseDensityModulate(FAN_BOARD_PIN, pwm_pos[PWM_BOARD_FAN], pwm_pos_set[PWM_BOARD_FAN], false);
-#else
-    if (pwm_pos_set[PWM_BOARD_FAN] == pwm_count_cooler && pwm_pos_set[PWM_BOARD_FAN] != COOLER_PWM_MASK)
-        WRITE(FAN_BOARD_PIN, 0);
-#endif
-#endif
-#if FAN_PIN > -1 && FEATURE_FAN_CONTROL
-    if (fanKickstart == 0) {
-#if PDM_FOR_COOLER
-        pulseDensityModulate(FAN_PIN, pwm_pos[PWM_FAN1], pwm_pos_set[PWM_FAN1], false);
-#else
-        if (pwm_pos_set[PWM_FAN1] == pwm_count_cooler && pwm_pos_set[PWM_FAN1] != COOLER_PWM_MASK)
-            WRITE(FAN_PIN, 0);
-#endif
-    } else {
-#if PDM_FOR_COOLER
-        pulseDensityModulate(FAN_PIN, MAX_FAN_PWM, pwm_pos_set[PWM_FAN1], false);
-#else
-        if ((MAX_FAN_PWM & COOLER_PWM_MASK) == pwm_count_cooler && (MAX_FAN_PWM & COOLER_PWM_MASK) != COOLER_PWM_MASK)
-            WRITE(FAN_PIN, 0);
-#endif
+    pwm_count0++;
+    pwm_count1 += 2;
+    pwm_count2 += 4;
+    pwm_count3 += 8;
+    pwm_count4 += 16;
+
+    GUI::handleKeypress();
+#if FEATURE_WATCHDOG
+    if (HAL::wdPinged) {
+        IWatchdog.reload();
+        HAL::wdPinged = false;
     }
 #endif
-#if FAN2_PIN > -1 && FEATURE_FAN2_CONTROL
-    if (fan2Kickstart == 0) {
-#if PDM_FOR_COOLER
-        pulseDensityModulate(FAN2_PIN, pwm_pos[PWM_FAN2], pwm_pos_set[PWM_FAN2], false);
-#else
-        if (pwm_pos_set[PWM_FAN2] == pwm_count_cooler && pwm_pos_set[PWM_FAN2] != COOLER_PWM_MASK)
-            WRITE(FAN2_PIN, 0);
-#endif
-    } else {
-#if PDM_FOR_COOLER
-        pulseDensityModulate(FAN2_PIN, MAX_FAN_PWM, pwm_pos_set[PWM_FAN2], false);
-#else
-        if ((MAX_FAN_PWM & COOLER_PWM_MASK) == pwm_count_cooler && (MAX_FAN_PWM & COOLER_PWM_MASK) != COOLER_PWM_MASK)
-            WRITE(FAN2_PIN, 0);
-#endif
-    }
-#endif
-#if defined(FAN_THERMO_PIN) && FAN_THERMO_PIN > -1
-#if PDM_FOR_COOLER
-    pulseDensityModulate(FAN_THERMO_PIN, pwm_pos[PWM_FAN_THERMO], pwm_pos_set[PWM_FAN_THERMO], false);
-#else
-    if (pwm_pos_set[PWM_FAN_THERMO] == pwm_count_cooler && pwm_pos_set[PWM_FAN_THERMO] != COOLER_PWM_MASK)
-        WRITE(FAN_THERMO_PIN, 0);
-#endif
-#endif
-#if HEATED_BED_HEATER_PIN > -1 && HAVE_HEATED_BED
-#if PDM_FOR_EXTRUDER
-    pulseDensityModulate(HEATED_BED_HEATER_PIN, pwm_pos[NUM_EXTRUDER], pwm_pos_set[NUM_EXTRUDER], HEATER_PINS_INVERTED);
-#else
-    if (pwm_pos_set[NUM_EXTRUDER] == pwm_count_heater && pwm_pos_set[NUM_EXTRUDER] != HEATER_PWM_MASK)
-        WRITE(HEATED_BED_HEATER_PIN, HEATER_PINS_INVERTED);
-#endif
-#endif
+
     counterPeriodical++; // Approximate a 100ms timer
     if (counterPeriodical >= (int)(F_CPU / 40960)) {
         counterPeriodical = 0;
         executePeriodical = 1;
-#if FEATURE_FAN_CONTROL
-        if (fanKickstart)
-            fanKickstart--;
-#endif
-#if FEATURE_FAN2_CONTROL
-        if (fan2Kickstart)
-            fan2Kickstart--;
-#endif
     }
-// read analog values
-#if ANALOG_INPUTS > 0
-    if ((ADCSRA & _BV(ADSC)) == 0) { // Conversion finished?
-        osAnalogInputBuildup[osAnalogInputPos] += ADCW;
-        if (++osAnalogInputCounter[osAnalogInputPos] >= _BV(ANALOG_INPUT_SAMPLE)) {
-            // update temperatures only when values have been read
-            if (executePeriodical == 0 || osAnalogInputPos >= NUM_ANALOG_TEMP_SENSORS) {
-#if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE < 12
-                osAnalogInputValues[osAnalogInputPos] = osAnalogInputBuildup[osAnalogInputPos] << (12 - ANALOG_INPUT_BITS - ANALOG_INPUT_SAMPLE);
-#endif
-#if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE > 12
-                osAnalogInputValues[osAnalogInputPos] = osAnalogInputBuildup[osAnalogInputPos] >> (ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE - 12);
-#endif
-#if ANALOG_INPUT_BITS + ANALOG_INPUT_SAMPLE == 12
-                osAnalogInputValues[osAnalogInputPos] = osAnalogInputBuildup[osAnalogInputPos];
-#endif
+    // read analog values
+    if (analogInputCount > 0) {
+        if ((ADCSRA & _BV(ADSC)) == 0) { // Conversion finished?
+            analogValues[analogSamplePos] = ADCW << 2;
+            do {
+                analogSamplePos++;
+            } while (analogSamplePos < MAX_ANALOG_INPUTS && !analogEnabled[analogSamplePos]);
+            if (analogSamplePos == MAX_ANALOG_INPUTS) {
+                analogSamplePos = 0;
+                while (!analogEnabled[analogSamplePos]) {
+                    analogSamplePos++;
+                }
+                // Execute operations on values
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_ANALOG_INPUT_LOOP
+#include "io/redefine.h"
             }
-            osAnalogInputBuildup[osAnalogInputPos] = 0;
-            osAnalogInputCounter[osAnalogInputPos] = 0;
-            // Start next conversion
-            if (++osAnalogInputPos >= ANALOG_INPUTS)
-                osAnalogInputPos = 0;
-            uint8_t channel = pgm_read_byte(&osAnalogInputChannels[osAnalogInputPos]);
 #if defined(ADCSRB) && defined(MUX5)
-            if (channel & 8) // Reading channel 0-7 or 8-15?
+            if (analogSamplePos & 8) { // Reading channel 0-7 or 8-15?
                 ADCSRB |= _BV(MUX5);
-            else
+            } else {
                 ADCSRB &= ~_BV(MUX5);
+            }
 #endif
-            ADMUX = (ADMUX & ~(0x1F)) | (channel & 7);
+            ADMUX = (ADMUX & ~(0x1F)) | (analogSamplePos & 7);
+            ADCSRA |= _BV(ADSC); // start next conversion
         }
-        ADCSRA |= _BV(ADSC); // start next conversion
     }
-#endif
-
-    GUI::handleKeypress();
-    pwm_count_cooler += COOLER_PWM_STEP;
-    pwm_count_heater += HEATER_PWM_STEP;
-#if FEATURE_WATCHDOG
-    if (HAL::wdPinged) {
-        wdt_reset();
-        HAL::wdPinged = false;
-    }
-#endif
 }
 
-#ifndef EXTERNALSERIAL
+void HAL::analogEnable(int channel) {
+    if (!analogEnabled[channel]) {
+        analogInputCount++;
+    }
+    analogEnabled[channel] = true;
+}
+
+void HAL::switchToBootMode() {
+    // not relevant for AVR systems
+}
+
+// Called within checkForPeriodicalActions (main loop, more or less)
+// as fast as possible
+void HAL::handlePeriodical() {
+}
+
+void HAL::spiInit() {
+    SPI.begin();
+}
+
+void HAL::spiBegin(uint32_t clock, uint8_t mode, uint8_t msbfirst) {
+    SPI.beginTransaction(SPISettings(clock, msbfirst ? MSBFIRST : LSBFIRST, mode));
+}
+
+uint8_t HAL::spiTransfer(uint8_t data) {
+    return SPI.transfer(data);
+}
+
+void HAL::spiEnd() {
+    SPI.endTransaction();
+}
+
 // Implement serial communication for one stream only!
 /*
   HardwareSerial.h - Hardware serial library for Wiring
@@ -752,11 +488,8 @@ ISR(PWM_TIMER_VECTOR) {
   Modified to use only 1 queue with fixed length by Repetier
 */
 
-ring_buffer rx_buffer = { { 0 }, 0, 0 };
-ring_buffer_tx tx_buffer = { { 0 }, 0, 0 };
-
 inline void rf_store_char(unsigned char c, ring_buffer* buffer) {
-    uint8_t i = (buffer->head + 1) & SERIAL_BUFFER_MASK;
+    uint8_t i = (buffer->head + 1) & (SERIAL_RX_BUFFER_SIZE - 1);
 
     // if we should be storing the received character into the location
     // just before the tail (meaning that the head would advance to the
@@ -767,169 +500,13 @@ inline void rf_store_char(unsigned char c, ring_buffer* buffer) {
         buffer->head = i;
     }
 }
-#if !defined(USART0_RX_vect) && defined(USART1_RX_vect)
-// do nothing - on the 32u4 the first USART is USART1
-#else
-void rfSerialEvent() __attribute__((weak));
-void rfSerialEvent() { }
-#define serialEvent_implemented
-#if defined(USART_RX_vect)
-SIGNAL(USART_RX_vect)
-#elif defined(USART0_RX_vect)
-SIGNAL(USART0_RX_vect)
-#else
-#if defined(SIG_USART0_RECV)
-SIGNAL(SIG_USART0_RECV)
-#elif defined(SIG_UART0_RECV)
-SIGNAL(SIG_UART0_RECV)
-#elif defined(SIG_UART_RECV)
-SIGNAL(SIG_UART_RECV)
-#else
-#error "Don't know what the Data Received vector is called for the first UART"
-#endif
-#endif
-{
-#if defined(UDR0)
-    uint8_t c = UDR0;
-#elif defined(UDR)
-    uint8_t c = UDR;
-#else
-#error UDR not defined
-#endif
-    rf_store_char(c, &rx_buffer);
-}
-#endif
-
-#if !defined(USART0_UDRE_vect) && defined(USART1_UDRE_vect)
-// do nothing - on the 32u4 the first USART is USART1
-#else
-#if !defined(UART0_UDRE_vect) && !defined(UART_UDRE_vect) && !defined(USART0_UDRE_vect) && !defined(USART_UDRE_vect)
-#error "Don't know what the Data Register Empty vector is called for the first UART"
-#else
-#if defined(UART0_UDRE_vect)
-ISR(UART0_UDRE_vect)
-#elif defined(UART_UDRE_vect)
-ISR(UART_UDRE_vect)
-#elif defined(USART0_UDRE_vect)
-ISR(USART0_UDRE_vect)
-#elif defined(USART_UDRE_vect)
-ISR(USART_UDRE_vect)
-#endif
-{
-    if (tx_buffer.head == tx_buffer.tail) {
-        // Buffer empty, so disable interrupts
-#if defined(UCSR0B)
-        bit_clear(UCSR0B, UDRIE0);
-#else
-        bit_clear(UCSRB, UDRIE);
-#endif
-    } else {
-        // There is more data in the output buffer. Send the next byte
-        uint8_t c = tx_buffer.buffer[tx_buffer.tail];
-#if defined(UDR0)
-        UDR0 = c;
-#elif defined(UDR)
-        UDR = c;
-#else
-#error UDR not defined
-#endif
-        tx_buffer.tail = (tx_buffer.tail + 1) & SERIAL_TX_BUFFER_MASK;
-    }
-}
-#endif
-#endif
-
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-#if !(defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega1284__) || defined(__AVR_ATmega2561__) || defined(__AVR_ATmega1281__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega644P__))
-#error BlueTooth option cannot be used with your mainboard
-#endif
-#if BLUETOOTH_SERIAL > 1 && !(defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__))
-#error BlueTooth serial 2 or 3 can be used only with boards based on ATMega2560 or ATMega1280
-#endif
-#if (BLUETOOTH_SERIAL == 1)
-#if defined(USART1_RX_vect)
-#define SIG_USARTx_RECV USART1_RX_vect
-#define USARTx_UDRE_vect USART1_UDRE_vect
-#else
-#define SIG_USARTx_RECV SIG_USART1_RECV
-#define USARTx_UDRE_vect SIG_USART1_DATA
-#endif
-#define UDRx UDR1
-#define UCSRxA UCSR1A
-#define UCSRxB UCSR1B
-#define UBRRxH UBRR1H
-#define UBRRxL UBRR1L
-#define U2Xx U2X1
-#define UARTxENABLE ((1 << RXEN1) | (1 << TXEN1) | (1 << RXCIE1) | (1 << UDRIE1))
-#define UDRIEx UDRIE1
-#define RXxPIN 19
-#elif (BLUETOOTH_SERIAL == 2)
-#if defined(USART2_RX_vect)
-#define SIG_USARTx_RECV USART2_RX_vect
-#define USARTx_UDRE_vect USART2_UDRE_vect
-#else
-#define SIG_USARTx_RECV SIG_USART2_RECV
-#define USARTx_UDRE_vect SIG_USART2_DATA
-#endif
-#define UDRx UDR2
-#define UCSRxA UCSR2A
-#define UCSRxB UCSR2B
-#define UBRRxH UBRR2H
-#define UBRRxL UBRR2L
-#define U2Xx U2X2
-#define UARTxENABLE ((1 << RXEN2) | (1 << TXEN2) | (1 << RXCIE2) | (1 << UDRIE2))
-#define UDRIEx UDRIE2
-#define RXxPIN 17
-#elif (BLUETOOTH_SERIAL == 3)
-#if defined(USART3_RX_vect)
-#define SIG_USARTx_RECV USART3_RX_vect
-#define USARTx_UDRE_vect USART3_UDRE_vect
-#else
-#define SIG_USARTx_RECV SIG_USART3_RECV
-#define USARTx_UDRE_vect SIG_USART3_DATA
-#endif
-#define UDRx UDR3
-#define UCSRxA UCSR3A
-#define UCSRxB UCSR3B
-#define UBRRxH UBRR3H
-#define UBRRxL UBRR3L
-#define U2Xx U2X3
-#define UARTxENABLE ((1 << RXEN3) | (1 << TXEN3) | (1 << RXCIE3) | (1 << UDRIE3))
-#define UDRIEx UDRIE3
-#define RXxPIN 15
-#else
-#error Wrong serial port number for BlueTooth
-#endif
-
-SIGNAL(SIG_USARTx_RECV) {
-    uint8_t c = UDRx;
-    rf_store_char(c, &rx_buffer);
-}
-
-volatile uint8_t txx_buffer_tail = 0;
-
-ISR(USARTx_UDRE_vect) {
-    if (tx_buffer.head == txx_buffer_tail) {
-        // Buffer empty, so disable interrupts
-        bit_clear(UCSRxB, UDRIEx);
-    } else {
-        // There is more data in the output buffer. Send the next byte
-        uint8_t c = tx_buffer.buffer[txx_buffer_tail];
-        txx_buffer_tail = (txx_buffer_tail + 1) & SERIAL_TX_BUFFER_MASK;
-        UDRx = c;
-    }
-}
-#endif
 
 // Constructors ////////////////////////////////////////////////////////////////
 
-RFHardwareSerial::RFHardwareSerial(ring_buffer* rx_buffer, ring_buffer_tx* tx_buffer,
-                                   volatile uint8_t* ubrrh, volatile uint8_t* ubrrl,
+RFHardwareSerial::RFHardwareSerial(volatile uint8_t* ubrrh, volatile uint8_t* ubrrl,
                                    volatile uint8_t* ucsra, volatile uint8_t* ucsrb,
                                    volatile uint8_t* udr,
                                    uint8_t rxen, uint8_t txen, uint8_t rxcie, uint8_t udrie, uint8_t u2x) {
-    _rx_buffer = rx_buffer;
-    _tx_buffer = tx_buffer;
     _ubrrh = ubrrh;
     _ubrrl = ubrrl;
     _ucsra = ucsra;
@@ -940,6 +517,8 @@ RFHardwareSerial::RFHardwareSerial(ring_buffer* rx_buffer, ring_buffer_tx* tx_bu
     _rxcie = rxcie;
     _udrie = udrie;
     _u2x = u2x;
+    _rx_buffer.head = _rx_buffer.tail = 0;
+    _tx_buffer.head = _tx_buffer.tail = 0;
 }
 
 // Public Methods //////////////////////////////////////////////////////////////
@@ -980,18 +559,11 @@ try_again:
     bit_set(*_ucsrb, _txen);
     bit_set(*_ucsrb, _rxcie);
     bit_clear(*_ucsrb, _udrie);
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-    WRITE(RXxPIN, 1); // Pullup on RXDx
-    UCSRxA = (1 << U2Xx);
-    UBRRxH = (uint8_t)(((F_CPU / 4 / BLUETOOTH_BAUD - 1) / 2) >> 8);
-    UBRRxL = (uint8_t)(((F_CPU / 4 / BLUETOOTH_BAUD - 1) / 2) & 0xFF);
-    UCSRxB |= UARTxENABLE;
-#endif
 }
 
 void RFHardwareSerial::end() {
     // wait for transmission of outgoing data
-    while (_tx_buffer->head != _tx_buffer->tail)
+    while (_tx_buffer.head != _tx_buffer.tail)
         ;
 
     bit_clear(*_ucsrb, _rxen);
@@ -999,83 +571,133 @@ void RFHardwareSerial::end() {
     bit_clear(*_ucsrb, _rxcie);
     bit_clear(*_ucsrb, _udrie);
 
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-    UCSRxB = 0;
-#endif
     // clear a  ny received data
-    _rx_buffer->head = _rx_buffer->tail;
+    _rx_buffer.head = _rx_buffer.tail;
 }
 
 int RFHardwareSerial::available(void) {
-    return (unsigned int)(SERIAL_BUFFER_SIZE + _rx_buffer->head - _rx_buffer->tail) & SERIAL_BUFFER_MASK;
+    return (unsigned int)(SERIAL_RX_BUFFER_SIZE + _rx_buffer.head - _rx_buffer.tail) & (SERIAL_RX_BUFFER_SIZE - 1);
 }
 int RFHardwareSerial::outputUnused(void) {
-    return SERIAL_TX_BUFFER_SIZE - (unsigned int)((SERIAL_TX_BUFFER_SIZE + _tx_buffer->head - _tx_buffer->tail) & SERIAL_TX_BUFFER_MASK);
+    return SERIAL_TX_BUFFER_SIZE - (unsigned int)((SERIAL_TX_BUFFER_SIZE + _tx_buffer.head - _tx_buffer.tail) & (SERIAL_TX_BUFFER_SIZE - 1));
 }
 
 int RFHardwareSerial::peek(void) {
-    if (_rx_buffer->head == _rx_buffer->tail) {
+    if (_rx_buffer.head == _rx_buffer.tail) {
         return -1;
     }
-    return _rx_buffer->buffer[_rx_buffer->tail];
+    return _rx_buffer.buffer[_rx_buffer.tail];
 }
 
 int RFHardwareSerial::read(void) {
     // if the head isn't ahead of the tail, we don't have any characters
-    if (_rx_buffer->head == _rx_buffer->tail) {
+    if (_rx_buffer.head == _rx_buffer.tail) {
         return -1;
     }
-    unsigned char c = _rx_buffer->buffer[_rx_buffer->tail];
-    _rx_buffer->tail = (_rx_buffer->tail + 1) & SERIAL_BUFFER_MASK;
+    unsigned char c = _rx_buffer.buffer[_rx_buffer.tail];
+    _rx_buffer.tail = (_rx_buffer.tail + 1) & (SERIAL_RX_BUFFER_SIZE - 1);
     return c;
 }
 
 void RFHardwareSerial::flush() {
-    while (_tx_buffer->head != _tx_buffer->tail)
+    while (_tx_buffer.head != _tx_buffer.tail)
         ;
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-    while (_tx_buffer->head != txx_buffer_tail)
-        ;
-#endif
 }
-#ifdef COMPAT_PRE1
-void
-#else
-size_t
-#endif
-RFHardwareSerial::write(uint8_t c) {
-    uint8_t i = (_tx_buffer->head + 1) & SERIAL_TX_BUFFER_MASK;
+
+size_t RFHardwareSerial::write(uint8_t c) {
+    uint8_t i = (_tx_buffer.head + 1) & (SERIAL_TX_BUFFER_SIZE - 1);
 
     // If the output buffer is full, there's nothing for it other than to
     // wait for the interrupt handler to empty it a bit
-    while (i == _tx_buffer->tail) { }
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-    while (i == txx_buffer_tail) { }
-#endif
-    _tx_buffer->buffer[_tx_buffer->head] = c;
-    _tx_buffer->head = i;
+    while (i == _tx_buffer.tail) { }
+    _tx_buffer.buffer[_tx_buffer.head] = c;
+    _tx_buffer.head = i;
 
     bit_set(*_ucsrb, _udrie);
-#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
-    bit_set(UCSRxB, UDRIEx);
-#endif
-#ifndef COMPAT_PRE1
     return 1;
-#endif
 }
 
 // Preinstantiate Objects //////////////////////////////////////////////////////
 
-#if defined(UBRRH) && defined(UBRRL)
-RFHardwareSerial RFSerial(&rx_buffer, &tx_buffer, &UBRRH, &UBRRL, &UCSRA, &UCSRB, &UDR, RXEN, TXEN, RXCIE, UDRIE, U2X);
-#elif defined(UBRR0H) && defined(UBRR0L)
-RFHardwareSerial RFSerial(&rx_buffer, &tx_buffer, &UBRR0H, &UBRR0L, &UCSR0A, &UCSR0B, &UDR0, RXEN0, TXEN0, RXCIE0, UDRIE0, U2X0);
-#elif defined(USBCON)
-// do nothing - Serial object and buffers are initialized in CDC code
-#else
-#error no serial port defined (port 0)
+// Default serial connected to usb
+
+RFHardwareSerial Serial(&UBRR0H, &UBRR0L, &UCSR0A, &UCSR0B, &UDR0, RXEN0, TXEN0, RXCIE0, UDRIE0, U2X0);
+SIGNAL(USART0_RX_vect) {
+    uint8_t c = UDR0;
+    rf_store_char(c, &Serial._rx_buffer);
+}
+
+ISR(USART0_UDRE_vect) {
+    if (Serial._tx_buffer.head == Serial._tx_buffer.tail) {
+        bit_clear(UCSR0B, UDRIE0);
+    } else {
+        // There is more data in the output buffer. Send the next byte
+        uint8_t c = Serial._tx_buffer.buffer[Serial._tx_buffer.tail];
+        UDR0 = c;
+        Serial._tx_buffer.tail = (Serial._tx_buffer.tail + 1) & (SERIAL_TX_BUFFER_SIZE - 1);
+    }
+}
+
+// Serial 1
+#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL == 1
+RFHardwareSerial Serial1(&UBRR1H, &UBRR1L, &UCSR1A, &UCSR1B, &UDR1, RXEN1, TXEN1, RXCIE1, UDRIE1, U2X1);
+SIGNAL(USART1_RX_vect) {
+    uint8_t c = UDR1;
+    rf_store_char(c, &Serial1._rx_buffer);
+}
+
+ISR(USART1_UDRE_vect) {
+    if (Serial1._tx_buffer.head == Serial1._tx_buffer.tail) {
+        bit_clear(UCSR1B, UDRIE1);
+    } else {
+        // There is more data in the output buffer. Send the next byte
+        uint8_t c = Serial1._tx_buffer.buffer[Serial1._tx_buffer.tail];
+        UDR1 = c;
+        Serial1._tx_buffer.tail = (Serial1._tx_buffer.tail + 1) & (SERIAL_TX_BUFFER_SIZE - 1);
+    }
+}
 #endif
 
+// Serial 2
+#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL == 2
+RFHardwareSerial Serial2(&UBRR2H, &UBRR2L, &UCSR2A, &UCSR2B, &UDR2, RXEN2, TXEN2, RXCIE2, UDRIE2, U2X2);
+SIGNAL(USART2_RX_vect) {
+    uint8_t c = UDR2;
+    rf_store_char(c, &Serial2._rx_buffer);
+}
+
+ISR(USART2_UDRE_vect) {
+    if (Serial2._tx_buffer.head == Serial2._tx_buffer.tail) {
+        bit_clear(UCSR2B, UDRIE2);
+    } else {
+        // There is more data in the output buffer. Send the next byte
+        uint8_t c = Serial2._tx_buffer.buffer[Serial2._tx_buffer.tail];
+        UDR2 = c;
+        Serial2._tx_buffer.tail = (Serial2._tx_buffer.tail + 2) & (SERIAL_TX_BUFFER_SIZE - 1);
+    }
+}
 #endif
+
+// Serial 3
+#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL == 3
+RFHardwareSerial Serial3(&UBRR3H, &UBRR3L, &UCSR3A, &UCSR3B, &UDR3, RXEN3, TXEN3, RXCIE3, UDRIE3, U2X3);
+SIGNAL(USART3_RX_vect) {
+    uint8_t c = UDR3;
+    rf_store_char(c, &Serial3._rx_buffer);
+}
+
+ISR(USART3_UDRE_vect) {
+    if (Serial3._tx_buffer.head == Serial3._tx_buffer.tail) {
+        bit_clear(UCSR3B, UDRIE3);
+    } else {
+        // There is more data in the output buffer. Send the next byte
+        uint8_t c = Serial3._tx_buffer.buffer[Serial3._tx_buffer.tail];
+        UDR3 = c;
+        Serial3._tx_buffer.tail = (Serial3._tx_buffer.tail + 1) & (SERIAL_TX_BUFFER_SIZE - 1);
+    }
+}
+#endif
+
+void serialEventRun(void) { }
 
 #endif

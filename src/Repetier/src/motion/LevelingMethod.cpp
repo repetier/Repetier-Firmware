@@ -49,14 +49,18 @@ void LevelingCorrector::correct(Plane* plane) {
     h2 -= h1;
     h3 -= h1;
 #if defined(LIMIT_MOTORIZED_CORRECTION)
-    if (h2 < -LIMIT_MOTORIZED_CORRECTION)
+    if (h2 < -LIMIT_MOTORIZED_CORRECTION) {
         h2 = -LIMIT_MOTORIZED_CORRECTION;
-    if (h2 > LIMIT_MOTORIZED_CORRECTION)
+    }
+    if (h2 > LIMIT_MOTORIZED_CORRECTION) {
         h2 = LIMIT_MOTORIZED_CORRECTION;
-    if (h3 < -LIMIT_MOTORIZED_CORRECTION)
+    }
+    if (h3 < -LIMIT_MOTORIZED_CORRECTION) {
         h3 = -LIMIT_MOTORIZED_CORRECTION;
-    if (h3 > LIMIT_MOTORIZED_CORRECTION)
+    }
+    if (h3 > LIMIT_MOTORIZED_CORRECTION) {
         h3 = LIMIT_MOTORIZED_CORRECTION;
+    }
 #endif
     Com::printFLN(PSTR("Correction P2:"), h2, 2);
     Com::printFLN(PSTR("Correction P3:"), h3, 2);
@@ -102,7 +106,7 @@ void LevelingCorrector::correct(Plane* plane) {
     Motion1::maxAcceleration[E_AXIS] = 20;
     Motion1::updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
-    Motion1::setTmpPositionXYZE(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, h2);
+    Motion1::setTmpPositionXYZE(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, -h2);
     Motion1::moveByOfficial(Motion1::tmpPosition, LC_Z_SPEED, false);
     Motion1::waitForEndOfMoves();
     LC_P2_MOTOR.disable();
@@ -111,7 +115,7 @@ void LevelingCorrector::correct(Plane* plane) {
     Motion1::currentPosition[E_AXIS] = 0;
     Motion1::updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
-    Motion1::setTmpPositionXYZE(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, h3);
+    Motion1::setTmpPositionXYZE(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, -h3);
     Motion1::moveByOfficial(Motion1::tmpPosition, LC_Z_SPEED, false);
     Motion1::waitForEndOfMoves();
     LC_P3_MOTOR.disable();
@@ -757,7 +761,7 @@ void Leveling::importBumpMatrix(char* filename) {
             tempFile.close();
             Com::printF(Com::tErrorImportBump);
             Com::printF(PSTR("Grid size larger than max grid size "), newSize);
-            Com::printFLN(" vs ", MAX_GRID_SIZE);
+            Com::printFLN(PSTR(" vs "), MAX_GRID_SIZE);
             return;
         }
         ok = false;

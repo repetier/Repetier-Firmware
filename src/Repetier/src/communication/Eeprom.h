@@ -31,6 +31,7 @@
 #define EEPROM_SIGNATURE_CARTESIAN 10
 #define EEPROM_SIGNATURE_GRID_LEVELING 11
 #define EEPROM_SIGNATURE_STEPPER 12
+#define EEPROM_SIGNATURE_GUI 13
 
 #define EPR_MAGIC_BYTE 0
 #define EPR_INTEGRITY_BYTE 1         // Here the xored sum over eeprom is stored
@@ -116,6 +117,7 @@ public:
     static void handleLong(uint pos, PGM_P text, int32_t& var);
     static void handleLong(uint pos, PGM_P text, uint32_t& var);
     static void handleInt(uint pos, PGM_P text, int16_t& var);
+    static void handleInt(uint pos, PGM_P text, uint16_t& var);
     static void handleByte(uint pos, PGM_P text, uint8_t& var);
     static void handleByte(uint pos, PGM_P text, int8_t& var);
     static void handleByte(uint pos, PGM_P text, int32_t& var);

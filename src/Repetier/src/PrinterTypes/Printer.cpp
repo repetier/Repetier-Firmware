@@ -33,14 +33,22 @@ int32_t baudrate = BAUDRATE; ///< Communication speed rate.
 volatile int waitRelax = 0;  // Delay filament relax at the end of print, could be a simple timeout
 
 ServoInterface* servos[] = SERVO_LIST;
+#if CPU_ARCH == ARCH_AVR
+constexpr int numServos = NUM_SERVOS;
+#else
 constexpr int numServos = std::extent<decltype(servos)>::value;
 static_assert(numServos == NUM_SERVOS, "NUM_SERVOS not defined correctly");
+#endif
 
 FanController fans[NUM_FANS];
 
 BeeperSourceBase* beepers[] = BEEPER_LIST;
+#if CPU_ARCH == ARCH_AVR
+constexpr int numBeepers = NUM_BEEPERS;
+#else
 constexpr int numBeepers = std::extent<decltype(beepers)>::value;
 static_assert(numBeepers == NUM_BEEPERS, "NUM_BEEPERS not defined correctly");
+#endif
 
 uint8_t Printer::unitIsInches = 0; ///< 0 = Units are mm, 1 = units are inches.
 //Stepper Movement Variables
@@ -298,7 +306,7 @@ void Printer::enablePowerIfNeeded() {
 /**
   \brief Stop heater and stepper motors. Disable power,if possible.
 */
-void Printer::kill(uint8_t onlySteppers) {
+void Printer::kill(uint8_t onlySteppers, bool motors) {
     EVENT_KILL(onlySteppers);
     if (areAllSteppersDisabled() && onlySteppers) {
         return;
@@ -306,33 +314,35 @@ void Printer::kill(uint8_t onlySteppers) {
     if (Printer::isAllKilled()) {
         return;
     }
+    if (motors) {
 #if defined(NUM_MOTOR_DRIVERS) && NUM_MOTOR_DRIVERS > 0
-    disableAllMotorDrivers();
+        disableAllMotorDrivers();
 #endif // defined
-    XMotor.disable();
-    YMotor.disable();
+        XMotor.disable();
+        YMotor.disable();
 #if defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT) && PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT == 0
-    ZMotor.disable();
-#else
-    if (!onlySteppers) {
         ZMotor.disable();
-    }
-#endif
-    for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
-        Motion1::motors[i]->disable();
-    }
-    Tool::disableMotors();
-    setAllSteppersDisabled();
-
-    FOR_ALL_AXES(i) {
-#if defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT) && PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT == 1
-        if (i == Z_AXIS) {
-            continue;
+#else
+        if (!onlySteppers) {
+            ZMotor.disable();
         }
 #endif
-        Motion1::setAxisHomed(i, false);
+        for (fast8_t i = A_AXIS; i < NUM_AXES; i++) {
+            Motion1::motors[i]->disable();
+        }
+        Tool::disableMotors();
+        setAllSteppersDisabled();
+
+        FOR_ALL_AXES(i) {
+#if defined(PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT) && PREVENT_Z_DISABLE_ON_STEPPER_TIMEOUT == 1
+            if (i == Z_AXIS) {
+                continue;
+            }
+#endif
+            Motion1::setAxisHomed(i, false);
+        }
+        unsetHomedAll();
     }
-    unsetHomedAll();
     if (!onlySteppers) {
         for (uint8_t i = 0; i < NUM_TOOLS; i++) {
             Tool::getTool(i)->shutdown();
@@ -347,7 +357,9 @@ void Printer::kill(uint8_t onlySteppers) {
         WRITE(PS_ON_PIN, (POWER_INVERTING ? LOW : HIGH));
         Printer::setPowerOn(false);
 #endif
-        Printer::setAllKilled(true);
+        if (!onlySteppers && motors) {
+            Printer::setAllKilled(true);
+        }
     } else {
         UI_STATUS_UPD("Motors disabled");
     }
@@ -565,8 +577,12 @@ void Printer::setup() {
 #include "io/redefine.h"
 
     PWMHandler* tempFans[] = FAN_LIST;
+#if CPU_ARCH == ARCH_AVR
+    constexpr int numFans = NUM_FANS;
+#else
     constexpr int numFans = std::extent<decltype(tempFans)>::value;
     static_assert(numFans == NUM_FANS, "NUM_FANS not defined correctly");
+#endif
 
     for (fast8_t i = 0; i < NUM_FANS; i++) {
         fans[i].fan = tempFans[i];
@@ -638,9 +654,6 @@ void Printer::setup() {
     SET_INPUT(MOTOR_FAULT_PIN);
     SET_INPUT(MOTOR_FAULT_PIGGY_PIN);
 #endif              //(MOTHERBOARD == 501) || (MOTHERBOARD == 502)
-    EEPROM::init(); // Read settings from eeprom if wanted, run after initialization!
-    // Extruder::initExtruder();
-    // sets auto leveling in eeprom init
     GUI::init();
 
 #if SDSUPPORT // Try mounting the SDCard first in case it has an eeprom file.
@@ -1347,7 +1360,7 @@ void Printer::rescueReport() {
         FOR_ALL_AXES(i) {
             Com::print(' ');
             Com::print('L');
-            Com::printF(axisNames[i]);
+            Com::printF((const char*)HAL::readFlashAddress(&axisNames[i]));
             Com::printF(Com::tColon, EEPROM::getRecoverFloat(rescuePos + EPR_RESCUE_LAST_RECEIVED + sizeof(float) * i), 2);
         }
         Com::printF(PSTR(" LT:"), (int)EEPROM::getRecoverByte(rescuePos + EPR_RESCUE_TOOL));
@@ -1355,7 +1368,7 @@ void Printer::rescueReport() {
     if (mode & 2) {
         FOR_ALL_AXES(i) {
             Com::print(' ');
-            Com::printF(axisNames[i]);
+            Com::printF((const char*)HAL::readFlashAddress(&axisNames[i]));
             Com::printF(Com::tColon, EEPROM::getRecoverFloat(rescuePos + EPR_RESCUE_LAST_POS + sizeof(float) * i), 2);
         }
     }

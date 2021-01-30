@@ -96,8 +96,12 @@ volatile fast8_t Motion1::process; /// being processed
 volatile fast8_t Motion1::length;  /// number of entries
 volatile fast8_t Motion1::lengthUnprocessed;
 
+#if CPU_ARCH == ARCH_AVR
+constexpr int numMotors = NUM_MOTORS;
+#else
 constexpr int numMotors = std::extent<decltype(Motion1::drivers)>::value;
 static_assert(numMotors == NUM_MOTORS, "NUM_MOTORS not defined correctly");
+#endif
 
 void Motion1::init() {
 
@@ -113,7 +117,7 @@ void Motion1::init() {
     axesTriggered = 0;
     motorTriggered = 0;
     FOR_ALL_AXES(i) {
-        axisBits[i] = (uint8_t)1 << i;
+        axisBits[i] = static_cast<uint8_t>(1 << i);
         allAxes |= axisBits[i];
         currentPosition[i] = 0;
         currentPositionTransformed[i] = 0;
@@ -331,6 +335,15 @@ void Motion1::setAutolevelActive(bool state, bool silent) {
     printCurrentPosition();
 }
 
+void Motion1::emergencyStop() {
+    InterruptProtectedBlock block;
+    Motion3::init();
+    Motion2::init();
+    last = first = length = 0;
+    axesHomed = 0;
+    endstopMode = EndstopMode::DISABLED;
+    Printer::setHomedAll(false);
+}
 /// Compute safety margin required by rotation and sheer to not leave allowed region
 void Motion1::updateRotMinMax() {
     bool old = autolevelActive;
@@ -631,6 +644,9 @@ void Motion1::setTmpPositionXYZE(float x, float y, float z, float e) {
 
 // Move with coordinates in official coordinates (before offset, transform, ...)
 bool Motion1::moveByOfficial(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
+    if (Printer::failedMode) {
+        return false;
+    }
     bool movingEAxis = (coords[E_AXIS] != currentPosition[E_AXIS]);
     Printer::unparkSafety();
     FOR_ALL_AXES(i) {
@@ -814,6 +830,9 @@ void Motion1::setToolOffset(float ox, float oy, float oz) {
 
 // Move to the printer coordinates (after offset, transform, ...)
 bool Motion1::moveByPrinter(float coords[NUM_AXES], float feedrate, bool secondaryMove) {
+    if (Printer::failedMode) {
+        return false;
+    }
     bool movingEAxis = (coords[E_AXIS] != destinationPositionTransformed[E_AXIS]);
     Printer::unparkSafety();
     FOR_ALL_AXES(i) {
@@ -890,8 +909,8 @@ void Motion1::moveRelativeBySteps(int32_t coords[NUM_AXES]) {
     Motion1Buffer& buf = reserve();
     buf.flags = 0;
     buf.action = Motion1Action::MOVE_STEPS;
-    buf.feedrate = 0.2 * PrinterType::feedrateForMoveSteps(axesUsed);
-    buf.acceleration = 0.2 * PrinterType::accelerationForMoveSteps(axesUsed);
+    buf.feedrate = PrinterType::feedrateForMoveSteps(axesUsed);
+    buf.acceleration = 0.5 * PrinterType::accelerationForMoveSteps(axesUsed);
     buf.startSpeed = buf.endSpeed = buf.length = 0;
     FOR_ALL_AXES(i) {
         buf.start[i] = lpos[i];
@@ -990,22 +1009,22 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
     buf.invLength = 1.0 / buf.length;
 #ifdef DEBUG_MOVES
     if (Printer::debugEcho()) {
-        Com::printF("Move CX:", currentPositionTransformed[X_AXIS]);
+        Com::printF(PSTR("Move CX:"), currentPositionTransformed[X_AXIS]);
 #if NUM_AXES > A_AXIS
-        Com::printF(" AX:", currentPositionTransformed[A_AXIS]);
+        Com::printF(PSTR(" AX:"), currentPositionTransformed[A_AXIS]);
 #endif
-        Com::printF(" CY:", currentPositionTransformed[Y_AXIS]);
-        Com::printF(" CZ:", currentPositionTransformed[Z_AXIS]);
-        Com::printF(" OX:", toolOffset[X_AXIS]);
-        Com::printF(" l:", buf.length);
-        Com::printFLN(" f:", feedrate);
-        Com::printF("Move DX:", delta[X_AXIS]);
+        Com::printF(PSTR(" CY:"), currentPositionTransformed[Y_AXIS]);
+        Com::printF(PSTR(" CZ:"), currentPositionTransformed[Z_AXIS]);
+        Com::printF(PSTR(" OX:"), toolOffset[X_AXIS]);
+        Com::printF(PSTR(" l:"), buf.length);
+        Com::printFLN(PSTR(" f:"), feedrate);
+        Com::printF(PSTR("Move DX:"), delta[X_AXIS]);
 #if NUM_AXES > A_AXIS
-        Com::printF(" DA:", delta[A_AXIS]);
+        Com::printF(PSTR(" DA:"), delta[A_AXIS]);
 #endif
-        Com::printF(" DE:", delta[E_AXIS]);
-        Com::printF(" DY:", delta[Y_AXIS]);
-        Com::printFLN(" DZ:", delta[Z_AXIS]);
+        Com::printF(PSTR(" DE:"), delta[E_AXIS]);
+        Com::printF(PSTR(" DY:"), delta[Y_AXIS]);
+        Com::printFLN(PSTR(" DZ:"), delta[Z_AXIS]);
         // Com::printArrayFLN(PSTR("cpt4:"), Motion1::currentPositionTransformed, 5, 2);
         // Com::printArrayFLN(PSTR("mp:"), Motion2::lastMotorPos[Motion2::lastMotorIdx], 5);
     }
@@ -1121,9 +1140,9 @@ void Motion1::insertWaitIfNeeded() {
         Motion1Buffer& buf = reserve();
         buf.action = Motion1Action::WAIT;
         if (i == 0) {
-            buf.feedrate = ceilf((300.0 * 1000000.0) * invStepperFrequency);
+            buf.feedrate = ceilf(0.1 * STEPPER_FREQUENCY);
         } else {
-            buf.feedrate = ceilf((20.0 * 1000000.0) * invStepperFrequency);
+            buf.feedrate = ceilf(0.02 * STEPPER_FREQUENCY);
         }
         buf.flags = 0;
         Tool* tool = Tool::getActiveTool();
@@ -1139,7 +1158,7 @@ void Motion1::insertWaitIfNeeded() {
 void Motion1::WarmUp(uint32_t wait, int secondary) {
     Motion1Buffer& buf = reserve();
     buf.action = Motion1Action::WARMUP;
-    buf.feedrate = ceilf((wait * 1000000.0) * invStepperFrequency);
+    buf.feedrate = ceilf(static_cast<float>(wait) * STEPPER_FREQUENCY * 0.000001);
     buf.flags = 0;
     buf.state = Motion1State::FORWARD_PLANNED;
     buf.secondSpeed = secondary;
@@ -1154,8 +1173,8 @@ void Motion1::backplan(fast8_t actId) {
         InterruptProtectedBlock noInts;
         maxLoops = lengthUnprocessed;
     }
-    //Com::printFLN("BL:", (int)maxLoops);
-    //Com::printFLN(" L:", (int)actId);
+    //Com::printFLN(PSTR("BL:"), (int)maxLoops);
+    //Com::printFLN(PSTR(" L:"), (int)actId);
     do {
         if (next != nullptr) { // free processed block
             next->unblock();
@@ -1166,7 +1185,7 @@ void Motion1::backplan(fast8_t actId) {
             if (next != nullptr) {
                 next->unblock();
             }
-            //Com::printFLN("BF:");
+            //Com::printFLN(PSTR("BF:"));
             return;
         }
         if (actId > 0) {
@@ -1180,7 +1199,6 @@ void Motion1::backplan(fast8_t actId) {
                 next->unblock();
             }
             act->unblock();
-            //Com::printFLN("BF2:");
             return;
         }
         if (next == nullptr) { // first element, just set start speed
@@ -1200,8 +1218,8 @@ void Motion1::backplan(fast8_t actId) {
         // next->maxJoinSpeed
         // First we compute what speed we can reach at allowMoves
         lastJunctionSpeed = sqrtf(lastJunctionSpeed * lastJunctionSpeed + next->sa2);
-        //Com::printF("BP:", lastJunctionSpeed, 1);
-        //Com::printFLN(" ", (int)next->state);
+        //Com::printF(PSTR("BP:"), lastJunctionSpeed, 1);
+        //Com::printFLN(PSTR(" "), (int)next->state);
         if (lastJunctionSpeed > act->maxJoinSpeed) {
             // We can reach target speed, mark finished
             next->startSpeed = act->endSpeed = act->maxJoinSpeed;
@@ -1336,23 +1354,23 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
                     }
                 }
                 // Acceleration stops at feedrate so make sure it is set to right limit
-                /* Com::printF(" f:", f->feedrate, 0);
-                Com::printF(" t1:", m2->t1, 4);
-                Com::printF(" t2:", m2->t2, 4);
-                Com::printF(" t3:", m2->t3, 4);
-                Com::printF(" fm:", fmid, 4);*/
+                /* Com::printF(PSTR(" f:"), f->feedrate, 0);
+                Com::printF(PSTR(" t1:"), m2->t1, 4);
+                Com::printF(PSTR(" t2:"), m2->t2, 4);
+                Com::printF(PSTR(" t3:"), m2->t3, 4);
+                Com::printF(PSTR(" fm:"), fmid, 4);*/
             } else {
                 m2->s2 = f->length - m2->s1 - m2->s3;
                 m2->t2 = m2->s2 / f->feedrate;
-                // Com::printFLN(" s2:", m2->s2,2);
+                // Com::printFLN(PSTR(" s2:"), m2->s2,2);
             }
-            /* Com::printF(" t1:", m2->t1, 4);
-            Com::printF(" t2:", m2->t2, 4);
-            Com::printF(" t3:", m2->t3, 4);
-            Com::printF(" f:", f->feedrate, 2);
-            Com::printF(" ss:", f->startSpeed, 1);
-            Com::printF(" es:", f->endSpeed, 1);
-            Com::printFLN(" l:", f->length, 4); */
+            /* Com::printF(PSTR(" t1:"), m2->t1, 4);
+            Com::printF(PSTR(" t2:"), m2->t2, 4);
+            Com::printF(PSTR(" t3:"), m2->t3, 4);
+            Com::printF(PSTR(" f:"), f->feedrate, 2);
+            Com::printF(PSTR(" ss:"), f->startSpeed, 1);
+            Com::printF(PSTR(" es:"), f->endSpeed, 1);
+            Com::printFLN(PSTR(" l:"), f->length, 4); */
         } else if (f->action == Motion1Action::MOVE_STEPS) {
             float invAcceleration = 1.0 / f->acceleration;
             // Where do we hit if we accelerate from both speed
@@ -1376,18 +1394,18 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
             } else {
                 m2->s2 = f->length - m2->s1 - m2->s3;
                 m2->t2 = m2->s2 / f->feedrate;
-                // Com::printFLN(" s2:", m2->s2,2);
+                // Com::printFLN(PSTR(" s2:"), m2->s2,2);
             }
-            /* Com::printF("ss:", f->startSpeed, 0);
-            Com::printF(" es:", f->endSpeed, 0);
-            Com::printF(" f:", f->feedrate, 0);
-            Com::printF(" t1:", m2->t1, 4);
-            Com::printF(" t2:", m2->t2, 4);
-            Com::printF(" t3:", m2->t3, 4);
-            Com::printF(" s1:", m2->s1, 4);
-            Com::printF(" s2:", m2->s2, 4);
-            Com::printF(" l:", f->length, 4);
-            Com::printFLN(" a:", f->acceleration, 4); */
+            /* Com::printF(PSTR("ss:"), f->startSpeed, 0);
+            Com::printF(PSTR(" es:"), f->endSpeed, 0);
+            Com::printF(PSTR(" f:"), f->feedrate, 0);
+            Com::printF(PSTR(" t1:"), m2->t1, 4);
+            Com::printF(PSTR(" t2:"), m2->t2, 4);
+            Com::printF(PSTR(" t3:"), m2->t3, 4);
+            Com::printF(PSTR(" s1:"), m2->s1, 4);
+            Com::printF(PSTR(" s2:"), m2->s2, 4);
+            Com::printF(PSTR(" l:"), f->length, 4);
+            Com::printFLN(PSTR(" a:"), f->acceleration, 4); */
         }
         f->state = Motion1State::FORWARD_PLANNED;
         {
@@ -1399,7 +1417,7 @@ Motion1Buffer* Motion1::forward(Motion2Buffer* m2) {
             lengthUnprocessed--;
         }
         f->unblock(); // now protected by state!
-        // Com::printFLN(" ff:", (int)f->id);
+        // Com::printFLN(PSTR(" ff:"), (int)f->id);
         return f;
     } else if (f->action == Motion1Action::MOVE_BABYSTEPS) {
         return f;
@@ -1495,9 +1513,9 @@ void Motion1Buffer::calculateMaxJoinSpeed(Motion1Buffer& next) {
         maxJoinSpeed = endSpeed;
         state = Motion1State::BACKWARD_FINISHED;
     }
-    // Com::printFLN("mj:", maxJoinSpeed, 1);
-    //Com::printFLN(" v0:", speed[0], 1);
-    //Com::printFLN(" v1:", next.speed[0], 1);
+    // Com::printFLN(PSTR("mj:"), maxJoinSpeed, 1);
+    //Com::printFLN(PSTR(" v0:"), speed[0], 1);
+    //Com::printFLN(PSTR(" v1:"), next.speed[0], 1);
 }
 
 static int errcount = 0;
@@ -1506,9 +1524,9 @@ bool Motion1Buffer::block() {
     if (flags & FLAG_BLOCKED) {
         /*if (errcount < 10) {
             errcount++;
-            Com::printFLN("bf1 ", (int)id);
-            //Com::printF(" id ", (int)id);
-            //Com::printFLN(" f ", (int)flags);
+            Com::printFLN(PSTR("bf1 "), (int)id);
+            //Com::printF(PSTR(" id "), (int)id);
+            //Com::printFLN(PSTR(" f "), (int)flags);
         }*/
         return false;
     }
@@ -1900,7 +1918,7 @@ bool Motion1::simpleHome(fast8_t axis) {
         waitForEndOfMoves();
     } else {
         Com::printWarningF(PSTR("Endstop for axis "));
-        Com::print(axisNames[axis]);
+        Com::printF((const char*)HAL::readFlashAddress(&axisNames[axis]));
         Com::printFLN(PSTR(" did not untrigger for retest!"));
         ok = false;
     }

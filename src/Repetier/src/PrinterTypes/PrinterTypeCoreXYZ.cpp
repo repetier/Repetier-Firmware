@@ -133,7 +133,7 @@ float PrinterType::feedrateForMoveSteps(fast8_t axes) {
     float feedrate = 100.0f;
     FOR_ALL_AXES(i) {
         if (axes & axisBits[i]) {
-            feedrate = RMath::min(feedrate, Motion1::maxFeedrate[i]);
+            feedrate = RMath::min(feedrate, Motion1::homingFeedrate[i]);
         }
     }
     return feedrate;

@@ -35,6 +35,7 @@ IO_OUTPUT_LOG(name, output, changeOnly)
 #undef IO_OUTPUT_INVERTED
 #undef IO_OUTPUT_FAKE
 #undef IO_OUTPUT_LOG
+#undef IO_STRING
 
 #if IO_TARGET == IO_TARGET_INIT // Init pins
 
@@ -79,9 +80,9 @@ IO_OUTPUT_LOG(name, output, changeOnly)
 #define IO_OUTPUT_FAKE(name) \
     class name { \
     public: \
-        inline static void set(fast8_t val) {} \
-        inline static void on() {} \
-        inline static void off() {} \
+        inline static void set(fast8_t val) { } \
+        inline static void on() { } \
+        inline static void off() { } \
     };
 
 #define IO_OUTPUT_LOG(name, output, changeOnly) \
@@ -100,10 +101,17 @@ IO_OUTPUT_LOG(name, output, changeOnly)
         inline static void on() { set(true); } \
         inline static void off() { set(false); } \
     };
+
+#define IO_STRING(name, text) \
+    extern PGM_P const PROGMEM name;
+
 #elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES
 
 #define IO_OUTPUT_LOG(name, output, changeOnly) \
     fast8_t name::state = false;
+
+#define IO_STRING(name, text) \
+    PGM_P const PROGMEM name = text;
 
 #endif
 // Fallback to remove unused macros preventing errors!
@@ -119,4 +127,7 @@ IO_OUTPUT_LOG(name, output, changeOnly)
 #endif
 #ifndef IO_OUTPUT_LOG
 #define IO_OUTPUT_LOG(name, output, changeOnly)
+#endif
+#ifndef IO_STRING
+#define IO_STRING(name, text)
 #endif
