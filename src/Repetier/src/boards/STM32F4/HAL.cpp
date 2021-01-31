@@ -957,7 +957,7 @@ void TIMER_VECTOR(PWM_TIMER_NUM) {
     pwm_count4 += 16;
 
     if (__HAL_DMA_GET_FLAG(&hdma_adc, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc))) {
-#ifdef DEBUG_TIMING
+#if DEBUG_TIMING
         WRITE(DEBUG_ISR_ANALOG_PIN, 1);
 #endif
         for (int i = 0; i < numAnalogInputs; i++) {
@@ -967,7 +967,7 @@ void TIMER_VECTOR(PWM_TIMER_NUM) {
 #define IO_TARGET IO_TARGET_ANALOG_INPUT_LOOP
 #include "io/redefine.h"
         __HAL_DMA_CLEAR_FLAG(&hdma_adc, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc));
-#ifdef DEBUG_TIMING
+#if DEBUG_TIMING
         WRITE(DEBUG_ISR_ANALOG_PIN, 0);
 #endif
     }

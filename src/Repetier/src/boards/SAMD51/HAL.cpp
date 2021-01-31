@@ -669,7 +669,7 @@ void HAL::analogStart(void) {
     }
 }
 inline void analogISRFunction() {
-#ifdef DEBUG_TIMING
+#if DEBUG_TIMING
     WRITE(DEBUG_ISR_ANALOG_PIN, 1);
 #endif
     Adc* adc;
@@ -705,7 +705,7 @@ inline void analogISRFunction() {
         // Start conversion again, since The first conversion after the reference is changed must not be used.
         adc->SWTRIG.bit.START = 1;
     }
-#ifdef DEBUG_TIMING
+#if DEBUG_TIMING
     WRITE(DEBUG_ISR_ANALOG_PIN, 0);
 #endif
 }
