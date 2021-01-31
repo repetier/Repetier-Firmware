@@ -88,13 +88,14 @@
  *
  * Enabling dedicated SPI will cost some extra flash and RAM.
  */
+// Enabling often conflicts with spi displays!
 #if defined(__AVR__) && FLASHEND < 0X8000
 // 32K AVR boards.
-#define ENABLE_DEDICATED_SPI 1
+#define ENABLE_DEDICATED_SPI 0
 #else // defined(__AVR__) && FLASHEND < 0X8000
 // All other boards.
 #ifndef ENABLE_DEDICATED_SPI
-#define ENABLE_DEDICATED_SPI 1
+#define ENABLE_DEDICATED_SPI 0
 #endif
 #endif // defined(__AVR__) && FLASHEND < 0X8000
 //-----------------------------------------------------------------------------

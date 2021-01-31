@@ -653,7 +653,7 @@ void Printer::setup() {
     SET_INPUT(ESP_WIFI_MODULE_COM);
     SET_INPUT(MOTOR_FAULT_PIN);
     SET_INPUT(MOTOR_FAULT_PIGGY_PIN);
-#endif              //(MOTHERBOARD == 501) || (MOTHERBOARD == 502)
+#endif //(MOTHERBOARD == 501) || (MOTHERBOARD == 502)
     GUI::init();
 
 #if SDSUPPORT // Try mounting the SDCard first in case it has an eeprom file.
@@ -702,9 +702,7 @@ void Printer::defaultLoopActions() {
         }
     }
 #if SDCARDDETECT > -1 && SDSUPPORT
-    if (Printer::isAutomount()) {
-        sd.automount();
-    }
+    sd.automount();
 #endif
 #if defined(EEPROM_AVAILABLE) && (EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH)
     HAL::syncEEPROM();

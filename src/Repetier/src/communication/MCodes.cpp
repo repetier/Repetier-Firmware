@@ -156,7 +156,8 @@ void __attribute__((weak)) MCode_20(GCode* com) {
             }
         }
     } else {
-        sd.ls();
+        char folder[2] = { '/', 0 };
+        sd.ls(folder, false);
     }
 #else
     sd.ls();

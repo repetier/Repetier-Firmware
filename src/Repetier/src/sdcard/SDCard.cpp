@@ -49,7 +49,6 @@ SDCard::SDCard()
     , mountRetries(0ul)
     , mountDebounceTimeMS(0ul)
     , printingSilent(true) {
-    Printer::setAutomount((SDCARDDETECT > -1));
 }
 
 void SDCard::automount() {
@@ -57,7 +56,6 @@ void SDCard::automount() {
     bool pinLevel = SDCARDDETECTINVERTED
         ? HAL::digitalRead(SDCARDDETECT)
         : !HAL::digitalRead(SDCARDDETECT);
-
     if (pinLevel && state == SDState::SD_UNMOUNTED) {
         if (!mountDebounceTimeMS) {
             mountDebounceTimeMS = HAL::timeInMilliseconds();
@@ -101,7 +99,7 @@ void SDCard::mount(const bool manual) {
     SdSpiConfig spiConfig = SdSpiConfig(SDSS, ENABLE_DEDICATED_SPI ? DEDICATED_SPI : SHARED_SPI, SD_SCK_MHZ(constrain(SD_SPI_SPEED_MHZ, 1ul, 50ul)));
 #endif
     if (!fileSystem.begin(spiConfig)) {
-        if (mountRetries < 2u) {
+        if (mountRetries < 3u) {
             mountRetries++;
             if (manual) {
                 mount(true); // Try recursively remounting 3 times if manually mounted
@@ -118,8 +116,8 @@ void SDCard::mount(const bool manual) {
             }
 #if SDCARDDETECT > -1
             HAL::delayMilliseconds(35ul); // wait a little more before reporting the pin state
-            Com::printFLN(PSTR("Card detect pin:"),
-                          HAL::digitalRead(SDCARDDETECT) ? Com::tH : Com::tL);
+            Com::printF(PSTR("Card detect pin:"));
+            Com::printFLN(HAL::digitalRead(SDCARDDETECT) ? Com::tH : Com::tL);
 #endif
         } else if (!fileSystem.fatType()) {
 #if SDFAT_FILE_TYPE == 3
@@ -213,7 +211,7 @@ void SDCard::printCardStats() {
 }
 
 void SDCard::unmount(const bool manual) {
-    if (state <= SDState::SD_SAFE_EJECTED) {
+    if (state == SDState::SD_SAFE_EJECTED || state == SDState::SD_UNMOUNTED) {
         // in case we're unmounting manually due to sd error
         return;
     }
