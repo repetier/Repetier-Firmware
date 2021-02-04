@@ -2,7 +2,7 @@
 
 // BASE --
 void BeeperSourceBase::muteAll(bool set) {
-    for (size_t i = 0; i < NUM_BEEPERS; i++) {
+    for (size_t i = 0u; i < NUM_BEEPERS; i++) {
         beepers[i]->mute(set);
     }
 }
@@ -15,7 +15,7 @@ bool BeeperSourceBase::pushTone(const TonePacket packet) {
     }
     beepBuf[toneHead] = packet;
     if (!isPlaying()) {
-        prevToneTime = HAL::timeInMilliseconds();
+        prevToneTimeMS = HAL::timeInMilliseconds();
         toneTail = 0;
         playingFreq = packet.frequency;
         InterruptProtectedBlock noInts;
@@ -24,17 +24,16 @@ bool BeeperSourceBase::pushTone(const TonePacket packet) {
     }
     return true;
 }
-
 fast8_t BeeperSourceBase::process() {
     if (!isMuted()) {
         if (isPlaying()) {
             millis_t curTime = HAL::timeInMilliseconds();
-            if ((curTime - prevToneTime) >= beepBuf[toneTail].duration) {
+            if ((curTime - prevToneTimeMS) >= beepBuf[toneTail].duration) {
                 if (getHeadDist()) {
                     if (++toneTail >= beepBufSize) {
                         toneTail = 0;
                     }
-                    prevToneTime = curTime;
+                    prevToneTimeMS = curTime;
                     playingFreq = beepBuf[toneTail].frequency;
                     refreshBeepFreq();
                 } else {
@@ -45,16 +44,14 @@ fast8_t BeeperSourceBase::process() {
     }
     return toneTail;
 }
-
 inline void BeeperSourceBase::finishPlaying() {
     playing = halted = blocking = false;
     toneHead = toneTail = -1;
-    playingFreq = 0;
+    playingFreq = 0u;
 }
-
 bool BeeperSourceBase::playTheme(ToneTheme& theme, bool block) {
     if (!isMuted() && !isBlocking()) {
-        for (fast8_t i = 0; i < theme.getSize(); i++) {
+        for (fast8_t i = 0u; i < theme.getSize(); i++) {
             pushTone(theme.getTone(i));
         }
         if (block) {
@@ -93,8 +90,8 @@ void BeeperSourceBase::runConditions() {
                     if (curValidCondition->plays > 0) {
                         blocking = false; // Unblock in case we're finishing filling the buffer
                         while (curValidCondition->plays
-                               && getHeadDist() < (beepBufSize - curValidCondition->theme->getSize())) {
-                            playTheme(*(curValidCondition->theme), (curValidCondition->plays == 1)); // set blocking once done
+                               && getHeadDist() < (beepBufSize - curValidCondition->theme.getSize())) {
+                            playTheme((curValidCondition->theme), (curValidCondition->plays == 1)); // set blocking once done
                             curValidCondition->plays--;
                         }
                     }
@@ -130,27 +127,28 @@ void BeeperSourceBase::setCondition(bool set, ToneCondition& condition) {
 // PWM --
 void BeeperSourcePWM::refreshBeepFreq() {
     if (playingFreq > 0) {
-        pwmPin->setFreq(playingFreq);
-        pwmPin->set((Printer::toneVolume * 127) / 100);
+        pwmPin.setFreq(playingFreq);
+        pwmPin.set((Printer::toneVolume * 127u) / 100);
         halted = false;
     } else { // Turn off and just wait if we have no frequency.
         halted = true;
-        pwmPin->set(0);
+        pwmPin.set(0);
     }
 }
 // PWM --
+
 // IO --
 template <class IOPin>
 void BeeperSourceIO<IOPin>::refreshBeepFreq() {
     InterruptProtectedBlock noInts;
-    if (playingFreq > 0) {
+    if (playingFreq > 0u) {
         halted = false;
-        freqDiv = 0;
+        freqDiv = 0u;
         HAL::tone(playingFreq);
     } else { // Turn off and just wait if we have no frequency.
         halted = true;
         HAL::noTone();
-        IOPin::set((freqCnt = 0));
+        IOPin::set((freqCnt = 0u));
     }
 }
 template <class IOPin>
@@ -159,7 +157,7 @@ void BeeperSourceIO<IOPin>::finishPlaying() {
     BeeperSourceBase::finishPlaying();
     HAL::noTone();
     IOPin::off();
-    freqDiv = freqCnt = 0;
+    freqDiv = freqCnt = 0u;
 }
 // IO --
 
