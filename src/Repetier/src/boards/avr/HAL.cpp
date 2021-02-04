@@ -1,6 +1,9 @@
 #include "Repetier.h"
 #ifdef AVR_BOARD
+
+#if defined(WIRE_PORT)
 #include <compat/twi.h>
+#endif
 
 // New adc handling
 #if MAX_ANALOG_INPUTS == 16
@@ -164,18 +167,20 @@ void HAL::analogStart() {
  Setting for I2C Clock speed. needed to change  clock speed for different peripherals
 ****************************************************************************************/
 
-void HAL::i2cSetClockspeed(uint32_t clockSpeedHz)
-
-{
+void HAL::i2cSetClockspeed(uint32_t clockSpeedHz) {
+#if defined(WIRE_PORT)
     WIRE_PORT.setClock(clockSpeedHz);
+#endif
 }
 
 /*************************************************************************
  Initialization of the I2C bus interface. Need to be called only once
 *************************************************************************/
-void HAL::i2cInit(unsigned long clockSpeedHz) {
+void HAL::i2cInit(uint32_t clockSpeedHz) {
+#if defined(WIRE_PORT)
     WIRE_PORT.begin(); // create I2C master access
     WIRE_PORT.setClock(clockSpeedHz);
+#endif
 }
 
 /*************************************************************************
@@ -186,9 +191,11 @@ void HAL::i2cInit(unsigned long clockSpeedHz) {
 } */
 
 void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
+#if defined(WIRE_PORT)
     if (!i2cError) {
         i2cError |= (WIRE_PORT.requestFrom(address, bytes) != bytes);
     }
+#endif
 }
 /*************************************************************************
  Issues a start condition and sends address and transfer direction.
@@ -197,6 +204,7 @@ void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
  Input:   address and transfer direction of I2C device, internal address
 *************************************************************************/
 void HAL::i2cStartAddr(unsigned char address, unsigned int pos, uint8_t readBytes) {
+#if defined(WIRE_PORT)
     if (!i2cError) {
         WIRE_PORT.beginTransmission(address);
         WIRE_PORT.write(pos >> 8);
@@ -206,13 +214,16 @@ void HAL::i2cStartAddr(unsigned char address, unsigned int pos, uint8_t readByte
             i2cError |= (WIRE_PORT.requestFrom(address, readBytes) != readBytes);
         }
     }
+#endif
 }
 
 /*************************************************************************
  Terminates the data transfer and releases the I2C bus
 *************************************************************************/
 void HAL::i2cStop(void) {
+#if defined(WIRE_PORT)
     i2cError |= WIRE_PORT.endTransmission();
+#endif
 }
 
 /*************************************************************************
@@ -221,9 +232,11 @@ void HAL::i2cStop(void) {
   Input:    byte to be transfered
 *************************************************************************/
 void HAL::i2cWrite(uint8_t data) {
+#if defined(WIRE_PORT)
     if (!i2cError) {
         WIRE_PORT.write(data);
     }
+#endif
 }
 
 /*************************************************************************
@@ -231,9 +244,11 @@ void HAL::i2cWrite(uint8_t data) {
  Return:  byte read from I2C device
 *************************************************************************/
 int HAL::i2cRead(void) {
+#if defined(WIRE_PORT)
     if (!i2cError && WIRE_PORT.available()) {
         return WIRE_PORT.read();
     }
+#endif
     return -1; // should never happen, but better then blocking
 }
 
