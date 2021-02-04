@@ -214,9 +214,8 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define NUM_MOTORS 4
 #define MOTORS \
     { &XMotor, &YMotor, &ZMotor, &E1Motor }
-extern const char* const axisNames[] PROGMEM;
 #define MOTOR_NAMES \
-    { Com::tXLetter, Com::tYLetter, Com::tZLetter, Com::tELetter }
+    { strX, Com::tYLetter, Com::tZLetter, Com::tELetter }
 
 // Some common settings for trinamic driver settings
 /**

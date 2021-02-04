@@ -19,6 +19,8 @@ and will add the semicolon if required.
 
 /* Define motor pins here. Each motor needs a setp, dir and enable pin. */
 
+IO_STRING(strX, "X")
+
 ENDSTOP_NONE(endstopNone)
 // For use when no output is wanted, but possible
 IO_OUTPUT_FAKE(fakeOut)

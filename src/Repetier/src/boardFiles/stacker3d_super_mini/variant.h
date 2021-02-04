@@ -171,6 +171,8 @@ extern "C" {
 // UART Definitions
 #define SERIAL_UART_INSTANCE 1 // Connected to EXP3 header
 
+#define HAL_DAC_MODULE_ENABLED
+
 // Default pin used for 'Serial' instance (ex: ST-Link)
 // Mandatory for Firmata
 #define PIN_SERIAL_RX PA10

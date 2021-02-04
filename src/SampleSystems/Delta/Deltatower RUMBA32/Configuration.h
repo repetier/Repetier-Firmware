@@ -111,6 +111,16 @@ Early stage version for Stacke X2 printer - use with care
 #define DISPLAY_FULL_BUFFER 1
 // Direction 1 or -1
 #define ENCODER_DIRECTION -1
+// Encoder speed 0 = fastest, 1 or 2 = slowest - set so 1 click is one menu move
+// Default is 2 if not set by controller. Us eonly to fix wrong setting	// Default is 2 if not set by controller. Us eonly to fix wrong setting
+// #define ENCODER_SPEED 1
+
+// Dynamically increase the speed at which we step through the menus/change values.
+// Set ENCODER_MAX_REPEAT_STEPS to 1 to disable this. Also stored in EEPROM.
+#define ENCODER_MAX_REPEAT_STEPS 5            // Max. extra steps we can gain.
+#define ENCODER_MAX_REPEAT_TIME_MS 40         // Max. time we have before our extra steps reset.
+#define ENCODER_MIN_REPEAT_TIME_MS 15         // At this repeat rate we accumulate to the max step speed.
+#define ENCODER_APPLY_REPEAT_STEPS_IN_MENUS 1 // Set to 0 to only affect changing config values.
 
 // List of default materials for temperature dialogs. Values are extruder temperature, bed temeprature and chamber temperature
 #define DEFAULT_MATERIALS \
@@ -125,9 +135,6 @@ Early stage version for Stacke X2 printer - use with care
 
 // Uncomment to hide toogle light menu entry in controls
 // #define NO_LIGHT_CONTROL
-// Encoder speed 0 = fastest, 1 or 2 = slowest - set so 1 click is one menu move
-// Default is 2 if not set by controller. Us eonly to fix wrong setting
-// #define ENCODER_SPEED 2
 // Set 1 if you want to replace the default themes and define them in
 // configuration_io.h
 #define CUSTOM_DEFAULT_THEMES 0
