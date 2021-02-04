@@ -156,6 +156,9 @@ to the position. 0 = no contribution. */
 #define AXISCOMP_TANYZ 0
 #define AXISCOMP_TANXZ 0
 
+// SKR E3 Mini - If not using the SPI1 pins, enable this to improve SD read/write speeds.
+#define ENABLE_DEDICATED_SPI 1
+
 // Next 7 lines are required to make the following work, do not change!
 #include "boards/pins.h"
 #undef IO_TARGET
