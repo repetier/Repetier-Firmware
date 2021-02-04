@@ -92,7 +92,7 @@
 #define ENCODER_SPEED 1
 
 // Dynamically increase the speed at which we step through the menus/change values.
-// Set ENCODER_MAX_REPEAT_STEPS to 1 to disable this. Also stored in EEPROM.
+// Set ENCODER_MAX_REPEAT_STEPS to 1 to disable this. EEPROM/Runtime configurable. (Set to 0 to compile out entirely for extra RAM)
 #define ENCODER_MAX_REPEAT_STEPS 5            // Max. extra steps we can gain.
 #define ENCODER_MAX_REPEAT_TIME_MS 40         // Max. time we have before our extra steps reset.
 #define ENCODER_MIN_REPEAT_TIME_MS 15         // At this repeat rate we accumulate to the max step speed.
