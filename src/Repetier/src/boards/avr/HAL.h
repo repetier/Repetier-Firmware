@@ -52,8 +52,12 @@
 #include <avr/wdt.h>
 
 // Which I2C port to use?
+#ifndef NO_I2C
 #ifndef WIRE_PORT
 #define WIRE_PORT Wire
+#endif
+#else
+#undef WIRE_PORT
 #endif
 
 #define PWM_CLOCK_FREQ 3000
@@ -74,7 +78,9 @@ extern uint16_t analogValues[MAX_ANALOG_INPUTS];
 #endif
 
 #include "Arduino.h"
+#if defined(WIRE_PORT)
 #include <Wire.h>
+#endif
 #include "fastio.h"
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
