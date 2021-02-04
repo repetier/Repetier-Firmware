@@ -28,7 +28,7 @@
 
 #if IO_TARGET == IO_TARGET_CLASS_DEFINITION
 
-static constexpr fast8_t beepBufSize = 50;
+static constexpr fast8_t beepBufSize = 10;
 
 struct TonePacket {
     //If the frequency is 0, it'll behave as putting a G4 P(duration) command in between M300's.
@@ -39,7 +39,7 @@ struct TonePacket {
 class ToneTheme {
 public:
     template <fast8_t size>
-    ToneTheme(const TonePacket (&theme)[size])
+    explicit ToneTheme(const TonePacket (&theme)[size])
         : savedTheme(theme)
         , themeSize(size) {
     }
@@ -61,7 +61,7 @@ struct ToneCondition {
     bool heard;
     fast8_t plays;
     const fast8_t playCount;
-    ToneTheme* theme;
+    ToneTheme& theme;
 };
 
 class BeeperSourceBase {
@@ -73,8 +73,8 @@ public:
         , blocking(false)
         , toneHead(-1)
         , toneTail(-1)
-        , prevToneTime(0)
-        , playingFreq(0)
+        , prevToneTimeMS(0u)
+        , playingFreq(0u)
         , beepBuf { 0 }
         , lastConditionStep(0)
         , curConditionStep(0)
@@ -84,7 +84,7 @@ public:
     inline fast8_t getHeadDist() {
         return !isPlaying() ? 0 : (toneHead >= toneTail ? (toneHead - toneTail) : (beepBufSize - toneTail + toneHead));
     }
-    virtual ufast8_t getOutputType() { return 0; };
+    virtual ufast8_t getOutputType() { return 0u; };
     inline uint16_t getCurFreq() { return playingFreq; }
     inline bool isPlaying() { return playing; }
     inline bool isHalted() { return halted; }
@@ -115,9 +115,10 @@ protected:
     bool halted; // Special state between beeps/duration only beeps.
     bool muted;  // eeprom etc
     bool blocking;
+
     fast8_t toneHead;
     fast8_t toneTail;
-    millis_t prevToneTime;
+    millis_t prevToneTimeMS;
     uint16_t playingFreq;
     TonePacket beepBuf[beepBufSize];
 
@@ -133,20 +134,20 @@ class BeeperSourceIO : public BeeperSourceBase {
 public:
     BeeperSourceIO()
         : BeeperSourceBase()
-        , freqCnt(0)
-        , freqDiv(0)
+        , freqCnt(0u)
+        , freqDiv(0u)
         , lastPinState(false) {
         IOPin::off();
     }
-    inline ufast8_t getOutputType() final { return 1; }
+    inline ufast8_t getOutputType() final { return 1u; }
     inline ufast8_t getFreqDiv() final { return freqDiv; }
-    inline void setFreqDiv(ufast8_t div) final { freqDiv = div * 2; }
+    inline void setFreqDiv(ufast8_t div) final { freqDiv = div * 2u; }
     INLINE void toggle(bool state) {
         if (isPlaying() && !isHalted()) {
             if (!getFreqDiv()) {
                 IOPin::set((lastPinState = state));
             } else if ((freqCnt++ >= getFreqDiv())) {
-                freqCnt = 0;
+                freqCnt = 0u;
                 IOPin::set((lastPinState = state));
             }
         } else if (lastPinState) {
@@ -154,6 +155,7 @@ public:
             IOPin::set((lastPinState = false));
         }
     }
+    virtual ~BeeperSourceIO() {};
 
 private:
     void refreshBeepFreq() final;
@@ -165,22 +167,22 @@ private:
 
 class BeeperSourcePWM : public BeeperSourceBase {
 public:
-    BeeperSourcePWM(PWMHandler* pwm)
+    explicit BeeperSourcePWM(PWMHandler &pwm)
         : BeeperSourceBase()
         , pwmPin(pwm) {
-        pwmPin->set(0);
+        pwmPin.set(0);
     };
-    inline ufast8_t getOutputType() final { return 2; }
-    inline ufast8_t getFreqDiv() final { return 0; }
+    inline ufast8_t getOutputType() final { return 2u; }
+    inline ufast8_t getFreqDiv() final { return 0u; }
     inline void setFreqDiv(ufast8_t div) final { }
-
+    virtual ~BeeperSourcePWM() {};
 private:
     void refreshBeepFreq() final;
     inline void finishPlaying() final {
-        pwmPin->set(0);
+        pwmPin.set(0);
         BeeperSourceBase::finishPlaying();
     }
-    PWMHandler* pwmPin;
+    PWMHandler& pwmPin;
 };
 
 #define PLAY_THEME(source, theme, blocking) \
@@ -208,7 +210,7 @@ private:
     static_assert(NUM_BEEPERS, "\"" #name "\" created in config_io but NUM_BEEPERS is zero!");
 
 #define BEEPER_SOURCE_PWM(name, PWMPin) \
-    BeeperSourcePWM name(&PWMPin); \
+    BeeperSourcePWM name(PWMPin); \
     static_assert(NUM_BEEPERS, "\"" #name "\" created in config_io but NUM_BEEPERS is zero!");
 
 #define TONE_THEME(name, theme) \
@@ -217,7 +219,7 @@ private:
     static_assert(!((sizeof(name##_theme) / sizeof(TonePacket)) > beepBufSize), "Length of \"" #name "\" is larger than beeper buffer size!");
 
 #define TONE_THEME_COND(name, source, cond, theme, playTimes) \
-    ToneCondition name##_cond = { false, (playTimes == 0), false, 0, playTimes, &theme };
+    ToneCondition name##_cond = { false, (playTimes == 0), false, 0, playTimes, theme };
 
 #elif IO_TARGET == IO_TARGET_SERVO_INTERRUPT // IO_TARGET_PERIODICAL_ACTIONS
 
