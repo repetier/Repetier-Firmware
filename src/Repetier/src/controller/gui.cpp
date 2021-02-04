@@ -14,11 +14,14 @@ GUIStatusLevel GUI::statusLevel = GUIStatusLevel::REGULAR;
 bool GUI::contentChanged = false;                                 ///< set to true if forced refresh is wanted
 GUIAction GUI::nextAction = GUIAction::NONE;                      ///< Next action to execute on opdate
 int GUI::nextActionRepeat = 0;                                    ///< Increment for next/previous
+
+#if ENCODER_MAX_REPEAT_STEPS != 0
 uint8_t GUI::maxActionRepeatStep = ENCODER_MAX_REPEAT_STEPS;      ///< Max amount of extra encoder repeat steps
 uint16_t GUI::maxActionRepeatTimeMS = ENCODER_MAX_REPEAT_TIME_MS; ///< Clicks longer than this will not recieve any extra steps
 uint16_t GUI::minActionRepeatTimeMS = ENCODER_MIN_REPEAT_TIME_MS; ///
 millis_t GUI::lastActionRepeatDiffMS;                             ///< Just used to display the time diff in the encoder speed menu
 bool GUI::speedAffectMenus = ENCODER_APPLY_REPEAT_STEPS_IN_MENUS;
+#endif
 
 uint16_t GUI::eprStart;
 
@@ -68,18 +71,22 @@ void GUI::resetMenu() { ///< Go to start page
     replace(Printer::isPrinting() ? printProgress : Printer::isZProbingActive() ? probeProgress : startScreen, nullptr, GUIPageType::TOPLEVEL);
 }
 void GUI::resetEeprom() {
+#if ENCODER_MAX_REPEAT_STEPS != 0
     speedAffectMenus = ENCODER_APPLY_REPEAT_STEPS_IN_MENUS;
     maxActionRepeatTimeMS = ENCODER_MAX_REPEAT_TIME_MS;
     minActionRepeatTimeMS = ENCODER_MIN_REPEAT_TIME_MS;
     maxActionRepeatStep = ENCODER_MAX_REPEAT_STEPS;
+#endif
 }
 void GUI::eepromHandle() {
+#if ENCODER_MAX_REPEAT_STEPS != 0
     EEPROM::handlePrefix("Encoder");
     EEPROM::handleByte(eprStart + 0, PSTR("max. extra repeat steps [steps/click]"), maxActionRepeatStep);
     EEPROM::handleInt(eprStart + 1, PSTR("max. repeat time [ms]"), maxActionRepeatTimeMS);
     EEPROM::handleInt(eprStart + 3, PSTR("min. repeat time [ms]"), minActionRepeatTimeMS);
     EEPROM::handleByte(eprStart + 5, PSTR("affect speed in menus [0/1]"), speedAffectMenus);
     EEPROM::removePrefix();
+#endif
 }
 void GUI::init() {
     resetEeprom();
@@ -232,6 +239,7 @@ void GUI::backKey() {
     resetScrollbarTimer();
 }
 
+#if ENCODER_MAX_REPEAT_STEPS != 0
 static fast8_t calcRepeatSteps(bool changedDir) {
     static millis_t lastRepeatTimeMS;
     millis_t curDiffTime = HAL::timeInMilliseconds() - lastRepeatTimeMS;
@@ -275,18 +283,13 @@ static fast8_t calcRepeatSteps(bool changedDir) {
     }
     return step;
 }
+#endif
 void GUI::nextKey() {
     nextAction = GUIAction::NEXT;
-    nextActionRepeat = (maxActionRepeatStep > 1) ? calcRepeatSteps(false) : 1;
-    contentChanged = true;
-    resetScrollbarTimer();
 }
 
 void GUI::previousKey() {
     nextAction = GUIAction::PREVIOUS;
-    nextActionRepeat = (maxActionRepeatStep > 1) ? calcRepeatSteps(false) : 1;
-    contentChanged = true;
-    resetScrollbarTimer();
 }
 
 void GUI::okKey() {
@@ -370,7 +373,16 @@ void GUI::setEncoder() {
         } else {
             GUI::nextKey();
         }
+    } else {
+        return;
     }
+#if ENCODER_MAX_REPEAT_STEPS != 0
+    nextActionRepeat = (maxActionRepeatStep > 1) ? calcRepeatSteps(false) : 1;
+#else
+    nextActionRepeat = 1;
+#endif
+    contentChanged = true;
+    resetScrollbarTimer();
 }
 
 const float roundingTable[] PROGMEM = { 0.5, 0.05, 0.005, 0.0005, 0.00005, 0.000005 };
@@ -840,7 +852,8 @@ bool GUI::handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, 
     return orig != value;
 }
 void GUI::menuAffectBySpeed(GUIAction& action) {
-    if ((action == GUIAction::NEXT || action == GUIAction::PREVIOUS)
+#if ENCODER_MAX_REPEAT_STEPS != 0 
+    if (GUI::speedAffectMenus && (action == GUIAction::NEXT || action == GUIAction::PREVIOUS)
         && nextActionRepeat > 1) {
         static GUIAction lastDir = action;
         if (action != lastDir) {
@@ -858,6 +871,7 @@ void GUI::menuAffectBySpeed(GUIAction& action) {
         }
         lastDir = action;
     }
+#endif
 }
 
 void GUI::menuBack(GUIAction& action) {
@@ -976,7 +990,9 @@ void directAction(GUIAction action, void* data) {
         Printer::failedMode = false;
         GCode::resetFatalError();
     case GUI_DIRECT_ACTION_TOGGLE_ENCODER_AFFECT_MENUS_BY_SPEED:
+#if ENCODER_MAX_REPEAT_STEPS != 0
         GUI::speedAffectMenus = !GUI::speedAffectMenus;
+#endif
         break;
     }
 }

@@ -530,6 +530,7 @@ void __attribute__((weak)) menuTempConfig(GUIAction action, void* data) {
     GUI::menuEnd(action);
 }
 
+#if ENCODER_MAX_REPEAT_STEPS != 0
 void __attribute__((weak)) menuEncoderMaxRepeatSteps(GUIAction action, void* data) {
     DRAW_LONG_P(PSTR("Max. repeat steps:"), "steps/click", GUI::maxActionRepeatStep);
     if (GUI::handleLongValueAction(action, v, 1, 15, 1)) {
@@ -547,7 +548,7 @@ void __attribute__((weak)) menuEncoderMinRepeatTime(GUIAction action, void* data
     if (GUI::handleLongValueAction(action, v, 1, GUI::maxActionRepeatTimeMS - 1u, 1)) {
         GUI::minActionRepeatTimeMS = v;
     }
-} 
+}
 void __attribute__((weak)) menuConfigEncoder(GUIAction action, void* data) {
     GUI::menuStart(action);
     GUI::menuTextP(action, PSTR("= Config Encoder ="), true);
@@ -571,6 +572,7 @@ void __attribute__((weak)) menuConfigEncoder(GUIAction action, void* data) {
     GUI::menuOnOffP(action, PSTR("Affect in menus:"), GUI::speedAffectMenus, directAction, (void*)GUI_DIRECT_ACTION_TOGGLE_ENCODER_AFFECT_MENUS_BY_SPEED, GUIPageType::ACTION);
     GUI::menuEnd(action);
 }
+#endif
 #if NUM_TOOLS > 1
 void dittoToTmpString(int32_t mode, bool mirror) {
     if (mode == 0) {
@@ -1007,7 +1009,9 @@ void __attribute__((weak)) menuConfig(GUIAction action, void* data) {
 #endif
         }
     }
+#if ENCODER_MAX_REPEAT_STEPS != 0
     GUI::menuSelectableP(action, PSTR("Encoder"), menuConfigEncoder, nullptr, GUIPageType::MENU);
+#endif
     GUI::menuSelectableP(action, PSTR("Store Settings"), directAction, (void*)GUI_DIRECT_ACTION_STORE_EEPROM, GUIPageType::ACTION);
     GUI::menuSelectableP(action, PSTR("Factory Reset"), directAction, (void*)GUI_DIRECT_ACTION_FACTORY_RESET, GUIPageType::ACTION);
     GUI::menuEnd(action);
