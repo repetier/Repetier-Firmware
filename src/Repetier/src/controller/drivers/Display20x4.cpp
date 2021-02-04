@@ -792,7 +792,7 @@ void GUI::menuStart(GUIAction action) {
 }
 
 void GUI::menuEnd(GUIAction action, bool scrollbar, bool affectedBySpeed) {
-    if (affectedBySpeed && GUI::speedAffectMenus) {
+    if (affectedBySpeed) {
         GUI::menuAffectBySpeed(action);
     }
     if (action == GUIAction::NEXT) {

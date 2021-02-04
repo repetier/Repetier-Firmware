@@ -160,11 +160,13 @@ public:
     static fast8_t bufPos;                       ///< Pos for appending data
     static GUIAction nextAction;                 ///< Next action to execute on opdate
     static int nextActionRepeat;                 ///< Increment for next/previous
+#if ENCODER_MAX_REPEAT_STEPS != 0
     static bool speedAffectMenus;                ///< Apply encoder step speed to menus
     static uint8_t maxActionRepeatStep;          ///< Max amount of extra encoder repeat steps
     static uint16_t maxActionRepeatTimeMS;       ///< Clicks longer than this will not recieve any extra steps
     static uint16_t minActionRepeatTimeMS;       ///
     static millis_t lastActionRepeatDiffMS;      ///< Just used to display the time diff in the encoder speed menu
+#endif
 
     static uint16_t eprStart;
     static GUIStatusLevel statusLevel;
