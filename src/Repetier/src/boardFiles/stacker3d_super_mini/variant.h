@@ -19,10 +19,6 @@
 #ifndef _VARIANT_ARDUINO_STM32_
 #define _VARIANT_ARDUINO_STM32_
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 /*----------------------------------------------------------------------------
  *        Pins
  *----------------------------------------------------------------------------*/
@@ -140,6 +136,8 @@ extern "C" {
 #define PG14 110 //D110
 #define PG15 111 //D111
 
+#define CMSIS_STARTUP_FILE "stacker3d_super_mini_startup_stm32f446ve.S"
+
 // This must be a literal
 #define NUM_DIGITAL_PINS 112
 // This must be a literal with a value less than or equal to to MAX_ANALOG_INPUTS
@@ -150,8 +148,8 @@ extern "C" {
 #define PWM_MAX_DUTY_CYCLE 255
 
 // On-board LED pin number
-#define LED_BUILTIN PB14
-#define LED_HEARTBEAT LED_BUILTIN
+// #define LED_BUILTIN PB14
+// #define LED_HEARTBEAT LED_BUILTIN
 
 // SPI Definitions
 #define PIN_SPI_SS PA4
@@ -181,31 +179,44 @@ extern "C" {
 /* HAL configuration */
 #define HSE_VALUE 12000000U
 
-#ifdef __cplusplus
-} // extern "C"
-#endif
-/*----------------------------------------------------------------------------
- *        Arduino objects - C++ only
- *----------------------------------------------------------------------------*/
+//#define DEBUG_UART_BAUDRATE 115200
+//#define DEBUG_UART PA_2
 
-#ifdef __cplusplus
-// These serial port names are intended to allow libraries and architecture-neutral
-// sketches to automatically default to the correct port name for a particular type
-// of use.  For example, a GPS module would normally connect to SERIAL_PORT_HARDWARE_OPEN,
-// the first hardware serial port whose RX/TX pins are not dedicated to another use.
-//
-// SERIAL_PORT_MONITOR        Port which normally prints to the Arduino Serial Monitor
-//
-// SERIAL_PORT_USBVIRTUAL     Port which is USB virtual serial
-//
-// SERIAL_PORT_LINUXBRIDGE    Port which connects to a Linux system via Bridge library
-//
-// SERIAL_PORT_HARDWARE       Hardware serial port, physical RX & TX pins.
-//
-// SERIAL_PORT_HARDWARE_OPEN  Hardware serial ports which are open for use.  Their RX & TX
-//                            pins are NOT connected to anything by default.
+// Important note: Forgetting to override/define a IRQHandler function
+// and then trying to enable the IRQ will cause an infinite loop.
+// This is because the "default handler" in the CMSIS startup
+// assembly file for IRQ's IS an infinite loop.
+
+// If you have a debugger, you can detect a missing IRQHandler
+// by looking at the last call stack and seeing the "WWDG_IRQHandler"
+// as the previous function call right before the infinite loop.
+
+// See \framework-arduinoststm32\cores\arduino\stm32\timer.h
+// for more timer function name redefinitions!
+
+#define RAW_TIM1_IRQn RAW_TIM1_UP_TIM10_IRQn
+#define RAW_TIM1_IRQHandler RAW_TIM1_UP_TIM10_IRQHandler
+
+#define RAW_TIM6_IRQn RAW_TIM6_DAC_IRQn
+#define RAW_TIM6_IRQHandler RAW_TIM6_DAC_IRQHandler
+
+#define RAW_TIM8_IRQn RAW_TIM8_UP_TIM13_IRQn
+#define RAW_TIM8_IRQHandler RAW_TIM8_UP_TIM13_IRQHandler
+
+#define RAW_TIM9_IRQn RAW_TIM1_BRK_TIM9_IRQn
+#define RAW_TIM9_IRQHandler RAW_TIM1_BRK_TIM9_IRQHandler
+
+#define RAW_TIM11_IRQn RAW_TIM1_TRG_COM_TIM11_IRQn
+#define RAW_TIM11_IRQHandler RAW_TIM1_TRG_COM_TIM11_IRQHandler
+
+#define RAW_TIM12_IRQn RAW_TIM8_BRK_TIM12_IRQn
+#define RAW_TIM12_IRQHandler RAW_TIM8_BRK_TIM12_IRQHandler
+
+#define RAW_TIM10_IRQn RAW_TIM1_UP_TIM10_IRQn
+#define RAW_TIM10_IRQHandler RAW_TIM1_IRQHandler
+//TIM10_IRQHandler is mapped on TIM1_IRQHandler!!
+
 #define SERIAL_PORT_MONITOR Serial
 #define SERIAL_PORT_HARDWARE_OPEN Serial
-#endif
 
 #endif /* _VARIANT_ARDUINO_STM32_ */

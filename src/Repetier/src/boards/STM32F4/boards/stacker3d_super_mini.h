@@ -12,7 +12,7 @@ Timer 1 (PE13, PE14), 2 (PB8, PB9), 3 (PB0, PC6, PC7), 4 (PD12), 9 (PE5, PE6)
 #pragma once
 
 #ifndef STM32F4
-#error "Oops! Select RUMBA32 in platformio.ini -> default_envs"
+#error "Oops! Select stacker3d_super_mini in platformio.ini -> default_envs"
 #endif
 
 // Users expect Serial to be usb port!
@@ -20,7 +20,7 @@ Timer 1 (PE13, PE14), 2 (PB8, PB9), 3 (PB0, PC6, PC7), 4 (PD12), 9 (PE5, PE6)
 #define Serial SerialUSB
 
 #define CPU_ARCH ARCH_ARM
-#define MAX_RAM 131072 // Rumba32
+#define MAX_RAM 131072 // stacker3d_super_mini
 
 // Default is 9 but that is used by fan pins, so map servo to timer 13
 #define SERVO_TIMER_NUM 13
@@ -137,8 +137,10 @@ Timer 1 (PE13, PE14), 2 (PB8, PB9), 3 (PB0, PC6, PC7), 4 (PD12), 9 (PE5, PE6)
 #define ORIG_PS_ON_PIN -1
 #define KILL_PIN -1
 
+#ifndef SDSUPPORT
 #undef SDSUPPORT
 #define SDSUPPORT 1
+#endif
 #ifndef SDSS
 #define SDSS PC10 // CS1
 #endif

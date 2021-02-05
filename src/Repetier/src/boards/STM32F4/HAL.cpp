@@ -626,6 +626,9 @@ void HAL::analogEnable(int pinId) {
 }
 
 int HAL::analogRead(int pin) {
+    if(pin < 0) {
+        return 0;
+    }
     AnalogFunction* af = analogMap[pin];
     if (af == nullptr) { // protect for config errors
         return 0;
@@ -659,7 +662,7 @@ void HAL::eprBurnValue(unsigned int pos, int size, union eeval_t newvalue) {
 #endif
 }
 
-#if EEPROM_AVAILABLE == EEPROM_FLASH
+#if EEPROM_AVAILABLE == EEPROM_FLASH && EEPROM_MODE != EEPROM_NONE
 millis_t eprSyncTime = 0; // in sync
 void HAL::syncEEPROM() {  // store to disk if changed
     millis_t time = millis();
