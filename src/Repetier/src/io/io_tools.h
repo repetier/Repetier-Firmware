@@ -97,7 +97,7 @@
         GUI::flashToStringLong(help, PSTR("= Extruder @ ="), name.getToolId() + 1); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
-        if (stepper.overridesResolution()) { \
+        if (stepper.overridesResolution() || stepper.hasConfigMenu()) { \
             stepper.menuConfig(action, data); \
         } else { \
             GUI::menuFloatP(action, PSTR("Resolution :"), name.getResolution(), 2, menuExtruderStepsPerMM, &name, GUIPageType::FIXED_CONTENT); \

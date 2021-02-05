@@ -143,6 +143,18 @@ void ProgrammableStepperBase::processEEPROM(uint8_t flags) {
 #endif
 }
 
+template <class derived>
+void ProgrammableStepperBase::menuSetCurrent(GUIAction action, derived* driver) {
+#if FEATURE_CONTROLLER != NO_CONTROLLER
+    DRAW_LONG_P(Com::tMotorCurrentColon, Com::tUnitMilliamps, driver->currentMillis);
+    if (GUI::handleLongValueAction(action, v, 100u, 3000u, 50u)) {
+        driver->currentMillis = v;
+    } else if (action == GUIAction::CLICK) {
+        driver->setMaxCurrent(driver->currentMillis);
+    }
+#endif
+}
+
 void reportTMC2130(TMC2130Stepper* driver, ProgrammableStepperBase* b, int level) {
     uint8_t constat = driver->test_connection();
     Com::printF(Com::tMotorStatusColon);
@@ -198,6 +210,14 @@ void reportTMC2130(TMC2130Stepper* driver, ProgrammableStepperBase* b, int level
     }
     if (level > 1) {
     }
+}
+
+template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
+void __attribute__((weak)) TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::menuConfig(GUIAction action, void* data) {
+#if FEATURE_CONTROLLER != NO_CONTROLLER
+    GUI::menuLongP(
+        action, Com::tMotorCurrentColon, currentMillis, +[](GUIAction action, void* data) { menuSetCurrent(action, static_cast<decltype(this)>(data)); }, this, GUIPageType::FIXED_CONTENT);
+#endif
 }
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
@@ -464,6 +484,14 @@ void reportTMC5160(TMC5160Stepper* driver, ProgrammableStepperBase* b, int level
     }
     if (level > 1) {
     }
+}
+
+template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
+void __attribute__((weak)) TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::menuConfig(GUIAction action, void* data) {
+#if FEATURE_CONTROLLER != NO_CONTROLLER
+    GUI::menuLongP(
+        action, Com::tMotorCurrentColon, currentMillis, +[](GUIAction action, void* data) { menuSetCurrent(action, static_cast<decltype(this)>(data)); }, this, GUIPageType::FIXED_CONTENT);
+#endif
 }
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
@@ -734,6 +762,14 @@ void reportTMC2208(TMC2208Stepper* driver, ProgrammableStepperBase* b, int level
 }
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
+void __attribute__((weak)) TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::menuConfig(GUIAction action, void* data) {
+#if FEATURE_CONTROLLER != NO_CONTROLLER
+    GUI::menuLongP(
+        action, Com::tMotorCurrentColon, currentMillis, +[](GUIAction action, void* data) { menuSetCurrent(action, static_cast<decltype(this)>(data)); }, this, GUIPageType::FIXED_CONTENT);
+#endif
+}
+
+template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::init() {
     disable();
     driver->begin();
@@ -996,6 +1032,14 @@ void reportTMC2209(TMC2209Stepper* driver, ProgrammableStepperBase* b, int level
         Com::printFLN(PSTR("sedn: "), (int)driver->sedn());
         Com::printFLN(PSTR("seimin: "), (int)driver->seimin());
     }
+}
+
+template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
+void __attribute__((weak)) TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::menuConfig(GUIAction action, void* data) {
+#if FEATURE_CONTROLLER != NO_CONTROLLER
+    GUI::menuLongP(
+        action, Com::tMotorCurrentColon, currentMillis, +[](GUIAction action, void* data) { menuSetCurrent(action, static_cast<decltype(this)>(data)); }, this, GUIPageType::FIXED_CONTENT);
+#endif
 }
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
