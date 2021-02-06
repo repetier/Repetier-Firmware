@@ -193,6 +193,9 @@ void __attribute__((weak)) menuConfigAxis(GUIAction action, void* data) {
     GUI::menuStart(action);
     GUI::menuText(action, GUI::tmpString, true);
     GUI::menuBack(action);
+    if (Motion1::drivers[axis]->hasConfigMenu()) {
+        Motion1::drivers[axis]->menuConfig(action, data);
+    }
     GUI::menuFloatP(action, PSTR("Resolution  :"), Motion1::resolution[axis], 2, menuStepsPerMM, (void*)axis, GUIPageType::FIXED_CONTENT);
     GUI::menuFloatP(action, PSTR("Homing Speed:"), Motion1::homingFeedrate[axis], 0, menuHomingSpeed, (void*)axis, GUIPageType::FIXED_CONTENT);
     GUI::menuFloatP(action, PSTR("Move Speed  :"), Motion1::moveFeedrate[axis], 0, menuMoveSpeed, (void*)axis, GUIPageType::FIXED_CONTENT);

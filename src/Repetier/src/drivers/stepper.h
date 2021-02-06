@@ -72,6 +72,7 @@ public:
     virtual bool overridesResolution() { return false; }
     // Configuration in GUI
     virtual void menuConfig(GUIAction action, void* data) { }
+    virtual bool hasConfigMenu() { return false; }
     // Allow having own settings e.g. current, microsteps
     virtual void eepromHandle() { }
     int motorIndex();
@@ -191,6 +192,9 @@ public:
     virtual void menuConfig(GUIAction action, void* data) {
         stepper->menuConfig(action, data);
     }
+    virtual bool hasConfigMenu() {
+        return stepper->hasConfigMenu();
+    }
     virtual void eepromHandle() final {
         stepper->eepromHandle();
     }
@@ -269,6 +273,7 @@ public:
     static void menuStepsPerMM(GUIAction action, void* data);
     // Configuration in GUI
     virtual void menuConfig(GUIAction action, void* data) final;
+    virtual bool hasConfigMenu() final { return true; }
     virtual void init() final;
     virtual void eepromHandle() final;
     void restoreFromConfiguration(int32_t _to) {
@@ -282,6 +287,7 @@ class SimpleStepperDriver : public StepperDriverBase {
 public:
     SimpleStepperDriver(EndstopDriver* minES, EndstopDriver* maxES)
         : StepperDriverBase(minES, maxES) { }
+    virtual ~SimpleStepperDriver() { }
     virtual void init() { disable(); }
     inline void step() final {
         stepCls::on();
@@ -321,8 +327,9 @@ public:
         , stealthChop(_stealthChop)
         , debug(-1)
         , otpw(false)
-        , otpwCount(0)
-        , stallguardSensitivity(_stallguardSensitivity) { }
+        , otpwCount(0u)
+        , stallguardSensitivity(_stallguardSensitivity)
+        , eprStart(0u) { }
     inline int16_t getMicrosteps() { return microsteps; }
     inline int16_t getCurrentMillis() { return currentMillis; }
     inline bool getStealthChop() { return stealthChop; }
@@ -330,6 +337,8 @@ public:
     inline bool hasStallguard() { return stallguardSensitivity != -128; }
     void reserveEEPROM(uint16_t extraBytes);
     void processEEPROM(uint8_t flags);
+    template <class derived>
+    static void menuSetCurrent(GUIAction action, derived* driver);
 };
 
 /// Plain stepper driver with optional endstops attached.
@@ -382,6 +391,8 @@ public:
     virtual void beforeHoming() final;
     virtual void afterHoming() final;
     virtual void handleMCode(GCode& com) final;
+    virtual void menuConfig(GUIAction action, void* data) final;
+    virtual bool hasConfigMenu() final { return true; }
     void timer500ms();
 };
 
@@ -434,6 +445,8 @@ public:
     virtual void beforeHoming() final;
     virtual void afterHoming() final;
     virtual void handleMCode(GCode& com) final;
+    virtual void menuConfig(GUIAction action, void* data) final;
+    virtual bool hasConfigMenu() final { return true; }
     void timer500ms();
 };
 
@@ -487,6 +500,8 @@ public:
     virtual void beforeHoming() final;
     virtual void afterHoming() final;
     virtual void handleMCode(GCode& com) final;
+    virtual void menuConfig(GUIAction action, void* data) final;
+    virtual bool hasConfigMenu() final { return true; }
     void timer500ms();
 };
 
@@ -549,6 +564,8 @@ public:
     virtual void beforeHoming() final;
     virtual void afterHoming() final;
     virtual void handleMCode(GCode& com) final;
+    virtual void menuConfig(GUIAction action, void* data) final;
+    virtual bool hasConfigMenu() final { return true; }
     void timer500ms();
 };
 /// Plain stepper driver with optional endstops attached.
@@ -596,6 +613,9 @@ public:
     virtual void menuConfig(GUIAction action, void* data) {
         motor1->menuConfig(action, data);
         motor2->menuConfig(action, data);
+    }
+    virtual bool hasConfigMenu() final {
+        return (motor1->hasConfigMenu() || motor2->hasConfigMenu());
     }
     virtual void eepromHandle() final {
         motor1->eepromHandle();
@@ -657,6 +677,9 @@ public:
         motor1->menuConfig(action, data);
         motor2->menuConfig(action, data);
         motor3->menuConfig(action, data);
+    }
+    virtual bool hasConfigMenu() final {
+        return (motor1->hasConfigMenu() || motor2->hasConfigMenu() || motor3->hasConfigMenu());
     }
     virtual void eepromHandle() final {
         motor1->eepromHandle();
@@ -728,6 +751,9 @@ public:
         motor2->menuConfig(action, data);
         motor3->menuConfig(action, data);
         motor4->menuConfig(action, data);
+    }
+    virtual bool hasConfigMenu() final {
+        return (motor1->hasConfigMenu() || motor2->hasConfigMenu() || motor3->hasConfigMenu() || motor4->hasConfigMenu());
     }
     virtual void eepromHandle() final {
         motor1->eepromHandle();
