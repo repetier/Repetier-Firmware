@@ -657,12 +657,11 @@ void __attribute__((weak)) menuControls(GUIAction action, void* data) {
 }
 
 void __attribute__((weak)) menuFan(GUIAction action, void* data) {
-    int id = reinterpret_cast<int>(data);
-    PWMHandler* pwm = fans[reinterpret_cast<int>(data)].fan;
-    int32_t percent = (pwm->get() * 100) / 255;
+    fast8_t id = reinterpret_cast<fast8_t>(data);
+    int32_t percent = ((fans[id].fan->get() * 100l) + 127l) / 255l;
     GUI::flashToStringLong(GUI::tmpString, PSTR("Fan @ Speed:"), id + 1);
     DRAW_LONG(GUI::tmpString, Com::tUnitPercent, percent);
-    if (GUI::handleLongValueAction(action, percent, 0, 100, 5)) {
+    if (GUI::handleLongValueAction(action, percent, 0l, 100l, 1l)) {
         Printer::setFanSpeed((percent * 255) / 100, true, id);
     }
 }
@@ -671,9 +670,8 @@ void __attribute__((weak)) menuFans(GUIAction action, void* data) {
     GUI::menuStart(action);
     GUI::menuTextP(action, PSTR("= Fans = "), true);
     GUI::menuBack(action);
-    for (int i = 0; i < NUM_FANS; i++) {
-        PWMHandler* fan = fans[i].fan;
-        int32_t percent = (fan->get() * 100) / 255;
+    for (fast8_t i = 0; i < NUM_FANS; i++) {
+        int32_t percent = ((fans[i].fan->get() * 100l) + 127l) / 255l;
         GUI::flashToStringLong(GUI::tmpString, PSTR("Fan @:"), i + 1);
         GUI::menuLong(action, GUI::tmpString, percent, menuFan, (void*)i, GUIPageType::FIXED_CONTENT);
     }
