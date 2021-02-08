@@ -178,49 +178,49 @@ void SDCard::printCardInfo(bool json) {
     getCardInfo(volumeLabel, sizeof(volumeLabel), &volumeSectors, &usageBytes, &fileCount, &folderCount);
 
     if (!json) {
-    Com::printF(PSTR("Label: "), volumeLabel);
-    Com::printF(PSTR(" | "));
+        Com::printF(PSTR("Label: "), volumeLabel);
+        Com::printF(PSTR(" | "));
 
-    if (fileSystem.fatType() == FAT_TYPE_EXFAT) {
-        Com::printF(PSTR("exFAT"));
-    } else {
-        Com::printF(PSTR("FAT"), fileSystem.fatType());
-    }
-
-    Com::printF(PSTR(" SD"));
-    uint8_t type = fileSystem.card()->type();
-    if (type == SD_CARD_TYPE_SD1) {
-        Com::printF(PSTR("V1"));
-    } else if (type == SD_CARD_TYPE_SD2) {
-        Com::printF(PSTR("V2"));
-    } else if (type == SD_CARD_TYPE_SDHC) {
-        if (fileSystem.sectorsPerCluster() > 64ul) {
-            Com::printF(PSTR("XC")); // Cards > 32gb are XC.
+        if (fileSystem.fatType() == FAT_TYPE_EXFAT) {
+            Com::printF(PSTR("exFAT"));
         } else {
-            Com::printF(PSTR("HC"));
+            Com::printF(PSTR("FAT"), fileSystem.fatType());
         }
-    }
 
-    // Print out volume size
-    bool gb = false;
-    float size = ((0.000001f * 512.0f) * static_cast<float>(volumeSectors));
-    if (size > 1000.0f) {
-        gb = true;
-        size /= 1000.f;
-    }
-    Com::printF(PSTR(" | Volume Size: "), size);
-    Com::printF(gb ? PSTR(" GB") : PSTR(" MB"));
-    // Print out current estimated usage
-    gb = false;
-    size = (0.000001f * static_cast<float>(usageBytes));
-    if (size > 1000.0f) {
-        gb = true;
-        size /= 1000.0f;
-    }
-    Com::printF(PSTR(" | Usage: "), size);
-    Com::printF(gb ? PSTR(" GB (") : PSTR(" MB ("), static_cast<int32_t>(fileCount));
-    Com::printF(PSTR(" files, "), folderCount);
-    Com::printFLN(PSTR(" folders found.)"));
+        Com::printF(PSTR(" SD"));
+        uint8_t type = fileSystem.card()->type();
+        if (type == SD_CARD_TYPE_SD1) {
+            Com::printF(PSTR("V1"));
+        } else if (type == SD_CARD_TYPE_SD2) {
+            Com::printF(PSTR("V2"));
+        } else if (type == SD_CARD_TYPE_SDHC) {
+            if (fileSystem.sectorsPerCluster() > 64ul) {
+                Com::printF(PSTR("XC")); // Cards > 32gb are XC.
+            } else {
+                Com::printF(PSTR("HC"));
+            }
+        }
+
+        // Print out volume size
+        bool gb = false;
+        float size = ((0.000001f * 512.0f) * static_cast<float>(volumeSectors));
+        if (size > 1000.0f) {
+            gb = true;
+            size /= 1000.f;
+        }
+        Com::printF(PSTR(" | Volume Size: "), size);
+        Com::printF(gb ? PSTR(" GB") : PSTR(" MB"));
+        // Print out current estimated usage
+        gb = false;
+        size = (0.000001f * static_cast<float>(usageBytes));
+        if (size > 1000.0f) {
+            gb = true;
+            size /= 1000.0f;
+        }
+        Com::printF(PSTR(" | Usage: "), size);
+        Com::printF(gb ? PSTR(" GB (") : PSTR(" MB ("), static_cast<int32_t>(fileCount));
+        Com::printF(PSTR(" files, "), folderCount);
+        Com::printFLN(PSTR(" folders found.)"));
     } else {
 #if JSON_OUTPUT
         //{"SDinfo":{"slot":0,"present":1,"capacity":4294967296,"free":2147485184,"speed":20971520,"clsize":32768}}
