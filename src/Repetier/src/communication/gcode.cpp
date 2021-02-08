@@ -208,9 +208,9 @@ uint8_t GCode::computeBinarySize(char* ptr) // unsigned int bitfield) {
     return s;
 }
 
-GCode::GCode() {
-    reset();
-}
+GCode::GCode()
+    : params(0u)
+    , params2(0u) { }
 
 void GCode::keepAlive(enum FirmwareState state, int id) {
     // Id is only for debugging to see where busy is hanging!
@@ -1227,12 +1227,12 @@ void GCodeSource::printAllFLN(FSTRINGPARAM(text), int32_t v) {
     Com::writeToAll = old;
 }
 
-GCodeSource::GCodeSource() {
-    lastLineNumber = 0;
-    wasLastCommandReceivedAsBinary = false;
-    outOfOrder = false;
-    waitingForResend = -1;
-}
+GCodeSource::GCodeSource()
+    : lastLineNumber(0u)
+    , wasLastCommandReceivedAsBinary(false)
+    , timeOfLastDataPacket(0u)
+    , waitingForResend(-1)
+    , outOfOrder(false) { }
 
 bool GCodeSource::hasBaudSources() {
     if (!usbHostSource) {

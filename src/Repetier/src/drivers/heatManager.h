@@ -145,11 +145,11 @@ public:
     inline millis_t getDecouplePeriod() { return decouplePeriod; }
     inline void setDecouplePeriod(millis_t val) { decouplePeriod = val; }
     inline float getHysteresisTemperature() { return hysteresisTemperature; }
-    inline void setHysteresisTemperature(float val) { hysteresisTemperature = val >= 0 ? val : 0; }
+    inline void setHysteresisTemperature(float val) { hysteresisTemperature = val >= 0.0f ? val : 0.0f; }
     inline millis_t getHysteresisTime() { return hysteresisTime; }
-    inline void setHysteresisTime(millis_t val) { hysteresisTime = val >= 0 ? val : 0; }
+    inline void setHysteresisTime(millis_t val) { hysteresisTime = val; }
     inline millis_t getMaxWait() { return maxWait; }
-    inline void setMaxWait(millis_t val) { maxWait = val >= 0 ? val : 0; }
+    inline void setMaxWait(millis_t val) { maxWait = val; }
     virtual void updateLocal(float tempError) = 0;
     void eepromHandle();
     virtual void eepromHandleLocal(int pos) = 0;
@@ -194,8 +194,9 @@ public:
     int eepromSize() {
         return 1;
     }
-    void resetFromConfig(fast8_t _maxPwm, float decVariance, millis_t decPeriod) {
+    void resetFromConfig(ufast8_t _maxPwm, float maxTemp, float decVariance, millis_t decPeriod) {
         maxPWM = _maxPwm;
+        maxTemperature = maxTemp;
         decoupleVariance = decVariance;
         decouplePeriod = decPeriod;
     }
@@ -230,7 +231,7 @@ public:
     }
     void updateLocal(float tempError);
     void updateDerived();
-    void resetFromConfig(fast8_t _maxPwm, float decVariance, millis_t decPeriod,
+    void resetFromConfig(ufast8_t _maxPwm, float maxTemp, float decVariance, millis_t decPeriod,
                          float p, float i, float d, float _driveMin, float _driveMax);
     void eepromHandleLocal(int adr);
     int eepromSizeLocal();
@@ -308,7 +309,7 @@ public:
         updateTimings();
     }
     void updateLocal(float tempError);
-    void resetFromConfig(fast8_t _maxPwm, float decVariance, millis_t decPeriod,
+    void resetFromConfig(ufast8_t _maxPwm, float maxTemp, float decVariance, millis_t decPeriod,
                          float _temp1, float _deadUp1, float _deadDown1, float _temp2, float _deadUp2, float _deadDown2);
     void eepromHandleLocal(int adr);
     int eepromSizeLocal();

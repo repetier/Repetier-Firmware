@@ -181,11 +181,19 @@ void EEPROM::restoreEEPROMSettingsFromConfiguration() {
     LevelingCorrector::resetEeprom();
     Leveling::resetEeprom();
     GUI::resetEeprom();
+
+    initBaudrate();
+    maxInactiveTime = MAX_INACTIVE_TIME * 1000ul;
+    stepperInactiveTime = STEPPER_INACTIVE_TIME * 1000ul;
+
     markChanged();
 }
 
 void EEPROM::storeDataIntoEEPROM(uint8_t corrupted) {
 #if EEPROM_MODE != 0
+    if (corrupted) {
+        restoreEEPROMSettingsFromConfiguration();
+    }
     Com::printFLN(PSTR("Storing data to eeprom"));
     mode = EEPROMMode::STORE;
     callHandle();
@@ -277,7 +285,7 @@ void EEPROM::init() {
         }
     } else {
         resetRec = true;
-        storeDataIntoEEPROM(storedcheck != check);
+        storeDataIntoEEPROM(!check || (storedcheck != check));
     }
     var1 = getRecoverByte(0);
     var2 = getRecoverByte(1);
@@ -345,10 +353,11 @@ void EEPROM::updateChecksum() {
 void EEPROM::handlePrefix(PGM_P text) {
     if (mode == EEPROMMode::REPORT) {
         uint8_t i = 0;
-        while (i < 19) {
+        while (i < (sizeof(prefix) - 2)) {
             uint8_t c = pgm_read_byte(text++);
-            if (!c)
+            if (!c) {
                 break;
+            }
             prefix[i++] = c;
         }
         prefix[i++] = 32;

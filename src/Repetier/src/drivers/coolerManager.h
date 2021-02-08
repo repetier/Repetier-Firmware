@@ -42,8 +42,8 @@ public:
         , startTemp(_startTemp)
         , maxTemp(_maxTemp)
         , minPWM(_minPWM)
-        , maxPWM(_maxPWM) {
-        diff = static_cast<float>(maxPWM - minPWM) / (maxTemp - startTemp);
+        , maxPWM(_maxPWM)
+        , diff(static_cast<float>(maxPWM - minPWM) / (maxTemp - startTemp)) {
     }
     void update();
 };
@@ -72,8 +72,8 @@ public:
         , startTemp(_startTemp)
         , maxTemp(_maxTemp)
         , minPWM(_minPWM)
-        , maxPWM(_maxPWM) {
-        diff = static_cast<float>(maxPWM - minPWM) / (maxTemp - startTemp);
+        , maxPWM(_maxPWM)
+        , diff(static_cast<float>(maxPWM - minPWM) / (maxTemp - startTemp)) {
     }
     void update();
 };
@@ -92,9 +92,9 @@ public:
                         int postCoolingSeconds)
         : pwm(_pwm)
         , offPWM(_offPWM)
-        , onPWM(_onPWM) {
-        postCooling = 2 * postCoolingSeconds;
-        onCount = -1;
+        , onPWM(_onPWM)
+        , postCooling(2 * postCoolingSeconds)
+        , onCount(-1) {
         pwm->set(offPWM);
     }
     void update();

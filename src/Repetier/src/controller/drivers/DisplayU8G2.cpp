@@ -139,7 +139,7 @@ void GUI::refresh() {
 void __attribute__((weak)) drawStatusLine() {
     GUI::bufClear();
     Tool* t = Tool::getActiveTool();
-    HeatManager* hm = t->getHeater();
+    HeatManager* hm = t ? t->getHeater() : nullptr;
     if (hm != nullptr) { // E1:210/210°C
         GUI::bufAddChar('E');
         GUI::bufAddInt(t->getToolId() + 1, 1);
@@ -710,7 +710,7 @@ void GUI::showValue(char* text, PGM_P unit, char* value) {
     lcd.setDrawColor(0);
     GUI::bufClear();
     GUI::bufAddStringP(Com::tBtnOK);
-    lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+    lcd.drawUTF8(64 - 3 * GUI::bufPos, 62, GUI::buf);
     lcd.setDrawColor(1);
 }
 

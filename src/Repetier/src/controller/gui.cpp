@@ -765,8 +765,6 @@ void GUI::setStatus(char* text, GUIStatusLevel lvl) {
         }
         if (lvl == GUIStatusLevel::WARNING) {
             push(warningScreen, status, GUIPageType::STATUS);
-            Printer::playDefaultSound(DefaultSounds::WARNING);
-            push(warningScreen, status, GUIPageType::STATUS);
             Com::promptStart(GUI::pop, Com::tWarning, status, false);
             Com::promptButton(Com::tOk);
             Com::promptShow();
