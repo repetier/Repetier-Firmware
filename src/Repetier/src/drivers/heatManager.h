@@ -145,11 +145,11 @@ public:
     inline millis_t getDecouplePeriod() { return decouplePeriod; }
     inline void setDecouplePeriod(millis_t val) { decouplePeriod = val; }
     inline float getHysteresisTemperature() { return hysteresisTemperature; }
-    inline void setHysteresisTemperature(float val) { hysteresisTemperature = val >= 0 ? val : 0; }
+    inline void setHysteresisTemperature(float val) { hysteresisTemperature = val >= 0.0f ? val : 0.0f; }
     inline millis_t getHysteresisTime() { return hysteresisTime; }
-    inline void setHysteresisTime(millis_t val) { hysteresisTime = val >= 0 ? val : 0; }
+    inline void setHysteresisTime(millis_t val) { hysteresisTime = val; }
     inline millis_t getMaxWait() { return maxWait; }
-    inline void setMaxWait(millis_t val) { maxWait = val >= 0 ? val : 0; }
+    inline void setMaxWait(millis_t val) { maxWait = val; }
     virtual void updateLocal(float tempError) = 0;
     void eepromHandle();
     virtual void eepromHandleLocal(int pos) = 0;

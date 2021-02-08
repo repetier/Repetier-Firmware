@@ -161,9 +161,7 @@ void PrinterType::updateDerived() { }
 void PrinterType::enableMotors(fast8_t axes) {
     FOR_ALL_AXES(i) {
         if ((axes & axisBits[i]) != 0 && Motion1::motors[i]) {
-            if (Motion1::motors[i]) {
-                Motion1::motors[i]->enable();
-            }
+            Motion1::motors[i]->enable();
         }
     }
     if ((axes & axisBits[E_AXIS]) != 0 && Motion1::dittoMode) {

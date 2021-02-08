@@ -345,10 +345,11 @@ void EEPROM::updateChecksum() {
 void EEPROM::handlePrefix(PGM_P text) {
     if (mode == EEPROMMode::REPORT) {
         uint8_t i = 0;
-        while (i < 19) {
+        while (i < (sizeof(prefix) - 2)) {
             uint8_t c = pgm_read_byte(text++);
-            if (!c)
+            if (!c) {
                 break;
+            }
             prefix[i++] = c;
         }
         prefix[i++] = 32;
