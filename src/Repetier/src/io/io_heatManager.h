@@ -78,13 +78,13 @@
 #elif IO_TARGET == IO_TARGET_RESTORE_FROM_CONFIG // restore from config
 
 #define HEAT_MANAGER_BANG_BANG(name, tp, index, input, output, maxTemp, maxPwm, decVariance, decPeriod, hotPlugable) \
-    name.resetFromConfig(maxPwm, decVariance, decPeriod);
+    name.resetFromConfig(maxPwm, maxTemp, decVariance, decPeriod);
 #define HEAT_MANAGER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable) \
-    name.resetFromConfig(maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax);
+    name.resetFromConfig(maxPwm, maxTemp, decVariance, decPeriod, p, i, d, driveMin, driveMax);
 #define HEAT_MANAGER_PELTIER_PID(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, p, i, d, driveMin, driveMax, hotPlugable, pType, flowPin, minTemp) \
-    name.resetFromConfig(maxPwm, decVariance, decPeriod, p, i, d, driveMin, driveMax);
+    name.resetFromConfig(maxPwm, maxTemp, decVariance, decPeriod, p, i, d, driveMin, driveMax);
 #define HEAT_MANAGER_DYN_DEAD_TIME(name, tp, index, input, output, maxTemp, maxPwm, sampleTime, decVariance, decPeriod, temp1, timeUp1, timeDown1, temp2, timeUp2, timeDown2, hotPlugable) \
-    name.resetFromConfig(maxPwm, decVariance, decPeriod, temp1, timeUp1, timeDown1, temp2, timeUp2, timeDown2);
+    name.resetFromConfig(maxPwm, maxTemp, decVariance, decPeriod, temp1, timeUp1, timeDown1, temp2, timeUp2, timeDown2);
 #define HEAT_MANAGER_DEFINE_HYSTERESIS(name, hysteresisTemperature, hysteresisTime, maxWait) \
     name.initHysteresis(hysteresisTemperature, hysteresisTime, maxWait);
 

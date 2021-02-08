@@ -194,8 +194,9 @@ public:
     int eepromSize() {
         return 1;
     }
-    void resetFromConfig(fast8_t _maxPwm, float decVariance, millis_t decPeriod) {
+    void resetFromConfig(ufast8_t _maxPwm, float maxTemp, float decVariance, millis_t decPeriod) {
         maxPWM = _maxPwm;
+        maxTemperature = maxTemp;
         decoupleVariance = decVariance;
         decouplePeriod = decPeriod;
     }
@@ -230,7 +231,7 @@ public:
     }
     void updateLocal(float tempError);
     void updateDerived();
-    void resetFromConfig(fast8_t _maxPwm, float decVariance, millis_t decPeriod,
+    void resetFromConfig(ufast8_t _maxPwm, float maxTemp, float decVariance, millis_t decPeriod,
                          float p, float i, float d, float _driveMin, float _driveMax);
     void eepromHandleLocal(int adr);
     int eepromSizeLocal();
@@ -308,7 +309,7 @@ public:
         updateTimings();
     }
     void updateLocal(float tempError);
-    void resetFromConfig(fast8_t _maxPwm, float decVariance, millis_t decPeriod,
+    void resetFromConfig(ufast8_t _maxPwm, float maxTemp, float decVariance, millis_t decPeriod,
                          float _temp1, float _deadUp1, float _deadDown1, float _temp2, float _deadUp2, float _deadDown2);
     void eepromHandleLocal(int adr);
     int eepromSizeLocal();

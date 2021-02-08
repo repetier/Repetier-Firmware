@@ -495,9 +495,10 @@ void HeatManagerPID::updateDerived() {
     kd = D / timeSeconds;
 }
 
-void HeatManagerPID::resetFromConfig(fast8_t _maxPwm, float decVariance, millis_t decPeriod,
+void HeatManagerPID::resetFromConfig(ufast8_t _maxPwm, float maxTemp, float decVariance, millis_t decPeriod,
                                      float p, float i, float d, float _driveMin, float _driveMax) {
     maxPWM = _maxPwm;
+    maxTemperature = maxTemp;
     decoupleVariance = decVariance;
     decouplePeriod = decPeriod;
     P = p;
@@ -1045,9 +1046,10 @@ void HeatManagerDynDeadTime::updateTimings() {
     // Com::printFLN(PSTR("DeadDown"), deadDown, 2);
 }
 
-void HeatManagerDynDeadTime::resetFromConfig(fast8_t _maxPwm, float decVariance, millis_t decPeriod,
+void HeatManagerDynDeadTime::resetFromConfig(ufast8_t _maxPwm, float maxTemp, float decVariance, millis_t decPeriod,
                                              float _temp1, float _deadUp1, float _deadDown1, float _temp2, float _deadUp2, float _deadDown2) {
     maxPWM = _maxPwm;
+    maxTemperature = maxTemp;
     decoupleVariance = decVariance;
     decouplePeriod = decPeriod;
     temp1 = _temp1;
