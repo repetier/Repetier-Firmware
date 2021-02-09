@@ -114,7 +114,7 @@ void GUI::processInit() {
     lcd.firstPage();
     do {
         lcd.setFont(u8g2_font_6x10_mf);
-        lcd.drawXBM(0, 0, LOGO_width, LOGO_height, LOGO_bits);
+        lcd.drawXBMP(0, 0, LOGO_width, LOGO_height, LOGO_bits);
         bufClear();
         bufAddStringP(PSTR(REPETIER_VERSION));
         lcd.drawUTF8(20, 55, buf);
@@ -1111,7 +1111,7 @@ void __attribute__((weak)) warningScreen(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         drawStatusLine();
         lcd.setFont(u8g2_font_10x20_mf);
-        lcd.drawXBM(2, 13, WARNING_width, WARNING_height, WARNING_bits); // 26x26 pixel
+        lcd.drawXBMP(2, 13, WARNING_width, WARNING_height, WARNING_bits); // 26x26 pixel
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Warning"));
         lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
@@ -1132,7 +1132,7 @@ void __attribute__((weak)) errorScreen(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         drawStatusLine();
         lcd.setFont(u8g2_font_10x20_mf);
-        lcd.drawXBM(2, 13, ERROR_width, ERROR_height, ERROR_bits); // 26x26 pixel
+        lcd.drawXBMP(2, 13, ERROR_width, ERROR_height, ERROR_bits); // 26x26 pixel
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Error"));
         lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
@@ -1153,7 +1153,7 @@ void __attribute__((weak)) infoScreen(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         drawStatusLine();
         lcd.setFont(u8g2_font_10x20_mf);
-        lcd.drawXBM(2, 13, INFO_width, INFO_height, INFO_bits); // 26x26 pixel
+        lcd.drawXBMP(2u, 13u, INFO_width, INFO_height, INFO_bits); // 26x26 pixel
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Info"));
         lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
@@ -1174,7 +1174,7 @@ void __attribute__((weak)) warningScreenP(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         drawStatusLine();
         lcd.setFont(u8g2_font_10x20_mf);
-        lcd.drawXBM(2, 13, WARNING_width, WARNING_height, WARNING_bits); // 26x26 pixel
+        lcd.drawXBMP(2, 13, WARNING_width, WARNING_height, WARNING_bits); // 26x26 pixel
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Warning"));
         lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
@@ -1196,7 +1196,7 @@ void __attribute__((weak)) errorScreenP(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         drawStatusLine();
         lcd.setFont(u8g2_font_10x20_mf);
-        lcd.drawXBM(2, 13, ERROR_width, ERROR_height, ERROR_bits); // 26x26 pixel
+        lcd.drawXBMP(2, 13, ERROR_width, ERROR_height, ERROR_bits); // 26x26 pixel
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Error"));
         lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
@@ -1219,7 +1219,7 @@ void __attribute__((weak)) infoScreenP(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         drawStatusLine();
         lcd.setFont(u8g2_font_10x20_mf);
-        lcd.drawXBM(2, 13, INFO_width, INFO_height, INFO_bits); // 26x26 pixel
+        lcd.drawXBMP(2u, 13u, INFO_width, INFO_height, INFO_bits); // 26x26 pixel
         GUI::bufClear();
         GUI::bufAddStringP(PSTR("Info"));
         lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
@@ -1246,40 +1246,40 @@ void waitScreen(GUIAction action, void* data) {
         drawStatusLine();
         switch (refresh_counter % 9) {
         case 0:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN1_width / 2, SPIN_CENTER_Y - SPIN1_height / 2, SPIN1_width, SPIN1_height, SPIN1_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN1_width / 2, SPIN_CENTER_Y - SPIN1_height / 2, SPIN1_width, SPIN1_height, SPIN1_bits);
             break;
         case 1:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN2_width / 2, SPIN_CENTER_Y - SPIN2_height / 2, SPIN2_width, SPIN2_height, SPIN2_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN2_width / 2, SPIN_CENTER_Y - SPIN2_height / 2, SPIN2_width, SPIN2_height, SPIN2_bits);
             break;
         case 2:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN3_width / 2, SPIN_CENTER_Y - SPIN3_height / 2, SPIN3_width, SPIN3_height, SPIN3_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN3_width / 2, SPIN_CENTER_Y - SPIN3_height / 2, SPIN3_width, SPIN3_height, SPIN3_bits);
             break;
         case 3:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN4_width / 2, SPIN_CENTER_Y - SPIN4_height / 2, SPIN4_width, SPIN4_height, SPIN4_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN4_width / 2, SPIN_CENTER_Y - SPIN4_height / 2, SPIN4_width, SPIN4_height, SPIN4_bits);
             break;
         case 4:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN5_width / 2, SPIN_CENTER_Y - SPIN5_height / 2, SPIN5_width, SPIN5_height, SPIN5_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN5_width / 2, SPIN_CENTER_Y - SPIN5_height / 2, SPIN5_width, SPIN5_height, SPIN5_bits);
             break;
         case 5:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN6_width / 2, SPIN_CENTER_Y - SPIN6_height / 2, SPIN6_width, SPIN6_height, SPIN6_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN6_width / 2, SPIN_CENTER_Y - SPIN6_height / 2, SPIN6_width, SPIN6_height, SPIN6_bits);
             break;
         case 6:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN7_width / 2, SPIN_CENTER_Y - SPIN7_height / 2, SPIN7_width, SPIN7_height, SPIN7_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN7_width / 2, SPIN_CENTER_Y - SPIN7_height / 2, SPIN7_width, SPIN7_height, SPIN7_bits);
             break;
         case 7:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN8_width / 2, SPIN_CENTER_Y - SPIN8_height / 2, SPIN8_width, SPIN8_height, SPIN8_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN8_width / 2, SPIN_CENTER_Y - SPIN8_height / 2, SPIN8_width, SPIN8_height, SPIN8_bits);
             break;
         case 8:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN9_width / 2, SPIN_CENTER_Y - SPIN9_height / 2, SPIN9_width, SPIN9_height, SPIN9_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN9_width / 2, SPIN_CENTER_Y - SPIN9_height / 2, SPIN9_width, SPIN9_height, SPIN9_bits);
             refresh_counter = 8;
             break;
         }
-        char* str = static_cast<char*>(data); 
+        char* str = static_cast<char*>(data);
         int len = strlen(str);
         if (len <= 10) {
             lcd.setFont(u8g2_font_10x20_mf);
             lcd.drawUTF8(73 - len * 5, SPIN_CENTER_Y + 7, str);
-        } else { 
+        } else {
             char* newLine = strchr(str, '\n');
             lcd.setFont(u8g2_font_6x10_mf);
             if (newLine) { 
@@ -1289,7 +1289,7 @@ void waitScreen(GUIAction action, void* data) {
                 *newLine = '\n';
                 lcd.drawUTF8(73 - (len - newLineLen) * 3, (SPIN_CENTER_Y + 3) + 5, str + newLineLen + 1);
             } else {
-                lcd.drawUTF8(73 - len * 3, SPIN_CENTER_Y + 3, str); 
+                lcd.drawUTF8(73 - len * 3, SPIN_CENTER_Y + 3, str);
             }
         }
     }
@@ -1300,31 +1300,31 @@ void waitScreenP(GUIAction action, void* data) {
         drawStatusLine();
         switch (refresh_counter % 9) {
         case 0:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN1_width / 2, SPIN_CENTER_Y - SPIN1_height / 2, SPIN1_width, SPIN1_height, SPIN1_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN1_width / 2, SPIN_CENTER_Y - SPIN1_height / 2, SPIN1_width, SPIN1_height, SPIN1_bits);
             break;
         case 1:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN2_width / 2, SPIN_CENTER_Y - SPIN2_height / 2, SPIN2_width, SPIN2_height, SPIN2_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN2_width / 2, SPIN_CENTER_Y - SPIN2_height / 2, SPIN2_width, SPIN2_height, SPIN2_bits);
             break;
         case 2:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN3_width / 2, SPIN_CENTER_Y - SPIN3_height / 2, SPIN3_width, SPIN3_height, SPIN3_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN3_width / 2, SPIN_CENTER_Y - SPIN3_height / 2, SPIN3_width, SPIN3_height, SPIN3_bits);
             break;
         case 3:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN4_width / 2, SPIN_CENTER_Y - SPIN4_height / 2, SPIN4_width, SPIN4_height, SPIN4_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN4_width / 2, SPIN_CENTER_Y - SPIN4_height / 2, SPIN4_width, SPIN4_height, SPIN4_bits);
             break;
         case 4:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN5_width / 2, SPIN_CENTER_Y - SPIN5_height / 2, SPIN5_width, SPIN5_height, SPIN5_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN5_width / 2, SPIN_CENTER_Y - SPIN5_height / 2, SPIN5_width, SPIN5_height, SPIN5_bits);
             break;
         case 5:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN6_width / 2, SPIN_CENTER_Y - SPIN6_height / 2, SPIN6_width, SPIN6_height, SPIN6_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN6_width / 2, SPIN_CENTER_Y - SPIN6_height / 2, SPIN6_width, SPIN6_height, SPIN6_bits);
             break;
         case 6:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN7_width / 2, SPIN_CENTER_Y - SPIN7_height / 2, SPIN7_width, SPIN7_height, SPIN7_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN7_width / 2, SPIN_CENTER_Y - SPIN7_height / 2, SPIN7_width, SPIN7_height, SPIN7_bits);
             break;
         case 7:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN8_width / 2, SPIN_CENTER_Y - SPIN8_height / 2, SPIN8_width, SPIN8_height, SPIN8_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN8_width / 2, SPIN_CENTER_Y - SPIN8_height / 2, SPIN8_width, SPIN8_height, SPIN8_bits);
             break;
         case 8:
-            lcd.drawXBM(SPIN_CENTER_X - SPIN9_width / 2, SPIN_CENTER_Y - SPIN9_height / 2, SPIN9_width, SPIN9_height, SPIN9_bits);
+            lcd.drawXBMP(SPIN_CENTER_X - SPIN9_width / 2, SPIN_CENTER_Y - SPIN9_height / 2, SPIN9_width, SPIN9_height, SPIN9_bits);
             refresh_counter = 8;
             break;
         }
