@@ -2254,11 +2254,12 @@ bool Printer::homeZAxis() { // Cartesian homing
 #endif
 #if defined(ENDSTOP_Z_BACK_ON_HOME)
         // If we want to go up a bit more for some reason
-        if (ENDSTOP_Z_BACK_ON_HOME > 0)
+        if (ENDSTOP_Z_BACK_ON_HOME > 0) {
             zCorrection -= axisStepsPerMM[Z_AXIS] * ENDSTOP_Z_BACK_ON_HOME * Z_HOME_DIR;
+        }
 #endif
 #if Z_HOME_DIR < 0
-            // Fix bed coating
+        // Fix bed coating
 #if Z_PROBE_Z_OFFSET_MODE == 0 // Only if measure through coating e.g. inductive
         zCorrection += axisStepsPerMM[Z_AXIS] * zBedOffset;
 #endif

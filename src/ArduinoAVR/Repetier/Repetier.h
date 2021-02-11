@@ -1233,9 +1233,9 @@ public:
         plane.b = ((sum_x * sum_xy - sum_xx * sum_y) * sum_z + (n * sum_xx - sum_x * sum_x) * sum_yz + sum_xz * (sum_x * sum_y - n * sum_xy)) / det;
         plane.c = ((sum_xx * sum_yy - sum_xy * sum_xy) * sum_z + (sum_x * sum_xy - sum_xx * sum_y) * sum_yz + sum_xz * (sum_xy * sum_y - sum_x * sum_yy)) / det;
         if (!silent) {
-            Com::printF(PSTR("plane: a = "), plane.a, 4);
-            Com::printF(PSTR(" b = "), plane.b, 4);
-            Com::printFLN(PSTR(" c = "), plane.c, 4);
+            Com::printF(PSTR("plane: a = "), plane.a, 5);
+            Com::printF(PSTR(" b = "), plane.b, 5);
+            Com::printFLN(PSTR(" c = "), plane.c, 5);
         }
     }
 };

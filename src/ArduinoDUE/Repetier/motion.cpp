@@ -2092,8 +2092,9 @@ uint8_t PrintLine::queueNonlinearMove(uint8_t check_endstops, uint8_t pathOptimi
 
     int32_t startPosition[E_AXIS_ARRAY], fractionalSteps[E_AXIS_ARRAY];
     if (numLines > 1) {
-        for (fast8_t i = 0; i < Z_AXIS_ARRAY; i++)
+        for (fast8_t i = 0; i < Z_AXIS_ARRAY; i++) {
             startPosition[i] = Printer::currentPositionSteps[i];
+        }
         startPosition[E_AXIS] = 0;
         cartesianDistance /= static_cast<float>(numLines);
     }

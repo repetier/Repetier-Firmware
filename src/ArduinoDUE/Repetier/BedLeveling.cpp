@@ -383,13 +383,15 @@ bool runBedLeveling(int s) {
                     EEPROM::zProbeBedDistance() + (EEPROM::zProbeHeight() > 0 ? EEPROM::zProbeHeight() : 0),
                     IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
 #else
-    if (!Printer::isXHomed() || !Printer::isYHomed())
+    if (!Printer::isXHomed() || !Printer::isYHomed()) {
         Printer::homeAxis(true, true, false);
-    Printer::updateCurrentPosition(true);
+    }
+    Printer::updateCurrentPosition(true); //xyz now from motor position derived
     // Printer::moveTo(EEPROM::zProbeX1(), EEPROM::zProbeY1(), IGNORE_COORDINATE,
     // IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
     Printer::moveTo(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE,
                     IGNORE_COORDINATE, EEPROM::zProbeXYSpeed());
+    // now z at 0,0 would be starting z, all othe rposition depend on rotation!
 #endif
     Printer::coordinateOffset[X_AXIS] = Printer::coordinateOffset[Y_AXIS] = Printer::coordinateOffset[Z_AXIS] = 0;
     if (!Printer::startProbing(true)) {
@@ -424,9 +426,7 @@ bool runBedLeveling(int s) {
 
         // Leveling is finished now update own positions and store leveling data if
         // needed
-        // float currentZ = plane.z((float)Printer::currentPositionSteps[X_AXIS] *
-        // Printer::invAxisStepsPerMM[X_AXIS],(float)Printer::currentPositionSteps[Y_AXIS]
-        // * Printer::invAxisStepsPerMM[Y_AXIS]);
+        // float currentZ = plane.z(Printer::currentPosition[X_AXIS],Printer::currentPosition[Y_AXIS]);
         float currentZ = plane.z(
             0.0, 0.0); // we rotated around this point, so that is now z height
         // With max z end stop we adjust z length so after next homing we have also
@@ -447,41 +447,53 @@ bool runBedLeveling(int s) {
             // * Printer::invAxisStepsPerMM[Y_AXIS]) - zRot;
             Com::printFLN(Com::tZProbePrinterHeight, Printer::zLength);
         }
-#endif
+#endif // MAX_HARDWARE_ENDSTOP_Z
 #if Z_PROBE_Z_OFFSET_MODE == 1
-        currentZ -= EEPROM::zProbeZOffset();
+        currentZ -= Printer::zBedOffset;
 #endif
         Com::printF(PSTR("CurrentZ:"), currentZ); // this is at x=0, y=0!
         Com::printFLN(PSTR(" atZ:"), Printer::currentPosition[Z_AXIS]);
+        /*
+ // this is wrong! Activating autoleveling adds the difference so with it we get correction twice!
         currentZ = plane.z(Printer::currentPosition[X_AXIS], Printer::currentPosition[Y_AXIS]); // we are not at 0,0 in general so update for our position!
-        Printer::currentPositionSteps[Z_AXIS] = currentZ * Printer::axisStepsPerMM[Z_AXIS];
-        Printer::updateCurrentPosition(
-            true); // set position based on steps position
+#if Z_PROBE_Z_OFFSET_MODE == 1
+        currentZ -= Printer::zBedOffset; // correct again
+#endif
+*/
 #if BED_CORRECTION_METHOD == 1
+        // end condition for motorziced leveling
         if (fabsf(plane.a) < 0.00025 && fabsf(plane.b) < 0.00025) {
             success = true;
             break; // we reached achievable precision so we can stop
         }
     } // for BED_LEVELING_REPETITIONS
+    Printer::currentPositionSteps[Z_AXIS] = currentZ * Printer::axisStepsPerMM[Z_AXIS];
+    Printer::updateCurrentPosition(
+        true); // set position based on steps position
 #if Z_HOME_DIR > 0 && MAX_HARDWARE_ENDSTOP_Z
     float zall = Printer::runZProbe(false, false, 1, false);
-    if (zall == ILLEGAL_Z_PROBE)
+    if (zall == ILLEGAL_Z_PROBE) {
         return false;
+    }
     Printer::currentPosition[Z_AXIS] = zall;
     Printer::currentPositionSteps[Z_AXIS] = zall * Printer::axisStepsPerMM[Z_AXIS];
 #if NONLINEAR_SYSTEM
     transformCartesianStepsToDeltaSteps(Printer::currentPositionSteps,
                                         Printer::currentNonlinearPositionSteps);
-#endif
+#endif // NONLINEAR_SYSTEM
     if (s >= 1) {
         float zMax = Printer::runZMaxProbe();
-        if (zMax == ILLEGAL_Z_PROBE)
+        if (zMax == ILLEGAL_Z_PROBE) {
             return false;
+        }
         zall += zMax - ENDSTOP_Z_BACK_ON_HOME + plane.z(Printer::currentPosition[X_AXIS], Printer::currentPosition[Y_AXIS]) - plane.z(0, 0);
         Printer::zLength = zall;
     }
-#endif
+#endif // Z_HOME_DIR > 0 && MAX_HARDWARE_ENDSTOP_Z
 #endif // BED_CORRECTION_METHOD == 1
+    Printer::currentPositionSteps[Z_AXIS] = currentZ * Printer::axisStepsPerMM[Z_AXIS];
+    Printer::updateCurrentPosition(
+        true); // set position based on steps position
     Printer::updateDerivedParameter();
     Printer::finishProbing();
 #if BED_CORRECTION_METHOD != 1
@@ -492,9 +504,10 @@ bool runBedLeveling(int s) {
         EEPROM::storeDataIntoEEPROM();
     }
 #if DISTORTION_CORRECTION
-    if (distEnabled)
+    if (distEnabled) {
         Printer::distortion.enable(
             false); // if level has changed, distortion is also invalid
+    }
 #endif
     Printer::updateCurrentPosition(true);
     Commands::printCurrentPosition();
@@ -883,8 +896,12 @@ float Printer::runZProbe(bool first, bool last, uint8_t repeat,
 #endif
     // Com::printFLN(PSTR("OrigDistance:"),distance);
 #if Z_PROBE_Z_OFFSET_MODE == 1
-    distance += EEPROM::zProbeZOffset(); // We measured including coating, so we
-                                         // need to add coating thickness!
+    distance += Printer::zBedOffset; // We measured including coating, so we
+                                     // need to add coating thickness!
+#else
+    // homig will go Printer::zBedOffset in addition, so correct here as well
+    distance -= Printer::zBedOffset; // We measured including coating, so we
+                                     // need to subtract coating thickness!
 #endif
 
     distance += bendingCorrectionAt(currentPosition[X_AXIS], currentPosition[Y_AXIS]);

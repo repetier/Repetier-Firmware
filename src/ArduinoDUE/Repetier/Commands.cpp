@@ -1699,6 +1699,10 @@ void Commands::processGCode(GCode* com) {
                 GCode::fatalError(PSTR("G30 probing failed!"));
                 break;
             }
+#if Z_PROBE_Z_OFFSET_MODE == 1
+            z -= Printer::zBedOffset; // We measured including coating, so we
+                                      // need to subtract coating thickness!
+#endif
             if (com->hasR() || com->hasH()) {
                 float h = Printer::convertToMM(com->hasH() ? com->H : 0);
                 float o = Printer::convertToMM(com->hasR() ? com->R : h);

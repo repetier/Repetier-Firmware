@@ -84,7 +84,7 @@ void Printer::measureDistortion(void) {
 #endif
 }
 
-Distortion::Distortion() {}
+Distortion::Distortion() { }
 
 void Distortion::init() {
     updateDerived();
@@ -235,7 +235,7 @@ bool Distortion::measure(void) {
     // Com::printFLN(PSTR("steps:"), step);
     int32_t zCorrection = 0;
 #if Z_PROBE_Z_OFFSET_MODE == 1
-    zCorrection -= Printer::zBedOffset * Printer::axisStepsPerMM[Z_AXIS];
+    zCorrection -= Printer::zBedOffset * Printer::axisStepsPerMM[Z_AXIS]; // runZProbe adds this!
 #endif
 
     if (!Printer::startProbing(true)) {
