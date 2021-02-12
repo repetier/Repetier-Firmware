@@ -98,7 +98,7 @@ union wizardVar {
 #define PRINTER_FLAG0_FORCE_CHECKSUM 8
 #define PRINTER_FLAG0_MANUAL_MOVE_MODE 16
 #define PRINTER_FLAG0_AUTOLEVEL_ACTIVE 32
-#define PRINTER_FLAG0_ZPROBEING 64
+#define PRINTER_FLAG0_ZPROBING 64
 #define PRINTER_FLAG0_LARGE_MACHINE 128
 #define PRINTER_FLAG1_HOMED_ALL 1
 #define PRINTER_FLAG1_AUTOMOUNT 2
@@ -963,11 +963,11 @@ public:
     }
     static void setAutolevelActive(bool on);
     static INLINE void setZProbingActive(bool on) {
-        flag0 = (on ? flag0 | PRINTER_FLAG0_ZPROBEING
-                    : flag0 & ~PRINTER_FLAG0_ZPROBEING);
+        flag0 = (on ? flag0 | PRINTER_FLAG0_ZPROBING
+                    : flag0 & ~PRINTER_FLAG0_ZPROBING);
     }
     static INLINE bool isZProbingActive() {
-        return (flag0 & PRINTER_FLAG0_ZPROBEING);
+        return (flag0 & PRINTER_FLAG0_ZPROBING);
     }
     static INLINE void executeXYGantrySteps() {
 #if (GANTRY) && !defined(FAST_COREXYZ)
