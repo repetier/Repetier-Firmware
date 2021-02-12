@@ -64,6 +64,7 @@ Measure and store new zLength
 - G33 L0 - List distortion map
 - G33 X<xpos> Y<ypos> Z<newdistortioncorrection> - Set new distortion for
 nearest distortion point.
+- G35 test accelerator z probe
 - G90 - Use absolute coordinates
 - G91 - Use relative coordinates
 - G92 - Set current position to coordinates given

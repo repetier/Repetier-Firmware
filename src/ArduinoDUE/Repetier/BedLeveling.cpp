@@ -564,6 +564,16 @@ void Printer::setAutolevelActive(bool on) {
     updateCurrentPosition(false);
 #endif // FEATURE_AUTOLEVEL
 }
+
+// extern uint8_t Printer::flag0;
+void Printer::setZProbingActive(bool on) {
+    flag0 = (on ? flag0 | PRINTER_FLAG0_ZPROBING
+                : flag0 & ~PRINTER_FLAG0_ZPROBING);
+#if defined(Z_PROBE_IIS2DH) && Z_PROBE_IIS2DH == 1
+    accelerometer_ready();
+#endif // Z_PROBE_IIS2DH
+}
+
 #if MAX_HARDWARE_ENDSTOP_Z
 /** \brief Measure distance from current position until triggering z max
 endstop.
@@ -668,6 +678,11 @@ bool Printer::startProbing(bool runScript, bool enforceStartHeight) {
 #endif
     Printer::moveToReal(cx, cy, cz, IGNORE_COORDINATE, EXTRUDER_SWITCH_XY_SPEED);
     updateCurrentPosition(false);
+#if defined(Z_PROBE_IIS2DH) && Z_PROBE_IIS2DH == 1
+    if (!accelerometer_ready()) {
+        return false;
+    }
+#endif // Z_PROBE_IIS2DH
     return true;
 }
 
@@ -980,6 +995,9 @@ float Printer::bendingCorrectionAt(float x, float y) {
 }
 
 void Printer::waitForZProbeStart() {
+#if defined(Z_PROBE_IIS2DH) && Z_PROBE_IIS2DH == 1
+    accelerometer_ready();
+#endif Z_PROBE_IIS2DH
 #if Z_PROBE_WAIT_BEFORE_TEST
     Endstops::update();
     Endstops::update(); // double test to get right signal. Needed for crosstalk

@@ -962,10 +962,7 @@ public:
         return (flag0 & PRINTER_FLAG0_AUTOLEVEL_ACTIVE) != 0;
     }
     static void setAutolevelActive(bool on);
-    static INLINE void setZProbingActive(bool on) {
-        flag0 = (on ? flag0 | PRINTER_FLAG0_ZPROBING
-                    : flag0 & ~PRINTER_FLAG0_ZPROBING);
-    }
+    static void setZProbingActive(bool on);
     static INLINE bool isZProbingActive() {
         return (flag0 & PRINTER_FLAG0_ZPROBING);
     }

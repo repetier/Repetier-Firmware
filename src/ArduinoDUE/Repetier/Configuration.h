@@ -1626,6 +1626,8 @@ to recalibrate z.
 #define FEATURE_Z_PROBE 0
 // Especially if you have more then 1 extruder acting as z probe this is important!
 #define EXTRUDER_IS_Z_PROBE 0
+// Set to 1 for accelerometer z probe like used in SeeMeCNC Rostock
+#define Z_PROBE_IIS2DH 0
 // Disable all heaters before probing - required for inductive sensors
 #define Z_PROBE_DISABLE_HEATERS 0
 #define Z_PROBE_PIN -1 // 63

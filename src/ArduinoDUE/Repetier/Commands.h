@@ -26,31 +26,40 @@
 #ifndef COMMANDS_H_INCLUDED
 #define COMMANDS_H_INCLUDED
 
+#if defined(Z_PROBE_IIS2DH) && Z_PROBE_IIS2DH == 1
+void accelerometer_send(uint8_t);
+void accelerometer_write(uint8_t, uint8_t);
+bool accelerometer_recv(uint8_t);
+void accelerometer_init();
+bool accelerometer_status();
+bool accelerometer_ready();
+#endif // Z_PROBE_IIS2DH
+
 class Commands {
 public:
-  static void commandLoop();
-  static void checkForPeriodicalActions(bool allowNewMoves);
-  static void processArc(GCode *com);
-  static void processGCode(GCode *com);
-  static void processMCode(GCode *com);
-  static void executeGCode(GCode *com);
-  static void waitUntilEndOfAllMoves();
-  static void waitUntilEndOfAllBuffers();
-  static void printCurrentPosition();
-  static void printTemperatures(bool showRaw = false);
-  static void setFanSpeed(int speed,
-                          bool immediately = false); /// Set fan speed 0..255
-  static void setFan2Speed(int speed);               /// Set fan speed 0..255
-  static void changeFeedrateMultiply(int factorInPercent);
-  static void changeFlowrateMultiply(int factorInPercent);
-  static void reportPrinterUsage();
-  static void emergencyStop();
-  static void checkFreeMemory();
-  static void writeLowestFreeRAM();
+    static void commandLoop();
+    static void checkForPeriodicalActions(bool allowNewMoves);
+    static void processArc(GCode* com);
+    static void processGCode(GCode* com);
+    static void processMCode(GCode* com);
+    static void executeGCode(GCode* com);
+    static void waitUntilEndOfAllMoves();
+    static void waitUntilEndOfAllBuffers();
+    static void printCurrentPosition();
+    static void printTemperatures(bool showRaw = false);
+    static void setFanSpeed(int speed,
+                            bool immediately = false); /// Set fan speed 0..255
+    static void setFan2Speed(int speed);               /// Set fan speed 0..255
+    static void changeFeedrateMultiply(int factorInPercent);
+    static void changeFlowrateMultiply(int factorInPercent);
+    static void reportPrinterUsage();
+    static void emergencyStop();
+    static void checkFreeMemory();
+    static void writeLowestFreeRAM();
 
 private:
-  static int lowestRAMValue;
-  static int lowestRAMValueSend;
+    static int lowestRAMValue;
+    static int lowestRAMValueSend;
 };
 
 #endif // COMMANDS_H_INCLUDED
