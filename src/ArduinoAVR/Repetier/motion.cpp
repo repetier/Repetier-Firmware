@@ -2067,7 +2067,7 @@ uint8_t PrintLine::queueNonlinearMove(uint8_t check_endstops, uint8_t pathOptimi
         Com::printFLN(Com::tDBGDeltaSeconds, seconds);
 #endif
         float sps = static_cast<float>((cartesianDir & ESTEP) == ESTEP ? Printer::printMovesPerSecond : Printer::travelMovesPerSecond);
-        segmentCount = RMath::max(1, static_cast<int32_t>(sps * seconds));
+        segmentCount = RMath::max(static_cast<int32_t>(1), static_cast<int32_t>(sps * seconds));
 #ifdef DEBUG_SEGMENT_LENGTH
         float segDist = cartesianDistance / (float)segmentCount;
         if (segDist > Printer::maxRealSegmentLength) {
