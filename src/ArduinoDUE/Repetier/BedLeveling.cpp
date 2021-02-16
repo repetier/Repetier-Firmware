@@ -399,6 +399,7 @@ bool runBedLeveling(int s) {
     }
     // GCode::executeFString(Com::tZProbeStartScript);
     Plane plane;
+    float currentZ = 0;
 #if BED_CORRECTION_METHOD == 1
     success = false;
     for (int r = 0; r < BED_LEVELING_REPETITIONS; r++) {
@@ -427,7 +428,7 @@ bool runBedLeveling(int s) {
         // Leveling is finished now update own positions and store leveling data if
         // needed
         // float currentZ = plane.z(Printer::currentPosition[X_AXIS],Printer::currentPosition[Y_AXIS]);
-        float currentZ = plane.z(
+        currentZ = plane.z(
             0.0, 0.0); // we rotated around this point, so that is now z height
         // With max z end stop we adjust z length so after next homing we have also
         // a calibrated printer
