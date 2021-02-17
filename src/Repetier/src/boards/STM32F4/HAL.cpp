@@ -271,7 +271,7 @@ void HAL::hwSetup(void) {
 
     servo = reserveTimerInterrupt(SERVO_TIMER_NUM); // prevent pwm usage
     servo->timer = new HardwareTimer(TIMER(SERVO_TIMER_NUM));
-    servo->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
+    // servo->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
     servo->timer->setOverflow(200, HERTZ_FORMAT);
 
     LL_TIM_OC_EnableFast(TIMER(SERVO_TIMER_NUM), servo->timer->getLLChannel(1));
@@ -314,7 +314,7 @@ void HAL::setupTimer() {
     HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
     motion2 = reserveTimerInterrupt(MOTION2_TIMER_NUM); // prevent pwm usage
     motion2->timer = new HardwareTimer(TIMER(MOTION2_TIMER_NUM));
-    motion2->timer->setMode(2, TIMER_OUTPUT_COMPARE);
+    // motion2->timer->setMode(2, TIMER_OUTPUT_COMPARE);
     motion2->timer->setOverflow(PREPARE_FREQUENCY, HERTZ_FORMAT);
     motion2->timer->attachInterrupt(TIMER_VECTOR_NAME(MOTION2_TIMER_NUM));
     motion2->timer->resume();
@@ -324,7 +324,7 @@ void HAL::setupTimer() {
 
     pwm = reserveTimerInterrupt(PWM_TIMER_NUM); // prevent pwm usage
     pwm->timer = new HardwareTimer(TIMER(PWM_TIMER_NUM));
-    pwm->timer->setMode(2, TIMER_OUTPUT_COMPARE);
+    // pwm->timer->setMode(2, TIMER_OUTPUT_COMPARE);
     pwm->timer->setOverflow(PWM_CLOCK_FREQ, HERTZ_FORMAT);
     pwm->timer->attachInterrupt(TIMER_VECTOR_NAME(PWM_TIMER_NUM));
     pwm->timer->resume();
@@ -334,7 +334,7 @@ void HAL::setupTimer() {
 
     motion3 = reserveTimerInterrupt(MOTION3_TIMER_NUM); // prevent pwm usage
     motion3->timer = new HardwareTimer(TIMER(MOTION3_TIMER_NUM));
-    motion3->timer->setMode(2, TIMER_OUTPUT_COMPARE);
+    // motion3->timer->setMode(2, TIMER_OUTPUT_COMPARE);
     motion3->timer->setOverflow(STEPPER_FREQUENCY, HERTZ_FORMAT);
     motion3->timer->attachInterrupt(TIMER_VECTOR_NAME(MOTION3_TIMER_NUM));
     motion3->timer->resume();
@@ -347,7 +347,7 @@ void HAL::setupTimer() {
             toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
             toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
             // Timer 11 has only one channel, 1.
-            toneTimer->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
+            // toneTimer->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
             toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
             toneTimer->timer->attachInterrupt(1, [] {});
             // Not on by default for output_compare
@@ -626,7 +626,7 @@ void HAL::analogEnable(int pinId) {
 }
 
 int HAL::analogRead(int pin) {
-    if(pin < 0) {
+    if (pin < 0) {
         return 0;
     }
     AnalogFunction* af = analogMap[pin];
