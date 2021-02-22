@@ -123,6 +123,8 @@ Timer 1 (PE13, PE14), 2 (PB8, PB9), 3 (PB0, PC6, PC7), 4 (PD12), 9 (PE5, PE6)
 #define EEPROM_AVAILABLE EEPROM_FLASH
 #endif
 
+#define SERVO_TIMER_NUM 12
+
 // I2C
 #define SCK_PIN PA5
 #define MISO_PIN PA6
