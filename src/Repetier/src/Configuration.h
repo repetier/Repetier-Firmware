@@ -35,15 +35,15 @@
 
 */
 
-// The follwing variables are required early to decide on the right modules.
+// The following variables are required early to decide on the right modules.
 #define NUM_TOOLS 2
 #define NUM_EXTRUDER 2
 #define NUM_SERVOS 1                  // Number of serves available
 #define MOTHERBOARD MOTHERBOARD_RADDS // 405
 #define EEPROM_MODE 3
 #define RFSERIAL Serial
-//#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
-// Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
+//#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more RAM, has only 63 byte input buffer.
+// Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier than 1.0
 // If it is incompatible you will get compiler errors about write functions not being compatible!
 //#define COMPAT_PRE1
 #define BLUETOOTH_SERIAL 101
@@ -55,7 +55,7 @@
 #define NUM_AXES 4 // X,Y,Z and E for extruder A,B,C would be 5,6,7
 // #define STEPPER_FREQUENCY 153000     // Maximum stepper frequency.
 #define STEPPER_FREQUENCY 100000     // Maximum stepper frequency.
-#define PREPARE_FREQUENCY 1000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
+#define PREPARE_FREQUENCY 1000       // Update frequency for new blocks. Must be higher than PREPARE_FREQUENCY.
 #define BLOCK_FREQUENCY 500          // Number of blocks with constant stepper rate per second.
 #define VELOCITY_PROFILE 2           // 0 = linear, 1 = cubic, 2 = quintic velocity shape
 #define Z_SPEED 10                   // Z positioning speed
@@ -74,7 +74,7 @@
 
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta, 3 = Dual X-Axis
 #define PRINTER_TYPE 0
-// steps to include as babysteps per 1/BLOCK_FREQUENCY seconds. Must be lower then STEPPER_FREQUENCY/BLOCK_FREQUENCY and be low enough to not loose steps.
+// steps to include as babysteps per 1/BLOCK_FREQUENCY seconds. Must be lower than STEPPER_FREQUENCY/BLOCK_FREQUENCY and be low enough to not lose steps.
 #define BABYSTEPS_PER_BLOCK \
     { 10, 10, 10 }
 // If all axis end stops are hardware based we can skip the time consuming tests each step
@@ -88,7 +88,7 @@
 // Direction 1 or -1
 // #define ENCODER_DIRECTION -1
 // Encoder speed 0 = fastest, 1 or 2 = slowest - set so 1 click is one menu move
-// Default is 2 if not set by controller. Us eonly to fix wrong setting
+// Default is 2 if not set by controller. Use only to fix wrong setting
 #define ENCODER_SPEED 1
 
 // Dynamically increase the speed at which we step through the menus/change values.
@@ -176,7 +176,7 @@ to the position. 0 = no contribution. */
 #include "drivers/drivers.h"
 #include "io/redefine.h"
 
-// Define ZProbe by referencing a endstop defined
+// Define ZProbe by referencing an endstop defined
 CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 
 /** Axes are homed in order of priority (0..10) if homing direction is not 0. */
@@ -218,7 +218,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define MOTOR_NAMES \
     { PSTR("X"), PSTR("Y"), PSTR("Z") }
 
-// Some common settings for trinamic driver settings
+// Some common settings for Trinamic driver settings
 /**
  Chopper timing is an array with
  {toff, hend, hstrt}
