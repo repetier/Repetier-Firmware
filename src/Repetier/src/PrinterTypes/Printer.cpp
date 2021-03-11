@@ -819,7 +819,7 @@ void Printer::showConfiguration() {
     Com::config(PSTR("YHomePos:"), 0, 2);
 #endif
     Com::config(PSTR("ZHomePos:"), Motion1::maxPos[Z_AXIS], 3);
-#else
+#else // not delta printer
     Com::config(PSTR("XHomePos:"), (Motion1::homeDir[X_AXIS] > 0 ? Motion1::maxPos[X_AXIS] : Motion1::minPos[X_AXIS]), 2);
     Com::config(PSTR("YHomePos:"), (Motion1::homeDir[Y_AXIS] > 0 ? Motion1::maxPos[Y_AXIS] : Motion1::minPos[Y_AXIS]), 2);
 #if ZHOME_HEIGHT > 0
