@@ -21,10 +21,12 @@ static_assert(numMotorNames == NUM_MOTORS, "NUM_MOTORS not defined correctly");
 
 int StepperDriverBase::motorIndex() {
     for (fast8_t i = 0; i < NUM_MOTORS; i++) {
-        if (this == Motion1::drivers[i]
-            || (this->parent == Motion1::drivers[i])) {
+        if (this == Motion1::drivers[i]) {
             return i;
         }
+    }
+    if (parent) {
+        return parent->motorIndex();
     }
     return 0;
 }
