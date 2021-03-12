@@ -575,7 +575,10 @@ public:
     Mirror2StepperDriver(StepperDriverBase* m1, StepperDriverBase* m2, EndstopDriver* minES, EndstopDriver* maxES)
         : StepperDriverBase(minES, maxES)
         , motor1(m1)
-        , motor2(m2) { }
+        , motor2(m2) {
+        m1->setParent(this);
+        m2->setParent(this);
+    }
     virtual void setAxis(fast8_t ax) {
         StepperDriverBase::setAxis(ax);
         motor1->setAxis(ax);
@@ -631,7 +634,11 @@ public:
         : StepperDriverBase(minES, maxES)
         , motor1(m1)
         , motor2(m2)
-        , motor3(m3) { }
+        , motor3(m3) {
+        m1->setParent(this);
+        m2->setParent(this);
+        m3->setParent(this);
+    }
     virtual void setAxis(fast8_t ax) {
         StepperDriverBase::setAxis(ax);
         motor1->setAxis(ax);
@@ -697,7 +704,12 @@ public:
         , motor1(m1)
         , motor2(m2)
         , motor3(m3)
-        , motor4(m4) { }
+        , motor4(m4) {
+        m1->setParent(this);
+        m2->setParent(this);
+        m3->setParent(this);
+        m4->setParent(this);
+    }
     virtual void setAxis(fast8_t ax) {
         StepperDriverBase::setAxis(ax);
         motor1->setAxis(ax);
