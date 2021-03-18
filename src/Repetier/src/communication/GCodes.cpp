@@ -110,42 +110,54 @@ void __attribute__((weak)) GCode_2_3(GCode* com) {
     }
 #endif
     if (!Printer::relativeCoordinateMode) {
-        if (com->hasX())
+        if (com->hasX()) {
             target[X_AXIS] = Printer::convertToMM(com->X) - Motion1::g92Offsets[X_AXIS];
-        if (com->hasY())
+        }
+        if (com->hasY()) {
             target[Y_AXIS] = Printer::convertToMM(com->Y) - Motion1::g92Offsets[Y_AXIS];
-        if (com->hasZ())
+        }
+        if (com->hasZ()) {
             target[Z_AXIS] = Printer::convertToMM(com->Z) - Motion1::g92Offsets[Z_AXIS];
+        }
 #if NUM_AXES > A_AXIS
-        if (com->hasA())
+        if (com->hasA()) {
             target[A_AXIS] = Printer::convertToMM(com->A) - Motion1::g92Offsets[A_AXIS];
+        }
 #endif
 #if NUM_AXES > B_AXIS
-        if (com->hasB())
+        if (com->hasB()) {
             target[B_AXIS] = Printer::convertToMM(com->B) - Motion1::g92Offsets[B_AXIS];
+        }
 #endif
 #if NUM_AXES > C_AXIS
-        if (com->hasC())
+        if (com->hasC()) {
             target[C_AXIS] = Printer::convertToMM(com->C) - Motion1::g92Offsets[C_AXIS];
+        }
 #endif
     } else {
-        if (com->hasX())
+        if (com->hasX()) {
             target[X_AXIS] += Printer::convertToMM(com->X);
-        if (com->hasY())
+        }
+        if (com->hasY()) {
             target[Y_AXIS] += Printer::convertToMM(com->Y);
-        if (com->hasZ())
+        }
+        if (com->hasZ()) {
             target[Z_AXIS] += Printer::convertToMM(com->Z);
+        }
 #if NUM_AXES > A_AXIS
-        if (com->hasA())
+        if (com->hasA()) {
             target[A_AXIS] += Printer::convertToMM(com->A);
+        }
 #endif
 #if NUM_AXES > B_AXIS
-        if (com->hasB())
+        if (com->hasB()) {
             target[B_AXIS] += Printer::convertToMM(com->B);
+        }
 #endif
 #if NUM_AXES > C_AXIS
-        if (com->hasC())
+        if (com->hasC()) {
             target[C_AXIS] += Printer::convertToMM(com->C);
+        }
 #endif
     }
     if (com->hasE() && !Printer::debugDryrun()) {
@@ -518,8 +530,11 @@ void __attribute__((weak)) GCode_32(GCode* com) {
         // and measure z distance with probe. Difference between z and measured z is z max error.
         Motion1::homeAxes(axisBits[Z_AXIS]);
         float zTheroetical = ZProbeHandler::optimumProbingHeight(), zMeasured = 0;
-        Motion1::setTmpPositionXYZ((Motion1::minPosOff[X_AXIS] + Motion1::maxPosOff[X_AXIS]) * 0.5,
-                                   (Motion1::minPosOff[Y_AXIS] + Motion1::maxPosOff[Y_AXIS]) * 0.5, zTheroetical);
+        float xMin, xMax, yMin, yMax, xCenter, yCenter;
+        PrinterType::getBedRectangle(xMin, xMax, yMin, yMax);
+        xCenter = 0.5 * (xMin + xMax);
+        yCenter = 0.5 * (yMin + yMax);
+        Motion1::setTmpPositionXYZ(xCenter, yCenter, zTheroetical);
         ok = Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
         if (ok) {
             ok &= ZProbeHandler::activate();
@@ -530,7 +545,7 @@ void __attribute__((weak)) GCode_32(GCode* com) {
             ok = zMeasured != ILLEGAL_Z_PROBE;
         }
         if (ok) {
-            Motion1::maxPos[Z_AXIS] += zMeasured - zTheroetical + (Leveling::isDistortionEnabled() ? Leveling::distortionAt(Motion1::currentPositionTransformed[X_AXIS], Motion1::currentPositionTransformed[Y_AXIS]) : 0);
+            Motion1::maxPos[Z_AXIS] += zMeasured - zTheroetical + (oldDistortion ? Leveling::distortionAt(xCenter, yCenter) : 0);
             EEPROM::markChanged();
             Motion1::updateRotMinMax();
             Motion1::currentPosition[Z_AXIS] = zMeasured;

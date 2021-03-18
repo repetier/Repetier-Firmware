@@ -48,6 +48,7 @@ IO_TEMPERATURE_TABLE(name,analog,table)
 #undef IO_TEMPERATURE_FAKE
 #undef IO_HOTTEST_OF_2
 #undef IO_COOLEST_OF_2
+#undef IO_FIRST_WORKING_OF_2
 
 #if IO_TARGET == IO_TARGET_INIT // hardware init
 
@@ -254,6 +255,19 @@ public:
     }; \
     extern name##Class name;
 
+#define IO_FIRST_WORKING_OF_2(name, temp1, temp2) \
+    class name##Class : public IOTemperature { \
+    public: \
+        float get() { \
+            if (!temp1.isDefect()) { \
+                return temp1.get(); \
+            } \
+            return temp2.get(); \
+        } \
+        bool isDefect() { return temp1.isDefect() && temp2.isDefect(); } \
+    }; \
+    extern name##Class name;
+
 #elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES // variable
 
 #define IO_TEMP_TABLE_NTC(name, dataname) \
@@ -285,6 +299,9 @@ public:
 #define IO_COOLEST_OF_2(name, temp1, temp2) \
     name##Class name;
 
+#define IO_FIRST_WORKING_OF_2(name, temp1, temp2) \
+    name##Class name;
+
 #endif
 
 #ifndef IO_TEMP_TABLE_NTC
@@ -313,4 +330,7 @@ public:
 #endif
 #ifndef IO_COOLEST_OF_2
 #define IO_COOLEST_OF_2(name, temp1, temp2)
+#endif
+#ifndef IO_FIRST_WORKING_OF_2
+#define IO_FIRST_WORKING_OF_2(name, temp1, temp2)
 #endif
