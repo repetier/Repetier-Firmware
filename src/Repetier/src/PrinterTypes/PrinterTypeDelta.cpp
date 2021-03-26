@@ -424,18 +424,20 @@ bool PrinterType::untriggerEndstops() {
     return isAnyEndstopTriggered(moveX, moveY, moveZ);
 }
 
-void PrinterType::homeZ() {
+bool PrinterType::homeZ() {
     Motion1::toolOffset[X_AXIS] = Motion1::toolOffset[Y_AXIS] = 0;
     if (untriggerEndstops()) {
         Com::printErrorF(PSTR("Unable to untrigger endstops - giving up!"));
-        return;
+        return false;
     }
     Motion1::currentPosition[X_AXIS] = 0;
     Motion1::currentPosition[Y_AXIS] = 0;
     Motion1::currentPosition[Z_AXIS] = Motion1::maxPos[Z_AXIS];
     Motion1::updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
-    Motion1::simpleHome(Z_AXIS);
+    if (!Motion1::simpleHome(Z_AXIS)) {
+        return false;
+    }
 
     // Correct end position
     Motion1::waitForEndOfMoves();
@@ -464,15 +466,16 @@ void PrinterType::homeZ() {
     Motion1::setAxisHomed(X_AXIS, true);
     Motion1::setAxisHomed(Y_AXIS, true);
     Motion1::setAxisHomed(Z_AXIS, true);
+    return true;
 }
 
-void PrinterType::homeAxis(fast8_t axis) {
+bool PrinterType::homeAxis(fast8_t axis) {
     if (axis < Z_AXIS) {
-        return; // Deltas can not home x or y
+        return true; // Deltas can not home x or y
     } else if (axis > Z_AXIS) {
-        Motion1::simpleHome(axis); // Non delta axis, default homing
-    } else {                       // XYZ homing
-        homeZ();
+        return Motion1::simpleHome(axis); // Non delta axis, default homing
+    } else {                              // XYZ homing
+        return homeZ();
     }
 }
 

@@ -725,8 +725,9 @@ void Printer::reportCaseLightStatus() {
 }
 
 void Printer::handleInterruptEvent() {
-    if (interruptEvent == 0)
+    if (interruptEvent == 0) {
         return;
+    }
     int event = interruptEvent;
     interruptEvent = 0;
     switch (event) {

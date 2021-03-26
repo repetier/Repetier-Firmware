@@ -43,7 +43,7 @@ class PrinterType {
     static uint16_t eeprom;                             // start position eeprom
     static MotionMode mode;                             // 0 = delta, 1 = cartesian
 
-    static void homeZ();
+    static bool homeZ();
     static bool untriggerEndstops();
 
 public:
@@ -53,9 +53,10 @@ public:
     }
     static bool isAnyEndstopTriggered(bool& moveX, bool& moveY, bool& moveZ);
     static void setMotionMode(MotionMode newMode);
+    static void prepareHoming(fast8_t& axes) { axes &= 252; }
     static void transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]);
 
-    static void homeAxis(fast8_t axis);
+    static bool homeAxis(fast8_t axis);
 
     static bool positionAllowed(float pos[NUM_AXES], float zOfficial);
     static void closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety);

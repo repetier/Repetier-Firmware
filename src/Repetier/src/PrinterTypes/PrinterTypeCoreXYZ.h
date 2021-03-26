@@ -30,7 +30,8 @@ public:
 
     static void transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]);
 
-    static void homeAxis(fast8_t axis);
+    static void prepareHoming(fast8_t& axes) { }
+    static bool homeAxis(fast8_t axis);
 
     static bool positionAllowed(float pos[NUM_AXES], float zOfficial);
     static void closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety);

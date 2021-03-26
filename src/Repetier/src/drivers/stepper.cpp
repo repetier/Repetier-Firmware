@@ -262,6 +262,7 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::init() {
         stallguardSensitivity = constrain(stallguardSensitivity, -64, 63);
         driver->sgt(stallguardSensitivity);
     }
+    driver->internal_Rsense(TMC_INTERNAL_RSENSE);
     driver->GSTAT(); // Clear GSTAT
 }
 
@@ -539,6 +540,7 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::init() {
         stallguardSensitivity = constrain(stallguardSensitivity, -64, 63);
         driver->sgt(stallguardSensitivity);
     }
+    driver->internal_Rsense(TMC_INTERNAL_RSENSE);
     driver->GSTAT(); // Clear GSTAT
 }
 
@@ -815,6 +817,7 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::init() {
         driver->TPWMTHRS(0); // Only stealthChop or spreadCycle
     }
 
+    driver->internal_Rsense(TMC_INTERNAL_RSENSE);
     driver->GSTAT(0b111); // Clear GSTAT
     HAL::delayMilliseconds(200);
 }
@@ -1095,6 +1098,7 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::init() {
         stallguardSensitivity = constrain(stallguardSensitivity, 0, 255);
         driver->SGTHRS(stallguardSensitivity);
     }
+    driver->internal_Rsense(TMC_INTERNAL_RSENSE);
     driver->GSTAT(); // Clear GSTAT
 }
 

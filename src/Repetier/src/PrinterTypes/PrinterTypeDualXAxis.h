@@ -33,6 +33,7 @@ class PrinterType {
     static float endPos[2], targetReal;
     static bool dontChangeCoords;
     static float bedRectangle[2][2];
+    static float bedRectangleStored[2][2];
     static float bedCenter;
     static uint16_t eeprom; // start position eeprom
     static fast8_t activeAxis;
@@ -46,7 +47,8 @@ public:
 
     static void transform(float pos[NUM_AXES], int32_t motor[NUM_AXES]);
 
-    static void homeAxis(fast8_t axis);
+    static void prepareHoming(fast8_t& axes);
+    static bool homeAxis(fast8_t axis);
     static void closestAllowedPositionWithNewXYOffset(float pos[NUM_AXES], float offX, float offY, float safety);
     static bool positionOnBed(float pos[2]);
     static void getBedRectangle(float& xmin, float& xmax, float& ymin, float& ymax);

@@ -338,8 +338,9 @@ void GCode::pushCommand() {
   returned command, the gcode_command_finished() function must be called.
 */
 GCode* GCode::peekCurrentCommand() {
-    if (bufferLength == 0)
+    if (bufferLength == 0) {
         return nullptr; // No more data
+    }
     return &commandsBuffered[bufferReadIndex];
 }
 

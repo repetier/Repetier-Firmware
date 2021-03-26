@@ -1110,43 +1110,13 @@ void PWM_TIMER_VECTOR() {
         executePeriodical = 1;
     }
     // read analog values
-    //#if ANALOG_INPUTS > 0
     // conversion finished?
     if ((ADC->ADC_ISR & adcEnable) == adcEnable) {
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_ANALOG_INPUT_LOOP
 #include "io/redefine.h"
-        /*if (executePeriodical) {
-            Com::printFLN("bed:",IOAnalogBed0.value);
-        }*/
-        /*adcCounter++;
-        for (int i = 0; i < ANALOG_INPUTS; i++) {
-            int32_t cur = ADC->ADC_CDR[osAnalogInputChannels[i]];
-            osAnalogInputBuildup[i] += cur;
-            adcSamplesMin[i] = RMath::min(adcSamplesMin[i], cur);
-            adcSamplesMax[i] = RMath::max(adcSamplesMax[i], cur);
-            if (adcCounter >= NUM_ADC_SAMPLES) {   // store new conversion result
-                // Strip biggest and smallest value and round correctly
-                osAnalogInputBuildup[i] = osAnalogInputBuildup[i] + (1 << (ANALOG_INPUT_SAMPLE - 1)) - (adcSamplesMin[i] + adcSamplesMax[i]);
-                adcSamplesMin[i] = 100000;
-                adcSamplesMax[i] = 0;
-                osAnalogSamplesSum[i] -= osAnalogSamples[i][adcSamplePos];
-                osAnalogSamplesSum[i] += (osAnalogSamples[i][adcSamplePos] = osAnalogInputBuildup[i] >> ANALOG_INPUT_SAMPLE);
-                if(executePeriodical == 0 || i >= NUM_ANALOG_TEMP_SENSORS) {
-                    osAnalogInputValues[i] = osAnalogSamplesSum[i] / ANALOG_INPUT_MEDIAN;
-                }
-                osAnalogInputBuildup[i] = 0;
-            } // adcCounter >= NUM_ADC_SAMPLES
-        } // for i
-        if (adcCounter >= NUM_ADC_SAMPLES) {
-            adcCounter = 0;
-            adcSamplePos++;
-            if (adcSamplePos >= ANALOG_INPUT_MEDIAN)
-                adcSamplePos = 0;
-        }*/
         ADC->ADC_CR = ADC_CR_START; // reread values
     }
-    // #endif // ANALOG_INPUTS > 0
     pwm_count0++;
     pwm_count1 += 2;
     pwm_count2 += 4;

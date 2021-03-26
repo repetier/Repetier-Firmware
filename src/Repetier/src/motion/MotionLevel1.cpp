@@ -1630,7 +1630,18 @@ void Motion1::homeAxes(fast8_t axes) {
     if (axes == 0) {
         axes = 127; // default is home all axes
     }
+#if FIXED_Z_HOME_POSITION
+    if (axes & axisBits[Z_AXIS]) { // ensure x and y are homed
+        if (!isAxisHomed(X_AXIS)) {
+            axes |= axisBits[X_AXIS];
+        }
+        if (!isAxisHomed(Y_AXIS)) {
+            axes |= axisBits[Y_AXIS];
+        }
+    }
+#endif
     waitForEndOfMoves();
+    PrinterType::prepareHoming(axes);
     float oldCoordinates[NUM_AXES];
     copyCurrentOfficial(oldCoordinates); // store to redo position when finished
     Printer::setHoming(true);
@@ -1655,16 +1666,6 @@ void Motion1::homeAxes(fast8_t axes) {
     Motion2::setMotorPositionFromTransformed();
     fast8_t activeToolId = Tool::getActiveToolId();
     callBeforeHomingOnSteppers();
-#if FIXED_Z_HOME_POSITION
-    if (axes & axisBits[Z_AXIS]) { // ensure x and y are homed
-        if (!isAxisHomed(X_AXIS)) {
-            axes |= axisBits[X_AXIS];
-        }
-        if (!isAxisHomed(Y_AXIS)) {
-            axes |= axisBits[Y_AXIS];
-        }
-    }
-#endif
     for (int priority = 0; priority <= 10; priority++) {
         FOR_ALL_AXES(i) {
             if ((axisBits[i] & axes) == 0 && axes != 0) {
@@ -1689,7 +1690,15 @@ void Motion1::homeAxes(fast8_t axes) {
                         }
                     }
                 }
+#if SAFE_HOMING
+                if (!PrinterType::homeAxis(i)) {
+                    Printer::setHoming(false);
+                    GCode::fatalError(PSTR("Homing failed"));
+                    return;
+                }
+#else
                 PrinterType::homeAxis(i);
+#endif
                 oldCoordinates[i] = currentPosition[i]; // replace start coords with homed axes coords
                 g92Offsets[i] = 0;
                 if (i == Z_AXIS && ZProbe != nullptr && homeDir[Z_AXIS] < 0) {
@@ -1898,29 +1907,43 @@ bool Motion1::simpleHome(fast8_t axis) {
         moveRelativeByOfficial(dest, homingFeedrate[axis], false);
         waitForEndOfMoves();
     }
+    if (!eStop.update()) { // endstop should be triggered now
+        Com::printWarningF(PSTR("Endstop for axis "));
+        Com::printF((const char*)HAL::readFlashAddress(&axisNames[axis]));
+        Com::printFLN(PSTR(" did not trigger for first test!"));
+        ok = false;
+    }
     updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
     HAL::delayMilliseconds(50);
 
     // Move back for retest
-    endstopMode = EndstopMode::DISABLED;
-    dest[axis] = -homeDir[axis] * homeRetestDistance[axis];
-    Motion1::axesTriggered = 0;
-    moveRelativeByOfficial(dest, homingFeedrate[axis], false);
-    waitForEndOfMoves();
-
-    // retest
-    endstopMode = newMode;
-    dest[axis] = homeDir[axis] * homeRetestDistance[axis] * 1.5f;
-    Motion1::axesTriggered = 0;
-    if (!eStop.update()) {
-        moveRelativeByOfficial(dest, homingFeedrate[axis] / homeRetestReduction[axis], false);
+    if (ok) {
+        endstopMode = EndstopMode::DISABLED;
+        dest[axis] = -homeDir[axis] * homeRetestDistance[axis];
+        Motion1::axesTriggered = 0;
+        moveRelativeByOfficial(dest, homingFeedrate[axis], false);
         waitForEndOfMoves();
-    } else {
-        Com::printWarningF(PSTR("Endstop for axis "));
-        Com::printF((const char*)HAL::readFlashAddress(&axisNames[axis]));
-        Com::printFLN(PSTR(" did not untrigger for retest!"));
-        ok = false;
+
+        // retest
+        endstopMode = newMode;
+        dest[axis] = homeDir[axis] * homeRetestDistance[axis] * 1.5f;
+        Motion1::axesTriggered = 0;
+        if (!eStop.update()) {
+            moveRelativeByOfficial(dest, homingFeedrate[axis] / homeRetestReduction[axis], false);
+            waitForEndOfMoves();
+            if (!eStop.update()) { // endstop should be triggered now
+                Com::printWarningF(PSTR("Endstop for axis "));
+                Com::printF((const char*)HAL::readFlashAddress(&axisNames[axis]));
+                Com::printFLN(PSTR(" did not trigger for second test!"));
+                ok = false;
+            }
+        } else {
+            Com::printWarningF(PSTR("Endstop for axis "));
+            Com::printF((const char*)HAL::readFlashAddress(&axisNames[axis]));
+            Com::printFLN(PSTR(" did not untrigger for retest!"));
+            ok = false;
+        }
     }
     updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
@@ -1963,8 +1986,10 @@ bool Motion1::simpleHome(fast8_t axis) {
     }
     endstopMode = EndstopMode::DISABLED;
     setHardwareEndstopsAttached(false, &eStop);
-    moveRelativeByOfficial(dest, homingFeedrate[axis], false); // also adds toolOffset!
-    waitForEndOfMoves();
+    if (ok) {
+        moveRelativeByOfficial(dest, homingFeedrate[axis], false); // also adds toolOffset!
+        waitForEndOfMoves();
+    }
     currentPosition[axis] = curPos;
     updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();

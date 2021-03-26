@@ -52,21 +52,6 @@ void __attribute__((weak)) GCode_0_1(GCode* com) {
     // gets filled while waiting, the lost is neglectable.
 //        PrintLine::waitForXFreeLines(1, true);
 #endif // UI_HAS_KEYS
-#ifdef DEBUG_QUEUE_MOVE
-    {
-
-        InterruptProtectedBlock noInts;
-        int lc = (int)PrintLine::linesCount;
-        int lp = (int)PrintLine::linesPos;
-        int wp = (int)PrintLine::linesWritePos;
-        int n = (wp - lp);
-        if (n < 0)
-            n += PRINTLINE_CACHE_SIZE;
-        noInts.unprotect();
-        if (n != lc)
-            Com::printFLN(PSTR("Buffer corrupted"));
-    }
-#endif
 }
 
 void __attribute__((weak)) GCode_2_3(GCode* com) {

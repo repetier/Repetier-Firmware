@@ -317,6 +317,10 @@ enum class BootReason {
     DEFAULT_MATERIAL(Com::tMatFLEX, 240, 50, 0)
 #endif
 
+#ifndef SAFE_HOMING
+#define SAFE_HOMING 1
+#endif
+
 #ifndef ALWAYS_CHECK_ENDSTOPS
 #define ALWAYS_CHECK_ENDSTOPS 0
 #endif
@@ -420,6 +424,9 @@ enum class BootReason {
 #endif
 #ifndef TMC_INTERPOLATE
 #define TMC_INTERPOLATE true
+#endif
+#ifndef TMC_INTERNAL_RSENSE
+#define TMC_INTERNAL_RSENSE false
 #endif
 #ifndef TMC_HOLD_MULTIPLIER
 #define TMC_HOLD_MULTIPLIER 0.5
