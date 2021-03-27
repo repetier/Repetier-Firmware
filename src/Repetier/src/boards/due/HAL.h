@@ -41,13 +41,15 @@
 
 #ifndef HAL_H
 #define HAL_H
-
+#define INLINE __attribute__((always_inline))
 #define USE_ARDUINO_SPI_LIB
 
+#include "RepetierSerialUSB.h"
 #include <inttypes.h>
 #include "pins.h"
 #include "Print.h"
 #include "fastio.h"
+#include "usb/usb_task.h"
 
 // Which I2C port to use?
 #ifndef WIRE_PORT
@@ -72,8 +74,6 @@
 
 // Some structures assume no padding, need to add this attribute on ARM
 #define PACK __attribute__((packed))
-
-#define INLINE __attribute__((always_inline))
 
 // do not use program space memory with Due
 #define PROGMEM
@@ -383,6 +383,7 @@ public:
 #endif
         trng_enable(TRNG);
         randomSeed(trng_read_output_data(TRNG));
+        usb_task_init();
     }
     static inline void digitalWrite(uint8_t pin, uint8_t value) {
         WRITE_VAR(pin, value);

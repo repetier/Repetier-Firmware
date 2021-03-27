@@ -42,6 +42,7 @@
 #define NUM_SERVOS 1                  // Number of servos available
 #define MOTHERBOARD MOTHERBOARD_FELIX // 405
 #define EEPROM_MODE 1
+#define SAFE_HOMING 1 // enable safe homing
 #define RFSERIAL Serial
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in. Requires more ram, has only 63 byte input buffer.
 // Uncomment the following line if you are using Arduino compatible firmware made for Arduino version earlier then 1.0
