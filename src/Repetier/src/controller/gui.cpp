@@ -14,6 +14,7 @@ GUIStatusLevel GUI::statusLevel = GUIStatusLevel::REGULAR;
 bool GUI::contentChanged = false;                                 ///< set to true if forced refresh is wanted
 GUIAction GUI::nextAction = GUIAction::NONE;                      ///< Next action to execute on opdate
 int GUI::nextActionRepeat = 0;                                    ///< Increment for next/previous
+uint8_t GUI::idle = 0;
 
 #if ENCODER_MAX_REPEAT_STEPS != 0
 uint8_t GUI::maxActionRepeatStep = ENCODER_MAX_REPEAT_STEPS;      ///< Max amount of extra encoder repeat steps
@@ -150,6 +151,9 @@ void GUI::update() {
     if (level > 0 && !isStickyPageType(pageType[level]) && (HAL::timeInMilliseconds() - lastAction) > UI_AUTORETURN_TO_MENU_AFTER) {
         level = 0;
     }
+
+	GUI::idle = (HAL::timeInMilliseconds() - lastAction) > UI_AUTORETURN_TO_MENU_AFTER ? 1 : 0;
+
     if ((statusLevel == GUIStatusLevel::BUSY || textIsScrolling) && timeDiff > 500) {
         contentChanged = true; // for faster spinning icon
     }

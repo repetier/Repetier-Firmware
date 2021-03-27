@@ -160,6 +160,7 @@ public:
     static fast8_t bufPos;                       ///< Pos for appending data
     static GUIAction nextAction;                 ///< Next action to execute on opdate
     static int nextActionRepeat;                 ///< Increment for next/previous
+    static uint8_t idle;
 #if ENCODER_MAX_REPEAT_STEPS != 0
     static bool speedAffectMenus;                ///< Apply encoder step speed to menus
     static uint8_t maxActionRepeatStep;          ///< Max amount of extra encoder repeat steps
@@ -253,6 +254,10 @@ public:
     static bool handleFloatValueAction(GUIAction& action, float& value, float increment);
     static bool handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, int32_t max, int32_t increment);
     static void menuAffectBySpeed(GUIAction& action);
+
+    static INLINE uint8_t isGUIIdle() {
+        return GUI::idle;
+    }
 };
 
 struct probeProgInfo {
