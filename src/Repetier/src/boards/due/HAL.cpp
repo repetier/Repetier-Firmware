@@ -995,7 +995,7 @@ int HAL::i2cRead(void) {
     return -1; // should never happen, but better then blocking
 }
 
-#if NUM_SERVOS > 0
+#if NUM_SERVOS > 0 || NUM_BEEPERS > 0
 unsigned int HAL::servoTimings[4] = { 0, 0, 0, 0 };
 unsigned int servoAutoOff[4] = { 0, 0, 0, 0 };
 static uint8_t servoIndex = 0;
@@ -1012,7 +1012,7 @@ ServoInterface* analogServoSlots[4] = { nullptr, nullptr, nullptr, nullptr };
 void SERVO_TIMER_VECTOR() {
     // apparently have to read status register
     SERVO_TIMER->TC_CHANNEL[SERVO_TIMER_CHANNEL].TC_SR;
-#if NUM_SERVOS > 0
+#if NUM_SERVOS > 0 || NUM_BEEPERS > 0
     static uint32_t interval = 0;
     fast8_t servoId = servoIndex >> 1;
     ServoInterface* act = analogServoSlots[servoId];

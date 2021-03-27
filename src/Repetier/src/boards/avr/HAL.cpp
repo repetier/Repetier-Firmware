@@ -61,7 +61,7 @@ void HAL::setupTimer() {
     TCCR2B = _BV(CS22) + _BV(CS20); // Prescaler 1/128
     TIMSK2 |= _BV(OCIE2A);          // Enable interrupt
 
-#if NUM_SERVOS > 0
+#if NUM_SERVOS > 0 || NUM_BEEPERS > 0
     TCCR3A = 0;         // normal counting mode
     TCCR3B = _BV(CS31); // set prescaler of 8
     TCNT3 = 0;          // clear the timer count
@@ -252,7 +252,7 @@ int HAL::i2cRead(void) {
     return -1; // should never happen, but better then blocking
 }
 
-#if NUM_SERVOS > 0
+#if NUM_SERVOS > 0 || NUM_BEEPERS > 0
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__) || defined(__AVR_ATmega128__) || defined(__AVR_ATmega1281__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega2561__)
 #define SERVO2500US F_CPU / 3200
 #define SERVO5000US F_CPU / 1600
