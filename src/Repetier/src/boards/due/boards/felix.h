@@ -100,7 +100,9 @@
 
 #ifndef CUSTOM_CONTROLLER_PINS
 // Controller related default pins
+#ifndef BEEPER_PIN
 #define BEEPER_PIN -1
+#endif
 #define UI_DISPLAY_RS_PIN 42
 #define UI_DISPLAY_ENABLE_PIN 44
 #define UI_DISPLAY_D4_PIN 43

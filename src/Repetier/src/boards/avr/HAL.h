@@ -388,10 +388,8 @@ public:
         wdPinged = true;
 #endif
     };
-#if NUM_SERVOS > 0 || NUM_BEEPERS > 0
     static unsigned int servoTimings[4];
     static void servoMicroseconds(uint8_t servo, int ms, uint16_t autoOff);
-#endif
     static void analogStart();
     static void analogEnable(int channel);
     static int analogRead(int channel) { return analogValues[channel]; }
