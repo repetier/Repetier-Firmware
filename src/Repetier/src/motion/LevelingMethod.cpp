@@ -617,7 +617,7 @@ void Leveling::set(float x, float y, float z) {
 }
 
 void Leveling::execute_M323(GCode* com) {
-    if (com->hasS() && com->S > 0l) {
+    if (com->hasS()) {
 // Auto import bed mesh
 #if NUM_HEATED_BEDS > 0 && SDSUPPORT
         if (com->S == 2l) {
@@ -695,11 +695,9 @@ void Leveling::execute_M323(GCode* com) {
         }
 #endif
         // End auto import bed mesh
-        if (distortionEnabled != (com->S != 0l)) {
-            setDistortionEnabled(!distortionEnabled);
-            if (com->hasP() && com->P != 0l) {
-                EEPROM::markChanged();
-            }
+        setDistortionEnabled(static_cast<bool>(com->S));
+        if (com->getP(0l)) {
+            EEPROM::markChanged();
         }
     }
     reportDistortionStatus();
