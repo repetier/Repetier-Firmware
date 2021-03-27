@@ -78,7 +78,7 @@
 //#define  USB_DEVICE_LOW_SPEED
 
 //! To define a Full speed device
-//#define USB_DEVICE_FULL_SPEED
+#define USB_DEVICE_FULL_SPEED
 
 //! To authorize the High speed
 #ifndef USB_DEVICE_FULL_SPEED
