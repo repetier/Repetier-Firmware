@@ -38,8 +38,14 @@ public:
     virtual bool isAttached() { return true; } // SW Endstops always "attached".
     virtual ~EndstopDriver() { }
     void resetHistory() { historyFlag = 0; }
-    bool historyWasTriggered() { return historyFlag & 1; }
-    bool historyWasUntriggered() { return historyFlag & 2; }
+    bool historyWasTriggered() {
+        update();
+        return historyFlag & 1;
+    }
+    bool historyWasUntriggered() {
+        update();
+        return historyFlag & 2;
+    }
     void historyUpdate(bool val) { historyFlag |= (val ? 1 : 2); }
 };
 
@@ -67,7 +73,7 @@ class EndstopSwitchDriver : public EndstopDriver {
 
 public:
     EndstopSwitchDriver()
-        : state(false)
+        : state(inp::get())
         , parent(nullptr) { }
     virtual bool update() final;
     inline virtual bool triggered() final {
@@ -116,7 +122,7 @@ class EndstopSwitchDebounceDriver : public EndstopDriver {
 
 public:
     EndstopSwitchDebounceDriver()
-        : state(0) { }
+        : state(inp::get()) { }
     inline virtual bool update() final;
     inline virtual bool triggered() final {
         return state == level;

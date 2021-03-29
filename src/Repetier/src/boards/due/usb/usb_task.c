@@ -269,7 +269,7 @@ bool usb_task_other_requests(void) {
 
 void usb_task_init(void) {
 
-  uint16_t *ptr;
+  // uint16_t *ptr;
 
   // Disable USB peripheral so we start clean and avoid lockups
   otg_disable();
@@ -282,7 +282,7 @@ void usb_task_init(void) {
   udc_start();
 
   // Patch in filament diameter - Be careful: String is in UNICODE (2bytes per char)
-  ptr = &microsoft_extended_properties_descriptor.PropertyData[0];
+  // ptr = &microsoft_extended_properties_descriptor.PropertyData[0];
   /* while (ptr[0] || ptr[1]) { // Double 0 flags end of resource
 
     // Found the filamentdiameter= unicode string

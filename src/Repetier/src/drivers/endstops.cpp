@@ -37,7 +37,7 @@ template <class inp, int axis, bool dir>
 EndstopSwitchHardwareDriver<inp, axis, dir>::EndstopSwitchHardwareDriver(void_fn_t cb)
     : parent(nullptr)
     , callbackFunc(cb)
-    , state(false)
+    , state(inp::get())
     , attached(false) {
 }
 
