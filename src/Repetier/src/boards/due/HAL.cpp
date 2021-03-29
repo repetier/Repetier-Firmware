@@ -132,7 +132,7 @@ void HAL::setupTimer() {
     NVIC_SetPriority(PIOC_IRQn, 1);
     NVIC_SetPriority(PIOD_IRQn, 1);
     // Servo control
-#if NUM_SERVOS > 0 || NUM_BEEPER > 0
+#if NUM_SERVOS > 0 || NUM_BEEPERS > 0
     pmc_enable_periph_clk(SERVO_TIMER_IRQ);
     //NVIC_SetPriority((IRQn_Type)SERVO_TIMER_IRQ, NVIC_EncodePriority(4, 5, 0));
     NVIC_SetPriority((IRQn_Type)SERVO_TIMER_IRQ, 3);
