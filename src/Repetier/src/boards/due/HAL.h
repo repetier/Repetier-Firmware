@@ -383,7 +383,13 @@ public:
 #endif
         trng_enable(TRNG);
         randomSeed(trng_read_output_data(TRNG));
-        usb_task_init();
+        if (static_cast<Stream*>(&RFSERIAL) == &SerialUSB
+#if defined(BLUETOOTH_SERIAL) && BLUETOOTH_SERIAL > 0
+            || static_cast<Stream*>(&RFSERIAL2) == &SerialUSB
+#endif
+        ) { //Only init if serial is used!
+            usb_task_init();
+        }
     }
     static inline void digitalWrite(uint8_t pin, uint8_t value) {
         WRITE_VAR(pin, value);

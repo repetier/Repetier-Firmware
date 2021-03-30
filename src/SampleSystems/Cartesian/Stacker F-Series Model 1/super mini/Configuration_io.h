@@ -120,8 +120,8 @@ ENDSTOP_SWITCH_HW(endstopAMax, IOEndstopAMax, A_AXIS, true)
 #endif
 
 #ifdef STACKER_2_Z_END_STOPS
-IO_INPUT_INVERTED_PULLUP(IOEndstopZMax1, ORIG_Z_MAX_PIN) // TODO: Set correct pin
-IO_INPUT_INVERTED_PULLUP(IOEndstopZMax2, ORIG_Z_MAX_PIN) // TODO: Set correct pin
+IO_INPUT_INVERTED_PULLUP(IOEndstopZMax1, ORIG_Z_MAX_PIN) 
+IO_INPUT_INVERTED_PULLUP(IOEndstopZMax2, ORIG_Z2_MAX_PIN)
 ENDSTOP_SWITCH_HW(endstopZMax1, IOEndstopZMax1, -1, true)
 ENDSTOP_SWITCH_HW(endstopZMax2, IOEndstopZMax2, -1, true)
 ENDSTOP_MERGE2(endstopZMax, endstopZMax1, endstopZMax2, Z_AXIS, true)

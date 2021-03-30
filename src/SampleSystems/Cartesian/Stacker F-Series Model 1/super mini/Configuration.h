@@ -155,7 +155,9 @@ Early stage version for Stacke F1 printer - use with care
 #define NO_SOFTWARE_AXIS_ENDSTOPS
 // Normally only a delta has motor end stops required. Normally you trigger
 // using axis endstops.
+#if STACKER_2_Z_END_STOPS == 0
 #define NO_MOTOR_ENDSTOPS
+#endif
 
 #define FEATURE_CONTROLLER CONTROLLER_SPARKLCD
 // Use more memory to speedup display updates
