@@ -269,8 +269,6 @@ bool usb_task_other_requests(void) {
 
 void usb_task_init(void) {
 
-  // uint16_t *ptr;
-
   // Disable USB peripheral so we start clean and avoid lockups
   otg_disable();
   udd_disable();
@@ -281,30 +279,6 @@ void usb_task_init(void) {
   // Start USB stack to authorize VBus monitoring
   udc_start();
 
-  // Patch in filament diameter - Be careful: String is in UNICODE (2bytes per char)
-  // ptr = &microsoft_extended_properties_descriptor.PropertyData[0];
-  /* while (ptr[0] || ptr[1]) { // Double 0 flags end of resource
-
-    // Found the filamentdiameter= unicode string
-    if (ptr[0] == 'r' && ptr[1] == '=') {
-      char diam[16];
-      char *sptr;
-
-      // Patch in the filament diameter
-      sprintf_P(diam, PSTR("%d"), (int)((DEFAULT_NOMINAL_FILAMENT_DIA) * 1000.0));
-
-      // And copy it to the proper place, expanding it to unicode
-      sptr = &diam[0];
-      ptr += 2;
-      while (*sptr) *ptr++ = *sptr++;
-
-      // Done!
-      break;
-    }
-
-    // Go to the next character
-    ptr++;
-  } */
 }
 
 #endif // ARDUINO_ARCH_SAM

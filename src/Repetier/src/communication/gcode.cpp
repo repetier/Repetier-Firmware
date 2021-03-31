@@ -1090,7 +1090,7 @@ void GCode::fatalError(FSTRINGPARAM(message), uint8_t flags) {
         Motion1::emergencyStop();
     }
     EVENT_FATAL_ERROR_OCCURED
-    Printer::kill(flags & FATAL_FLAG_HEATER, flags & FATAL_FLAG_MOTORS);
+    Printer::kill(!(flags & FATAL_FLAG_HEATER), flags & FATAL_FLAG_MOTORS);
     Printer::failedMode = true;
     reportFatalError();
 #if defined(PS_ON_PIN) && PS_ON_PIN > -1
@@ -1103,7 +1103,8 @@ void GCode::fatalError(FSTRINGPARAM(message), uint8_t flags) {
 
 void GCode::reportFatalError() {
     Com::writeToAll = true;
-    Com::printF(Com::tFatal);
+    // Com::printF(Com::tFatal);
+    Com::printF(Com::tError);
     Com::printF(fatalErrorMsg);
     Com::printFLN(PSTR(" - Printer stopped and heaters disabled due to this error. Fix error and restart with M999."));
     UI_ERROR_P(fatalErrorMsg)

@@ -1022,6 +1022,9 @@ void __attribute__((weak)) mainMenu(GUIAction action, void* data) {
     GUI::menuStart(action);
     GUI::menuTextP(action, PSTR("= Main Menu ="), true);
     GUI::menuBack(action);
+    if (Printer::failedMode) {
+        GUI::menuSelectableP(action, PSTR("Error fixed - Cont."), directAction, (void*)GUI_EXIT_FATAL, GUIPageType::ACTION);
+    }
     if (Printer::isPrinting()) {
         GUI::menuSelectableP(action, PSTR("Tune"), menuTune, nullptr, GUIPageType::MENU);
     } else {
