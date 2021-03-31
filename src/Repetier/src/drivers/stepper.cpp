@@ -1311,6 +1311,9 @@ void MixingStepperDriver::setWeight(ufast8_t motorId, int weight) {
 /// Always executes the step
 void MixingStepperDriver::step() {
 }
+bool MixingStepperDriver::stepMotorEndStop() {
+    return true;
+}
 /// Set step signal low
 void MixingStepperDriver::unstep() {
     MixingStepperState* act = state;

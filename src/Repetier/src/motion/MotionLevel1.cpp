@@ -1880,6 +1880,9 @@ void Motion1::setHardwareEndstopsAttached(bool attach, EndstopDriver* specificDr
 }
 
 bool Motion1::simpleHome(fast8_t axis) {
+#ifdef DEBUG_MOVES
+    Com::printFLN(PSTR("simpleHome started:"), static_cast<int32_t>(axis));
+#endif
     if (homeDir[axis] == 0) { // nothing to do, just set to min
         setAxisHomed(axis, true);
         currentPosition[axis] = minPos[axis];
@@ -2000,6 +2003,9 @@ bool Motion1::simpleHome(fast8_t axis) {
     endstopMode = oldMode;
     setAxisHomed(axis, true);
     Motion1::axesTriggered = 0;
+#ifdef DEBUG_MOVES
+    Com::printFLN(PSTR("simpleHome finished:"), static_cast<int32_t>(axis));
+#endif
     return ok;
 }
 

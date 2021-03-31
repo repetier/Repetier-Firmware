@@ -223,10 +223,18 @@ void Motion3::timer() {
 #endif
             if ((Motion1::motorTriggered & 1) == 0) {
                 if ((act->error[X_AXIS] += act->delta[X_AXIS]) > 0) {
+#if defined(NO_MOTOR_ENDSTOPS)
 #ifdef XMOTOR_SWITCHABLE
                     Motion1::motors[X_AXIS]->step();
 #else
                     XMotor.step();
+#endif
+#else
+#ifdef XMOTOR_SWITCHABLE
+                    Motion1::motors[X_AXIS]->stepMotorEndStop();
+#else
+                    XMotor.stepMotorEndStop();
+#endif
 #endif
                     actM2->stepsRemaining[X_AXIS]--;
                     act->error[X_AXIS] -= act->errorUpdate;
@@ -234,14 +242,22 @@ void Motion3::timer() {
             }
             if ((Motion1::motorTriggered & 2) == 0) {
                 if ((act->error[Y_AXIS] += act->delta[Y_AXIS]) > 0) {
+#if defined(NO_MOTOR_ENDSTOPS)
                     YMotor.step();
+#else
+                    YMotor.stepMotorEndStop();
+#endif
                     actM2->stepsRemaining[Y_AXIS]--;
                     act->error[Y_AXIS] -= act->errorUpdate;
                 }
             }
             if ((Motion1::motorTriggered & 4) == 0) {
                 if ((act->error[Z_AXIS] += act->delta[Z_AXIS]) > 0) {
+#if defined(NO_MOTOR_ENDSTOPS)
                     ZMotor.step();
+#else
+                    ZMotor.stepMotorEndStop();
+#endif
                     actM2->stepsRemaining[Z_AXIS]--;
                     act->error[Z_AXIS] -= act->errorUpdate;
                 }
@@ -255,7 +271,11 @@ void Motion3::timer() {
                         }
                     } else {
                         if (Motion1::motors[E_AXIS]) {
+#if defined(NO_MOTOR_ENDSTOPS)
                             Motion1::motors[E_AXIS]->step();
+#else
+                            Motion1::motors[E_AXIS]->stepMotorEndStop();
+#endif
                         }
                     }
                     actM2->stepsRemaining[E_AXIS]--;
@@ -266,7 +286,11 @@ void Motion3::timer() {
 #if NUM_AXES > A_AXIS
             if ((Motion1::motorTriggered & 16) == 0) {
                 if ((act->error[A_AXIS] += act->delta[A_AXIS]) > 0) {
+#if defined(NO_MOTOR_ENDSTOPS)
                     Motion1::motors[A_AXIS]->step();
+#else
+                    Motion1::motors[A_AXIS]->stepMotorEndStop();
+#endif
                     actM2->stepsRemaining[A_AXIS]--;
                     act->error[A_AXIS] -= act->errorUpdate;
                 }
@@ -275,7 +299,11 @@ void Motion3::timer() {
 #if NUM_AXES > B_AXIS
             if ((Motion1::motorTriggered & 32) == 0) {
                 if ((act->error[B_AXIS] += act->delta[B_AXIS]) > 0) {
+#if defined(NO_MOTOR_ENDSTOPS)
                     Motion1::motors[B_AXIS]->step();
+#else
+                    Motion1::motors[B_AXIS]->stepMotorEndStop();
+#endif
                     actM2->stepsRemaining[B_AXIS]--;
                     act->error[B_AXIS] -= act->errorUpdate;
                 }
@@ -284,7 +312,11 @@ void Motion3::timer() {
 #if NUM_AXES > C_AXIS
             if ((Motion1::motorTriggered & 64) == 0) {
                 if ((act->error[C_AXIS] += act->delta[C_AXIS]) > 0) {
+#if defined(NO_MOTOR_ENDSTOPS)
                     Motion1::motors[C_AXIS]->step();
+#else
+                    Motion1::motors[C_AXIS]->stepMotorEndStop();
+#endif
                     actM2->stepsRemaining[C_AXIS]--;
                     act->error[C_AXIS] -= act->errorUpdate;
                 }

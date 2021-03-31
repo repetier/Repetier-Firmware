@@ -47,6 +47,8 @@ public:
     virtual void init() { }
     /// Always executes the step
     virtual void step() = 0;
+    /// Execute the step if motor end stop is not triggered
+    virtual bool stepMotorEndStop() = 0;
     /// Set step signal low
     virtual void unstep() = 0;
     /// Set direction, true = max direction
@@ -100,34 +102,36 @@ public:
     inline ufast8_t numMotors() { return nStepper; } ///< Number of motors that get mixed
     void setWeight(ufast8_t motorId, int weight);
     /// Always executes the step
-    virtual void step();
+    virtual void step() override final;
+    /// Execute the step if motor end stop is not triggered
+    virtual bool stepMotorEndStop() override final;
     /// Set step signal low
-    virtual void unstep();
+    virtual void unstep() override final;
     /// Set direction, true = max direction
-    virtual void dir(bool d);
+    virtual void dir(bool d) override final;
     /// Enable motor driver
-    virtual void enable();
+    virtual void enable() override final;
     /// Disable motor driver
-    virtual void disable();
+    virtual void disable() override final;
     // Return true if setting microsteps is supported
-    virtual bool implementsSetMicrosteps();
+    virtual bool implementsSetMicrosteps() override final;
     // Return true if setting current in software is supported
-    virtual bool implementsSetMaxCurrent();
+    virtual bool implementsSetMaxCurrent() override final;
     /// Set microsteps. Must be a power of 2.
-    virtual void setMicrosteps(int microsteps);
+    virtual void setMicrosteps(int microsteps) override final;
     /// Set max current as range 0..255 or mA depending on driver
-    virtual void setMaxCurrent(int max);
+    virtual void setMaxCurrent(int max) override final;
     // Called before homing starts. Can be used e.g. to disable silent mode
     // or otherwise prepare for endstop detection.
-    virtual void beforeHoming();
-    virtual void afterHoming();
-    virtual void handleMCode(GCode& com);
+    virtual void beforeHoming() override final;
+    virtual void afterHoming() override final;
+    virtual void handleMCode(GCode& com) override final;
     // If true the stepper usage will not offer resolution modification in GUI
-    virtual bool overridesResolution() { return true; }
+    virtual bool overridesResolution() override final { return true; }
     // Configuration in GUI
-    virtual void menuConfig(GUIAction action, void* data);
+    virtual void menuConfig(GUIAction action, void* data) override final;
     // Allow having own settings e.g. current, microsteps
-    virtual void eepromHandle();
+    virtual void eepromHandle() override final;
 };
 
 /** Holds a position counter that can be observed, otherwise sends
@@ -151,9 +155,9 @@ public:
     inline EndstopDriver* getMinEndstop() { return minEndstop; }
     inline EndstopDriver* getMaxEndstop() { return maxEndstop; }
     /// Allows initialization of driver e.g. current, microsteps
-    virtual void init() final { }
+    virtual void init() override final { }
     /// Always executes the step
-    virtual void step() final {
+    virtual void step() override final {
         if (direction) {
             position++;
         } else {
@@ -161,41 +165,53 @@ public:
         }
         stepper->step();
     }
+    /// Execute the step if motor end stop is not triggered
+    bool stepMotorEndStop() override final {
+        if (stepper->stepMotorEndStop()) {
+            if (direction) {
+                position++;
+            } else {
+                position--;
+            }
+            return true;
+        }
+        return false;
+    }
     /// Set step signal low
-    virtual void unstep() final {
+    virtual void unstep() override final {
         stepper->unstep();
     }
     /// Set direction, true = max direction
-    virtual void dir(bool d) final {
+    virtual void dir(bool d) override final {
         direction = d;
         stepper->dir(d);
     }
     /// Enable motor driver
-    virtual void enable() final { stepper->enable(); }
+    virtual void enable() override final { stepper->enable(); }
     /// Disable motor driver
-    virtual void disable() final { stepper->disable(); }
+    virtual void disable() override final { stepper->disable(); }
     // Return true if setting microsteps is supported
-    virtual bool implementsSetMicrosteps() final { return stepper->implementsSetMicrosteps(); }
+    virtual bool implementsSetMicrosteps() override final { return stepper->implementsSetMicrosteps(); }
     // Return true if setting current in software is supported
-    virtual bool implementsSetMaxCurrent() final { return stepper->implementsSetMaxCurrent(); }
+    virtual bool implementsSetMaxCurrent() override final { return stepper->implementsSetMaxCurrent(); }
     /// Set microsteps. Must be a power of 2.
-    virtual void setMicrosteps(int microsteps) final { stepper->setMicrosteps(microsteps); }
+    virtual void setMicrosteps(int microsteps) override final { stepper->setMicrosteps(microsteps); }
     /// Set max current as range 0..255
-    virtual void setMaxCurrent(int max) final { stepper->setMaxCurrent(max); }
+    virtual void setMaxCurrent(int max) override final { stepper->setMaxCurrent(max); }
     // Called before homing starts. Can be used e.g. to disable silent mode
     // or otherwise prepare for endstop detection.
-    virtual void beforeHoming() final { stepper->beforeHoming(); }
-    virtual void afterHoming() final { stepper->afterHoming(); }
+    virtual void beforeHoming() override final { stepper->beforeHoming(); }
+    virtual void afterHoming() override final { stepper->afterHoming(); }
     // If true the stepper usage will not offer resolution modification in GUI
-    virtual bool overridesResolution() { return stepper->overridesResolution(); }
+    virtual bool overridesResolution() override final { return stepper->overridesResolution(); }
     // Configuration in GUI
-    virtual void menuConfig(GUIAction action, void* data) {
+    virtual void menuConfig(GUIAction action, void* data) override final {
         stepper->menuConfig(action, data);
     }
-    virtual bool hasConfigMenu() {
+    virtual bool hasConfigMenu() override final {
         return stepper->hasConfigMenu();
     }
-    virtual void eepromHandle() final {
+    virtual void eepromHandle() override final {
         stepper->eepromHandle();
     }
 };
@@ -223,12 +239,12 @@ public:
     virtual ~AdjustResolutionStepperDriver() { }
     inline EndstopDriver* getMinEndstop() { return minEndstop; }
     inline EndstopDriver* getMaxEndstop() { return maxEndstop; }
-    virtual void setAxis(fast8_t ax) {
+    virtual void setAxis(fast8_t ax) override final {
         StepperDriverBase::setAxis(ax);
         stepper->setAxis(ax);
     }
     /// Always executes the step
-    virtual void step() final {
+    virtual void step() override final {
         if (direction) {
             accumulator += to;
             if (accumulator >= to) {
@@ -243,39 +259,60 @@ public:
             }
         }
     }
+    /// Execute the step if motor end stop is not triggered
+    bool stepMotorEndStop() override final {
+        if (direction) {
+            accumulator += to;
+            if (accumulator >= to) {
+                if (stepper->stepMotorEndStop()) {
+                    accumulator -= from;
+                    return true;
+                }
+            }
+        } else {
+            accumulator -= to;
+            if (accumulator <= -to) {
+                if (stepper->stepMotorEndStop()) {
+                    accumulator += from;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     /// Set step signal low
-    virtual void unstep() final {
+    virtual void unstep() override final {
         stepper->unstep();
     }
     /// Set direction, true = max direction
-    virtual void dir(bool d) final {
+    virtual void dir(bool d) override final {
         direction = d;
         stepper->dir(d);
     }
     /// Enable motor driver
-    virtual void enable() final { stepper->enable(); }
+    virtual void enable() override final { stepper->enable(); }
     /// Disable motor driver
-    virtual void disable() final { stepper->disable(); }
+    virtual void disable() override final { stepper->disable(); }
     // Return true if setting microsteps is supported
-    virtual bool implementsSetMicrosteps() final { return stepper->implementsSetMicrosteps(); }
+    virtual bool implementsSetMicrosteps() override final { return stepper->implementsSetMicrosteps(); }
     // Return true if setting current in software is supported
-    virtual bool implementsSetMaxCurrent() final { return stepper->implementsSetMaxCurrent(); }
+    virtual bool implementsSetMaxCurrent() override final { return stepper->implementsSetMaxCurrent(); }
     /// Set microsteps. Must be a power of 2.
-    virtual void setMicrosteps(int microsteps) final { stepper->setMicrosteps(microsteps); }
+    virtual void setMicrosteps(int microsteps) override final { stepper->setMicrosteps(microsteps); }
     /// Set max current as range 0..255
-    virtual void setMaxCurrent(int max) final { stepper->setMaxCurrent(max); }
+    virtual void setMaxCurrent(int max) override final { stepper->setMaxCurrent(max); }
     // Called before homing starts. Can be used e.g. to disable silent mode
     // or otherwise prepare for endstop detection.
-    virtual void beforeHoming() final { stepper->beforeHoming(); }
-    virtual void afterHoming() final { stepper->afterHoming(); }
+    virtual void beforeHoming() override final { stepper->beforeHoming(); }
+    virtual void afterHoming() override final { stepper->afterHoming(); }
     // If true the stepper usager will not offer resolution modification in GUI
-    virtual bool overridesResolution() final { return true; }
+    virtual bool overridesResolution() override final { return true; }
     static void menuStepsPerMM(GUIAction action, void* data);
     // Configuration in GUI
-    virtual void menuConfig(GUIAction action, void* data) final;
-    virtual bool hasConfigMenu() final { return true; }
-    virtual void init() final;
-    virtual void eepromHandle() final;
+    virtual void menuConfig(GUIAction action, void* data) override final;
+    virtual bool hasConfigMenu() override final { return true; }
+    virtual void init() override final;
+    virtual void eepromHandle() override final;
     void restoreFromConfiguration(int32_t _to) {
         to = _to;
     }
@@ -289,20 +326,25 @@ public:
         : StepperDriverBase(minES, maxES) { }
     virtual ~SimpleStepperDriver() { }
     virtual void init() { disable(); }
-    inline void step() final {
+    inline void step() override final {
         stepCls::on();
     }
-    inline void unstep() final {
+    /// Execute the step if motor end stop is not triggered
+    bool stepMotorEndStop() override final {
+        stepCls::on();
+        return true;
+    }
+    inline void unstep() override final {
         stepCls::off();
     }
-    inline void dir(bool d) final {
+    inline void dir(bool d) override final {
         dirCls::set(d);
         direction = d;
     }
-    inline void enable() final {
+    inline void enable() override final {
         enableCls::on();
     }
-    inline void disable() final {
+    inline void disable() override final {
         enableCls::off();
     }
 };
@@ -356,43 +398,48 @@ public:
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
         , driver(_driver)
         , isEnabled(false) { }
-    virtual void init() final;
+    virtual void init() override final;
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity);
-    inline void step() final {
+    inline void step() override final {
         stepCls::on();
     }
-    inline void unstep() final {
+    /// Execute the step if motor end stop is not triggered
+    bool stepMotorEndStop() override final {
+        stepCls::on();
+        return true;
+    }
+    inline void unstep() override final {
         stepCls::off();
     }
-    inline void dir(bool d) final {
+    inline void dir(bool d) override final {
         dirCls::set(d);
         direction = d;
     }
-    inline void enable() final {
+    inline void enable() override final {
         enableCls::on();
         isEnabled = true;
     }
-    inline void disable() final {
+    inline void disable() override final {
         enableCls::off();
         isEnabled = false;
     }
     void eepromHandle();
     void eepromReserve();
     // Return true if setting microsteps is supported
-    virtual bool implementsSetMicrosteps() final { return true; }
+    virtual bool implementsSetMicrosteps() override final { return true; }
     // Return true if setting current in software is supported
-    virtual bool implementsSetMaxCurrent() final { return true; }
+    virtual bool implementsSetMaxCurrent() override final { return true; }
     /// Set microsteps. Must be a power of 2.
-    virtual void setMicrosteps(int microsteps) final;
+    virtual void setMicrosteps(int microsteps) override final;
     /// Set max current as range 0..255 or mA depedning on driver
-    virtual void setMaxCurrent(int max) final;
+    virtual void setMaxCurrent(int max) override final;
     // Called before homing starts. Can be used e.g. to disable silent mode
     // or otherwise prepare for endstop detection.
-    virtual void beforeHoming() final;
-    virtual void afterHoming() final;
-    virtual void handleMCode(GCode& com) final;
-    virtual void menuConfig(GUIAction action, void* data) final;
-    virtual bool hasConfigMenu() final { return true; }
+    virtual void beforeHoming() override final;
+    virtual void afterHoming() override final;
+    virtual void handleMCode(GCode& com) override final;
+    virtual void menuConfig(GUIAction action, void* data) override final;
+    virtual bool hasConfigMenu() override final { return true; }
     void timer500ms();
 };
 
@@ -412,41 +459,46 @@ public:
         , isEnabled(false) { }
     virtual void init() final;
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity);
-    inline void step() final {
+    inline void step() override final {
         stepCls::on();
     }
-    inline void unstep() final {
+    /// Execute the step if motor end stop is not triggered
+    bool stepMotorEndStop() override final {
+        stepCls::on();
+        return true;
+    }
+    inline void unstep() override final {
         stepCls::off();
     }
-    inline void dir(bool d) final {
+    inline void dir(bool d) override final {
         dirCls::set(d);
         direction = d;
     }
-    inline void enable() final {
+    inline void enable() override final {
         enableCls::on();
         isEnabled = true;
     }
-    inline void disable() final {
+    inline void disable() override final {
         enableCls::off();
         isEnabled = false;
     }
-    virtual void eepromHandle() final;
+    virtual void eepromHandle() override final;
     void eepromReserve();
     // Return true if setting microsteps is supported
-    virtual bool implementsSetMicrosteps() final { return true; }
+    virtual bool implementsSetMicrosteps() override final { return true; }
     // Return true if setting current in software is supported
-    virtual bool implementsSetMaxCurrent() final { return true; }
+    virtual bool implementsSetMaxCurrent() override final { return true; }
     /// Set microsteps. Must be a power of 2.
-    virtual void setMicrosteps(int microsteps) final;
+    virtual void setMicrosteps(int microsteps) override final;
     /// Set max current as range 0..255 or mA depedning on driver
-    virtual void setMaxCurrent(int max) final;
+    virtual void setMaxCurrent(int max) override final;
     // Called before homing starts. Can be used e.g. to disable silent mode
     // or otherwise prepare for endstop detection.
-    virtual void beforeHoming() final;
-    virtual void afterHoming() final;
-    virtual void handleMCode(GCode& com) final;
-    virtual void menuConfig(GUIAction action, void* data) final;
-    virtual bool hasConfigMenu() final { return true; }
+    virtual void beforeHoming() override final;
+    virtual void afterHoming() override final;
+    virtual void handleMCode(GCode& com) override final;
+    virtual void menuConfig(GUIAction action, void* data) override final;
+    virtual bool hasConfigMenu() override final { return true; }
     void timer500ms();
 };
 
@@ -465,43 +517,48 @@ public:
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, -128)
         , driver(_driver)
         , isEnabled(false) { }
-    virtual void init() final;
+    virtual void init() override final;
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs);
-    inline void step() final {
+    inline void step() override final {
         stepCls::on();
     }
-    inline void unstep() final {
+    /// Execute the step if motor end stop is not triggered
+    bool stepMotorEndStop() override final {
+        stepCls::on();
+        return true;
+    }
+    inline void unstep() override final {
         stepCls::off();
     }
-    inline void dir(bool d) final {
+    inline void dir(bool d) override final {
         dirCls::set(d);
         direction = d;
     }
-    inline void enable() final {
+    inline void enable() override final {
         enableCls::on();
         isEnabled = true;
     }
-    inline void disable() final {
+    inline void disable() override final {
         enableCls::off();
         isEnabled = false;
     }
-    virtual void eepromHandle() final;
+    virtual void eepromHandle() override final;
     void eepromReserve();
     // Return true if setting microsteps is supported
-    virtual bool implementsSetMicrosteps() final { return true; }
+    virtual bool implementsSetMicrosteps() override final { return true; }
     // Return true if setting current in software is supported
-    virtual bool implementsSetMaxCurrent() final { return true; }
+    virtual bool implementsSetMaxCurrent() override final { return true; }
     /// Set microsteps. Must be a power of 2.
-    virtual void setMicrosteps(int microsteps) final;
+    virtual void setMicrosteps(int microsteps) override final;
     /// Set max current as range 0..255 or mA depedning on driver
-    virtual void setMaxCurrent(int max) final;
+    virtual void setMaxCurrent(int max) override final;
     // Called before homing starts. Can be used e.g. to disable silent mode
     // or otherwise prepare for endstop detection.
-    virtual void beforeHoming() final;
-    virtual void afterHoming() final;
-    virtual void handleMCode(GCode& com) final;
-    virtual void menuConfig(GUIAction action, void* data) final;
-    virtual bool hasConfigMenu() final { return true; }
+    virtual void beforeHoming() override final;
+    virtual void afterHoming() override final;
+    virtual void handleMCode(GCode& com) override final;
+    virtual void menuConfig(GUIAction action, void* data) override final;
+    virtual bool hasConfigMenu() override final { return true; }
     void timer500ms();
 };
 
@@ -529,43 +586,48 @@ public:
         }
 #endif
     }
-    virtual void init() final;
+    virtual void init() override final;
     void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int16_t _stallSensitivity);
-    inline void step() final {
+    inline void step() override final {
         stepCls::on();
     }
-    inline void unstep() final {
+    /// Execute the step if motor end stop is not triggered
+    bool stepMotorEndStop() override final {
+        stepCls::on();
+        return true;
+    }
+    inline void unstep() override final {
         stepCls::off();
     }
-    inline void dir(bool d) final {
+    inline void dir(bool d) override final {
         dirCls::set(d);
         direction = d;
     }
-    inline void enable() final {
+    inline void enable() override final {
         enableCls::on();
         isEnabled = true;
     }
-    inline void disable() final {
+    inline void disable() override final {
         enableCls::off();
         isEnabled = false;
     }
-    virtual void eepromHandle() final;
+    virtual void eepromHandle() override final;
     void eepromReserve();
     // Return true if setting microsteps is supported
-    virtual bool implementsSetMicrosteps() final { return true; }
+    virtual bool implementsSetMicrosteps() override final { return true; }
     // Return true if setting current in software is supported
-    virtual bool implementsSetMaxCurrent() final { return true; }
+    virtual bool implementsSetMaxCurrent() override final { return true; }
     /// Set microsteps. Must be a power of 2.
-    virtual void setMicrosteps(int microsteps) final;
+    virtual void setMicrosteps(int microsteps) override final;
     /// Set max current as range 0..255 or mA depedning on driver
-    virtual void setMaxCurrent(int max) final;
+    virtual void setMaxCurrent(int max) override final;
     // Called before homing starts. Can be used e.g. to disable silent mode
     // or otherwise prepare for endstop detection.
-    virtual void beforeHoming() final;
-    virtual void afterHoming() final;
-    virtual void handleMCode(GCode& com) final;
-    virtual void menuConfig(GUIAction action, void* data) final;
-    virtual bool hasConfigMenu() final { return true; }
+    virtual void beforeHoming() override final;
+    virtual void afterHoming() override final;
+    virtual void handleMCode(GCode& com) override final;
+    virtual void menuConfig(GUIAction action, void* data) override final;
+    virtual bool hasConfigMenu() override final { return true; }
     void timer500ms();
 };
 /// Plain stepper driver with optional endstops attached.
@@ -584,43 +646,68 @@ public:
         motor1->setAxis(ax);
         motor2->setAxis(ax);
     }
-    inline void step() final {
+    inline void step() override final {
         motor1->step();
         motor2->step();
     }
-    inline void unstep() final {
+    /// Execute the step if motor end stop is not triggered
+    bool stepMotorEndStop() override final {
+#if defined(NO_MOTOR_ENDSTOPS)
+        motor1->step();
+        motor2->step();
+        return true;
+#else
+        if (direction) {
+            if (!motor1->getMaxEndstop()->triggered()) {
+                motor1->step();
+            }
+            if (!motor2->getMaxEndstop()->triggered()) {
+                motor2->step();
+            }
+        } else {
+            if (!motor1->getMinEndstop()->triggered()) {
+                motor1->step();
+            }
+            if (!motor2->getMinEndstop()->triggered()) {
+                motor2->step();
+            }
+        }
+        return true;
+#endif
+    }
+    inline void unstep() override final {
         motor1->unstep();
         motor2->unstep();
     }
-    inline void dir(bool d) final {
+    inline void dir(bool d) override final {
         // Com::printFLN(PSTR("SD:"), (int)d);
         motor1->dir(d);
         motor2->dir(d);
         direction = d;
     }
-    inline void enable() final {
+    inline void enable() override final {
         motor1->enable();
         motor2->enable();
     }
-    inline void disable() final {
+    inline void disable() override final {
         motor1->disable();
         motor2->disable();
     }
-    inline void handleMCode(GCode& com) final {
+    inline void handleMCode(GCode& com) override final {
         motor1->handleMCode(com);
         motor2->handleMCode(com);
     }
     // If true the stepper usage will not offer resolution modification in GUI
-    virtual bool overridesResolution() { return motor1->overridesResolution() || motor2->overridesResolution(); }
+    virtual bool overridesResolution() override final { return motor1->overridesResolution() || motor2->overridesResolution(); }
     // Configuration in GUI
-    virtual void menuConfig(GUIAction action, void* data) {
+    virtual void menuConfig(GUIAction action, void* data) override final {
         motor1->menuConfig(action, data);
         motor2->menuConfig(action, data);
     }
-    virtual bool hasConfigMenu() final {
+    virtual bool hasConfigMenu() override final {
         return (motor1->hasConfigMenu() || motor2->hasConfigMenu());
     }
-    virtual void eepromHandle() final {
+    virtual void eepromHandle() override final {
         motor1->eepromHandle();
         motor2->eepromHandle();
     }
@@ -645,50 +732,82 @@ public:
         motor2->setAxis(ax);
         motor3->setAxis(ax);
     }
-    inline void step() final {
+    inline void step() override final {
         motor1->step();
         motor2->step();
         motor3->step();
     }
-    inline void unstep() final {
+    /// Execute the step if motor end stop is not triggered
+    bool stepMotorEndStop() override final {
+#if defined(NO_MOTOR_ENDSTOPS)
+        motor1->step();
+        motor2->step();
+        motor3->step();
+        return true;
+#else
+        if (direction) {
+            if (!motor1->getMaxEndstop()->triggered()) {
+                motor1->step();
+            }
+            if (!motor2->getMaxEndstop()->triggered()) {
+                motor2->step();
+            }
+            if (!motor3->getMaxEndstop()->triggered()) {
+                motor3->step();
+            }
+        } else {
+            if (!motor1->getMinEndstop()->triggered()) {
+                motor1->step();
+            }
+            if (!motor2->getMinEndstop()->triggered()) {
+                motor2->step();
+            }
+            if (!motor3->getMinEndstop()->triggered()) {
+                motor3->step();
+            }
+        }
+        return true;
+#endif
+    }
+    inline void unstep() override final {
         motor1->unstep();
         motor2->unstep();
         motor3->unstep();
     }
-    inline void dir(bool d) final {
+    inline void dir(bool d) override final {
         // Com::printFLN(PSTR("SD:"), (int)d);
         motor1->dir(d);
         motor2->dir(d);
         motor3->dir(d);
         direction = d;
     }
-    inline void enable() final {
+    inline void enable() override final {
         motor1->enable();
         motor2->enable();
         motor3->enable();
     }
-    inline void disable() final {
+    inline void disable() override final {
         motor1->disable();
         motor2->disable();
         motor3->disable();
     }
-    inline void handleMCode(GCode& com) final {
+    inline void handleMCode(GCode& com) override final {
         motor1->handleMCode(com);
         motor2->handleMCode(com);
         motor3->handleMCode(com);
     }
     // If true the stepper usage will not offer resolution modification in GUI
-    virtual bool overridesResolution() { return motor1->overridesResolution() || motor2->overridesResolution() || motor3->overridesResolution(); }
+    virtual bool overridesResolution() override final { return motor1->overridesResolution() || motor2->overridesResolution() || motor3->overridesResolution(); }
     // Configuration in GUI
-    virtual void menuConfig(GUIAction action, void* data) {
+    virtual void menuConfig(GUIAction action, void* data) override final {
         motor1->menuConfig(action, data);
         motor2->menuConfig(action, data);
         motor3->menuConfig(action, data);
     }
-    virtual bool hasConfigMenu() final {
+    virtual bool hasConfigMenu() override final {
         return (motor1->hasConfigMenu() || motor2->hasConfigMenu() || motor3->hasConfigMenu());
     }
-    virtual void eepromHandle() final {
+    virtual void eepromHandle() override final {
         motor1->eepromHandle();
         motor2->eepromHandle();
         motor3->eepromHandle();
@@ -710,26 +829,65 @@ public:
         m3->setParent(this);
         m4->setParent(this);
     }
-    virtual void setAxis(fast8_t ax) {
+    virtual void setAxis(fast8_t ax) override final {
         StepperDriverBase::setAxis(ax);
         motor1->setAxis(ax);
         motor2->setAxis(ax);
         motor3->setAxis(ax);
         motor4->setAxis(ax);
     }
-    inline void step() final {
+    inline void step() override final {
         motor1->step();
         motor2->step();
         motor3->step();
         motor4->step();
     }
-    inline void unstep() final {
+    /// Execute the step if motor end stop is not triggered
+    bool stepMotorEndStop() override final {
+#if defined(NO_MOTOR_ENDSTOPS)
+        motor1->step();
+        motor2->step();
+        motor3->step();
+        motor4->step();
+        return true;
+#else
+        if (direction) {
+            if (!motor1->getMaxEndstop()->triggered()) {
+                motor1->step();
+            }
+            if (!motor2->getMaxEndstop()->triggered()) {
+                motor2->step();
+            }
+            if (!motor3->getMaxEndstop()->triggered()) {
+                motor3->step();
+            }
+            if (!motor4->getMaxEndstop()->triggered()) {
+                motor4->step();
+            }
+        } else {
+            if (!motor1->getMinEndstop()->triggered()) {
+                motor1->step();
+            }
+            if (!motor2->getMinEndstop()->triggered()) {
+                motor2->step();
+            }
+            if (!motor3->getMinEndstop()->triggered()) {
+                motor3->step();
+            }
+            if (!motor4->getMinEndstop()->triggered()) {
+                motor4->step();
+            }
+        }
+        return true;
+#endif
+    }
+    inline void unstep() override final {
         motor1->unstep();
         motor2->unstep();
         motor3->unstep();
         motor4->unstep();
     }
-    inline void dir(bool d) final {
+    inline void dir(bool d) override final {
         // Com::printFLN(PSTR("SD:"), (int)d);
         motor1->dir(d);
         motor2->dir(d);
@@ -737,37 +895,37 @@ public:
         motor4->dir(d);
         direction = d;
     }
-    inline void enable() final {
+    inline void enable() override final {
         motor1->enable();
         motor2->enable();
         motor3->enable();
         motor4->enable();
     }
-    inline void disable() final {
+    inline void disable() override final {
         motor1->disable();
         motor2->disable();
         motor3->disable();
         motor4->disable();
     }
-    inline void handleMCode(GCode& com) final {
+    inline void handleMCode(GCode& com) override final {
         motor1->handleMCode(com);
         motor2->handleMCode(com);
         motor3->handleMCode(com);
         motor4->handleMCode(com);
     }
     // If true the stepper usage will not offer resolution modification in GUI
-    virtual bool overridesResolution() { return motor1->overridesResolution() || motor2->overridesResolution() || motor3->overridesResolution() || motor4->overridesResolution(); }
+    virtual bool overridesResolution() override final { return motor1->overridesResolution() || motor2->overridesResolution() || motor3->overridesResolution() || motor4->overridesResolution(); }
     // Configuration in GUI
-    virtual void menuConfig(GUIAction action, void* data) {
+    virtual void menuConfig(GUIAction action, void* data) override final {
         motor1->menuConfig(action, data);
         motor2->menuConfig(action, data);
         motor3->menuConfig(action, data);
         motor4->menuConfig(action, data);
     }
-    virtual bool hasConfigMenu() final {
+    virtual bool hasConfigMenu() override final {
         return (motor1->hasConfigMenu() || motor2->hasConfigMenu() || motor3->hasConfigMenu() || motor4->hasConfigMenu());
     }
-    virtual void eepromHandle() final {
+    virtual void eepromHandle() override final {
         motor1->eepromHandle();
         motor2->eepromHandle();
         motor3->eepromHandle();
