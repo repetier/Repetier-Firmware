@@ -498,9 +498,9 @@ void __attribute__((weak)) GCode_30(GCode* com) {
 void __attribute__((weak)) GCode_31(GCode* com) {
     // G31 display hall sensor output
     if (ZProbe != nullptr) {
-        ZProbe->update();
         Com::printF(Com::tZProbeState);
-        Com::printFLN(ZProbe->triggered() ? Com::tHSpace : Com::tLSpace);
+        ZProbe->report();
+        Com::println();
     }
 }
 

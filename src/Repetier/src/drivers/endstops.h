@@ -114,6 +114,10 @@ public:
     inline virtual bool isAttached() final {
         return attached;
     }
+    void report() override {
+        updateReal();
+        Com::printF(update() ? Com::tHSpace : Com::tLSpace);
+    }
 };
 
 template <class inp, int level>
@@ -188,11 +192,14 @@ public:
         return (e1->isAttached() && e2->isAttached());
     }
     virtual void report() override final {
+        bool attache = isAttached();
+        setAttached(true);
         Com::printF(update() ? Com::tHSpace : Com::tLSpace);
         Com::print('(');
         e1->report();
         e2->report();
         Com::print(')');
+        setAttached(attache);
     }
     virtual void updateMaster() override final {
         fast8_t oldState = state;
@@ -258,12 +265,15 @@ public:
         return (e1->isAttached() && e2->isAttached() && e3->isAttached());
     }
     virtual void report() override final {
+        bool attache = isAttached();
+        setAttached(true);
         Com::printF(update() ? Com::tHSpace : Com::tLSpace);
         Com::print('(');
         e1->report();
         e2->report();
         e3->report();
         Com::print(')');
+        setAttached(attache);
     }
     virtual void updateMaster() override final {
         fast8_t oldState = state;
@@ -336,6 +346,8 @@ public:
         return (e1->isAttached() && e2->isAttached() && e3->isAttached() && e4->isAttached());
     }
     virtual void report() override final {
+        bool attache = isAttached();
+        setAttached(true);
         Com::printF(update() ? Com::tHSpace : Com::tLSpace);
         Com::print('(');
         e1->report();
@@ -343,6 +355,7 @@ public:
         e3->report();
         e4->report();
         Com::print(')');
+        setAttached(attache);
     }
     virtual void updateMaster() override final {
         fast8_t oldState = state;

@@ -898,7 +898,11 @@ void Leveling::exportBumpMatrix(char* filename) {
     tempFile.printField(static_cast<fast8_t>(Motion1::isAutolevelActive()), ',');
     tempFile.printField(static_cast<fast8_t>(curGridSize), ',');
     tempFile.printField(roundf(gridTemp), ',', 1u);
-    tempFile.printField(static_cast<float>(Z_PROBE_HEIGHT), ',', 4u);
+    if (ZProbe) {
+        tempFile.printField(ZProbe->getZProbeHeight(), ',', 4u);
+    } else {
+        tempFile.printField(static_cast<float>(Z_PROBE_HEIGHT), ',', 4u);
+    }
     tempFile.printField(Motion1::maxPos[Z_AXIS], '\n', 5u);
 
     for (size_t iy = 0u; iy < curGridSize; iy++) {

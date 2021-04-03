@@ -530,7 +530,12 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define ZHOME_MIN_TEMPERATURE 0
 #define ZHOME_HEAT_ALL 0
 #define ZHOME_HEIGHT 0
-#if STACKER_WITH_ZPROBE
+#if STACKER_2_Z_END_STOPS
+#define FIXED_Z_HOME_POSITION 0
+#define ZHOME_X_POS 0
+#define ZHOME_Y_POS 0
+#elif STACKER_WITH_ZPROBE
+// Need to ensure we are above bed when using z probe
 #define FIXED_Z_HOME_POSITION 1
 #define ZHOME_X_POS 50
 #define ZHOME_Y_POS 50
