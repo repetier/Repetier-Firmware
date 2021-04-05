@@ -915,15 +915,26 @@ void SDCard::deleteFile(const char* filename) {
         return;
     }
     fileSystem.chdir();
-    if (fileSystem.remove(filename)) {
+    if (fileSystem.rmdir(filename)) {
         Com::printFLN(Com::tFileDeleted);
-    } else {
-        if (fileSystem.rmdir(filename)) {
+        return;
+    }
+
+#if EEPROM_AVAILABLE == EEPROM_SDCARD // allow deleting eeprom.bin, but make sure we close the handler too.
+    if (eepromFile.isOpen() && !strcmp(filename, getFN(eepromFile))) {
+        eepromFile.remove();
+        Com::printFLN(Com::tFileDeleted);
+        return;
+    }
+#endif
+
+    if (!(selectedFile.isOpen() && !strcmp(filename, getFN(selectedFile)))) {
+        if (fileSystem.remove(filename)) {
             Com::printFLN(Com::tFileDeleted);
-        } else {
-            Com::printFLN(Com::tDeletionFailed);
+            return;
         }
     }
+    Com::printFLN(Com::tDeletionFailed);
 }
 
 void SDCard::makeDirectory(const char* filename) {
