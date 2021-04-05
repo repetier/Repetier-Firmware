@@ -272,6 +272,7 @@ void SDCard::unmount(const bool manual) {
     GUI::cwd[0u] = '/';
     GUI::cwd[1u] = '\0';
     GUI::folderLevel = 0u;
+    GUI::cwdFile.close();
 
 #if SDFAT_FILE_TYPE == 3 // When using FSVolume (ExFAT & FAT)
     fileSystem.end();

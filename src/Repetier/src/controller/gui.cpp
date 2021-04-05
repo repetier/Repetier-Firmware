@@ -35,6 +35,7 @@ probeProgInfo* GUI::curProbingProgress = nullptr;
 #if SDSUPPORT
 char GUI::cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2] = { '/', 0 };
 uint8_t GUI::folderLevel = 0;
+sd_file_t GUI::cwdFile;
 #endif
 
 #if DISPLAY_DRIVER == DRIVER_NONE

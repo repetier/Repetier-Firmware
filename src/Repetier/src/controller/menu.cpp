@@ -739,7 +739,7 @@ void __attribute__((weak)) menuSDStartPrint(GUIAction action, void* data) {
         return;
     }
     sd_file_t file;
-    if (file.open(sd.fileSystem.cwv(), pos, O_RDONLY)) {
+    if (file.open(&sd.fileSystem, pos, O_RDONLY)) {
         sd.getFN(file);
         if (file.isDir()) {
             file.close();
@@ -761,11 +761,10 @@ void __attribute__((weak)) menuSDStartPrint(GUIAction action, void* data) {
             GUI::replace(menuSDPrint, data, GUIPageType::MENU);
         } else { // File for print selected instead
             file.close();
-            sd.fileSystem.chdir(GUI::cwd);
             if (sd.selectFile(tempLongFilename)) {
                 GUI::pop();
-                GUI::cwd[0] = '/'; // reset the GUI directory
-                GUI::cwd[1] = '\0';
+                GUI::cwd[0u] = '/'; // reset the GUI directory
+                GUI::cwd[1u] = '\0';
                 GUI::folderLevel = 0u;
                 sd.startPrint();
             }
@@ -799,13 +798,20 @@ static bool menuSDFilterName(sd_file_t* file, char* tempFilename, size_t size) {
     return true;
 }
 #if ENABLED(SD_MENU_CACHE_SCROLL_ENTRIES)
-constexpr uint8_t menuSDCacheRows = 5u;
-constexpr uint8_t menuSDCacheNameLen = LONG_FILENAME_LENGTH;
+static constexpr uint8_t menuSDCacheRows = 5u;
+static constexpr uint8_t menuSDCacheNameLen = sizeof(tempLongFilename);
 static uint16_t menuSDCacheLastIndexPos = 0u;
 static struct menuSDCacheStruct {
     uint16_t dirIndexPos;
-    char name[menuSDCacheNameLen + 1];
+    char name[menuSDCacheNameLen];
 } menuSDNameCache[menuSDCacheRows] = { 0 };
+static constexpr uint16_t menuSDCacheMinIndexGap = 5u;
+static constexpr ufast8_t menuSDCacheMaxGaps = 15u;
+// Fights cluster fragmentation issues. Small flash footprint.
+static struct menuSDCacheGapStruct {
+    uint16_t gapStart;
+    uint16_t gapEnd;
+} menuSDCacheGaps[menuSDCacheMaxGaps] = { 0 };
 
 void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
     GUI::menuStart(action);
@@ -829,97 +835,144 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
     }
 
     static bool reversedDir = false;
-    static uint16_t lastRowDirItem = 0u, dirItemCount = 0u, dirMaxIndex = 0u;
+    static uint16_t lastRowDirItem = 0u, dirItemCount = 0u, analyzedGapMinDir = 0u;
     static uint8_t lastRow = 0u;
-    sd.fileSystem.chdir(GUI::cwd);
-    sd_file_t curDir = sd.fileSystem.open(GUI::cwd);
 
-    if (action == GUIAction::ANALYSE) {
-        curDir.rewind();
+    if (action == GUIAction::ANALYSE || !GUI::cwdFile.isOpen()) {
+        GUI::cwdFile.open(&sd.fileSystem, GUI::cwd, O_RDONLY);
         lastRow = 0u;
-        lastRowDirItem = 0u;
-        dirItemCount = 0u;
-        dirMaxIndex = 0u;
-        size_t renderedRows = 0u;
+        lastRowDirItem = dirItemCount = 0u;
         reversedDir = false;
+        memset(menuSDCacheGaps, 0u, sizeof(menuSDCacheGaps));
         memset(menuSDNameCache, 0u, sizeof(menuSDNameCache));
-        sd.doForDirectory(curDir, [&](sd_file_t file, sd_file_t dir, size_t depth) {
+        uint16_t prevDirIndex = 0u;
+        sd.doForDirectory(GUI::cwdFile, [&](sd_file_t file, sd_file_t dir, size_t depth) {
             if (menuSDFilterName(&file, sd.getFN(file), menuSDCacheNameLen)) {
-                if (renderedRows < menuSDCacheRows) {
-                    memcpy(menuSDNameCache[renderedRows].name, tempLongFilename, menuSDCacheNameLen);
-                    menuSDNameCache[renderedRows++].dirIndexPos = file.dirIndex();
-                }
-                if (file.dirIndex() > dirMaxIndex) {
-                    dirMaxIndex = file.dirIndex();
+                if (dirItemCount < menuSDCacheRows) {
+                    memcpy(menuSDNameCache[dirItemCount].name, tempLongFilename, menuSDCacheNameLen);
+                    menuSDNameCache[dirItemCount].dirIndexPos = file.dirIndex();
+                    // append to cached gaps if it's a large gap
+                    if ((file.dirIndex() - prevDirIndex) >= menuSDCacheMinIndexGap) {
+                        memmove(&menuSDCacheGaps[0u], &menuSDCacheGaps[1u], (menuSDCacheMaxGaps - 1u) * sizeof(menuSDCacheGaps[0u]));
+                        menuSDCacheGaps[menuSDCacheMaxGaps - 1u].gapStart = prevDirIndex;
+                        menuSDCacheGaps[menuSDCacheMaxGaps - 1u].gapEnd = file.dirIndex();
+                    }
+                    prevDirIndex = file.dirIndex();
                 }
                 dirItemCount++;
             }
             return true;
         });
+        analyzedGapMinDir = menuSDCacheGaps[menuSDCacheMaxGaps - 1u].gapEnd;
         menuSDCacheLastIndexPos = menuSDNameCache[menuSDCacheRows - 1u].dirIndexPos;
     }
-    for (size_t i = 0u; i < menuSDCacheRows; i++) {
-        if (menuSDNameCache[i].name[0u] != '\0') { // just in case.
-            GUI::menuSelectable(action, menuSDNameCache[i].name, menuSDStartPrint,
-                                reinterpret_cast<void*>(menuSDNameCache[i].dirIndexPos), GUIPageType::ACTION);
+    for (ufast8_t i = 0u; i < menuSDCacheRows; i++) {
+        if (menuSDNameCache[i].name[0u] != '\0') {
+            GUI::menuSelectable(action, menuSDNameCache[i].name, menuSDStartPrint, reinterpret_cast<void*>(menuSDNameCache[i].dirIndexPos), GUIPageType::ACTION);
         }
     }
-    uint8_t curRow = GUI::cursorRow[GUI::level];
+    uint16_t curScrollPos = (!lastRowDirItem ? lastRowDirItem + (GUI::topRow[GUI::level])
+                                             : lastRowDirItem + 2u);
     if (GUI::length[GUI::level] > menuSDCacheRows + 1) {
         if (action == GUIAction::NEXT
-            && curRow == lastRow
-            && menuSDCacheLastIndexPos < dirMaxIndex
-            && curRow >= GUI::maxCursorRow[GUI::level]) {
+            && GUI::cursorRow[GUI::level] == lastRow
+            && curScrollPos < (dirItemCount - 3u)
+            && GUI::cursorRow[GUI::level] >= GUI::maxCursorRow[GUI::level]) {
             if (reversedDir) {
                 menuSDCacheLastIndexPos = menuSDNameCache[menuSDCacheRows - 1u].dirIndexPos;
             }
+            GUI::cwdFile.seekSet(32u * (menuSDCacheLastIndexPos + 1u));
             reversedDir = false;
-            uint16_t startDirIndex = menuSDCacheLastIndexPos; // caps scan max
-            bool hit = false;
+            uint16_t prevDirIndex = menuSDCacheLastIndexPos;
             sd_file_t file;
-            while (!hit && ((menuSDCacheLastIndexPos - startDirIndex) < 0xff)
-                   && menuSDCacheLastIndexPos < dirMaxIndex) {
-                if (file.open(&curDir, ++menuSDCacheLastIndexPos, O_RDONLY)
-                    && menuSDFilterName(&file, sd.getFN(file), menuSDCacheNameLen)) {
+            // openNext uses FAT cluster chains to traverse, so it's very fast.
+            while (file.openNext(&GUI::cwdFile)) {
+                if (menuSDFilterName(&file, sd.getFN(file), menuSDCacheNameLen)) {
+                    if (prevDirIndex && (file.dirIndex() - prevDirIndex) >= menuSDCacheMinIndexGap
+                        && menuSDCacheGaps[menuSDCacheMaxGaps - 1u].gapStart != prevDirIndex) {
+                        if (prevDirIndex > menuSDCacheGaps[menuSDCacheMaxGaps - 1u].gapStart) {
+                            if (analyzedGapMinDir && menuSDCacheGaps[0u].gapEnd == analyzedGapMinDir) {
+                                analyzedGapMinDir = 0u;
+                            }
+                            memmove(&menuSDCacheGaps[0u], &menuSDCacheGaps[1u], (menuSDCacheMaxGaps - 1u) * sizeof(menuSDCacheGaps[0u]));
+                            menuSDCacheGaps[menuSDCacheMaxGaps - 1u].gapStart = prevDirIndex;
+                            menuSDCacheGaps[menuSDCacheMaxGaps - 1u].gapEnd = file.dirIndex();
+                        }
+                    }
+                    prevDirIndex = file.dirIndex(); // save start index of this file for next itr.
                     memmove(&menuSDNameCache[0u], &menuSDNameCache[1u], (menuSDCacheRows - 1u) * sizeof(menuSDNameCache[0u]));
                     memcpy(menuSDNameCache[menuSDCacheRows - 1u].name, tempLongFilename, menuSDCacheNameLen);
-                    menuSDNameCache[menuSDCacheRows - 1u].dirIndexPos = file.dirIndex();
-                    hit = true;
+                    menuSDCacheLastIndexPos = file.dirIndex();
+                    menuSDNameCache[menuSDCacheRows - 1u].dirIndexPos = menuSDCacheLastIndexPos;
                     lastRowDirItem++;
+                    if (!--GUI::nextActionRepeat) {
+                        break;
+                    }
                 }
             }
             file.close();
-        } else if (curRow <= GUI::topRow[GUI::level]) {
-            if (GUI::nextAction == GUIAction::PREVIOUS && menuSDCacheLastIndexPos) {
+        } else if (GUI::nextAction == GUIAction::PREVIOUS && menuSDCacheLastIndexPos) {
+            if (GUI::cursorRow[GUI::level] <= GUI::topRow[GUI::level]) {
                 if (!reversedDir) {
                     menuSDCacheLastIndexPos = menuSDNameCache[0u].dirIndexPos;
                 }
                 reversedDir = true;
-                bool hit = false;
                 sd_file_t file;
-                while (!hit && menuSDCacheLastIndexPos) {
-                    if (file.open(&curDir, --menuSDCacheLastIndexPos, O_RDONLY)
+                // Cluster chains don't go backwards. We need to seek manually. 32 bytes each step.
+                while (menuSDCacheLastIndexPos) {
+                    // check if this index was marked as the end of a big gap jump
+                    ufast8_t i = menuSDCacheMaxGaps - 1u; // start from the back
+                    while (i && menuSDCacheGaps[i].gapEnd) {
+                        if (menuSDCacheGaps[i].gapEnd == menuSDCacheLastIndexPos) {
+                            // update our next index to the start of the gap
+                            menuSDCacheLastIndexPos = menuSDCacheGaps[i].gapStart + 1u;
+                            // LIFO.
+                            if (!analyzedGapMinDir || (menuSDCacheLastIndexPos > analyzedGapMinDir)) {
+                                ufast8_t x = (menuSDCacheMaxGaps - i);
+                                memmove(&menuSDCacheGaps[x], &menuSDCacheGaps[0u], (menuSDCacheMaxGaps - x) * sizeof(menuSDCacheGaps[0u]));
+                                while (x--) {
+                                    menuSDCacheGaps[x].gapStart = 0u;
+                                    menuSDCacheGaps[x].gapEnd = 0u;
+                                }
+                            }
+                            break;
+                        }
+                        i--;
+                    }
+
+                    if (file.open(&GUI::cwdFile, --menuSDCacheLastIndexPos, O_RDONLY)
                         && menuSDFilterName(&file, sd.getFN(file), menuSDCacheNameLen)) {
                         memmove(&menuSDNameCache[1u], &menuSDNameCache[0u], (menuSDCacheRows - 1u) * sizeof(menuSDNameCache[0u]));
                         memcpy(menuSDNameCache[0u].name, tempLongFilename, menuSDCacheNameLen);
-                        menuSDNameCache[0u].dirIndexPos = file.dirIndex();
-                        hit = true;
+                        menuSDNameCache[0u].dirIndexPos = menuSDCacheLastIndexPos;
                         lastRowDirItem--;
+                        if (GUI::nextActionRepeat < 2) {
+                            break;
+                        } else {
+                            GUI::nextActionRepeat--;
+                        }
                     }
                 }
                 file.close();
                 if (menuSDCacheLastIndexPos) {
                     GUI::cursorRow[GUI::level]++;
                 }
+            } else if (GUI::nextActionRepeat > 1) { // Small fix for reverse speed
+                GUI::cursorRow[GUI::level] -= GUI::nextActionRepeat - 1;
+                if (GUI::cursorRow[GUI::level] <= GUI::topRow[GUI::level]) {
+                    GUI::cursorRow[GUI::level] = GUI::topRow[GUI::level] + 1;
+                }
             }
         }
-        uint16_t curScrollPos = lastRowDirItem;
-        curScrollPos += !lastRowDirItem ? (GUI::topRow[GUI::level] + 1u) : 3u;
-        GUI::showScrollbar(action, static_cast<float>(curScrollPos - 1u) / static_cast<float>(dirItemCount - 3u), 5u, dirItemCount);
     }
-    curDir.close();
-    lastRow = curRow; // For scrolling to the last row without doing a scan/moving the list.
-    GUI::menuEnd(action);
+    if (GUI::length[GUI::level] > 5) {
+        GUI::showScrollbar(action, static_cast<float>(curScrollPos) / static_cast<float>(dirItemCount - 3u), 5u, dirItemCount);
+    }
+    lastRow = GUI::cursorRow[GUI::level]; // For scrolling to the last row without doing a scan/moving the list.
+    if (!(GUI::nextAction == GUIAction::PREVIOUS && menuSDCacheLastIndexPos)) {
+        GUI::menuAffectBySpeed(action);
+    }
+    GUI::menuEnd(action, false, false);
 }
 #else
 void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
@@ -943,10 +996,11 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
         GUI::menuBack(action);
     }
 
-    sd.fileSystem.chdir(GUI::cwd);
-    sd_file_t curDir = sd.fileSystem.open(GUI::cwd);
+    if (action == GUIAction::ANALYSE || !GUI::cwdFile.isOpen()) {
+        GUI::cwdFile.open(&sd.fileSystem, GUI::cwd, O_RDONLY);
+    }
     ufast8_t count = 0u;
-    sd.doForDirectory(curDir, [&](sd_file_t file, sd_file_t dir, size_t depth) {
+    sd.doForDirectory(GUI::cwdFile, [&](sd_file_t file, sd_file_t dir, size_t depth) {
         if (menuSDFilterName(&file, sd.getFN(file), sizeof(tempLongFilename))) {
             GUI::menuSelectable(action, tempLongFilename, menuSDStartPrint, reinterpret_cast<void*>(file.dirIndex()), GUIPageType::ACTION);
             if (count++ > 200u) { // Arbitrary maximum, limited only by how long someone would scroll
@@ -955,10 +1009,6 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
         }
         return true;
     });
-    /* if (count > 3u) {
-        GUI::showScrollbar(action);
-    } */
-    curDir.close();
     GUI::menuEnd(action);
 }
 #endif
