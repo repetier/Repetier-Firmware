@@ -491,6 +491,9 @@ void Commands::processMCode(GCode* com) {
     case 36: // M36 JSON File Info
         MCode_36(com);
         break;
+    case 39: // M39 Print SD card info
+        MCode_39(com);
+        break;
     case 42: // M42 -Change pin status via gcode
         MCode_42(com);
         break;

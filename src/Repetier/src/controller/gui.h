@@ -175,6 +175,7 @@ public:
 #if SDSUPPORT
     static char cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2];
     static uint8_t folderLevel;
+    static sd_file_t cwdFile;
 #endif
 
     static void bufClear();

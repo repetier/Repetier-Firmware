@@ -152,6 +152,7 @@ FSTRINGVALUE(Com::tTestM999, "Testing fatal error")
 FSTRINGVALUE(Com::tColdExtrusionPrevented, "Cold extrusion prevented")
 #if JSON_OUTPUT
 FSTRINGVALUE(Com::tJSONDir, "{\"dir\":\"")
+FSTRINGVALUE(Com::tJSONSDInfo, "{\"SDinfo\":")
 FSTRINGVALUE(Com::tJSONFiles, "\",\"files\":[")
 FSTRINGVALUE(Com::tJSONArrayEnd, "]}")
 FSTRINGVALUE(Com::tJSONErrorStart, "{\"err\":\"")
@@ -624,6 +625,11 @@ void Com::printF(FSTRINGPARAM(text), uint32_t value) {
     printNumber(value);
 }
 
+void Com::printF(FSTRINGPARAM(text), uint64_t value) {
+    printF(text);
+    printNumber(value);
+}
+
 void Com::printFLN(FSTRINGPARAM(text), int value) {
     printF(text);
     print(value);
@@ -637,6 +643,12 @@ void Com::printFLN(FSTRINGPARAM(text), int32_t value) {
 }
 
 void Com::printFLN(FSTRINGPARAM(text), uint32_t value) {
+    printF(text);
+    printNumber(value);
+    println();
+}
+
+void Com::printFLN(FSTRINGPARAM(text), uint64_t value) {
     printF(text);
     printNumber(value);
     println();
@@ -669,7 +681,7 @@ void Com::print(long value) {
         GCodeSource::writeToAll('-');
         value = -value;
     }
-    printNumber(value);
+    printNumber(static_cast<uint32_t>(value));
 }
 void Com::print(bool value, BoolFormat format) {
     switch (format) {
@@ -695,6 +707,17 @@ void Com::print(bool value, BoolFormat format) {
         }
         break;
     }
+}
+void Com::printNumber(uint64_t n) {
+    char buf[21]; // Assumes 8-bit chars plus zero byte.
+    char *str = &buf[sizeof(buf) - 1];
+    *str = '\0';
+    do {
+        uint64_t m = n;
+        n /= 10;
+        *--str = '0' + (m - 10 * n);
+    } while (n);
+    print(str);
 }
 void Com::printNumber(uint32_t n) {
     char buf[11]; // Assumes 8-bit chars plus zero byte.

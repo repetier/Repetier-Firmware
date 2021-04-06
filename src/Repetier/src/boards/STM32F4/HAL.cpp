@@ -694,11 +694,13 @@ void HAL::syncEEPROM() {                                     // store to disk if
             return;
         }
 
-        eepromFile.rewind();
-        if ((eepromFile.write(virtualEeprom, EEPROM_BYTES) != EEPROM_BYTES
-             || !eepromFile.sync())) {
+        if (!eepromFile.isOpen()
+            || eepromFile.write(virtualEeprom, EEPROM_BYTES) != EEPROM_BYTES
+            || !eepromFile.sync()) {
             Com::printErrorFLN(PSTR("Could not write eeprom to sd card"));
             sd.printIfCardErrCode();
+        } else {
+            eepromFile.rewind();
         }
     }
 }
