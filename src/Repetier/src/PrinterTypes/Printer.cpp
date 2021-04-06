@@ -1294,6 +1294,9 @@ void Printer::continuePrint() {
 #endif
         if (Printer::isMenuMode(MENU_MODE_PAUSED)) {
         GCodeSource::printAllFLN(PSTR("RequestContinue:"));
+#if !defined(DISABLE_PRINTMODE_ON_PAUSE) || DISABLE_PRINTMODE_ON_PAUSE == 1
+        Printer::setPrinting(true);
+#endif
     }
     setMenuMode(MENU_MODE_PAUSED, false);
 }
