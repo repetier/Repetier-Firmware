@@ -77,6 +77,14 @@ void SDCard::automount() {
 #endif
 }
 
+#ifdef CREATE_SPI2
+SPIClass CREATE_SPI2(SPI2_MOSI_PIN, SPI2_MISO_PIN, SPI2_SCK_PIN, SDSS);
+#endif
+
+#ifndef SD_SPI_ADDRESS
+#define SD_SPI_ADDRESS &SPI
+#endif
+
 void SDCard::mount(const bool manual) {
 #if SDSS > -1
     if (state > SDState::SD_SAFE_EJECTED) {
@@ -96,7 +104,7 @@ void SDCard::mount(const bool manual) {
 #if defined(ENABLE_SOFTWARE_SPI_CLASS) && ENABLE_SOFTWARE_SPI_CLASS
     SdSpiConfig spiConfig = SdSpiConfig(SDSS, ENABLE_DEDICATED_SPI ? DEDICATED_SPI : SHARED_SPI, SD_SCK_MHZ(constrain(SD_SPI_SPEED_MHZ, 1ul, 50ul)), &softSpi);
 #else
-    SdSpiConfig spiConfig = SdSpiConfig(SDSS, ENABLE_DEDICATED_SPI ? DEDICATED_SPI : SHARED_SPI, SD_SCK_MHZ(constrain(SD_SPI_SPEED_MHZ, 1ul, 50ul)));
+    SdSpiConfig spiConfig = SdSpiConfig(SDSS, ENABLE_DEDICATED_SPI ? DEDICATED_SPI : SHARED_SPI, SD_SCK_MHZ(constrain(SD_SPI_SPEED_MHZ, 1ul, 50ul)), SD_SPI_ADDRESS);
 #endif
     if (!fileSystem.begin(spiConfig)) {
         if (mountRetries < 3u) {

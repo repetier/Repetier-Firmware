@@ -897,7 +897,7 @@ void Leveling::exportBumpMatrix(char* filename) {
     tempFile.printField(static_cast<fast8_t>(curGridSize), ',');
     tempFile.printField(roundf(gridTemp), ',', 1u);
     if (ZProbe) {
-        tempFile.printField(ZProbe->getZProbeHeight(), ',', 4u);
+        tempFile.printField(ZProbeHandler::getZProbeHeight(), ',', 4u);
     } else {
         tempFile.printField(static_cast<float>(Z_PROBE_HEIGHT), ',', 4u);
     }
