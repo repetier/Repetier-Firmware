@@ -710,7 +710,7 @@ void Com::print(bool value, BoolFormat format) {
 }
 void Com::printNumber(uint64_t n) {
     char buf[21]; // Assumes 8-bit chars plus zero byte.
-    char *str = &buf[sizeof(buf) - 1];
+    char* str = &buf[sizeof(buf) - 1];
     *str = '\0';
     do {
         uint64_t m = n;

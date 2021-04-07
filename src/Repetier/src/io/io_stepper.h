@@ -23,9 +23,13 @@
 #undef STEPPER_OBSERVEABLE
 #undef STEPPER_ADJUST_RESOLUTION
 #undef STEPPER_TMC2130_HW_SPI
+#undef STEPPER_TMC2660_HW_SPI
 #undef STEPPER_TMC5160_HW_SPI
+#undef STEPPER_TMC5161_HW_SPI
 #undef STEPPER_TMC2130_SW_SPI
+#undef STEPPER_TMC2660_SW_SPI
 #undef STEPPER_TMC5160_SW_SPI
+#undef STEPPER_TMC5161_SW_SPI
 #undef STEPPER_TMC2208_HW_UART
 #undef STEPPER_TMC2209_HW_UART
 #undef STEPPER_TMC2209_SW_UART
@@ -39,18 +43,34 @@
     extern TMC2130Stepper name##Inst; \
     extern TMCStepper2130Driver<stepPin, dirPin, enablePin, fclk> name; \
     typedef TMCStepper2130Driver<stepPin, dirPin, enablePin, fclk> name##Type;
+#define STEPPER_TMC2660_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    extern TMC2660Stepper name##Inst; \
+    extern TMCStepper2660Driver<stepPin, dirPin, enablePin, fclk> name; \
+    typedef TMCStepper2660Driver<stepPin, dirPin, enablePin, fclk> name##Type;
 #define STEPPER_TMC5160_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     extern TMC5160Stepper name##Inst; \
     extern TMCStepper5160Driver<stepPin, dirPin, enablePin, fclk> name; \
     typedef TMCStepper5160Driver<stepPin, dirPin, enablePin, fclk> name##Type;
+#define STEPPER_TMC5161_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    extern TMC5161Stepper name##Inst; \
+    extern TMCStepper5161Driver<stepPin, dirPin, enablePin, fclk> name; \
+    typedef TMCStepper5161Driver<stepPin, dirPin, enablePin, fclk> name##Type;
 #define STEPPER_TMC2130_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     extern TMC2130Stepper name##Inst; \
     extern TMCStepper2130Driver<stepPin, dirPin, enablePin, fclk> name; \
     typedef TMCStepper2130Driver<stepPin, dirPin, enablePin, fclk> name##Type;
+#define STEPPER_TMC2660_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    extern TMC2660Stepper name##Inst; \
+    extern TMCStepper2660Driver<stepPin, dirPin, enablePin, fclk> name; \
+    typedef TMCStepper2660Driver<stepPin, dirPin, enablePin, fclk> name##Type;
 #define STEPPER_TMC5160_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     extern TMC5160Stepper name##Inst; \
     extern TMCStepper5160Driver<stepPin, dirPin, enablePin, fclk> name; \
     typedef TMCStepper5160Driver<stepPin, dirPin, enablePin, fclk> name##Type;
+#define STEPPER_TMC5161_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    extern TMC5161Stepper name##Inst; \
+    extern TMCStepper5161Driver<stepPin, dirPin, enablePin, fclk> name; \
+    typedef TMCStepper5161Driver<stepPin, dirPin, enablePin, fclk> name##Type;
 #define STEPPER_TMC2208_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, fclk, minEndstop, maxEndstop) \
     extern TMC2208Stepper name##Inst; \
     extern TMCStepper2208Driver<stepPin, dirPin, enablePin, fclk> name; \
@@ -86,15 +106,27 @@
 #define STEPPER_TMC2130_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     TMC2130Stepper name##Inst(csPin, rsense, chainPos); \
     TMCStepper2130Driver<stepPin, dirPin, enablePin, fclk> name(&minEndstop, &maxEndstop, &name##Inst, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity);
+#define STEPPER_TMC2660_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    TMC2660Stepper name##Inst(csPin, rsense /*, chainPos */); \
+    TMCStepper2660Driver<stepPin, dirPin, enablePin, fclk> name(&minEndstop, &maxEndstop, &name##Inst, microsteps, currentMillis, stallSensitivity);
 #define STEPPER_TMC5160_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     TMC5160Stepper name##Inst(csPin, rsense, chainPos); \
     TMCStepper5160Driver<stepPin, dirPin, enablePin, fclk> name(&minEndstop, &maxEndstop, &name##Inst, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity);
+#define STEPPER_TMC5161_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    TMC5161Stepper name##Inst(csPin, rsense, chainPos); \
+    TMCStepper5161Driver<stepPin, dirPin, enablePin, fclk> name(&minEndstop, &maxEndstop, &name##Inst, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity);
 #define STEPPER_TMC2130_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     TMC2130Stepper name##Inst(csPin, rsense, mosiPin, misoPin, sckPin, chainPos); \
     TMCStepper2130Driver<stepPin, dirPin, enablePin, fclk> name(&minEndstop, &maxEndstop, &name##Inst, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity);
+#define STEPPER_TMC2660_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    TMC2660Stepper name##Inst(csPin, rsense, mosiPin, misoPin, sckPin, chainPos); \
+    TMCStepper2660Driver<stepPin, dirPin, enablePin, fclk> name(&minEndstop, &maxEndstop, &name##Inst, microsteps, currentMillis, stallSensitivity);
 #define STEPPER_TMC5160_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     TMC5160Stepper name##Inst(csPin, rsense, mosiPin, misoPin, sckPin, chainPos); \
     TMCStepper5160Driver<stepPin, dirPin, enablePin, fclk> name(&minEndstop, &maxEndstop, &name##Inst, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity);
+#define STEPPER_TMC5161_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    TMC5161Stepper name##Inst(csPin, rsense, mosiPin, misoPin, sckPin, chainPos); \
+    TMCStepper5161Driver<stepPin, dirPin, enablePin, fclk> name(&minEndstop, &maxEndstop, &name##Inst, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity);
 #define STEPPER_TMC2208_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, fclk, minEndstop, maxEndstop) \
     TMC2208Stepper name##Inst(&serial, rsense, (bool)true); \
     TMCStepper2208Driver<stepPin, dirPin, enablePin, fclk> name(&minEndstop, &maxEndstop, &name##Inst, microsteps, currentMillis, stealth, hybridSpeed);
@@ -119,11 +151,19 @@
 
 #define STEPPER_TMC2130_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.eepromReserve();
+#define STEPPER_TMC2660_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.eepromReserve();
 #define STEPPER_TMC5160_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.eepromReserve();
+#define STEPPER_TMC5161_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.eepromReserve();
 #define STEPPER_TMC2130_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.eepromReserve();
+#define STEPPER_TMC2660_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.eepromReserve();
 #define STEPPER_TMC5160_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.eepromReserve();
+#define STEPPER_TMC5161_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.eepromReserve();
 #if defined(SAMD51_BOARD) || defined(ARDUINO_ARCH_STM32)
 #define STEPPER_TMC2208_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, fclk, minEndstop, maxEndstop) \
@@ -151,11 +191,19 @@
     name.init();
 #define STEPPER_TMC2130_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.init();
+#define STEPPER_TMC2660_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.init();
 #define STEPPER_TMC5160_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.init();
+#define STEPPER_TMC5161_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.init();
 #define STEPPER_TMC2130_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.init();
+#define STEPPER_TMC2660_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.init();
 #define STEPPER_TMC5160_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.init();
+#define STEPPER_TMC5161_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.init();
 #define STEPPER_TMC2208_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, fclk, minEndstop, maxEndstop) \
     name.init();
@@ -179,11 +227,19 @@
     name.restoreFromConfiguration(to);
 #define STEPPER_TMC2130_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.reset(microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity);
+#define STEPPER_TMC2660_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.reset(microsteps, currentMillis, stallSensitivity);
 #define STEPPER_TMC5160_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.reset(microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity);
+#define STEPPER_TMC5161_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.reset(microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity);
 #define STEPPER_TMC2130_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.reset(microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity);
+#define STEPPER_TMC2660_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.reset(microsteps, currentMillis, stallSensitivity);
 #define STEPPER_TMC5160_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.reset(microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity);
+#define STEPPER_TMC5161_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.reset(microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity);
 #define STEPPER_TMC2208_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, fclk, minEndstop, maxEndstop) \
     name.reset(microsteps, currentMillis, stealth, hybridSpeed);
@@ -202,12 +258,20 @@
     template class AdjustResolutionStepperDriver<driver##Type>;
 #define STEPPER_TMC2130_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     template class TMCStepper2130Driver<stepPin, dirPin, enablePin, fclk>;
+#define STEPPER_TMC2660_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    template class TMCStepper2660Driver<stepPin, dirPin, enablePin, fclk>;
 #define STEPPER_TMC5160_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     template class TMCStepper5160Driver<stepPin, dirPin, enablePin, fclk>;
+#define STEPPER_TMC5161_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    template class TMCStepper5161Driver<stepPin, dirPin, enablePin, fclk>;
 #define STEPPER_TMC2130_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     template class TMCStepper2130Driver<stepPin, dirPin, enablePin, fclk>;
+#define STEPPER_TMC2660_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    template class TMCStepper2660Driver<stepPin, dirPin, enablePin, fclk>;
 #define STEPPER_TMC5160_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     template class TMCStepper5160Driver<stepPin, dirPin, enablePin, fclk>;
+#define STEPPER_TMC5161_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    template class TMCStepper5161Driver<stepPin, dirPin, enablePin, fclk>;
 #define STEPPER_TMC2208_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, fclk, minEndstop, maxEndstop) \
     template class TMCStepper2208Driver<stepPin, dirPin, enablePin, fclk>;
 #define STEPPER_TMC2209_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, slaveAddr, stallSensitivity, fclk, minEndstop, maxEndstop) \
@@ -219,11 +283,19 @@
 
 #define STEPPER_TMC2130_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.init();
+#define STEPPER_TMC2660_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.init();
 #define STEPPER_TMC5160_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.init();
+#define STEPPER_TMC5161_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.init();
 #define STEPPER_TMC2130_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.init();
+#define STEPPER_TMC2660_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.init();
 #define STEPPER_TMC5160_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.init();
+#define STEPPER_TMC5161_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.init();
 #define STEPPER_TMC2208_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, fclk, minEndstop, maxEndstop) \
     name.init();
@@ -236,11 +308,19 @@
 
 #define STEPPER_TMC2130_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.timer500ms();
+#define STEPPER_TMC2660_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.timer500ms();
 #define STEPPER_TMC5160_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.timer500ms();
+#define STEPPER_TMC5161_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.timer500ms();
 #define STEPPER_TMC2130_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.timer500ms();
+#define STEPPER_TMC2660_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.timer500ms();
 #define STEPPER_TMC5160_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
+    name.timer500ms();
+#define STEPPER_TMC5161_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop) \
     name.timer500ms();
 #define STEPPER_TMC2208_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, fclk, minEndstop, maxEndstop) \
     name.timer500ms();
@@ -257,14 +337,26 @@
 #ifndef STEPPER_TMC2130_HW_SPI
 #define STEPPER_TMC2130_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop)
 #endif
+#ifndef STEPPER_TMC2660_HW_SPI
+#define STEPPER_TMC2660_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop)
+#endif
 #ifndef STEPPER_TMC5160_HW_SPI
 #define STEPPER_TMC5160_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop)
+#endif
+#ifndef STEPPER_TMC5161_HW_SPI
+#define STEPPER_TMC5161_HW_SPI(name, stepPin, dirPin, enablePin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop)
 #endif
 #ifndef STEPPER_TMC2130_SW_SPI
 #define STEPPER_TMC2130_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop)
 #endif
+#ifndef STEPPER_TMC2660_SW_SPI
+#define STEPPER_TMC2660_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stallSensitivity, fclk, minEndstop, maxEndstop)
+#endif
 #ifndef STEPPER_TMC5160_SW_SPI
 #define STEPPER_TMC5160_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop)
+#endif
+#ifndef STEPPER_TMC5161_SW_SPI
+#define STEPPER_TMC5161_SW_SPI(name, stepPin, dirPin, enablePin, mosiPin, misoPin, sckPin, csPin, rsense, chainPos, microsteps, currentMillis, stealth, hybridSpeed, stallSensitivity, fclk, minEndstop, maxEndstop)
 #endif
 #ifndef STEPPER_TMC2208_HW_UART
 #define STEPPER_TMC2208_HW_UART(name, stepPin, dirPin, enablePin, serial, rsense, microsteps, currentMillis, stealth, hybridSpeed, fclk, minEndstop, maxEndstop)

@@ -23,7 +23,7 @@ ENDSTOP_NONE(endstopNone)
 // X Motor left
 
 IO_OUTPUT(IOX1Step, ORIG_X_STEP_PIN)
-IO_OUTPUT(IOX1Dir, ORIG_X_DIR_PIN)
+IO_OUTPUT_INVERTED(IOX1Dir, ORIG_X_DIR_PIN)
 IO_OUTPUT_INVERTED(IOX1Enable, ORIG_X_ENABLE_PIN)
 
 // X Motor right
@@ -35,21 +35,21 @@ IO_OUTPUT_INVERTED(IOAEnable, ORIG_A_ENABLE_PIN)
 // Y Motor
 
 IO_OUTPUT(IOY1Step, ORIG_Y_STEP_PIN)
-IO_OUTPUT_INVERTED(IOY1Dir, ORIG_Y_DIR_PIN)
+IO_OUTPUT(IOY1Dir, ORIG_Y_DIR_PIN)
 IO_OUTPUT_INVERTED(IOY1Enable, ORIG_Y_ENABLE_PIN)
 
 // Y2 Motor
 
 #if DUAL_Y
 IO_OUTPUT(IOY2Step, ORIG_Y2_STEP_PIN)
-IO_OUTPUT_INVERTED(IOY2Dir, ORIG_Y2_DIR_PIN)
+IO_OUTPUT(IOY2Dir, ORIG_Y2_DIR_PIN)
 IO_OUTPUT_INVERTED(IOY2Enable, ORIG_Y2_ENABLE_PIN)
 #endif
 
 // Z Motor
 
 IO_OUTPUT(IOZ1Step, ORIG_Z_STEP_PIN)
-IO_OUTPUT_INVERTED(IOZ1Dir, ORIG_Z_DIR_PIN)
+IO_OUTPUT(IOZ1Dir, ORIG_Z_DIR_PIN)
 IO_OUTPUT_INVERTED(IOZ1Enable, ORIG_Z_ENABLE_PIN)
 
 // Z2 Motor
@@ -61,7 +61,7 @@ IO_OUTPUT_INVERTED(IOZ2Enable, ORIG_Z2_ENABLE_PIN)
 // E0 Motor
 
 IO_OUTPUT(IOE1Step, ORIG_E0_STEP_PIN)
-IO_OUTPUT_INVERTED(IOE1Dir, ORIG_E0_DIR_PIN)
+IO_OUTPUT(IOE1Dir, ORIG_E0_DIR_PIN)
 IO_OUTPUT_INVERTED(IOE1Enable, ORIG_E0_ENABLE_PIN)
 
 // E1 Motor
@@ -103,7 +103,7 @@ IO_INPUT_DUMMY(ControllerReset, false)
 // IO_INPUT_PULLUP(IOEndstopXMax, ORIG_X_MAX_PIN)
 IO_INPUT_INVERTED_PULLUP(IOEndstopXMin, ORIG_X_MIN_PIN)
 IO_INPUT_INVERTED_PULLUP(IOEndstopYMin, ORIG_Y_MIN_PIN)
-IO_INPUT(IOJam1, FILAMENT_SENSOR0)
+IO_INPUT_INVERTED_PULLUP(IOJam1, FILAMENT_SENSOR0)
 
 // Define our endstops solutions
 // You need to define all min and max endstops for all
@@ -130,7 +130,7 @@ ENDSTOP_NONE(endstopZMax)
 #endif
 // Set to nullptr for no zprobe or &endstopName for a switch
 #ifdef STACKER_WITH_ZPROBE
-IO_INPUT_PULLUP(IOEndstopZProbe, ORIG_Z_MIN_PIN)
+IO_INPUT_INVERTED_PULLUP(IOEndstopZProbe, ORIG_Z_MIN_PIN)
 ENDSTOP_SWITCH_HW(endstopZProbe, IOEndstopZProbe, ZPROBE_AXIS, false)
 ENDSTOP_NONE(endstopZMin)
 #undef ZPROBE_ADDRESS
@@ -177,27 +177,52 @@ IO_PWM_HARDWARE(PWMBed1, HEATER_1_PIN, 500)
 // For deltas the top is the minumum position in motor coordinates
 // therefore the max endstops of a delta need to be entered as
 // minimum endstop here!
-STEPPER_TMC2130_HW_SPI(XMotor, IOX1Step, IOX1Dir, IOX1Enable, ORIG_X_CS_PIN, 0.11, 1, 64, 900, true, 100, 8, 12500000, endstopNone, endstopNone)
-STEPPER_TMC2130_HW_SPI(AMotor, IOAStep, IOADir, IOAEnable, ORIG_A_CS_PIN, 0.11, 1, 64, 900, true, 100, 8, 12500000, endstopNone, endstopNone)
+#ifdef USE_TMC2660
+STEPPER_TMC2660_HW_SPI(XMotor, IOX1Step, IOX1Dir, IOX1Enable, ORIG_X_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2660_HW_SPI(AMotor, IOAStep, IOADir, IOAEnable, ORIG_A_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopNone)
 #if DUAL_Y
-STEPPER_TMC2130_HW_SPI(Y1Motor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN, 0.11, 1, 64, 900, true, 100, 8, 12500000, endstopNone, endstopNone)
-STEPPER_TMC2130_HW_SPI(Y2Motor, IOY2Step, IOY2Dir, IOY2Enable, ORIG_Y2_CS_PIN, 0.11, 1, 64, 900, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2660_HW_SPI(Y1Motor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2660_HW_SPI(Y2Motor, IOY2Step, IOY2Dir, IOY2Enable, ORIG_Y2_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopNone)
 STEPPER_MIRROR2(YMotor, Y1Motor, Y2Motor, endstopNone, endstopNone)
 #else
-STEPPER_TMC2130_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_X_CS_PIN, 0.11, 1, 64, 900, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2660_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_X_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopNone)
 #endif
 
 #ifdef STACKER_2_Z_END_STOPS
-STEPPER_TMC2130_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN, 0.11, 1, 64, 900, true, 100, 8, 12500000, endstopNone, endstopZMax1)
-STEPPER_TMC2130_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN, 0.11, 1, 64, 900, true, 100, 8, 12500000, endstopNone, endstopZMax2)
+STEPPER_TMC2660_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopZMax1)
+STEPPER_TMC2660_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopZMax2)
 #else
-STEPPER_TMC2130_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN, 0.11, 1, 64, 900, true, 100, 8, 12500000, endstopNone, endstopNone)
-STEPPER_TMC2130_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN, 0.11, 1, 64, 900, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2660_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2660_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopNone)
 #endif
 STEPPER_MIRROR2(ZMotor, Z1Motor, Z2Motor, endstopNone, endstopNone)
-STEPPER_TMC2130_HW_SPI(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, ORIG_E0_CS_PIN, 0.11, 1, 64, 900, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2660_HW_SPI(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, ORIG_E0_CS_PIN, 0.11, 1, 16, 1000, 8, 12500000, endstopNone, endstopNone)
 #if IDEX
-STEPPER_TMC2130_HW_SPI(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, ORIG_E1_CS_PIN, 0.11, 1, 64, 900, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2660_HW_SPI(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, ORIG_E1_CS_PIN, 0.11, 1, 16, 1000, 8, 12500000, endstopNone, endstopNone)
+#endif
+#else
+STEPPER_TMC2130_HW_SPI(XMotor, IOX1Step, IOX1Dir, IOX1Enable, ORIG_X_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2130_HW_SPI(AMotor, IOAStep, IOADir, IOAEnable, ORIG_A_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+#if DUAL_Y
+STEPPER_TMC2130_HW_SPI(Y1Motor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2130_HW_SPI(Y2Motor, IOY2Step, IOY2Dir, IOY2Enable, ORIG_Y2_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_MIRROR2(YMotor, Y1Motor, Y2Motor, endstopNone, endstopNone)
+#else
+STEPPER_TMC2130_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_X_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+#endif
+
+#ifdef STACKER_2_Z_END_STOPS
+STEPPER_TMC2130_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopZMax1)
+STEPPER_TMC2130_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopZMax2)
+#else
+STEPPER_TMC2130_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2130_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+#endif
+STEPPER_MIRROR2(ZMotor, Z1Motor, Z2Motor, endstopNone, endstopNone)
+STEPPER_TMC2130_HW_SPI(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, ORIG_E0_CS_PIN, 0.11, 1, 16, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+#if IDEX
+STEPPER_TMC2130_HW_SPI(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, ORIG_E1_CS_PIN, 0.11, 1, 16, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+#endif
 #endif
 
 // Heat manages are used for every component that needs to
@@ -206,7 +231,7 @@ STEPPER_TMC2130_HW_SPI(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, ORIG_E1_CS_PIN, 0
 HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 120, 255, 1000, 10,
                  300000, 196.0, 33.0, 290, 80, 255, false)
 HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 310, 255,
-                 1000, 20, 20000, 20.0, 4.0, 48, 40, 255, false)
+                 1000, 20, 20000, 14.0, 0.6, 24, 40, 255, false)
 // Extruder temperature must be in a +/-2°C corridor for 20 seconds when we wait for
 // target temperature. Stops after 300 seconds with error if it does not succeed.
 HEAT_MANAGER_DEFINE_HYSTERESIS(HeaterExtruder1, 2.0, 20000, 300000)
@@ -222,9 +247,9 @@ IO_PWM_HARDWARE(Fan2NoKSPWM, ORIG_FAN2_PIN, 500)
 // IO_PDM_SOFTWARE(Fan1NoKSPWM, IOFan1) // alternative to PWM signals
 IO_PWM_KICKSTART(Fan2PWM, Fan2NoKSPWM, 20, 85)
 
-IO_INPUT(IOJam2, FILAMENT_SENSOR1)
+IO_INPUT_INVERTED_PULLUP(IOJam2, FILAMENT_SENSOR1)
 HEAT_MANAGER_PID(HeaterExtruder2, 'E', 0, TempExt2, PWMExtruder2, 310, 255,
-                 1000, 20, 20000, 20.0, 4.0, 48, 40, 255, false)
+                 1000, 20, 20000, 14.0, 0.6, 24, 40, 255, false)
 HEAT_MANAGER_DEFINE_HYSTERESIS(HeaterExtruder2, 2.0, 20000, 300000)
 COOLER_MANAGER_SENSOR(ExtruderCooler2, TempExt2, CoolerFan2, 70, 200, 150, 255)
 TOOL_EXTRUDER(ToolExtruder2, 0, 0, 0, HeaterExtruder2, E2Motor, 1.75, 440, 20,

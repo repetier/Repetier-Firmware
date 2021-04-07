@@ -30,6 +30,16 @@ Early stage version for Stacke F1 printer - use with care
 // #define STACKER_F1_XL
 // #define STACKER_F1_XL_IDEX
 
+// ------- Optional changes ------------
+
+// XYZ Stepper resolution. Due to TMC stepper smoothing higher values are not required!
+// You can increase them by factor 2. Always change both!
+#define MICROSTEPS 16
+#define STEPS_FACTOR 1
+
+// Uncomment to use TMC2660 instead of TMC2130 drivers
+// #define USE_TMC2660
+
 // ------- No further changes required below --------
 
 // ******* Model dependent changes ***********
@@ -128,7 +138,7 @@ Early stage version for Stacke F1 printer - use with care
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
 #define Z_PROBE_RUN_AFTER_EVERY_PROBE ""
-#define LEVELING_METHOD 1 // Grid measurement
+#define LEVELING_METHOD 1                 // Grid measurement
 #define MAX_GRID_SIZE 6                   // Maximum grid size allocation in memory, imported grid can be smaller
 #define ENABLE_BUMP_CORRECTION 1          // CPU intensive, so only activate if required
 #define BUMP_CORRECTION_START_DEGRADE 0.5 // Until this height we correct 100%
@@ -434,22 +444,22 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #endif
 #define PARK_POSITION_Z_RAISE 10
 
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 400
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_A 400
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 400
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 600
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_A 600
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 600
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 50
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 1000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_A 1000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1000
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 50
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 25
 
-#define XAXIS_STEPS_PER_MM 146 * 2
-#define AAXIS_STEPS_PER_MM 146 * 2
-#define YAXIS_STEPS_PER_MM 146 * 2
-#define ZAXIS_STEPS_PER_MM 400 * 2
+#define XAXIS_STEPS_PER_MM 146 * STEPS_FACTOR
+#define AAXIS_STEPS_PER_MM 146 * STEPS_FACTOR
+#define YAXIS_STEPS_PER_MM 176 * STEPS_FACTOR
+#define ZAXIS_STEPS_PER_MM 400 * STEPS_FACTOR
 #define MAX_FEEDRATE_X 200
 #define MAX_FEEDRATE_Y 200
-#define MAX_FEEDRATE_Z 12
+#define MAX_FEEDRATE_Z 25
 #define MAX_FEEDRATE_A 200
 
 //#define EXTERNALSERIAL  use Arduino serial library instead of build in.
@@ -522,7 +532,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define MOVE_A_WHEN_HOMED 1
 #define HOMING_FEEDRATE_X 25
 #define HOMING_FEEDRATE_Y 25
-#define HOMING_FEEDRATE_Z 10
+#define HOMING_FEEDRATE_Z 25
 #define HOMING_FEEDRATE_A 25
 #define ZHOME_PRE_RAISE 1
 #define ZHOME_PRE_RAISE_DISTANCE 10

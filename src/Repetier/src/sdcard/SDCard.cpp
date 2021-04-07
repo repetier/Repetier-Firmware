@@ -522,7 +522,7 @@ void SDCard::printFullyPaused() {
         return;
     }
     scheduledPause = false;
-    if (EVENT_SD_PAUSE_START(true)) {
+    if (EVENT_SD_PAUSE_START(false)) {
         Commands::waitUntilEndOfAllBuffers();
         Motion1::pushToMemory();
         Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE,
@@ -535,16 +535,16 @@ void SDCard::printFullyPaused() {
         Motion1::moveToParkPosition();
         GCode::executeFString(PSTR(PAUSE_START_COMMANDS));
     }
-    EVENT_SD_PAUSE_END(internal);
+    EVENT_SD_PAUSE_END(false);
 }
 
-void SDCard::continuePrint(const bool internal) {
+void SDCard::continuePrint() {
     if (state != SDState::SD_PRINTING
-        && Printer::isMenuMode(MENU_MODE_PAUSED)) {
+        || !Printer::isMenuMode(MENU_MODE_PAUSED)) {
         return;
     }
-    if (EVENT_SD_CONTINUE_START(internal)) {
-        if (internal) {
+    if (EVENT_SD_CONTINUE_START(scheduledPause)) {
+        if (scheduledPause) {
             Tool* tool = Tool::getActiveTool();
             if (tool) {
                 tool->beforeContinue();
@@ -563,10 +563,11 @@ void SDCard::continuePrint(const bool internal) {
             Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::maxFeedrate[E_AXIS], false);
         }
     }
-    EVENT_SD_CONTINUE_END(internal);
+    EVENT_SD_CONTINUE_END(scheduledPause);
     GCodeSource::registerSource(&sdSource);
     Printer::setPrinting(true);
     Printer::setMenuMode(MENU_MODE_PAUSED, false);
+    scheduledPause = false;
 }
 
 void SDCard::stopPrint(const bool silent) {

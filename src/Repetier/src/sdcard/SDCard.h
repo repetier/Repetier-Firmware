@@ -18,7 +18,7 @@ public:
     SDCard();
     void writeCommand(GCode* code);
     void startPrint();
-    void continuePrint(const bool internal = false);
+    void continuePrint();
 
     void pausePrint(const bool internal = false);
     void printFullyPaused();
@@ -26,7 +26,7 @@ public:
     void stopPrint(const bool silent = false);
     void printFullyStopped();
     static bool validGCodeExtension(const char* filename);
- 
+
     inline void setIndex(uint32_t newpos) {
         if (state < SDState::SD_MOUNTED || !selectedFile.isOpen()) {
             return;

@@ -693,12 +693,12 @@ void Printer::defaultLoopActions() {
     } else {
         curtime -= previousMillisCmd;
         if (maxInactiveTime != 0 && curtime > maxInactiveTime) {
-            Printer::kill(false);
+            Printer::kill(false, true);
         } else {
             Printer::setAllKilled(false); // prevent repeated kills
         }
         if (stepperInactiveTime != 0 && curtime > stepperInactiveTime) {
-            Printer::kill(true);
+            Printer::kill(true, true);
         }
     }
 #if SDCARDDETECT > -1 && SDSUPPORT
@@ -1289,7 +1289,7 @@ void Printer::pausePrint() {
 void Printer::continuePrint() {
 #if SDSUPPORT
     if (Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED)) {
-        sd.continuePrint(true);
+        sd.continuePrint();
     } else
 #endif
         if (Printer::isMenuMode(MENU_MODE_PAUSED)) {

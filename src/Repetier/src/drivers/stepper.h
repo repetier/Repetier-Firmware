@@ -444,6 +444,65 @@ public:
 };
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
+class TMCStepper2660Driver : public StepperDriverBase, public ProgrammableStepperBase {
+    TMC2660Stepper* driver;
+
+protected:
+    bool isEnabled;
+
+public:
+    TMCStepper2660Driver(EndstopDriver* minES, EndstopDriver* maxES,
+                         TMC2660Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, int8_t _stallSensitivity)
+        : StepperDriverBase(minES, maxES)
+        , ProgrammableStepperBase(_microsteps, _current_millis, false, 0, _stallSensitivity)
+        , driver(_driver)
+        , isEnabled(false) { }
+    virtual void init() override final;
+    void reset(uint16_t _microsteps, uint16_t _current_millis, int8_t _stallSensitivity);
+    inline void step() override final {
+        stepCls::on();
+    }
+    /// Execute the step if motor end stop is not triggered
+    bool stepMotorEndStop() override final {
+        stepCls::on();
+        return true;
+    }
+    inline void unstep() override final {
+        stepCls::off();
+    }
+    inline void dir(bool d) override final {
+        dirCls::set(d);
+        direction = d;
+    }
+    inline void enable() override final {
+        enableCls::on();
+        isEnabled = true;
+    }
+    inline void disable() override final {
+        enableCls::off();
+        isEnabled = false;
+    }
+    void eepromHandle();
+    void eepromReserve();
+    // Return true if setting microsteps is supported
+    virtual bool implementsSetMicrosteps() override final { return true; }
+    // Return true if setting current in software is supported
+    virtual bool implementsSetMaxCurrent() override final { return true; }
+    /// Set microsteps. Must be a power of 2.
+    virtual void setMicrosteps(int microsteps) override final;
+    /// Set max current as range 0..255 or mA depedning on driver
+    virtual void setMaxCurrent(int max) override final;
+    // Called before homing starts. Can be used e.g. to disable silent mode
+    // or otherwise prepare for endstop detection.
+    virtual void beforeHoming() override final;
+    virtual void afterHoming() override final;
+    virtual void handleMCode(GCode& com) override final;
+    virtual void menuConfig(GUIAction action, void* data) override final;
+    virtual bool hasConfigMenu() override final { return true; }
+    void timer500ms();
+};
+
+template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 class TMCStepper5160Driver : public StepperDriverBase, public ProgrammableStepperBase {
     TMC5160Stepper* driver;
 
@@ -453,6 +512,65 @@ protected:
 public:
     TMCStepper5160Driver(EndstopDriver* minES, EndstopDriver* maxES,
                          TMC5160Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity)
+        : StepperDriverBase(minES, maxES)
+        , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
+        , driver(_driver)
+        , isEnabled(false) { }
+    virtual void init() final;
+    void reset(uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity);
+    inline void step() override final {
+        stepCls::on();
+    }
+    /// Execute the step if motor end stop is not triggered
+    bool stepMotorEndStop() override final {
+        stepCls::on();
+        return true;
+    }
+    inline void unstep() override final {
+        stepCls::off();
+    }
+    inline void dir(bool d) override final {
+        dirCls::set(d);
+        direction = d;
+    }
+    inline void enable() override final {
+        enableCls::on();
+        isEnabled = true;
+    }
+    inline void disable() override final {
+        enableCls::off();
+        isEnabled = false;
+    }
+    virtual void eepromHandle() override final;
+    void eepromReserve();
+    // Return true if setting microsteps is supported
+    virtual bool implementsSetMicrosteps() override final { return true; }
+    // Return true if setting current in software is supported
+    virtual bool implementsSetMaxCurrent() override final { return true; }
+    /// Set microsteps. Must be a power of 2.
+    virtual void setMicrosteps(int microsteps) override final;
+    /// Set max current as range 0..255 or mA depedning on driver
+    virtual void setMaxCurrent(int max) override final;
+    // Called before homing starts. Can be used e.g. to disable silent mode
+    // or otherwise prepare for endstop detection.
+    virtual void beforeHoming() override final;
+    virtual void afterHoming() override final;
+    virtual void handleMCode(GCode& com) override final;
+    virtual void menuConfig(GUIAction action, void* data) override final;
+    virtual bool hasConfigMenu() override final { return true; }
+    void timer500ms();
+};
+
+template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
+class TMCStepper5161Driver : public StepperDriverBase, public ProgrammableStepperBase {
+    TMC5161Stepper* driver;
+
+protected:
+    bool isEnabled;
+
+public:
+    TMCStepper5161Driver(EndstopDriver* minES, EndstopDriver* maxES,
+                         TMC5161Stepper* _driver, uint16_t _microsteps, uint16_t _current_millis, bool _stealthChop, float _hybridThrs, int8_t _stallSensitivity)
         : StepperDriverBase(minES, maxES)
         , ProgrammableStepperBase(_microsteps, _current_millis, _stealthChop, _hybridThrs, _stallSensitivity)
         , driver(_driver)
