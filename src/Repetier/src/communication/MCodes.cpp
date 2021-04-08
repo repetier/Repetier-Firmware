@@ -197,7 +197,7 @@ void __attribute__((weak)) MCode_24(GCode* com) {
 
 void __attribute__((weak)) MCode_25(GCode* com) {
 #if SDSUPPORT
-    sd.pausePrint();
+    sd.pausePrint(com->hasS() ? com->S != 0 : true);
 #endif
 }
 

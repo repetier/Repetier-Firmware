@@ -95,7 +95,7 @@ Custom M Codes
 - M22  - Release SD card
 - M23  - Select SD file (M23 filename.g)
 - M24  - Start/resume SD print
-- M25  - Pause SD print
+- M25  - Pause SD print, S0 = do not park head
 - M26  - Set SD position in bytes (M26 S12345) 
 - M27 C0 S<seconds/off> P<milliseconds/off> - Report SD print status. 
         Set S<sec> P<ms> to enable autoreporting while printing, set P or S to 0 to disable. Set C without P or S to report the current open filename.
