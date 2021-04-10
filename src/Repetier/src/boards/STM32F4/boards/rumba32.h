@@ -145,7 +145,7 @@ This makes EXP3 pin 11/12 also a serial as described in pin header above.
 #define EEPROM_AVAILABLE EEPROM_FLASH
 #endif
 
-// I2C
+// SPI
 #define SCK_PIN PA5
 #define MISO_PIN PA6
 #define MOSI_PIN PA7
