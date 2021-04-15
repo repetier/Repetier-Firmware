@@ -361,6 +361,10 @@ enum class BootReason {
 #define Z_PROBE_FINISHED_SCRIPT ""
 #endif
 
+#ifndef Z_PROBE_USE_MEDIAN
+#define Z_PROBE_USE_MEDIAN 0
+#endif
+
 #ifndef ARC_SUPPORT
 #define ARC_SUPPORT 1
 #endif
@@ -633,7 +637,7 @@ extern void writeMonitor();
 extern char tempLongFilename[LONG_FILENAME_LENGTH + 1];
 extern char fullName[LONG_FILENAME_LENGTH * SD_MAX_FOLDER_DEPTH + SD_MAX_FOLDER_DEPTH + 1];
 
-#if SDSUPPORT 
+#if SDSUPPORT
 #include "sdcard/SDCard.h"
 #endif
 

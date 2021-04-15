@@ -25,7 +25,7 @@ Early stage version for Stacke X2 printer - use with care
 #define CONFIGURATION_H
 
 // Short version has z max 300, long version 610 mm
-#define STACKER_SHORT 1
+#define STACKER_SHORT 0
 
 /**************** READ FIRST ************************
 
@@ -61,22 +61,22 @@ Early stage version for Stacke X2 printer - use with care
 #define FEATURE_Z_PROBE 0
 #define FEATURE_RETRACTION 1
 #define USE_ADVANCE 1
-#define NUM_AXES 5                   // X,Y,Z and E for extruder A,B,C would be 5,6,7
-#define STEPPER_FREQUENCY 120000     // Maximum stepper frequency.
-#define PREPARE_FREQUENCY 2000       // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
-#define BLOCK_FREQUENCY 1000         // Number of blocks with constant stepper rate per second.
-#define VELOCITY_PROFILE 2           // 0 = linear, 1 = cubic, 2 = quintic velocity shape
-#define SLOW_DIRECTION_CHANGE 1      // can be reason for lost steps on slow drivers
-#define SMALL_SEGMENT_SIZE 0.4       // Smaller segments reduce join speed to prevent vibrations causing lost steps
-#define Z_SPEED 8                    // Z positioning speed
-#define XY_SPEED 200                 // XY positioning speed for normal operations
-#define G0_FEEDRATE 0                // Speed for G0 moves. Independent from set F value! Set 0 to use F value.
-#define A_SPEED 150                  // Second X axis
-#define MAX_ROOM_TEMPERATURE 25      // No heating below this temperature!
-#define TEMPERATURE_CONTROL_RANGE 20 // Start with controlling if temperature is +/- this value to target temperature
-#define Z_PROBE_TYPE 0               // 0 = no z probe, 1 = default z probe, 2 = Nozzle as probe
-#define Z_PROBE_BORDER 2             // Safety border to ensure position is allowed
-#define Z_PROBE_TEMPERATURE 170      // Temperature for type 2
+#define NUM_AXES 5                     // X,Y,Z and E for extruder A,B,C would be 5,6,7
+#define STEPPER_FREQUENCY 120000       // Maximum stepper frequency.
+#define PREPARE_FREQUENCY 2000         // Update frequency for new blocks. Must be higher then PREPARE_FREQUENCY.
+#define BLOCK_FREQUENCY 1000           // Number of blocks with constant stepper rate per second.
+#define VELOCITY_PROFILE 2             // 0 = linear, 1 = cubic, 2 = quintic velocity shape
+#define SLOW_DIRECTION_CHANGE 1        // can be reason for lost steps on slow drivers
+#define SMALL_SEGMENT_SIZE 0.4         // Smaller segments reduce join speed to prevent vibrations causing lost steps
+#define Z_SPEED 8                      // Z positioning speed
+#define XY_SPEED 200                   // XY positioning speed for normal operations
+#define G0_FEEDRATE 0                  // Speed for G0 moves. Independent from set F value! Set 0 to use F value.
+#define A_SPEED 150                    // Second X axis
+#define MAX_ROOM_TEMPERATURE 25        // No heating below this temperature!
+#define TEMPERATURE_CONTROL_RANGE 20   // Start with controlling if temperature is +/- this value to target temperature
+#define Z_PROBE_TYPE Z_PROBE_TYPE_NONE // 0 = no z probe, 1 = default z probe, 2 = Nozzle as probe
+#define Z_PROBE_BORDER 2               // Safety border to ensure position is allowed
+#define Z_PROBE_TEMPERATURE 170        // Temperature for type 2
 
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta, 3 = Dual X-Axis
 #define PRINTER_TYPE PRINTER_TYPE_DUAL_X
@@ -184,7 +184,6 @@ to the position. 0 = no contribution. */
 
 // Define ZProbe by referencing a endstop defined
 CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
-
 /** Axes are homed in order of priority (0..10) if homing direction is not 0. */
 #define X_HOME_PRIORITY 0
 #define Y_HOME_PRIORITY 1
@@ -269,7 +268,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #if STACKER_SHORT
 #define Z_MAX_LENGTH 300
 #else
-define Z_MAX_LENGTH 610
+#define Z_MAX_LENGTH 610
 #endif
 
 #define A_MAX_LENGTH 450
