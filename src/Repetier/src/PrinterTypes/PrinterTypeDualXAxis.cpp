@@ -545,6 +545,7 @@ bool PrinterType::ignoreAxisForLength(fast8_t axis) {
  * This is ok because moves are based on reverse and this is only called to update
  * current position. */
 void PrinterType::transformedToOfficial(float trans[NUM_AXES], float official[NUM_AXES]) {
+#ifdef OFFSETS_IN_TRANSFORMED_COS
     Motion1::transformFromPrinter(
         targetReal,
         trans[Y_AXIS],
@@ -552,6 +553,18 @@ void PrinterType::transformedToOfficial(float trans[NUM_AXES], float official[NU
         official[X_AXIS],
         official[Y_AXIS],
         official[Z_AXIS]);
+    official[X_AXIS] -= Motion1::toolOffset[X_AXIS]; // Offset from active extruder or z probe
+    official[Y_AXIS] -= Motion1::toolOffset[Y_AXIS];
+    official[Z_AXIS] -= Motion1::toolOffset[Z_AXIS];
+#else
+    Motion1::transformFromPrinter(
+        targetReal - Motion1::toolOffset[X_AXIS],
+        trans[Y_AXIS] - Motion1::toolOffset[Y_AXIS],
+        trans[Z_AXIS] - Motion1::toolOffset[Z_AXIS],
+        official[X_AXIS],
+        official[Y_AXIS],
+        official[Z_AXIS]);
+#endif
     official[X_AXIS] -= Motion1::toolOffset[X_AXIS]; // Offset from active extruder or z probe
     official[Y_AXIS] -= Motion1::toolOffset[Y_AXIS];
     official[Z_AXIS] -= Motion1::toolOffset[Z_AXIS];
@@ -567,12 +580,24 @@ void PrinterType::officialToTransformed(float official[NUM_AXES], float trans[NU
     if (trans == Motion1::currentPositionTransformed && !dontChangeCoords) {
         // use effective coordinates for X and A
         float transXorA = 0;
+#ifdef OFFSETS_IN_TRANSFORMED_COS
         Motion1::transformToPrinter(official[X_AXIS] + Motion1::toolOffset[X_AXIS],
                                     official[Y_AXIS] + Motion1::toolOffset[Y_AXIS],
                                     official[Z_AXIS] + Motion1::toolOffset[Z_AXIS],
                                     transXorA,
                                     trans[Y_AXIS],
                                     trans[Z_AXIS]);
+#else
+        Motion1::transformToPrinter(official[X_AXIS],
+                                    official[Y_AXIS],
+                                    official[Z_AXIS],
+                                    transXorA,
+                                    trans[Y_AXIS],
+                                    trans[Z_AXIS]);
+        transXorA += Motion1::toolOffset[X_AXIS];
+        trans[Y_AXIS] += Motion1::toolOffset[Y_AXIS];
+        trans[Z_AXIS] += Motion1::toolOffset[Z_AXIS];
+#endif
         for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
             if (i != A_AXIS) {
                 trans[i] = official[i];
@@ -601,12 +626,24 @@ void PrinterType::officialToTransformed(float official[NUM_AXES], float trans[NU
             trans[A_AXIS] = endPos[1];
         }
     } else {
+#ifdef OFFSETS_IN_TRANSFORMED_COS
         Motion1::transformToPrinter(official[X_AXIS] + Motion1::toolOffset[X_AXIS],
                                     official[Y_AXIS] + Motion1::toolOffset[Y_AXIS],
                                     official[Z_AXIS] + Motion1::toolOffset[Z_AXIS],
                                     trans[X_AXIS],
                                     trans[Y_AXIS],
                                     trans[Z_AXIS]);
+#else
+        Motion1::transformToPrinter(official[X_AXIS],
+                                    official[Y_AXIS],
+                                    official[Z_AXIS],
+                                    trans[X_AXIS],
+                                    trans[Y_AXIS],
+                                    trans[Z_AXIS]);
+        trans[X_AXIS] += Motion1::toolOffset[X_AXIS];
+        trans[Y_AXIS] += Motion1::toolOffset[Y_AXIS];
+        trans[Z_AXIS] += Motion1::toolOffset[Z_AXIS];
+#endif
         for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
             trans[i] = official[i];
         }

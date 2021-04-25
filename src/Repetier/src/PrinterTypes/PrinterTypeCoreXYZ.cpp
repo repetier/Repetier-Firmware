@@ -186,6 +186,7 @@ void PrinterType::setDittoMode(fast8_t count, bool mirror) {
 }
 
 void PrinterType::transformedToOfficial(float trans[NUM_AXES], float official[NUM_AXES]) {
+#ifdef OFFSETS_IN_TRANSFORMED_COS
     Motion1::transformFromPrinter(
         trans[X_AXIS],
         trans[Y_AXIS],
@@ -196,18 +197,36 @@ void PrinterType::transformedToOfficial(float trans[NUM_AXES], float official[NU
     official[X_AXIS] -= Motion1::toolOffset[X_AXIS]; // Offset from active extruder or z probe
     official[Y_AXIS] -= Motion1::toolOffset[Y_AXIS];
     official[Z_AXIS] -= Motion1::toolOffset[Z_AXIS];
-    for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
-        official[i] = trans[i];
-    }
+#else
+    Motion1::transformFromPrinter(
+        trans[X_AXIS] - Motion1::toolOffset[X_AXIS],
+        trans[Y_AXIS] - Motion1::toolOffset[Y_AXIS],
+        trans[Z_AXIS] - Motion1::toolOffset[Z_AXIS],
+        official[X_AXIS],
+        official[Y_AXIS],
+        official[Z_AXIS]);
+#endif
 }
 
 void PrinterType::officialToTransformed(float official[NUM_AXES], float trans[NUM_AXES]) {
+#ifdef OFFSETS_IN_TRANSFORMED_COS
     Motion1::transformToPrinter(official[X_AXIS] + Motion1::toolOffset[X_AXIS],
                                 official[Y_AXIS] + Motion1::toolOffset[Y_AXIS],
                                 official[Z_AXIS] + Motion1::toolOffset[Z_AXIS],
                                 trans[X_AXIS],
                                 trans[Y_AXIS],
                                 trans[Z_AXIS]);
+#else
+    Motion1::transformToPrinter(official[X_AXIS],
+                                official[Y_AXIS],
+                                official[Z_AXIS],
+                                trans[X_AXIS],
+                                trans[Y_AXIS],
+                                trans[Z_AXIS]);
+    trans[X_AXIS] += Motion1::toolOffset[X_AXIS];
+    trans[Y_AXIS] += Motion1::toolOffset[Y_AXIS];
+    trans[Z_AXIS] += Motion1::toolOffset[Z_AXIS];
+#endif
     for (fast8_t i = E_AXIS; i < NUM_AXES; i++) {
         trans[i] = official[i];
     }

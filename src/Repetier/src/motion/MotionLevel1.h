@@ -235,10 +235,10 @@ public:
     static float resolution[NUM_AXES];
     static float minPos[NUM_AXES];
     static float maxPos[NUM_AXES];
-    static float minPosOff[NUM_AXES]; // positions including max. tool offset
+    static float minPosOff[NUM_AXES]; // positions including max. tool offset for global coordinates
     static float maxPosOff[NUM_AXES];
-    static float rotMax[3]; // Max positive offset from rotation at z max
-    static float rotMin[3]; // Min negative offset from rotation at z max
+    static float rotMax[3]; // Max positive offset from rotation
+    static float rotMin[3]; // Min negative offset from rotation
     static float g92Offsets[NUM_AXES];
     static float maxYank[NUM_AXES];
     static float toolOffset[3];

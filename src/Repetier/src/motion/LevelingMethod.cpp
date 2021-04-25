@@ -238,7 +238,7 @@ void Leveling::setDistortionEnabled(bool newState) {
 
 bool Leveling::measure(GCode* com) {
     float pos[NUM_AXES];
-    float tOffMinX, tOffMaxX, tOffMinY, tOffMaxY;
+    // float tOffMinX, tOffMaxX, tOffMinY, tOffMaxY;
     Plane plane;
     PlaneBuilder builder;
 
@@ -260,13 +260,23 @@ bool Leveling::measure(GCode* com) {
     yMin += Z_PROBE_BORDER;
     yMax -= Z_PROBE_BORDER;
     // get get min and max offsets from tools (without z-probe offsets)
-    Tool::minMaxOffsetForAxis(X_AXIS, tOffMinX, tOffMaxX);
-    Tool::minMaxOffsetForAxis(Y_AXIS, tOffMinY, tOffMaxY);
+    // Tool::minMaxOffsetForAxis(X_AXIS, tOffMinX, tOffMaxX);
+    // Tool::minMaxOffsetForAxis(Y_AXIS, tOffMinY, tOffMaxY);
     // calc min and max coordinates defining the area reachable by ZProbe
-    xMin = RMath::max(xMin - tOffMaxX + ZProbeHandler::xOffset(), xMin);
-    xMax = RMath::min(xMax - tOffMinX + ZProbeHandler::xOffset(), xMax);
-    yMin = RMath::max(yMin - tOffMaxY + ZProbeHandler::yOffset(), yMin);
-    yMax = RMath::min(yMax - tOffMinY + ZProbeHandler::yOffset(), yMax);
+    //xMin = RMath::max(xMin - tOffMaxX + ZProbeHandler::xOffset(), xMin);
+    //xMax = RMath::min(xMax - tOffMinX + ZProbeHandler::xOffset(), xMax);
+    //yMin = RMath::max(yMin - tOffMaxY + ZProbeHandler::yOffset(), yMin);
+    //yMax = RMath::min(yMax - tOffMinY + ZProbeHandler::yOffset(), yMax);
+
+    xMin = RMath::max(Motion1::minPosOff[0], xMin);
+    xMax = RMath::min(Motion1::maxPosOff[0], xMax);
+    yMin = RMath::max(Motion1::minPosOff[1], yMin);
+    yMax = RMath::min(Motion1::maxPosOff[1], yMax);
+
+    xMin = RMath::max(Motion1::minPos[0] + Motion1::rotMin[0] + ZProbeHandler::xOffset(), xMin);
+    xMax = RMath::min(Motion1::maxPos[0] + Motion1::rotMax[0] + ZProbeHandler::xOffset(), xMax);
+    yMin = RMath::max(Motion1::minPos[1] + Motion1::rotMin[1] + ZProbeHandler::yOffset(), yMin);
+    yMax = RMath::min(Motion1::maxPos[1] + Motion1::rotMax[1] + ZProbeHandler::yOffset(), yMax);
 
     updateDerived();
 
