@@ -760,7 +760,7 @@ void __attribute__((weak)) menuSDStartPrint(GUIAction action, void* data) {
         } else { // File for print selected instead
             file.close();
             if (sd.selectFile(tempLongFilename)) {
-                GUI::pop();
+                GUI::popAll();
                 GUI::cwd[0u] = '/'; // reset the GUI directory
                 GUI::cwd[1u] = '\0';
                 GUI::folderLevel = 0u;

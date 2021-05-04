@@ -962,6 +962,12 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
         FOR_ALL_AXES(i) { // mark as unhomed, might even prevent moves if unhomed moves are prevented!
             setAxisHomed(i, false);
         }
+        if (sd.state == SDState::SD_PRINTING) {
+            sd.stopPrint(true);
+            Com::printWarningFLN(PSTR("Print stopped due to illegal positions!"));
+        }
+        GUI::push(warningScreenP, (void*)PSTR("Illegal Position!"), GUIPageType::STATUS);
+        Printer::playDefaultSound(DefaultSounds::WARNING);
         return false;
     }
     float delta[NUM_AXES];

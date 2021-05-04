@@ -543,6 +543,7 @@ void SDCard::continuePrint() {
         || !Printer::isMenuMode(MENU_MODE_PAUSED)) {
         return;
     }
+    MCode_513(nullptr); // Reset jam marker
     if (EVENT_SD_CONTINUE_START(scheduledPause)) {
         if (scheduledPause) {
             Tool* tool = Tool::getActiveTool();
@@ -599,7 +600,7 @@ void SDCard::printFullyStopped() {
         GCode::executeFString(PSTR(SD_RUN_ON_STOP));
         if (SD_STOP_HEATER_AND_MOTORS_ON_STOP) {
             Commands::waitUntilEndOfAllMoves();
-            Printer::kill(false);
+            Printer::kill(false, true);
         }
     }
     EVENT_SD_STOP_END;

@@ -207,7 +207,8 @@ public:
     static void update();           ///< Calls refresh, checks buttons
     static void pop();              ///< Go 1 level higher if possible
     static void pop(int selection); // For prompt callbacks!
-    static void popBusy();          ///< Pop if waiting is on top
+    static void popAll();
+    static void popBusy(); ///< Pop if waiting is on top
     static void push(GuiCallback cb, void* cData, GUIPageType tp);
     static void replace(GuiCallback cb, void* cData, GUIPageType tp);
     static bool isStickyPageType(GUIPageType t);

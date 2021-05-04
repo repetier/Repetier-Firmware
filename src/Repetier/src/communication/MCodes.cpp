@@ -1389,8 +1389,9 @@ void __attribute__((weak)) MCode_502(GCode* com) {
 }
 
 void __attribute__((weak)) MCode_513(GCode* com) {
-    // TODO: jam
-    // Extruder::markAllUnjammed();
+    for (int i = 0; i < NUM_TOOLS; i++) {
+        Tool::getTool(i)->resetError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT);
+    }
 }
 
 // Abort SD Printjob

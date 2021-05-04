@@ -167,6 +167,12 @@ bool GUI::isStickyPageType(GUIPageType t) {
     return t == GUIPageType::WIZARD_FIXED || t == GUIPageType::WIZARD_MENU || t == GUIPageType::ACK_MESSAGE || t == GUIPageType::BUSY || t == GUIPageType::STATUS;
 }
 
+void GUI::popAll() {
+    while (level) {
+        pop();
+    }
+}
+
 void GUI::pop() {
     if (level > 0) {
         if (pageType[level] == GUIPageType::BUSY || pageType[level] == GUIPageType::STATUS) {
@@ -951,12 +957,14 @@ void directAction(GUIAction action, void* data) {
         break;
     case GUI_DIRECT_ACTION_STOP_PRINT:
         Printer::stopPrint();
+        GUI::popAll();
         break;
     case GUI_DIRECT_ACTION_PAUSE_PRINT:
         Printer::pausePrint();
         break;
     case GUI_DIRECT_ACTION_CONTINUE_PRINT:
         Printer::continuePrint();
+        GUI::popAll();
         break;
     case GUI_DIRECT_ACTION_POWERLOSS:
         Printer::handlePowerLoss();
