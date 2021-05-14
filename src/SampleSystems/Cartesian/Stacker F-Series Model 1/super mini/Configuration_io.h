@@ -110,7 +110,15 @@ IO_INPUT_INVERTED_PULLUP(IOJam1, FILAMENT_SENSOR0)
 // axes except E even if you have none!
 
 ENDSTOP_SWITCH_HW(endstopXMin, IOEndstopXMin, X_AXIS, false)
+#if DUAL_Y_ENDSTOP
+IO_INPUT_INVERTED_PULLUP(IOEndstopY2Min, ORIG_Y2_MIN_PIN)
+ENDSTOP_SWITCH_HW(endstopYMin1, IOEndstopYMin, Y_AXIS, false)
+ENDSTOP_SWITCH_HW(endstopYMin2, IOEndstopY2Min, Y_AXIS, false)
+ENDSTOP_MERGE2(endstopYMin, endstopYMin1, endstopYMin2, Y_AXIS, false)
+#else
 ENDSTOP_SWITCH_HW(endstopYMin, IOEndstopYMin, Y_AXIS, false)
+#endif
+
 ENDSTOP_NONE(endstopXMax)
 ENDSTOP_NONE(endstopYMax)
 #if IDEX
@@ -120,7 +128,7 @@ ENDSTOP_SWITCH_HW(endstopAMax, IOEndstopAMax, A_AXIS, true)
 #endif
 
 #ifdef STACKER_2_Z_END_STOPS
-IO_INPUT_INVERTED_PULLUP(IOEndstopZMax1, ORIG_Z_MAX_PIN) 
+IO_INPUT_INVERTED_PULLUP(IOEndstopZMax1, ORIG_Z_MAX_PIN)
 IO_INPUT_INVERTED_PULLUP(IOEndstopZMax2, ORIG_Z2_MAX_PIN)
 ENDSTOP_SWITCH_HW(endstopZMax1, IOEndstopZMax1, -1, true)
 ENDSTOP_SWITCH_HW(endstopZMax2, IOEndstopZMax2, -1, true)
@@ -178,50 +186,92 @@ IO_PWM_HARDWARE(PWMBed1, HEATER_1_PIN, 500)
 // therefore the max endstops of a delta need to be entered as
 // minimum endstop here!
 #ifdef USE_TMC2660
-STEPPER_TMC2660_HW_SPI(XMotor, IOX1Step, IOX1Dir, IOX1Enable, ORIG_X_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopNone)
-STEPPER_TMC2660_HW_SPI(AMotor, IOAStep, IOADir, IOAEnable, ORIG_A_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2660_HW_SPI(XMotor, IOX1Step, IOX1Dir, IOX1Enable, ORIG_X_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       endstopNone)
+STEPPER_TMC2660_HW_SPI(AMotor, IOAStep, IOADir, IOAEnable, ORIG_A_CS_PIN, 0.11,
+                       1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       endstopNone)
 #if DUAL_Y
-STEPPER_TMC2660_HW_SPI(Y1Motor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopNone)
-STEPPER_TMC2660_HW_SPI(Y2Motor, IOY2Step, IOY2Dir, IOY2Enable, ORIG_Y2_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2660_HW_SPI(Y1Motor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       endstopNone)
+STEPPER_TMC2660_HW_SPI(Y2Motor, IOY2Step, IOY2Dir, IOY2Enable, ORIG_Y2_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       endstopNone)
 STEPPER_MIRROR2(YMotor, Y1Motor, Y2Motor, endstopNone, endstopNone)
 #else
-STEPPER_TMC2660_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_X_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2660_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_X_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       endstopNone)
 #endif
 
 #ifdef STACKER_2_Z_END_STOPS
-STEPPER_TMC2660_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopZMax1)
-STEPPER_TMC2660_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopZMax2)
+STEPPER_TMC2660_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       endstopZMax1)
+STEPPER_TMC2660_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       endstopZMax2)
 #else
-STEPPER_TMC2660_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopNone)
-STEPPER_TMC2660_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN, 0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2660_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       endstopNone)
+STEPPER_TMC2660_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       endstopNone)
 #endif
 STEPPER_MIRROR2(ZMotor, Z1Motor, Z2Motor, endstopNone, endstopNone)
-STEPPER_TMC2660_HW_SPI(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, ORIG_E0_CS_PIN, 0.11, 1, 16, 1000, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2660_HW_SPI(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, ORIG_E0_CS_PIN,
+                       0.11, 1, 16, 1000, 8, 12500000, endstopNone, endstopNone)
 #if IDEX
-STEPPER_TMC2660_HW_SPI(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, ORIG_E1_CS_PIN, 0.11, 1, 16, 1000, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2660_HW_SPI(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, ORIG_E1_CS_PIN,
+                       0.11, 1, 16, 1000, 8, 12500000, endstopNone, endstopNone)
 #endif
 #else
-STEPPER_TMC2130_HW_SPI(XMotor, IOX1Step, IOX1Dir, IOX1Enable, ORIG_X_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
-STEPPER_TMC2130_HW_SPI(AMotor, IOAStep, IOADir, IOAEnable, ORIG_A_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2130_HW_SPI(XMotor, IOX1Step, IOX1Dir, IOX1Enable, ORIG_X_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
+                       endstopNone, endstopNone)
+STEPPER_TMC2130_HW_SPI(AMotor, IOAStep, IOADir, IOAEnable, ORIG_A_CS_PIN, 0.11,
+                       1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone,
+                       endstopNone)
 #if DUAL_Y
-STEPPER_TMC2130_HW_SPI(Y1Motor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
-STEPPER_TMC2130_HW_SPI(Y2Motor, IOY2Step, IOY2Dir, IOY2Enable, ORIG_Y2_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2130_HW_SPI(Y1Motor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
+                       endstopNone, endstopNone)
+STEPPER_TMC2130_HW_SPI(Y2Motor, IOY2Step, IOY2Dir, IOY2Enable, ORIG_Y2_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
+                       endstopNone, endstopNone)
 STEPPER_MIRROR2(YMotor, Y1Motor, Y2Motor, endstopNone, endstopNone)
 #else
-STEPPER_TMC2130_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_X_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2130_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_X_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
+                       endstopNone, endstopNone)
 #endif
 
 #ifdef STACKER_2_Z_END_STOPS
-STEPPER_TMC2130_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopZMax1)
-STEPPER_TMC2130_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopZMax2)
+STEPPER_TMC2130_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
+                       endstopNone, endstopZMax1)
+STEPPER_TMC2130_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
+                       endstopNone, endstopZMax2)
 #else
-STEPPER_TMC2130_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
-STEPPER_TMC2130_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN, 0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2130_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
+                       endstopNone, endstopNone)
+STEPPER_TMC2130_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
+                       endstopNone, endstopNone)
 #endif
 STEPPER_MIRROR2(ZMotor, Z1Motor, Z2Motor, endstopNone, endstopNone)
-STEPPER_TMC2130_HW_SPI(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, ORIG_E0_CS_PIN, 0.11, 1, 16, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2130_HW_SPI(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, ORIG_E0_CS_PIN,
+                       0.11, 1, 16, 1000, true, 100, 8, 12500000, endstopNone,
+                       endstopNone)
 #if IDEX
-STEPPER_TMC2130_HW_SPI(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, ORIG_E1_CS_PIN, 0.11, 1, 16, 1000, true, 100, 8, 12500000, endstopNone, endstopNone)
+STEPPER_TMC2130_HW_SPI(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, ORIG_E1_CS_PIN,
+                       0.11, 1, 16, 1000, true, 100, 8, 12500000, endstopNone,
+                       endstopNone)
 #endif
 #endif
 
@@ -232,8 +282,9 @@ HEAT_MANAGER_PID(HeatedBed1, 'B', 0, TempBed1, PWMBed1, 120, 255, 1000, 10,
                  300000, 196.0, 33.0, 290, 80, 255, false)
 HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 310, 255,
                  1000, 20, 20000, 14.0, 0.6, 24, 40, 255, false)
-// Extruder temperature must be in a +/-2°C corridor for 20 seconds when we wait for
-// target temperature. Stops after 300 seconds with error if it does not succeed.
+// Extruder temperature must be in a +/-2°C corridor for 20 seconds when we wait
+// for target temperature. Stops after 300 seconds with error if it does not
+// succeed.
 HEAT_MANAGER_DEFINE_HYSTERESIS(HeaterExtruder1, 2.0, 20000, 300000)
 COOLER_MANAGER_SENSOR(ExtruderCooler, TempExt1, CoolerFan, 70, 200, 150, 255)
 
@@ -275,8 +326,8 @@ TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 440, 20,
 FILAMENT_DETECTOR(JamDetector1, IOJam1, ToolExtruder1)
 
 // IO_OUTPUT(caseLightPin, HEATER_6_PIN)
-//IO_PWM_HARDWARE(caseLightPWM, LED_PIN, 500)
-//LIGHT_STATE_PWM(caseLightState)
+// IO_PWM_HARDWARE(caseLightPWM, LED_PIN, 500)
+// LIGHT_STATE_PWM(caseLightState)
 /* LIGHT_COND(caseLightState, true, Printer::caseLightMode, 255, 255, 255,
            Printer::caseLightBrightness)
 LIGHT_COND(caseLightState, GUI::statusLevel == GUIStatusLevel::ERROR,

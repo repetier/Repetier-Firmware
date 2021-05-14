@@ -26,14 +26,15 @@ Early stage version for Stacke F1 printer - use with care
 
 // ------- SELECT MODEL TO COMPILE -----------
 
-#define STACKER_F1
+// #define STACKER_F1
 // #define STACKER_F1_XL
 // #define STACKER_F1_XL_IDEX
+#define STACKER_G2
 
 // ------- Optional changes ------------
 
-// XYZ Stepper resolution. Due to TMC stepper smoothing higher values are not required!
-// You can increase them by factor 2. Always change both!
+// XYZ Stepper resolution. Due to TMC stepper smoothing higher values are not
+// required! You can increase them by factor 2. Always change both!
 #define MICROSTEPS 16
 #define STEPS_FACTOR 1
 
@@ -49,12 +50,18 @@ Early stage version for Stacke F1 printer - use with care
 #define IDEX 0
 #endif
 
-#if defined(STACKER_F1_XL) || defined(STACKER_F1_XL_IDEX)
+#if defined(STACKER_F1_XL) || defined(STACKER_F1_XL_IDEX) || defined(STACKER_G2)
 #define DUAL_Y 1
 #define XL_FORMAT 1
 #else
 #define DUAL_Y 0
 #define XL_FORMAT 0
+#endif
+
+#if defined(STACKER_G2)
+#define DUAL_Y_ENDSTOP 1
+#else
+#define DUAL_Y_ENDSTOP 0
 #endif
 
 // Adds z probe support
@@ -96,7 +103,7 @@ Early stage version for Stacke F1 printer - use with care
 #define FEATURE_WATCHDOG 1
 #define FEATURE_RETRACTION 1
 #define USE_ADVANCE 1
-#define NUM_AXES 4 + IDEX        // X,Y,Z and E for extruder A,B,C would be 5,6,7
+#define NUM_AXES 4 + IDEX // X,Y,Z and E for extruder A,B,C would be 5,6,7
 #define STEPPER_FREQUENCY 300000 // Maximum stepper frequency.
 
 // Update frequency for new blocks. Must be higher then
@@ -104,7 +111,7 @@ Early stage version for Stacke F1 printer - use with care
 // Number of blocks with constant stepper rate per second.
 #define PREPARE_FREQUENCY 2000
 #define BLOCK_FREQUENCY 1000
-#define VELOCITY_PROFILE 2      // 0 = linear, 1 = cubic, 2 = quintic velocity shape
+#define VELOCITY_PROFILE 2 // 0 = linear, 1 = cubic, 2 = quintic velocity shape
 #define SLOW_DIRECTION_CHANGE 1 // can be reason for lost steps on slow drivers
 // Smaller segments reduce join speed to prevent vibrations causing lost steps
 #define SMALL_SEGMENT_SIZE 0.4
@@ -127,23 +134,26 @@ Early stage version for Stacke F1 printer - use with care
 #define Z_PROBE_X_OFFSET 30     // x offset relative to extruder 0,0 offset
 #define Z_PROBE_Y_OFFSET -23    // y offset relative to extruder 0,0 offset
 #define Z_PROBE_COATING 0       // Coating thickness if not detected by probe
-// Extra delay before starting again. Only needed on electronic probes keeping state for a while
+// Extra delay before starting again. Only needed on electronic probes keeping
+// state for a while
 #define Z_PROBE_DELAY 0
 #define Z_PROBE_REPETITIONS 1 // How often should we probe, 1 is minimum
 // 0 = use average, 1 = use middle value after ordering z
 #define Z_PROBE_USE_MEDIAN 1
-// Minimum distance required to safely untrigger probe - used for faster repeated measurement
+// Minimum distance required to safely untrigger probe - used for faster
+// repeated measurement
 #define Z_PROBE_SWITCHING_DISTANCE 1
 #define Z_PROBE_BORDER 5 // Safety border to ensure position is allowed
 #define Z_PROBE_START_SCRIPT ""
 #define Z_PROBE_FINISHED_SCRIPT ""
 #define Z_PROBE_RUN_AFTER_EVERY_PROBE ""
-#define LEVELING_METHOD 1                 // Grid measurement
-#define MAX_GRID_SIZE 6                   // Maximum grid size allocation in memory, imported grid can be smaller
-#define ENABLE_BUMP_CORRECTION 1          // CPU intensive, so only activate if required
+#define LEVELING_METHOD 1 // Grid measurement
+#define MAX_GRID_SIZE                                                          \
+  6 // Maximum grid size allocation in memory, imported grid can be smaller
+#define ENABLE_BUMP_CORRECTION 1 // CPU intensive, so only activate if required
 #define BUMP_CORRECTION_START_DEGRADE 0.5 // Until this height we correct 100%
-#define BUMP_CORRECTION_END_HEIGHT 2      // From this height on we do no correction
-#define BUMP_LIMIT_TO 2                   // Maximum allowed correction up/down
+#define BUMP_CORRECTION_END_HEIGHT 2 // From this height on we do no correction
+#define BUMP_LIMIT_TO 2              // Maximum allowed correction up/down
 
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta, 3 = Dual X-Axis
 #if IDEX
@@ -154,11 +164,11 @@ Early stage version for Stacke F1 printer - use with care
 // steps to include as babysteps per 1/BLOCK_FREQUENCY seconds. Must be lower
 // then STEPPER_FREQUENCY/BLOCK_FREQUENCY and be low enough to not loose steps.
 #if IDEX
-#define BABYSTEPS_PER_BLOCK \
-    { 1, 1, 1, 1, 1 }
+#define BABYSTEPS_PER_BLOCK                                                    \
+  { 1, 1, 1, 1, 1 }
 #else
-#define BABYSTEPS_PER_BLOCK \
-    { 1, 1, 1, 1 }
+#define BABYSTEPS_PER_BLOCK                                                    \
+  { 1, 1, 1, 1 }
 #endif
 // If all axis end stops are hardware based we can skip the time consuming tests
 // each step
@@ -279,29 +289,29 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 // by selecteing the fan number with P0..P<NUM_FANS-1>
 #define NUM_FANS 1 + IDEX
 #if IDEX
-#define FAN_LIST \
-    { &Fan1PWM, &Fan2PWM }
+#define FAN_LIST                                                               \
+  { &Fan1PWM, &Fan2PWM }
 #else
-#define FAN_LIST \
-    { &Fan1PWM }
+#define FAN_LIST                                                               \
+  { &Fan1PWM }
 #endif
 
 #define NUM_HEATED_BEDS 1
-#define HEATED_BED_LIST \
-    { &HeatedBed1 }
+#define HEATED_BED_LIST                                                        \
+  { &HeatedBed1 }
 
 #define NUM_HEATED_CHAMBERS 0
-#define HEATED_CHAMBER_LIST \
-    { }
+#define HEATED_CHAMBER_LIST                                                    \
+  {}
 
-#define SERVO_LIST \
-    { }
+#define SERVO_LIST                                                             \
+  {}
 #if IDEX
-#define TOOLS \
-    { &ToolExtruder1, &ToolExtruder2 }
+#define TOOLS                                                                  \
+  { &ToolExtruder1, &ToolExtruder2 }
 #else
-#define TOOLS \
-    { &ToolExtruder1 }
+#define TOOLS                                                                  \
+  { &ToolExtruder1 }
 #endif
 
 // Heaters enumerate all heaters, so we can loop over them
@@ -310,11 +320,11 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 // heaters
 #define NUM_HEATERS 2 + IDEX
 #if IDEX
-#define HEATERS \
-    { &HeaterExtruder1, &HeaterExtruder2, &HeatedBed1 }
+#define HEATERS                                                                \
+  { &HeaterExtruder1, &HeaterExtruder2, &HeatedBed1 }
 #else
-#define HEATERS \
-    { &HeaterExtruder1, &HeatedBed1 }
+#define HEATERS                                                                \
+  { &HeaterExtruder1, &HeatedBed1 }
 #endif
 
 // Array to call motor related commands like microstepping/current if supported.
@@ -322,39 +332,39 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define NUM_MOTORS 4 + IDEX + DUAL_Y
 #if IDEX
 #if DUAL_X
-#define MOTORS \
-    { &XMotor, &YMotor, &ZMotor, &E1Motor, &E2Motor }
-#define MOTOR_NAMES \
-    { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("E0"), PSTR("E1") }
+#define MOTORS                                                                 \
+  { &XMotor, &YMotor, &ZMotor, &E1Motor, &E2Motor }
+#define MOTOR_NAMES                                                            \
+  { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("E0"), PSTR("E1") }
 #else
-#define MOTORS \
-    { &XMotor, &YMotor, &ZMotor, &AMotor, &E1Motor, &E2Motor }
-#define MOTOR_NAMES \
-    { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("A"), PSTR("E0"), PSTR("E1") }
+#define MOTORS                                                                 \
+  { &XMotor, &YMotor, &ZMotor, &AMotor, &E1Motor, &E2Motor }
+#define MOTOR_NAMES                                                            \
+  { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("A"), PSTR("E0"), PSTR("E1") }
 #endif
 #else
 #if DUAL_X
-#define MOTORS \
-    { &XMotor, &YMotor, &ZMotor, &AMotor, &E1Motor }
-#define MOTOR_NAMES \
-    { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("A"), PSTR("E0") }
+#define MOTORS                                                                 \
+  { &XMotor, &YMotor, &ZMotor, &AMotor, &E1Motor }
+#define MOTOR_NAMES                                                            \
+  { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("A"), PSTR("E0") }
 #else
-#define MOTORS \
-    { &XMotor, &YMotor, &ZMotor, &E1Motor }
-#define MOTOR_NAMES \
-    { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("E0") }
+#define MOTORS                                                                 \
+  { &XMotor, &YMotor, &ZMotor, &E1Motor }
+#define MOTOR_NAMES                                                            \
+  { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("E0") }
 #endif
 #endif
 
 // Define beeper list
 #if BEEPER_PIN > -1
 #define NUM_BEEPERS 1
-#define BEEPER_LIST \
-    { &MainBeeper }
+#define BEEPER_LIST                                                            \
+  { &MainBeeper }
 #else
 #define NUM_BEEPERS 0
-#define BEEPER_LIST \
-    { }
+#define BEEPER_LIST                                                            \
+  {}
 #endif
 
 // Some common settings for trinamic driver settings
@@ -385,6 +395,20 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
 // x axis extruders are 62mm width, distance after homing 503mm
 
+#if defined(STACKER_G2)
+#define X_MAX_LENGTH 1000.0f
+#define A_MAX_LENGTH 1000.0f
+#define Y_MAX_LENGTH 1000.0f
+#define Z_MAX_LENGTH 405.0f
+#define X_MIN_POS 0.0f
+#define Y_MIN_POS 0.0f
+#define Z_MIN_POS 0
+#define A_MIN_POS 0
+#define BED_X_MIN 0
+#define BED_X_MAX 1000.0f
+#define BED_Y_MIN 0.0f
+#define BED_Y_MAX 1000.0f
+#else
 #if XL_FORMAT
 #if IDEX
 // Stacke F1 IDEX dimensions and bed positions
@@ -432,6 +456,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define BED_X_MAX 285.0f
 #define BED_Y_MIN 0.0f
 #define BED_Y_MAX 285.0f
+#endif
 #endif
 
 // Park position used when pausing from firmware side
@@ -598,7 +623,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define SDCARDDETECT ORIG_SDCARDDETECT
 #define SDCARDDETECTINVERTED 0
 #endif
-/** Show extended directory including file length. Don't use this with 
+/** Show extended directory including file length. Don't use this with
          Pronterface! */
 #define SD_EXTENDED_DIR 1
 #define SD_RUN_ON_STOP ""
