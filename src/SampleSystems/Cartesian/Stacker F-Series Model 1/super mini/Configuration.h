@@ -16,20 +16,17 @@
 
 */
 
-/*
-Early stage version for Stacke F1 printer - use with care
-
-*/
+// Early stage version for Stacker printers with Super Mini Board
 
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
 // ------- SELECT MODEL TO COMPILE -----------
 
-// #define STACKER_F1
-// #define STACKER_F1_XL
-// #define STACKER_F1_XL_IDEX
-#define STACKER_G2
+// #define STACKER_F_SERIES_MODEL_1
+// #define STACKER_F_SERIES_MODEL_2
+// #define STACKER_F_SERIES_MODEL_2_IDEX
+// #define STACKER_G2
 
 // ------- Optional changes ------------
 
@@ -38,19 +35,26 @@ Early stage version for Stacke F1 printer - use with care
 #define MICROSTEPS 16
 #define STEPS_FACTOR 1
 
-// Uncomment to use TMC2660 instead of TMC2130 drivers
-// #define USE_TMC2660
+// Comment to use TMC2130 instead of TMC2660 drivers
+#define USE_TMC2660
 
 // ------- No further changes required below --------
 
+#if !defined(STACKER_F_SERIES_MODEL_1) &&                                      \
+    !defined(STACKER_F_SERIES_MODEL_2) &&                                      \
+    !defined(STACKER_F_SERIES_MODEL_2_IDEX) && !defined(STACKER_G2)
+#error Please select a printer model first in Configuration.h
+#endif
+
 // ******* Model dependent changes ***********
-#if defined(STACKER_F1_XL_IDEX)
+#if defined(STACKER_F_SERIES_MODEL_2_IDEX) || defined(STACKER_G2)
 #define IDEX 1
 #else
 #define IDEX 0
 #endif
 
-#if defined(STACKER_F1_XL) || defined(STACKER_F1_XL_IDEX) || defined(STACKER_G2)
+#if defined(STACKER_F_SERIES_MODEL_2) ||                                       \
+    defined(STACKER_F_SERIES_MODEL_2_IDEX) || defined(STACKER_G2)
 #define DUAL_Y 1
 #define XL_FORMAT 1
 #else
@@ -411,7 +415,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #else
 #if XL_FORMAT
 #if IDEX
-// Stacke F1 IDEX dimensions and bed positions
+// Stacker F-Series Model 2 dimensions and bed positions
 // Extra parameter in case you have a dual x axis
 #define DUAL_X_LEFT_OFFSET -60.0f
 #define DUAL_X_RIGHT_OFFSET 565.0f
@@ -428,7 +432,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define BED_Y_MIN 0
 #define BED_Y_MAX 405.0f
 #else
-// Stacker F1 XL dimensions and bed positions
+// Stacker F-Series Model 2 dimensions and bed positions
 #define X_MAX_LENGTH 625.0f
 #define A_MAX_LENGTH 625.0f
 #define Y_MAX_LENGTH 405.0f
@@ -443,7 +447,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define BED_Y_MAX 405.0f
 #endif
 #else
-// Stacke F1 dimensions and bed position
+// Stacker F-Series Model 1 dimensions and bed position
 #define X_MAX_LENGTH 310.0f
 #define A_MAX_LENGTH 310.0f
 #define Y_MAX_LENGTH 291.0f
@@ -628,7 +632,18 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define SD_EXTENDED_DIR 1
 #define SD_RUN_ON_STOP ""
 #define SD_STOP_HEATER_AND_MOTORS_ON_STOP 1
-#define UI_PRINTER_NAME "Stacker F1"
+#ifdef STACKER_F_SERIES_MODEL_1
+#define UI_PRINTER_NAME "F-Series Model 1"
+#endif
+#ifdef STACKER_F_SERIES_MODEL_2
+#define UI_PRINTER_NAME "F-Series Model 2"
+#endif
+#ifdef STACKER_F_SERIES_MODEL_2_IDEX
+#define UI_PRINTER_NAME "F-Series Model 2 IDEX"
+#endif
+#ifdef STACKER_G2
+#define UI_PRINTER_NAME "Stacker G2"
+#endif
 #define UI_PRINTER_COMPANY "Stacker"
 #define UI_AUTORETURN_TO_MENU_AFTER 30000
 
