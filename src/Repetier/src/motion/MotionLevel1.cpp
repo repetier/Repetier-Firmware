@@ -208,7 +208,7 @@ void Motion1::setFromConfig() {
     homePriority[X_AXIS] = X_HOME_PRIORITY;
     homePriority[Y_AXIS] = Y_HOME_PRIORITY;
     homePriority[Z_AXIS] = Z_HOME_PRIORITY;
-    homePriority[E_AXIS] = -1;
+    homePriority[E_AXIS] = 0;
 
     motors[X_AXIS] = &XMotor;
     motors[Y_AXIS] = &YMotor;
@@ -1893,6 +1893,7 @@ bool Motion1::simpleHome(fast8_t axis) {
 #endif
     if (homeDir[axis] == 0) { // nothing to do, just set to min
         setAxisHomed(axis, true);
+        Motion1::g92Offsets[axis] = 0;
         currentPosition[axis] = minPos[axis];
         updatePositionsFromCurrent();
         Motion2::setMotorPositionFromTransformed();
