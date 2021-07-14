@@ -66,31 +66,42 @@ void __attribute__((weak)) GCode_2_3(GCode* com) {
     bool posAllowed = true;
     Motion1::copyCurrentOfficial(target);
     bool secondaryMove = false;
-#if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
+#if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1 || (NUM_AXES > A_AXIS && MOVE_A_WHEN_HOMED) || (NUM_AXES > B_AXIS && MOVE_B_WHEN_HOMED) || (NUM_AXES > C_AXIS && MOVE_C_WHEN_HOMED)
     if (!Printer::isNoDestinationCheck()) {
 #if MOVE_X_WHEN_HOMED
-        if (!Motion1::isAxisHomed(X_AXIS))
+        if (!Motion1::isAxisHomed(X_AXIS)) {
             com->unsetX();
+        }
 #endif
 #if MOVE_Y_WHEN_HOMED
-        if (!Motion1::isAxisHomed(Y_AXIS))
+        if (!Motion1::isAxisHomed(Y_AXIS)) {
             com->unsetY();
+        }
 #endif
 #if MOVE_Z_WHEN_HOMED
-        if (!Motion1::isAxisHomed(Z_AXIS))
+        if (!Motion1::isAxisHomed(Z_AXIS)) {
             com->unsetZ();
+        }
 #endif
 #if NUM_AXES > A_AXIS && MOVE_A_WHEN_HOMED
-        if (!Motion1::isAxisHomed(A_AXIS))
+        if (!Motion1::isAxisHomed(A_AXIS)) {
             com->unsetA();
+        }
 #endif
 #if NUM_AXES > B_AXIS && MOVE_B_WHEN_HOMED
-        if (!Motion1::isAxisHomed(B_AXIS))
+        if (!Motion1::isAxisHomed(B_AXIS)) {
             com->unsetB();
+        }
 #endif
 #if NUM_AXES > C_AXIS && MOVE_C_WHEN_HOMED
-        if (!Motion1::isAxisHomed(C_AXIS))
+        if (!Motion1::isAxisHomed(C_AXIS)) {
             com->unsetC();
+        }
+#endif
+#if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
+        if (!Printer::isHomedAll() && !com->hasNoXYZ()) {
+            com->unsetE();
+        }
 #endif
     }
 #endif

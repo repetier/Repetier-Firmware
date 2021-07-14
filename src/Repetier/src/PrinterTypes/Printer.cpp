@@ -419,7 +419,7 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
     float coords[NUM_AXES];
     Motion1::copyCurrentOfficial(coords);
     bool secondaryMove = false;
-#if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
+#if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1 || (NUM_AXES > A_AXIS && MOVE_A_WHEN_HOMED) || (NUM_AXES > B_AXIS && MOVE_B_WHEN_HOMED) || (NUM_AXES > C_AXIS && MOVE_C_WHEN_HOMED)
     if (!isNoDestinationCheck()) {
 #if MOVE_X_WHEN_HOMED
         if (!Motion1::isAxisHomed(X_AXIS))
@@ -444,6 +444,11 @@ void Printer::setDestinationStepsFromGCode(GCode* com) {
 #if NUM_AXES > C_AXIS && MOVE_C_WHEN_HOMED
         if (!Motion1::isAxisHomed(C_AXIS))
             com->unsetC();
+#endif
+#if MOVE_X_WHEN_HOMED == 1 || MOVE_Y_WHEN_HOMED == 1 || MOVE_Z_WHEN_HOMED == 1
+        if (!isHomedAll() && !com->hasNoXYZ()) {
+            com->unsetE();
+        }
 #endif
     }
 #endif

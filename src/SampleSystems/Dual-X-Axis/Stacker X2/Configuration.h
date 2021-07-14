@@ -52,7 +52,7 @@ Early stage version for Stacke X2 printer - use with care
 #define NUM_SERVOS 0
 #define NUM_TOOLS 2
 #define MOTHERBOARD 412 // Stacker 3d Superboard
-#define EEPROM_MODE 2
+#define EEPROM_MODE 8
 #define RFSERIAL Serial
 #define BLUETOOTH_SERIAL 101
 #define JSON_OUTPUT 1
@@ -151,11 +151,11 @@ to the position. 0 = no contribution. */
 #define DELTA_HOME_OFFSET_C 0.85f
 
 // Extra parameter in case you have a dual x axis
-#define DUAL_X_LEFT_OFFSET -64
+#define DUAL_X_LEFT_OFFSET -16
 #define DUAL_X_RIGHT_OFFSET 448.25
 // Minimum distance between both heads
 #define DUAL_X_MIN_DISTANCE 64
-#define LAZY_DUAL_X_AXIS 0
+#define LAZY_DUAL_X_AXIS 1
 
 // Set all directions where no explicit test is required.
 // This is for dummy endstops and for hardware endstops.
@@ -263,8 +263,8 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
 // x axis extruders are 62mm width, distance after homing 503mm
 
-#define X_MAX_LENGTH 376
-#define Y_MAX_LENGTH 385
+#define X_MAX_LENGTH 434
+#define Y_MAX_LENGTH 380
 #if STACKER_SHORT
 #define Z_MAX_LENGTH 300
 #else
@@ -290,14 +290,14 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #endif
 #define PARK_POSITION_Z_RAISE 0
 
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 800
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 800
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_X 400
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Y 400
 #define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_Z 10
-#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_A 800
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 1200
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1200
+#define MAX_ACCELERATION_UNITS_PER_SQ_SECOND_A 400
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_X 1000
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Y 1000
 #define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_Z 10
-#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_A 1200
+#define MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND_A 1000
 
 #ifdef RAPS128_XY
 #define XAXIS_STEPS_PER_MM 146.1 * 4.0
@@ -308,7 +308,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define AAXIS_STEPS_PER_MM 146.1
 #define YAXIS_STEPS_PER_MM 146.1
 #endif
-#define ZAXIS_STEPS_PER_MM 404.18
+#define ZAXIS_STEPS_PER_MM 400.75
 #define MAX_FEEDRATE_X 400
 #define MAX_FEEDRATE_Y 250
 #define MAX_FEEDRATE_Z 8
@@ -420,9 +420,9 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 #define X_BACKLASH 0
 #define Y_BACKLASH 0
 #define Z_BACKLASH 0
-#define MAX_JERK 10
-#define MAX_ZJERK 0
-#define MAX_AJERK 10
+#define MAX_JERK 4
+#define MAX_ZJERK 1
+#define MAX_AJERK 4
 #define PRINTLINE_CACHE_SIZE 32    // Max. number of buffered moves
 #define MIN_PRINTLINE_FILL 8       // Min. number of moves we want to buffer even if length is > MAX_BUFFERED_LENGTH_MM
 #define MAX_BUFFERED_LENGTH_MM 200 // Max. length of moves we want to buffer
