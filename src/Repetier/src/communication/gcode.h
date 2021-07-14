@@ -215,6 +215,11 @@ public:
     inline bool hasE() {
         return ((params & 64) != 0);
     }
+
+    inline void unsetE() {
+        params2 &= ~64;
+    }
+
     inline void setE(float val) {
         E = val;
         params |= 64;
