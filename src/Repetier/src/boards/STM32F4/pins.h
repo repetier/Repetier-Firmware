@@ -33,6 +33,10 @@
 #include "boards/stacker3d_super_mini.h"
 #endif
 
+#if MOTHERBOARD == MOTHERBOARD_SKR_2
+#include "boards/skr2.h"
+#endif
+
 #ifndef SDSSORIG
 #define SDSSORIG -1
 #endif

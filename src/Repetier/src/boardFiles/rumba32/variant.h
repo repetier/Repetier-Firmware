@@ -100,8 +100,6 @@
 #define PE14 78 //D78
 #define PE15 79 //D79
 
-#define CMSIS_STARTUP_FILE "rumba32_startup_stm32f446ve.S"
-
 #define NUM_DIGITAL_PINS 80
 #define NUM_ANALOG_INPUTS 7
 

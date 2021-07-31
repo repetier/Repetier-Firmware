@@ -11,7 +11,7 @@ Timer 1 (PE13, PE14), 2 (PB8, PB9), 3 (PB0, PC6, PC7), 4 (PD12), 9 (PE5, PE6)
 
 #pragma once
 
-#ifndef STM32F4
+#if !defined(STM32F4) || !defined(INI_STACKER3DSM)
 #error "Oops! Select stacker3d_super_mini in platformio.ini -> default_envs"
 #endif
 
@@ -32,7 +32,7 @@ Timer 1 (PE13, PE14), 2 (PB8, PB9), 3 (PB0, PC6, PC7), 4 (PD12), 9 (PE5, PE6)
 #define ORIG_X_CS_PIN PD1
 #define ORIG_X_DIAG0_PIN PD4
 #define ORIG_X_MIN_PIN PB12
-#define ORIG_X_MAX_PIN -1
+#define ORIG_X_MAX_PIN NO_PIN
 
 #define ORIG_Y_STEP_PIN PE2
 #define ORIG_Y_DIR_PIN PE3
@@ -40,7 +40,7 @@ Timer 1 (PE13, PE14), 2 (PB8, PB9), 3 (PB0, PC6, PC7), 4 (PD12), 9 (PE5, PE6)
 #define ORIG_Y_CS_PIN PE1
 #define ORIG_Y_DIAG0_PIN PE4
 #define ORIG_Y_MIN_PIN PB14
-#define ORIG_Y_MAX_PIN -1
+#define ORIG_Y_MAX_PIN NO_PIN
 
 #define ORIG_Y2_STEP_PIN PF13
 #define ORIG_Y2_DIR_PIN PF14
@@ -63,7 +63,7 @@ Timer 1 (PE13, PE14), 2 (PB8, PB9), 3 (PB0, PC6, PC7), 4 (PD12), 9 (PE5, PE6)
 #define ORIG_Z2_ENABLE_PIN PG0
 #define ORIG_Z2_CS_PIN PG1
 #define ORIG_Z2_DIAG0_PIN PG4
-#define ORIG_Z2_MIN_PIN -1
+#define ORIG_Z2_MIN_PIN NO_PIN
 #define ORIG_Z2_MAX_PIN PB1
 
 #define ORIG_A_STEP_PIN PD7

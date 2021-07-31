@@ -31,16 +31,16 @@ EXP1 and EXP2 are rotated 180° compared to Smart Graphics Controller pins, so r
 Expansion ports with orientation board power connector lower right corner.
 
 EXP1:
-                      GND     PE14   PE12       PE7      PE8
+                      GND     PE14   PE12       PE9      PE8
 Header pins top:       9       7       5         3        1
 Header pins bottom:    10      8       6         4        2
-                      3.3V    PE15    PE13      PE10     PE7
+                      5/3.3V    PE15    PE13      PE10     PE7
 
 EXP2:
-                      GND     PB0     PB1       PB2      MISO
+                      GND     PB0     PB1       PB2      MISO/PA6
 Header pins top:       9       7       5         3        1
 Header pins bottom:    10      8       6         4        2
-                      Kill   Reset    MOSI      PA2      SCK
+                      Kill   Reset    MOSI/PA7   PA2      SCK/PA5
 
 EXP3:
                      PD13   PA9(TX1) (SCL)    PA4   PD14(PWM1)  GND      12V
@@ -57,7 +57,7 @@ This makes EXP3 pin 11/12 also a serial as described in pin header above.
 */
 #pragma once
 
-#ifndef STM32F4
+#if !defined(STM32F4) || !defined(INI_RUMBA32)
 #error "Oops! Select RUMBA32 in platformio.ini -> default_envs"
 #endif
 

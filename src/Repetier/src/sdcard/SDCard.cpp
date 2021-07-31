@@ -21,6 +21,14 @@
 
 #include "Repetier.h"
 
+#ifdef CREATE_SPI3
+SPIClass CREATE_SPI3(SPI3_MOSI_PIN, SPI3_MISO_PIN, SPI3_SCK_PIN);
+#endif
+
+#ifndef SD_SPI3_ADDRESS
+#define SD_SPI3_ADDRESS &SPI3
+#endif
+
 #if SDSUPPORT
 
 #ifndef SD_SPI_SPEED_MHZ

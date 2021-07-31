@@ -305,6 +305,10 @@ enum class BootReason {
 #error The minimum NUM_AXES allowed is 4!
 #endif
 
+#ifdef CREATE_SPI3
+extern SPIClass CREATE_SPI3;
+#endif
+
 #ifndef DEFAULT_MATERIALS
 #define DEFAULT_MATERIALS \
     DEFAULT_MATERIAL(Com::tMatPLA, 215, 60, 0) \

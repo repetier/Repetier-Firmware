@@ -138,7 +138,8 @@ typedef char prog_char;
     } while (0)
 #define WRITE(pin, v) _WRITE(pin, v)
 #define READ_VAR(pin) (LL_GPIO_IsInputPinSet(get_GPIO_Port(STM_PORT(pin)), STM_LL_GPIO_PIN(pin)) ? 1 : 0)
-#define READ(pin) _READ(pin)
+#define __READ(pin) _READ(pin)
+#define READ(pin) __READ(pin)
 #define WRITE_VAR(pin, v) \
     do { \
         if (v) { \
