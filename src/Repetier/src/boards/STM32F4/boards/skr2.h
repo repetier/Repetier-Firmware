@@ -119,15 +119,15 @@
 #define EEPROM_AVAILABLE EEPROM_FLASH
 #endif
 
-// SPI on EXP2 pins
-#define SCK_PIN PA5
-#define MISO_PIN PA6
-#define MOSI_PIN PA7
+// SPI for motor
+#define SCK_PIN PE15
+#define MISO_PIN PA14
+#define MOSI_PIN PE14
 
-// Board has a extra SPI for motors - Use SPI3 for it
+// Board has a extra SPI for EXP2 - Use SPI3 for it
 
 #define SD_SPI3_ADDRESS &SPI_3
-#define CREATE_SPI3 SPI_3
+// #define CREATE_SPI3 SPI_3 // remove comment to activate the spi
 #define SPI3_SCK_PIN PA5
 #define SPI3_MISO_PIN PA6
 #define SPI3_MOSI_PIN PA7
