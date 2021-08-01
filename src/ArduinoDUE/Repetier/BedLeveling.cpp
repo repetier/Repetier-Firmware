@@ -120,6 +120,8 @@ Z_PROBE_Z_OFFSET after endstop is hit. This requires the extruder to bend the
 coating thickness without harm!
 */
 
+// Looks like bed leveling has a problem due to wrong transformation. Enabling this flag uses the correct version
+#define NEW_TRANSFORM
 #include "Repetier.h"
 
 #ifndef BED_LEVELING_METHOD
@@ -1052,9 +1054,18 @@ void Printer::transformToPrinter(float x, float y, float z, float& transX,
 #endif
 #if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
     if (isAutolevelActive()) {
+#ifndef NEW_TRANSFORM
         transX = x * autolevelTransformation[0] + y * autolevelTransformation[3] + z * autolevelTransformation[6];
         transY = x * autolevelTransformation[1] + y * autolevelTransformation[4] + z * autolevelTransformation[7];
         transZ = x * autolevelTransformation[2] + y * autolevelTransformation[5] + z * autolevelTransformation[8];
+#else
+        x -= offsetX;
+        y -= offsetY;
+        z -= offsetZ;
+        transX = x * autolevelTransformation[0] + y * autolevelTransformation[3] + z * autolevelTransformation[6] + offsetX;
+        transY = x * autolevelTransformation[1] + y * autolevelTransformation[4] + z * autolevelTransformation[7] + offsetY;
+        transZ = x * autolevelTransformation[2] + y * autolevelTransformation[5] + z * autolevelTransformation[8] + offsetZ;
+#endif
     } else {
         transX = x;
         transY = y;
@@ -1072,9 +1083,18 @@ void Printer::transformFromPrinter(float x, float y, float z, float& transX,
                                    float& transY, float& transZ) {
 #if BED_CORRECTION_METHOD != 1 && FEATURE_AUTOLEVEL
     if (isAutolevelActive()) {
+#ifndef NEW_TRANSFORM
         transX = x * autolevelTransformation[0] + y * autolevelTransformation[1] + z * autolevelTransformation[2];
         transY = x * autolevelTransformation[3] + y * autolevelTransformation[4] + z * autolevelTransformation[5];
         transZ = x * autolevelTransformation[6] + y * autolevelTransformation[7] + z * autolevelTransformation[8];
+#else
+        x -= offsetX;
+        y -= offsetY;
+        z -= offsetZ;
+        transX = x * autolevelTransformation[0] + y * autolevelTransformation[1] + z * autolevelTransformation[2] + offsetX;
+        transY = x * autolevelTransformation[3] + y * autolevelTransformation[4] + z * autolevelTransformation[5] + offsetY;
+        transZ = x * autolevelTransformation[6] + y * autolevelTransformation[7] + z * autolevelTransformation[8] + offsetZ;
+#endif
     } else {
         transX = x;
         transY = y;
