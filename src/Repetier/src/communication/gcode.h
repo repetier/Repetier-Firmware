@@ -161,57 +161,85 @@ public:
     inline bool hasM() {
         return ((params & 2) != 0);
     }
+
     inline void setM(uint16_t val) {
         M = val;
         params |= 2;
     }
+
     inline bool hasN() {
         return ((params & 1) != 0);
     }
+
     inline void setN(uint16_t val) {
         N = val;
         params |= 1;
     }
+
     inline bool hasG() {
         return ((params & 4) != 0);
     }
+
     inline void setG(uint16_t val) {
         G = val;
         params |= 4;
     }
+
     inline bool hasX() {
         return ((params & 8) != 0);
     }
+
     inline void setX(float val) {
         X = val;
         params |= 8;
     }
+
     inline void unsetX() {
         params &= ~8;
     }
+
+    inline float getX(float def) {
+        return hasX() ? X : def;
+    }
+
     inline bool hasY() {
         return ((params & 16) != 0);
     }
+
     inline void setY(float val) {
         Y = val;
         params |= 16;
     }
+
     inline void unsetY() {
         params &= ~16;
     }
+
+    inline float getY(float def) {
+        return hasY() ? Y : def;
+    }
+
     inline bool hasZ() {
         return ((params & 32) != 0);
     }
+
     inline void setZ(float val) {
         Z = val;
         params |= 32;
     }
+
     inline void unsetZ() {
         params &= ~32;
     }
+
+    inline float getZ(float def) {
+        return hasZ() ? Z : def;
+    }
+
     inline bool hasNoXYZ() {
         return ((params & 56) == 0);
     }
+
     inline bool hasE() {
         return ((params & 64) != 0);
     }
@@ -220,30 +248,49 @@ public:
         params2 &= ~64;
     }
 
+    inline float getE(float def) {
+        return hasE() ? E : def;
+    }
+
     inline void setE(float val) {
         E = val;
         params |= 64;
     }
+
     inline bool hasF() {
         return ((params & 256) != 0);
     }
+
     inline void setF(float val) {
         F = val;
         params |= 256;
     }
+
+    inline float getF(float def) {
+        return hasF() ? F : def;
+    }
+
     inline bool hasT() {
         return ((params & 512) != 0);
     }
+
     inline void setT(uint8_t val) {
         T = val;
         params |= 512;
     }
+    inline int32_t getT(uint8_t def) {
+        return hasT() ? T : def;
+    }
+
     inline bool hasS() {
         return ((params & 1024) != 0);
     }
     inline void setS(int32_t val) {
         S = val;
         params |= 8;
+    }
+    inline int32_t getS(int32_t def) {
+        return hasS() ? S : def;
     }
     inline bool hasP() {
         return ((params & 2048) != 0);
@@ -252,145 +299,234 @@ public:
         P = val;
         params |= 2048;
     }
+    inline int32_t getP(int32_t def) {
+        return hasP() ? P : def;
+    }
+
     inline bool isV2() {
         return ((params & 4096) != 0);
     }
+
     inline bool hasString() {
         return ((params & 32768) != 0);
     }
+
     inline bool hasI() {
         return ((params2 & 1) != 0);
     }
+
     inline void setI(float val) {
         I = val;
         params |= 4096;
         params2 |= 8;
     }
+
+    inline float getI(float def) {
+        return hasI() ? I : def;
+    }
+
     inline bool hasJ() {
         return ((params2 & 2) != 0);
     }
+
     inline void setJ(float val) {
         J = val;
         params |= 4096;
         params2 |= 2;
     }
+
+    inline float getJ(float def) {
+        return hasJ() ? J : def;
+    }
+
     inline bool hasR() {
         return ((params2 & 4) != 0);
     }
+
     inline void setR(float val) {
         R = val;
         params |= 4096;
         params2 |= 4;
     }
+
+    inline float getR(float def) {
+        return hasR() ? X : def;
+    }
+
     inline bool hasD() {
         return ((params2 & 8) != 0);
     }
+
     inline void setD(float val) {
         D = val;
         params |= 4096;
         params2 |= 8;
     }
+
+    inline float getD(float def) {
+        return hasD() ? D : def;
+    }
+
     inline bool hasC() {
         return ((params2 & 16) != 0);
     }
+
     inline void unsetC() {
         params2 &= ~16;
     }
+
     inline void setC(float val) {
         C = val;
         params |= 4096;
         params2 |= 16;
     }
+
+    inline float getC(float def) {
+        return hasC() ? C : def;
+    }
+
     inline bool hasH() {
         return ((params2 & 32) != 0);
     }
+
     inline void setH(float val) {
         H = val;
         params |= 4096;
         params2 |= 32;
     }
+
+    inline float getH(float def) {
+        return hasH() ? H : def;
+    }
+
     inline bool hasA() {
         return ((params2 & 64) != 0);
     }
+
     inline void unsetA() {
         params2 &= ~64;
     }
+
     inline void setA(float val) {
         A = val;
         params |= 4096;
         params2 |= 64;
     }
+
+    inline float getA(float def) {
+        return hasA() ? A : def;
+    }
+
     inline bool hasB() {
         return ((params2 & 128) != 0);
     }
+
     inline void unsetB() {
         params2 &= ~128;
     }
+
     inline void setB(float val) {
         B = val;
         params |= 4096;
         params2 |= 128;
     }
+
+    inline float getB(float def) {
+        return hasB() ? B : def;
+    }
+
     inline bool hasK() {
         return ((params2 & 256) != 0);
     }
+
     inline void setK(float val) {
         K = val;
         params |= 4096;
         params2 |= 256;
     }
+
+    inline float getK(float def) {
+        return hasK() ? K : def;
+    }
+
     inline bool hasL() {
         return ((params2 & 512) != 0);
     }
+
     inline void setL(float val) {
         L = val;
         params |= 4096;
         params2 |= 512;
     }
+
+    inline float getL(float def) {
+        return hasL() ? L : def;
+    }
+
     inline bool hasO() {
         return ((params2 & 1024) != 0);
     }
+
     inline void setO(float val) {
         O = val;
         params |= 4096;
         params2 |= 1024;
     }
+
+    inline float getO(float def) {
+        return hasO() ? O : def;
+    }
+
     inline bool hasU() {
         return ((params2 & 2048) != 0);
     }
+
     inline void setU(float val) {
         U = val;
         params |= 4096;
         params2 |= 2048;
     }
+
+    inline float getU(float def) {
+        return hasU() ? U : def;
+    }
+
     inline bool hasV() {
         return ((params2 & 4096) != 0);
     }
+
     inline void setV(float val) {
         V = val;
         params |= 4096;
         params2 |= 4096;
     }
+
+    inline float getV(float def) {
+        return hasV() ? V : def;
+    }
+
     inline bool hasW() {
         return ((params2 & 8192) != 0);
     }
+
     inline void setW(float val) {
         W = val;
         params |= 4096;
         params2 |= 8192;
     }
-    inline long getS(long def) {
-        return (hasS() ? S : def);
+
+    inline float getW(float def) {
+        return hasW() ? W : def;
     }
-    inline long getP(long def) {
-        return (hasP() ? P : def);
-    }
+
     inline void setFormatError() {
         params2 |= 32768;
     }
+
     inline bool hasFormatError() {
         return ((params2 & 32768) != 0);
     }
+
     inline void reset() { params = params2 = 0; }
     inline bool isPriorityM() {
 #if HOST_PRIORITY_CONTROLS

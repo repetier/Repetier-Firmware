@@ -635,7 +635,9 @@ void Motion2::endstopTriggered(Motion3Buffer* act, fast8_t axis, bool dir) {
     if ((m1->axisDir & bitMask) != (Motion1::axesDirTriggered & bitMask)) {
         return; // we move away so it is a stale signal from other direction
     }
-    Motion1::setAxisHomed(axis, false);
+    if (Motion1::endstopMode != EndstopMode::PROBING) { // ignore if probing
+        Motion1::setAxisHomed(axis, false);
+    }
     if (Motion1::endstopMode == EndstopMode::STOP_AT_ANY_HIT || Motion1::endstopMode == EndstopMode::PROBING) {
         FOR_ALL_AXES(i) {
             Motion1::stepsRemaining[i] = m2.stepsRemaining[i];

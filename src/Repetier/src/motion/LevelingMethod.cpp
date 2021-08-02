@@ -28,7 +28,9 @@
 void LevelingCorrector::correct(Plane* plane) {
     // adjust current z
     Motion1::currentPositionTransformed[Z_AXIS] = plane->z(Motion1::currentPositionTransformed[X_AXIS], Motion1::currentPositionTransformed[Y_AXIS]);
+    Motion1::waitForEndOfMoves();
     Motion1::updatePositionsFromCurrentTransformed();
+    Motion2::setMotorPositionFromTransformed();
     // enable rotation
 #if LEVELING_METHOD > 0
     Motion1::buildTransformationMatrix(*plane);
@@ -836,6 +838,7 @@ void Leveling::importBumpMatrix(char* filename) {
     if (Motion1::isAutolevelActive()) {
         Motion1::updateRotMinMax();
         Motion1::updatePositionsFromCurrentTransformed();
+        Motion2::setMotorPositionFromTransformed();
     } else {
         Motion1::setAutolevelActive(true);
     }

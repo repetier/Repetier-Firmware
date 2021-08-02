@@ -497,6 +497,7 @@ void __attribute__((weak)) GCode_30(GCode* com) {
             Motion1::g92Offsets[Z_AXIS] = o - h; // o = what it should be official - h = here I am
             Motion1::currentPosition[Z_AXIS] = z + h + Motion1::minPos[Z_AXIS];
             Motion1::updatePositionsFromCurrent();
+            Motion2::setMotorPositionFromTransformed();
             Motion1::setAxisHomed(Z_AXIS, true);
         }
     }
@@ -775,39 +776,49 @@ void __attribute__((weak)) GCode_133(GCode* com) {
 }
 
 void __attribute__((weak)) GCode_134(GCode* com) {
-    /*
-#if FEATURE_Z_PROBE && NUM_TOOLS > 1
-    // - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extrude x against reference, Zx = add to measured z distance for Sx for correction.
-    float z = com->hasZ() ? com->Z : 0;
-    int p = com->hasP() ? com->P : 0;
-    int s = com->hasS() ? com->S : -1;
-    int startExtruder = Extruder::current->id;
-    extruder[p].zOffset = 0;
-    float mins[NUM_EXTRUDER], maxs[NUM_EXTRUDER], avg[NUM_EXTRUDER];
+#if Z_PROBE_TYPE == 2 && NUM_TOOLS > 1
+    if ((Motion1::axesHomed & 7) != 7) {
+        Com::printWarningFLN(PSTR("You need to home first!"));
+        return;
+    }
+    // - G134 Px Sx Zx - Calibrate nozzle height difference (need z probe in nozzle!) Px = reference extruder, Sx = only measure extruder x against reference, Zx = add to measured z distance for Sx for correction.
+    float z = com->getZ(0);
+    int p = com->getP(0);
+    int s = com->getS(-1);
+    fast8_t startExtruder = Tool::getActiveToolId();
+    Tool::getTool(p)->setOffsetForAxis(Z_AXIS, 0);
+    float mins[NUM_TOOLS], maxs[NUM_TOOLS], avg[NUM_TOOLS];
     for (int i = 0; i < NUM_EXTRUDER; i++) { // silence unnecessary compiler warning
         avg[i] = 0;
     }
     bool bigError = false;
 
-#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
-    float actTemp[NUM_EXTRUDER];
-    for (int i = 0; i < NUM_EXTRUDER; i++)
-        actTemp[i] = extruder[i].tempControl.targetTemperatureC;
-    Printer::moveToReal(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEAT_HEIGHT, IGNORE_COORDINATE, Printer::homingFeedrate[Z_AXIS]);
-    Motion1::waitForEndOfMoves();
-#if ZHOME_HEAT_ALL
-    for (int i = 0; i < NUM_EXTRUDER; i++) {
-        Extruder::setTemperatureForExtruder(RMath::max(actTemp[i], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), i, false, false);
+    int zProbeMinTemp = ZProbeHandler::getProbingTemp();
+    float actTemp[NUM_TOOLS];
+    if (zProbeMinTemp > 0) {
+        for (int i = 0; i < NUM_TOOLS; i++) {
+            Tool* t = Tool::getTool(i);
+            if (t->supportsTemperatures()) {
+                actTemp[i] = t->getHeater()->getTargetTemperature();
+                ;
+            } else {
+                actTemp[i] = 0;
+            }
+        }
+        Motion1::setTmpPositionXYZ(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEIGHT);
+        Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::homingFeedrate[Z_AXIS], false);
+        Motion1::waitForEndOfMoves();
+        for (int i = 0; i < NUM_TOOLS && !bigError; i++) {
+            if (i != p && (s >= 0 && i != s)) {
+                continue;
+            }
+            Tool* t = Tool::getTool(i);
+            if (t->supportsTemperatures() && t->getHeater()->getTargetTemperature() < zProbeMinTemp) {
+                t->getHeater()->setTargetTemperature(zProbeMinTemp);
+            }
+        }
+        Tool::waitForTemperatures();
     }
-    for (int i = 0; i < NUM_EXTRUDER; i++) {
-        if (extruder[i].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
-            Extruder::setTemperatureForExtruder(RMath::max(actTemp[i], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), i, false, true);
-    }
-#else
-    if (extruder[Extruder::current->id].tempControl.currentTemperatureC < ZPROBE_MIN_TEMPERATURE)
-        Extruder::setTemperatureForExtruder(RMath::max(actTemp[Extruder::current->id], static_cast<float>(ZPROBE_MIN_TEMPERATURE)), Extruder::current->id, false, true);
-#endif
-#endif
 
 #ifndef G134_REPETITIONS
 #define G134_REPETITIONS 3
@@ -815,22 +826,25 @@ void __attribute__((weak)) GCode_134(GCode* com) {
 #ifndef G134_PRECISION
 #define G134_PRECISION 0.05
 #endif
-    Printer::startProbing(true);
+    ZProbeHandler::activate();
     for (int r = 0; r < G134_REPETITIONS && !bigError; r++) {
-        Extruder::selectExtruderById(p);
-        float refHeight = Printer::runZProbe(false, false);
+        Tool::selectTool(p);
+        float refHeight = ZProbeHandler::runProbe();
         if (refHeight == ILLEGAL_Z_PROBE) {
             bigError = true;
             break;
         }
-        for (int i = 0; i < NUM_EXTRUDER && !bigError; i++) {
-            if (i == p)
+        for (fast8_t i = 0; i < NUM_TOOLS && !bigError; i++) {
+            if (i == p) {
                 continue;
-            if (s >= 0 && i != s)
+            }
+            if (s >= 0 && i != s) {
                 continue;
-            extruder[i].zOffset = 0;
-            Extruder::selectExtruderById(i);
-            float height = Printer::runZProbe(false, false);
+            }
+            Tool* testTool = Tool::getTool(i);
+            testTool->setOffsetForAxis(Z_AXIS, 0);
+            Tool::selectTool(i);
+            float height = ZProbeHandler::runProbe();
             if (height == ILLEGAL_Z_PROBE) {
                 bigError = true;
                 break;
@@ -840,10 +854,12 @@ void __attribute__((weak)) GCode_134(GCode* com) {
                 avg[i] = mins[i] = maxs[i] = off;
             } else {
                 avg[i] += off;
-                if (off < mins[i])
+                if (off < mins[i]) {
                     mins[i] = off;
-                if (off > maxs[i])
+                }
+                if (off > maxs[i]) {
                     maxs[i] = off;
+                }
                 if (maxs[i] - mins[i] > G134_PRECISION) {
                     Com::printErrorFLN(PSTR("Deviation between measurements were too big, please repeat."));
                     bigError = true;
@@ -853,29 +869,32 @@ void __attribute__((weak)) GCode_134(GCode* com) {
         }
     }
     if (!bigError) {
-        for (int i = 0; i < NUM_EXTRUDER; i++) {
-            if (s >= 0 && i != s)
+        for (int i = 0; i < NUM_TOOLS; i++) {
+            if (s >= 0 && i != s) {
                 continue;
-            extruder[i].zOffset = avg[i] * Motion1::resolution[Z_AXIS] / G134_REPETITIONS;
+            }
+            float newOffset = avg[i] / G134_REPETITIONS;
+            Tool::getTool(i)->setOffsetForAxis(Z_AXIS, newOffset);
+            Com::printF(PSTR("ZOffset Tool "), static_cast<int32_t>(i));
+            Com::print(':');
+            Com::printFloat(newOffset, 4);
+            Com::println();
         }
-#if EEPROM_MODE != 0
-        EEPROM::storeDataIntoEEPROM(0);
+#if EEPROM_MODE != EEPROM_NONE
+        EEPROM::markChanged();
 #endif
     }
-    Extruder::selectExtruderById(startExtruder);
-    Printer::finishProbing();
-#if defined(Z_PROBE_MIN_TEMPERATURE) && Z_PROBE_MIN_TEMPERATURE
-#if ZHOME_HEAT_ALL
-    for (int i = 0; i < NUM_EXTRUDER; i++)
-        Extruder::setTemperatureForExtruder(actTemp[i], i, false, false);
-    for (int i = 0; i < NUM_EXTRUDER; i++)
-        Extruder::setTemperatureForExtruder(actTemp[i], i, false, actTemp[i] > MAX_ROOM_TEMPERATURE);
-#else
-    Extruder::setTemperatureForExtruder(actTemp[Extruder::current->id], Extruder::current->id, false, actTemp[Extruder::current->id] > MAX_ROOM_TEMPERATURE);
+    Tool::selectTool(startExtruder);
+    ZProbeHandler::deactivate();
+    if (zProbeMinTemp > 0) {
+        for (int i = 0; i < NUM_TOOLS; i++) {
+            Tool* t = Tool::getTool(i);
+            if (t->supportsTemperatures()) {
+                t->getHeater()->setTargetTemperature(actTemp[i]);
+            }
+        }
+    }
 #endif
-#endif
-#endif
-*/
 }
 
 void __attribute__((weak)) GCode_135(GCode* com) {

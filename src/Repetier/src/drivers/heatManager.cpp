@@ -343,6 +343,9 @@ void HeatManager::waitForTargetTemperature() {
             GCode::fatalError(PSTR("Target temp. not reached within set time limit"));
             break;
         }
+        if (getError() != HeaterError::NO_ERROR) { // decoupled or so happened
+            break;
+        }
     }
     Printer::setAutoreportTemp(oldReport);
 }

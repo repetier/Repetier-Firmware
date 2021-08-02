@@ -129,7 +129,7 @@ float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
     }
     bool alActive = Motion1::isAutolevelActive();
     Motion1::setAutolevelActive(false, true);
-    EndstopMode oldMode = Motion1::endstopMode;
+    RememberedEndstopMode oldMode; // RAII does restore on return
     Motion1::endstopMode = EndstopMode::PROBING;
     Motion1::waitForEndOfMoves(); // defined starting condition
     Motion1::stopMask = 4u;       // z trigger is finished
@@ -275,7 +275,7 @@ float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
     GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));
 #endif
 
-    Motion1::endstopMode = oldMode;
+    RememberedEndstopMode oldMode; // RAII does restore on return
     Motion1::setAutolevelActive(alActive, true);
     if (!wasActivated) {
         deactivate();
@@ -491,7 +491,7 @@ float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
     }
     bool alActive = Motion1::isAutolevelActive();
     Motion1::setAutolevelActive(false, true);
-    EndstopMode oldMode = Motion1::endstopMode;
+    RememberedEndstopMode oldMode; // RAII does restore on return
     Motion1::endstopMode = EndstopMode::PROBING;
     Motion1::waitForEndOfMoves(); // defined starting condition
     Motion1::stopMask = 4u;       // z trigger is finished
@@ -637,7 +637,6 @@ float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
     GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));
 #endif
 
-    Motion1::endstopMode = oldMode;
     Motion1::setAutolevelActive(alActive, true);
     if (!wasActivated) {
         deactivate();
@@ -845,7 +844,7 @@ float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
     }
     bool alActive = Motion1::isAutolevelActive();
     Motion1::setAutolevelActive(false, true);
-    EndstopMode oldMode = Motion1::endstopMode;
+    RememberedEndstopMode oldMode; // RAII does restore on return
     Motion1::endstopMode = EndstopMode::PROBING;
     Motion1::waitForEndOfMoves(); // defined starting condition
     Motion1::stopMask = 4u;       // z trigger is finished
@@ -995,7 +994,6 @@ float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
     GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));
 #endif
 
-    Motion1::endstopMode = oldMode;
     Motion1::setAutolevelActive(alActive, true);
     if (!wasActivated) {
         deactivate();

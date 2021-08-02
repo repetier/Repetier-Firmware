@@ -589,16 +589,16 @@ void __attribute__((weak)) MCode_111(GCode* com) {
 
 void __attribute__((weak)) MCode_114(GCode* com) {
     Com::writeToAll = false;
-    Motion1::printCurrentPosition();
-    if (com->hasS() && com->S) {
-        Com::printF(PSTR("XS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][X_AXIS]);
+    Motion1::printCurrentPosition(false);
+    if (com->getS(0)) {
+        Com::printF(PSTR(" XS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][X_AXIS]);
         Com::printF(PSTR(" YS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Y_AXIS]);
         Com::printF(PSTR(" ZS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Z_AXIS]);
 #if NUM_AXES > A_AXIS
         Com::printF(PSTR(" AS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][A_AXIS]);
 #endif
-        Com::println();
     }
+    Com::println();
 }
 
 void __attribute__((weak)) MCode_115(GCode* com) {

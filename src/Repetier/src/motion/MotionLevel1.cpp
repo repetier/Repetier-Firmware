@@ -103,6 +103,15 @@ constexpr int numMotors = std::extent<decltype(Motion1::drivers)>::value;
 static_assert(numMotors == NUM_MOTORS, "NUM_MOTORS not defined correctly");
 #endif
 
+RememberedEndstopMode::RememberedEndstopMode()
+    : mode(Motion1::endstopMode) { }
+RememberedEndstopMode::~RememberedEndstopMode() {
+    Motion1::endstopMode = mode;
+}
+void RememberedEndstopMode::restore() {
+    Motion1::endstopMode = mode;
+}
+
 void Motion1::init() {
 
     int i;
@@ -323,7 +332,9 @@ void Motion1::setAutolevelActive(bool state, bool silent) {
     if (state != autolevelActive) {
         autolevelActive = state;
         updateRotMinMax();
+        waitForEndOfMoves();
         updatePositionsFromCurrentTransformed();
+        Motion2::setMotorPositionFromTransformed();
     }
     if (!silent) {
         if (autolevelActive) {
@@ -512,6 +523,7 @@ void Motion1::waitForEndOfMoves() {
         Commands::checkForPeriodicalActions(false);
         GCode::keepAlive(FirmwareState::Processing, 3);
     }
+    Commands::checkForPeriodicalActions(false); // report end stops in time for correct log sequence
 }
 
 void Motion1::waitForXFreeMoves(fast8_t n, bool allowMoves) {
@@ -560,7 +572,7 @@ void Motion1::setIgnoreABC(float coords[NUM_AXES]) {
     }
 }
 
-void Motion1::printCurrentPosition() {
+void Motion1::printCurrentPosition(bool newLine) {
     float x, y, z;
     Printer::realPosition(x, y, z);
     x += Motion1::g92Offsets[X_AXIS];
@@ -581,7 +593,9 @@ void Motion1::printCurrentPosition() {
 #if NUM_AXES > C_AXIS
     Com::printF(Com::tSpaceCColon, Motion1::currentPosition[C_AXIS] * (Printer::unitIsInches ? 0.03937 : 1), 2);
 #endif
-    Com::println();
+    if (newLine) {
+        Com::println();
+    }
 #ifdef DEBUG_POS
     Com::printF(PSTR("OffX:"), Motion1::toolOffset[X_AXIS]); // to debug offset handling
     Com::printF(PSTR(" OffY:"), Motion1::toolOffset[Y_AXIS]);
@@ -800,6 +814,7 @@ void Motion1::arc(float position[NUM_AXES], float target[NUM_AXES], float* offse
 }
 
 void Motion1::setToolOffset(float ox, float oy, float oz) {
+#ifdef OFFSETS_IN_TRANSFORMED_COS
     if (Motion1::isAxisHomed(X_AXIS) && Motion1::isAxisHomed(Y_AXIS)) {
         setTmpPositionXYZ(currentPosition[X_AXIS] + ox - toolOffset[X_AXIS],
                           currentPosition[Y_AXIS] + oy - toolOffset[Y_AXIS],
@@ -826,6 +841,34 @@ void Motion1::setToolOffset(float ox, float oy, float oz) {
     }
     toolOffset[Z_AXIS] = oz;
     updatePositionsFromCurrentTransformed();
+#else
+    if (Motion1::isAxisHomed(X_AXIS) && Motion1::isAxisHomed(Y_AXIS)) {
+        setTmpPositionXYZ(currentPositionTransformed[X_AXIS] + ox - toolOffset[X_AXIS],
+                          currentPositionTransformed[Y_AXIS] + oy - toolOffset[Y_AXIS],
+                          currentPositionTransformed[Z_AXIS]);
+        moveByPrinter(tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
+        waitForEndOfMoves();
+    } else {
+        currentPositionTransformed[X_AXIS] += ox - toolOffset[X_AXIS];
+        currentPositionTransformed[Y_AXIS] += oy - toolOffset[Y_AXIS];
+        updatePositionsFromCurrentTransformed();
+    }
+    toolOffset[X_AXIS] = ox;
+    toolOffset[Y_AXIS] = oy;
+    updatePositionsFromCurrentTransformed();
+    if (Motion1::isAxisHomed(Z_AXIS)) {
+        setTmpPositionXYZ(currentPositionTransformed[X_AXIS],
+                          currentPositionTransformed[Y_AXIS],
+                          currentPositionTransformed[Z_AXIS] + oz - toolOffset[Z_AXIS]);
+        moveByPrinter(tmpPosition, Motion1::moveFeedrate[Z_AXIS], false);
+        waitForEndOfMoves();
+    } else {
+        currentPositionTransformed[Z_AXIS] += oz - toolOffset[Z_AXIS];
+        updatePositionsFromCurrentTransformed();
+    }
+    toolOffset[Z_AXIS] = oz;
+    updatePositionsFromCurrentTransformed();
+#endif
 }
 
 // Move to the printer coordinates (after offset, transform, ...)
@@ -865,6 +908,22 @@ void Motion1::updatePositionsFromCurrent() {
 
 void Motion1::updatePositionsFromCurrentTransformed() {
     PrinterType::transformedToOfficial(currentPositionTransformed, currentPosition);
+}
+
+void Motion1::reportPosition(FSTRINGPARAM(hint), bool withSteps) {
+    Com::writeToAll = true;
+    Com::printF(hint);
+    Com::print(' ');
+    Motion1::printCurrentPosition(false);
+    if (withSteps) {
+        Com::printF(PSTR(" XS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][X_AXIS]);
+        Com::printF(PSTR(" YS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Y_AXIS]);
+        Com::printF(PSTR(" ZS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][Z_AXIS]);
+#if NUM_AXES > A_AXIS
+        Com::printF(PSTR(" AS:"), Motion2::lastMotorPos[Motion2::lastMotorIdx][A_AXIS]);
+#endif
+    }
+    Com::println();
 }
 
 // Move with coordinates in official coordinates (before offset, transform, ...)
@@ -1702,6 +1761,9 @@ void Motion1::homeAxes(fast8_t axes) {
                 if (!PrinterType::homeAxis(i)) {
                     callAfterHomingOnSteppers(); // for motor drivers to turn off crash detection if wanted
                     Printer::setHoming(false);
+                    if (i == Z_AXIS && ZProbe != nullptr && homeDir[Z_AXIS] < 0) {
+                        ZProbeHandler::deactivate(); // activates tool offsets
+                    }
                     GCode::fatalError(PSTR("Homing failed"));
                     return;
                 }
@@ -1712,11 +1774,17 @@ void Motion1::homeAxes(fast8_t axes) {
                 g92Offsets[i] = 0;
                 if (i == Z_AXIS && ZProbe != nullptr && homeDir[Z_AXIS] < 0) {
                     ZProbeHandler::deactivate(); // activates tool offsets
+#ifdef DEBUG_MOVES
+                    reportPosition(PSTR("homeAxes ZP off"), true);
+#endif
                 }
 #if ZHOME_HEIGHT > 0
                 if (i == Z_AXIS) {
                     setTmpPositionXYZE(IGNORE_COORDINATE, IGNORE_COORDINATE, ZHOME_HEIGHT, IGNORE_COORDINATE);
                     moveByOfficial(tmpPosition, maxFeedrate[Z_AXIS], false);
+#ifdef DEBUG_MOVES
+                    reportPosition(PSTR("homeAxes home height"), true);
+#endif
                 }
 #endif
             }
@@ -1799,6 +1867,9 @@ void Motion1::homeAxes(fast8_t axes) {
     if (Tool::getActiveTool() != nullptr && ok && (axes & 7) != 0) { // select only if all is homed or we get unwanted moves! Also only do it if position has changed allowing homing of non position axis in extruder selection.
         Tool::selectTool(activeToolId, true);
     }
+#ifdef DEBUG_MOVES
+    reportPosition(PSTR("homeAxes end"), true);
+#endif
 
     Motion1::printCurrentPosition();
     GUI::popBusy();
@@ -1902,7 +1973,7 @@ bool Motion1::simpleHome(fast8_t axis) {
     bool ok = true;
     EndstopDriver& eStop = endstopForAxisDir(axis, homeDir[axis] > 0);
     const float secureDistance = (maxPosOff[axis] - minPosOff[axis]) * 1.5f;
-    const EndstopMode oldMode = endstopMode;
+    RememberedEndstopMode oldMode; // RAII does restore on return
     const EndstopMode newMode = axis == Z_AXIS && ZProbe != nullptr && homeDir[Z_AXIS] < 0 ? EndstopMode::PROBING : EndstopMode::STOP_HIT_AXES;
     endstopMode = newMode;
     Motion1::stopMask = axisBits[axis]; // when this endstop is triggered we are at home
@@ -1963,6 +2034,9 @@ bool Motion1::simpleHome(fast8_t axis) {
     }
     updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
+#ifdef DEBUG_MOVES
+    reportPosition(PSTR("simpleHome A"), true);
+#endif
     HAL::delayMilliseconds(30);
     float minOff, maxOff;
     float curPos = homeDir[axis] > 0 ? maxPos[axis] : minPos[axis];
@@ -1982,7 +2056,7 @@ bool Motion1::simpleHome(fast8_t axis) {
     }
     if (axis < Z_AXIS) {
         toolOffset[axis] = -Tool::getActiveTool()->getOffsetForAxis(axis);
-    } else {                     // z axis special case
+    } else if (axis == Z_AXIS) { // z axis special case
         if (homeDir[axis] < 0) { // security to not hit bed
             dest[axis] += rotMax[axis];
         } else {
@@ -2000,19 +2074,25 @@ bool Motion1::simpleHome(fast8_t axis) {
             // coating, z probe height and tool offset get fixed in homeAxes
         }
     }
+#ifdef DEBUG_MOVES
+    reportPosition(PSTR("simpleHome B"), true);
+#endif
     endstopMode = EndstopMode::DISABLED;
     setHardwareEndstopsAttached(false, &eStop);
     if (ok) {
         moveRelativeByOfficial(dest, homingFeedrate[axis], false); // also adds toolOffset!
         waitForEndOfMoves();
+#ifdef DEBUG_MOVES
+        reportPosition(PSTR("simpleHome C"), true);
+#endif
     }
     currentPosition[axis] = curPos;
     updatePositionsFromCurrent();
     Motion2::setMotorPositionFromTransformed();
-    endstopMode = oldMode;
     setAxisHomed(axis, true);
     Motion1::axesTriggered = 0;
 #ifdef DEBUG_MOVES
+    reportPosition(PSTR("simpleHome"), true);
     Com::printFLN(PSTR("simpleHome finished:"), static_cast<int32_t>(axis));
 #endif
     return ok;

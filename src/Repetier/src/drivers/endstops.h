@@ -40,11 +40,11 @@ public:
     virtual void resetHistory() { historyFlag = 0; }
     virtual bool historyWasTriggered() {
         update();
-        return historyFlag & 1;
+        return (historyFlag & 1) || triggered();
     }
     virtual bool historyWasUntriggered() {
         update();
-        return historyFlag & 2;
+        return (historyFlag & 2) || !triggered();
     }
     void historyUpdate(bool val) { historyFlag |= (val ? 1 : 2); }
 };

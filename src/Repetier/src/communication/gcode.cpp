@@ -1080,10 +1080,9 @@ void GCode::fatalError(FSTRINGPARAM(message), uint8_t flags) {
     if (flags & FATAL_FLAG_SLOW_STOP) {
         if (Motion1::isAxisHomed(Z_AXIS) && Motion1::currentPosition[Z_AXIS] < Motion1::maxPos[Z_AXIS] - 15) {
             Motion1::setTmpPositionXYZ(0, 0, 10);
-            EndstopMode oldMode = Motion1::endstopMode;
+            RememberedEndstopMode oldMode; // RAII does restore on return
             Motion1::endstopMode = EndstopMode::STOP_HIT_AXES;
             Motion1::moveRelativeByOfficial(Motion1::tmpPosition, Motion1::homingFeedrate[Z_AXIS], false);
-            Motion1::endstopMode = oldMode;
         }
         Commands::waitUntilEndOfAllMoves();
     } else {

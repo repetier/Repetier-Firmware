@@ -110,6 +110,15 @@ enum class EndstopMode {
     PROBING = 3          // Z probing
 };
 
+/// RAII solution to restore endstop mode on exit
+class RememberedEndstopMode {
+    EndstopMode mode;
+public:
+    RememberedEndstopMode();
+    ~RememberedEndstopMode();
+    void restore();    
+};
+
 // 158 byte for 7 axes
 class Motion1Buffer {
 public:
@@ -324,7 +333,7 @@ public:
     static void updatePositionsFromCurrentTransformed();
     // Sets A,B,C coordinates to ignore for easy use.
     static void setIgnoreABC(float coords[NUM_AXES]);
-    static void printCurrentPosition();
+    static void printCurrentPosition(bool newLine = true);
     static void copyCurrentOfficial(float coords[NUM_AXES]);
     static void copyCurrentPrinter(float coords[NUM_AXES]);
     static void setTmpPositionXYZ(float x, float y, float z);
@@ -362,6 +371,7 @@ public:
     static void callAfterHomingOnSteppers();
     static void updateRotMinMax();
     static int32_t getBufferedLengthMM();
+    static void reportPosition(FSTRINGPARAM(hint), bool withSteps);
 
 private:
     // Moved outside FEATURE_Z_PROBE to allow auto-level functional test on
