@@ -275,7 +275,6 @@ float ZProbeHandler::runProbe(uint8_t repetitions, bool useMedian) {
     GCode::executeFString(PSTR(Z_PROBE_RUN_AFTER_EVERY_PROBE));
 #endif
 
-    RememberedEndstopMode oldMode; // RAII does restore on return
     Motion1::setAutolevelActive(alActive, true);
     if (!wasActivated) {
         deactivate();
