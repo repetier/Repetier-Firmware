@@ -45,6 +45,8 @@ IO_TEMPERATURE_TABLE(name,analog,table)
 #undef IO_TEMPERATURE_BETA
 #undef IO_TEMPERATURE_TABLE_PERMANENT_ERROR
 #undef IO_TEMPERATURE_BETA_PERMANENT_ERROR
+#undef IO_TEMPERATURE_LINEAR_ANALOG
+#undef IO_TEMPERATURE_LINEAR_ANALOG_PERMANENT_ERROR
 #undef IO_TEMPERATURE_MAX31855
 #undef IO_TEMPERATURE_MAX6675
 #undef IO_TEMPERATURE_FAKE
@@ -104,6 +106,35 @@ public:
         bool isDefect() { \
             int a = analog.get(); \
             return a < 20 || a > 4075; \
+        } \
+    }; \
+    extern name##Class name;
+
+#define IO_TEMPERATURE_LINEAR_ANALOG(name, analog, maxVoltage, offset, vPerKelvin) \
+    class name##Class : public IOTemperature { \
+    public: \
+        float get() { \
+            return (static_cast<float>(analog.get() / 4095.0) - offset) / vPerKelvin; \
+        } \
+        bool isDefect() { \
+            int a = analog.get(); \
+            return a < 20 || a > 4075; \
+        } \
+    }; \
+    extern name##Class name;
+
+#define IO_TEMPERATURE_LINEAR_ANALOG_PERMANENT_ERROR(name, analog, maxVoltage, offset, vPerKelvin) \
+    class name##Class : public IOTemperature { \
+        bool hadError = false; \
+\
+    public: \
+        float get() { \
+            return (static_cast<float>(analog.get() / 4095.0) - offset) / vPerKelvin; \
+        } \
+        bool isDefect() { \
+            int a = analog.get(); \
+            hadError |= a < 20 || a > 4075; \
+            return hadError; \
         } \
     }; \
     extern name##Class name;
@@ -328,6 +359,12 @@ public:
 #define IO_TEMPERATURE_TABLE(name, analog, table) \
     name##Class name;
 
+#define IO_TEMPERATURE_LINEAR_ANALOG(name, analog, maxVoltage, offset, vPerKelvin) \
+    name##Class name;
+
+#define IO_TEMPERATURE_LINEAR_ANALOG_PERMANENT_ERROR(name, analog, maxVoltage, offset, vPerKelvin) \
+    name##Class name;
+
 #define IO_TEMPERATURE_BETA(name, analog, beta, seriesResistance, thermistorR25, cCoefficient) \
     name##Class name;
 
@@ -357,6 +394,9 @@ public:
 
 #endif
 
+#define IO_TEMPERATURE_LINEAR_ANALOG_PERMANENT_ERROR(name, analog, maxVoltage, offset, vPerKelvin) \
+    name##Class name;
+
 #ifndef IO_TEMP_TABLE_NTC
 #define IO_TEMP_TABLE_NTC(name, dataname)
 #endif
@@ -365,6 +405,12 @@ public:
 #endif
 #ifndef IO_TEMPERATURE_TABLE
 #define IO_TEMPERATURE_TABLE(name, analog, table)
+#endif
+#ifndef IO_TEMPERATURE_LINEAR_ANALOG_PERMANENT_ERROR
+#define IO_TEMPERATURE_LINEAR_ANALOG_PERMANENT_ERROR(name, analog, maxVoltage, offset, vPerKelvin)
+#endif
+#ifndef IO_TEMPERATURE_LINEAR_ANALOG
+#define IO_TEMPERATURE_LINEAR_ANALOG(name, analog, maxVoltage, offset, vPerKelvin)
 #endif
 #ifndef IO_TEMPERATURE_BETA
 #define IO_TEMPERATURE_BETA(name, analog, beta, seriesResistance, thermistorR25, cCoefficient)
