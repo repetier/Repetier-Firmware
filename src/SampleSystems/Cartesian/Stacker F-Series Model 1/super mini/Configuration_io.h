@@ -325,15 +325,15 @@ TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 440, 20,
 // IO_INPUT_LOG(IOJam2Mon, IOJam2, true)
 FILAMENT_DETECTOR(JamDetector1, IOJam1, ToolExtruder1)
 
-// IO_OUTPUT(caseLightPin, HEATER_6_PIN)
-// IO_PWM_HARDWARE(caseLightPWM, LED_PIN, 500)
-// LIGHT_STATE_PWM(caseLightState)
-/* LIGHT_COND(caseLightState, true, Printer::caseLightMode, 255, 255, 255,
+// IO_OUTPUT(caseLightPin, LED_PIN)
+IO_PWM_HARDWARE(caseLightPWM, LED_PIN, 500)
+LIGHT_STATE_PWM(caseLightState)
+LIGHT_COND(caseLightState, true, Printer::caseLightMode, 255, 255, 255,
            Printer::caseLightBrightness)
 LIGHT_COND(caseLightState, GUI::statusLevel == GUIStatusLevel::ERROR,
            LIGHT_STATE_BLINK_SLOW, 255, 255, 255, Printer::caseLightBrightness)
 LIGHT_SOURCE_PWM(caseLightDriver, caseLightPWM, caseLightState)
-*/
+
 // Define beeper output
 #if BEEPER_PIN > -1
 IO_OUTPUT(IOBeeperMain, BEEPER_PIN)

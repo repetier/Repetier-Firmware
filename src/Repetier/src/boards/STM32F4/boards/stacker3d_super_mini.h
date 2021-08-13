@@ -47,7 +47,7 @@ Timer 1 (PE13, PE14), 2 (PB8, PB9), 3 (PB0, PC6, PC7), 4 (PD12), 9 (PE5, PE6)
 #define ORIG_Y2_ENABLE_PIN PF11
 #define ORIG_Y2_CS_PIN PF12
 #define ORIG_Y2_DIAG0 PF15
-#define ORIG_Y2_MIN_PIN -1
+#define ORIG_Y2_MIN_PIN PB11
 #define ORIG_Y2_MAX_PIN -1
 
 #define ORIG_Z_STEP_PIN PE9
@@ -56,7 +56,7 @@ Timer 1 (PE13, PE14), 2 (PB8, PB9), 3 (PB0, PC6, PC7), 4 (PD12), 9 (PE5, PE6)
 #define ORIG_Z_CS_PIN PE8
 #define ORIG_Z_DIAG0_PIN PE11
 #define ORIG_Z_MIN_PIN PB15
-#define ORIG_Z_MAX_PIN PB2
+#define ORIG_Z_MAX_PIN PB5 // before rev. C it was PB2
 
 #define ORIG_Z2_STEP_PIN PG2
 #define ORIG_Z2_DIR_PIN PG3
@@ -131,9 +131,10 @@ Timer 1 (PE13, PE14), 2 (PB8, PB9), 3 (PB0, PC6, PC7), 4 (PD12), 9 (PE5, PE6)
 //
 // Misc. Functions
 //
-#define LED_PIN PB0  // blue - Timer 3 channel 3
-#define LED_PIN2 PC6 // red - Timer 3 channel 1
-#define LED_PIN3 PC7 // green - Timer 3 channel 2
+// #define LED_PIN PB0  // blue - Timer 3 channel 3 - does not exists since rev C
+// #define LED_PIN2 PC6 // red - Timer 3 channel 1
+// #define LED_PIN3 PC7 // green - Timer 3 channel 2
+#define LED_PIN PC6
 #define ORIG_PS_ON_PIN -1
 #define KILL_PIN -1
 
