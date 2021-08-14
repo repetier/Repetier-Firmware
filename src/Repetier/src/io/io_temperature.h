@@ -394,9 +394,6 @@ public:
 
 #endif
 
-#define IO_TEMPERATURE_LINEAR_ANALOG_PERMANENT_ERROR(name, analog, maxVoltage, offset, vPerKelvin) \
-    name##Class name;
-
 #ifndef IO_TEMP_TABLE_NTC
 #define IO_TEMP_TABLE_NTC(name, dataname)
 #endif
