@@ -1738,7 +1738,7 @@ bool NonlinearSegment::checkEndstops(PrintLine* cur, bool checkall) {
 #endif
         if (isZPositiveMove() && Endstops::zMax()) {
 #if MAX_HARDWARE_ENDSTOP_Z
-            if (Printer::stepsRemainingAtZHit)
+            if (Printer::stepsRemainingAtZHit < 0)
                 Printer::stepsRemainingAtZHit = cur->stepsRemaining;
 #endif
             setZMoveFinished();

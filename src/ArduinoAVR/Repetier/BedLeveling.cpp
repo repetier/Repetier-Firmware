@@ -1000,7 +1000,7 @@ float Printer::bendingCorrectionAt(float x, float y) {
 void Printer::waitForZProbeStart() {
 #if defined(Z_PROBE_IIS2DH) && Z_PROBE_IIS2DH == 1
     accelerometer_ready();
-#endif Z_PROBE_IIS2DH
+#endif // Z_PROBE_IIS2DH
 #if Z_PROBE_WAIT_BEFORE_TEST
     Endstops::update();
     Endstops::update(); // double test to get right signal. Needed for crosstalk
