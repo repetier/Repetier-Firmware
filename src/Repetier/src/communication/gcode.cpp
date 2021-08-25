@@ -236,10 +236,11 @@ void GCode::keepAlive(enum FirmwareState state, int id) {
 void GCode::requestResend() {
     HAL::serialFlush();
     commandsReceivingWritePosition = 0;
-    if (sendAsBinary)
+    if (sendAsBinary) {
         GCodeSource::activeSource->waitingForResend = 30;
-    else
+    } else {
         GCodeSource::activeSource->waitingForResend = 14;
+    }
     Com::println();
     Com::printFLN(Com::tResend, GCodeSource::activeSource->lastLineNumber + 1);
     Com::printFLN(Com::tOk);

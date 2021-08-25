@@ -41,9 +41,14 @@
 #include <IWatchdog.h>
 #endif
 
+// #pragma message "Frequency: " XSTR(F_CPU)
 // Which I2C port to use?
 #ifndef WIRE_PORT
 #define WIRE_PORT Wire
+#endif
+
+#if defined(F_CPU) && defined(f_cpu)
+#undef F_CPU
 #endif
 
 #ifndef F_CPU

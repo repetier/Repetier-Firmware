@@ -127,6 +127,10 @@
 #define MAX_ROOM_TEMPERATURE 25 // No heating below this temperature!
 // Start with controlling if temperature is +/- this value to target temperature
 #define TEMPERATURE_CONTROL_RANGE 20
+#define HOST_RESCUE 1                // Enable host rescue help system
+// #define DEBUG_RESCUE                 // Uncomment to add power loss entry in debug menu while printing
+#define POWERLOSS_LEVEL 0            // How much time do we have on powerloss, 0 = no move, 1 = short just raise Z, 2 = long full park move
+#define POWERLOSS_UP 0               // How much to move up if mode 1 is active
 #if STACKER_WITH_ZPROBE
 #define Z_PROBE_TYPE Z_PROBE_TYPE_DEFAULT
 #else

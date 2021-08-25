@@ -33,8 +33,8 @@
 #endif
 
 // Users expect Serial to be usb port!
-#undef Serial
-#define Serial SerialUSB
+// #undef Serial
+// #define Serial SerialUSB
 
 #define CPU_ARCH ARCH_ARM
 #define MAX_RAM 131072 // 128KB
@@ -96,8 +96,9 @@
 #define HEATER_1_PIN PD7 // BED
 
 // Note: In schematic fan0 goes to fan1 and fan1 to fan0. We use numbering printed on board.
-#define ORIG_FAN_PIN PB7  // Timer 8 Channel 4
-#define ORIG_FAN2_PIN PB6 // Timer 1 Channel 1
+#define ORIG_FAN_PIN PB7  // Timer 4 Channel 2
+#define ORIG_FAN2_PIN PB6 // Timer 4 Channel 1
+#define ORIG_FAN3_PIN PB5 // Timer 3 Channel 2
 #define PWM1_PIN          // TIM4_CH3
 #define PWM2_PIN          // TIM4_CH4
 
@@ -126,19 +127,22 @@
 
 // Board has a extra SPI for EXP2 - Use SPI3 for it
 
-#define SD_SPI3_ADDRESS &SPI_3
+// #define SD_SPI3_ADDRESS &SPI_3
 // #define CREATE_SPI3 SPI_3 // remove comment to activate the spi
 #define SPI3_SCK_PIN PA5
 #define SPI3_MISO_PIN PA6
 #define SPI3_MOSI_PIN PA7
+#define SPI3_CHIP_DETECT PC4
 
 // SD card uses second SPI so we need to create and assign it to sd card
-#define SD_SPI_ADDRESS &SPI_2
+// #define SD_SPI_ADDRESS &SPI_2
 #define CREATE_SPI2 SPI_2
 #define SPI2_MISO_PIN PC8
 #define SPI2_MOSI_PIN PD2
 #define SPI2_SCK_PIN PC12
+#define SPI2_SS_PIN PC11 // Chip select pin for internal sd card
 
+#define SDSUPPORT 0
 //
 // Misc. Functions
 //

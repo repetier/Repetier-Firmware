@@ -36,7 +36,7 @@ void Commands::commandLoop() {
     Printer::breakLongCommand = false; // block is now finished
     if (!Printer::isBlockingReceive()) {
 #if SDSUPPORT
-        if (sd.scheduledPause) {
+        if (sd.scheduledPause == SDScheduledPause::PARKING_PLANNED) {
             if (Motion1::buffersUsed() == 0) {
                 sd.printFullyPaused();
             }

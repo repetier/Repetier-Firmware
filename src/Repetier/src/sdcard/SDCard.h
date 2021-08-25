@@ -12,6 +12,11 @@ enum class SDState {
     SD_PRINTING,     // While printing. Includes while paused.
     SD_WRITING       // While writing to a file. 5 minute timeout from last write.
 };
+enum class SDScheduledPause {
+    NO_PAUSE,
+    PARKING_PLANNED,
+    PARKED
+};
 
 class SDCard {
 public:
@@ -125,7 +130,7 @@ public:
 
     char volumeLabel[16u];
 
-    bool scheduledPause;
+    SDScheduledPause scheduledPause;
     bool scheduledStop;
     millis_t lastWriteTimeMS;
     uint32_t writtenBytes;

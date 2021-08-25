@@ -50,7 +50,7 @@ SDCard::SDCard()
     , selectedFilePos(0ul)
     , state(SDState::SD_UNMOUNTED)
     , volumeLabel { 0u }
-    , scheduledPause(false)
+    , scheduledPause(SDScheduledPause::NO_PAUSE)
     , scheduledStop(false)
     , lastWriteTimeMS(0ul)
     , writtenBytes(0ul)
@@ -301,7 +301,7 @@ void SDCard::unmount(const bool manual) {
         GUI::setStatusP(PSTR("SD Card removed!"), GUIStatusLevel::ERROR);
     }
 
-    scheduledPause = false; // cancel any scheduled pauses. only scheduled stops survive
+    scheduledPause = SDScheduledPause::NO_PAUSE; // cancel any scheduled pauses. only scheduled stops survive
     state = manual ? SDState::SD_SAFE_EJECTED : SDState::SD_UNMOUNTED;
 }
 
@@ -494,7 +494,8 @@ void SDCard::startPrint() {
         || Printer::failedMode) {
         return;
     }
-    scheduledStop = scheduledPause = false;
+    scheduledStop = false;
+    scheduledPause = SDScheduledPause::NO_PAUSE;
     state = SDState::SD_PRINTING;
     Printer::setMenuMode(MENU_MODE_SD_PRINTING, true);
     Printer::setMenuMode(MENU_MODE_PAUSED, false);
@@ -515,7 +516,7 @@ void SDCard::pausePrint(const bool internal) {
     Printer::setPrinting(false);
 #endif
     GCodeSource::removeSource(&sdSource);
-    scheduledPause = internal;
+    scheduledPause = internal ? SDScheduledPause::PARKING_PLANNED : SDScheduledPause::NO_PAUSE;
     if (!internal) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-value"
@@ -526,10 +527,10 @@ void SDCard::pausePrint(const bool internal) {
 }
 
 void SDCard::printFullyPaused() {
-    if (!scheduledPause) {
+    if (scheduledPause != SDScheduledPause::PARKING_PLANNED) {
         return;
     }
-    scheduledPause = false;
+    scheduledPause = SDScheduledPause::NO_PAUSE;
     if (EVENT_SD_PAUSE_START(false)) {
         Commands::waitUntilEndOfAllBuffers();
         Motion1::pushToMemory();
@@ -542,6 +543,7 @@ void SDCard::printFullyPaused() {
         }
         Motion1::moveToParkPosition();
         GCode::executeFString(PSTR(PAUSE_START_COMMANDS));
+        scheduledPause = SDScheduledPause::PARKED;
     }
     EVENT_SD_PAUSE_END(false);
 }
@@ -553,12 +555,29 @@ void SDCard::continuePrint() {
     }
     MCode_513(nullptr); // Reset jam marker
     if (EVENT_SD_CONTINUE_START(scheduledPause)) {
-        if (scheduledPause) {
+        if (scheduledPause == SDScheduledPause::PARKED) {
             Tool* tool = Tool::getActiveTool();
             if (tool) {
                 tool->beforeContinue();
             }
             GCode::executeFString(PSTR(PAUSE_END_COMMANDS));
+
+            float pos[NUM_AXES];
+            if (Motion1::popFromMemory(pos)) {
+                float z = pos[Z_AXIS];
+                float e = pos[E_AXIS];
+                pos[Z_AXIS] = IGNORE_COORDINATE;
+                pos[E_AXIS] = IGNORE_COORDINATE;
+                Motion1::moveByOfficial(pos, Motion1::moveFeedrate[X_AXIS], false);
+                FOR_ALL_AXES(i) {
+                    pos[i] = IGNORE_COORDINATE;
+                }
+                pos[Z_AXIS] = z;
+                Motion1::moveByOfficial(pos, Motion1::moveFeedrate[Z_AXIS], false);
+                pos[E_AXIS] = e;
+                Motion1::moveByOfficial(pos, Motion1::maxFeedrate[E_AXIS], false);
+            }
+            /*
             Motion1::setTmpPositionXYZE(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE);
             Motion1::popFromMemory();
             Motion1::pushToMemory();
@@ -569,14 +588,14 @@ void SDCard::continuePrint() {
             Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::maxFeedrate[Z_AXIS], false);
             Motion1::setTmpPositionXYZE(IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE, IGNORE_COORDINATE);
             Motion1::popFromMemory();
-            Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::maxFeedrate[E_AXIS], false);
+            Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::maxFeedrate[E_AXIS], false); */
         }
     }
     EVENT_SD_CONTINUE_END(scheduledPause);
     GCodeSource::registerSource(&sdSource);
     Printer::setPrinting(true);
     Printer::setMenuMode(MENU_MODE_PAUSED, false);
-    scheduledPause = false;
+    scheduledPause = SDScheduledPause::NO_PAUSE;
 }
 
 void SDCard::stopPrint(const bool silent) {
