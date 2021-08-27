@@ -533,10 +533,10 @@ void TMCStepper2660Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
         // Access of bits results in reading register again, so we buffer result
         READ_RDSEL00_t status;
         status.sr = driver->DRVSTATUS();
-        /* has no com error value!
-        if (status.sr == 0xFFFFFFFF || status.sr == 0x0) { // not in working state
+        /* has no com error value! */
+        if (status.sr == 0xFFCFF || status.sr == 0x0) { // not in working state
             return;
-        } */
+        }
         if (status.ot) { // over temperature
             printMotorNumberAndName(false);
             Com::printFLN(Com::tMotorDriverOvertempCurrent, currentMillis);
