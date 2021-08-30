@@ -252,15 +252,13 @@ void GCode::requestResend() {
 */
 void GCode::checkAndPushCommand() {
     if (hasM()) {
-        if (M == 110) // Reset line number
-        {
+        if (M == 110) { // Reset line number
             GCodeSource::activeSource->lastLineNumber = actLineNumber;
             Com::printFLN(Com::tOk);
             GCodeSource::activeSource->waitingForResend = -1;
             return;
         }
-        if (M == 112) // Emergency kill - freeze printer
-        {
+        if (M == 112) { // Emergency kill - freeze printer
             Commands::emergencyStop();
         }
 #ifdef DEBUG_COM_ERRORS
@@ -482,7 +480,8 @@ void GCode::readFromSerial() {
         if (commandsReceivingWritePosition == 0) { // nothing read, we can rotate to next input source
             GCodeSource::rotateSource();
         }
-    }
+    } // end no data available
+
     // handle all available data on source
     while (GCodeSource::activeSource->dataAvailable() && commandsReceivingWritePosition < MAX_CMD_SIZE) // consume data until no data or buffer full
     {
@@ -491,10 +490,11 @@ void GCode::readFromSerial() {
         // first lets detect, if we got an old type ascii command
         if (commandsReceivingWritePosition == 1 && commentDetected == false) {
             if (GCodeSource::activeSource->waitingForResend >= 0 && GCodeSource::activeSource->wasLastCommandReceivedAsBinary) {
-                if (!commandReceiving[0])
+                if (!commandReceiving[0]) {
                     GCodeSource::activeSource->waitingForResend--; // Skip 30 zeros to get in sync
-                else
+                } else {
                     GCodeSource::activeSource->waitingForResend = 30;
+                }
                 commandsReceivingWritePosition = 0;
                 continue;
             }

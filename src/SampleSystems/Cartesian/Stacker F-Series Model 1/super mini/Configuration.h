@@ -337,31 +337,17 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
 // Array to call motor related commands like microstepping/current if supported.
 // Id's start at 0 and depend on position in this array.
-#define NUM_MOTORS 4 + IDEX + DUAL_Y
+#define NUM_MOTORS 4 + IDEX + IDEX
 #if IDEX
-#if DUAL_X
-#define MOTORS                                                                 \
-  { &XMotor, &YMotor, &ZMotor, &E1Motor, &E2Motor }
-#define MOTOR_NAMES                                                            \
-  { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("E0"), PSTR("E1") }
-#else
 #define MOTORS                                                                 \
   { &XMotor, &YMotor, &ZMotor, &AMotor, &E1Motor, &E2Motor }
 #define MOTOR_NAMES                                                            \
   { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("A"), PSTR("E0"), PSTR("E1") }
-#endif
-#else
-#if DUAL_X
-#define MOTORS                                                                 \
-  { &XMotor, &YMotor, &ZMotor, &AMotor, &E1Motor }
-#define MOTOR_NAMES                                                            \
-  { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("A"), PSTR("E0") }
-#else
+#else // IDEX
 #define MOTORS                                                                 \
   { &XMotor, &YMotor, &ZMotor, &E1Motor }
 #define MOTOR_NAMES                                                            \
   { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("E0") }
-#endif
 #endif
 
 // Define beeper list
