@@ -201,7 +201,7 @@ STEPPER_TMC2660_HW_SPI(Y2Motor, IOY2Step, IOY2Dir, IOY2Enable, ORIG_Y2_CS_PIN,
                        endstopNone)
 STEPPER_MIRROR2(YMotor, Y1Motor, Y2Motor, endstopNone, endstopNone)
 #else
-STEPPER_TMC2660_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_X_CS_PIN,
+STEPPER_TMC2660_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN,
                        0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
                        endstopNone)
 #endif
@@ -244,7 +244,7 @@ STEPPER_TMC2130_HW_SPI(Y2Motor, IOY2Step, IOY2Dir, IOY2Enable, ORIG_Y2_CS_PIN,
                        endstopNone, endstopNone)
 STEPPER_MIRROR2(YMotor, Y1Motor, Y2Motor, endstopNone, endstopNone)
 #else
-STEPPER_TMC2130_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_X_CS_PIN,
+STEPPER_TMC2130_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN,
                        0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
                        endstopNone, endstopNone)
 #endif
