@@ -193,12 +193,21 @@ STEPPER_TMC2660_HW_SPI(AMotor, IOAStep, IOADir, IOAEnable, ORIG_A_CS_PIN, 0.11,
                        1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
                        endstopNone)
 #if DUAL_Y
+#if DUAL_Y_ENDSTOP
+STEPPER_TMC2660_HW_SPI(Y1Motor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopYMin1,
+                       endstopNone)
+STEPPER_TMC2660_HW_SPI(Y2Motor, IOY2Step, IOY2Dir, IOY2Enable, ORIG_Y2_CS_PIN,
+                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopYMin2,
+                       endstopNone)
+#else
 STEPPER_TMC2660_HW_SPI(Y1Motor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN,
                        0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
                        endstopNone)
 STEPPER_TMC2660_HW_SPI(Y2Motor, IOY2Step, IOY2Dir, IOY2Enable, ORIG_Y2_CS_PIN,
                        0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
                        endstopNone)
+#endif
 STEPPER_MIRROR2(YMotor, Y1Motor, Y2Motor, endstopNone, endstopNone)
 #else
 STEPPER_TMC2660_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN,
