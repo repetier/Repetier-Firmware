@@ -49,13 +49,13 @@ IO_OUTPUT_INVERTED(IOY2Enable, ORIG_Y2_ENABLE_PIN)
 // Z Motor
 
 IO_OUTPUT(IOZ1Step, ORIG_Z_STEP_PIN)
-IO_OUTPUT(IOZ1Dir, ORIG_Z_DIR_PIN)
+IO_OUTPUT_INVERTED(IOZ1Dir, ORIG_Z_DIR_PIN)
 IO_OUTPUT_INVERTED(IOZ1Enable, ORIG_Z_ENABLE_PIN)
 
 // Z2 Motor
 
 IO_OUTPUT(IOZ2Step, ORIG_Z2_STEP_PIN)
-IO_OUTPUT(IOZ2Dir, ORIG_Z2_DIR_PIN)
+IO_OUTPUT_INVERTED(IOZ2Dir, ORIG_Z2_DIR_PIN)
 IO_OUTPUT_INVERTED(IOZ2Enable, ORIG_Z2_ENABLE_PIN)
 
 // E0 Motor
@@ -187,63 +187,67 @@ IO_PWM_HARDWARE(PWMBed1, HEATER_1_PIN, 500)
 // minimum endstop here!
 #ifdef USE_TMC2660
 STEPPER_TMC2660_HW_SPI(XMotor, IOX1Step, IOX1Dir, IOX1Enable, ORIG_X_CS_PIN,
-                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       0.10, 1, MICROSTEPS, 900, 8, 12500000, endstopNone,
                        endstopNone)
+#if IDEX
 STEPPER_TMC2660_HW_SPI(AMotor, IOAStep, IOADir, IOAEnable, ORIG_A_CS_PIN, 0.11,
-                       1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       1, MICROSTEPS, 900, 8, 12500000, endstopNone,
                        endstopNone)
+#endif
 #if DUAL_Y
 #if DUAL_Y_ENDSTOP
 STEPPER_TMC2660_HW_SPI(Y1Motor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN,
-                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopYMin1,
+                       0.10, 1, MICROSTEPS, 900, 8, 12500000, endstopYMin1,
                        endstopNone)
 STEPPER_TMC2660_HW_SPI(Y2Motor, IOY2Step, IOY2Dir, IOY2Enable, ORIG_Y2_CS_PIN,
-                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopYMin2,
+                       0.10, 1, MICROSTEPS, 900, 8, 12500000, endstopYMin2,
                        endstopNone)
 #else
 STEPPER_TMC2660_HW_SPI(Y1Motor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN,
-                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       0.10, 1, MICROSTEPS, 900, 8, 12500000, endstopNone,
                        endstopNone)
 STEPPER_TMC2660_HW_SPI(Y2Motor, IOY2Step, IOY2Dir, IOY2Enable, ORIG_Y2_CS_PIN,
-                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       0.10, 1, MICROSTEPS, 900, 8, 12500000, endstopNone,
                        endstopNone)
 #endif
 STEPPER_MIRROR2(YMotor, Y1Motor, Y2Motor, endstopNone, endstopNone)
 #else
 STEPPER_TMC2660_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN,
-                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       0.10, 1, MICROSTEPS, 900, 8, 12500000, endstopNone,
                        endstopNone)
 #endif
 
 #ifdef STACKER_2_Z_END_STOPS
 STEPPER_TMC2660_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN,
-                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       0.10, 1, MICROSTEPS, 450, 8, 12500000, endstopNone,
                        endstopZMax1)
 STEPPER_TMC2660_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN,
-                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       0.10, 1, MICROSTEPS, 450, 8, 12500000, endstopNone,
                        endstopZMax2)
 #else
 STEPPER_TMC2660_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN,
-                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       0.10, 1, MICROSTEPS, 450, 8, 12500000, endstopNone,
                        endstopNone)
 STEPPER_TMC2660_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN,
-                       0.11, 1, MICROSTEPS, 1000, 8, 12500000, endstopNone,
+                       0.10, 1, MICROSTEPS, 450, 8, 12500000, endstopNone,
                        endstopNone)
 #endif
 STEPPER_MIRROR2(ZMotor, Z1Motor, Z2Motor, endstopNone, endstopNone)
 STEPPER_TMC2660_HW_SPI(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, ORIG_E0_CS_PIN,
-                       0.11, 1, 16, 1000, 8, 12500000, endstopNone, endstopNone)
+                       0.10, 1, 16, 900, 8, 12500000, endstopNone, endstopNone)
 #if IDEX
 STEPPER_TMC2660_HW_SPI(E2Motor, IOE2Step, IOE2Dir, IOE2Enable, ORIG_E1_CS_PIN,
-                       0.11, 1, 16, 1000, 8, 12500000, endstopNone, endstopNone)
+                       0.10, 1, 16, 900, 8, 12500000, endstopNone, endstopNone)
 #endif
 #else
 STEPPER_TMC2130_HW_SPI(XMotor, IOX1Step, IOX1Dir, IOX1Enable, ORIG_X_CS_PIN,
                        0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
                        endstopNone, endstopNone)
+#if IDEX
 STEPPER_TMC2130_HW_SPI(AMotor, IOAStep, IOADir, IOAEnable, ORIG_A_CS_PIN, 0.11,
                        1, MICROSTEPS, 1000, true, 100, 8, 12500000, endstopNone,
                        endstopNone)
+#endif
 #if DUAL_Y
 STEPPER_TMC2130_HW_SPI(Y1Motor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN,
                        0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
