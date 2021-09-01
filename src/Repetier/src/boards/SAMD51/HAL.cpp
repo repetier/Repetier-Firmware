@@ -32,10 +32,10 @@
 // Adds output signals to pins below to measure interrupt timings
 // with a logic analyser. Set to 0 for production!
 #define DEBUG_TIMING 0
-#define DEBUG_ISR_STEPPER_PIN 37 // 39
-#define DEBUG_ISR_MOTION_PIN 51  // 35
-#define DEBUG_ISR_TEMP_PIN 49    // 33
-#define DEBUG_ISR_ANALOG_PIN 53
+#define DEBUG_ISR_STEPPER_PIN -1 // 37 // 39
+#define DEBUG_ISR_MOTION_PIN -1  // 51  // 35
+#define DEBUG_ISR_TEMP_PIN -1    // 49    // 33
+#define DEBUG_ISR_ANALOG_PIN -1  // 53
 
 //extern "C" void __cxa_pure_virtual() { }
 extern "C" char* sbrk(int i);
@@ -145,10 +145,18 @@ void getPrescaleFreq(uint32_t ticks, uint32_t& prescale, uint32_t& freq) {
 // Set up all timer interrupts
 void HAL::setupTimer() {
 #if DEBUG_TIMING
+#if defined(DEBUG_ISR_STEPPER_PIN) && DEBUG_ISR_STEPPER_PIN >= 0
     SET_OUTPUT(DEBUG_ISR_STEPPER_PIN);
+#endif
+#if defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
     SET_OUTPUT(DEBUG_ISR_MOTION_PIN);
+#endif
+#if defined(DEBUG_ISR_TEMP_PIN) && DEBUG_ISR_TEMP_PIN >= 0
     SET_OUTPUT(DEBUG_ISR_TEMP_PIN);
+#endif
+#if defined(DEBUG_ISR_ANALOG_PIN) && DEBUG_ISR_ANALOG_PIN >= 0
     SET_OUTPUT(DEBUG_ISR_ANALOG_PIN);
+#endif
 #endif
     uint32_t prescale, freq;
 
@@ -668,7 +676,7 @@ void HAL::analogStart(void) {
     }
 }
 inline void analogISRFunction() {
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_ANALOG_PIN) && DEBUG_ISR_ANALOG_PIN >= 0
     WRITE(DEBUG_ISR_ANALOG_PIN, 1);
 #endif
     Adc* adc;
@@ -704,7 +712,7 @@ inline void analogISRFunction() {
         // Start conversion again, since The first conversion after the reference is changed must not be used.
         adc->SWTRIG.bit.START = 1;
     }
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_ANALOG_PIN) && DEBUG_ISR_ANALOG_PIN >= 0
     WRITE(DEBUG_ISR_ANALOG_PIN, 0);
 #endif
 }
@@ -981,11 +989,11 @@ void SERVO_TIMER_VECTOR() {
 */
 void MOTION3_TIMER_VECTOR() {
     if (MOTION3_TIMER->COUNT16.INTFLAG.bit.MC0 == 1) {
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_STEPPER_PIN) && DEBUG_ISR_STEPPER_PIN >= 0
         WRITE(DEBUG_ISR_STEPPER_PIN, 1);
 #endif
         Motion3::timer();
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_STEPPER_PIN) && DEBUG_ISR_STEPPER_PIN >= 0
         WRITE(DEBUG_ISR_STEPPER_PIN, 0);
 #endif
         MOTION3_TIMER->COUNT16.INTFLAG.bit.MC0 = 1;
@@ -1000,7 +1008,7 @@ This timer is called 5000 times per second. It is used to update
 pwm values for heater and some other frequent jobs.
 */
 void PWM_TIMER_VECTOR() {
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_TEMP_PIN) && DEBUG_ISR_TEMP_PIN >= 0
     WRITE(DEBUG_ISR_TEMP_PIN, 1);
 #endif
     //InterruptProtectedBlock noInt;
@@ -1038,7 +1046,7 @@ void PWM_TIMER_VECTOR() {
             HAL::wdPinged = false;
         }
 #endif
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_TEMP_PIN) && DEBUG_ISR_TEMP_PIN >= 0
         WRITE(DEBUG_ISR_TEMP_PIN, 0);
 #endif
     }
@@ -1048,7 +1056,7 @@ void PWM_TIMER_VECTOR() {
 void MOTION2_TIMER_VECTOR() {
     // static bool inside = false; // prevent double call when not finished
     if (MOTION2_TIMER->COUNT16.INTFLAG.bit.MC0 == 1) {
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
         WRITE(DEBUG_ISR_MOTION_PIN, 1);
 #endif
         /*      if (inside) {
@@ -1058,7 +1066,7 @@ void MOTION2_TIMER_VECTOR() {
         Motion2::timer();
         //        inside = false;
         MOTION2_TIMER->COUNT16.INTFLAG.bit.MC0 = 1; // reenable interrupt
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
         WRITE(DEBUG_ISR_MOTION_PIN, 0);
 #endif
     }

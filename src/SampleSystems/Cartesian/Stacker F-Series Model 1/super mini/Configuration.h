@@ -108,7 +108,7 @@
 #define FEATURE_RETRACTION 1
 #define USE_ADVANCE 1
 #define NUM_AXES 4 + IDEX // X,Y,Z and E for extruder A,B,C would be 5,6,7
-#define STEPPER_FREQUENCY 300000 // Maximum stepper frequency.
+#define STEPPER_FREQUENCY 200000 // Maximum stepper frequency.
 
 // Update frequency for new blocks. Must be higher then
 // PREPARE_FREQUENCY.
@@ -474,7 +474,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
 #define XAXIS_STEPS_PER_MM 146 * STEPS_FACTOR
 #define AAXIS_STEPS_PER_MM 146 * STEPS_FACTOR
-#define YAXIS_STEPS_PER_MM 176 * STEPS_FACTOR
+#define YAXIS_STEPS_PER_MM 352 * STEPS_FACTOR
 #define ZAXIS_STEPS_PER_MM 400 * STEPS_FACTOR
 #define MAX_FEEDRATE_X 200
 #define MAX_FEEDRATE_Y 200

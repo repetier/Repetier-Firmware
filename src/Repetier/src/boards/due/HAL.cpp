@@ -30,9 +30,9 @@
 #include <malloc.h>
 
 #define DEBUG_TIMING 0
-#define DEBUG_ISR_STEPPER_PIN 37
-#define DEBUG_ISR_MOTION_PIN 35
-#define DEBUG_ISR_TEMP_PIN 33
+#define DEBUG_ISR_STEPPER_PIN -1 // 37
+#define DEBUG_ISR_MOTION_PIN -1  // 35
+#define DEBUG_ISR_TEMP_PIN -1    // 33
 
 //extern "C" void __cxa_pure_virtual() { }
 extern "C" char* sbrk(int i);
@@ -63,9 +63,15 @@ HAL::~HAL() {
 // Set up all timer interrupts
 void HAL::setupTimer() {
 #if DEBUG_TIMING
+#if defined(DEBUG_ISR_STEPPER_PIN) && DEBUG_ISR_STEPPER_PIN >= 0
     SET_OUTPUT(DEBUG_ISR_STEPPER_PIN);
+#endif
+#if defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
     SET_OUTPUT(DEBUG_ISR_MOTION_PIN);
+#endif
+#if defined(DEBUG_ISR_TEMP_PIN) && DEBUG_ISR_TEMP_PIN >= 0
     SET_OUTPUT(DEBUG_ISR_TEMP_PIN);
+#endif
 #endif
 
     uint32_t tc_count, tc_clock;
@@ -1063,7 +1069,7 @@ TcChannel* stepperChannel = (MOTION3_TIMER->TC_CHANNEL + MOTION3_TIMER_CHANNEL);
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
 void MOTION3_TIMER_VECTOR() {
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_STEPPER_PIN) && DEBUG_ISR_STEPPER_PIN >= 0
     WRITE(DEBUG_ISR_STEPPER_PIN, 1);
 #endif
     // apparently have to read status register
@@ -1075,7 +1081,7 @@ void MOTION3_TIMER_VECTOR() {
     inside = true;*/
     Motion3::timer();
     // inside = false;
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_STEPPER_PIN) && DEBUG_ISR_STEPPER_PIN >= 0
     WRITE(DEBUG_ISR_STEPPER_PIN, 0);
 #endif
 }
@@ -1088,7 +1094,7 @@ This timer is called 3906 times per second. It is used to update
 pwm values for heater and some other frequent jobs.
 */
 void PWM_TIMER_VECTOR() {
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_TEMP_PIN) && DEBUG_ISR_TEMP_PIN >= 0
     WRITE(DEBUG_ISR_TEMP_PIN, 1);
 #endif
     //InterruptProtectedBlock noInt;
@@ -1139,7 +1145,7 @@ void PWM_TIMER_VECTOR() {
         RTT->RTT_MR |= RTT_MR_RTTINCIEN;
     }
 #endif
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_TEMP_PIN) && DEBUG_ISR_TEMP_PIN >= 0
     WRITE(DEBUG_ISR_TEMP_PIN, 0);
 #endif
 }
@@ -1149,18 +1155,18 @@ TcChannel* motion2Channel = (MOTION2_TIMER->TC_CHANNEL + MOTION2_TIMER_CHANNEL);
 
 // MOTION2_TIMER IRQ handler
 void MOTION2_TIMER_VECTOR() {
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
     WRITE(DEBUG_ISR_MOTION_PIN, 1);
 #endif
     motion2Channel->TC_SR; // faster replacement for above line!
     Motion2::timer();
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
     WRITE(DEBUG_ISR_MOTION_PIN, 0);
 #endif
 }
 #else
 extern "C" void RTT_Handler() {
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
     WRITE(DEBUG_ISR_MOTION_PIN, 1);
 #endif
     // It's possible for the RTT interrupt to actually preempt itself
@@ -1169,7 +1175,7 @@ extern "C" void RTT_Handler() {
     RTT->RTT_SR;
     RTT->RTT_MR &= ~RTT_MR_RTTINCIEN;
     Motion2::timer();
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
     WRITE(DEBUG_ISR_MOTION_PIN, 0);
 #endif
 }

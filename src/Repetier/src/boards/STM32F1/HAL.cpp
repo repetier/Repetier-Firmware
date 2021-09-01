@@ -66,11 +66,12 @@
 
 // Adds output signals to pins below to measure interrupt timings
 // with a logic analyser. Set to 0 for production!
+// Only pins not set to -1  will be used
 #define DEBUG_TIMING 0
-#define DEBUG_ISR_STEPPER_PIN 60 // PD12
-#define DEBUG_ISR_MOTION_PIN 61  // PD13
-#define DEBUG_ISR_TEMP_PIN 10    // PD14/PWM1
-#define DEBUG_ISR_ANALOG_PIN 63  // PD15/PWM2
+#define DEBUG_ISR_STEPPER_PIN -1 // 60 // PD12
+#define DEBUG_ISR_MOTION_PIN -1  // 61  // PD13
+#define DEBUG_ISR_TEMP_PIN -1    // 10    // PD14/PWM1
+#define DEBUG_ISR_ANALOG_PIN -1  // 63  // PD15/PWM2
 
 //extern "C" void __cxa_pure_virtual() { }
 extern "C" char* sbrk(int i);
@@ -299,10 +300,18 @@ static uint32_t Servo2500 = 2500;
 void HAL::hwSetup(void) {
     updateStartReason();
 #if DEBUG_TIMING
+#if defined(DEBUG_ISR_STEPPER_PIN) && DEBUG_ISR_STEPPER_PIN >= 0
     SET_OUTPUT(DEBUG_ISR_STEPPER_PIN);
+#endif
+#if defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
     SET_OUTPUT(DEBUG_ISR_MOTION_PIN);
+#endif
+#if defined(DEBUG_ISR_TEMP_PIN) && DEBUG_ISR_TEMP_PIN >= 0
     SET_OUTPUT(DEBUG_ISR_TEMP_PIN);
+#endif
+#if defined(DEBUG_ISR_ANALOG_PIN) && DEBUG_ISR_ANALOG_PIN >= 0
     SET_OUTPUT(DEBUG_ISR_ANALOG_PIN);
+#endif
 #endif
     // Servo control
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
@@ -925,12 +934,12 @@ void TIMER_VECTOR(SERVO_TIMER_NUM) {
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
 void TIMER_VECTOR(MOTION3_TIMER_NUM) {
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_STEPPER_PIN) && DEBUG_ISR_STEPPER_PIN >= 0
     WRITE(DEBUG_ISR_STEPPER_PIN, 1);
 #endif
     LL_TIM_ClearFlag_UPDATE(TIMER(MOTION3_TIMER_NUM));
     Motion3::timer();
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_STEPPER_PIN) && DEBUG_ISR_STEPPER_PIN >= 0
     WRITE(DEBUG_ISR_STEPPER_PIN, 0);
 #endif
 }
@@ -947,7 +956,7 @@ pwm values for heater and some other frequent jobs.
 */
 
 void TIMER_VECTOR(PWM_TIMER_NUM) {
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_TEMP_PIN) && DEBUG_ISR_TEMP_PIN >= 0
     WRITE(DEBUG_ISR_TEMP_PIN, 1);
 #endif
     LL_TIM_ClearFlag_UPDATE(TIMER(PWM_TIMER_NUM));
@@ -991,19 +1000,19 @@ void TIMER_VECTOR(PWM_TIMER_NUM) {
         HAL::wdPinged = false;
     }
 #endif
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_TEMP_PIN) && DEBUG_ISR_TEMP_PIN >= 0
     WRITE(DEBUG_ISR_TEMP_PIN, 0);
 #endif
 }
 
 // MOTION2_TIMER IRQ handler
 void TIMER_VECTOR(MOTION2_TIMER_NUM) {
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
     WRITE(DEBUG_ISR_MOTION_PIN, 1);
 #endif
     LL_TIM_ClearFlag_UPDATE(TIMER(MOTION2_TIMER_NUM));
     Motion2::timer();
-#if DEBUG_TIMING
+#if DEBUG_TIMING && defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
     WRITE(DEBUG_ISR_MOTION_PIN, 0);
 #endif
 }
