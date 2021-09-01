@@ -183,7 +183,7 @@
 #define NO_SOFTWARE_AXIS_ENDSTOPS
 // Normally only a delta has motor end stops required. Normally you trigger
 // using axis endstops.
-#if STACKER_2_Z_END_STOPS == 0
+#if STACKER_2_Z_END_STOPS == 0 && DUAL_Y_ENDSTOP == 0
 #define NO_MOTOR_ENDSTOPS
 #endif
 
