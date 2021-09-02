@@ -373,7 +373,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
  CHOPPER_TIMING_PRUSAMK3_24V = { 3, -2, 6 }
 
 */
-#define TMC_CHOPPER_TIMING CHOPPER_TIMING_DEFAULT_12V
+#define TMC_CHOPPER_TIMING CHOPPER_TIMING_DEFAULT_24V
 // true = interpolate to 256 microsteps for smoother motion
 #define TMC_INTERPOLATE true
 // Current used when motor stands still

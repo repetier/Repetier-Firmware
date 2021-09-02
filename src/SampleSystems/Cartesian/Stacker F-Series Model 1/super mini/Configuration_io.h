@@ -219,17 +219,17 @@ STEPPER_TMC2660_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN,
 
 #ifdef STACKER_2_Z_END_STOPS
 STEPPER_TMC2660_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN,
-                       0.10, 1, MICROSTEPS, 450, 8, 12500000, endstopNone,
+                       0.10, 1, MICROSTEPS, 300, 8, 12500000, endstopNone,
                        endstopZMax1)
 STEPPER_TMC2660_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN,
-                       0.10, 1, MICROSTEPS, 450, 8, 12500000, endstopNone,
+                       0.10, 1, MICROSTEPS, 300, 8, 12500000, endstopNone,
                        endstopZMax2)
 #else
 STEPPER_TMC2660_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN,
-                       0.10, 1, MICROSTEPS, 450, 8, 12500000, endstopNone,
+                       0.10, 1, MICROSTEPS, 300, 8, 12500000, endstopNone,
                        endstopNone)
 STEPPER_TMC2660_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN,
-                       0.10, 1, MICROSTEPS, 450, 8, 12500000, endstopNone,
+                       0.10, 1, MICROSTEPS, 300, 8, 12500000, endstopNone,
                        endstopNone)
 #endif
 STEPPER_MIRROR2(ZMotor, Z1Motor, Z2Motor, endstopNone, endstopNone)
@@ -264,17 +264,17 @@ STEPPER_TMC2130_HW_SPI(YMotor, IOY1Step, IOY1Dir, IOY1Enable, ORIG_Y_CS_PIN,
 
 #ifdef STACKER_2_Z_END_STOPS
 STEPPER_TMC2130_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN,
-                       0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
+                       0.11, 1, MICROSTEPS, 300, true, 100, 8, 12500000,
                        endstopNone, endstopZMax1)
 STEPPER_TMC2130_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN,
-                       0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
+                       0.11, 1, MICROSTEPS, 300, true, 100, 8, 12500000,
                        endstopNone, endstopZMax2)
 #else
 STEPPER_TMC2130_HW_SPI(Z1Motor, IOZ1Step, IOZ1Dir, IOZ1Enable, ORIG_Z_CS_PIN,
-                       0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
+                       0.11, 1, MICROSTEPS, 300, true, 100, 8, 12500000,
                        endstopNone, endstopNone)
 STEPPER_TMC2130_HW_SPI(Z2Motor, IOZ2Step, IOZ2Dir, IOZ2Enable, ORIG_Z2_CS_PIN,
-                       0.11, 1, MICROSTEPS, 1000, true, 100, 8, 12500000,
+                       0.11, 1, MICROSTEPS, 300, true, 100, 8, 12500000,
                        endstopNone, endstopNone)
 #endif
 STEPPER_MIRROR2(ZMotor, Z1Motor, Z2Motor, endstopNone, endstopNone)
