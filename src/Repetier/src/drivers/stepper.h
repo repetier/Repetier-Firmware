@@ -390,6 +390,7 @@ class TMCStepper2130Driver : public StepperDriverBase, public ProgrammableSteppe
 
 protected:
     bool isEnabled;
+    bool initSucceded;
 
 public:
     TMCStepper2130Driver(EndstopDriver* minES, EndstopDriver* maxES,
@@ -449,6 +450,7 @@ class TMCStepper2660Driver : public StepperDriverBase, public ProgrammableSteppe
 
 protected:
     bool isEnabled;
+    bool initSucceded;
 
 public:
     TMCStepper2660Driver(EndstopDriver* minES, EndstopDriver* maxES,
@@ -508,6 +510,7 @@ class TMCStepper5160Driver : public StepperDriverBase, public ProgrammableSteppe
 
 protected:
     bool isEnabled;
+    bool initSucceded;
 
 public:
     TMCStepper5160Driver(EndstopDriver* minES, EndstopDriver* maxES,
@@ -567,6 +570,7 @@ class TMCStepper5161Driver : public StepperDriverBase, public ProgrammableSteppe
 
 protected:
     bool isEnabled;
+    bool initSucceded;
 
 public:
     TMCStepper5161Driver(EndstopDriver* minES, EndstopDriver* maxES,
@@ -624,6 +628,7 @@ public:
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 class TMCStepper2208Driver : public StepperDriverBase, public ProgrammableStepperBase {
     TMC2208Stepper* driver;
+    bool initSucceded;
 
 protected:
     bool isEnabled;
@@ -688,6 +693,7 @@ class TMCStepper2209Driver : public StepperDriverBase, public ProgrammableSteppe
 
 protected:
     bool isEnabled;
+    bool initSucceded;
 
 public:
     TMCStepper2209Driver(EndstopDriver* minES, EndstopDriver* maxES,

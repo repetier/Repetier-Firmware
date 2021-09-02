@@ -224,6 +224,8 @@ void __attribute__((weak)) TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::init() {
+    initSucceded = driver->test_connection() == 0;
+    bool wasEnabled = isEnabled;
     disable();
     // driver->setSPISpeed(500000UL);
     driver->begin();
@@ -264,6 +266,9 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::init() {
     }
     driver->internal_Rsense(TMC_INTERNAL_RSENSE);
     driver->GSTAT(); // Clear GSTAT
+    if (wasEnabled) {
+        enable();
+    }
 }
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
@@ -291,6 +296,9 @@ void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::reset(uint16_t _mic
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2130Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
+    if (!initSucceded) {
+        init();
+    }
     if (debug != -1) {
         reportTMC2130(driver, this, debug);
     }
@@ -479,6 +487,8 @@ void __attribute__((weak)) TMCStepper2660Driver<stepCls, dirCls, enableCls, fclk
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2660Driver<stepCls, dirCls, enableCls, fclk>::init() {
+    initSucceded = driver->test_connection() == 0;
+    bool wasEnabled = isEnabled;
     disable();
     // driver->setSPISpeed(500000UL);
     driver->begin();
@@ -498,6 +508,9 @@ void TMCStepper2660Driver<stepCls, dirCls, enableCls, fclk>::init() {
     if (hasStallguard()) {
         stallguardSensitivity = constrain(stallguardSensitivity, -64, 63);
         driver->sgt(stallguardSensitivity);
+    }
+    if (wasEnabled) {
+        enable();
     }
 }
 
@@ -526,6 +539,9 @@ void TMCStepper2660Driver<stepCls, dirCls, enableCls, fclk>::reset(uint16_t _mic
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2660Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
+    if (!initSucceded) {
+        init();
+    }
     if (debug != -1) {
         reportTMC2660(driver, this, debug);
     }
@@ -791,6 +807,9 @@ void TMCStepper5161Driver<stepCls, dirCls, enableCls, fclk>::reset(uint16_t _mic
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper5161Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
+    if (!initSucceded) {
+        init();
+    }
     if (debug != -1) {
         reportTMC5161(driver, this, debug);
     }
@@ -999,6 +1018,8 @@ void __attribute__((weak)) TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::init() {
+    initSucceded = driver->test_connection() == 0;
+    bool wasEnabled = isEnabled;
     disable();
     // driver->setSPISpeed(500000UL);
     driver->begin();
@@ -1042,6 +1063,9 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::init() {
     }
     driver->internal_Rsense(TMC_INTERNAL_RSENSE);
     driver->GSTAT(); // Clear GSTAT
+    if (wasEnabled) {
+        enable();
+    }
 }
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
@@ -1069,6 +1093,9 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::reset(uint16_t _mic
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
+    if (!initSucceded) {
+        init();
+    }
     if (debug != -1) {
         reportTMC5160(driver, this, debug);
     }
@@ -1275,6 +1302,8 @@ void __attribute__((weak)) TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::init() {
+    initSucceded = driver->test_connection() == 0;
+    bool wasEnabled = isEnabled;
     disable();
     driver->begin();
 
@@ -1320,6 +1349,9 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::init() {
     driver->internal_Rsense(TMC_INTERNAL_RSENSE);
     driver->GSTAT(0b111); // Clear GSTAT
     HAL::delayMilliseconds(200);
+    if (wasEnabled) {
+        enable();
+    }
 }
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
@@ -1346,6 +1378,9 @@ void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::reset(uint16_t _mic
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2208Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
+    if (!initSucceded) {
+        init();
+    }
 #ifndef IGNORE_TMC2208_FEEDBACK
     if (debug != -1) {
         reportTMC2208(driver, this, debug);
@@ -1549,6 +1584,8 @@ void __attribute__((weak)) TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::init() {
+    initSucceded = driver->test_connection() == 0;
+    bool wasEnabled = isEnabled;
     disable();
 
     // The TMC2209_n namespace doesn't recreate all the register structs for the 2209 specifically
@@ -1600,6 +1637,9 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::init() {
     }
     driver->internal_Rsense(TMC_INTERNAL_RSENSE);
     driver->GSTAT(); // Clear GSTAT
+    if (wasEnabled) {
+        enable();
+    }
 }
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
@@ -1627,6 +1667,9 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::reset(uint16_t _mic
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
+    if (!initSucceded) {
+        init();
+    }
 #ifndef IGNORE_TMC2209_FEEDBACK
     if (debug != -1) {
         reportTMC2209(driver, this, debug);
