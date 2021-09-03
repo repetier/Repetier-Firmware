@@ -458,6 +458,7 @@ void reportTMC2660(TMC2660Stepper* driver, ProgrammableStepperBase* b, int level
     }
     Com::printFLN(Com::tMotorEnabledColon, driver->isEnabled(), BoolFormat::YESNO);
     Com::printFLN(PSTR("rdsel:"), (int32_t)driver->rdsel());
+    Com::printFLN(PSTR("sdoff:"), (int32_t)driver->sdoff());
     Com::printFLN(PSTR("DRVSTATUS:"), (int32_t)driver->DRVSTATUS());
     Com::printF(Com::tMotorRMSCurrentMAColon, static_cast<int32_t>(driver->rms_current()));
     Com::printFLN(Com::tMotorSpaceSetColonSpace, b->getCurrentMillis());
@@ -506,7 +507,7 @@ void TMCStepper2660Driver<stepCls, dirCls, enableCls, fclk>::init() {
     driver->intpol(TMC_INTERPOLATE);
     driver->rms_current(currentMillis);
     driver->microsteps(microsteps);
-
+    driver->sdoff(0);
     if (hasStallguard()) {
         stallguardSensitivity = constrain(stallguardSensitivity, -64, 63);
         driver->sgt(stallguardSensitivity);
