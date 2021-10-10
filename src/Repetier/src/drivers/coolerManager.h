@@ -26,8 +26,8 @@ class CoolerManagerHeater {
     PWMHandler* pwm;
     float startTemp;
     float maxTemp;
-    fast8_t minPWM;
-    fast8_t maxPWM;
+    ufast8_t minPWM;
+    ufast8_t maxPWM;
     float diff;
 
 public:
@@ -35,8 +35,8 @@ public:
                         PWMHandler* _pwm,
                         float _startTemp,
                         float _maxTemp,
-                        fast8_t _minPWM,
-                        fast8_t _maxPWM)
+                        ufast8_t _minPWM,
+                        ufast8_t _maxPWM)
         : heater(_heater)
         , pwm(_pwm)
         , startTemp(_startTemp)
@@ -56,8 +56,8 @@ class CoolerManagerSensor {
     PWMHandler* pwm;
     float startTemp;
     float maxTemp;
-    fast8_t minPWM;
-    fast8_t maxPWM;
+    ufast8_t minPWM;
+    ufast8_t maxPWM;
     float diff;
 
 public:
@@ -80,15 +80,15 @@ public:
 
 class CoolerManagerMotors {
     PWMHandler* pwm;
-    fast8_t offPWM;
-    fast8_t onPWM;
+    ufast8_t offPWM;
+    ufast8_t onPWM;
     int postCooling;
     int onCount;
 
 public:
     CoolerManagerMotors(PWMHandler* _pwm,
-                        fast8_t _offPWM,
-                        fast8_t _onPWM,
+                        ufast8_t _offPWM,
+                        ufast8_t _onPWM,
                         int postCoolingSeconds)
         : pwm(_pwm)
         , offPWM(_offPWM)

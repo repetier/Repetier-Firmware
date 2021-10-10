@@ -110,12 +110,12 @@
     template <class pinname> \
     class name##Class : public PWMHandler { \
     public: \
-        fast8_t pwm, val; \
+        ufast8_t pwm, val; \
         name##Class() \
             : pwm(0) \
-            , val(0) {} \
-        void set(fast8_t _pwm) final { pwm = _pwm; } \
-        fast8_t get() final { return pwm; } \
+            , val(0) { } \
+        void set(ufast8_t _pwm) final { pwm = _pwm; } \
+        ufast8_t get() final { return pwm; } \
         void setFreq(uint32_t _freq) final {}; \
         uint32_t getFreq() { return speed; } \
     }; \
@@ -125,12 +125,12 @@
     template <class pinname> \
     class name##Class : public PWMHandler { \
     public: \
-        fast8_t pwm, error; \
+        ufast8_t pwm, error; \
         name##Class() \
             : pwm(0) \
-            , error(0) {} \
-        void set(fast8_t _pwm) final { pwm = _pwm; } \
-        fast8_t get() final { return pwm; } \
+            , error(0) { } \
+        void set(ufast8_t _pwm) final { pwm = _pwm; } \
+        ufast8_t get() final { return pwm; } \
         void setFreq(uint32_t _freq) final {}; \
         uint32_t getFreq() final { return error; } \
     }; \
@@ -139,13 +139,13 @@
 #define IO_PWM_FAKE(name) \
     class name##Class : public PWMHandler { \
     public: \
-        fast8_t pwm; \
+        ufast8_t pwm; \
         uint32_t freq; \
         name##Class() \
             : pwm(0) \
-            , freq(0) {} \
-        void set(fast8_t _pwm) final { pwm = _pwm; } \
-        fast8_t get() final { return pwm; } \
+            , freq(0) { } \
+        void set(ufast8_t _pwm) final { pwm = _pwm; } \
+        ufast8_t get() final { return pwm; } \
         void setFreq(uint32_t _freq) final { freq = _freq; } \
         uint32_t getFreq() final { return freq; } \
     }; \
@@ -155,14 +155,14 @@
     template <class pinname> \
     class name##Class : public PWMHandler { \
     public: \
-        fast8_t pwm; \
+        ufast8_t pwm; \
         name##Class() \
-            : pwm(0) {} \
-        void set(fast8_t _pwm) final { \
+            : pwm(0) { } \
+        void set(ufast8_t _pwm) final { \
             pwm = _pwm; \
             pinname::set(_pwm >= onLevel); \
         } \
-        fast8_t get() final { return pwm; } \
+        ufast8_t get() final { return pwm; } \
         void setFreq(uint32_t _freq) final { pwmname.setFreq(_freq); } \
         uint32_t getFreq() final { return pwmname.getFreq(); } \
     }; \
@@ -171,19 +171,20 @@
 #define IO_PWM_HARDWARE(name, pinid, frequency) \
     class name##Class : public PWMHandler { \
     public: \
-        fast8_t pwm, id; \
+        ufast8_t pwm; \
+        fast8_t id; \
         uint32_t freq; \
         name##Class() \
             : pwm(0) \
             , id(-1) \
-            , freq(frequency) {} \
-        void set(fast8_t _pwm) final { \
+            , freq(frequency) { } \
+        void set(ufast8_t _pwm) final { \
             if (_pwm != pwm) { \
                 pwm = _pwm; \
                 HAL::setHardwarePWM(id, pwm); \
             } \
         } \
-        fast8_t get() final { return pwm; } \
+        ufast8_t get() final { return pwm; } \
         void setFreq(uint32_t _freq) final { \
             if (_freq != freq) { \
                 freq = _freq; \
@@ -197,17 +198,18 @@
 #define IO_PWM_DAC(name, dacPin) \
     class name##Class : public PWMHandler { \
     public: \
-        fast8_t val, id; \
+        ufast8_t val; \
+        fast8_t id; \
         name##Class() \
             : val(0) \
             , id(-1) { } \
-        void set(fast8_t _val) final { \
+        void set(ufast8_t _val) final { \
             if (_val != val) { \
                 val = _val; \
                 HAL::setHardwareDAC(id, val); \
             } \
         } \
-        fast8_t get() final { return val; } \
+        ufast8_t get() final { return val; } \
         void setFreq(uint32_t _freq) final {}; \
         uint32_t getFreq() final { return 0ul; } \
     }; \
@@ -217,7 +219,7 @@
     class name##Class : public PWMHandler { \
     public: \
         name##Class() {}; \
-        void set(fast8_t _pwm) final { \
+        void set(ufast8_t _pwm) final { \
             if (_pwm > minValue) { \
                 pwmname.set(_pwm); \
             } else if (offBelow || _pwm == 0) { \
@@ -226,7 +228,7 @@
                 pwmname.set(minValue); \
             } \
         } \
-        fast8_t get() final { return pwmname.get(); } \
+        ufast8_t get() final { return pwmname.get(); } \
         void setFreq(uint32_t _freq) final { pwmname.setFreq(_freq); } \
         uint32_t getFreq() final { return pwmname.getFreq(); } \
     }; \
@@ -235,19 +237,19 @@
 #define IO_PWM_SCALEDOWN(name, pwmname, maxValue) \
     class name##Class : public PWMHandler { \
     public: \
-        fast8_t pwm; \
+        ufast8_t pwm; \
         name##Class() \
-            : pwm(0) {} \
-        void set(fast8_t _pwm) final { \
+            : pwm(0) { } \
+        void set(ufast8_t _pwm) final { \
             pwm = _pwm; \
-            uint8_t scaled = static_cast<uint8_t>(static_cast<uint16_t>(_pwm) * maxValue / 256); \
+            ufast8_t scaled = static_cast<ufast8_t>(RMath::min(static_cast<uint16_t>(255), static_cast<uint16_t>(static_cast<int32_t>(_pwm) * maxValue / 256)); \
             if (scaled > maxValue) { \
                 pwmname.set(maxValue); \
             } else { \
                 pwmname.set(scaled); \
             } \
         } \
-        fast8_t get() final { return pwm; } \
+        ufast8_t get() final { return pwm; } \
         void setFreq(uint32_t _freq) final { pwmname.setFreq(_freq); } \
         uint32_t getFreq() final { return pwmname.getFreq(); } \
     }; \
@@ -256,11 +258,11 @@
 #define IO_PWM_KICKSTART(name, pwmname, time100ms, treshold) \
     class name##Class : public PWMHandler { \
     public: \
-        fast8_t pwm, kickcount; \
+        ufast8_t pwm, kickcount; \
         name##Class() \
             : pwm(0) \
-            , kickcount(0) {} \
-        void set(fast8_t _pwm) final { \
+            , kickcount(0) { } \
+        void set(ufast8_t _pwm) final { \
             if (kickcount == 0 && _pwm < treshold \
                 && (pwm == 0 && _pwm > 0) \
                 && time100ms > 0) { \
@@ -274,7 +276,7 @@
                 } \
             } \
         } \
-        fast8_t get() final { return pwm; } \
+        ufast8_t get() final { return pwm; } \
         void setFreq(uint32_t _freq) final { pwmname.setFreq(_freq); } \
         uint32_t getFreq() final { return pwmname.getFreq(); } \
     }; \
@@ -288,8 +290,8 @@
         name##Class() \
             : steps(0) \
             , realPwm(0) \
-            , targPwm(0) {} \
-        void set(fast8_t _pwm) final { \
+            , targPwm(0) { } \
+        void set(ufast8_t _pwm) final { \
             if (_pwm != (targPwm >> scale)) { \
                 targPwm = (static_cast<uint16_t>(_pwm) << scale); \
                 if (difThreshold && (abs(realPwm - targPwm) >> scale) <= difThreshold) { \
@@ -306,7 +308,7 @@
                 } \
             } \
         } \
-        fast8_t get() final { return pwmname.get(); } \
+        ufast8_t get() final { return pwmname.get(); } \
         void setFreq(uint32_t _freq) final { pwmname.setFreq(_freq); } \
         uint32_t getFreq() final { return pwmname.getFreq(); } \
     }; \
@@ -315,11 +317,11 @@
 #define IO_PWM_INVERTED(name, pwmname) \
     class name##Class : public PWMHandler { \
     public: \
-        name##Class() {} \
-        void set(fast8_t _pwm) final { \
+        name##Class() { } \
+        void set(ufast8_t _pwm) final { \
             pwmname.set(255 - _pwm); \
         } \
-        fast8_t get() final { return 255 - pwmname.get(); } \
+        ufast8_t get() final { return 255 - pwmname.get(); } \
         void setFreq(uint32_t _freq) final { pwmname.setFreq(_freq); } \
         uint32_t getFreq() final { return pwmname.getFreq(); } \
     }; \
@@ -329,13 +331,13 @@
     class name##Class : public PWMHandler { \
 \
     public: \
-        void set(fast8_t _pwm) final { \
+        void set(ufast8_t _pwm) final { \
             if (pwmname.get() != _pwm) { \
                 pwmname.set(_pwm); \
                 Com::printFLN(PSTR(#name) "=", (int)_pwm); \
             } \
         } \
-        fast8_t get() final { return pwmname.get(); } \
+        ufast8_t get() final { return pwmname.get(); } \
         void setFreq(uint32_t _freq) final { \
             if (getFreq() != _freq) { \
                 pwmname.setFreq(_freq); \

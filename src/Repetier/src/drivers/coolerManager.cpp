@@ -28,7 +28,7 @@ void CoolerManagerHeater::update() {
         pwm->set(maxPWM);
         return;
     }
-    pwm->set(RMath::min(static_cast<fast8_t>(255), minPWM + static_cast<fast8_t>((temp - startTemp) * diff)));
+    pwm->set(RMath::min(static_cast<int32_t>(255), minPWM + static_cast<int32_t>((temp - startTemp) * diff)));
 }
 
 void CoolerManagerSensor::update() {

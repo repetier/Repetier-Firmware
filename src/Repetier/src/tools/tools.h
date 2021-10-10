@@ -154,7 +154,7 @@ public:
     }
     ///< Sends speed directly to connected pwm device
     inline void sendSecondary(int speed) {
-        if (secondary != nullptr && secondary->get() != speed) {
+        if (secondary != nullptr && secondary->get() != static_cast<ufast8_t>(speed)) {
             secondary->set(speed);
         }
     }

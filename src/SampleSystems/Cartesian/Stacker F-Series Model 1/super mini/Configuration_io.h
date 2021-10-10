@@ -179,7 +179,8 @@ IO_TEMPERATURE_TABLE(TempExt1, IOAnalogExt1, TempTablePT100)
 // select a software pwm model whcih works on all pins.
 
 IO_PWM_HARDWARE(PWMExtruder1, HEATER_0_PIN, 500)
-IO_PWM_HARDWARE(PWMBed1, HEATER_1_PIN, 500)
+// Limit frequency to not heat up the FET too much!
+IO_PWM_HARDWARE(PWMBed1, HEATER_1_PIN, 100)
 
 // Define all stepper motors used
 // For deltas the top is the minumum position in motor coordinates
