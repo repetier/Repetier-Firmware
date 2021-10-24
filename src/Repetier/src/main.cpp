@@ -200,7 +200,7 @@ Custom M Codes
 - M667 - force communication error, required DEBUG_COM_ERRORS
 - M668 - set line number 0 without notice to simulate error
 - M669 - Measure time for a LCD display refresh
-- M900 K<advance> R<ratio> W<extrusion width> H<layer height> D<filament diameter> - set advance parameter.
+- M900 K<advance> R<ratio> W<extrusion width> H<layer height> D<filament diameter> T<toolId> - set advance parameter.
 - M906 P<address> S<value> - Get stepper current, with S value it is also set
 - M907 P<address> S<value> - Set stepper current
 - M908 P<address> S<value> - Set stepper current

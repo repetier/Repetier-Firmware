@@ -67,6 +67,10 @@
 
 #define FORCE_INLINE __attribute__((always_inline)) inline
 
+#define JTAG_DISABLE() AFIO_DBGAFR_CONFIG(AFIO_MAPR_SWJ_CFG_JTAGDISABLE)
+#define JTAGSWD_DISABLE() AFIO_DBGAFR_CONFIG(AFIO_MAPR_SWJ_CFG_DISABLE)
+#define JTAGSWD_RESET() AFIO_DBGAFR_CONFIG(AFIO_MAPR_SWJ_CFG_RESET); // Reset: FULL SWD+JTAG
+
 // do not use program space memory with Due
 #define PROGMEM
 #ifndef PGM_P
@@ -154,7 +158,6 @@ typedef char prog_char;
             LL_GPIO_ResetOutputPin(get_GPIO_Port(STM_PORT(pin)), STM_LL_GPIO_PIN(pin)); \
         } \
     } while (0)
-#define WRITE(pin, v) _WRITE(pin, v)
 
 #define SET_INPUT(pin) ::pinMode(pin, INPUT);
 #define SET_OUTPUT(pin) ::pinMode(pin, OUTPUT);

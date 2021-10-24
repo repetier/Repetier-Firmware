@@ -538,6 +538,19 @@ void Printer::setup() {
 #if defined(MB_SETUP)
     MB_SETUP;
 #endif
+
+#if defined(DISABLE_DEBUG) || defined(DISABLE_JTAG)
+    delay(10);
+// Disable any hardware debug to free up pins for IO
+#if ENABLED(DISABLE_DEBUG) && defined(JTAGSWD_DISABLE)
+    JTAGSWD_DISABLE();
+#elif defined(JTAG_DISABLE)
+    JTAG_DISABLE();
+#else
+#error "DISABLE_(DEBUG|JTAG) is not supported for the selected MCU/Board."
+#endif
+#endif
+
     // HAL::serialSetBaudrate(115200);
     // Start serial
     HAL::hwSetup();

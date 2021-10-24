@@ -124,6 +124,15 @@ inline void memcopy4(void* dest, void* source) {
 #include "STM32F4/HAL.h"
 #endif
 
+// Fix missing defines with defaults or replacement
+
+#ifndef EEPROM_MODE
+#define EEPROM_MODE EEPROM_NONE
+#endif
+#ifndef EEPROM_AVAILABLE
+#define EEPROM_AVAILABLE EEPROM_NONE
+#endif
+
 #ifndef BEEPER_PIN
 #define BEEPER_PIN -1
 #endif

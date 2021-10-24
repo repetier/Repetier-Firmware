@@ -18,52 +18,53 @@
 
 #pragma once
 
-#ifndef STM32F1
+#ifndef skr_mini_e3_v2_0
 #error "Oops! Select skr_mini_e3_v2_0 in platformio.ini -> default_envs"
 #endif
+#define skr_mini_e3_v1_2 // Prevent error message in included file
 
 // SKR E3 Mini V2 has a small onboard AT24C32 I2C EEPROM. Powered @ 3.3V.
-#define TWI_CLOCK_FREQ          1000000
+#define TWI_CLOCK_FREQ 1000000
 
 #undef EEPROM_AVAILABLE
-#define EEPROM_AVAILABLE        EEPROM_I2C
+#define EEPROM_AVAILABLE EEPROM_I2C
 
-#define EEPROM_SERIAL_ADDR      0x50
-#define EEPROM_PAGE_WRITE_TIME  10
+#define EEPROM_SERIAL_ADDR 0x50
+#define EEPROM_PAGE_WRITE_TIME 10
 
 /*
     SKR E3 Mini V2 - We use V1.2 as a base since it shares almost all the same pins.
     We just replace/add any new V2 pins here.
 */
-#include "skr_mini_e3_v1_2.h" 
+#include "skr_mini_e3_v1_2.h"
 
 #undef EEPROM_PAGE_SIZE
-#define EEPROM_PAGE_SIZE        32
+#define EEPROM_PAGE_SIZE 32
 
-#define ORIG_FAN2_PIN           PC7
+#define ORIG_FAN2_PIN PC7
 #undef ORIG_FAN_PIN
-#define ORIG_FAN_PIN            PC6
+#define ORIG_FAN_PIN PC6
 
 #undef NEOPIXEL_PIN
-#define NEOPIXEL_PIN            PA8
+#define NEOPIXEL_PIN PA8
 
 #undef ORIG_PS_ON_PIN
-#define ORIG_PS_ON_PIN          PC13
+#define ORIG_PS_ON_PIN PC13
 
 #undef STATUS_LED_PIN
-#define STATUS_LED_PIN          PA13
+#define STATUS_LED_PIN PA13
 
-#undef LED_PIN 
-#define LED_PIN                 STATUS_LED_PIN
+#undef LED_PIN
+#define LED_PIN STATUS_LED_PIN
 
 // LCD / Controller
 #ifndef CUSTOM_CONTROLLER_PINS
 #if FEATURE_CONTROLLER != CONTROLLER_NONE
 
 #undef UI_ENCODER_CLICK
-#define UI_ENCODER_CLICK        PA15
+#define UI_ENCODER_CLICK PA15
 #undef UI_DISPLAY_ENABLE_PIN
-#define UI_DISPLAY_ENABLE_PIN   PB15
+#define UI_DISPLAY_ENABLE_PIN PB15
 
 #endif
-#endif 
+#endif
