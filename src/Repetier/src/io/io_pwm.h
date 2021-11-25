@@ -242,7 +242,7 @@
             : pwm(0) { } \
         void set(ufast8_t _pwm) final { \
             pwm = _pwm; \
-            ufast8_t scaled = static_cast<ufast8_t>(RMath::min(static_cast<uint16_t>(255), static_cast<uint16_t>(static_cast<int32_t>(_pwm) * maxValue / 256)); \
+            ufast8_t scaled = static_cast<ufast8_t>(RMath::min(static_cast<uint16_t>(255), static_cast<uint16_t>(static_cast<int32_t>(_pwm) * maxValue / 256))); \
             if (scaled > maxValue) { \
                 pwmname.set(maxValue); \
             } else { \
