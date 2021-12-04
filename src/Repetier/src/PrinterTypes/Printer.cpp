@@ -554,7 +554,10 @@ void Printer::setup() {
     // HAL::serialSetBaudrate(115200);
     // Start serial
     HAL::hwSetup();
-
+#if defined(SAFE_POWER_PIN) && SAFE_POWER_PIN > -1
+    SET_OUTPUT(SAFE_POWER_PIN);
+    WRITE(SAFE_POWER_PIN, HIGH);
+#endif
     EEPROM::initBaudrate();
     HAL::serialSetBaudrate(baudrate);
     Com::printFLN(Com::tStart);
