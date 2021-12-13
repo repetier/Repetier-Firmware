@@ -144,6 +144,7 @@ public:
     inline void resetError(fast8_t flag) { errorFlags &= ~flag; }
     inline bool usesSecondary(void* sec) { return secondary == sec; }
     bool hasSecondary() { return secondary != nullptr; }
+    static bool isToolActivelyUsed(int id); // Return true if it is active tool or used by active ditto mode
     inline void setSecondaryFixed(int sec) {
         activeSecondaryValue = sec;
         activeSecondaryPerMMPS = 0;

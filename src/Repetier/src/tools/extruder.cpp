@@ -214,7 +214,7 @@ void JamDetectorHW<inputPin, ObserverType>::eepromHandle() {
 
 template <class inputPin, class ObserverType>
 void JamDetectorHW<inputPin, ObserverType>::testForJam() {
-    if (Tool::getActiveTool() != tool) {
+    if (Tool::isToolActivelyUsed(tool->toolId)) {
         return;
     }
     if (Printer::isTestJamRequired()) {
@@ -301,7 +301,7 @@ void FilamentDetector<inputPin>::setup() {
 
 template <class inputPin>
 void FilamentDetector<inputPin>::testFilament() {
-    if (Tool::getActiveTool() != tool) { // trigger only if active
+    if (Tool::isToolActivelyUsed(tool->toolId)) { // trigger only if active
         return;
     }
     if (inputPin::get()) {

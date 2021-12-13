@@ -278,6 +278,16 @@ void Tool::unselectTool() {
     activeToolId = 255;
 }
 
+bool Tool::isToolActivelyUsed(int id) { // Return true if it is active tool or used by active ditto mode
+    if (id == activeToolId) {
+        return true;
+    }
+    if (Motion1::dittoMode) {
+        return id <= Motion1::dittoMode;
+    }
+    return false;
+}
+
 void Tool::selectTool(fast8_t id, bool force) {
     bool doMove = activeToolId != 255;
     if (Printer::isZProbingActive()) { // stop probing when selecting a tool
