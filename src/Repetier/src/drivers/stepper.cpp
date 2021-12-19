@@ -1064,7 +1064,7 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::init() {
         stallguardSensitivity = constrain(stallguardSensitivity, -64, 63);
         driver->sgt(stallguardSensitivity);
     }
-    driver->internal_Rsense(TMC_INTERNAL_RSENSE);
+    // driver->internal_Rsense(TMC_INTERNAL_RSENSE); // protected so we can not set it!
     driver->GSTAT(); // Clear GSTAT
     if (wasEnabled) {
         enable();
