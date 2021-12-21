@@ -1491,7 +1491,7 @@ void __attribute__((weak)) MCode_601(GCode* com) {
     bool extruder = com->hasE() ? com->E != 0 : true;
     bool bed = com->hasB() && com->B != 0;
     bool chamber = com->hasC() && com->C != 0;
-    bool all = extruder && !bed && !chamber;
+    bool all = !com->hasE() && !com->hasB() && !com->hasC();
     extruder |= all;
     chamber |= all;
     bed |= all;

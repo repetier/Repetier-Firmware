@@ -191,7 +191,7 @@ Custom M Codes
 - M539 S<supportStartStop> P<paused> - S1 Tells firmware that host will use the feature. P1/0 signals paused/running state.
 - M575 B<Baudrate> - Update all available serial port baudrates to one of the permitted rates (38400, 56000, 57600, 76800, 115200, 128000, 230400, 250000, 256000, 460800, 500000)
 - M600 Change filament
-- M601 S<1/0> B<1/0> P<1/0> - Pause extruders. B1 also pauses heated bed. Paused extrudes disable heaters and motor. Continue (S0) reheats extruder to old temp. P0 does not wait for target temperature.
+- M601 S<1/0> E<1/0> B<1/0> C<1/0> P<1/0> - Pause extruders. E0 excepts extruders. B1 also pauses heated bed. C1 also waits for chamber. If E, B and C are omitted all are assumed to be 1! Paused extrudes disable heaters and motor. Continue (S0) reheats extruder to old temp. P0 does not wait for target temperature.
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
 - M603 Park extruder for printer types where this makes sense.
 - M604 X<slowdownSteps> Y<errorSteps> Z<slowdownTo> T<extruderId> - Set jam detection values on a per extruder basis. If not set it uses defaults from Configuration.h
