@@ -402,17 +402,21 @@ void GCode::executeFString(FSTRINGPARAM(cmd)) {
         buflen = 0;
         do {
             c = HAL::readFlashByte(cmd++);
-            if (c == 0 || c == '\n')
+            if (c == 0 || c == '\n') {
                 break;
-            if (c == ';')
+            }
+            if (c == ';') {
                 comment = 1;
-            if (comment)
+            }
+            if (comment) {
                 continue;
+            }
             buf[buflen++] = c;
         } while (buflen < 79);
         if (buflen == 0) { // empty line ignore
-            if (!c)
+            if (!c) {
                 return; // Special case \n0
+            }
             continue;
         }
         buf[buflen] = 0;

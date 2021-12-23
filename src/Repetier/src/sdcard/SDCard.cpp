@@ -560,8 +560,9 @@ void SDCard::continuePrint() {
             if (tool) {
                 tool->beforeContinue();
             }
+            // Com::printFLN(PSTR("Before M601"));
             GCode::executeFString(PSTR(PAUSE_END_COMMANDS));
-
+            // Com::printFLN(PSTR("After M601"));
             float pos[NUM_AXES];
             if (Motion1::popFromMemory(pos)) {
                 float z = pos[Z_AXIS];

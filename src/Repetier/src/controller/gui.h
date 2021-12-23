@@ -52,11 +52,12 @@ enum class GUIAction {
     DRAW = 1,
     NEXT = 2,
     PREVIOUS = 3,
-    CLICK = 4,
+    CLICK = 4, // button clicked down, wait for execution
     ANALYSE = 5,
-    BACK = 6,
-    CLICK_PROCESSED = 7,
-    BACK_PROCESSED = 8
+    BACK = 6, // back pressed, waiting execution
+    CLICK_PROCESSED = 7, // click function executed, wait for button release
+    BACK_PROCESSED = 8, // back operation executed
+    CLICK_PROCESSING = 9 // started execution, but not finished
 };
 
 enum class GUIPageType {
@@ -222,8 +223,8 @@ public:
     static void okKey();
     static void setEncoder();
     static void handleKeypress();
-    static void replaceOn(GUIAction a, GuiCallback cb, void* cData, GUIPageType tp);
-    static void pushOn(GUIAction a, GuiCallback cb, void* cData, GUIPageType tp);
+    static void replaceOn(GUIAction a, GUIAction cur, GuiCallback cb, void* cData, GUIPageType tp);
+    static void pushOn(GUIAction a, GUIAction cur, GuiCallback cb, void* cData, GUIPageType tp);
 
     // Draw menu functions - driver specific
 

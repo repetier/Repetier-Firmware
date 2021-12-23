@@ -887,9 +887,9 @@ void __attribute__((weak)) probeProgress(GUIAction action, void* data) {
             startScreen(action, data);
         }
     }
-    GUI::replaceOn(GUIAction::NEXT, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
-    GUI::replaceOn(GUIAction::PREVIOUS, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
-    GUI::pushOn(GUIAction::CLICK, mainMenu, nullptr, GUIPageType::MENU);
+    GUI::replaceOn(GUIAction::NEXT, action, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::replaceOn(GUIAction::PREVIOUS, action, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::pushOn(GUIAction::CLICK, action, mainMenu, nullptr, GUIPageType::MENU);
 }
 //extern void __attribute__((weak)) startScreen(GUIAction action, void* data);
 //extern void __attribute__((weak)) printProgress(GUIAction action, void* data);
@@ -995,10 +995,10 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
     }
     if (Printer::isPrinting() || Printer::isZProbingActive()) {
         GuiCallback cb = Printer::isPrinting() ? printProgress : probeProgress;
-        GUI::replaceOn(GUIAction::NEXT, cb, nullptr, GUIPageType::FIXED_CONTENT);
-        GUI::replaceOn(GUIAction::PREVIOUS, cb, nullptr, GUIPageType::FIXED_CONTENT);
+        GUI::replaceOn(GUIAction::NEXT, action, cb, nullptr, GUIPageType::FIXED_CONTENT);
+        GUI::replaceOn(GUIAction::PREVIOUS, action, cb, nullptr, GUIPageType::FIXED_CONTENT);
     }
-    GUI::pushOn(GUIAction::CLICK, mainMenu, nullptr, GUIPageType::MENU);
+    GUI::pushOn(GUIAction::CLICK, action, mainMenu, nullptr, GUIPageType::MENU);
 }
 
 void __attribute__((weak)) printProgress(GUIAction action, void* data) {
@@ -1102,9 +1102,9 @@ void __attribute__((weak)) printProgress(GUIAction action, void* data) {
             startScreen(action, data); // print is finished!
         }
     }
-    GUI::replaceOn(GUIAction::NEXT, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
-    GUI::replaceOn(GUIAction::PREVIOUS, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
-    GUI::pushOn(GUIAction::CLICK, mainMenu, nullptr, GUIPageType::MENU);
+    GUI::replaceOn(GUIAction::NEXT, action, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::replaceOn(GUIAction::PREVIOUS, action, startScreen, nullptr, GUIPageType::FIXED_CONTENT);
+    GUI::pushOn(GUIAction::CLICK, action, mainMenu, nullptr, GUIPageType::MENU);
 }
 
 void __attribute__((weak)) warningScreen(GUIAction action, void* data) {

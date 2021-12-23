@@ -909,7 +909,7 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
                 }
             }
             file.close();
-        } else if (GUI::nextAction == GUIAction::PREVIOUS && menuSDCacheLastIndexPos) {
+        } else if (action == GUIAction::PREVIOUS && menuSDCacheLastIndexPos) {
             if (GUI::cursorRow[GUI::level] <= GUI::topRow[GUI::level]) {
                 if (!reversedDir) {
                     menuSDCacheLastIndexPos = menuSDNameCache[0u].dirIndexPos;
@@ -967,7 +967,7 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
         GUI::showScrollbar(action, static_cast<float>(curScrollPos) / static_cast<float>(dirItemCount - 3u), 5u, dirItemCount);
     }
     lastRow = GUI::cursorRow[GUI::level]; // For scrolling to the last row without doing a scan/moving the list.
-    if (!(GUI::nextAction == GUIAction::PREVIOUS && menuSDCacheLastIndexPos)) {
+    if (!(action == GUIAction::PREVIOUS && menuSDCacheLastIndexPos)) {
         GUI::menuAffectBySpeed(action);
     }
     GUI::menuEnd(action, false, false);

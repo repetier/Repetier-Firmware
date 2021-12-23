@@ -134,7 +134,7 @@ void GUI::update() {
         lastAction = HAL::timeInMilliseconds();
         nextActionRepeat = 0;
         contentChanged = true;
-    } else if (nextAction != GUIAction::NONE && nextAction != GUIAction::CLICK_PROCESSED && nextAction != GUIAction::BACK_PROCESSED) {
+    } else if (nextAction != GUIAction::NONE && nextAction != GUIAction::CLICK_PROCESSED && nextAction != GUIAction::CLICK_PROCESSING && nextAction != GUIAction::BACK_PROCESSED) {
         if (nextAction == GUIAction::NEXT || nextAction == GUIAction::PREVIOUS) {
             Printer::playDefaultSound(DefaultSounds::NEXT_PREV);
         } else if (nextAction == GUIAction::CLICK) {
@@ -142,8 +142,14 @@ void GUI::update() {
         }
         // Com::printFLN(PSTR("Action:"), (int32_t)nextAction);
         lastAction = HAL::timeInMilliseconds();
-        callbacks[level](nextAction, data[level]); // Execute action
-        nextAction = nextAction == GUIAction::CLICK ? GUIAction::CLICK_PROCESSED : (nextAction == GUIAction::BACK ? GUIAction::BACK_PROCESSED : GUIAction::NONE);
+        if (nextAction == GUIAction::CLICK) {
+            nextAction = GUIAction::CLICK_PROCESSING;
+            callbacks[level](GUIAction::CLICK, data[level]); // Execute action
+            nextAction = GUIAction::CLICK_PROCESSED;
+        } else {
+            callbacks[level](nextAction, data[level]); // Execute action
+            nextAction = GUIAction::NONE;
+        }
         nextActionRepeat = 0;
         contentChanged = true;
     }
@@ -227,14 +233,14 @@ void GUI::replace(GuiCallback cb, void* cData, GUIPageType tp) {
     contentChanged = true;
 }
 
-void GUI::replaceOn(GUIAction a, GuiCallback cb, void* cData, GUIPageType tp) {
-    if (nextAction == a) {
+void GUI::replaceOn(GUIAction a, GUIAction cur, GuiCallback cb, void* cData, GUIPageType tp) {
+    if (cur == a) {
         replace(cb, cData, tp);
     }
 }
 
-void GUI::pushOn(GUIAction a, GuiCallback cb, void* cData, GUIPageType tp) {
-    if (nextAction == a) {
+void GUI::pushOn(GUIAction a, GUIAction cur, GuiCallback cb, void* cData, GUIPageType tp) {
+    if (cur == a) {
         push(cb, cData, tp);
     }
 }
@@ -307,21 +313,19 @@ void GUI::okKey() {
 
 /** Check for button and store result in nextAction. */
 void GUI::handleKeypress() {
-    if (!ControllerClick::get()) {
+    if (!ControllerClick::get()) { // ignore while button is pushed!
         setEncoder();
-        // setEncoderA(ControllerEncA::get());
-        // setEncoderB(ControllerEncB::get());
     }
     // debounce clicks
-    if (nextAction == GUIAction::CLICK_PROCESSED || nextAction == GUIAction::BACK_PROCESSED) {
+    if (nextAction == GUIAction::CLICK_PROCESSED || nextAction == GUIAction::BACK_PROCESSED || nextAction == GUIAction::CLICK_PROCESSING) {
         millis_t timeDiff = HAL::timeInMilliseconds() - lastAction;
         if (timeDiff < 200) { // wait 200ms until next click counts
             return;
         }
     }
-    // action sequence: CLICK -> execute operation -> CLICK_PROCESSED -> ok key up -> NONE
+    // action sequence: CLICK -> execute operation (with CLICK_PROCESSING active) -> CLICK_PROCESSED -> ok key up -> NONE
     if (ControllerClick::get()) {
-        if (nextAction != GUIAction::CLICK_PROCESSED) {
+        if (nextAction != GUIAction::CLICK_PROCESSED && nextAction != GUIAction::CLICK_PROCESSING) {
             okKey();
         }
     } else if (nextAction == GUIAction::CLICK_PROCESSED) {
