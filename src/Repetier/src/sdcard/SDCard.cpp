@@ -553,6 +553,7 @@ void SDCard::continuePrint() {
         || !Printer::isMenuMode(MENU_MODE_PAUSED)) {
         return;
     }
+    GUI::setStatusP(PSTR("Continuing..."), GUIStatusLevel::BUSY);
     MCode_513(nullptr); // Reset jam marker
     if (EVENT_SD_CONTINUE_START(scheduledPause)) {
         if (scheduledPause == SDScheduledPause::PARKED) {
@@ -597,6 +598,8 @@ void SDCard::continuePrint() {
     Printer::setPrinting(true);
     Printer::setMenuMode(MENU_MODE_PAUSED, false);
     scheduledPause = SDScheduledPause::NO_PAUSE;
+    GUI::pop();
+    GUI::setStatusP(Com::tEmpty, GUIStatusLevel::REGULAR);
 }
 
 void SDCard::stopPrint(const bool silent) {
