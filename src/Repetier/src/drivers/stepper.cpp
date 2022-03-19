@@ -1744,10 +1744,18 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::setMaxCurrent(int m
 // or otherwise prepare for endstop detection.
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::beforeHoming() {
+    if (hasStallguard()) {
+        driver->TCOOLTHRS(0xFFFFF);
+        driver->en_spreadCycle(false);
+    }
 }
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::afterHoming() {
+    if (hasStallguard()) {
+        driver->en_spreadcycle(stealthChop);
+        driver->TCOOLTHRS(0);
+    }
 }
 
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>

@@ -617,10 +617,12 @@ void HeatManagerPID::autocalibrate(GCode* g) {
     bool storeValues = g->hasX();
     int method = g->hasC() ? static_cast<int>(g->C) : 0;
     decoupleMode = DecoupleMode::CALIBRATING;
-    if (method < 0)
+    if (method < 0) {
         method = 0;
-    if (method > 4)
+    }
+    if (method > 4) {
         method = 4;
+    }
     float currentTemp;
     int cycles = 0;
     bool heating = true;

@@ -192,6 +192,8 @@ HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 260, 255,
                  1000, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
 HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 260, 255,
                  1000, 10, 20000, 20.0, 0.6, 65.0, 40, 220, false)
+HEAT_MANAGER_DEFINE_HYSTERESIS(HeaterExtruder1, 2.0, 10000, 300000)
+HEAT_MANAGER_DEFINE_HYSTERESIS(HeaterExtruder2, 2.0, 10000, 300000)
 
 // HEAT_MANAGER_DYN_DEAD_TIME(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1,
 // 260, 255, 100, 10, 20000, 150, 7, 7, 200, 7, 7, false)

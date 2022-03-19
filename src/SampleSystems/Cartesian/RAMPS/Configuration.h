@@ -311,15 +311,11 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, &endstopZMin)
 #define JAM_METHOD 1
 #define JAM_ACTION 1
 
-#define RETRACT_DURING_HEATUP true
-#define PID_CONTROL_RANGE 20
 #define EXTRUDE_MAXLENGTH 160
 
 // ############# Heated bed configuration ########################
 
-#define SKIP_M190_IF_WITHIN 5
 #define MIN_EXTRUDER_TEMP 150
-#define MILLISECONDS_PREHEAT_TIME 30000
 
 // ################ Endstop configuration #####################
 

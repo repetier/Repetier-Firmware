@@ -515,9 +515,7 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 
 // ############# Heated bed configuration ########################
 
-#define SKIP_M190_IF_WITHIN 5
 #define MIN_EXTRUDER_TEMP 150
-#define MILLISECONDS_PREHEAT_TIME 30000
 
 // ################ Endstop/homing configuration #####################
 
