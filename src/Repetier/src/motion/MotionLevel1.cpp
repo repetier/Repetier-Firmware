@@ -2003,7 +2003,7 @@ bool Motion1::simpleHome(fast8_t axis) {
     HAL::delayMilliseconds(50);
 
     // Move back for retest
-    if (ok) {
+    if (ok && homeRetestDistance[axis] > 0) {
         endstopMode = EndstopMode::DISABLED;
         eStop.resetHistory();
         dest[axis] = -homeDir[axis] * homeRetestDistance[axis];
