@@ -1753,7 +1753,7 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::beforeHoming() {
 template <class stepCls, class dirCls, class enableCls, uint32_t fclk>
 void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::afterHoming() {
     if (hasStallguard()) {
-        driver->en_spreadcycle(stealthChop);
+        driver->en_spreadCycle(stealthChop);
         driver->TCOOLTHRS(0);
     }
 }
