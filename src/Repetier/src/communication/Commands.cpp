@@ -833,6 +833,11 @@ void Commands::processMCode(GCode* com) {
     case 998:
         MCode_998(com);
         break;
+    case 997:
+#if defined(DEBUG_COUNTER) && DEBUG_COUNTER
+        MCode_997(com);
+#endif
+        break;
     case 999: // Stop fatal error take down
         MCode_999(com);
         break;

@@ -305,6 +305,18 @@ enum class BootReason {
 #error The minimum NUM_AXES allowed is 4!
 #endif
 
+#if defined(DEBUG_COUNTER) && DEBUG_COUNTER
+extern uint32_t debugCounter[DEBUG_COUNTER];
+#define INC_DEBUG_COUNTER(x) \
+    { \
+        if ((x) < DEBUG_COUNTER) { \
+            debugCounter[x]++; \
+        } \
+    }
+#else
+#define INC_DEBUG_COUNTER(x)
+#endif
+
 #ifdef CREATE_SPI3
 extern SPIClass CREATE_SPI3;
 #endif

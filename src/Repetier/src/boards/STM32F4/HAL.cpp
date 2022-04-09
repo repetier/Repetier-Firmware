@@ -277,17 +277,16 @@ void HAL::hwSetup(void) {
 #endif
     // Servo control
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
-
     servo = reserveTimerInterrupt(SERVO_TIMER_NUM); // prevent pwm usage
     servo->timer = new HardwareTimer(TIMER(SERVO_TIMER_NUM));
-    // servo->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
+    // servo->timer->setMode(1, TIMER_DISABLED, NC);
     servo->timer->setOverflow(200, HERTZ_FORMAT);
 
     LL_TIM_OC_EnableFast(TIMER(SERVO_TIMER_NUM), servo->timer->getLLChannel(1));
     LL_TIM_OC_EnablePreload(TIMER(SERVO_TIMER_NUM), servo->timer->getLLChannel(1));
 
     servo->timer->attachInterrupt(TIMER_VECTOR_NAME(SERVO_TIMER_NUM));
-    servo->timer->attachInterrupt(1, &servoOffTimer);
+    servo->timer->attachInterrupt(1, &servoOffTimer); // called on compare match
     servo->timer->refresh();
     servo->timer->resume();
 
@@ -906,17 +905,17 @@ INLINE inline void servoOffTimer() {
 // Servo timer Interrupt handler
 void TIMER_VECTOR(SERVO_TIMER_NUM) {
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
-    if (LL_TIM_IsActiveFlag_CC1(TIMER(SERVO_TIMER_NUM))) {
+#if NUM_SERVOS > 0
+    if (actServo && HAL::servoTimings[servoId]) {
+        actServo->enable();
+    }
+#endif
+/*    if (LL_TIM_IsActiveFlag_CC1(TIMER(SERVO_TIMER_NUM))) {
         LL_TIM_ClearFlag_CC1(TIMER(SERVO_TIMER_NUM));
-        servoOffTimer();
+        // servoOffTimer();
     } else if (LL_TIM_IsActiveFlag_UPDATE(TIMER(SERVO_TIMER_NUM))) {
         LL_TIM_ClearFlag_UPDATE(TIMER(SERVO_TIMER_NUM));
-#if NUM_SERVOS > 0
-        if (actServo && HAL::servoTimings[servoId]) {
-            actServo->enable();
-        }
-#endif
-    }
+    }*/
 #endif
 }
 

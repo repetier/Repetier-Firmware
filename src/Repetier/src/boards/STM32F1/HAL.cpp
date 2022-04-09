@@ -917,17 +917,17 @@ FORCE_INLINE void servoOffTimer() {
 // Servo timer Interrupt handler
 void TIMER_VECTOR(SERVO_TIMER_NUM) {
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
-    if (LL_TIM_IsActiveFlag_CC1(TIMER(SERVO_TIMER_NUM))) {
+#if NUM_SERVOS > 0
+    if (actServo && HAL::servoTimings[servoId]) {
+        actServo->enable();
+    }
+#endif
+    /* if (LL_TIM_IsActiveFlag_CC1(TIMER(SERVO_TIMER_NUM))) {
         LL_TIM_ClearFlag_CC1(TIMER(SERVO_TIMER_NUM));
         servoOffTimer();
     } else if (LL_TIM_IsActiveFlag_UPDATE(TIMER(SERVO_TIMER_NUM))) {
         LL_TIM_ClearFlag_UPDATE(TIMER(SERVO_TIMER_NUM));
-#if NUM_SERVOS > 0
-        if (actServo && HAL::servoTimings[servoId]) {
-            actServo->enable();
-        }
-#endif
-    }
+    }*/
 #endif
 }
 
