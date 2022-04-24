@@ -378,6 +378,7 @@ bool Leveling::measure(GCode* com) {
     Motion1::moveByOfficial(Motion1::tmpPosition, Motion1::moveFeedrate[X_AXIS], false);
 #endif
     ZProbeHandler::deactivate();
+    GUI::pop();
     if (ok && !Printer::breakLongCommand) {
         GUI::setStatusP(PSTR("Autolevel complete!"), GUIStatusLevel::INFO);
 #if NUM_HEATED_BEDS
@@ -401,7 +402,6 @@ bool Leveling::measure(GCode* com) {
         reportDistortionStatus();
 #endif
     } else {
-        GUI::pop();
         GUI::setStatusP(Com::tEmpty, GUIStatusLevel::REGULAR);
         GUI::contentChanged = true;
         if (!ok) {
