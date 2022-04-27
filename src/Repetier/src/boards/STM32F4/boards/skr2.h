@@ -95,7 +95,6 @@
 #define HEATER_2_PIN PB4 // HE1
 #define HEATER_1_PIN PD7 // BED
 
-// Note: In schematic fan0 goes to fan1 and fan1 to fan0. We use numbering printed on board.
 #define ORIG_FAN_PIN PB7  // Timer 4 Channel 2
 #define ORIG_FAN2_PIN PB6 // Timer 4 Channel 1
 #define ORIG_FAN3_PIN PB5 // Timer 3 Channel 2

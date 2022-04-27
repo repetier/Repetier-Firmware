@@ -18,23 +18,6 @@
 
 #pragma once
 
-/**************** READ FIRST ************************
-
-   This configuration file was created with the configuration tool. For that
-   reason, it does not contain the same informations as the original Configuration.h file.
-   It misses the comments and unused parts. Open this file file in the config tool
-   to see and change the data. You can also upload it to newer/older versions. The system
-   will silently add new options, so compilation continues to work.
-
-   This file is optimized for version 1.0.0dev
-   generator: http://www.repetier.com/firmware/dev/
-
-   If you are in doubt which named functions use which pins on your board, please check the
-   pins.h for the used name->pin assignments and your board documentation to verify it is
-   as you expect.
-
-*/
-
 // The following variables are required early to decide on the right modules.
 #define NUM_TOOLS 2
 #define NUM_EXTRUDER 2
