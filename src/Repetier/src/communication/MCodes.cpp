@@ -26,7 +26,7 @@
 const int8_t sensitive_pins[] PROGMEM = SENSITIVE_PINS; // Sensitive pin list for M42
 
 #if defined(DEBUG_COUNTER) && DEBUG_COUNTER
-uint32_t debugCounter[DEBUG_COUNTER] = {0};
+uint32_t debugCounter[DEBUG_COUNTER] = { 0 };
 #endif
 
 void __attribute__((weak)) MCode_3(GCode* com) { // Spindle CW on, laser intensity
@@ -144,6 +144,7 @@ void __attribute__((weak)) MCode_18(GCode* com) {
             }
         }
         Tool::disableMotors();
+        Printer::setAllSteppersDisabled();
     }
 }
 
@@ -1646,7 +1647,7 @@ void __attribute__((weak)) MCode_910(GCode* com) {
 
 #if defined(DEBUG_COUNTER) && DEBUG_COUNTER
 void __attribute__((weak)) MCode_997(GCode* com) {
-    for(int i = 0;i < DEBUG_COUNTER; i++) {
+    for (int i = 0; i < DEBUG_COUNTER; i++) {
         Com::printF(PSTR("Counter"), static_cast<int32_t>(i));
         Com::printFLN(PSTR(":"), debugCounter[i]);
     }
