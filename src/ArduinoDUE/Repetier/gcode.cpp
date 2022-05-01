@@ -997,7 +997,7 @@ bool GCode::parseAscii(char* line, bool fromSerial) {
                 }
                 text = pos;
                 while (*pos) {
-                    if ((M != 117 && M != 20 && M != 531 && *pos == ' ') || *pos == '*')
+                    if ((M != 117 && M != 118 && M != 20 && M != 23 && M != 30 && M != 32 && M != 531 && *pos == ' ') || *pos == '*')
                         break;
                     pos++; // find a space as file name end
                 }
