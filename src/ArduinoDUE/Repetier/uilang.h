@@ -3841,7 +3841,7 @@
 #define UI_TEXT_NOSDCARD_TR "SD Kart Yok"
 #define UI_TEXT_ERROR_TR "**** HATA ****"
 #define UI_TEXT_BACK_TR "Geri " cUP
-#define UI_TEXT_QUICK_SETTINGS_TR "Control" //"Hizli Ayar"
+#define UI_TEXT_QUICK_SETTINGS_TR "Hizli Ayarlar" //"Hizli Ayar" "Control"
 #define UI_TEXT_ERRORMSG_TR "%oe"
 #define UI_TEXT_CONFIGURATION_TR "Yapilandirma"
 #define UI_TEXT_POSITION_TR "Konum-Hareket"
@@ -3853,8 +3853,8 @@
 #define UI_TEXT_HOME_X_TR "X S.Gonder"
 #define UI_TEXT_HOME_Y_TR "Y S.Gonder"
 #define UI_TEXT_HOME_Z_TR "Z S.Gonder"
-#define UI_TEXT_PREHEAT_SINGLE_TR "Preheat Single Extr."
-#define UI_TEXT_PREHEAT_ALL_TR "Preheat All Extr."
+#define UI_TEXT_PREHEAT_SINGLE_TR "On Isitma Tek Extr." //Preheat Single Extr. Md
+#define UI_TEXT_PREHEAT_ALL_TR "On Isitma Tum Extr." //Preheat All Extr. Md
 #define UI_TEXT_LIGHTS_ONOFF_TR "Isiklar :%lo"
 #define UI_TEXT_COOLDOWN_TR "Soguma"
 #define UI_TEXT_SET_TO_ORIGIN_TR "Orijine ayarla"
@@ -3865,18 +3865,18 @@
 #define UI_TEXT_Y_POS_FAST_TR "Y Hizli Hareketi"
 #define UI_TEXT_Z_POSITION_TR "Z Hareketi"
 #define UI_TEXT_Z_POS_FAST_TR "Z Hizli Hareketi"
-#define UI_TEXT_E_POSITION_TR "Hareketi"
-#define UI_TEXT_BED_TEMP_TR "Tabla Sic: %Eb" cDEG "C"
-#define UI_TEXT_EXTR0_TEMP_TR "Sic. 1 : %E0" cDEG "C"
-#define UI_TEXT_EXTR1_TEMP_TR "Sic. 2 : %E1" cDEG "C"
-#define UI_TEXT_EXTR2_TEMP_TR "Sic. 3 : %E2" cDEG "C"
+#define UI_TEXT_E_POSITION_TR "Extr. Hareketi"
+#define UI_TEXT_BED_TEMP_TR "Tab. Sic:%eb/%Eb" cDEG "C"
+#define UI_TEXT_EXTR0_TEMP_TR "Sic. 1 : %e0/%E0" cDEG "C"
+#define UI_TEXT_EXTR1_TEMP_TR "Sic. 2 : %e1/%E1" cDEG "C"
+#define UI_TEXT_EXTR2_TEMP_TR "Sic. 3 : %e2/%E2" cDEG "C"
 #define UI_TEXT_EXTR0_OFF_TR "Extr. 1'i Kapa"
 #define UI_TEXT_EXTR1_OFF_TR "Extr. 2'i Kapa"
 #define UI_TEXT_EXTR2_OFF_TR "Extr. 3'i Kapa"
 #define UI_TEXT_EXTR0_SELECT_TR "%X0 Extr. 1'i Sec"
 #define UI_TEXT_EXTR1_SELECT_TR "%X1 Extr. 2'yi Sec"
 #define UI_TEXT_EXTR2_SELECT_TR "%X2 Extr. 3'u Sec"
-#define UI_TEXT_EXTR_ORIGIN_TR "Origin i Ayarla"
+#define UI_TEXT_EXTR_ORIGIN_TR "Orijin'i Ayarla"
 #define UI_TEXT_PRINT_X_TR "Yazma H. X:%ax"
 #define UI_TEXT_PRINT_Y_TR "Yazma H. Y:%ay"
 #define UI_TEXT_PRINT_Z_TR "Yazma H. Z:%az"
@@ -3915,7 +3915,7 @@
 #define UI_TEXT_FEED_MAX_Z_TR "Max Z:%fz"
 #define UI_TEXT_FEED_MAX_Z_DELTA_TR "Max:%fz"
 #define UI_TEXT_FEED_HOME_X_TR "X'i Sif.Gon.Hiz.:%fX"
-#define UI_TEXT_FEED_HOME_Y_TR "Y'yi Sif.Gon.Hiz.:%fY"
+#define UI_TEXT_FEED_HOME_Y_TR "Y'i Sif.Gon.Hiz.:%fY"
 #define UI_TEXT_FEED_HOME_Z_TR "Z'i Sif.Gon.Hiz:%fZ"
 #define UI_TEXT_FEED_HOME_Z_DELTA_TR "Delta Sif.Gon.Hiz:%fZ"
 #define UI_TEXT_ACTION_XPOSITION4A_TR "X:%x0 mm %dx%dX"
@@ -3993,16 +3993,16 @@
 #define UI_TEXT_STRING_HM_PID_TR "PID"
 #define UI_TEXT_STRING_ACTION_TR "Eylem:%la"
 #define UI_TEXT_HEATING_EXTRUDER_TR "Extruder Isiniyor"
-#define UI_TEXT_HEATING_BED_TR "Bed Isiniyor"
-#define UI_TEXT_KILLED_TR "DURDU"
+##define UI_TEXT_HEATING_BED_TR "Tabla Isiniyor"
+define UI_TEXT_KILLED_TR "DURDU"
 #define UI_TEXT_STEPPER_DISABLED_TR "Motorlar Kapali"
 #define UI_TEXT_EEPROM_STOREDA_TR "Konfigurasyon"
 #define UI_TEXT_EEPROM_STOREDB_TR "EEPROM'a kaydedildi"
 #define UI_TEXT_EEPROM_LOADEDA_TR "Konfigurasyon"
 #define UI_TEXT_EEPROM_LOADEDB_TR "EEPROM'dan cagrildi"
-#define UI_TEXT_RESET_EEPROM_TR "Reset EEPROM"
-#define UI_TEXT_EEPROM_RESETEDA_TR "Configuration"
-#define UI_TEXT_EEPROM_RESETEDB_TR "Reset from Config"
+#define UI_TEXT_RESET_EEPROM_TR "EEPROM'u Sifirla" //"Reset EEPROM" Md
+#define UI_TEXT_EEPROM_RESETEDA_TR "Konfigurasyon" //"Configuration" Md
+#define UI_TEXT_EEPROM_RESETEDB_TR "ayarlari sifirlandi" //"Reset from Config" Md
 #define UI_TEXT_UPLOADING_TR "Yukluyor..."
 #define UI_TEXT_PAGE_BUFFER_TR "Onbellek:%oB"
 #define UI_TEXT_PAGE_EXTRUDER_TR " E:%ec/%Ec" cDEG "C" cARROW "%oC"
@@ -4060,10 +4060,10 @@
 #define UI_TEXT_BUILDTAK_TR "BuildTak"
 #define UI_TEXT_KAPTON_TR "Kapton"
 #define UI_TEXT_BLUETAPE_TR "Mavi Boya Kagidi"
-#define UI_TEXT_PETTAPE_TR "Yesil PET Tape"
+#define UI_TEXT_PETTAPE_TR "Yesil PET Bant"
 #define UI_TEXT_GLUESTICK_TR "Yapiskan"
 #define UI_TEXT_CUSTOM_TR "Diger"
-#define UI_TEXT_COATING_CUSTOM_TR "Diger : %oCmm"
+#define UI_TEXT_COATING_CUSTOM_TR "Diger : %BCmm"
 #define UI_TEXT_LANGUAGE_TR "Dil"
 #if NUM_EXTRUDER > 2 || MIXING_EXTRUDER != 0
 #define UI_TEXT_MAINPAGE6_1_TR "\xa %ec/%Ec\xb0 X:%x0"
@@ -4082,9 +4082,9 @@
 #elif FEATURE_DITTO_PRINTING
 #define UI_TEXT_MAINPAGE6_3_TR "Kopie: %ed     Z:%x2"
 #else
-#define UI_TEXT_MAINPAGE6_3_TR "Przep:\xfd %of%%%  Z:%x2"
+#define UI_TEXT_MAINPAGE6_3_TR "Akis :\xfd %of%%%  Z:%x2" //"Przep:\xfd %of%%%  Z:%x2"
 #endif
-#define UI_TEXT_MAINPAGE6_4_TR "Mul: %om%%% \xfd   E: %x4m"
+#define UI_TEXT_MAINPAGE6_4_TR "Hiz: %om%%% \xfd   E: %x4m" //"Mul: %om%%% \xfd   E: %x4m" Md
 #define UI_TEXT_MAINPAGE6_5_TR "Buf: %oB"
 #define UI_TEXT_MAINPAGE6_6_TR "%os"
 #define UI_TEXT_MAINPAGE_TEMP_BED_TR cTEMP "%ec/%Ec" cDEG "B%eB/%Eb" cDEG
@@ -4099,10 +4099,10 @@
 #define UI_TEXT_EMPTY_TR ""
 #define UI_TEXT_TEMP_SET_TR cTEMP "%ec/%Ec" cDEG
 #define UI_TEXT_CURRENT_TEMP_TR cTEMP "%ec" cDEG
-#define UI_TEXT_COATING_THICKNESS_TR " %oCmm"
-#define UI_TEXT_EXTR3_TEMP_TR "Sic. 4 : %E3" cDEG "C"
-#define UI_TEXT_EXTR4_TEMP_TR "Sic. 5 : %E4" cDEG "C"
-#define UI_TEXT_EXTR5_TEMP_TR "Sic. 6 : %E5" cDEG "C"
+#define UI_TEXT_COATING_THICKNESS_TR " %BCmm"
+#define UI_TEXT_EXTR3_TEMP_TR "Sic. 4 : %e3/%E3" cDEG "C"
+#define UI_TEXT_EXTR4_TEMP_TR "Sic. 5 : %e4/%E4" cDEG "C"
+#define UI_TEXT_EXTR5_TEMP_TR "Sic. 6 : %e5/%E5" cDEG "C"
 #define UI_TEXT_EXTR3_OFF_TR "Ext. 4’u kapat"
 #define UI_TEXT_EXTR4_OFF_TR " Ext. 5’i kapat "
 #define UI_TEXT_EXTR5_OFF_TR " Ext. 6’yi kapat "
@@ -4114,7 +4114,7 @@
 #define UI_TEXT_DITTO_2_TR "%D2 2 kopya"
 #define UI_TEXT_DITTO_3_TR "%D3 3 kopya"
 #define UI_TEXT_ZPROBE_HEIGHT_TR "Z-prob yuksekligi:%zh"
-#define UI_TEXT_OFFSETS_TR "Set print offsets"
+#define UI_TEXT_OFFSETS_TR "Baski ofset ayarla" //Set print offsets Md
 #define UI_TEXT_X_OFFSET_TR "Set X offset:%T0mm"
 #define UI_TEXT_Y_OFFSET_TR "Set Y offset:%T1mm"
 #define UI_TEXT_Z_OFFSET_TR "Set Z offset:%T2mm"
@@ -4122,26 +4122,26 @@
 #define UI_TEXT_PROGRESS_TR "%Pp%%%"
 #define UI_TEXT_PRINTNAME_TR "%Pn"
 
-#define UI_TEXT_SETUP_TR "Setup"
+#define UI_TEXT_SETUP_TR "Durumlar" //"Setup" Md
 #define UI_TEXT_MEASURE_DISTORTION_TR "Measure z-distortion"
 #define UI_TEXT_DISTORTION_CORR_TR "Distortion corr.:%De"
-#define UI_TEXT_ACTION_FAN2SPEED_TR "Fan 2 speed:%FS%%%"
+#define UI_TEXT_ACTION_FAN2SPEED_TR "Fan 2 Hizi:%FS%%%" //Fan 2 speed Md
 #define UI_TEXT_CANCEL_TR "Cancel"
-#define UI_TEXT_PLEASE_WAIT_TR "*** Please wait ***"
-#define UI_TEXT_CLEARBED1_TR "Make sure the heated"
+#define UI_TEXT_PLEASE_WAIT_TR "** L"STR_uuml"tfen Bekleyin **" //"*** Please wait ***" MD
+#define UI_TEXT_CLEARBED1_TR "Isitildiginden emin olun" //"Make sure the heated"
 #define UI_TEXT_CLEARBED2_TR "bed is clear of any"
-#define UI_TEXT_CLEARBED3_TR "obstructions"
-#define UI_TEXT_NOTIFICATION_TR "Notification:"
-#define UI_TEXT_TEMPSENSOR_DEFECT_TR "Temp. sensor defect"
-#define UI_TEXT_HEATER_DECOUPLED_TR "Heater decoupled"
-#define UI_TEXT_SLIPPING_TR "Filament slipping"
+#define UI_TEXT_CLEARBED3_TR "Engeller" //"obstructions"
+#define UI_TEXT_NOTIFICATION_TR "Bildirim:" //"Notification:" Md
+#define UI_TEXT_TEMPSENSOR_DEFECT_TR "Sicaklik sensor hata" //"Temp. sensor defect" Md
+#define UI_TEXT_HEATER_DECOUPLED_TR "Isitici Ayrilmis" //"Heater decoupled" Md
+#define UI_TEXT_SLIPPING_TR "Filament kaymasi" //"Filament slipping"
 #define UI_TEXT_LEVELING_ERROR_TR "Leveling error"
-#define UI_TEXT_OK_TR "    >>> Ok <<<"
+#define UI_TEXT_OK_TR "    >>> Tamam <<<"  //"    >>> Ok <<<"
 #define UI_TEXT_CALIBRATING_TR "Calibrating bed"
 #define UI_TEXT_CALIBRATION_ERROR_TR "Calibration Error"
 #define UI_TEXT_AUTOLEVEL_BED_TR "Autolevel bed"
-#define UI_TEXT_HOMING_TR "Homing..."
-#define UI_TEXT_PREHEAT_TEMPS_TR "Preheat Temperatures"
+#define UI_TEXT_HOMING_TR "Sifir Anahtari Arama..." //Homing... Md
+#define UI_TEXT_PREHEAT_TEMPS_TR "On isitma sicaklik" //"Preheat Temperatures"
 #define UI_TEXT_PREHEAT_E0_TR "Extr. 1: %p0" cDEG "C"
 #define UI_TEXT_PREHEAT_E1_TR "Extr. 2: %p1" cDEG "C"
 #define UI_TEXT_PREHEAT_E2_TR "Extr. 3: %p2" cDEG "C"
@@ -4152,8 +4152,8 @@
 #define UI_TEXT_MEAS_ZP_HEIGHT_TR "Meas. Probe Height"
 #define UI_TEXT_CUR_TEMP_TR "Temp. %ec/%Ec" cDEG "C"
 #define UI_TEXT_REAL_Z_TR "Real Z Pos:%W0mm"
-#define UI_TEXT_CONTINUE_TR "Continue"
-#define UI_TEXT_CLOSE_TR "Close"
+#define UI_TEXT_CONTINUE_TR "Devam Et" //"Continue" Md
+#define UI_TEXT_CLOSE_TR "Kapat" //"Close" Md
 #define UI_TEXT_EXTR_ZOFF_TR "Z-Offset:%Xz"
 #define UI_TEXT_MEASURING_TR "Measuring ..."
 #define UI_TEXT_Z_PROBE_TR "Start Z-Probe"
