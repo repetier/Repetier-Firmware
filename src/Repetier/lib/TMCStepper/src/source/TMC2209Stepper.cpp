@@ -23,6 +23,8 @@ void TMC2209Stepper::push() {
 	CHOPCONF(CHOPCONF_register.sr);
 	PWMCONF(PWMCONF_register.sr);
 	TCOOLTHRS(TCOOLTHRS_register.sr);
+	SGTHRS(SGTHRS_register.sr);
+	COOLCONF(COOLCONF_register.sr);
 }
 
 void TMC2209Stepper::SGTHRS(uint8_t input) {

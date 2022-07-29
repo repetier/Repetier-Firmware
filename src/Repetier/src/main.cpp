@@ -170,6 +170,7 @@ Custom M Codes
 - M350 S<mstepsAll> X<mstepsX> Y<mstepsY> Z<mstepsZ> E<mstepsE0> P<mstespE1> : Set micro stepping on RAMBO board
 - M355 S<0/1/2/3/4> - Turn case light on/off/burst/blink fast/blink slow , no S = report status
 - M355 P<0..255>   - Change case light brightness if it's configured as a pwm light source.
+- M357 R<red> E<green> B<blue> W<white> S<brightness> - Set UI background color if supported
 - M360 - show configuration
 - M374 <filename> - Saves the currently loaded bed bump/distortion map to the SD card in CSV format.
 - M375 <filename> - Imports a CSV bed bump/distortion map from the SD card and saves it to EEPROM. 
@@ -207,6 +208,7 @@ Custom M Codes
 - M914 P<motorId> S<value> - Set TMC sensorless homing sensitivity. 
         Value range of -64 - 63 (Range of 0 - 255 for TMC2209 series)
 - M999 - Continue from fatal error. M999 S1 will create a fatal error for testing.
+- M1005 - Write debug informationss about analog values (for supported hardware only)
 */
 
 #include "Repetier.h"
@@ -216,6 +218,15 @@ Custom M Codes
 //#include <LiquidCrystal.h> // Uncomment this if you are using liquid crystal library
 #endif
 
+#if PURE_BOARD_TEST
+// For simple tests only, not used in production
+void setup() {
+    //Printer::setup();
+}
+
+void loop() {
+}
+#else
 void setup() {
     Printer::setup();
 }
@@ -223,3 +234,4 @@ void setup() {
 void loop() {
     Commands::commandLoop();
 }
+#endif

@@ -23,10 +23,18 @@
 
 #if DISPLAY_DRIVER == DRIVER_U8G2
 #include "controller/u8g2/cppsrc/U8g2lib.h"
+#ifndef UI_SPI_SCK
 #define UI_SPI_SCK UI_DISPLAY_D4_PIN
+#endif
+#ifndef UI_SPI_MOSI
 #define UI_SPI_MOSI UI_DISPLAY_ENABLE_PIN
+#endif
+#ifndef UI_SPI_CS
 #define UI_SPI_CS UI_DISPLAY_RS_PIN
+#endif
+#ifndef UI_DC // RS/A0
 #define UI_DC UI_DISPLAY_D5_PIN
+#endif
 #ifndef DISPLAY_ROTATION
 #define DISPLAY_ROTATION U8G2_R0
 #endif
@@ -94,6 +102,24 @@ U8G2_KS0108_128X64_2 lcd(DISPLAY_ROTATION, UI_DISPLAY_D0_PIN, UI_DISPLAY_D1_PIN,
 #endif
 #endif
 
+#if ENABLED(DISPLAY_UC1701_12864_SW_SPI)
+#if ENABLED(DISPLAY_FULL_BUFFER)
+// void u8g2_Setup_uc1701_mini12864_1(u8g2_t *u8g2, const u8g2_cb_t *rotation, u8x8_msg_cb byte_cb, u8x8_msg_cb gpio_and_delay_cb);
+U8G2_UC1701_MINI12864_F_4W_SW_SPI lcd(DISPLAY_ROTATION, UI_SPI_SCK, UI_SPI_MOSI, UI_SPI_CS, UI_DC, U8X8_PIN_NONE);
+#else
+U8G2_UC1701_MINI12864_2_4W_HW_SPI lcd(DISPLAY_ROTATION, UI_SPI_SCK, UI_SPI_MOSI, UI_SPI_CS, UI_DC, U8X8_PIN_NONE);
+#endif
+#endif
+
+#if ENABLED(DISPLAY_UC1701_12864_HW_SPI)
+#if ENABLED(DISPLAY_FULL_BUFFER)
+// void u8g2_Setup_uc1701_mini12864_1(u8g2_t *u8g2, const u8g2_cb_t *rotation, u8x8_msg_cb byte_cb, u8x8_msg_cb gpio_and_delay_cb);
+U8G2_UC1701_MINI12864_F_4W_HW_SPI lcd(DISPLAY_ROTATION, UI_SPI_CS, UI_DC, U8X8_PIN_NONE);
+#else
+U8G2_UC1701_MINI12864_2_4W_HW_SPI lcd(DISPLAY_ROTATION, UI_SPI_CS, UI_DC, U8X8_PIN_NONE);
+#endif
+#endif
+
 static millis_t init100msTicks;
 void GUI::driverInit() {
     init100msTicks = 0;
@@ -111,6 +137,13 @@ void GUI::processInit() {
     bufClear();
     setStatusP(PSTR("Ready"), GUIStatusLevel::REGULAR);
     HAL::delayMilliseconds(10);
+#ifdef UI_HAS_CONTRAST
+#ifdef UI_CONTRAST
+    lcd.setContrast(UI_CONTRAST);
+#else
+    lcd.setContrast(255);
+#endif
+#endif
     lcd.firstPage();
     do {
         lcd.setFont(u8g2_font_6x10_mf);
@@ -236,7 +269,7 @@ void GUI::menuEnd(GUIAction action, bool scrollbar, bool affectedBySpeed) {
         if (cursorRow[level] < 0) {
             cursorRow[level] = 0;
         }
-    } else if(action == GUIAction::DRAW && scrollbar) {
+    } else if (action == GUIAction::DRAW && scrollbar) {
         GUI::showScrollbar(action);
     }
 }
@@ -725,7 +758,7 @@ void GUI::showScrollbar(GUIAction& action, float percent, uint16_t min, uint16_t
             return;
         }
         static float lastPos = 0.0f;
-        
+
         uint16_t pxSize = static_cast<uint16_t>((static_cast<float>(min) / static_cast<float>(max)) * 35.0f);
         if (pxSize < 5.0f) {
             pxSize = 5.0f;
@@ -1282,7 +1315,7 @@ void waitScreen(GUIAction action, void* data) {
         } else {
             char* newLine = strchr(str, '\n');
             lcd.setFont(u8g2_font_6x10_mf);
-            if (newLine) { 
+            if (newLine) {
                 *newLine = '\0';
                 uint8_t newLineLen = (newLine - str);
                 lcd.drawUTF8(73 - newLineLen * 3, (SPIN_CENTER_Y + 3) - 5, str);
@@ -1337,14 +1370,14 @@ void waitScreenP(GUIAction action, void* data) {
         } else {
             char* newLine = strchr(GUI::buf, '\n');
             lcd.setFont(u8g2_font_6x10_mf);
-            if (newLine) { 
+            if (newLine) {
                 *newLine = '\0';
                 uint8_t newLineLen = (newLine - GUI::buf);
                 lcd.drawUTF8(73 - newLineLen * 3, (SPIN_CENTER_Y + 3) - 5, GUI::buf);
                 *newLine = '\n';
                 lcd.drawUTF8(73 - (len - newLineLen) * 3, (SPIN_CENTER_Y + 3) + 5, GUI::buf + newLineLen + 1);
             } else {
-                lcd.drawUTF8(73 - len * 3, SPIN_CENTER_Y + 3, GUI::buf); 
+                lcd.drawUTF8(73 - len * 3, SPIN_CENTER_Y + 3, GUI::buf);
             }
         }
     }

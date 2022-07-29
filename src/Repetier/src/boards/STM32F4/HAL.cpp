@@ -45,10 +45,11 @@
 // with a logic analyser. Set to 0 for production!
 // Pins set to -1 will not enable the check. Use pins unused by other function on your printer!
 #define DEBUG_TIMING 0
-#define DEBUG_ISR_STEPPER_PIN -1 // PD12
-#define DEBUG_ISR_MOTION_PIN -1  // PD13
-#define DEBUG_ISR_TEMP_PIN -1    // PD14/PWM1
-#define DEBUG_ISR_ANALOG_PIN -1  // PD15/PWM2
+#define DEBUG_ISR_STEPPER_PIN PB6 // PD12
+#define DEBUG_ISR_MOTION_PIN PC0  // PD13
+#define DEBUG_ISR_TEMP_PIN PD5    // PD14/PWM1
+#define DEBUG_ISR_ANALOG_PIN -1   // PD15/PWM2
+#define DEBUG_ISR_TONE_PIN PD6    // PD15/PWM2
 
 //extern "C" void __cxa_pure_virtual() { }
 extern "C" char* sbrk(int i);
@@ -254,11 +255,12 @@ extern "C" void TIMER_VECTOR(TONE_TIMER_NUM);
 
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
 extern void servoOffTimer();
+extern void toneOnTimer();
+extern void toneOffTimer();
 extern "C" void TIMER_VECTOR(SERVO_TIMER_NUM);
 static uint32_t ServoPrescalerfactor = 20000;
 static uint32_t Servo2500 = 2500;
 #endif
-
 void HAL::hwSetup(void) {
     updateStartReason();
 #if DEBUG_TIMING
@@ -273,6 +275,9 @@ void HAL::hwSetup(void) {
 #endif
 #if defined(DEBUG_ISR_ANALOG_PIN) && DEBUG_ISR_ANALOG_PIN >= 0
     SET_OUTPUT(DEBUG_ISR_ANALOG_PIN);
+#endif
+#if defined(DEBUG_ISR_TONE_PIN) && DEBUG_ISR_TONE_PIN >= 0
+    SET_OUTPUT(DEBUG_ISR_TONE_PIN);
 #endif
 #endif
     // Servo control
@@ -294,7 +299,6 @@ void HAL::hwSetup(void) {
     Servo2500 = ((2500 * (servo->timer->getTimerClkFreq() / 1000000)) / ServoPrescalerfactor) - 1;
     HAL_NVIC_SetPriority(TIMER_IRQ(SERVO_TIMER_NUM), 3, 0);
 #endif
-
 #if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
     HAL::i2cInit(TWI_CLOCK_FREQ);
 #endif
@@ -355,9 +359,9 @@ void HAL::setupTimer() {
             toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
             toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
             // Timer 11 has only one channel, 1.
-            // toneTimer->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
-            toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
-            toneTimer->timer->attachInterrupt(1, [] {});
+            toneTimer->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
+            toneTimer->timer->attachInterrupt(&toneOnTimer);
+            toneTimer->timer->attachInterrupt(1, &toneOffTimer);
             // Not on by default for output_compare
             LL_TIM_OC_EnablePreload(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
             LL_TIM_OC_EnableFast(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
@@ -501,52 +505,108 @@ void HAL::setHardwareFrequency(int id, uint32_t frequency) {
     pwmEntries[id].ht->setOverflow(frequency, HERTZ_FORMAT);
 }
 
-ADC_HandleTypeDef AdcHandle = {};
+ADC_HandleTypeDef AdcHandle1 = {};
+ADC_HandleTypeDef AdcHandle2 = {};
+ADC_HandleTypeDef AdcHandle3 = {};
 struct AnalogFunction {
     bool enabled;
     int32_t channel;
     int32_t lastValue;
     ADC_TypeDef* def;
     int32_t pin;
+    int32_t dmaBufferPos;
 };
 
 // Initialize ADC channels
 static AnalogFunction analogValues[MAX_ANALOG_INPUTS] = { false, -1, 0, nullptr, -1 };
 static AnalogFunction* analogMap[256] = { nullptr }; // Map pin number to entry in analogValues
 int numAnalogInputs = 0;
-uint16_t adcData[16] = { 0 }; // Target for DMA adc transfer
+uint16_t adcData1[16] = { 0 }; // Target for DMA adc1 transfer
+uint16_t adcData2[16] = { 0 }; // Target for DMA adc2 transfer
+uint16_t adcData3[16] = { 0 }; // Target for DMA adc3 transfer
 
 void reportAnalog() {
+    HAL::reportHALDebug();
     for (int i = 0; i < 256; i++) {
         if (analogMap[i]) {
             Com::printF("Analog ", i);
             Com::printFLN(" = ", static_cast<int32_t>(analogMap[i]->lastValue));
         }
     }
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < numAnalogInputs; i++) {
+        AnalogFunction& af = analogValues[i];
         Com::printF("adc ", i);
-        Com::printF(" channel ", analogValues[i].channel);
-        Com::printF(" pin ", analogValues[i].pin);
-        Com::printFLN(", val = ", static_cast<int32_t>(adcData[i]));
+        Com::printF(" channel ", af.channel);
+        Com::printF(" pin ", af.pin);
+        if (af.def == ADC1) {
+            Com::printFLN(", ADC1, val = ", static_cast<int32_t>(adcData1[af.dmaBufferPos]));
+        }
+        if (af.def == ADC2) {
+            Com::printFLN(", ADC2, val = ", static_cast<int32_t>(adcData2[af.dmaBufferPos]));
+        }
+        if (af.def == ADC3) {
+            Com::printFLN(", ADC3, val = ", static_cast<int32_t>(adcData3[af.dmaBufferPos]));
+        }
     }
+
+    // Check devices
+    for (uint8_t address = 2; address < 127; address++) {
+        // The i2c_scanner uses the return value of
+        // the Write.endTransmisstion to see if
+        // a device did acknowledge to the address.
+        WIRE_PORT.beginTransmission(address);
+        uint8_t error = WIRE_PORT.endTransmission();
+
+        if (error == 0) {
+            Com::printFLN("I2Cdevice found:", (int32_t)address);
+        } else if (error == 4) {
+            Com::printFLN("unknown error for:", (int32_t)address);
+        }
+    }
+
+    // Test eeprom
+    eeval_t e1, e2;
+    e1.l = 123456789;
+    HAL::eprBurnValue(4000, 4, e1);
+    e2 = HAL::eprGetValue(4000, 4);
+    Com::printFLN("Eeprom backread", (int32_t)e2.l);
+    e1.l = 987654321;
+    HAL::eprBurnValue(4000, 4, e1);
+    e2 = HAL::eprGetValue(4000, 4);
+    Com::printFLN("Eeprom backread", (int32_t)e2.l);
 }
 
-static DMA_HandleTypeDef hdma_adc;
+static DMA_HandleTypeDef hdma_adc1, hdma_adc2, hdma_adc3;
 int dmaInitState, dmaInitError;
 int adcerror = 0, dmaerror = 0;
+static int numADC1 = 0, numADC2 = 0, numADC3 = 0;
 
 void HAL::reportHALDebug() {
-    reportAnalog();
-    Com::printFLN("AdcHandle state:", AdcHandle.State);
-    Com::printFLN("AdcHandle ErrorCode:", AdcHandle.ErrorCode);
-    Com::printFLN("hdma_adc state:", hdma_adc.State);
-    Com::printFLN("hdma_adc ErrorCode:", hdma_adc.ErrorCode);
+    if (numADC1) {
+        Com::printFLN("AdcHandle 1 state:", AdcHandle1.State);
+        Com::printFLN("AdcHandle 1 ErrorCode:", AdcHandle1.ErrorCode);
+        Com::printFLN("hdma_adc 1 state:", hdma_adc1.State);
+        Com::printFLN("hdma_adc 1 ErrorCode:", hdma_adc1.ErrorCode);
+    }
+    if (numADC2) {
+        Com::printFLN("AdcHandle 2 state:", AdcHandle2.State);
+        Com::printFLN("AdcHandle 2 ErrorCode:", AdcHandle2.ErrorCode);
+        Com::printFLN("hdma_adc 2 state:", hdma_adc2.State);
+        Com::printFLN("hdma_adc 2 ErrorCode:", hdma_adc2.ErrorCode);
+    }
+    if (numADC3) {
+        Com::printFLN("AdcHandle 3 state:", AdcHandle3.State);
+        Com::printFLN("AdcHandle 3 ErrorCode:", AdcHandle3.ErrorCode);
+        Com::printFLN("hdma_adc 3 state:", hdma_adc3.State);
+        Com::printFLN("hdma_adc 3 ErrorCode:", hdma_adc3.ErrorCode);
+    }
     Com::printFLN("dmaInitState state:", dmaInitState);
     Com::printFLN("dmaInitError ErrorCode:", dmaInitError);
     Com::printFLN("numAnalogInputs:", numAnalogInputs);
     Com::printFLN("numPWMEntries:", numPWMEntries);
     Com::printFLN("adcerror:", adcerror);
     Com::printFLN("dmaerror:", dmaerror);
+    Com::printFLN("I2C Errror:", (uint16_t)i2cError);
 }
 
 void HAL::analogStart(void) {
@@ -555,60 +615,186 @@ void HAL::analogStart(void) {
     if (numAnalogInputs == 0) {
         return;
     }
-    ADC_ChannelConfTypeDef sConfig = { 0 };
-
-    AdcHandle.Instance = ADC1;
-    AdcHandle.State = 0;
-    AdcHandle.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
-    AdcHandle.Init.Resolution = ADC_RESOLUTION_12B;
-    AdcHandle.Init.ScanConvMode = ENABLE;
-    AdcHandle.Init.ContinuousConvMode = ENABLE;
-    AdcHandle.Init.DiscontinuousConvMode = DISABLE;
-    AdcHandle.Init.NbrOfDiscConversion = 0;
-    AdcHandle.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-    AdcHandle.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-    AdcHandle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-    AdcHandle.Init.NbrOfConversion = numAnalogInputs;
-    AdcHandle.Init.DMAContinuousRequests = ENABLE;
-    AdcHandle.Init.EOCSelection = DISABLE;
-    if (HAL_ADC_Init(&AdcHandle) != HAL_OK) {
-        adcerror++;
-        return;
-    }
-    sConfig.SamplingTime = numAnalogInputs <= 6 ? ADC_SAMPLETIME_480CYCLES : ADC_SAMPLETIME_144CYCLES;
+    numADC1 = numADC2 = numADC3 = 0;
     for (int i = 0; i < numAnalogInputs; i++) {
-        sConfig.Channel = analogValues[i].channel;
-        sConfig.Rank = i + 1;
-        if (HAL_ADC_ConfigChannel(&AdcHandle, &sConfig) != HAL_OK) {
-            adcerror++;
-            // Error_Handler();
+        AnalogFunction& af = analogValues[i];
+        if (af.def == ADC1) {
+            af.dmaBufferPos = numADC1;
+            numADC1++;
+        }
+        if (af.def == ADC2) {
+            af.dmaBufferPos = numADC2;
+            numADC2++;
+        }
+        if (af.def == ADC3) {
+            af.dmaBufferPos = numADC3;
+            numADC3++;
         }
     }
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    __HAL_RCC_ADC1_CLK_ENABLE();
-    __HAL_RCC_DMA2_CLK_ENABLE(); // Enable DMA2 clock
+    ADC_ChannelConfTypeDef sConfig = { 0 };
 
-    hdma_adc.Instance = DMA2_Stream0;
-    hdma_adc.Init.Channel = DMA_CHANNEL_0;
-    hdma_adc.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    hdma_adc.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_adc.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_adc.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-    hdma_adc.Init.MemDataAlignment = DMA_PDATAALIGN_HALFWORD;
-    hdma_adc.Init.Mode = DMA_CIRCULAR;
-    hdma_adc.Init.Priority = DMA_PRIORITY_HIGH;
-    hdma_adc.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-    hdma_adc.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
-    hdma_adc.Init.MemBurst = DMA_MBURST_SINGLE;
-    hdma_adc.Init.PeriphBurst = DMA_PBURST_SINGLE;
-    dmaerror
-        += HAL_DMA_Init(&hdma_adc);
-    dmaInitState = hdma_adc.State;
-    dmaInitError = hdma_adc.ErrorCode;
-    __HAL_LINKDMA(&AdcHandle, DMA_Handle, hdma_adc);
-    dmaerror += HAL_ADC_Start_DMA(&AdcHandle, (uint32_t*)&adcData, numAnalogInputs);
-    // Just in case.
-    __HAL_DMA_DISABLE_IT(&hdma_adc, DMA_IT_HT | DMA_IT_TE | DMA_IT_TC);
+    if (numADC1) {
+        AdcHandle1.Instance = ADC1;
+        AdcHandle1.State = 0;
+        AdcHandle1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
+        AdcHandle1.Init.Resolution = ADC_RESOLUTION_12B;
+        AdcHandle1.Init.ScanConvMode = ENABLE;
+        AdcHandle1.Init.ContinuousConvMode = ENABLE;
+        AdcHandle1.Init.DiscontinuousConvMode = DISABLE;
+        AdcHandle1.Init.NbrOfDiscConversion = 0;
+        AdcHandle1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+        AdcHandle1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+        AdcHandle1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+        AdcHandle1.Init.NbrOfConversion = numADC1;
+        AdcHandle1.Init.DMAContinuousRequests = ENABLE;
+        AdcHandle1.Init.EOCSelection = DISABLE;
+        if (HAL_ADC_Init(&AdcHandle1) != HAL_OK) {
+            adcerror++;
+            return;
+        }
+        sConfig.SamplingTime = numADC1 <= 6 ? ADC_SAMPLETIME_480CYCLES : ADC_SAMPLETIME_144CYCLES;
+        for (int i = 0; i < numAnalogInputs; i++) {
+            sConfig.Channel = analogValues[i].channel;
+            sConfig.Rank = analogValues[i].dmaBufferPos + 1;
+            if (HAL_ADC_ConfigChannel(&AdcHandle1, &sConfig) != HAL_OK) {
+                adcerror++;
+                // Error_Handler();
+            }
+        }
+        __HAL_RCC_GPIOA_CLK_ENABLE();
+        __HAL_RCC_ADC1_CLK_ENABLE();
+        __HAL_RCC_DMA2_CLK_ENABLE(); // Enable DMA2 clock
+
+        hdma_adc1.Instance = DMA2_Stream0;
+        hdma_adc1.Init.Channel = DMA_CHANNEL_0;
+        hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
+        hdma_adc1.Init.PeriphInc = DMA_PINC_DISABLE;
+        hdma_adc1.Init.MemInc = DMA_MINC_ENABLE;
+        hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+        hdma_adc1.Init.MemDataAlignment = DMA_PDATAALIGN_HALFWORD;
+        hdma_adc1.Init.Mode = DMA_CIRCULAR;
+        hdma_adc1.Init.Priority = DMA_PRIORITY_HIGH;
+        hdma_adc1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+        hdma_adc1.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
+        hdma_adc1.Init.MemBurst = DMA_MBURST_SINGLE;
+        hdma_adc1.Init.PeriphBurst = DMA_PBURST_SINGLE;
+        dmaerror
+            += HAL_DMA_Init(&hdma_adc1);
+        dmaInitState = hdma_adc1.State;
+        dmaInitError = hdma_adc1.ErrorCode;
+        __HAL_LINKDMA(&AdcHandle1, DMA_Handle, hdma_adc1);
+        dmaerror += HAL_ADC_Start_DMA(&AdcHandle1, (uint32_t*)&adcData1, numADC1);
+        // Just in case.
+        __HAL_DMA_DISABLE_IT(&hdma_adc1, DMA_IT_HT | DMA_IT_TE | DMA_IT_TC);
+    }
+    if (numADC2) {
+        AdcHandle2.Instance = ADC2;
+        AdcHandle2.State = 0;
+        AdcHandle2.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
+        AdcHandle2.Init.Resolution = ADC_RESOLUTION_12B;
+        AdcHandle2.Init.ScanConvMode = ENABLE;
+        AdcHandle2.Init.ContinuousConvMode = ENABLE;
+        AdcHandle2.Init.DiscontinuousConvMode = DISABLE;
+        AdcHandle2.Init.NbrOfDiscConversion = 0;
+        AdcHandle2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+        AdcHandle2.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+        AdcHandle2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+        AdcHandle2.Init.NbrOfConversion = numADC2;
+        AdcHandle2.Init.DMAContinuousRequests = ENABLE;
+        AdcHandle2.Init.EOCSelection = DISABLE;
+        if (HAL_ADC_Init(&AdcHandle2) != HAL_OK) {
+            adcerror++;
+            return;
+        }
+        sConfig.SamplingTime = numADC2 <= 6 ? ADC_SAMPLETIME_480CYCLES : ADC_SAMPLETIME_144CYCLES;
+        for (int i = 0; i < numAnalogInputs; i++) {
+            sConfig.Channel = analogValues[i].channel;
+            sConfig.Rank = analogValues[i].dmaBufferPos + 1;
+            if (HAL_ADC_ConfigChannel(&AdcHandle2, &sConfig) != HAL_OK) {
+                adcerror++;
+                // Error_Handler();
+            }
+        }
+        __HAL_RCC_GPIOA_CLK_ENABLE();
+        __HAL_RCC_ADC2_CLK_ENABLE();
+        __HAL_RCC_DMA2_CLK_ENABLE(); // Enable DMA2 clock
+
+        hdma_adc2.Instance = DMA2_Stream2;
+        hdma_adc2.Init.Channel = DMA_CHANNEL_1;
+        hdma_adc2.Init.Direction = DMA_PERIPH_TO_MEMORY;
+        hdma_adc2.Init.PeriphInc = DMA_PINC_DISABLE;
+        hdma_adc2.Init.MemInc = DMA_MINC_ENABLE;
+        hdma_adc2.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+        hdma_adc2.Init.MemDataAlignment = DMA_PDATAALIGN_HALFWORD;
+        hdma_adc2.Init.Mode = DMA_CIRCULAR;
+        hdma_adc2.Init.Priority = DMA_PRIORITY_HIGH;
+        hdma_adc2.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+        hdma_adc2.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
+        hdma_adc2.Init.MemBurst = DMA_MBURST_SINGLE;
+        hdma_adc2.Init.PeriphBurst = DMA_PBURST_SINGLE;
+        dmaerror
+            += HAL_DMA_Init(&hdma_adc2);
+        dmaInitState = hdma_adc2.State;
+        dmaInitError = hdma_adc2.ErrorCode;
+        __HAL_LINKDMA(&AdcHandle2, DMA_Handle, hdma_adc2);
+        dmaerror += HAL_ADC_Start_DMA(&AdcHandle2, (uint32_t*)&adcData2, numADC2);
+        // Just in case.
+        __HAL_DMA_DISABLE_IT(&hdma_adc2, DMA_IT_HT | DMA_IT_TE | DMA_IT_TC);
+    }
+    if (numADC3) {
+        AdcHandle3.Instance = ADC3;
+        AdcHandle3.State = 0;
+        AdcHandle3.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
+        AdcHandle3.Init.Resolution = ADC_RESOLUTION_12B;
+        AdcHandle3.Init.ScanConvMode = ENABLE;
+        AdcHandle3.Init.ContinuousConvMode = ENABLE;
+        AdcHandle3.Init.DiscontinuousConvMode = DISABLE;
+        AdcHandle3.Init.NbrOfDiscConversion = 0;
+        AdcHandle3.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+        AdcHandle3.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+        AdcHandle3.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+        AdcHandle3.Init.NbrOfConversion = numADC3;
+        AdcHandle3.Init.DMAContinuousRequests = ENABLE;
+        AdcHandle3.Init.EOCSelection = DISABLE;
+        if (HAL_ADC_Init(&AdcHandle3) != HAL_OK) {
+            adcerror++;
+            return;
+        }
+        sConfig.SamplingTime = numADC3 <= 6 ? ADC_SAMPLETIME_480CYCLES : ADC_SAMPLETIME_144CYCLES;
+        for (int i = 0; i < numAnalogInputs; i++) {
+            sConfig.Channel = analogValues[i].channel;
+            sConfig.Rank = analogValues[i].dmaBufferPos + 1;
+            if (HAL_ADC_ConfigChannel(&AdcHandle3, &sConfig) != HAL_OK) {
+                adcerror++;
+                // Error_Handler();
+            }
+        }
+        __HAL_RCC_GPIOA_CLK_ENABLE();
+        __HAL_RCC_ADC3_CLK_ENABLE();
+        __HAL_RCC_DMA2_CLK_ENABLE(); // Enable DMA2 clock
+
+        hdma_adc3.Instance = DMA2_Stream1;
+        hdma_adc3.Init.Channel = DMA_CHANNEL_2;
+        hdma_adc3.Init.Direction = DMA_PERIPH_TO_MEMORY;
+        hdma_adc3.Init.PeriphInc = DMA_PINC_DISABLE;
+        hdma_adc3.Init.MemInc = DMA_MINC_ENABLE;
+        hdma_adc3.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+        hdma_adc3.Init.MemDataAlignment = DMA_PDATAALIGN_HALFWORD;
+        hdma_adc3.Init.Mode = DMA_CIRCULAR;
+        hdma_adc3.Init.Priority = DMA_PRIORITY_HIGH;
+        hdma_adc3.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+        hdma_adc3.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
+        hdma_adc3.Init.MemBurst = DMA_MBURST_SINGLE;
+        hdma_adc3.Init.PeriphBurst = DMA_PBURST_SINGLE;
+        dmaerror
+            += HAL_DMA_Init(&hdma_adc3);
+        dmaInitState = hdma_adc3.State;
+        dmaInitError = hdma_adc3.ErrorCode;
+        __HAL_LINKDMA(&AdcHandle3, DMA_Handle, hdma_adc3);
+        dmaerror += HAL_ADC_Start_DMA(&AdcHandle3, (uint32_t*)&adcData3, numADC3);
+        // Just in case.
+        __HAL_DMA_DISABLE_IT(&hdma_adc3, DMA_IT_HT | DMA_IT_TE | DMA_IT_TC);
+    }
 }
 
 void HAL::analogEnable(int pinId) {
@@ -643,10 +829,114 @@ int HAL::analogRead(int pin) {
     }
     return af->lastValue;
 }
+#ifdef EEPROM_SIZE
+#define SMALL_EEPROM (EEPROM_SIZE <= 0x800)
+#define BIG_EEPROM (EEPROM_SIZE > 0x10000)
+#else
+#define SMALL_EEPROM 0
+#define BIG_EEPROM 0
+#endif
+
+// Up to 3 extra bits in eeprom adress bits.
+inline uint8_t eepromAddressForPosition(uint32_t pos) {
+#if SMALL_EEPROM == 1
+    return EEPROM_SERIAL_ADDR | ((pos >> 8) & 0x07);
+#elif BIG_EEPROM == 1
+    return EEPROM_SERIAL_ADDR | ((pos >> 16) & 0x07);
+#else
+    return EEPROM_SERIAL_ADDR;
+#endif
+}
+void eepromWaitWhileBusy() {
+#if 1
+    HAL::delayMilliseconds(EEPROM_PAGE_WRITE_TIME);
+#else
+    do {
+        WIRE_PORT.beginTransmission(EEPROM_SERIAL_ADDR);
+    } while (WIRE_PORT.endTransmission());
+#endif
+}
+
+#define EEPROM_DIRECT_WIRING 1
+#if EEPROM_DIRECT_WIRING
+static void eepromBegin(uint32_t const pos) {
+    const uint8_t eepromAddress = eepromAddressForPosition(pos);
+    WIRE_PORT.beginTransmission(eepromAddress);
+#if (!SMALL_EEPROM)
+    HAL::i2cError |= WIRE_PORT.write(uint8_t((pos >> 8) & 0xFF));
+#endif
+    HAL::i2cError |= WIRE_PORT.write(uint8_t(pos & 0xFF));
+}
+#endif
+
+inline union eeval_t HAL::eprGetValue(unsigned int pos, int size) {
+#if EEPROM_AVAILABLE == EEPROM_I2C
+    eeval_t v;
+#if EEPROM_DIRECT_WIRING
+    eepromBegin(pos);
+    uint8_t err = WIRE_PORT.endTransmission(false);
+    if (Printer::feedrate == 50) {
+        if (err) {
+            Com::printFLN("end send adr:", (int32_t)err);
+        }
+    }
+    err = WIRE_PORT.requestFrom(eepromAddressForPosition(pos), static_cast<uint8_t>(size), 0, 0, true);
+    if (Printer::feedrate == 50) {
+        if (err != size) {
+            Com::printFLN("wrong rcv size:", (int32_t)err);
+        }
+    }
+    for (int i = 0; i < size; i++) {
+        // read an incomming byte
+        v.b[i] = WIRE_PORT.available() ? WIRE_PORT.read() : 0xFF;
+    }
+    // WIRE_PORT.endTransmission();
+#else
+    // set read location
+    i2cStartAddr(eepromAddressForPosition(pos), pos, size);
+    for (int i = 0; i < size; i++) {
+        // read an incomming byte
+        v.b[i] = i2cRead();
+    }
+#endif
+    return v;
+#else
+    eeval_t v;
+    int i;
+    for (i = 0; i < size; i++) {
+        // read an incomming byte
+        v.b[i] = 0;
+    }
+    return v;
+#endif //(MOTHERBOARD==500) || (MOTHERBOARD==501) || (MOTHERBOARD==502)
+}
+
 // Write any data type to EEPROM
 void HAL::eprBurnValue(unsigned int pos, int size, union eeval_t newvalue) {
 #if EEPROM_AVAILABLE == EEPROM_I2C
-    i2cStartAddr(EEPROM_SERIAL_ADDR, pos, 0);
+#if EEPROM_DIRECT_WIRING
+    eepromBegin(pos);
+    WIRE_PORT.write(newvalue.b[0]);
+    for (int i = 1; i < size; i++) {
+        pos++;
+        // writes can not cross page boundary
+        if ((pos % EEPROM_PAGE_SIZE) == 0) {
+            // burn current page then address next one
+            WIRE_PORT.endTransmission();
+            eepromWaitWhileBusy();
+            eepromBegin(pos);
+        }
+        WIRE_PORT.write(newvalue.b[i]);
+    }
+    // WIRE_PORT.endTransmission();
+    uint8_t err = WIRE_PORT.endTransmission();
+    if (Printer::feedrate == 50) {
+        if (err) {
+            Com::printFLN("end write:", (int32_t)err);
+        }
+    }
+#else
+    i2cStartAddr(eepromAddressForPosition(pos), pos, 0);
     i2cWrite(newvalue.b[0]); // write first byte
     for (int i = 1; i < size; i++) {
         pos++;
@@ -659,8 +949,9 @@ void HAL::eprBurnValue(unsigned int pos, int size, union eeval_t newvalue) {
         }
         i2cWrite(newvalue.b[i]);
     }
-    i2cStop();                                 // signal end of transaction
-    delayMilliseconds(EEPROM_PAGE_WRITE_TIME); // wait for page write to complete
+    i2cStop(); // signal end of transaction
+#endif
+    eepromWaitWhileBusy();
 #elif EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH
     if (pos >= EEPROM::reservedEnd) {
         eprSyncTime = 1UL; // enforce fast write to finish before power is lost
@@ -791,7 +1082,13 @@ void HAL::i2cSetClockspeed(uint32_t clockSpeedHz) {
  Initialization of the I2C bus interface. Need to be called only once
 *************************************************************************/
 void HAL::i2cInit(uint32_t clockSpeedHz) {
+#if defined(I2C_SCL_PIN) && defined(I2C_SCL_PIN)
+    WIRE_PORT.setSDA(I2C_SDA_PIN);
+    WIRE_PORT.setSCL(I2C_SCL_PIN);
     WIRE_PORT.begin(); // create I2C master access
+#else
+    WIRE_PORT.begin(); // create I2C master access
+#endif
     WIRE_PORT.setClock(clockSpeedHz);
 }
 
@@ -804,7 +1101,7 @@ void HAL::i2cInit(uint32_t clockSpeedHz) {
 
 void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
     if (!i2cError) {
-        i2cError |= (WIRE_PORT.requestFrom(address, bytes) != bytes);
+        i2cError |= (WIRE_PORT.requestFrom(address, bytes) != bytes ? 128 : 0);
     }
 }
 /*************************************************************************
@@ -816,11 +1113,13 @@ void HAL::i2cStartRead(uint8_t address, uint8_t bytes) {
 void HAL::i2cStartAddr(uint8_t address, unsigned int pos, uint8_t readBytes) {
     if (!i2cError) {
         WIRE_PORT.beginTransmission(address);
+#if SMALL_EEPROM == 0
         WIRE_PORT.write(pos >> 8);
+#endif
         WIRE_PORT.write(pos & 255);
         if (readBytes) {
             i2cError |= WIRE_PORT.endTransmission();
-            i2cError |= (WIRE_PORT.requestFrom(address, readBytes) != readBytes);
+            i2cError |= (WIRE_PORT.requestFrom(address, readBytes) != readBytes ? 256 : 0);
         }
     }
 }
@@ -904,19 +1203,17 @@ INLINE inline void servoOffTimer() {
 
 // Servo timer Interrupt handler
 void TIMER_VECTOR(SERVO_TIMER_NUM) {
-#if NUM_SERVOS > 0 || NUM_BEEPERS > 0
 #if NUM_SERVOS > 0
     if (actServo && HAL::servoTimings[servoId]) {
         actServo->enable();
     }
 #endif
-/*    if (LL_TIM_IsActiveFlag_CC1(TIMER(SERVO_TIMER_NUM))) {
+    /*    if (LL_TIM_IsActiveFlag_CC1(TIMER(SERVO_TIMER_NUM))) {
         LL_TIM_ClearFlag_CC1(TIMER(SERVO_TIMER_NUM));
         // servoOffTimer();
     } else if (LL_TIM_IsActiveFlag_UPDATE(TIMER(SERVO_TIMER_NUM))) {
         LL_TIM_ClearFlag_UPDATE(TIMER(SERVO_TIMER_NUM));
     }*/
-#endif
 }
 
 /** \brief Timer interrupt routine to drive the stepper motors.
@@ -925,7 +1222,7 @@ void TIMER_VECTOR(MOTION3_TIMER_NUM) {
 #if DEBUG_TIMING && defined(DEBUG_ISR_STEPPER_PIN) && DEBUG_ISR_STEPPER_PIN >= 0
     WRITE(DEBUG_ISR_STEPPER_PIN, 1);
 #endif
-    LL_TIM_ClearFlag_UPDATE(TIMER(MOTION3_TIMER_NUM));
+    // LL_TIM_ClearFlag_UPDATE(TIMER(MOTION3_TIMER_NUM));
     Motion3::timer();
 #if DEBUG_TIMING && defined(DEBUG_ISR_STEPPER_PIN) && DEBUG_ISR_STEPPER_PIN >= 0
     WRITE(DEBUG_ISR_STEPPER_PIN, 0);
@@ -969,17 +1266,33 @@ void TIMER_VECTOR(PWM_TIMER_NUM) {
     pwm_count3 += 8;
     pwm_count4 += 16;
 
-    if (__HAL_DMA_GET_FLAG(&hdma_adc, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc))) {
+    // wait for ALL adc dma transfers to finish
+    if ((numADC1 == 0 || (numADC1 && __HAL_DMA_GET_FLAG(&hdma_adc1, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc1)))) && (numADC2 == 0 || (numADC2 && __HAL_DMA_GET_FLAG(&hdma_adc2, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc2)))) && (numADC3 == 0 || (numADC3 && __HAL_DMA_GET_FLAG(&hdma_adc3, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc3))))) {
 #if DEBUG_TIMING && defined(DEBUG_ISR_ANALOG_PIN) && DEBUG_ISR_ANALOG_PIN >= 0
         WRITE(DEBUG_ISR_ANALOG_PIN, 1);
 #endif
         for (int i = 0; i < numAnalogInputs; i++) {
-            analogValues[i].lastValue = adcData[i];
+            auto& af = analogValues[i];
+            if (af.def == ADC1) {
+                af.lastValue = adcData1[af.dmaBufferPos];
+            } else if (af.def == ADC2) {
+                af.lastValue = adcData2[af.dmaBufferPos];
+            } else if (af.def == ADC3) {
+                af.lastValue = adcData3[af.dmaBufferPos];
+            }
         }
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_ANALOG_INPUT_LOOP
 #include "io/redefine.h"
-        __HAL_DMA_CLEAR_FLAG(&hdma_adc, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc));
+        if (numADC1) {
+            __HAL_DMA_CLEAR_FLAG(&hdma_adc1, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc1));
+        }
+        if (numADC2) {
+            __HAL_DMA_CLEAR_FLAG(&hdma_adc2, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc2));
+        }
+        if (numADC3) {
+            __HAL_DMA_CLEAR_FLAG(&hdma_adc3, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc3));
+        }
 #if DEBUG_TIMING && defined(DEBUG_ISR_ANALOG_PIN) && DEBUG_ISR_ANALOG_PIN >= 0
         WRITE(DEBUG_ISR_ANALOG_PIN, 0);
 #endif
@@ -1002,7 +1315,7 @@ void TIMER_VECTOR(MOTION2_TIMER_NUM) {
 #if DEBUG_TIMING && defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
     WRITE(DEBUG_ISR_MOTION_PIN, 1);
 #endif
-    LL_TIM_ClearFlag_UPDATE(TIMER(MOTION2_TIMER_NUM));
+    // LL_TIM_ClearFlag_UPDATE(TIMER(MOTION2_TIMER_NUM));
     Motion2::timer();
 #if DEBUG_TIMING && defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
     WRITE(DEBUG_ISR_MOTION_PIN, 0);
@@ -1024,16 +1337,22 @@ void HAL::spiEnd() {
 }
 
 #if NUM_BEEPERS > 0
-void TIMER_VECTOR(TONE_TIMER_NUM) {
+void toneOnTimer() {
+#if DEBUG_TIMING && defined(DEBUG_ISR_TONE_PIN) && DEBUG_ISR_TONE_PIN >= 0
+    WRITE(DEBUG_ISR_TONE_PIN, 1);
+#endif
+    bool beeperIRQPhase = true;
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_BEEPER_LOOP
+#include "io/redefine.h"
+    UNUSED(beeperIRQPhase);
+#if DEBUG_TIMING && defined(DEBUG_ISR_TONE_PIN) && DEBUG_ISR_TONE_PIN >= 0
+    WRITE(DEBUG_ISR_TONE_PIN, 0);
+#endif
+}
+
+void toneOffTimer() {
     bool beeperIRQPhase = false;
-    if (LL_TIM_IsActiveFlag_UPDATE(TIMER(TONE_TIMER_NUM))) {
-        LL_TIM_ClearFlag_UPDATE(TIMER(TONE_TIMER_NUM));
-        beeperIRQPhase = true;
-    }
-    if (LL_TIM_IsActiveFlag_CC1(TIMER(TONE_TIMER_NUM))) {
-        LL_TIM_ClearFlag_CC1(TIMER(TONE_TIMER_NUM));
-        beeperIRQPhase = false;
-    }
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_BEEPER_LOOP
 #include "io/redefine.h"

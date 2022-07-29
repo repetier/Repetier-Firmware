@@ -37,6 +37,10 @@
 #include "boards/skr2.h"
 #endif
 
+#if MOTHERBOARD == MOTHERBOARD_BTT_OCTOPUS_1_0 || MOTHERBOARD == MOTHERBOARD_BTT_OCTOPUS_PRO_1_0 || MOTHERBOARD == MOTHERBOARD_BTT_OCTOPUS_1_1
+#include "boards/btt_octopus.h"
+#endif
+
 #ifndef SDSSORIG
 #define SDSSORIG -1
 #endif

@@ -54,7 +54,9 @@
  * Set INCLUDE_SDIOS nonzero to include sdios.h in SdFat.h.
  * sdios.h provides C++ style IO Streams.
  */
+#ifndef INCLUDE_SDIOS
 #define INCLUDE_SDIOS 0
+#endif
 //------------------------------------------------------------------------------
 /**
  * Set USE_FAT_FILE_FLAG_CONTIGUOUS nonzero to optimize access to 

@@ -705,6 +705,7 @@ void Printer::setup() {
 void Printer::defaultLoopActions() {
     Commands::checkForPeriodicalActions(true); //check heater every n milliseconds
     if (HAL::i2cError && HAL::i2cError != 255) {
+        Com::printFLN("I2C Errror:", (uint16_t)HAL::i2cError);
         HAL::i2cError = 255; // Flag to show error message only once
         GCode::fatalError(Com::tI2CError);
     }

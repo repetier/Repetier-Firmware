@@ -691,6 +691,11 @@ void Commands::processMCode(GCode* com) {
     case 355: // M355 S<0/1/2/3/4> - Turn case light on/off/burst/blink fast/blink slow , no S = report status
         MCode_355(com);
         break;
+#if ENABLED(UI_BACKLIGHT_CHANGEABLE)
+    case 357:
+        MCode_357(com);
+        break;
+#endif
     case 360: // M360 - show configuration
         MCode_360(com);
         break;
@@ -841,6 +846,11 @@ void Commands::processMCode(GCode* com) {
     case 999: // Stop fatal error take down
         MCode_999(com);
         break;
+#ifdef SUPPORTS_REPORT_ANALOG
+    case 1005:
+        reportAnalog();
+        break;
+#endif
     case 9999: // Switch to bootmode if possible
         HAL::switchToBootMode();
         break;

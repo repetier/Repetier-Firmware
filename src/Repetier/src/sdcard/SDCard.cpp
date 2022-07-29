@@ -25,6 +25,10 @@
 SPIClass CREATE_SPI3(SPI3_MOSI_PIN, SPI3_MISO_PIN, SPI3_SCK_PIN);
 #endif
 
+#ifdef CREATE_SPI2
+SPIClass CREATE_SPI2(SPI2_MOSI_PIN, SPI2_MISO_PIN, SPI2_SCK_PIN);
+#endif
+
 #ifndef SD_SPI3_ADDRESS
 #define SD_SPI3_ADDRESS &SPI3
 #endif
@@ -85,9 +89,6 @@ void SDCard::automount() {
 #endif
 }
 
-#ifdef CREATE_SPI2
-SPIClass CREATE_SPI2(SPI2_MOSI_PIN, SPI2_MISO_PIN, SPI2_SCK_PIN);
-#endif
 
 #ifndef SD_SPI_ADDRESS
 #define SD_SPI_ADDRESS &SPI

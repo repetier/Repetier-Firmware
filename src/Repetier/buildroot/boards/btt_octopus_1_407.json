@@ -1,0 +1,45 @@
+{
+    "build": {
+        "cpu": "cortex-m4",
+        "extra_flags": "-DSTM32F4 -DSTM32F407xx -DF_CPU=168000000L",
+        "f_cpu": "168000000L",
+        "mcu": "stm32f407zet6",
+        "variant": "btt_octopus"
+    },
+    "connectivity": [
+        "can"
+    ],
+    "debug": {
+        "default_tools": [
+            "stlink"
+        ],
+        "jlink_device": "STM32F407ZE",
+        "onboard_tools": [
+            "stlink"
+        ],
+        "openocd_board": "stm32f407",
+        "openocd_target": "stm32f4x",
+        "svd_path": "STM32F407x.svd"
+    },
+    "frameworks": [
+        "arduino",
+        "cmsis",
+        "mbed",
+        "stm32cube",
+        "libopencm3",
+        "zephyr"
+    ],
+    "name": "STM32F407ZE (128k RAM. 512k Flash)",
+    "upload": {
+        "maximum_ram_size": 131072,
+        "maximum_size": 524288,
+        "protocol": "stlink",
+        "protocols": [
+            "stlink",
+            "dfu",
+            "jlink"
+        ]
+    },
+    "url": "https://www.st.com/en/microcontrollers-microprocessors/stm32f407-417.html",
+    "vendor": "ST"
+}

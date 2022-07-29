@@ -5,6 +5,10 @@
 	#include "source/rpi_bcm2835.h"
 	#include "source/bcm2835_spi.h"
 	#include "source/bcm2835_stream.h"
+#elif __cplusplus >= 201703L
+	#if __has_include(<Arduino.h>)
+		#include <Arduino.h>
+	#endif
 #endif
 
 #include "TMC_platforms.h"

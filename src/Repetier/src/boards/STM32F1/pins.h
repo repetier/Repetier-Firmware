@@ -29,6 +29,8 @@
 #include "boards/skr_mini_e3_v1_2.h"
 #elif MOTHERBOARD == MOTHERBOARD_E3_MINI_V2_0
 #include "boards/skr_mini_e3_v2_0.h"
+#elif MOTHERBOARD == MOTHERBOARD_E3_MINI_V3_0
+#include "boards/skr_mini_e3_v3_0.h"
 #elif MOTHERBOARD == MOTHERBOARD_CREALITY_V4
 #include "boards/creality_v4.h"
 #elif MOTHERBOARD == MOTHERBOARD_CREALITY_V4_2_10

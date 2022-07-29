@@ -224,10 +224,10 @@ void HeatManager::update() {
     // Test for decoupled HeaterError
 
     float tempError = targetTemperature - currentTemperature;
-    if (decouplePeriod > 0 && time - lastDecoupleTest > decouplePeriod) {
+    if (decouplePeriod > 0 && (decoupleMode == DecoupleMode::HOLDING || time - lastDecoupleTest > decouplePeriod)) {
         // we should do a test
         if (decoupleMode == DecoupleMode::FAST_RISING) {
-            if (currentTemperature - 1 < lastDecoupleTemp) {
+            if (currentTemperature - 1.0f < lastDecoupleTemp) {
                 // we waited and nothing happened, that is not ok
                 Com::printErrorF(PSTR("Heater "));
                 printName();
@@ -394,7 +394,14 @@ void HeatManager::reportTemperature(char c, int idx) {
 
 void HeatManager::resetAllErrorStates() {
     for (uint8_t i = 0; i < NUM_HEATERS; i++) {
-        heaters[i]->resetError();
+        if (heaters[i]->input->isDefect() == false) {
+#ifdef PERMANENT_DECOUPLE
+            if (heaters[i]->error == HeaterError::NO_HEATUP || heaters[i]->error == HeaterError::LEAVING_RANGE) {
+                continue;
+            }
+#endif
+            heaters[i]->resetError();
+        }
     }
 }
 

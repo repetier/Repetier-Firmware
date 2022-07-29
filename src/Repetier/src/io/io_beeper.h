@@ -167,7 +167,7 @@ private:
 
 class BeeperSourcePWM : public BeeperSourceBase {
 public:
-    explicit BeeperSourcePWM(PWMHandler &pwm)
+    explicit BeeperSourcePWM(PWMHandler& pwm)
         : BeeperSourceBase()
         , pwmPin(pwm) {
         pwmPin.set(0);
@@ -176,6 +176,7 @@ public:
     inline ufast8_t getFreqDiv() final { return 0u; }
     inline void setFreqDiv(ufast8_t div) final { }
     virtual ~BeeperSourcePWM() {};
+
 private:
     void refreshBeepFreq() final;
     inline void finishPlaying() final {

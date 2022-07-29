@@ -161,6 +161,9 @@ void MCode_323(GCode* com);
 void MCode_340(GCode* com);
 void MCode_350(GCode* com);
 void MCode_355(GCode* com);
+#if ENABLED(UI_BACKLIGHT_CHANGEABLE)
+void MCode_357(GCode* com);
+#endif
 void MCode_360(GCode* com);
 void MCode_400(GCode* com);
 void MCode_401(GCode* com);

@@ -350,7 +350,11 @@ public:
     }
 
     inline float getR(float def) {
-        return hasR() ? X : def;
+        return hasR() ?: def;
+    }
+
+    inline float getR() {
+        return R;
     }
 
     inline bool hasD() {
@@ -429,6 +433,10 @@ public:
         B = val;
         params |= 4096;
         params2 |= 128;
+    }
+
+    inline float getB() {
+        return B;
     }
 
     inline float getB(float def) {

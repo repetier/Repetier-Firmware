@@ -28,7 +28,11 @@
 
 #include "Repetier.h"
 #ifdef STM32F1_BOARD
+#ifdef STM32G0B1xx
+#include <stm32g0b1xx.h>
+#else
 #include <stm32f1xx_hal.h>
+#endif
 #include <malloc.h>
 
 // For SKR E3 mini V1.2:
@@ -359,7 +363,8 @@ void HAL::hwSetup(void) {
 void HAL::setupTimer() {
 
     /*!< 4 bits for pre-emption priority (0-15) 0 bits for subpriority */
-    HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
+    // HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
+    NVIC_SetPriorityGrouping((uint32_t)0x00000003);
 
     motion2 = reserveTimerInterrupt(MOTION2_TIMER_NUM); // prevent pwm usage
     motion2->timer = new HardwareTimer(TIMER(MOTION2_TIMER_NUM));
@@ -557,7 +562,7 @@ void HAL::analogStart(void) {
     AdcHandle.Init.ScanConvMode = ADC_SCAN_ENABLE;
     AdcHandle.Init.ContinuousConvMode = ENABLE;
     AdcHandle.Init.DiscontinuousConvMode = DISABLE;
-    AdcHandle.Init.NbrOfDiscConversion = 0;
+    // AdcHandle.Init.NbrOfDiscConversion = 0;
     AdcHandle.Init.ExternalTrigConv = ADC_SOFTWARE_START;
     AdcHandle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
     AdcHandle.Init.NbrOfConversion = numAnalogInputs;
@@ -566,7 +571,11 @@ void HAL::analogStart(void) {
         return;
     }
     ADC_ChannelConfTypeDef sConfig = { 0 };
+#ifdef STM32G0xx
+    sConfig.SamplingTime = ADC_SAMPLETIME_160CYCLES_5;
+#else
     sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
+#endif
 
     for (int i = 0; i < numAnalogInputs; i++) {
         sConfig.Channel = analogValues[i].channel;
@@ -576,7 +585,11 @@ void HAL::analogStart(void) {
         }
     }
     __HAL_RCC_GPIOA_CLK_ENABLE();
+#ifdef STM32G0xx
+    __HAL_RCC_ADC_CLK_ENABLE();
+#else
     __HAL_RCC_ADC1_CLK_ENABLE();
+#endif
     __HAL_RCC_DMA1_CLK_ENABLE(); // ADC1 is connected with DMA1
 
     RCC_PeriphCLKInitTypeDef PeriphClkInit = { 0 };

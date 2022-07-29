@@ -1,5 +1,6 @@
 #include "Repetier.h"
 
+// -------------- Base store -----------------
 void LightStoreBase::reset() {
     mode = LIGHT_STATE_OFF;
 }
@@ -24,29 +25,37 @@ bool LightStoreBase::on() {
     }
 }
 
-LightStoreMonochrome::LightStoreMonochrome()
-    : LightStoreBase() {}
+// -------------- Monochrome store -----------------
 
-void LightStoreMonochrome::set(uint8_t _mode, uint8_t red, uint8_t green, uint8_t blue, uint8_t brightness) {
+LightStoreMonochrome::LightStoreMonochrome()
+    : LightStoreBase() { }
+
+void LightStoreMonochrome::set(uint8_t _mode, uint8_t red, uint8_t green, uint8_t blue, uint8_t white, uint8_t brightness) {
     mode = _mode;
 }
+
+// -------------- RGB store -----------------
 
 void LightStoreRGB::reset() {
     mode = LIGHT_STATE_OFF;
     redVal = greenVal = blueVal = 255;
+    brightnessVal = 255;
 }
 
 LightStoreRGB::LightStoreRGB()
-    : LightStoreBase() {}
+    : LightStoreBase() { }
 
-void LightStoreRGB::set(uint8_t _mode, uint8_t _red, uint8_t _green, uint8_t _blue, uint8_t brightness) {
+void LightStoreRGB::set(uint8_t _mode, uint8_t _red, uint8_t _green, uint8_t _blue, uint8_t white, uint8_t brightness) {
     mode = _mode;
     redVal = _red;
     greenVal = _green;
     blueVal = _blue;
+    brightnessVal = brightness;
 }
 
-void LightStorePWM::set(uint8_t _mode, uint8_t _red, uint8_t _green, uint8_t _blue, uint8_t brightness) {
+// -------------- Monochrome PWM store -----------------
+
+void LightStorePWM::set(uint8_t _mode, uint8_t _red, uint8_t _green, uint8_t _blue, uint8_t white, uint8_t brightness) {
     finalSetBrightness = brightness;
     finalSetMode = _mode;
 }
@@ -119,4 +128,31 @@ fast8_t LightStorePWM::updatePWM() {
         curPWM = ((curPWM -= rolloverCheck(fadeStep, false)) < targetPWM) ? targetPWM : curPWM;
     }
     return curPWM;
+}
+
+// ---------- Neopixel implementation -------------
+
+LightSourceNEOPixel::LightSourceNEOPixel(uint8_t pin, uint32_t _pixelType, uint32_t _count)
+    : pixel(_count, pin, _pixelType) {
+    lastColor = 0xfeffffff;
+    pixel.begin(); // define as output
+    pixel.setPixelColor(0, 0);
+}
+
+void LightSourceNEOPixel::set(LightStoreBase& state) {
+    uint32_t bright = state.getMode() == LIGHT_STATE_ON ? state.brightness() : 0;
+    uint32_t colorBright = ((((uint32_t)(state.white()) * bright) >> 8) << 24) | ((((uint32_t)(state.red()) * bright) >> 8) << 16) | ((((uint32_t)(state.green()) * bright) >> 8) << 8) | (((uint32_t)(state.blue()) * bright) >> 8);
+    // time consuming so skip if same color
+    if (lastColor == colorBright) {
+        return;
+    }
+    lastColor = colorBright;
+    uint32_t color = pixel.Color(state.red(), state.green(), state.blue(), state.white());
+    pixel.setBrightness(bright);
+    for (int i = 0; i < pixel.numPixels(); i++) {
+        pixel.setPixelColor(i, color);
+    }
+    Motion1::waitForEndOfMoves();          // we might miss steps without interrupt
+    InterruptProtectedBlock protectedArea; // interrupts can disturb timing
+    pixel.show();
 }

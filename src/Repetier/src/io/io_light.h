@@ -51,7 +51,7 @@ Definies the following macros:
 #define LIGHT_COND(state, cond, mode, red, green, blue, brightness) 
 #define LIGHT_SOURCE_MONOCHROME(name, output, state)
 #define LIGHT_SOURCE_PWM(name, output, state) 
-
+#define LIGHT_SOURCE_NEOPIXEL(name, outputPin, pixelType, count, state)
 
 */
 
@@ -70,9 +70,11 @@ Definies the following macros:
 
 #undef LIGHT_STATE_MONOCHROME
 #undef LIGHT_STATE_RGB
+#undef LIGHT_STATE_RGB_HOLD
 #undef LIGHT_STATE_PWM
 #undef LIGHT_SOURCE_MONOCHROME
 #undef LIGHT_SOURCE_PWM
+#undef LIGHT_SOURCE_NEOPIXEL
 #undef LIGHT_COND
 
 #if IO_TARGET == IO_TARGET_PERIODICAL_ACTIONS
@@ -83,14 +85,18 @@ Definies the following macros:
 
 #if IO_TARGET == IO_TARGET_100MS // 100ms
 
-#define LIGHT_STATE_MONOCHROME(name) name.reset();
+#define LIGHT_STATE_MONOCHROME(name) \
+    name.reset();
 #define LIGHT_STATE_RGB(name) name.reset();
+#define LIGHT_STATE_RGB_HOLD(name, red, green, blue, brightness)
 #define LIGHT_STATE_PWM(name) name.reset();
 
 #define LIGHT_SOURCE_MONOCHROME(name, output, state) output::set(state.on());
+#define LIGHT_SOURCE_NEOPIXEL(name, outputPin, pixelType, count, state) \
+    name.set(state);
 #define LIGHT_COND(state, cond, mode, red, green, blue, brightness) \
     if (cond) { \
-        state.set(mode, red, green, blue, brightness); \
+        state.set(mode, red, green, blue, 0, brightness); \
     }
 
 #elif IO_TARGET == IO_TARGET_CLASS_DEFINITION // class
@@ -101,12 +107,14 @@ public:
         : mode(0)
         , counter(0) { }
     virtual void reset();
-    virtual void set(uint8_t mode, uint8_t red, uint8_t green, uint8_t blue, uint8_t brightness) = 0;
-    virtual bool on(); ///< Call only once per loop a sit manages blinking as well
+    virtual void set(uint8_t mode, uint8_t red, uint8_t green, uint8_t blue, uint8_t white, uint8_t brightness) = 0;
+    virtual bool on(); ///< Call only once per loop as it manages blinking as well
     virtual uint8_t red() = 0;
     virtual uint8_t green() = 0;
     virtual uint8_t blue() = 0;
+    virtual uint8_t white() = 0;
     virtual uint8_t brightness() = 0;
+    fast8_t getMode() { return mode; }
 
 protected:
     fast8_t mode;
@@ -116,10 +124,11 @@ protected:
 class LightStoreMonochrome : public LightStoreBase {
 public:
     LightStoreMonochrome();
-    virtual void set(uint8_t mode, uint8_t red, uint8_t green, uint8_t blue, uint8_t brightness) final;
+    virtual void set(uint8_t mode, uint8_t red, uint8_t green, uint8_t blue, uint8_t white, uint8_t brightness) final;
     virtual uint8_t red() final { return 255; };
     virtual uint8_t green() final { return 255; };
     virtual uint8_t blue() final { return 255; };
+    virtual uint8_t white() final { return 255; };
     virtual uint8_t brightness() final { return 255; };
 
 private:
@@ -129,16 +138,18 @@ class LightStoreRGB : public LightStoreBase {
 public:
     LightStoreRGB();
     virtual void reset() final;
-    virtual void set(uint8_t mode, uint8_t red, uint8_t green, uint8_t blue, uint8_t brightness) final;
+    virtual void set(uint8_t mode, uint8_t red, uint8_t green, uint8_t blue, uint8_t white, uint8_t brightness) final;
     virtual uint8_t red() final { return redVal; };
     virtual uint8_t green() final { return greenVal; };
     virtual uint8_t blue() final { return blueVal; };
-    virtual uint8_t brightness() final { return 255; };
+    virtual uint8_t white() final { return 0; };
+    virtual uint8_t brightness() final { return brightnessVal; };
 
 private:
     uint8_t redVal;
     uint8_t greenVal;
     uint8_t blueVal;
+    uint8_t brightnessVal;
 };
 
 class LightStorePWM : public LightStoreBase {
@@ -152,13 +163,14 @@ public:
         , lastBrightness(0)
         , fadeStep(0)
         , finalSetBrightness(0)
-        , finalSetMode(0) { };
+        , finalSetMode(0) {};
 
     virtual void reset() final;
-    virtual void set(uint8_t mode, uint8_t red, uint8_t green, uint8_t blue, uint8_t brightness) final;
+    virtual void set(uint8_t mode, uint8_t red, uint8_t green, uint8_t blue, uint8_t white, uint8_t brightness) final;
     virtual uint8_t red() final { return 255; };
     virtual uint8_t green() final { return 255; };
     virtual uint8_t blue() final { return 255; };
+    virtual uint8_t white() final { return 255; };
     virtual uint8_t brightness() final { return curPWM; };
     fast8_t updatePWM();
 
@@ -191,22 +203,42 @@ private:
     fast8_t finalSetMode;
 };
 
+class LightSourceNEOPixel {
+    Adafruit_NeoPixel pixel;
+    uint32_t lastColor;
+
+public:
+    LightSourceNEOPixel(uint8_t pin, uint32_t _pixelType, uint32_t _count);
+    void set(LightStoreBase& state);
+};
 #define LIGHT_STATE_MONOCHROME(name) \
     extern LightStoreMonochrome name;
 #define LIGHT_STATE_RGB(name) \
-    extern LightStoreMonochrome name;
+    extern LightStoreRGB name;
+#define LIGHT_STATE_RGB_HOLD(name, red, green, blue, brightness) \
+    extern LightStoreRGB name;
 #define LIGHT_STATE_PWM(name) \
     extern LightStorePWM name;
+#define LIGHT_SOURCE_NEOPIXEL(name, outputPin, pixelType, count, state) \
+    extern LightSourceNEOPixel name;
 
 #elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES // variable
 
 #define LIGHT_STATE_MONOCHROME(name) \
     LightStoreMonochrome name;
 #define LIGHT_STATE_RGB(name) \
-    LightStoreMonochrome name;
+    LightStoreRGB name;
+#define LIGHT_STATE_RGB_HOLD(name, red, green, blue, brightness) \
+    LightStoreRGB name;
 #define LIGHT_STATE_PWM(name) \
     LightStorePWM name;
+#define LIGHT_SOURCE_NEOPIXEL(name, outputPin, pixelType, count, state) \
+    LightSourceNEOPixel name(outputPin, pixelType, count);
 
+#elif IO_TARGET == IO_TARGET_INIT
+
+#define LIGHT_STATE_RGB_HOLD(name, red, green, blue, brightness) \
+    name.set(LIGHT_STATE_ON, red, green, blue, 0, brightness);
 #endif
 
 #ifndef LIGHT_COND
@@ -218,6 +250,9 @@ private:
 #ifndef LIGHT_STATE_RGB
 #define LIGHT_STATE_RGB(name)
 #endif
+#ifndef LIGHT_STATE_RGB_HOLD
+#define LIGHT_STATE_RGB_HOLD(name, red, green, blue, brightness)
+#endif
 #ifndef LIGHT_STATE_PWM
 #define LIGHT_STATE_PWM(name)
 #endif
@@ -227,4 +262,8 @@ private:
 
 #ifndef LIGHT_SOURCE_PWM
 #define LIGHT_SOURCE_PWM(name, output, state)
+#endif
+
+#ifndef LIGHT_SOURCE_NEOPIXEL
+#define LIGHT_SOURCE_NEOPIXEL(name, outputPin, pixelType, count, state)
 #endif

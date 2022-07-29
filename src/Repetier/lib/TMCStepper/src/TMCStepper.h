@@ -14,6 +14,16 @@
 	#include <bcm2835.h>
 	#include "source/bcm2835_spi.h"
 	#include "source/bcm2835_stream.h"
+#elif __cplusplus >= 201703L
+	#if __has_include(<Arduino.h>)
+		#include <Arduino.h>
+	#endif
+	#if __has_include(<SPI.h>)
+		#include <SPI.h>
+	#endif
+	#if __has_include(<Stream.h>)
+		#include <Stream.h>
+	#endif
 #endif
 
 #if (__cplusplus == 201703L) && defined(__has_include)
@@ -51,7 +61,7 @@
 #define INIT2224_REGISTER(REG) TMC2224_n::REG##_t REG##_register = TMC2224_n::REG##_t
 #define SET_ALIAS(TYPE, DRIVER, NEW, ARG, OLD) TYPE (DRIVER::*NEW)(ARG) = &DRIVER::OLD
 
-#define TMCSTEPPER_VERSION 0x000701 // v0.7.1
+#define TMCSTEPPER_VERSION 0x000703 // v0.7.3
 
 class TMCStepper {
 	public:
@@ -590,11 +600,11 @@ class TMC5130Stepper : public TMC2160Stepper {
 		uint32_t VSTART();
 		void VSTART(uint32_t input);
 		// W: A1
-		uint16_t A1();
-		void A1(uint16_t input);
+		uint16_t a1();
+		void a1(uint16_t input);
 		// W: V1
-		uint32_t V1();
-		void V1(uint32_t input);
+		uint32_t v1();
+		void v1(uint32_t input);
 		// W: AMAX
 		uint16_t AMAX();
 		void AMAX(uint16_t input);
@@ -605,8 +615,8 @@ class TMC5130Stepper : public TMC2160Stepper {
 		uint16_t DMAX();
 		void DMAX(uint16_t input);
 		// W: D1
-		uint16_t D1();
-		void D1(uint16_t input);
+		uint16_t d1();
+		void d1(uint16_t input);
 		// W: VSTOP
 		uint32_t VSTOP();
 		void VSTOP(uint32_t input);

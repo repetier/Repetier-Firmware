@@ -22,6 +22,7 @@
 #ifndef _REPETIER_H
 #define _REPETIER_H
 
+#define PURE_BOARD_TEST 0
 #include <math.h>
 #include <stdint.h>
 #if 1 || !(defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__))
@@ -114,6 +115,8 @@ struct is_floating_point
 #ifndef HOST_PRIORITY_CONTROLS
 #define HOST_PRIORITY_CONTROLS EMERGENCY_PARSER
 #endif
+
+#include <Adafruit_NeoPixel.h>
 
 #include "utilities/constants.h"
 

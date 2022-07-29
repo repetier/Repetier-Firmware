@@ -58,6 +58,7 @@
 #define F_CPU 180000000L // should be factor of F_CPU_TRUE
 #endif
 #endif
+
 #define EEPROM_BYTES 4096 // bytes of eeprom we simulate
 #define F_CPU_TRUE F_CPU  // actual CPU clock frequency
 
@@ -66,6 +67,7 @@
 
 #define INLINE __attribute__((always_inline))
 
+#define SUPPORTS_REPORT_ANALOG // Activates M1005 to debug analog sensor data
 // do not use program space memory with Due
 #define PROGMEM
 #ifndef PGM_P
@@ -392,26 +394,7 @@ public:
     static void eprBurnValue(unsigned int pos, int size, union eeval_t newvalue);
 
     // Read any data type from EEPROM that was previously written by eprBurnValue
-    static inline union eeval_t eprGetValue(unsigned int pos, int size) {
-#if EEPROM_AVAILABLE == EEPROM_I2C
-        eeval_t v;
-        // set read location
-        i2cStartAddr(EEPROM_SERIAL_ADDR, pos, size);
-        for (int i = 0; i < size; i++) {
-            // read an incomming byte
-            v.b[i] = i2cRead();
-        }
-        return v;
-#else
-        eeval_t v;
-        int i;
-        for (i = 0; i < size; i++) {
-            // read an incomming byte
-            v.b[i] = 0;
-        }
-        return v;
-#endif //(MOTHERBOARD==500) || (MOTHERBOARD==501) || (MOTHERBOARD==502)
-    }
+    static union eeval_t eprGetValue(unsigned int pos, int size);
 
     static inline void allowInterrupts() {
         //__enable_irq();

@@ -60,12 +60,12 @@ void TMC5160Stepper::push() {
     RAMPMODE(RAMPMODE_register.sr);
     XACTUAL(XACTUAL_register.sr);
     VSTART(VSTART_register.sr);
-    A1(A1_register.sr);
-    V1(V1_register.sr);
+    a1(A1_register.sr);
+    v1(V1_register.sr);
     AMAX(AMAX_register.sr);
     VMAX(VMAX_register.sr);
     DMAX(DMAX_register.sr);
-    D1(D1_register.sr);
+    d1(D1_register.sr);
     VSTOP(VSTOP_register.sr);
     TZEROWAIT(TZEROWAIT_register.sr);
     SW_MODE(SW_MODE_register.sr);

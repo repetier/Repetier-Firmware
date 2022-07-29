@@ -1210,6 +1210,7 @@ void __attribute__((weak)) MCode_300(GCode* com) {
     if (Printer::toneVolume <= MINIMUM_TONE_VOLUME) {
         return;
     }
+    Com::printFLN(PSTR("Play vol"), (int32_t)Printer::toneVolume); // TODO
     ufast8_t index = static_cast<ufast8_t>(com->hasB() ? com->B : 0);
     if (index < NUM_BEEPERS) {
         uint16_t freq = static_cast<uint16_t>(com->hasS() ? com->S : 1000);
@@ -1300,6 +1301,21 @@ void __attribute__((weak)) MCode_355(GCode* com) {
     }
     Printer::reportCaseLightStatus();
 }
+
+#if ENABLED(UI_BACKLIGHT_CHANGEABLE)
+void __attribute__((weak)) MCode_357(GCode* com) {
+    uint8_t red = com->hasR() ? static_cast<uint8_t>(com->getR()) : uiBacklight.red();
+    uint8_t green = com->hasE() ? static_cast<uint8_t>(com->E) : uiBacklight.red();
+    uint8_t blue = com->hasB() ? static_cast<uint8_t>(com->getB()) : uiBacklight.blue();
+    uint8_t white = com->hasW() ? static_cast<uint8_t>(com->W) : uiBacklight.white();
+    uint8_t bright = com->hasS() ? static_cast<uint8_t>(com->S) : uiBacklight.brightness();
+    if (bright == 0 || (red == 0 && green == 0 && blue == 0 && white == 0)) {
+        uiBacklight.set(LIGHT_STATE_OFF, red, green, blue, white, bright);
+    } else {
+        uiBacklight.set(LIGHT_STATE_ON, red, green, blue, white, bright);
+    }
+}
+#endif
 
 void __attribute__((weak)) MCode_360(GCode* com) {
     Com::writeToAll = false;

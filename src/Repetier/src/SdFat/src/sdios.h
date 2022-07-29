@@ -24,6 +24,7 @@
  */
 #ifndef sdios_h
 #define sdios_h
+
 /**
  * \file
  * \brief C++ IO Streams features.
@@ -31,4 +32,4 @@
 #include "iostream/ArduinoStream.h"
 #include "iostream/fstream.h"
 #include "iostream/StdioStream.h"
-#endif  // sdios_h
+#endif // sdios_h
