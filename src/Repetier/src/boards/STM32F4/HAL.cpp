@@ -863,9 +863,9 @@ static void eepromBegin(uint32_t const pos) {
     const uint8_t eepromAddress = eepromAddressForPosition(pos);
     WIRE_PORT.beginTransmission(eepromAddress);
 #if (!SMALL_EEPROM)
-    HAL::i2cError |= WIRE_PORT.write(uint8_t((pos >> 8) & 0xFF));
+    HAL::i2cError |= !WIRE_PORT.write(uint8_t((pos >> 8) & 0xFF));
 #endif
-    HAL::i2cError |= WIRE_PORT.write(uint8_t(pos & 0xFF));
+    HAL::i2cError |= !WIRE_PORT.write(uint8_t(pos & 0xFF));
 }
 #endif
 
