@@ -71,6 +71,10 @@ void SDCard::initsd() {
     sdactive = false;
 #if SDSS > -1
 #if SDCARDDETECT > -1
+    if (READ(SDCARDDETECT) != SDCARDDETECTINVERTED) {
+        Com::printFLN(Com::tSDInitFail);
+        return;
+    }
     if (READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
         return;
 #endif
