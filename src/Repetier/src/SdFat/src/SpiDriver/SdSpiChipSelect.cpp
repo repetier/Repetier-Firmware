@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -28,7 +28,7 @@
 #if SD_CHIP_SELECT_MODE == 0
 //------------------------------------------------------------------------------
 void sdCsInit(SdCsPin_t pin) {
-    pinMode(pin, OUTPUT);
+  pinMode(pin, OUTPUT);
 }
 //------------------------------------------------------------------------------
 void sdCsWrite(SdCsPin_t pin, bool level) {
@@ -40,12 +40,14 @@ void sdCsWrite(SdCsPin_t pin, bool level) {
 }
 #elif SD_CHIP_SELECT_MODE == 1
 //------------------------------------------------------------------------------
-__attribute__((weak)) void sdCsInit(SdCsPin_t pin) {
-    pinMode(pin, OUTPUT);
+__attribute__((weak))
+void sdCsInit(SdCsPin_t pin) {
+  pinMode(pin, OUTPUT);
 }
 //------------------------------------------------------------------------------
-__attribute__((weak)) void sdCsWrite(SdCsPin_t pin, bool level) {
-    digitalWrite(pin, level);
+__attribute__((weak))
+void sdCsWrite(SdCsPin_t pin, bool level) {
+  digitalWrite(pin, level);
 }
-#endif // SD_CHIP_SELECT_MODE == 0
-#endif // ENABLE_ARDUINO_FEATURES
+#endif  // SD_CHIP_SELECT_MODE == 0
+#endif  // ENABLE_ARDUINO_FEATURES

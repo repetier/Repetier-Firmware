@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -198,13 +198,13 @@ bool istream::getDouble(double* value) {
     if (exp & 1) {
       if (expNeg) {
         // check for underflow
-        if (v < FLT_MIN * pow10  && frac != 0) {
+        if (v < DBL_MIN * pow10  && frac != 0) {
           goto fail;
         }
         v /= pow10;
       } else {
         // check for overflow
-        if (v > FLT_MAX / pow10) {
+        if (v > DBL_MAX / pow10) {
           goto fail;
         }
         v *= pow10;
@@ -217,7 +217,7 @@ bool istream::getDouble(double* value) {
   *value = neg ? -v : v;
   return true;
 
-fail:
+ fail:
   // error restore position to last good place
   setpos(&endPos);
   setstate(failbit);

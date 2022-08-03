@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -26,24 +26,26 @@
 #include "FsLib.h"
 FsVolume* FsVolume::m_cwv = nullptr;
 //------------------------------------------------------------------------------
-bool FsVolume::begin(BlockDevice* blockDev) {
+bool FsVolume::begin(FsBlockDevice* blockDev, bool setCwv,
+                     uint8_t part, uint32_t volStart) {
   m_blockDev = blockDev;
   m_fVol = nullptr;
   m_xVol = new (m_volMem) ExFatVolume;
-  if (m_xVol && m_xVol->begin(m_blockDev, false)) {
+  if (m_xVol && m_xVol->begin(m_blockDev, false, part, volStart)) {
     goto done;
   }
   m_xVol = nullptr;
   m_fVol = new (m_volMem) FatVolume;
-  if (m_fVol && m_fVol->begin(m_blockDev, false)) {
+  if (m_fVol && m_fVol->begin(m_blockDev, false, part, volStart)) {
     goto done;
   }
-  m_cwv = nullptr;
   m_fVol = nullptr;
   return false;
 
  done:
-  m_cwv = this;
+  if (setCwv || !m_cwv) {
+    m_cwv = this;
+  }
   return true;
 }
 //------------------------------------------------------------------------------
@@ -56,23 +58,6 @@ FsFile FsVolume::open(const char *path, oflag_t oflag) {
   FsFile tmpFile;
   tmpFile.open(this, path, oflag);
   return tmpFile;
-}
-//------------------------------------------------------------------------------
-/** M - 
- * \return The logical sector number for the root directory. */
-uint32_t FsVolume::rootDirStartSector() const {
-    if (m_fVol) {
-        if (fatType() == FAT_TYPE_FAT16) {
-            return m_fVol->rootDirStart();
-        } else if (fatType() == FAT_TYPE_FAT32) {
-            return m_fVol->dataStartSector()
-                + ((m_fVol->rootDirStart() - 2ul) << m_fVol->sectorsPerClusterShift());
-        }
-    } else if (m_xVol) {
-        return m_xVol->clusterHeapStartSector()
-            + ((m_xVol->rootDirectoryCluster() - 2ul) << m_xVol->sectorsPerClusterShift());
-    }
-    return 0ul;
 }
 #if ENABLE_ARDUINO_STRING
 //------------------------------------------------------------------------------

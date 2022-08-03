@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -24,31 +24,39 @@
  */
 /**
  * \file
- * \brief BlockDeviceInterface include file.
+ * \brief FsBlockDeviceInterface include file.
  */
-#ifndef BlockDeviceInterface_h
-#define BlockDeviceInterface_h
+#ifndef FsBlockDeviceInterface_h
+#define FsBlockDeviceInterface_h
 #include <stdint.h>
 #include <stddef.h>
-#include "../SdFatConfig.h"
 /**
- * \class BlockDeviceInterface
- * \brief BlockDeviceInterface class.
+ * \class FsBlockDeviceInterface
+ * \brief FsBlockDeviceInterface class.
  */
-class BlockDeviceInterface {
+class FsBlockDeviceInterface {
  public:
-  virtual ~BlockDeviceInterface() {}
+  virtual ~FsBlockDeviceInterface() {}
+
+  /** end use of device */
+  virtual void end() {}
   /**
-   * Read a 512 byte sector.
+   * Check for FsBlockDevice busy.
+   *
+   * \return true if busy else false.
+   */
+  virtual bool isBusy() = 0;
+  /**
+   * Read a sector.
    *
    * \param[in] sector Logical sector to be read.
    * \param[out] dst Pointer to the location that will receive the data.
    * \return true for success or false for failure.
    */
   virtual bool readSector(uint32_t sector, uint8_t* dst) = 0;
-#if USE_MULTI_SECTOR_IO
+
   /**
-   * Read multiple 512 byte sectors.
+   * Read multiple sectors.
    *
    * \param[in] sector Logical sector to be read.
    * \param[in] ns Number of sectors to be read.
@@ -56,7 +64,7 @@ class BlockDeviceInterface {
    * \return true for success or false for failure.
    */
   virtual bool readSectors(uint32_t sector, uint8_t* dst, size_t ns) = 0;
-#endif  // USE_MULTI_SECTOR_IO
+
   /** \return device size in sectors. */
   virtual uint32_t sectorCount() = 0;
 
@@ -66,16 +74,16 @@ class BlockDeviceInterface {
   virtual bool syncDevice() = 0;
 
   /**
-   * Writes a 512 byte sector.
+   * Writes a sector.
    *
    * \param[in] sector Logical sector to be written.
    * \param[in] src Pointer to the location of the data to be written.
    * \return true for success or false for failure.
    */
   virtual bool writeSector(uint32_t sector, const uint8_t* src) = 0;
-#if USE_MULTI_SECTOR_IO
+
   /**
-   * Write multiple 512 byte sectors.
+   * Write multiple sectors.
    *
    * \param[in] sector Logical sector to be written.
    * \param[in] ns Number of sectors to be written.
@@ -83,6 +91,5 @@ class BlockDeviceInterface {
    * \return true for success or false for failure.
    */
   virtual bool writeSectors(uint32_t sector, const uint8_t* src, size_t ns) = 0;
-#endif  // USE_MULTI_SECTOR_IO
 };
-#endif  // BlockDeviceInterface_h
+#endif  // FsBlockDeviceInterface_h

@@ -190,8 +190,12 @@ inline void memcopy4(void* dest, void* source) {
 #endif
 
 #include "communication/gcode.h"
-#if SDSUPPORT
+//#if SDSUPPORT
 #include "SdFat/src/SdFat.h"
+#ifndef NEW_FILE_HANDLING
+#define NEW_FILE_HANDLING 0
 #endif
+#include "sdcard/FileSource.h"
+//#endif
 
 #endif

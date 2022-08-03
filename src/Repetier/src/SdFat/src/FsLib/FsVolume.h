@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -39,66 +39,42 @@ class FsFile;
  */
 class FsVolume {
 public:
-    FsVolume()
-        : m_fVol(nullptr)
-        , m_xVol(nullptr) { }
+    FsVolume() { }
 
     ~FsVolume() { end(); }
-
+    /** Get file's user settable attributes.
+   * \param[in] path path to file.
+   * \return user settable file attributes for success else -1.
+   */
+    int attrib(const char* path) {
+        return m_fVol ? m_fVol->attrib(path) : m_xVol ? m_xVol->attrib(path) : -1;
+    }
+    /** Set file's user settable attributes.
+   * \param[in] path path to file.
+   * \param[in] bits bit-wise or of selected attributes: FS_ATTRIB_READ_ONLY,
+   *            FS_ATTRIB_HIDDEN, FS_ATTRIB_SYSTEM, FS_ATTRIB_ARCHIVE.
+   *
+   * \return true for success or false for failure.
+   */
+    bool attrib(const char* path, uint8_t bits) {
+        return m_fVol ? m_fVol->attrib(path, bits) : m_xVol ? m_xVol->attrib(path, bits) : false;
+    }
     /**
    * Initialize an FatVolume object.
    * \param[in] blockDev Device block driver.
+   * \param[in] setCwv Set current working volume if true.
+   * \param[in] part partition to initialize.
+   * \param[in] volStart Start sector of volume if part is zero.
    * \return true for success or false for failure.
    */
-    bool begin(BlockDevice* blockDev);
+    bool begin(FsBlockDevice* blockDev, bool setCwv = true, uint8_t part = 1, uint32_t volStart = 0);
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+    uint32_t __attribute__((error("use sectorsPerCluster()"))) blocksPerCluster();
+#endif // DOXYGEN_SHOULD_SKIP_THIS
     /** \return the number of bytes in a cluster. */
-    uint32_t bytesPerCluster() {
+    uint32_t bytesPerCluster() const {
         return m_fVol ? m_fVol->bytesPerCluster() : m_xVol ? m_xVol->bytesPerCluster() : 0;
     }
-    /** \return current working volume. */
-    static FsVolume* cwv() { return m_cwv; }
-    /** Change global working volume to this volume. */
-    void chvol() { m_cwv = this; }
-    /** \return The total number of clusters in the volume. */
-    uint32_t clusterCount() {
-        return m_fVol ? m_fVol->clusterCount() : m_xVol ? m_xVol->clusterCount() : 0;
-    }
-    /** \return The logical sector number for the start of file data. */
-    uint32_t dataStartSector() const {
-        return m_fVol ? m_fVol->dataStartSector() : m_xVol ? m_xVol->clusterHeapStartSector() : 0;
-    }
-    /** \return The logical sector number for the start of the first FAT. */
-    uint32_t fatStartSector() const {
-        return m_fVol ? m_fVol->fatStartSector() : m_xVol ? m_xVol->fatStartSector() : 0;
-    }
-    /** \return the free cluster count. */
-    uint32_t freeClusterCount() {
-        return m_fVol ? m_fVol->freeClusterCount() : m_xVol ? m_xVol->freeClusterCount() : 0;
-    }
-    /** \return The volume's cluster size in sectors. */
-    uint32_t sectorsPerCluster() const {
-        return m_fVol ? m_fVol->sectorsPerCluster() : m_xVol ? m_xVol->sectorsPerCluster() : 0;
-    }
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-    // Use sectorsPerCluster(). blocksPerCluster() will be removed in the future.
-    uint32_t blocksPerCluster() __attribute__((deprecated)) { return sectorsPerCluster(); } //NOLINT
-#endif                                                                                      // DOXYGEN_SHOULD_SKIP_THIS
-    // M - returns pointer to fat mbr from cache, or nullptr
-    MbrSector_t* fatMbrSector() {
-        return m_fVol ? m_fVol->fatMbrSector() : m_xVol ? m_xVol->fatMbrSector() : nullptr;
-    }
-    // M - returns pointer to partiton boot sector from cache, or nullptr
-    PbsFat_t* fatPartBootSector() {
-        return m_fVol ? m_fVol->fatPartBootSector() : m_xVol ? m_xVol->fatPartBootSector() : nullptr;
-    }
-    /** M - 
-     * \return The volume label obtained from the boot sector */
-    size_t getVolumeLabel(char* name, size_t len) const { 
-        return m_fVol ? m_fVol->getVolumeLabel(name, len) : 0; // TODO exFAT
-    }
-    /** M - 
-     * \return The logical sector number for the root directory. */
-    uint32_t rootDirStartSector() const;
     /**
    * Set volume working directory to root.
    * \return true for success or false for failure.
@@ -114,10 +90,24 @@ public:
     bool chdir(const char* path) {
         return m_fVol ? m_fVol->chdir(path) : m_xVol ? m_xVol->chdir(path) : false;
     }
-    /** free dynamic memory and end access to volume */
-    void end() {
+    /** Change global working volume to this volume. */
+    void chvol() { m_cwv = this; }
+    /** \return The total number of clusters in the volume. */
+    uint32_t clusterCount() const {
+        return m_fVol ? m_fVol->clusterCount() : m_xVol ? m_xVol->clusterCount() : 0;
+    }
+    /** \return The logical sector number for the start of file data. */
+    uint32_t dataStartSector() const {
+        return m_fVol ? m_fVol->dataStartSector() : m_xVol ? m_xVol->clusterHeapStartSector() : 0;
+    }
+    /** End access to volume
+   * \return pointer to sector size buffer for format.
+   */
+    uint8_t* end() {
         m_fVol = nullptr;
         m_xVol = nullptr;
+        static_assert(sizeof(m_volMem) >= 512, "m_volMem too small");
+        return reinterpret_cast<uint8_t*>(m_volMem);
     }
     /** Test for the existence of a file in a directory
    *
@@ -128,11 +118,27 @@ public:
     bool exists(const char* path) {
         return m_fVol ? m_fVol->exists(path) : m_xVol ? m_xVol->exists(path) : false;
     }
+    /** \return The logical sector number for the start of the first FAT. */
+    uint32_t fatStartSector() const {
+        return m_fVol ? m_fVol->fatStartSector() : m_xVol ? m_xVol->fatStartSector() : 0;
+    }
     /** \return Partition type, FAT_TYPE_EXFAT, FAT_TYPE_FAT32,
    *          FAT_TYPE_FAT16, or zero for error.
    */
     uint8_t fatType() const {
         return m_fVol ? m_fVol->fatType() : m_xVol ? m_xVol->fatType() : 0;
+    }
+    /** \return free cluster count or -1 if an error occurs. */
+    int32_t freeClusterCount() const {
+        return m_fVol ? m_fVol->freeClusterCount() : m_xVol ? m_xVol->freeClusterCount() : -1;
+    }
+    /**
+   * Check for device busy.
+   *
+   * \return true if busy else false.
+   */
+    bool isBusy() {
+        return m_fVol ? m_fVol->isBusy() : m_xVol ? m_xVol->isBusy() : false;
     }
     /** List directory contents.
    *
@@ -231,8 +237,12 @@ public:
     bool rmdir(const char* path) {
         return m_fVol ? m_fVol->rmdir(path) : m_xVol ? m_xVol->rmdir(path) : false;
     }
+    /** \return The volume's cluster size in sectors. */
+    uint32_t sectorsPerCluster() const {
+        return m_fVol ? m_fVol->sectorsPerCluster() : m_xVol ? m_xVol->sectorsPerCluster() : 0;
+    }
 #if ENABLE_ARDUINO_SERIAL
-    /** List directory contents. 
+    /** List directory contents.
    * \return true for success or false for failure.
    */
     bool ls() {
@@ -361,16 +371,25 @@ public:
    * \return true for success or false for failure.
    */
 #endif // ENABLE_ARDUINO_STRING
+       /** M - 
+     * \return The volume label obtained from the boot sector */
+    size_t getVolumeLabel(char* name, size_t len) const {
+        return m_fVol ? m_fVol->getVolumeLabel(name, len) : 0; // TODO exFAT
+    }
+
+protected:
+    newalign_t m_volMem[FS_ALIGN_DIM(ExFatVolume, FatVolume)];
 
 private:
     /** FsBaseFile allowed access to private members. */
     friend class FsBaseFile;
-    static FsVolume* m_cwv;
+    static FsVolume* cwv() { return m_cwv; }
     FsVolume(const FsVolume& from);
     FsVolume& operator=(const FsVolume& from);
-    newalign_t m_volMem[FS_ALIGN_DIM(ExFatVolume, FatVolume)];
-    FatVolume* m_fVol;
-    ExFatVolume* m_xVol;
-    BlockDevice* m_blockDev;
+
+    static FsVolume* m_cwv;
+    FatVolume* m_fVol = nullptr;
+    ExFatVolume* m_xVol = nullptr;
+    FsBlockDevice* m_blockDev;
 };
 #endif // FsVolume_h

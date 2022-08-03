@@ -31,16 +31,16 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
+#include "../SdFatConfig.h"
 
-class __FlashStringHelper;
-
-#ifdef F
-#warning F() macro defined for non Arduino System
-#elif defined(__AVR__)
+#ifndef F
+#if defined(__AVR__)
 #include <avr/pgmspace.h>
-#define F(str) (reinterpret_cast<const __FlashStringHelper *>(PSTR(str)))
-#else  // F
+class __FlashStringHelper;
+#define F(string_literal) (reinterpret_cast<const __FlashStringHelper *>(PSTR(string_literal)))
+#else  // defined(__AVR__)
 #define F(str) (str)
+#endif  // defined(__AVR__)
 #endif  // F
 
 #ifdef BIN
@@ -138,7 +138,7 @@ class PrintBasic {
   }
   virtual size_t write(uint8_t b) = 0;
 
-  virtual size_t write(const uint8_t *buffer, size_t size) {
+  virtual size_t write(const uint8_t* buffer, size_t size) {
     size_t i;
     for (i = 0; i < size; i++) {
       if (!write(buffer[i])) break;
@@ -146,7 +146,7 @@ class PrintBasic {
     return i;
   }
   size_t write(const char *buffer, size_t size) {
-    return write((const uint8_t *)buffer, size);
+    return write((const uint8_t*)buffer, size);
   }
 
  protected:

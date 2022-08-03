@@ -302,7 +302,9 @@ enum class BootReason {
 #define DEFAULT_MATERIAL(name, extr, bed, chamber) showTemperature(action, name, extr, bed, chamber);
 
 #include "io/temperature_tables.h"
+
 #include "Configuration.h"
+
 
 #if NUM_AXES < 4
 #error The minimum NUM_AXES allowed is 4!
@@ -656,7 +658,7 @@ extern void writeMonitor();
 extern char tempLongFilename[LONG_FILENAME_LENGTH + 1];
 extern char fullName[LONG_FILENAME_LENGTH * SD_MAX_FOLDER_DEPTH + SD_MAX_FOLDER_DEPTH + 1];
 
-#if SDSUPPORT
+#if SDSUPPORT || NEW_FILE_HANDLING == 1
 #include "sdcard/SDCard.h"
 #endif
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -22,35 +22,34 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#ifndef ExFatTypes_h
-#define ExFatTypes_h
-#include "ExFatConfig.h"
+#include "Repetier.h"
+#include "FsName.h"
+#include "FsUtf.h"
+#if USE_UTF8_LONG_NAMES
+uint16_t FsName::get16() {
+    uint16_t rtn;
+    if (ls) {
+        rtn = ls;
+        ls = 0;
+    } else if (next >= end) {
+        rtn = 0;
+    } else {
+        uint32_t cp;
+        const char* ptr = FsUtf::mbToCp(next, end, &cp);
+        if (!ptr) {
+            goto fail;
+        }
+        next = ptr;
+        if (cp <= 0XFFFF) {
+            rtn = cp;
+        } else {
+            ls = FsUtf::lowSurrogate(cp);
+            rtn = FsUtf::highSurrogate(cp);
+        }
+    }
+    return rtn;
 
-#if __cplusplus < 201103
-#warning no char16_t
-typedef uint16_t ExChar16_t;
-//  #error C++11 Support required
-#else  // __cplusplus < 201103
-typedef char16_t ExChar16_t;
-#endif  // __cplusplus < 201103
-
-#if USE_EXFAT_UNICODE_NAMES
-/** exFAT API character type */
-typedef ExChar16_t ExChar_t;
-#else  // USE_EXFAT_UNICODE_NAMES
-/** exFAT API character type */
-typedef char ExChar_t;
-#endif  // USE_EXFAT_UNICODE_NAMES
-/**
- * \struct DirPos_t
- * \brief Internal type for position in directory file.
- */
-struct DirPos_t {
-  /** current cluster */
-  uint32_t cluster;
-  /** offset */
-  uint32_t position;
-  /** directory is contiguous */
-  bool     isContiguous;
-};
-#endif  // ExFatTypes_h
+fail:
+    return 0XFFFF;
+}
+#endif // USE_UTF8_LONG_NAMES

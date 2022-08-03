@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -33,7 +33,7 @@
 /** For internal use in c++ streams */
 typedef fspos_t pos_t;
 //==============================================================================
-#if SDFAT_FILE_TYPE == 1
+#if SDFAT_FILE_TYPE == 1 || defined(DOXYGEN)
 /** Set File type for iostreams. */
 typedef FatFile StreamBaseFile;
 #elif SDFAT_FILE_TYPE == 2
@@ -389,7 +389,7 @@ inline ios_base& uppercase(ios_base& str) {
 class ios : public ios_base {
  public:
   /** Create ios with no error flags set */
-  ios() : m_iostate(0) {}
+  ios() {}
 
   /** \return null pointer if fail() is true. */
   operator const void*() const {
@@ -443,6 +443,6 @@ class ios : public ios_base {
   }
 
  private:
-  iostate m_iostate;
+  iostate m_iostate = 0;
 };
 #endif  // ios_h

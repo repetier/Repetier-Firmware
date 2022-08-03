@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -33,41 +33,52 @@
 #include "SdCardInfo.h"
 #include "SdCardInterface.h"
 #include "../SpiDriver/SdSpiDriver.h"
+/** Verify correct SPI active if non-zero. */
+#define CHECK_SPI_ACTIVE 0
+#if CHECK_SPI_ACTIVE
+/** Check SPI active. */
+#define SPI_ASSERT_ACTIVE {if (!m_spiActive) {\
+  Serial.print(F("SPI_ASSERTACTIVE"));\
+  Serial.println(__LINE__);}}
+#else  // CHECK_SPI_ACTIVE
+/** Do not check SPI active. */
+#define SPI_ASSERT_ACTIVE
+#endif  // CHECK_SPI_ACTIVE
 //==============================================================================
 /**
- * \class SdSpiCard
- * \brief Raw access to SD and SDHC flash memory cards via SPI protocol.
+ * \class SharedSpiCard
+ * \brief Raw access to SD and SDHC flash memory cards via shared SPI port.
  */
 #if HAS_SDIO_CLASS
-class SdSpiCard : public SdCardInterface {
+class SharedSpiCard : public SdCardInterface {
 #elif USE_BLOCK_DEVICE_INTERFACE
-class SdSpiCard : public BlockDeviceInterface {
+class SharedSpiCard : public FsBlockDeviceInterface {
 #else  // HAS_SDIO_CLASS
-class SdSpiCard {
+class SharedSpiCard {
 #endif  // HAS_SDIO_CLASS
  public:
-  /** Construct an instance of SdSpiCard. */
-  SdSpiCard() : m_errorCode(SD_CARD_ERROR_INIT_NOT_CALLED), m_type(0) {}
+  /** SD is in idle state */
+  static const uint8_t IDLE_STATE = 0;
+  /** SD is in multi-sector read state. */
+  static const uint8_t READ_STATE = 1;
+  /** SD is in multi-sector write state. */
+  static const uint8_t WRITE_STATE = 2;
+  /** Construct an instance of SharedSpiCard. */
+  SharedSpiCard() {}
   /** Initialize the SD card.
    * \param[in] spiConfig SPI card configuration.
    * \return true for success or false for failure.
    */
   bool begin(SdSpiConfig spiConfig);
-  /** Clear debug stats. */
-  void dbgClearStats();
-  /** Print debug stats. */
-  void dbgPrintStats();
-  /**
-   * Determine the size of an SD flash memory card.
+  /** CMD6 Switch mode: Check Function Set Function.
+   * \param[in] arg CMD6 argument.
+   * \param[out] status return status data.
    *
-   * \return The number of 512 byte data sectors in the card
-   *         or zero if an error occurs.
+   * \return true for success or false for failure.
    */
-  uint32_t sectorCount();
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-  // Use sectorCount(). cardSize() will be removed in the future.
-  uint32_t cardSize() __attribute__ ((deprecated)) {return sectorCount();}
-#endif  // DOXYGEN_SHOULD_SKIP_THIS
+  bool cardCMD6(uint32_t arg, uint8_t* status);
+  /** End use of card */
+  void end();
   /** Erase a range of sectors.
    *
    * \param[in] firstSector The address of the first sector in the range.
@@ -92,6 +103,7 @@ class SdSpiCard {
    *  \param[in] code value for error code.
    */
   void error(uint8_t code) {
+//    (void)code;
     m_errorCode = code;
   }
   /**
@@ -104,44 +116,16 @@ class SdSpiCard {
   uint32_t errorData() const {
     return m_status;
   }
+  /** \return false for shared class. */
+  bool hasDedicatedSpi() {return false;}
   /**
    * Check for busy.  MISO low indicates the card is busy.
    *
    * \return true if busy else false.
    */
   bool isBusy();
-
-  /**
-   * Read a 512 byte sector from an SD card.
-   *
-   * \param[in] sector Logical sector to be read.
-   * \param[out] dst Pointer to the location that will receive the data.
-   * \return true for success or false for failure.
-   */
-  bool readSector(uint32_t sector, uint8_t* dst) {
-#if ENABLE_DEDICATED_SPI
-    return readSectors(sector, dst, 1);
-#else  // ENABLE_DEDICATED_SPI
-    return readSingle(sector, dst);
-#endif  // ENABLE_DEDICATED_SPI
-  }
-  /**
-   * Read a 512 byte sector from an SD card.
-   *
-   * \param[in] sector Logical sector to be read.
-   * \param[out] dst Pointer to the location that will receive the data.
-   * \return true for success or false for failure.
-   */
-  bool readSingle(uint32_t sector, uint8_t* dst);
-  /**
-   * Read multiple 512 byte sectors from an SD card.
-   *
-   * \param[in] sector Logical sector to be read.
-   * \param[in] ns Number of sectors to be read.
-   * \param[out] dst Pointer to the location that will receive the data.
-   * \return true for success or false for failure.
-   */
-  bool readSectors(uint32_t sector, uint8_t* dst, size_t ns);
+  /** \return false, can't be in dedicated state. */
+  bool isDedicatedSpi() {return false;}
   /**
    * Read a card's CID register. The CID contains card identification
    * information such as Manufacturer ID, Product name, Product serial
@@ -171,13 +155,37 @@ class SdSpiCard {
    *
    * \return true for success or false for failure.
    */
-  bool readData(uint8_t *dst);
+  bool readData(uint8_t* dst);
   /** Read OCR register.
    *
    * \param[out] ocr Value of OCR register.
    * \return true for success or false for failure.
    */
   bool readOCR(uint32_t* ocr);
+  /** Read SCR register.
+   *
+   * \param[out] scr Value of SCR register.
+   * \return true for success or false for failure.
+   */
+  bool readSCR(scr_t* scr);
+  /**
+   * Read a 512 byte sector from an SD card.
+   *
+   * \param[in] sector Logical sector to be read.
+   * \param[out] dst Pointer to the location that will receive the data.
+   * \return true for success or false for failure.
+   */
+  bool readSector(uint32_t sector, uint8_t* dst);
+  /**
+   * Read multiple 512 byte sectors from an SD card.
+   *
+   * \param[in] sector Logical sector to be read.
+   * \param[in] ns Number of sectors to be read.
+   * \param[out] dst Pointer to the location that will receive the data.
+   * \return true for success or false for failure.
+   */
+  bool readSectors(uint32_t sector, uint8_t* dst, size_t ns);
+
   /** Start a read multiple sector sequence.
    *
    * \param[in] sector Address of first sector in sequence.
@@ -192,12 +200,38 @@ class SdSpiCard {
    * \param[out] status location for 64 status bytes.
    * \return true for success or false for failure.
    */
-  bool readStatus(uint8_t* status);
+  bool readStatus(SdStatus* status);
   /** End a read multiple sectors sequence.
    *
    * \return true for success or false for failure.
    */
   bool readStop();
+  /** \return SD multi-sector read/write state */
+  uint8_t sdState() {return m_state;}
+  /**
+   * Determine the size of an SD flash memory card.
+   *
+   * \return The number of 512 byte data sectors in the card
+   *         or zero if an error occurs.
+   */
+  uint32_t sectorCount();
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  // Use sectorCount(). cardSize() will be removed in the future.
+  uint32_t __attribute__((error("use sectorCount()"))) cardSize();
+#endif  // DOXYGEN_SHOULD_SKIP_THIS
+  /** Set SPI sharing state
+   * \param[in] value desired state.
+   * \return false for shared card
+   */
+  bool setDedicatedSpi(bool value) {
+    (void)value;
+    return false;
+  }
+  /** end a mult-sector transfer.
+   *
+   * \return true for success or false for failure.
+   */
+  bool stopTransfer();
   /** \return success if sync successful. Not for user apps. */
   bool syncDevice();
   /** Return the card type: SD V1, SD V2 or SDHC/SDXC
@@ -207,27 +241,13 @@ class SdSpiCard {
     return m_type;
   }
   /**
-   * Writes a 512 byte sector to an SD card.
+   * Write a 512 byte sector to an SD card.
    *
    * \param[in] sector Logical sector to be written.
    * \param[in] src Pointer to the location of the data to be written.
    * \return true for success or false for failure.
    */
-  bool writeSector(uint32_t sector, const uint8_t* src) {
-#if ENABLE_DEDICATED_SPI
-    return writeSectors(sector, src, 1);
-#else  // ENABLE_DEDICATED_SPI
-    return writeSingle(sector, src);
-#endif  // ENABLE_DEDICATED_SPI
-  }
-  /**
-   * Writes a 512 byte sector to an SD card.
-   *
-   * \param[in] sector Logical sector to be written.
-   * \param[in] src Pointer to the location of the data to be written.
-   * \return true for success or false for failure.
-   */
-  bool writeSingle(uint32_t sector, const uint8_t* src);
+  bool writeSector(uint32_t sector, const uint8_t* src);
   /**
    * Write multiple 512 byte sectors to an SD card.
    *
@@ -253,26 +273,11 @@ class SdSpiCard {
    */
   bool writeStart(uint32_t sector);
 
-  /** Start a write multiple sector sequence with pre-erase.
-   *
-   * \param[in] sector Address of first sector in sequence.
-   * \param[in] eraseCount The number of sectors to be pre-erased.
-   *
-   * \note This function is used with writeData() and writeStop()
-   * for optimized multiple sector writes.
-   *
-   * \return true for success or false for failure.
-   */
-  bool writeStart(uint32_t sector, uint32_t eraseCount);
   /** End a write multiple sectors sequence.
    *
    * \return true for success or false for failure.
    */
   bool writeStop();
-  /** Set CS low and activate the card. */
-  void spiStart();
-  /** Set CS high and deactivate the card. */
-  void spiStop();
 
  private:
   // private functions
@@ -281,21 +286,21 @@ class SdSpiCard {
     return cardCommand(cmd, arg);
   }
   uint8_t cardCommand(uint8_t cmd, uint32_t arg);
-  bool isTimedOut(SdMillis_t startMS, SdMillis_t timeoutMS);
   bool readData(uint8_t* dst, size_t count);
   bool readRegister(uint8_t cmd, void* buf);
   void spiSelect() {
     sdCsWrite(m_csPin, false);
   }
-  void type(uint8_t value) {
-    m_type = value;
-  }
+  void spiStart();
+  void spiStop();
   void spiUnselect() {
     sdCsWrite(m_csPin, true);
   }
-  bool waitNotBusy(SdMillis_t timeoutMS);
-  bool writeData(uint8_t token, const uint8_t*   src);
-
+  void type(uint8_t value) {
+    m_type = value;
+  }
+  bool waitReady(uint16_t ms);
+  bool writeData(uint8_t token, const uint8_t* src);
 #if SPI_DRIVER_SELECT < 2
   void spiActivate() {
     m_spiDriver.activate();
@@ -306,16 +311,23 @@ class SdSpiCard {
   void spiDeactivate() {
     m_spiDriver.deactivate();
   }
+  void spiEnd() {
+    m_spiDriver.end();
+  }
   uint8_t spiReceive() {
+    SPI_ASSERT_ACTIVE;
     return m_spiDriver.receive();
   }
   uint8_t spiReceive(uint8_t* buf, size_t n) {
-    return  m_spiDriver.receive(buf, n);
+    SPI_ASSERT_ACTIVE;
+    return m_spiDriver.receive(buf, n);
   }
   void spiSend(uint8_t data) {
+    SPI_ASSERT_ACTIVE;
     m_spiDriver.send(data);
   }
   void spiSend(const uint8_t* buf, size_t n) {
+    SPI_ASSERT_ACTIVE;
     m_spiDriver.send(buf, n);
   }
   void spiSetSckSpeed(uint32_t maxSck) {
@@ -332,35 +344,108 @@ class SdSpiCard {
   void spiDeactivate() {
     m_spiDriverPtr->deactivate();
   }
+  void spiEnd() {
+    m_spiDriverPtr->end();
+  }
   uint8_t spiReceive() {
+    SPI_ASSERT_ACTIVE;
     return m_spiDriverPtr->receive();
   }
   uint8_t spiReceive(uint8_t* buf, size_t n) {
-    return  m_spiDriverPtr->receive(buf, n);
+    SPI_ASSERT_ACTIVE;
+    return m_spiDriverPtr->receive(buf, n);
   }
   void spiSend(uint8_t data) {
+    SPI_ASSERT_ACTIVE;
     m_spiDriverPtr->send(data);
   }
   void spiSend(const uint8_t* buf, size_t n) {
+    SPI_ASSERT_ACTIVE;
     m_spiDriverPtr->send(buf, n);
   }
   void spiSetSckSpeed(uint32_t maxSck) {
     m_spiDriverPtr->setSckSpeed(maxSck);
   }
   SdSpiDriver* m_spiDriverPtr;
+
 #endif  // SPI_DRIVER_SELECT < 2
-#if ENABLE_DEDICATED_SPI
-  static const uint8_t IDLE_STATE = 0;
-  static const uint8_t READ_STATE = 1;
-  static const uint8_t WRITE_STATE = 2;
-  uint32_t m_curSector;
-  uint8_t m_curState;
-  bool    m_sharedSpi;
-#endif  // ENABLE_DEDICATED_SPI
+  bool m_beginCalled = false;
   SdCsPin_t m_csPin;
-  uint8_t m_errorCode;
+  uint8_t m_errorCode = SD_CARD_ERROR_INIT_NOT_CALLED;
   bool    m_spiActive;
+  uint8_t m_state;
   uint8_t m_status;
-  uint8_t m_type;
+  uint8_t m_type = 0;
 };
+
+//==============================================================================
+/**
+ * \class DedicatedSpiCard
+ * \brief Raw access to SD and SDHC flash memory cards via dedicate SPI port.
+ */
+class DedicatedSpiCard : public SharedSpiCard {
+ public:
+  /** Construct an instance of DedicatedSpiCard. */
+  DedicatedSpiCard() {}
+  /** Initialize the SD card.
+   * \param[in] spiConfig SPI card configuration.
+   * \return true for success or false for failure.
+   */
+  bool begin(SdSpiConfig spiConfig);
+  /** \return true, can be in dedicaded state. */
+  bool hasDedicatedSpi() {return true;}
+  /** \return true if in dedicated SPI state. */
+  bool isDedicatedSpi() {return m_dedicatedSpi;}
+  /**
+   * Read a 512 byte sector from an SD card.
+   *
+   * \param[in] sector Logical sector to be read.
+   * \param[out] dst Pointer to the location that will receive the data.
+   * \return true for success or false for failure.
+   */
+  bool readSector(uint32_t sector, uint8_t* dst);
+  /**
+   * Read multiple 512 byte sectors from an SD card.
+   *
+   * \param[in] sector Logical sector to be read.
+   * \param[in] ns Number of sectors to be read.
+   * \param[out] dst Pointer to the location that will receive the data.
+   * \return true for success or false for failure.
+   */
+  bool readSectors(uint32_t sector, uint8_t* dst, size_t ns);
+  /** Set SPI sharing state
+   * \param[in] value desired state.
+   * \return true for success else false;
+   */
+  bool setDedicatedSpi(bool value);
+  /**
+   * Write a 512 byte sector to an SD card.
+   *
+   * \param[in] sector Logical sector to be written.
+   * \param[in] src Pointer to the location of the data to be written.
+   * \return true for success or false for failure.
+   */
+  bool writeSector(uint32_t sector, const uint8_t* src);
+  /**
+   * Write multiple 512 byte sectors to an SD card.
+   *
+   * \param[in] sector Logical sector to be written.
+   * \param[in] ns Number of sectors to be written.
+   * \param[in] src Pointer to the location of the data to be written.
+   * \return true for success or false for failure.
+   */
+  bool writeSectors(uint32_t sector, const uint8_t* src, size_t ns);
+
+ private:
+  uint32_t m_curSector;
+  bool m_dedicatedSpi = false;
+};
+//==============================================================================
+#if ENABLE_DEDICATED_SPI
+/** typedef for dedicated SPI. */
+typedef DedicatedSpiCard SdSpiCard;
+#else
+/** typedef for shared SPI. */
+typedef SharedSpiCard SdSpiCard;
+#endif
 #endif  // SdSpiCard_h

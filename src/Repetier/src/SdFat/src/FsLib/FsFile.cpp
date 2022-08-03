@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -26,187 +26,220 @@
 #include "FsLib.h"
 //------------------------------------------------------------------------------
 FsBaseFile::FsBaseFile(const FsBaseFile& from) {
-  m_fFile = nullptr;
-  m_xFile = nullptr;
-  if (from.m_fFile) {
-    m_fFile = new (m_fileMem) FatFile;
-    *m_fFile = *from.m_fFile;
-  } else if (from.m_xFile) {
-    m_xFile = new (m_fileMem) ExFatFile;
-    *m_xFile = *from.m_xFile;
-  }
+    m_fFile = nullptr;
+    m_xFile = nullptr;
+    if (from.m_fFile) {
+        m_fFile = new (m_fileMem) FatFile;
+        *m_fFile = *from.m_fFile;
+    } else if (from.m_xFile) {
+        m_xFile = new (m_fileMem) ExFatFile;
+        *m_xFile = *from.m_xFile;
+    }
 }
 //------------------------------------------------------------------------------
 FsBaseFile& FsBaseFile::operator=(const FsBaseFile& from) {
-  if (this == &from) return *this;
-  close();
-  if (from.m_fFile) {
-    m_fFile = new (m_fileMem) FatFile;
-    *m_fFile = *from.m_fFile;
-  } else if (from.m_xFile) {
-    m_xFile = new (m_fileMem) ExFatFile;
-    *m_xFile = *from.m_xFile;
-  }
-  return *this;
+    if (this == &from) {
+        return *this;
+    }
+    close();
+    if (from.m_fFile) {
+        m_fFile = new (m_fileMem) FatFile;
+        *m_fFile = *from.m_fFile;
+    } else if (from.m_xFile) {
+        m_xFile = new (m_fileMem) ExFatFile;
+        *m_xFile = *from.m_xFile;
+    }
+    return *this;
 }
 //------------------------------------------------------------------------------
 bool FsBaseFile::close() {
-  if (m_fFile && m_fFile->close()) {
+    bool rtn = m_fFile ? m_fFile->close() : m_xFile ? m_xFile->close() : true;
     m_fFile = nullptr;
-    return true;
-  }
-  if (m_xFile && m_xFile->close()) {
     m_xFile = nullptr;
-    return true;
-  }
-  return false;
+    return rtn;
 }
 //------------------------------------------------------------------------------
 bool FsBaseFile::mkdir(FsBaseFile* dir, const char* path, bool pFlag) {
-  close();
-  if (dir->m_fFile) {
-    m_fFile = new (m_fileMem) FatFile;
-    if (m_fFile->mkdir(dir->m_fFile, path, pFlag)) {
-      return true;
+    close();
+    if (dir->m_fFile) {
+        m_fFile = new (m_fileMem) FatFile;
+        if (m_fFile->mkdir(dir->m_fFile, path, pFlag)) {
+            return true;
+        }
+        m_fFile = nullptr;
+    } else if (dir->m_xFile) {
+        m_xFile = new (m_fileMem) ExFatFile;
+        if (m_xFile->mkdir(dir->m_xFile, path, pFlag)) {
+            return true;
+        }
+        m_xFile = nullptr;
     }
-    m_fFile = nullptr;
-  } else if (dir->m_xFile) {
-    m_xFile = new (m_fileMem) ExFatFile;
-    if (m_xFile->mkdir(dir->m_xFile, path, pFlag)) {
-      return true;
-    }
-    m_xFile = nullptr;
-  }
-  return false;
+    return false;
 }
-
+//------------------------------------------------------------------------------
+// REPETIER: Special version with index for menu selection
+bool FsBaseFile::open(FsVolume* vol, uint32_t index, oflag_t oflag) {
+    if (!vol) {
+        return false;
+    }
+    close();
+    if (vol->m_fVol) {
+        m_fFile = new (m_fileMem) FatFile;
+        if (m_fFile && m_fFile->open(vol->m_fVol, static_cast<uint16_t>(index), oflag)) {
+            return true;
+        }
+        m_fFile = nullptr;
+        return false;
+    } else if (vol->m_xVol) {
+        m_xFile = new (m_fileMem) ExFatFile;
+        if (m_xFile && m_xFile->open(vol->m_xVol, index, oflag)) {
+            return true;
+        }
+        m_xFile = nullptr;
+    }
+    return false;
+}
 //------------------------------------------------------------------------------
 bool FsBaseFile::open(FsVolume* vol, const char* path, oflag_t oflag) {
-  if (!vol) { 
-    return false;
-  }
-  close();
-  if (vol->m_fVol) {
-    m_fFile = new (m_fileMem) FatFile;
-    if (m_fFile && m_fFile->open(vol->m_fVol, path, oflag)) {
-      return true;
+    if (!vol) {
+        return false;
     }
-    m_fFile = nullptr;
-    return false;
-  } else if (vol->m_xVol) {
-    m_xFile = new (m_fileMem) ExFatFile;
-    if (m_xFile && m_xFile->open(vol->m_xVol, path, oflag)) {
-      return true;
+    close();
+    if (vol->m_fVol) {
+        m_fFile = new (m_fileMem) FatFile;
+        if (m_fFile && m_fFile->open(vol->m_fVol, path, oflag)) {
+            return true;
+        }
+        m_fFile = nullptr;
+    } else if (vol->m_xVol) {
+        m_xFile = new (m_fileMem) ExFatFile;
+        if (m_xFile && m_xFile->open(vol->m_xVol, path, oflag)) {
+            return true;
+        }
+        m_xFile = nullptr;
     }
-    m_xFile = nullptr;
-  }
-  return false;
+    return false;
 }
-
-//------------------------------------------------------------------------------
-bool FsBaseFile::open(FsVolume* vol, uint32_t index, oflag_t oflag) {
-  if (!vol) { 
-    return false;
-  }
-  close();
-  if (vol->m_fVol) {
-    m_fFile = new (m_fileMem) FatFile;
-    if (m_fFile && m_fFile->open(vol->m_fVol, static_cast<uint16_t>(index), oflag)) {
-      return true;
-    }
-    m_fFile = nullptr;
-    return false;
-  } else if (vol->m_xVol) {
-    m_xFile = new (m_fileMem) ExFatFile;
-    if (m_xFile && m_xFile->open(vol->m_xVol, index, oflag)) {
-      return true;
-    }
-    m_xFile = nullptr;
-  }
-  return false;
-}
-
 //------------------------------------------------------------------------------
 bool FsBaseFile::open(FsBaseFile* dir, const char* path, oflag_t oflag) {
-  close();
-  if (dir->m_fFile) {
-    m_fFile = new (m_fileMem) FatFile;
-    if (m_fFile->open(dir->m_fFile, path, oflag)) {
-      return true;
+    close();
+    if (dir->m_fFile) {
+        m_fFile = new (m_fileMem) FatFile;
+        if (m_fFile->open(dir->m_fFile, path, oflag)) {
+            return true;
+        }
+        m_fFile = nullptr;
+    } else if (dir->m_xFile) {
+        m_xFile = new (m_fileMem) ExFatFile;
+        if (m_xFile->open(dir->m_xFile, path, oflag)) {
+            return true;
+        }
+        m_xFile = nullptr;
     }
-    m_fFile = nullptr;
-  } else if (dir->m_xFile) {
-    m_xFile = new (m_fileMem) ExFatFile;
-    if (m_xFile->open(dir->m_xFile, path, oflag)) {
-      return true;
-    }
-    m_xFile = nullptr;
-  }
-  return false;
+    return false;
 }
 //------------------------------------------------------------------------------
 bool FsBaseFile::open(FsBaseFile* dir, uint32_t index, oflag_t oflag) {
-  close();
-  if (dir->m_fFile) {
-    m_fFile = new (m_fileMem) FatFile;
-    if (m_fFile->open(dir->m_fFile, index, oflag)) {
-      return true;
+    close();
+    if (dir->m_fFile) {
+        m_fFile = new (m_fileMem) FatFile;
+        if (m_fFile->open(dir->m_fFile, index, oflag)) {
+            return true;
+        }
+        m_fFile = nullptr;
+    } else if (dir->m_xFile) {
+        m_xFile = new (m_fileMem) ExFatFile;
+        if (m_xFile->open(dir->m_xFile, index, oflag)) {
+            return true;
+        }
+        m_xFile = nullptr;
     }
-    m_fFile = nullptr;
-  } else if (dir->m_xFile) {
-    m_xFile = new (m_fileMem) ExFatFile;
-    if (m_xFile->open(dir->m_xFile, index, oflag)) {
-      return true;
+    return false;
+}
+//------------------------------------------------------------------------------
+bool FsBaseFile::openCwd() {
+    close();
+    if (FsVolume::m_cwv && FsVolume::m_cwv->m_fVol) {
+        m_fFile = new (m_fileMem) FatFile;
+        if (m_fFile->openCwd()) {
+            return true;
+        }
+        m_fFile = nullptr;
+    } else if (FsVolume::m_cwv && FsVolume::m_cwv->m_xVol) {
+        m_xFile = new (m_fileMem) ExFatFile;
+        if (m_xFile->openCwd()) {
+            return true;
+        }
+        m_xFile = nullptr;
     }
-    m_xFile = nullptr;
-  }
-  return false;
+    return false;
 }
 //------------------------------------------------------------------------------
 bool FsBaseFile::openNext(FsBaseFile* dir, oflag_t oflag) {
-  close();
-  if (dir->m_fFile) {
-    m_fFile = new (m_fileMem) FatFile;
-    if (m_fFile->openNext(dir->m_fFile, oflag)) {
-      return true;
+    close();
+    if (dir->m_fFile) {
+        m_fFile = new (m_fileMem) FatFile;
+        if (m_fFile->openNext(dir->m_fFile, oflag)) {
+            return true;
+        }
+        m_fFile = nullptr;
+    } else if (dir->m_xFile) {
+        m_xFile = new (m_fileMem) ExFatFile;
+        if (m_xFile->openNext(dir->m_xFile, oflag)) {
+            return true;
+        }
+        m_xFile = nullptr;
     }
-    m_fFile = nullptr;
-  } else if (dir->m_xFile) {
-    m_xFile = new (m_fileMem) ExFatFile;
-    if (m_xFile->openNext(dir->m_xFile, oflag)) {
-      return true;
+    return false;
+}
+//------------------------------------------------------------------------------
+bool FsBaseFile::openRoot(FsVolume* vol) {
+    if (!vol) {
+        return false;
     }
-    m_xFile = nullptr;
-  }
-  return false;
+    close();
+    if (vol->m_fVol) {
+        m_fFile = new (m_fileMem) FatFile;
+        if (m_fFile && m_fFile->openRoot(vol->m_fVol)) {
+            return true;
+        }
+        m_fFile = nullptr;
+    } else if (vol->m_xVol) {
+        m_xFile = new (m_fileMem) ExFatFile;
+        if (m_xFile && m_xFile->openRoot(vol->m_xVol)) {
+            return true;
+        }
+        m_xFile = nullptr;
+    }
+    return false;
 }
 //------------------------------------------------------------------------------
 bool FsBaseFile::remove() {
-  if (m_fFile) {
-    if (m_fFile->remove()) {
-      m_fFile = nullptr;
-      return true;
+    if (m_fFile) {
+        if (m_fFile->remove()) {
+            m_fFile = nullptr;
+            return true;
+        }
+    } else if (m_xFile) {
+        if (m_xFile->remove()) {
+            m_xFile = nullptr;
+            return true;
+        }
     }
-  } else if (m_xFile) {
-    if (m_xFile->remove()) {
-      m_xFile = nullptr;
-      return true;
-    }
-  }
-  return false;
+    return false;
 }
 //------------------------------------------------------------------------------
 bool FsBaseFile::rmdir() {
-  if (m_fFile) {
-    if (m_fFile->rmdir()) {
-      m_fFile = nullptr;
-      return true;
+    if (m_fFile) {
+        if (m_fFile->rmdir()) {
+            m_fFile = nullptr;
+            return true;
+        }
+    } else if (m_xFile) {
+        if (m_xFile->rmdir()) {
+            m_xFile = nullptr;
+            return true;
+        }
     }
-  } else if (m_xFile) {
-    if (m_xFile->rmdir()) {
-      m_xFile = nullptr;
-      return true;
-    }
-  }
-  return false;
+    return false;
 }

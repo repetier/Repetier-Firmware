@@ -1,22 +1,29 @@
+/*
+    This file is part of Repetier-Firmware.
+
+    Repetier-Firmware is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Repetier-Firmware is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
+
+    This firmware is a nearly complete rewrite of the sprinter firmware
+    by kliment (https://github.com/kliment/Sprinter)
+    which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
+*/
+
 #pragma once
 #include "Repetier.h"
 
+#if NEW_FILE_HANDLING == 0
 #if SDSUPPORT
-typedef SdFat sd_fsys_t;
-typedef SdBaseFile sd_file_t;
-enum class SDState {
-    SD_UNMOUNTED,    // No SD Card detected/mounted
-    SD_SAFE_EJECTED, // Manually ejected by M22
-    SD_HAS_ERROR,    // Rare, when has error but left SD card in.
-    SD_MOUNTED,      // When not printing/idle
-    SD_PRINTING,     // While printing. Includes while paused.
-    SD_WRITING       // While writing to a file. 5 minute timeout from last write.
-};
-enum class SDScheduledPause {
-    NO_PAUSE,
-    PARKING_PLANNED,
-    PARKED
-};
 
 class SDCard {
 public:
@@ -150,5 +157,6 @@ private:
 };
 
 extern SDCard sd;
+#endif
 
 #endif

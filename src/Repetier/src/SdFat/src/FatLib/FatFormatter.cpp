@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -23,9 +23,9 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #include "Repetier.h"
-#include "FatFormatter.h"
+#include "FatLib.h"
 // Set nonzero to use calculated CHS in MBR.  Should not be required.
-#define USE_LBA_TO_CHS 0
+#define USE_LBA_TO_CHS 1
 
 // Constants for file system structure optimized for flash.
 uint16_t const BU16 = 128;
@@ -36,7 +36,7 @@ const uint16_t SECTORS_PER_MB = 0X100000/BYTES_PER_SECTOR;
 const uint16_t FAT16_ROOT_ENTRY_COUNT = 512;
 const uint16_t FAT16_ROOT_SECTOR_COUNT =
                32*FAT16_ROOT_ENTRY_COUNT/BYTES_PER_SECTOR;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #define PRINT_FORMAT_PROGRESS 1
 #if !PRINT_FORMAT_PROGRESS
 #define writeMsg(str)
@@ -45,8 +45,8 @@ const uint16_t FAT16_ROOT_SECTOR_COUNT =
 #else  // PRINT_FORMAT_PROGRESS
 #define writeMsg(str) if (m_pr) m_pr->write(str)
 #endif  // PRINT_FORMAT_PROGRESS
-//-----------------------------------------------------------------------------
-bool FatFormatter::format(BlockDevice* dev, uint8_t* secBuf, print_t* pr) {
+//------------------------------------------------------------------------------
+bool FatFormatter::format(FsBlockDevice* dev, uint8_t* secBuf, print_t* pr) {
   bool rtn;
   m_dev = dev;
   m_secBuf = secBuf;
@@ -73,7 +73,7 @@ bool FatFormatter::format(BlockDevice* dev, uint8_t* secBuf, print_t* pr) {
     // SDXC cards
     m_sectorsPerCluster = 128;
   }
-  rtn = m_sectorCount < 0X400000 ? makeFat16() :makeFat32();
+  rtn = m_sectorCount < 0X400000 ? makeFat16() : makeFat32();
   if (rtn) {
     writeMsg("Format Done\r\n");
   } else {
@@ -81,7 +81,7 @@ bool FatFormatter::format(BlockDevice* dev, uint8_t* secBuf, print_t* pr) {
   }
   return rtn;
 }
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool FatFormatter::initFatDir(uint8_t fatType, uint32_t sectorCount) {
   size_t n;
   memset(m_secBuf, 0, BYTES_PER_SECTOR);
@@ -104,7 +104,7 @@ bool FatFormatter::initFatDir(uint8_t fatType, uint32_t sectorCount) {
   return m_dev->writeSector(m_fatStart, m_secBuf) &&
          m_dev->writeSector(m_fatStart + m_fatSize, m_secBuf);
 }
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void FatFormatter::initPbs() {
   PbsFat_t* pbs = reinterpret_cast<PbsFat_t*>(m_secBuf);
   memset(m_secBuf, 0, BYTES_PER_SECTOR);
@@ -129,7 +129,7 @@ void FatFormatter::initPbs() {
   // skip rest of bpb
   setLe16(pbs->signature, PBR_SIGNATURE);
 }
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool FatFormatter::makeFat16() {
   uint32_t nc;
   uint32_t r;
@@ -181,7 +181,7 @@ bool FatFormatter::makeFat16() {
   }
   return initFatDir(16, m_dataStart - m_fatStart);
 }
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool FatFormatter::makeFat32() {
   uint32_t nc;
   uint32_t r;

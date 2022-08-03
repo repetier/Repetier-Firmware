@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -95,7 +95,7 @@ const uint8_t UNGETC_BUF_SIZE = 2;
 /** Seek relative to current position. */
 #define SEEK_CUR 1
 #endif  // SEEK_CUR
-#ifndef  SEEK_END
+#ifndef SEEK_END
 /** Seek relative to end-of-file. */
 #define SEEK_END 2
 #endif  // SEEK_END
@@ -114,11 +114,7 @@ class StdioStream : private StreamBaseFile {
   /** Constructor
    *
    */
-  StdioStream() {
-    m_w = m_r = 0;
-    m_p = m_buf;
-    m_status = 0;
-  }
+  StdioStream() {}
   //----------------------------------------------------------------------------
   /** Clear the stream's end-of-file and error indicators. */
   void clearerr() {
@@ -444,7 +440,7 @@ class StdioStream : private StreamBaseFile {
     return n > 0 ? n : 0;
   }
   //----------------------------------------------------------------------------
-  /**  Print a number.
+  /** Print a number.
    *
    * \param[in] val the number to be printed.
    *
@@ -657,11 +653,11 @@ class StdioStream : private StreamBaseFile {
   static const uint8_t S_EOF = 0x10;  // found EOF
   static const uint8_t S_ERR = 0x20;  // found error
   //----------------------------------------------------------------------------
-  uint8_t  m_status;
-  uint8_t* m_p;
-  uint8_t  m_r;
-  uint8_t  m_w;
   uint8_t  m_buf[STREAM_BUF_SIZE];
+  uint8_t  m_status = 0;
+  uint8_t* m_p = m_buf;
+  uint8_t  m_r = 0;
+  uint8_t  m_w;
 };
 //------------------------------------------------------------------------------
 #endif  // StdioStream_h

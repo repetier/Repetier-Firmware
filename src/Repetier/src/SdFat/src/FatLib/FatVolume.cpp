@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -23,20 +23,24 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #include "Repetier.h"
-#include "FatVolume.h"
+#define DBG_FILE "FatVolume.cpp"
+#include "../common/DebugMacros.h"
+#include "FatLib.h"
 FatVolume* FatVolume::m_cwv = nullptr;
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool FatVolume::chdir(const char *path) {
   FatFile dir;
   if (!dir.open(vwd(), path, O_RDONLY)) {
+    DBG_FAIL_MACRO;
     goto fail;
   }
   if (!dir.isDir()) {
+    DBG_FAIL_MACRO;
     goto fail;
   }
   m_vwd = dir;
   return true;
 
-fail:
+ fail:
   return false;
 }

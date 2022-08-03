@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -40,17 +40,6 @@ void ostream::fill_not_left(unsigned len) {
   if ((flags() & adjustfield) != left) {
     do_fill(len);
   }
-}
-//------------------------------------------------------------------------------
-char* ostream::fmtNum(uint32_t n, char *ptr, uint8_t base) {
-  char a = flags() & uppercase ? 'A' - 10 : 'a' - 10;
-  do {
-    uint32_t m = n;
-    n /= base;
-    char c = m - base * n;
-    *--ptr = c < 10 ? c + '0' : c + a;
-  } while (n);
-  return ptr;
 }
 //------------------------------------------------------------------------------
 void ostream::putBool(bool b) {
@@ -119,7 +108,7 @@ void ostream::putDouble(double n) {
     }
     do_fill(len);
   } else {
-    // do fill for internal or right
+    // do fill for right
     fill_not_left(len);
     if (sign) {
       *--str = sign;
@@ -139,44 +128,12 @@ void ostream::putDouble(double n) {
 //------------------------------------------------------------------------------
 void ostream::putNum(int32_t n) {
   bool neg = n < 0 && flagsToBase() == 10;
-  if (neg) {
-    n = -n;
-  }
-  putNum(n, neg);
+  putNum((uint32_t)(neg ? -n : n), neg);
 }
 //------------------------------------------------------------------------------
-void ostream::putNum(uint32_t n, bool neg) {
-  char buf[13];
-  char* ptr = buf + sizeof(buf) - 1;
-  char* num;
-  char* str;
-  uint8_t base = flagsToBase();
-  *ptr = '\0';
-  str = num = fmtNum(n, ptr, base);
-  if (base == 10) {
-    if (neg) {
-      *--str = '-';
-    } else if (flags() & showpos) {
-      *--str = '+';
-    }
-  } else if (flags() & showbase) {
-    if (flags() & hex) {
-      *--str = flags() & uppercase ? 'X' : 'x';
-    }
-    *--str = '0';
-  }
-  uint8_t len = ptr - str;
-  fmtflags adj = flags() & adjustfield;
-  if (adj == internal) {
-    while (str < num) {
-      putch(*str++);
-    }
-  }
-  if (adj != left) {
-    do_fill(len);
-  }
-  putstr(str);
-  do_fill(len);
+void ostream::putNum(int64_t n) {
+  bool neg = n < 0 && flagsToBase() == 10;
+  putNum((uint64_t)(neg ? -n : n), neg);
 }
 //------------------------------------------------------------------------------
 void ostream::putPgm(const char* str) {

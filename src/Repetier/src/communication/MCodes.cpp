@@ -149,6 +149,8 @@ void __attribute__((weak)) MCode_18(GCode* com) {
 }
 
 void __attribute__((weak)) MCode_20(GCode* com) {
+#if NEW_FILE_HANDLING
+#else
 #if SDSUPPORT
 #if JSON_OUTPUT
     if (com->hasString() && com->text[1] == '2') { // " S2 P/folder"
@@ -168,29 +170,41 @@ void __attribute__((weak)) MCode_20(GCode* com) {
     sd.ls();
 #endif
 #endif
+#endif
 }
 
 void __attribute__((weak)) MCode_21(GCode* com) {
+#if NEW_FILE_HANDLING
+#else
 #if SDSUPPORT
     sd.mount(true);
+#endif
 #endif
 }
 
 void __attribute__((weak)) MCode_22(GCode* com) {
+#if NEW_FILE_HANDLING
+#else
 #if SDSUPPORT
     sd.unmount(true);
+#endif
 #endif
 }
 
 void __attribute__((weak)) MCode_23(GCode* com) {
+#if NEW_FILE_HANDLING
+#else
 #if SDSUPPORT
     if (com->hasString()) {
         sd.selectFile(com->text);
     }
 #endif
+#endif
 }
 
 void __attribute__((weak)) MCode_24(GCode* com) {
+#if NEW_FILE_HANDLING
+#else
 #if SDSUPPORT
     if (Printer::isMenuMode(MENU_MODE_PAUSED)) {
         sd.continuePrint();
@@ -198,23 +212,32 @@ void __attribute__((weak)) MCode_24(GCode* com) {
         sd.startPrint();
     }
 #endif
+#endif
 }
 
 void __attribute__((weak)) MCode_25(GCode* com) {
+#if NEW_FILE_HANDLING
+#else
 #if SDSUPPORT
     sd.pausePrint(com->hasS() ? com->S != 0 : true);
+#endif
 #endif
 }
 
 void __attribute__((weak)) MCode_26(GCode* com) {
+#if NEW_FILE_HANDLING
+#else
 #if SDSUPPORT
     if (com->hasS()) {
         sd.setIndex(com->S);
     }
 #endif
+#endif
 }
 
 void __attribute__((weak)) MCode_27(GCode* com) {
+#if NEW_FILE_HANDLING
+#else
 #if SDSUPPORT
     if (com->hasP() || com->hasS()) {
         Printer::setAutoreportSD((com->getS(0) || com->getP(0)));
@@ -226,48 +249,67 @@ void __attribute__((weak)) MCode_27(GCode* com) {
         sd.printStatus(com->hasC());
     }
 #endif
+#endif
 }
 
 void __attribute__((weak)) MCode_28(GCode* com) {
+#if NEW_FILE_HANDLING
+#else
 #if SDSUPPORT
     if (com->hasString()) {
         sd.startWrite(com->text);
     }
 #endif
+#endif
 }
 
 void __attribute__((weak)) MCode_29(GCode* com) {
+#if NEW_FILE_HANDLING
+#else
 #if SDSUPPORT
 //processed in write to file routine above
+#endif
 #endif
 }
 
 void __attribute__((weak)) MCode_30(GCode* com) {
+#if NEW_FILE_HANDLING
+#else
 #if SDSUPPORT
     if (com->hasString()) {
         sd.deleteFile(com->text);
     }
 #endif
+#endif
 }
 
 void __attribute__((weak)) MCode_32(GCode* com) {
+#if NEW_FILE_HANDLING
+#else
 #if SDSUPPORT
     if (com->hasString()) {
         sd.makeDirectory(com->text);
     }
 #endif
+#endif
 }
 
 void __attribute__((weak)) MCode_36(GCode* com) {
+#if NEW_FILE_HANDLING
+#else
 #if JSON_OUTPUT && SDSUPPORT
     if (com->hasString()) {
         sd.JSONFileInfo(com->text);
     }
 #endif
+#endif
 }
 void __attribute__((weak)) MCode_39(GCode* com) {
+#if NEW_FILE_HANDLING
+#else
 #if SDSUPPORT
     sd.printCardInfo(JSON_OUTPUT && static_cast<bool>(com->getS(0l) == 2l));
+#endif
 #endif
 }
 

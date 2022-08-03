@@ -677,8 +677,12 @@ void Printer::setup() {
 #endif //(MOTHERBOARD == 501) || (MOTHERBOARD == 502)
     GUI::init();
 
+#if NEW_FILE_HANDLING == 1
+    filePrintManager.mountAll();
+#else
 #if SDSUPPORT // Try mounting the SDCard first in case it has an eeprom file.
     sd.mount(true);
+#endif
 #endif
 
     EEPROM::init(); // Read settings from eeprom if wanted, run after initialization!
@@ -723,8 +727,12 @@ void Printer::defaultLoopActions() {
             Printer::kill(true, true);
         }
     }
+#if NEW_FILE_HANDLING == 1
+    filePrintManager.handleAutomount();
+#else
 #if SDCARDDETECT > -1 && SDSUPPORT
     sd.automount();
+#endif
 #endif
 #if defined(EEPROM_AVAILABLE) && (EEPROM_AVAILABLE == EEPROM_SDCARD || EEPROM_AVAILABLE == EEPROM_FLASH) && EEPROM_MODE != EEPROM_NONE
     HAL::syncEEPROM();
@@ -922,9 +930,14 @@ void Printer::showJSONStatus(int type) {
     Com::printF(PSTR("{\"status\": \""));
     if (Motion1::length == 0) {
         Com::print('I'); // IDLING
+#if NEW_FILE_HANDLING == 1
+    } else if (filePrintManager.isPrinting()) {
+        Com::print('P'); // SD PRINTING
+#else
 #if SDSUPPORT
     } else if (sd.state == SDState::SD_PRINTING) {
         Com::print('P'); // SD PRINTING
+#endif
 #endif
     } else {
         Com::print('B'); // SOMETHING ELSE, BUT SOMETHIG
@@ -1196,6 +1209,9 @@ void Printer::showJSONStatus(int type) {
         break;
     case 3:
         Com::printF(PSTR(",\"currentLayer\":"));
+#if NEW_FILE_HANDLING == 1
+        Com::printF(PSTR("-1")); // TODO: Temoprary solution!
+#else
 #if SDSUPPORT
         if (sd.state == SDState::SD_PRINTING && sd.fileInfo.layerHeight > 0) { // ONLY CAN TELL WHEN SD IS PRINTING
             Com::print((int)(Motion1::currentPosition[Z_AXIS] / sd.fileInfo.layerHeight));
@@ -1203,6 +1219,7 @@ void Printer::showJSONStatus(int type) {
             Com::print('0');
 #else
         Com::printF(PSTR("-1"));
+#endif
 #endif
         Com::printF(PSTR(",\"extrRaw\":["));
         firstOccurrence = true;
@@ -1213,6 +1230,8 @@ void Printer::showJSONStatus(int type) {
             firstOccurrence = false;
         }
         Com::printF(PSTR("],"));
+#if NEW_FILE_HANDLING == 1
+#else
 #if SDSUPPORT
         if (sd.state == SDState::SD_PRINTING) {
             Com::printF(PSTR("\"fractionPrinted\":"));
@@ -1225,7 +1244,11 @@ void Printer::showJSONStatus(int type) {
             Com::print(',');
         }
 #endif
+#endif
         Com::printF(PSTR("\"firstLayerHeight\":"));
+#if NEW_FILE_HANDLING == 1
+        Com::print('0'); // TODO: Temporary solution
+#else
 #if SDSUPPORT
         if (sd.state == SDState::SD_PRINTING) {
             Com::print(sd.fileInfo.layerHeight);
@@ -1234,6 +1257,7 @@ void Printer::showJSONStatus(int type) {
         }
 #else
         Com::print('0');
+#endif
 #endif
         break;
     case 4:
@@ -1294,10 +1318,16 @@ void Printer::showJSONStatus(int type) {
 #endif // JSON_OUTPUT
 
 void Printer::pausePrint() {
+#if NEW_FILE_HANDLING == 1
+    if (Printer::isMenuMode(MENU_MODE_SD_PRINTING)) {
+        filePrintManager.pausePrint(true);
+    } else
+#else
 #if SDSUPPORT
     if (Printer::isMenuMode(MENU_MODE_SD_PRINTING)) {
         sd.pausePrint(true);
     } else
+#endif
 #endif
         if (Printer::isMenuMode(MENU_MODE_PRINTING)) {
         GCodeSource::printAllFLN(PSTR("RequestPause:"));
@@ -1309,10 +1339,16 @@ void Printer::pausePrint() {
 }
 
 void Printer::continuePrint() {
+#if NEW_FILE_HANDLING == 1
+    if (Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED)) {
+        filePrintManager.continuePrint();
+    } else
+#else
 #if SDSUPPORT
     if (Printer::isMenuMode(MENU_MODE_SD_PRINTING + MENU_MODE_PAUSED)) {
         sd.continuePrint();
     } else
+#endif
 #endif
         if (Printer::isMenuMode(MENU_MODE_PAUSED)) {
         GCodeSource::printAllFLN(PSTR("RequestContinue:"));
@@ -1325,10 +1361,16 @@ void Printer::continuePrint() {
 
 void Printer::stopPrint() {
     flashSource.close(); // stop flash printing if busy
+#if NEW_FILE_HANDLING == 1
+    if (Printer::isMenuMode(MENU_MODE_SD_PRINTING)) {
+        filePrintManager.stopPrint();
+    } else
+#else
 #if SDSUPPORT
     if (Printer::isMenuMode(MENU_MODE_SD_PRINTING)) {
         sd.stopPrint();
     } else
+#endif
 #endif
     {
         GCodeSource::printAllFLN(PSTR("RequestStop:"));

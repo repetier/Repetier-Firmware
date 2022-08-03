@@ -74,7 +74,7 @@ public:
 };
 
 //#pragma message "Sd support: " XSTR(SDSUPPORT)
-#if SDSUPPORT
+#if SDSUPPORT || NEW_FILE_HANDLING == 1
 class SDCardGCodeSource : public GCodeSource {
 public:
     virtual bool isOpen();

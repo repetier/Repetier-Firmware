@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -25,7 +25,7 @@
 /**
  * \file
  * \brief iostreams for files.
- */ 
+ */
 #ifndef fstream_h
 #define fstream_h
 #include "iostream.h"
@@ -41,7 +41,7 @@ class StreamBaseClass : protected StreamBaseFile, virtual public ios {
   }
   /* Internal do not use
    * \return mode
-   */  
+   */
   int16_t getch();
   bool getWriteError() {
     return StreamBaseFile::getWriteError();

@@ -39,6 +39,8 @@ SPIClass CREATE_SPI2(SPI2_MOSI_PIN, SPI2_MISO_PIN, SPI2_SCK_PIN);
 #define SD_SPI_SPEED_MHZ 4
 #endif
 
+#if NEW_FILE_HANDLING == 0
+
 #if defined(EEPROM_AVAILABLE) && EEPROM_AVAILABLE == EEPROM_SDCARD
 extern sd_file_t eepromFile; // eepromFile has to always be closed on unmounts.
                              // otherwise it'll cause a freeze when we try opening
@@ -88,7 +90,6 @@ void SDCard::automount() {
     }
 #endif
 }
-
 
 #ifndef SD_SPI_ADDRESS
 #define SD_SPI_ADDRESS &SPI
@@ -1315,3 +1316,5 @@ bool GCodeFileInfo::findTotalHeight(char* buf, float& height) {
     return false;
 }
 #endif // JSON_OUTPUT
+
+#endif

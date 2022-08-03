@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -24,10 +24,11 @@
  */
 #ifndef FsStructs_h
 #define FsStructs_h
+#include <stddef.h>
 #include <stdint.h>
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void lbaToMbrChs(uint8_t* chs, uint32_t capacityMB, uint32_t lba);
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #if !defined(USE_SIMPLE_LITTLE_ENDIAN) || USE_SIMPLE_LITTLE_ENDIAN
 // assumes CPU is little-endian and handles alignment issues.
 inline uint16_t getLe16(const uint8_t* src) {
@@ -42,7 +43,6 @@ inline uint64_t getLe64(const uint8_t* src) {
 inline void setLe16(uint8_t* dst, uint16_t src) {
   *reinterpret_cast<uint16_t*>(dst) = src;
 }
-
 inline void setLe32(uint8_t* dst, uint32_t src) {
   *reinterpret_cast<uint32_t*>(dst) = src;
 }
@@ -91,7 +91,29 @@ inline void setLe64(uint8_t* dst, uint64_t src) {
   dst[7] = src >> 56;
 }
 #endif  // USE_SIMPLE_LITTLE_ENDIAN
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Size of FAT and exFAT directory structures.
+const size_t FS_DIR_SIZE = 32;
+//------------------------------------------------------------------------------
+// Reserved characters for exFAT names and FAT LFN.
+inline bool lfnReservedChar(uint8_t c) {
+  return c < 0X20 || c == '"' || c == '*' || c == '/' || c == ':'
+    || c == '<' || c == '>' || c == '?' || c == '\\'|| c == '|';
+}
+//------------------------------------------------------------------------------
+// Reserved characters for FAT short 8.3 names.
+inline bool sfnReservedChar(uint8_t c) {
+  if (c == '"' || c == '|' || c == '[' || c == '\\' || c == ']') {
+    return true;
+  }
+  //  *+,./ or :;<=>?
+  if ((0X2A <= c && c <= 0X2F && c != 0X2D) || (0X3A <= c && c <= 0X3F)) {
+    return true;
+  }
+  // Reserved if not in range (0X20, 0X7F).
+  return !(0X20 < c && c < 0X7F);
+}
+//------------------------------------------------------------------------------
 const uint16_t MBR_SIGNATURE = 0xAA55;
 const uint16_t PBR_SIGNATURE = 0xAA55;
 
@@ -103,13 +125,13 @@ typedef struct mbrPartition {
   uint8_t relativeSectors[4];
   uint8_t totalSectors[4];
 } MbrPart_t;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 typedef struct masterBootRecordSector {
   uint8_t   bootCode[446];
   MbrPart_t part[4];
   uint8_t   signature[2];
 } MbrSector_t;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 typedef struct partitionBootSector {
   uint8_t  jmpInstruction[3];
   char     oemName[8];
@@ -117,17 +139,17 @@ typedef struct partitionBootSector {
   uint8_t  bootCode[390];
   uint8_t  signature[2];
 } pbs_t;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 typedef struct {
   uint8_t type;
   uint8_t data[31];
 } DirGeneric_t;
-//=============================================================================
+//==============================================================================
 typedef struct {
   uint64_t position;
   uint32_t cluster;
 } fspos_t;
-//=============================================================================
+//==============================================================================
 const uint8_t EXTENDED_BOOT_SIGNATURE = 0X29;
 typedef struct biosParameterBlockFat16 {
   uint8_t  bytesPerSector[2];
@@ -150,7 +172,7 @@ typedef struct biosParameterBlockFat16 {
   uint8_t  volumeLabel[11];
   uint8_t  volumeType[8];
 } BpbFat16_t;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 typedef struct biosParameterBlockFat32 {
   uint8_t  bytesPerSector[2];
   uint8_t  sectorsPerCluster;
@@ -180,7 +202,7 @@ typedef struct biosParameterBlockFat32 {
   uint8_t  volumeLabel[11];
   uint8_t  volumeType[8];
 } BpbFat32_t;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 typedef struct partitionBootSectorFat {
   uint8_t  jmpInstruction[3];
   char     oemName[8];
@@ -192,7 +214,7 @@ typedef struct partitionBootSectorFat {
   uint8_t  bootCode[390];
   uint8_t  signature[2];
 } PbsFat_t;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const uint32_t FSINFO_LEAD_SIGNATURE = 0X41615252;
 const uint32_t FSINFO_STRUCT_SIGNATURE = 0x61417272;
 const uint32_t FSINFO_TRAIL_SIGNATURE = 0xAA550000;
@@ -205,17 +227,25 @@ typedef struct FsInfoSector {
   uint8_t reserved2[12];
   uint8_t trailSignature[4];
 } FsInfo_t;
-//-----------------------------------------------------------------------------
-/** name[0] value for entry that is free after being "deleted" */
-const uint8_t FAT_NAME_DELETED = 0XE5;
+//==============================================================================
+/** Attributes common to FAT and exFAT */
+const uint8_t FS_ATTRIB_READ_ONLY = 0x01;
+const uint8_t FS_ATTRIB_HIDDEN    = 0x02;
+const uint8_t FS_ATTRIB_SYSTEM    = 0x04;
+const uint8_t FS_ATTRIB_DIRECTORY = 0x10;
+const uint8_t FS_ATTRIB_ARCHIVE   = 0x20;
+// Attributes that users can change.
+const uint8_t FS_ATTRIB_USER_SETTABLE = FS_ATTRIB_READ_ONLY |
+  FS_ATTRIB_HIDDEN | FS_ATTRIB_SYSTEM | FS_ATTRIB_ARCHIVE;
+// Attributes to copy when a file is opened.
+const uint8_t FS_ATTRIB_COPY = FS_ATTRIB_USER_SETTABLE | FS_ATTRIB_DIRECTORY;
+//==============================================================================
 /** name[0] value for entry that is free and no allocated entries follow */
 const uint8_t FAT_NAME_FREE = 0X00;
-const uint8_t FAT_ATTRIB_READ_ONLY = 0x01;
-const uint8_t FAT_ATTRIB_HIDDEN    = 0x02;
-const uint8_t FAT_ATTRIB_SYSTEM    = 0x04;
+/** name[0] value for entry that is free after being "deleted" */
+const uint8_t FAT_NAME_DELETED = 0XE5;
+// Directiry attribute of volume label.
 const uint8_t FAT_ATTRIB_LABEL     = 0x08;
-const uint8_t FAT_ATTRIB_DIRECTORY = 0x10;
-const uint8_t FAT_ATTRIB_ARCHIVE   = 0x20;
 const uint8_t FAT_ATTRIB_LONG_NAME = 0X0F;
 /** Filename base-name is all lower case */
 const uint8_t FAT_CASE_LC_BASE = 0X08;
@@ -237,27 +267,29 @@ typedef struct {
   uint8_t  fileSize[4];
 } DirFat_t;
 
-static inline bool isFileDir(const DirFat_t* dir) {
-  return (dir->attributes & (FAT_ATTRIB_DIRECTORY | FAT_ATTRIB_LABEL)) == 0;
+static inline bool isFatFile(const DirFat_t* dir) {
+  return (dir->attributes & (FS_ATTRIB_DIRECTORY | FAT_ATTRIB_LABEL)) == 0;
 }
-static inline bool isFileOrSubdir(const DirFat_t* dir) {
+static inline bool isFatFileOrSubdir(const DirFat_t* dir) {
   return (dir->attributes & FAT_ATTRIB_LABEL) == 0;
 }
-static inline uint8_t isLongName(const DirFat_t* dir) {
+static inline uint8_t isFatLongName(const DirFat_t* dir) {
   return dir->attributes == FAT_ATTRIB_LONG_NAME;
 }
-static inline bool isSubdir(const DirFat_t* dir) {
-  return (dir->attributes & (FAT_ATTRIB_DIRECTORY | FAT_ATTRIB_LABEL))
-          == FAT_ATTRIB_DIRECTORY;
+static inline bool isFatSubdir(const DirFat_t* dir) {
+  return (dir->attributes & (FS_ATTRIB_DIRECTORY | FAT_ATTRIB_LABEL))
+          == FS_ATTRIB_DIRECTORY;
 }
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * Order mask that indicates the entry is the last long dir entry in a
  * set of long dir entries. All valid sets of long dir entries must
  * begin with an entry having this mask.
  */
 const uint8_t FAT_ORDER_LAST_LONG_ENTRY = 0X40;
+/** Max long file name length */
 
+const uint8_t FAT_MAX_LFN_LENGTH = 255;
 typedef struct {
   uint8_t  order;
   uint8_t  unicode1[10];
@@ -268,11 +300,11 @@ typedef struct {
   uint8_t  mustBeZero2[2];
   uint8_t  unicode3[4];
 } DirLfn_t;
-//=============================================================================
+//==============================================================================
 inline uint32_t exFatChecksum(uint32_t sum, uint8_t data) {
   return (sum << 31) + (sum >> 1) + data;
 }
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 typedef struct biosParameterBlockExFat {
   uint8_t mustBeZero[53];
   uint8_t partitionOffset[8];
@@ -292,7 +324,7 @@ typedef struct biosParameterBlockExFat {
   uint8_t percentInUse;
   uint8_t reserved[7];
 } BpbExFat_t;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 typedef struct ExFatBootSector {
   uint8_t  jmpInstruction[3];
   char     oemName[8];
@@ -300,7 +332,7 @@ typedef struct ExFatBootSector {
   uint8_t  bootCode[390];
   uint8_t  signature[2];
 } ExFatPbs_t;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const uint32_t EXFAT_EOC = 0XFFFFFFFF;
 
 const uint8_t EXFAT_TYPE_BITMAP = 0X81;
@@ -311,7 +343,7 @@ typedef struct {
   uint8_t  firstCluster[4];
   uint8_t  size[8];
 } DirBitmap_t;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const uint8_t EXFAT_TYPE_UPCASE = 0X82;
 typedef struct {
   uint8_t  type;
@@ -321,7 +353,7 @@ typedef struct {
   uint8_t  firstCluster[4];
   uint8_t  size[8];
 } DirUpcase_t;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const uint8_t EXFAT_TYPE_LABEL = 0X83;
 typedef struct {
   uint8_t  type;
@@ -329,14 +361,14 @@ typedef struct {
   uint8_t  unicode[22];
   uint8_t  reserved[8];
 } DirLabel_t;
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Last entry in directory.
+const uint8_t EXFAT_TYPE_END_DIR     = 0X00;
+// Entry is used if bit is set.
+const uint8_t EXFAT_TYPE_USED        = 0X80;
 const uint8_t EXFAT_TYPE_FILE        = 0X85;
-const uint8_t EXFAT_ATTRIB_READ_ONLY = 0x01;
-const uint8_t EXFAT_ATTRIB_HIDDEN    = 0x02;
-const uint8_t EXFAT_ATTRIB_SYSTEM    = 0x04;
+// File attribute reserved since used for FAT volume label.
 const uint8_t EXFAT_ATTRIB_RESERVED  = 0x08;
-const uint8_t EXFAT_ATTRIB_DIRECTORY = 0x10;
-const uint8_t EXFAT_ATTRIB_ARCHIVE   = 0x20;
 
 typedef struct {
   uint8_t  type;

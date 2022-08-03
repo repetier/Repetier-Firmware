@@ -631,7 +631,7 @@ void Leveling::set(float x, float y, float z) {
 void Leveling::execute_M323(GCode* com) {
     if (com->hasS()) {
 // Auto import bed mesh
-#if NUM_HEATED_BEDS > 0 && SDSUPPORT
+#if NUM_HEATED_BEDS > 0 && SDSUPPORT && NEW_FILE_HANDLING == 0
         if (com->S == 2l) {
             if ((!com->hasX() || com->X < 1.0f)
                 || (sd.state < SDState::SD_MOUNTED)) {
@@ -715,7 +715,7 @@ void Leveling::execute_M323(GCode* com) {
     reportDistortionStatus();
 }
 void Leveling::importBumpMatrix(char* filename) {
-#if SDSUPPORT
+#if SDSUPPORT && NEW_FILE_HANDLING == 0
     if (sd.state < SDState::SD_MOUNTED) {
         Com::printF(Com::tErrorImportBump);
         Com::printFLN(Com::tNoMountedCard);
@@ -857,7 +857,7 @@ void Leveling::importBumpMatrix(char* filename) {
 #endif
 }
 void Leveling::exportBumpMatrix(char* filename) {
-#if SDSUPPORT
+#if SDSUPPORT && NEW_FILE_HANDLING == 0
     if (sd.state < SDState::SD_MOUNTED) {
         Com::printF(Com::tErrorExportBump);
         Com::printFLN(Com::tNoMountedCard);

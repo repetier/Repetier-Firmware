@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -36,16 +36,17 @@
 #if INCLUDE_SDIOS
 #include "sdios.h"
 #endif  // INCLUDE_SDIOS
-
 //------------------------------------------------------------------------------
-/** SdFat version */
-#define SD_FAT_VERSION "2.0.0"
+/** SdFat version for cpp use. */
+#define SD_FAT_VERSION 20200
+/** SdFat version as string. */
+#define SD_FAT_VERSION_STR "2.2.0"
 //==============================================================================
 /**
  * \class SdBase
  * \brief base SD file system template class.
  */
-template <class Vol>
+template <class Vol, class Fmt>
 class SdBase : public Vol {
  public:
   //----------------------------------------------------------------------------
@@ -114,6 +115,14 @@ class SdBase : public Vol {
     return m_card && !m_card->errorCode();
   }
   //----------------------------------------------------------------------------
+  /** End use of card. */
+  void end() {
+    Vol::end();
+    if (m_card) {
+      m_card->end();
+    }
+  }
+  //----------------------------------------------------------------------------
   /** %Print error info and halt.
    *
    * \param[in] pr Print destination.
@@ -127,7 +136,7 @@ class SdBase : public Vol {
     } else if (!Vol::fatType()) {
       pr->println(F("Check SD format."));
     }
-    SysCall::halt();
+    while (true) {}
   }
   //----------------------------------------------------------------------------
   /** %Print error info and halt.
@@ -152,13 +161,51 @@ class SdBase : public Vol {
     errorHalt(pr);
   }
   //----------------------------------------------------------------------------
+  /** Format SD card
+   *
+   * \param[in] pr Print destination.
+   * \return true for success else false.
+   */
+  bool format(print_t* pr = nullptr) {
+    Fmt fmt;
+    uint8_t* mem = Vol::end();
+    if (!mem) {
+      return false;
+    }
+    bool switchSpi = hasDedicatedSpi() && !isDedicatedSpi();
+    if (switchSpi && !setDedicatedSpi(true)) {
+      return false;
+    }
+    bool rtn = fmt.format(card(), mem, pr);
+    if (switchSpi && !setDedicatedSpi(false)) {
+      return false;
+    }
+    return rtn;
+  }
+  //----------------------------------------------------------------------------
+  /** \return the free cluster count. */
+  uint32_t freeClusterCount() {
+    bool switchSpi = hasDedicatedSpi() && !isDedicatedSpi();
+    if (switchSpi && !setDedicatedSpi(true)) {
+      return 0;
+    }
+    uint32_t rtn = Vol::freeClusterCount();
+    if (switchSpi && !setDedicatedSpi(false)) {
+      return 0;
+    }
+    return rtn;
+  }
+  //----------------------------------------------------------------------------
+  /** \return true if can be in dedicated SPI state */
+  bool hasDedicatedSpi() {return m_card ? m_card->hasDedicatedSpi() : false;}
+  //----------------------------------------------------------------------------
   /** %Print error info and halt.
    *
    * \param[in] pr Print destination.
    */
   void initErrorHalt(print_t* pr) {
     initErrorPrint(pr);
-    SysCall::halt();
+    while (true) {}
   }
   //----------------------------------------------------------------------------
   /** %Print error info and halt.
@@ -176,7 +223,7 @@ class SdBase : public Vol {
    * \param[in] pr Print destination.
    * \param[in] msg Message to print.
    */
-  void initErrorHalt(Print* pr, const __FlashStringHelper* msg) {
+  void initErrorHalt(print_t* pr, const __FlashStringHelper* msg) {
     pr->println(msg);
     initErrorHalt(pr);
   }
@@ -185,7 +232,7 @@ class SdBase : public Vol {
    *
    * \param[in] pr Print destination.
    */
-  void initErrorPrint(Print* pr) {
+  void initErrorPrint(print_t* pr) {
     pr->println(F("begin() failed"));
     if (sdErrorCode()) {
       pr->println(F("Do not reformat the SD."));
@@ -195,6 +242,9 @@ class SdBase : public Vol {
     }
     errorPrint(pr);
   }
+  //----------------------------------------------------------------------------
+  /** \return true if in dedicated SPI state. */
+  bool isDedicatedSpi() {return m_card ? m_card->isDedicatedSpi() : false;}
   //----------------------------------------------------------------------------
   /** %Print volume FAT/exFAT type.
    *
@@ -240,7 +290,7 @@ class SdBase : public Vol {
    * \param[in] pr Print destination.
    * \param[in] msg Message to print.
    */
-  void errorPrint(Print* pr, const __FlashStringHelper* msg) {
+  void errorPrint(print_t* pr, const __FlashStringHelper* msg) {
     pr->print(F("error: "));
     pr->println(msg);
     errorPrint(pr);
@@ -261,7 +311,7 @@ class SdBase : public Vol {
       pr->print(sdErrorCode(), HEX);
       pr->print(F(",0x"));
       pr->println(sdErrorData(), HEX);
-    } else if (!Vol::cwv()) {
+    } else if (!Vol::fatType()) {
       pr->println(F("Check SD format."));
     }
   }
@@ -276,6 +326,17 @@ class SdBase : public Vol {
   //----------------------------------------------------------------------------
   /** \return SD card error data. */
   uint8_t sdErrorData() {return m_card ? m_card->errorData() : 0;}
+  //----------------------------------------------------------------------------
+  /** Set SPI sharing state
+   * \param[in] value desired state.
+   * \return true for success else false;
+   */
+  bool setDedicatedSpi(bool value) {
+    if (m_card) {
+      return m_card->setDedicatedSpi(value);
+    }
+    return false;
+  }
   //----------------------------------------------------------------------------
   /** \return pointer to base volume */
   Vol* vol() {return reinterpret_cast<Vol*>(this);}
@@ -340,7 +401,7 @@ class SdBase : public Vol {
 #endif  // ENABLE_ARDUINO_SERIAL
   //----------------------------------------------------------------------------
  private:
-  SdCard* m_card;
+  SdCard* m_card = nullptr;
   SdCardFactory m_cardFactory;
 };
 //------------------------------------------------------------------------------
@@ -348,69 +409,59 @@ class SdBase : public Vol {
  * \class SdFat32
  * \brief SD file system class for FAT volumes.
  */
-class SdFat32 : public SdBase<FatVolume> {
+class SdFat32 : public SdBase<FatVolume, FatFormatter> {
  public:
-  /** Format a SD card FAT32/FAT16.
-   *
-   * \param[in] pr Optional Print information.
-   * \return true for success or false for failure.
-   */
-  bool format(print_t* pr = nullptr) {
-    FatFormatter fmt;
-    uint8_t* cache = reinterpret_cast<uint8_t*>(cacheClear());
-    if (!cache) {
-      return false;
-    }
-    return fmt.format(card(), cache, pr);
-  }
 };
 //------------------------------------------------------------------------------
 /**
  * \class SdExFat
  * \brief SD file system class for exFAT volumes.
  */
-class SdExFat : public SdBase<ExFatVolume> {
+class SdExFat : public SdBase<ExFatVolume, ExFatFormatter> {
  public:
-  /** Format a SD card exFAT.
-   *
-   * \param[in] pr Optional Print information.
-   * \return true for success or false for failure.
-   */
-  bool format(print_t* pr = nullptr) {
-    ExFatFormatter fmt;
-    uint8_t* cache = reinterpret_cast<uint8_t*>(cacheClear());
-    if (!cache) {
-      return false;
-    }
-    return fmt.format(card(), cache, pr);
-  }
 };
 //------------------------------------------------------------------------------
 /**
  * \class SdFs
  * \brief SD file system class for FAT16, FAT32, and exFAT volumes.
  */
-class SdFs : public SdBase<FsVolume> {
+class SdFs : public SdBase<FsVolume, FsFormatter> {
+ public:
 };
 //------------------------------------------------------------------------------
-#if SDFAT_FILE_TYPE == 1
+#if SDFAT_FILE_TYPE == 1 || defined(DOXYGEN)
 /** Select type for SdFat. */
 typedef SdFat32 SdFat;
-/** Select type for File. */
-typedef File32 File;
 /** Select type for SdBaseFile. */
 typedef FatFile SdBaseFile;
 #elif SDFAT_FILE_TYPE == 2
 typedef SdExFat SdFat;
-typedef ExFile File;
 typedef ExFatFile SdBaseFile;
 #elif SDFAT_FILE_TYPE == 3
 typedef SdFs SdFat;
-typedef FsFile File;
 typedef FsBaseFile SdBaseFile;
 #else  // SDFAT_FILE_TYPE
 #error Invalid SDFAT_FILE_TYPE
 #endif  // SDFAT_FILE_TYPE
+//
+// Only define File if FS.h is not included.
+// Line with test for __has_include must not have operators or parentheses.
+#if defined __has_include
+#if __has_include(<FS.h>)
+#define HAS_INCLUDE_FS_H
+#warning File not defined because __has_include(FS.h)
+#endif  // __has_include(<FS.h>)
+#endif  // defined __has_include
+#ifndef HAS_INCLUDE_FS_H
+#if SDFAT_FILE_TYPE == 1 || defined(DOXYGEN)
+/** Select type for File. */
+typedef File32 File;
+#elif SDFAT_FILE_TYPE == 2
+typedef ExFile File;
+#elif SDFAT_FILE_TYPE == 3
+typedef FsFile File;
+#endif  // SDFAT_FILE_TYPE
+#endif  // HAS_INCLUDE_FS_H
 /**
  * \class SdFile
  * \brief FAT16/FAT32 file with Print.
@@ -437,11 +488,11 @@ class SdFile : public PrintFile<SdBaseFile> {
    *
    *   // User gets date and time from GPS or real-time clock here
    *
-   *   // return date using FAT_DATE macro to format fields
-   *   *date = FAT_DATE(year, month, day);
+   *   // return date using FS_DATE macro to format fields
+   *   *date = FS_DATE(year, month, day);
    *
-   *   // return time using FAT_TIME macro to format fields
-   *   *time = FAT_TIME(hour, minute, second);
+   *   // return time using FS_TIME macro to format fields
+   *   *time = FS_TIME(hour, minute, second);
    * }
    * \endcode
    *

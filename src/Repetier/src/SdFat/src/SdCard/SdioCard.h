@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2020 Bill Greiman
+ * Copyright (c) 2011-2022 Bill Greiman
  * This file is part of the SdFat library for SD memory cards.
  *
  * MIT License
@@ -35,7 +35,7 @@
  */
 class SdioConfig {
  public:
-  SdioConfig() : m_options(FIFO_SDIO) {}
+  SdioConfig() {}
   /**
    * SdioConfig constructor.
    * \param[in] opt SDIO options.
@@ -46,7 +46,7 @@ class SdioConfig {
   /** \return true if DMA_SDIO. */
   bool useDma() {return m_options & DMA_SDIO;}
  private:
-  uint8_t m_options;
+  uint8_t m_options = FIFO_SDIO;
 };
 //------------------------------------------------------------------------------
 /**
@@ -60,20 +60,20 @@ class SdioCard : public SdCardInterface {
    * \return true for success or false for failure.
    */
   bool begin(SdioConfig sdioConfig);
-  /** Disable an SDIO card.
-   * \return false - not implemented.
-   */
-  bool end() {return false;}
-  /**
-   * Determine the size of an SD flash memory card.
+  /** CMD6 Switch mode: Check Function Set Function.
+   * \param[in] arg CMD6 argument.
+   * \param[out] status return status data.
    *
-   * \return The number of 512 byte data sectors in the card
-   *         or zero if an error occurs.
+   * \return true for success or false for failure.
    */
-  uint32_t sectorCount();
+  bool cardCMD6(uint32_t arg, uint8_t* status);
+  /** Disable an SDIO card.
+   * not implemented.
+   */
+  void end() {}
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-  // Use sectorCount(). cardSize() will be removed in the future.
-  uint32_t cardSize() __attribute__ ((deprecated)) {return sectorCount();}
+    uint32_t __attribute__((error("use sectorCount()"))) cardSize();
 #endif  // DOXYGEN_SHOULD_SKIP_THIS
   /** Erase a range of sectors.
    *
@@ -146,13 +146,19 @@ class SdioCard : public SdCardInterface {
    *
    * \return true for success or false for failure.
    */
-  bool readData(uint8_t *dst);
+  bool readData(uint8_t* dst);
   /** Read OCR register.
    *
    * \param[out] ocr Value of OCR register.
    * \return true for success or false for failure.
    */
   bool readOCR(uint32_t* ocr);
+  /** Read SCR register.
+   *
+   * \param[out] scr Value of SCR register.
+   * \return true for success or false for failure.
+   */
+  bool readSCR(scr_t *scr);
   /** Start a read multiple sectors sequence.
    *
    * \param[in] sector Address of first sector in sequence.
@@ -180,6 +186,21 @@ class SdioCard : public SdCardInterface {
   bool readStop();
   /** \return SDIO card status. */
   uint32_t status();
+    /**
+   * Determine the size of an SD flash memory card.
+   *
+   * \return The number of 512 byte data sectors in the card
+   *         or zero if an error occurs.
+   */
+  uint32_t sectorCount();
+  /**
+   *  Send CMD12 to stop read or write.
+   *
+   * \param[in] blocking If true, wait for command complete.
+   *
+   * \return true for success or false for failure.
+   */
+  bool stopTransmission(bool blocking);
   /** \return success if sync successful. Not for user apps. */
   bool syncDevice();
   /** Return the card type: SD V1, SD V2 or SDHC
@@ -241,6 +262,6 @@ class SdioCard : public SdCardInterface {
   static const uint8_t WRITE_STATE = 2;
   uint32_t m_curSector;
   SdioConfig m_sdioConfig;
-  uint8_t m_curState;
+  uint8_t m_curState = IDLE_STATE;
 };
 #endif  // SdioCard_h
