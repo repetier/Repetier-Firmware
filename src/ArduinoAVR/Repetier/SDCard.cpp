@@ -75,8 +75,6 @@ void SDCard::initsd() {
         Com::printFLN(Com::tSDInitFail);
         return;
     }
-    if (READ(SDCARDDETECT) != SDCARDDETECTINVERTED)
-        return;
 #endif
     HAL::pingWatchdog();
     HAL::delayMilliseconds(50); // wait for stabilization of contacts, bootup ...
