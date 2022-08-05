@@ -1037,10 +1037,16 @@ void __attribute__((weak)) startScreen(GUIAction action, void* data) {
 void __attribute__((weak)) printProgress(GUIAction action, void* data) {
     if (action == GUIAction::DRAW) {
         if (Printer::isPrinting()) {
+#if NEW_FILE_HANDLING == 1
+            if (filePrintManager.isPrinting()) { // print from sd card
+                Printer::progress = filePrintManager.getProgress();
+            }
+#else
 #if SDSUPPORT
             if (sd.state == SDState::SD_PRINTING) { // print from sd card
                 Printer::progress = (static_cast<float>(sd.selectedFilePos) * 100.0) / static_cast<float>(sd.selectedFileSize);
             }
+#endif
 #endif
             lcd.setFont(u8g2_font_6x10_mf);
             int len = strlen(Printer::printName);

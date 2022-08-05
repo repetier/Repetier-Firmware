@@ -24,7 +24,7 @@
 #undef FILE_SOURCE_USB
 
 #if IO_TARGET == IO_TARGET_INIT // setup
-#define FILE_SOURCE_SPI(name, identifier, pos, spi, cs, speed, sdDetectPin) name.init(pos);
+#define FILE_SOURCE_SPI(name, identifier, pos, spi, cs, speed, sdDetectPin)
 #define FILE_SOURCE_SDIO(name, identifier, pos, sdDetectPin) name.init();
 #define FILE_SOURCE_USB(name, identifier, pos) name.init();
 
@@ -36,6 +36,11 @@
 #define FILE_SOURCE_SPI(name, identifier, pos, spi, cs, speed, sdDetectPin) \
     PGM_P name##name = PSTR(identifier); \
     FileSourceSPI<sdDetectPin, cs> name(name##name, pos, &spi, speed);
+
+#elif IO_TARGET == IO_TARGET_TEMPLATES // template definitions in tools.cpp
+#define FILE_SOURCE_SPI(name, identifier, pos, spi, cs, speed, sdDetectPin) \
+    template class FileSourceSPI<sdDetectPin, cs>;
+
 #endif
 
 #ifndef FILE_SOURCE_SPI

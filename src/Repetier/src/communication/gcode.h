@@ -113,10 +113,10 @@ extern SerialGCodeSource serial0Source;
 #if BLUETOOTH_SERIAL > 0
 extern SerialGCodeSource serial1Source;
 #endif
-#if SDSUPPORT
+#if SDSUPPORT || NEW_FILE_HANDLING == 1
 extern SDCardGCodeSource sdSource;
 #endif
-
+class FilePrintManager;
 class GCode // 97-99 uint8_ts per command needed
 {
     uint16_t params;
@@ -568,6 +568,7 @@ public:
     static void keepAlive(enum FirmwareState state, int id = 0);
     static uint32_t keepAliveInterval;
     friend class SDCard;
+    friend class FilePrintManager;
     static FSTRINGPARAM(fatalErrorMsg);
     friend class GCodeSource;
 
@@ -611,7 +612,7 @@ public:
     GCodeSource* source;
 };
 
-#if JSON_OUTPUT && SDSUPPORT
+#if JSON_OUTPUT
 #include "SdFat/src/SdFat.h"
 // Struct to hold Gcode file information 32 bytes
 #define GENBY_SIZE 16

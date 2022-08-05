@@ -150,6 +150,23 @@ void __attribute__((weak)) MCode_18(GCode* com) {
 
 void __attribute__((weak)) MCode_20(GCode* com) {
 #if NEW_FILE_HANDLING
+#if JSON_OUTPUT
+    if (com->hasString() && com->text[1] == '2') { // " S2 P/folder"
+        if (com->text[3] == 'P') {
+            char* slashPos = strchr(com->text, '/');
+            if (*slashPos) {
+                filePrintManager.lsJSON(slashPos);
+            } else {
+                filePrintManager.lsJSON(com->text + 4);
+            }
+        }
+    } else {
+        char folder[2] = { '/', 0 };
+        filePrintManager.ls(folder, false);
+    }
+#else
+    sd.ls();
+#endif
 #else
 #if SDSUPPORT
 #if JSON_OUTPUT
@@ -175,6 +192,11 @@ void __attribute__((weak)) MCode_20(GCode* com) {
 
 void __attribute__((weak)) MCode_21(GCode* com) {
 #if NEW_FILE_HANDLING
+    int pos = 255;
+    if (com->hasP()) {
+        pos = com->P;
+    }
+    filePrintManager.mount(true, pos);
 #else
 #if SDSUPPORT
     sd.mount(true);
@@ -193,6 +215,9 @@ void __attribute__((weak)) MCode_22(GCode* com) {
 
 void __attribute__((weak)) MCode_23(GCode* com) {
 #if NEW_FILE_HANDLING
+    if (com->hasString()) {
+        filePrintManager.startRead(com->text, false);
+    }
 #else
 #if SDSUPPORT
     if (com->hasString()) {
@@ -204,6 +229,11 @@ void __attribute__((weak)) MCode_23(GCode* com) {
 
 void __attribute__((weak)) MCode_24(GCode* com) {
 #if NEW_FILE_HANDLING
+    if (Printer::isMenuMode(MENU_MODE_PAUSED)) {
+        filePrintManager.continuePrint();
+    } else {
+        filePrintManager.startPrint();
+    }
 #else
 #if SDSUPPORT
     if (Printer::isMenuMode(MENU_MODE_PAUSED)) {
@@ -217,6 +247,7 @@ void __attribute__((weak)) MCode_24(GCode* com) {
 
 void __attribute__((weak)) MCode_25(GCode* com) {
 #if NEW_FILE_HANDLING
+    filePrintManager.pausePrint(com->hasS() ? com->S != 0 : true);
 #else
 #if SDSUPPORT
     sd.pausePrint(com->hasS() ? com->S != 0 : true);
@@ -237,6 +268,15 @@ void __attribute__((weak)) MCode_26(GCode* com) {
 
 void __attribute__((weak)) MCode_27(GCode* com) {
 #if NEW_FILE_HANDLING
+    if (com->hasP() || com->hasS()) {
+        Printer::setAutoreportSD((com->getS(0) || com->getP(0)));
+        millis_t period = constrain((com->getS(0) * 1000u) + com->getP(0), 0, 60000);
+        Printer::autoSDReportPeriodMS = (period <= 100) ? 0 : period;
+        // Can't autoreport faster than 100ms, just set to 0 to use periodical's 100ms tick.
+    } else {
+        Printer::lastSDReport = HAL::timeInMilliseconds();
+        filePrintManager.printStatus(com->hasC());
+    }
 #else
 #if SDSUPPORT
     if (com->hasP() || com->hasS()) {
@@ -254,6 +294,9 @@ void __attribute__((weak)) MCode_27(GCode* com) {
 
 void __attribute__((weak)) MCode_28(GCode* com) {
 #if NEW_FILE_HANDLING
+    if (com->hasString()) {
+        filePrintManager.startWrite(com->text);
+    }
 #else
 #if SDSUPPORT
     if (com->hasString()) {
@@ -274,6 +317,9 @@ void __attribute__((weak)) MCode_29(GCode* com) {
 
 void __attribute__((weak)) MCode_30(GCode* com) {
 #if NEW_FILE_HANDLING
+    if (com->hasString()) {
+        filePrintManager.deleteFile(com->text);
+    }
 #else
 #if SDSUPPORT
     if (com->hasString()) {
@@ -285,6 +331,9 @@ void __attribute__((weak)) MCode_30(GCode* com) {
 
 void __attribute__((weak)) MCode_32(GCode* com) {
 #if NEW_FILE_HANDLING
+    if (com->hasString()) {
+        filePrintManager.makeDirectory(com->text);
+    }
 #else
 #if SDSUPPORT
     if (com->hasString()) {
@@ -296,6 +345,11 @@ void __attribute__((weak)) MCode_32(GCode* com) {
 
 void __attribute__((weak)) MCode_36(GCode* com) {
 #if NEW_FILE_HANDLING
+#if JSON_OUTPUT && SDSUPPORT
+    if (com->hasString()) {
+        filePrintManager.JSONFileInfo(com->text);
+    }
+#endif
 #else
 #if JSON_OUTPUT && SDSUPPORT
     if (com->hasString()) {
@@ -306,6 +360,7 @@ void __attribute__((weak)) MCode_36(GCode* com) {
 }
 void __attribute__((weak)) MCode_39(GCode* com) {
 #if NEW_FILE_HANDLING
+    filePrintManager.printCardInfo(JSON_OUTPUT && static_cast<bool>(com->getS(0l) == 2l));
 #else
 #if SDSUPPORT
     sd.printCardInfo(JSON_OUTPUT && static_cast<bool>(com->getS(0l) == 2l));

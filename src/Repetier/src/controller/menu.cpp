@@ -713,7 +713,7 @@ void __attribute__((weak)) menuTune(GUIAction action, void* data) {
     GUI::menuEnd(action);
 }
 
-#if SDSUPPORT
+#if SDSUPPORT || NEW_FILE_HANDLING == 1
 void menuSDPrint(GUIAction action, void* dat);
 void __attribute__((weak)) menuSDStartPrint(GUIAction action, void* data) {
     int pos = reinterpret_cast<int>(data);
@@ -732,10 +732,15 @@ void __attribute__((weak)) menuSDStartPrint(GUIAction action, void* data) {
         }
         *(++p) = '\0';
         GUI::folderLevel--;
+#if NEW_FILE_HANDLING == 1
+#else
         sd.fileSystem.chdir(GUI::cwd);
+#endif
         GUI::replace(menuSDPrint, data, GUIPageType::MENU);
         return;
     }
+#if NEW_FILE_HANDLING == 1
+#else
     sd_file_t file;
     if (file.open(&sd.fileSystem, pos, O_RDONLY)) {
         sd.getFN(file);
@@ -768,6 +773,7 @@ void __attribute__((weak)) menuSDStartPrint(GUIAction action, void* data) {
             }
         }
     }
+#endif
 }
 static bool menuSDFilterName(sd_file_t* file, char* tempFilename, size_t size) {
     if (!file || (tempFilename && !size)) {
@@ -975,24 +981,32 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
 #else
 void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
     GUI::menuStart(action);
+#if NEW_FILE_HANDLING == 1
+#else
     if (sd.state < SDState::SD_MOUNTED) {
         // User was still inside the menu when their sdcard ejected.
         GUI::pop();
         GUI::refresh();
         return;
     }
+#endif
 
     if (GUI::folderLevel > 0u) {
         GUI::menuText(action, GUI::cwd, true);
         GUI::menuSelectableP(action, PSTR("# Parent Directory"), menuSDStartPrint, reinterpret_cast<void*>(-1), GUIPageType::ACTION);
     } else {
+#if NEW_FILE_HANDLING == 1
+#else
         if (sd.volumeLabel[0u] == '\0') {
             GUI::menuTextP(action, PSTR("= SD Print ="), true);
         } else {
             GUI::menuText(action, sd.volumeLabel, true);
         }
+#endif
         GUI::menuBack(action);
     }
+#if NEW_FILE_HANDLING == 1
+#else
 
     if (action == GUIAction::ANALYSE || !GUI::cwdFile.isOpen()) {
         GUI::cwdFile.open(&sd.fileSystem, GUI::cwd, O_RDONLY);
@@ -1007,6 +1021,7 @@ void __attribute__((weak)) menuSDPrint(GUIAction action, void* data) {
         }
         return true;
     });
+#endif
     GUI::menuEnd(action);
 }
 #endif
@@ -1089,6 +1104,8 @@ void __attribute__((weak)) mainMenu(GUIAction action, void* data) {
         }
         GUI::menuSelectableP(action, PSTR("Stop Print"), directAction, (void*)GUI_DIRECT_ACTION_STOP_PRINT, GUIPageType::ACTION);
     } else {
+#if NEW_FILE_HANDLING == 1
+#else
 #if SDSUPPORT
         if (sd.state >= SDState::SD_MOUNTED) {
             if (sd.volumeLabel[0u] == '\0') {
@@ -1098,6 +1115,7 @@ void __attribute__((weak)) mainMenu(GUIAction action, void* data) {
                 GUI::menuSelectable(action, GUI::tmpString, menuSDPrint, nullptr, GUIPageType::MENU);
             }
         }
+#endif
 #endif
     }
 #if SDSUPPORT && SDCARDDETECT < 0 // Offer mount option

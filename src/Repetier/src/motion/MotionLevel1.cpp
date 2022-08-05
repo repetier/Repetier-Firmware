@@ -1021,10 +1021,16 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
         FOR_ALL_AXES(i) { // mark as unhomed, might even prevent moves if unhomed moves are prevented!
             setAxisHomed(i, false);
         }
+#if NEW_FILE_HANDLING == 1
+        if (filePrintManager.isPrinting()) {
+            Com::printWarningFLN(PSTR("Print stopped due to illegal positions!"));
+        }
+#else    
 #if SDSUPPORT
         if (sd.state == SDState::SD_PRINTING) {
             Com::printWarningFLN(PSTR("Print stopped due to illegal positions!"));
         }
+#endif
 #endif
         Printer::stopPrint();
         GUI::push(warningScreenP, (void*)PSTR("Illegal Position!"), GUIPageType::STATUS);

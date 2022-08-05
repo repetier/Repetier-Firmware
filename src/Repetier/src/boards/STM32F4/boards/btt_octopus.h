@@ -193,7 +193,9 @@ Raspberry Serial: Serial2
 #define MISO_PIN PA6
 #define MOSI_PIN PA7
 #define ORIG_SDCARDDETECT PC15
+#ifndef SDSUPPORT
 #define SDSUPPORT 1
+#endif
 #define SDCARDDETECTINVERTED 0
 #ifndef SDSS
 #define SDSS PA4

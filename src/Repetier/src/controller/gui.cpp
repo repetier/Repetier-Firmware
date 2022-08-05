@@ -32,7 +32,7 @@ fast8_t GUI::bufPos;               ///< Pos for appending data
 GUIBootState GUI::curBootState = GUIBootState::DISPLAY_INIT;
 bool GUI::textIsScrolling = false; ///< Our selected row/text is now scrolling/anim
 probeProgInfo* GUI::curProbingProgress = nullptr;
-#if SDSUPPORT
+#if SDSUPPORT || NEW_FILE_HANDLING == 1
 char GUI::cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2] = { '/', 0 };
 uint8_t GUI::folderLevel = 0;
 sd_file_t GUI::cwdFile;
@@ -952,11 +952,14 @@ void directAction(GUIAction action, void* data) {
         Printer::kill(true);
         break;
     case GUI_DIRECT_ACTION_MOUNT_SD_CARD:
+#if NEW_FILE_HANDLING == 1
+#else
 #if SDSUPPORT
         if (sd.state == SDState::SD_HAS_ERROR) {
             sd.unmount(true);
         }
         sd.mount(true);
+#endif
 #endif
         break;
     case GUI_DIRECT_ACTION_STOP_PRINT:

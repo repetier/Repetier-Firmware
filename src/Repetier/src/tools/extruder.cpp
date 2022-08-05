@@ -223,6 +223,13 @@ void JamDetectorHW<inputPin, ObserverType>::testForJam() {
             tool->setError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT);
             EVENT_JAM_DETECTED;
             Com::printFLN(PSTR("important:Extruder jam detected"));
+#if NEW_FILE_HANDLING == 1
+            if (filePrintManager.isPrinting()) {
+                filePrintManager.pausePrint(true);
+                EVENT_JAM_DETECTED_END;
+                return;
+            }
+#else
 #if SDSUPPORT
             if (sd.state == SDState::SD_PRINTING) {
                 sd.pausePrint(true);
@@ -230,6 +237,7 @@ void JamDetectorHW<inputPin, ObserverType>::testForJam() {
                 return;
             }
 #endif // SDSUPPORT
+#endif
             GCodeSource::printAllFLN(PSTR("// action:out_of_filament T"), (int32_t)tool->getToolId());
             GCodeSource::printAllFLN(PSTR("RequestPause:Extruder Jam Detected!"));
             GUI::push(warningScreenP, (void*)PSTR("Jam/Out of filament"), GUIPageType::STATUS);
@@ -315,6 +323,13 @@ void FilamentDetector<inputPin>::testFilament() {
             tool->setError(TOOL_ERROR_JAMMED_OR_NO_FILAMENT);
             EVENT_JAM_DETECTED;
             Com::printFLN(PSTR("important:No Filament detected"));
+#if NEW_FILE_HANDLING == 1
+            if (filePrintManager.isPrinting()) {
+                filePrintManager.pausePrint(true);
+                EVENT_JAM_DETECTED_END;
+                return;
+            }
+#else
 #if SDSUPPORT
             if (sd.state == SDState::SD_PRINTING) {
                 sd.pausePrint(true);
@@ -322,6 +337,7 @@ void FilamentDetector<inputPin>::testFilament() {
                 return;
             }
 #endif // SDSUPPORT
+#endif
             GCodeSource::printAllFLN(PSTR("// action:out_of_filament T"), (int32_t)tool->getToolId());
             GCodeSource::printAllFLN(PSTR("RequestPause:No filament detected!"));
             GUI::push(warningScreenP, (void*)PSTR("Out of filament"), GUIPageType::STATUS);

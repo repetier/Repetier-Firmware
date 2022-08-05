@@ -44,27 +44,30 @@ void sdCsInit(SdCsPin_t pin);
 void sdCsWrite(SdCsPin_t pin, bool level);
 //------------------------------------------------------------------------------
 /** SPI bus is share with other devices. */
-const uint8_t SHARED_SPI = 0;
+const uint8_t SHARED_SPI = 1;
 #if ENABLE_DEDICATED_SPI
 /** The SD is the only device on the SPI bus. */
-const uint8_t DEDICATED_SPI = 1;
+const uint8_t DEDICATED_SPI = 0;
 /**
  * \param[in] opt option field of SdSpiConfig.
  * \return true for dedicated SPI.
  */
-inline bool spiOptionDedicated(uint8_t opt) {return opt & DEDICATED_SPI;}
+inline bool spiOptionDedicated(uint8_t opt) { return opt & DEDICATED_SPI; }
 #else  // ENABLE_DEDICATED_SPI
 /**
  * \param[in] opt option field of SdSpiConfig.
  * \return true for dedicated SPI.
  */
-inline bool spiOptionDedicated(uint8_t opt) {(void)opt; return false;}
-#endif  // ENABLE_DEDICATED_SPI
+inline bool spiOptionDedicated(uint8_t opt) {
+    (void)opt;
+    return false;
+}
+#endif // ENABLE_DEDICATED_SPI
 //------------------------------------------------------------------------------
 /** SPISettings for SCK frequency in Hz. */
 #define SD_SCK_HZ(maxSpeed) (maxSpeed)
 /** SPISettings for SCK frequency in MHz. */
-#define SD_SCK_MHZ(maxMhz) (1000000UL*(maxMhz))
+#define SD_SCK_MHZ(maxMhz) (1000000UL * (maxMhz))
 // SPI divisor constants - obsolete.
 /** Set SCK to max rate. */
 #define SPI_FULL_SPEED SD_SCK_MHZ(50)
@@ -94,53 +97,61 @@ class SdSpiBaseClass;
 /** Port type for extrernal SPI driver. */
 typedef SdSpiBaseClass SpiPort_t;
 #else  // SPI_DRIVER_SELECT
-typedef void*  SpiPort_t;
-#endif  // SPI_DRIVER_SELECT
+typedef void* SpiPort_t;
+#endif // SPI_DRIVER_SELECT
 //------------------------------------------------------------------------------
 /**
  * \class SdSpiConfig
  * \brief SPI card configuration.
  */
 class SdSpiConfig {
- public:
-   /** SdSpiConfig constructor.
+public:
+    /** SdSpiConfig constructor.
    *
    * \param[in] cs Chip select pin.
    * \param[in] opt Options.
    * \param[in] maxSpeed Maximum SCK frequency.
    * \param[in] port The SPI port to use.
    */
-  SdSpiConfig(SdCsPin_t cs, uint8_t opt, uint32_t maxSpeed, SpiPort_t* port) :
-    csPin(cs), options(opt), maxSck(maxSpeed), spiPort(port) {}
+    SdSpiConfig(SdCsPin_t cs, uint8_t opt, uint32_t maxSpeed, SpiPort_t* port)
+        : csPin(cs)
+        , options(opt)
+        , maxSck(maxSpeed)
+        , spiPort(port) { }
 
-  /** SdSpiConfig constructor.
+    /** SdSpiConfig constructor.
    *
    * \param[in] cs Chip select pin.
    * \param[in] opt Options.
    * \param[in] maxSpeed Maximum SCK frequency.
    */
-  SdSpiConfig(SdCsPin_t cs, uint8_t opt, uint32_t maxSpeed) :
-    csPin(cs), options(opt), maxSck(maxSpeed) {}
-  /** SdSpiConfig constructor.
+    SdSpiConfig(SdCsPin_t cs, uint8_t opt, uint32_t maxSpeed)
+        : csPin(cs)
+        , options(opt)
+        , maxSck(maxSpeed) { }
+    /** SdSpiConfig constructor.
    *
    * \param[in] cs Chip select pin.
    * \param[in] opt Options.
    */
-  SdSpiConfig(SdCsPin_t cs, uint8_t opt) : csPin(cs), options(opt) {}
-  /** SdSpiConfig constructor.
+    SdSpiConfig(SdCsPin_t cs, uint8_t opt)
+        : csPin(cs)
+        , options(opt) { }
+    /** SdSpiConfig constructor.
    *
    * \param[in] cs Chip select pin.
    */
-  explicit SdSpiConfig(SdCsPin_t cs) : csPin(cs) {}
+    explicit SdSpiConfig(SdCsPin_t cs)
+        : csPin(cs) { }
 
-  /** Chip select pin. */
-  const SdCsPin_t csPin;
-  /** Options */
-  const uint8_t options = SHARED_SPI;
-  /** Max SCK frequency */
-  const uint32_t maxSck = SD_SCK_MHZ(50);
-  /** SPI port */
-  SpiPort_t* spiPort = nullptr;
+    /** Chip select pin. */
+    const SdCsPin_t csPin;
+    /** Options */
+    const uint8_t options = SHARED_SPI;
+    /** Max SCK frequency */
+    const uint32_t maxSck = SD_SCK_MHZ(50);
+    /** SPI port */
+    SpiPort_t* spiPort = nullptr;
 };
 #if SPI_DRIVER_SELECT < 2
 #include "SdSpiArduinoDriver.h"
@@ -149,7 +160,7 @@ class SdSpiConfig {
 #elif SPI_DRIVER_SELECT == 3
 #include "SdSpiBaseClass.h"
 typedef SdSpiBaseClass SdSpiDriver;
-#else  // SPI_DRIVER_SELECT
+#else // SPI_DRIVER_SELECT
 #error Invalid SPI_DRIVER_SELECT
-#endif  // SPI_DRIVER_SELECT
-#endif  // SdSpiDriver_h
+#endif // SPI_DRIVER_SELECT
+#endif // SdSpiDriver_h

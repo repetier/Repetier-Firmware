@@ -1097,7 +1097,8 @@ void SDCard::writeToFile() {
 
 #endif
 
-#if JSON_OUTPUT && SDSUPPORT
+#endif
+#if JSON_OUTPUT && (SDSUPPORT || NEW_FILE_HANDLING == 1)
 
 // --------------------------------------------------------------- //
 // Code that gets gcode information is adapted from RepRapFirmware //
@@ -1316,5 +1317,3 @@ bool GCodeFileInfo::findTotalHeight(char* buf, float& height) {
     return false;
 }
 #endif // JSON_OUTPUT
-
-#endif

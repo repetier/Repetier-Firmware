@@ -1434,6 +1434,48 @@ bool SerialGCodeSource::testEmergency(GCode& gcode) {
 
 // ----- SD card source -----
 
+#if NEW_FILE_HANDLING == 1
+bool SDCardGCodeSource::isOpen() {
+    return filePrintManager.isPrinting();
+}
+
+bool SDCardGCodeSource::supportsWrite() { ///< true if write is a non dummy function
+    return false;
+}
+
+bool SDCardGCodeSource::closeOnError() { // return true if the channel can not interactively correct errors.
+    return true;
+}
+
+bool SDCardGCodeSource::dataAvailable() { // would read return a new byte?
+    if (filePrintManager.isPrinting()) {
+        if (filePrintManager.endReached()) {
+            close();
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+int SDCardGCodeSource::readByte() {
+    int n = filePrintManager.read();
+    if (n == -1) {
+        Com::printErrorFLN(PSTR("SD error did not recover!"));
+        close();
+        return 0;
+    }
+    return n;
+}
+
+void SDCardGCodeSource::writeByte(uint8_t byte) {
+    // dummy
+}
+
+void SDCardGCodeSource::close() {
+    filePrintManager.finishPrint();
+}
+#else
 #if SDSUPPORT
 bool SDCardGCodeSource::isOpen() {
     return (sd.state == SDState::SD_PRINTING);
@@ -1483,6 +1525,7 @@ void SDCardGCodeSource::writeByte(uint8_t byte) {
 void SDCardGCodeSource::close() {
     sd.finishPrint();
 }
+#endif
 #endif
 
 FlashGCodeSource::FlashGCodeSource()

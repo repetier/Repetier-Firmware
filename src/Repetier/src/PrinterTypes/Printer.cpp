@@ -1362,7 +1362,7 @@ void Printer::continuePrint() {
 void Printer::stopPrint() {
     flashSource.close(); // stop flash printing if busy
 #if NEW_FILE_HANDLING == 1
-    if (Printer::isMenuMode(MENU_MODE_SD_PRINTING)) {
+    if (filePrintManager.isPrinting()) {
         filePrintManager.stopPrint();
     } else
 #else

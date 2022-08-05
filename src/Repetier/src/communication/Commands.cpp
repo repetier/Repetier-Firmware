@@ -35,6 +35,17 @@ void Commands::commandLoop() {
 #endif
     Printer::breakLongCommand = false; // block is now finished
     if (!Printer::isBlockingReceive()) {
+#if NEW_FILE_HANDLING == 1
+        if (filePrintManager.getScheduledPause() == SDScheduledPause::PARKING_PLANNED) {
+            if (Motion1::buffersUsed() == 0) {
+                filePrintManager.printFullyPaused();
+            }
+        } else if (filePrintManager.isStopScheduled()) {
+            if (Motion1::buffersUsed() == 0) {
+                filePrintManager.printFullyStopped();
+            }
+        }
+#else
 #if SDSUPPORT
         if (sd.scheduledPause == SDScheduledPause::PARKING_PLANNED) {
             if (Motion1::buffersUsed() == 0) {
@@ -46,10 +57,23 @@ void Commands::commandLoop() {
             }
         }
 #endif
+#endif
         GCode::readFromSerial();
         GCode* code = GCode::peekCurrentCommand();
         millis_t curTime = HAL::timeInMilliseconds();
         if (code) {
+#if NEW_FILE_HANDLING == 1
+            if (filePrintManager.isWriting()) {
+                if (!(code->hasM() && code->M == 29u)) { // still writing to file
+                    filePrintManager.writeCommand(code);
+                } else {
+                    filePrintManager.finishWriting();
+                }
+#if ECHO_ON_EXECUTE
+                code->echoCommand();
+#endif
+            } else
+#else
 #if SDSUPPORT
             if (sd.state == SDState::SD_WRITING) {
                 if (!(code->hasM() && code->M == 29u)) { // still writing to file
@@ -62,6 +86,7 @@ void Commands::commandLoop() {
 #endif
             } else
 #endif
+#endif
                 Commands::executeGCode(code);
             code->popCurrentCommand();
             lastCommandReceived = curTime;
@@ -73,6 +98,15 @@ void Commands::commandLoop() {
                 lastCommandReceived = curTime;
                 Printer::parkSafety(); // will handle allowed conditions it self
             }
+#if NEW_FILE_HANDLING == 1
+            // 5 minute timeout if we never receive anything.
+            if (filePrintManager.isWriting()) {
+                if (filePrintManager.writingTimedOut(curTime)) {
+                    GUI::setStatusP(PSTR("Receive timeout!"), GUIStatusLevel::WARNING);
+                    filePrintManager.finishWriting();
+                }
+            }
+#else
 #if SDSUPPORT
             // 5 minute timeout if we never receive anything.
             if (sd.state == SDState::SD_WRITING) {
@@ -81,6 +115,7 @@ void Commands::commandLoop() {
                     sd.finishWrite();
                 }
             }
+#endif
 #endif
         }
     } else {
@@ -140,6 +175,17 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
             Commands::printTemperatures();
         }
     }
+#if NEW_FILE_HANDLING == 1
+    // Reports the sd file byte position every autoSDReportPeriodMS if set, and only if printing.
+    if (Printer::isAutoreportSD() && filePrintManager.isPrinting()) {
+        millis_t now = HAL::timeInMilliseconds();
+        if (now - Printer::lastSDReport > Printer::autoSDReportPeriodMS) {
+            Printer::lastSDReport = now;
+            Com::writeToAll = true; // need to be sure to receive correct receipient
+            filePrintManager.printStatus();
+        }
+    }
+#else
 #if SDSUPPORT
     // Reports the sd file byte position every autoSDReportPeriodMS if set, and only if printing.
     if (Printer::isAutoreportSD() && sd.state == SDState::SD_PRINTING) {
@@ -150,6 +196,7 @@ void Commands::checkForPeriodicalActions(bool allowNewMoves) {
             sd.printStatus();
         }
     }
+#endif
 #endif
     EVENT_TIMER_100MS;
     // Extruder::manageTemperatures();
@@ -205,6 +252,18 @@ void Commands::waitUntilEndOfAllBuffers() {
         //GCode::readFromSerial();
         code = GCode::peekCurrentCommand();
         if (code) {
+#if NEW_FILE_HANDLING == 1
+            if (filePrintManager.isWriting()) {
+                if (!(code->hasM() && code->M == 29)) {
+                    filePrintManager.writeCommand(code);
+                } else {
+                    filePrintManager.finishWriting();
+                }
+#if ECHO_ON_EXECUTE
+                code->echoCommand();
+#endif
+            } else
+#else
 #if SDSUPPORT
             if (sd.state == SDState::SD_WRITING) {
                 if (!(code->hasM() && code->M == 29)) {
@@ -216,6 +275,7 @@ void Commands::waitUntilEndOfAllBuffers() {
                 code->echoCommand();
 #endif
             } else
+#endif
 #endif
                 Commands::executeGCode(code);
             code->popCurrentCommand();

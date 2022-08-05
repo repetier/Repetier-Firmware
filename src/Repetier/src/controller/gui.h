@@ -54,9 +54,9 @@ enum class GUIAction {
     PREVIOUS = 3,
     CLICK = 4, // button clicked down, wait for execution
     ANALYSE = 5,
-    BACK = 6, // back pressed, waiting execution
+    BACK = 6,            // back pressed, waiting execution
     CLICK_PROCESSED = 7, // click function executed, wait for button release
-    BACK_PROCESSED = 8, // back operation executed
+    BACK_PROCESSED = 8,  // back operation executed
     CLICK_PROCESSING = 9 // started execution, but not finished
 };
 
@@ -173,7 +173,7 @@ public:
     static GUIStatusLevel statusLevel;
     static bool textIsScrolling;
     static probeProgInfo* curProbingProgress; ///< Pointer to a valid current probing datastruct
-#if SDSUPPORT
+#if SDSUPPORT || NEW_FILE_HANDLING == 1
     static char cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2];
     static uint8_t folderLevel;
     static sd_file_t cwdFile;
