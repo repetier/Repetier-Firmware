@@ -912,7 +912,9 @@ void Commands::processMCode(GCode* com) {
         break;
 #endif
     case 9999: // Switch to bootmode if possible
+#if !defined(NO_M9999)
         HAL::switchToBootMode();
+#endif
         break;
     /* case 888: {
         Motion1::waitForEndOfMoves();

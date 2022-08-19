@@ -187,6 +187,18 @@ Raspberry Serial: Serial2
 #define SD_SDIO 1 // Use SDIO for communication
 */
 
+// Define that we have a sdio slot so code for sdio gets compiled as well
+#define HAS_SDIO_SD_SLOT 1
+#define SDIO_D0_PIN PC8
+#define SDIO_D1_PIN PC9
+#define SDIO_D2_PIN PC10
+#define SDIO_D3_PIN PC11
+#define SDIO_CK_PIN PC12
+#define SDIO_CMD_PIN PD2
+#define SDIO_CARDDETECT PC14
+
+// We can add usb devices to host connector
+#define USB_HOST_SUPPORT 0
 // lcd sd card as board uses sdio
 
 #define SCK_PIN PA5
@@ -221,6 +233,7 @@ Raspberry Serial: Serial2
 #define SDPOWER -1
 
 // Used Timers for pwm output: 1, 4, 5, 9, 11 (SW serial)
+// 12 blocked by USB HS
 #define MOTION2_TIMER_NUM 6
 #define MOTION3_TIMER_NUM 7
 #define PWM_TIMER_NUM 10

@@ -125,7 +125,7 @@ public:
     inline void resetError() { error = HeaterError::NO_ERROR; }
     inline void setError(HeaterError err) {
         error = err;
-        Com::printFLN(PSTR("setError:"), (int)err);
+        // Com::printFLN(PSTR("setError:"), (int)err);
         if (err != HeaterError::NO_ERROR) {
             output->set(0);
             decoupleMode = DecoupleMode::NO_HEATING;

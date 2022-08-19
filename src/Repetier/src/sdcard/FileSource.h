@@ -19,6 +19,10 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
+#ifndef USB_HOST_SUPPORT // fallback is not available
+#define USB_HOST_SUPPORT 0
+#endif
+
 typedef SdFat sd_fsys_t;
 typedef SdBaseFile sd_file_t;
 enum class SDState {
@@ -34,6 +38,319 @@ enum class SDScheduledPause {
     PARKING_PLANNED,
     PARKED
 };
+
+typedef std::function<int(char*, int, int)> listDirectoryCallback;
+// typedef int (*listDirectoryCallback)(char*, int, int);
+
+#if USB_HOST_SUPPORT == 1
+class RFUSBDrive : public SdCardInterface {
+    uint8_t lastErrorCode = SD_CARD_ERROR_INIT_NOT_CALLED;
+    uint32_t lastErrorLine = 0;
+#if defined(STM32F4_BOARD) || defined(STM32F1_BOARD)
+private:
+#endif
+public:
+    RFUSBDrive();
+    virtual ~RFUSBDrive() { }
+    bool init();
+    /** end use of device */
+    virtual void end() override;
+    /**
+   * Check for FsBlockDevice busy.
+   *
+   * \return true if busy else false.
+   */
+    bool isBusy() override;
+    /**
+   * Read a sector.
+   *
+   * \param[in] sector Logical sector to be read.
+   * \param[out] dst Pointer to the location that will receive the data.
+   * \return true for success or false for failure.
+   */
+    bool readSector(uint32_t sector, uint8_t* dst) override;
+
+    /**
+   * Read multiple sectors.
+   *
+   * \param[in] sector Logical sector to be read.
+   * \param[in] ns Number of sectors to be read.
+   * \param[out] dst Pointer to the location that will receive the data.
+   * \return true for success or false for failure.
+   */
+    bool readSectors(uint32_t sector, uint8_t* dst, size_t ns) override;
+
+    /** \return device size in sectors. */
+    uint32_t sectorCount() override;
+
+    /** End multi-sector transfer and go to idle state.
+   * \return true for success or false for failure.
+   */
+    bool syncDevice() override;
+
+    /**
+   * Writes a sector.
+   *
+   * \param[in] sector Logical sector to be written.
+   * \param[in] src Pointer to the location of the data to be written.
+   * \return true for success or false for failure.
+   */
+    bool writeSector(uint32_t sector, const uint8_t* src) override;
+
+    /**
+   * Write multiple sectors.
+   *
+   * \param[in] sector Logical sector to be written.
+   * \param[in] ns Number of sectors to be written.
+   * \param[in] src Pointer to the location of the data to be written.
+   * \return true for success or false for failure.
+   */
+    bool writeSectors(uint32_t sector, const uint8_t* src, size_t ns) override;
+
+    /** CMD6 Switch mode: Check Function Set Function.
+   * \param[in] arg CMD6 argument.
+   * \param[out] status return status data.
+   *
+   * \return true for success or false for failure.
+   */
+    bool cardCMD6(uint32_t arg, uint8_t* status) override;
+
+    /** Erase a range of sectors.
+   *
+   * \param[in] firstSector The address of the first sector in the range.
+   * \param[in] lastSector The address of the last sector in the range.
+   *
+   * \return true for success or false for failure.
+   */
+    bool erase(uint32_t firstSector, uint32_t lastSector) override;
+    /** \return error code. */
+    uint8_t errorCode() const override;
+    /** \return error data. */
+    uint32_t errorData() const override;
+    /** \return false by default */
+    bool hasDedicatedSpi() override;
+    /** \return false by default */
+    bool isDedicatedSpi() override;
+    /** Set SPI sharing state
+   * \param[in] value desired state.
+   * \return false by default.
+   */
+    bool setDedicatedSpi(bool value) override;
+    /**
+   * Read a card's CID register.
+   *
+   * \param[out] cid pointer to area for returned data.
+   *
+   * \return true for success or false for failure.
+   */
+    bool readCID(cid_t* cid) override;
+    /**
+   * Read a card's CSD register.
+   *
+   * \param[out] csd pointer to area for returned data.
+   *
+   * \return true for success or false for failure.
+   */
+    bool readCSD(csd_t* csd) override;
+    /** Read OCR register.
+   *
+   * \param[out] ocr Value of OCR register.
+   * \return true for success or false for failure.
+   */
+    bool readOCR(uint32_t* ocr) override;
+    /** Read SCR register.
+   *
+   * \param[out] scr Value of SCR register.
+   * \return true for success or false for failure.
+   */
+    bool readSCR(scr_t* scr) override;
+    /** \return card status. */
+    uint32_t status() override;
+    /** Return the card type: SD V1, SD V2 or SDHC/SDXC
+   * \return 0 - SD V1, 1 - SD V2, or 3 - SDHC/SDXC.
+   */
+    uint8_t type() const override;
+    /** Write one data sector in a multiple sector write sequence.
+   * \param[in] src Pointer to the location of the data to be written.
+   * \return true for success or false for failure.
+   */
+
+    bool writeData(const uint8_t* src) override;
+    /** Start a write multiple sectors sequence.
+   *
+   * \param[in] sector Address of first sector in sequence.
+   *
+   * \return true for success or false for failure.
+   */
+    bool writeStart(uint32_t sector) override;
+    /** End a write multiple sectors sequence.
+   * \return true for success or false for failure.
+   */
+    bool writeStop() override;
+    bool driveAvailable(); // true if mass storage device is connected
+};
+#endif
+
+#if defined(HAS_SDIO_SD_SLOT) && HAS_SDIO_SD_SLOT == 1
+class RFSDSdio : public SdCardInterface {
+    uint8_t lastErrorCode = SD_CARD_ERROR_INIT_NOT_CALLED;
+    uint32_t lastErrorLine = 0;
+#if defined(STM32F4_BOARD) || defined(STM32F1_BOARD)
+public:
+    static SD_HandleTypeDef hsd;
+    static DMA_HandleTypeDef hdma_sdio;
+
+private:
+    void goToTransferSpeed();
+    void SDLowLevelInit();
+    bool SDIOReadWriteBlockDMA(uint32_t block, const uint8_t* src, uint8_t* dst);
+    bool SDIOInit();
+    bool SDIOReadBlock(uint32_t block, uint8_t* dst);
+    bool SDIOWriteBlock(uint32_t block, const uint8_t* src);
+    bool SDIOIsReady();
+    bool SDIOIsBusy();
+    uint32_t SDIOGetCardSize();
+    uint32_t SDIOGetBlocks();
+#endif
+public:
+    virtual ~RFSDSdio() { }
+    bool init();
+    /** end use of device */
+    virtual void end() override;
+    /**
+   * Check for FsBlockDevice busy.
+   *
+   * \return true if busy else false.
+   */
+    bool isBusy() override;
+    /**
+   * Read a sector.
+   *
+   * \param[in] sector Logical sector to be read.
+   * \param[out] dst Pointer to the location that will receive the data.
+   * \return true for success or false for failure.
+   */
+    bool readSector(uint32_t sector, uint8_t* dst) override;
+
+    /**
+   * Read multiple sectors.
+   *
+   * \param[in] sector Logical sector to be read.
+   * \param[in] ns Number of sectors to be read.
+   * \param[out] dst Pointer to the location that will receive the data.
+   * \return true for success or false for failure.
+   */
+    bool readSectors(uint32_t sector, uint8_t* dst, size_t ns) override;
+
+    /** \return device size in sectors. */
+    uint32_t sectorCount() override;
+
+    /** End multi-sector transfer and go to idle state.
+   * \return true for success or false for failure.
+   */
+    bool syncDevice() override;
+
+    /**
+   * Writes a sector.
+   *
+   * \param[in] sector Logical sector to be written.
+   * \param[in] src Pointer to the location of the data to be written.
+   * \return true for success or false for failure.
+   */
+    bool writeSector(uint32_t sector, const uint8_t* src) override;
+
+    /**
+   * Write multiple sectors.
+   *
+   * \param[in] sector Logical sector to be written.
+   * \param[in] ns Number of sectors to be written.
+   * \param[in] src Pointer to the location of the data to be written.
+   * \return true for success or false for failure.
+   */
+    bool writeSectors(uint32_t sector, const uint8_t* src, size_t ns) override;
+
+    /** CMD6 Switch mode: Check Function Set Function.
+   * \param[in] arg CMD6 argument.
+   * \param[out] status return status data.
+   *
+   * \return true for success or false for failure.
+   */
+    bool cardCMD6(uint32_t arg, uint8_t* status) override;
+
+    /** Erase a range of sectors.
+   *
+   * \param[in] firstSector The address of the first sector in the range.
+   * \param[in] lastSector The address of the last sector in the range.
+   *
+   * \return true for success or false for failure.
+   */
+    bool erase(uint32_t firstSector, uint32_t lastSector) override;
+    /** \return error code. */
+    uint8_t errorCode() const override;
+    /** \return error data. */
+    uint32_t errorData() const override;
+    /** \return false by default */
+    bool hasDedicatedSpi() override;
+    /** \return false by default */
+    bool isDedicatedSpi() override;
+    /** Set SPI sharing state
+   * \param[in] value desired state.
+   * \return false by default.
+   */
+    bool setDedicatedSpi(bool value) override;
+    /**
+   * Read a card's CID register.
+   *
+   * \param[out] cid pointer to area for returned data.
+   *
+   * \return true for success or false for failure.
+   */
+    bool readCID(cid_t* cid) override;
+    /**
+   * Read a card's CSD register.
+   *
+   * \param[out] csd pointer to area for returned data.
+   *
+   * \return true for success or false for failure.
+   */
+    bool readCSD(csd_t* csd) override;
+    /** Read OCR register.
+   *
+   * \param[out] ocr Value of OCR register.
+   * \return true for success or false for failure.
+   */
+    bool readOCR(uint32_t* ocr) override;
+    /** Read SCR register.
+   *
+   * \param[out] scr Value of SCR register.
+   * \return true for success or false for failure.
+   */
+    bool readSCR(scr_t* scr) override;
+    /** \return card status. */
+    uint32_t status() override;
+    /** Return the card type: SD V1, SD V2 or SDHC/SDXC
+   * \return 0 - SD V1, 1 - SD V2, or 3 - SDHC/SDXC.
+   */
+    uint8_t type() const override;
+    /** Write one data sector in a multiple sector write sequence.
+   * \param[in] src Pointer to the location of the data to be written.
+   * \return true for success or false for failure.
+   */
+
+    bool writeData(const uint8_t* src) override;
+    /** Start a write multiple sectors sequence.
+   *
+   * \param[in] sector Address of first sector in sequence.
+   *
+   * \return true for success or false for failure.
+   */
+    bool writeStart(uint32_t sector) override;
+    /** End a write multiple sectors sequence.
+   * \return true for success or false for failure.
+   */
+    bool writeStop() override;
+};
+#endif
 
 class FileSource {
 public:
@@ -62,7 +379,8 @@ public:
     virtual void JSONFileInfo(const char* filename) = 0;
 #endif
     virtual void ls(const char* lsDir = Com::tSlash, const bool json = false) = 0;
-
+    virtual bool listDirectory(char* dir, bool recursive, listDirectoryCallback callback, int depth = 0) = 0;
+    virtual char* filenameAtIndex(char* dir, int idx) = 0;
     PGM_P identifier;
 };
 
@@ -79,6 +397,7 @@ protected:
     bool getCardInfo(char* volumeLabelBuf = nullptr, uint8_t volumeLabelSize = 0, uint64_t* volumeSizeSectors = nullptr, uint64_t* usageBytes = nullptr, uint16_t* fileCount = nullptr, uint8_t* folderCount = nullptr);
     bool printIfCardErrCode();
     void ls(sd_file_t& rootDir, const bool json);
+    bool listDirectory(sd_file_t& dir, bool recursive, listDirectoryCallback callback, int depth);
 
 public:
     FileSourceSdFatBase(PGM_P _identifier, int pos);
@@ -101,11 +420,14 @@ public:
     void JSONFileInfo(const char* filename) override;
 #endif
     void ls(const char* lsDir = Com::tSlash, const bool json = false) override;
+    bool listDirectory(char* dir, bool recursive, listDirectoryCallback callback, int depth) override;
+    char* filenameAtIndex(char* dir, int idx) override;
 };
 
 template <class Detect, int cs>
 class FileSourceSPI : public FileSourceSdFatBase {
     int speed;
+    SdSpiCard card;
     SdSpiConfig spiConfig;
 
 public:
@@ -117,13 +439,50 @@ public:
     void printCardInfo(bool json) override;
 };
 
+#if defined(HAS_SDIO_SD_SLOT) && HAS_SDIO_SD_SLOT == 1
+
+template <class Detect>
+class FileSourceSDIO : public FileSourceSdFatBase {
+    int speed;
+    RFSDSdio card;
+
+public:
+    FileSourceSDIO(PGM_P name, int pos);
+    void mount(const bool manual) override;
+    bool usesAutomount() override { return Detect::pin() != 255; } ///< Does it detect insertion on it's own?
+    void handleAutomount() override;
+
+    void printCardInfo(bool json) override;
+};
+
+#endif
+
+#if USB_HOST_SUPPORT == 1
+class FileSourceUSB : public FileSourceSdFatBase {
+    RFUSBDrive card;
+
+public:
+    FileSourceUSB(PGM_P name, int pos);
+    void mount(const bool manual) override;
+    bool usesAutomount() override { return true; } ///< Does it detect insertion on it's own?
+    void handleAutomount() override;
+
+    void printCardInfo(bool json) override;
+};
+
+#endif
+
+extern FileSource* fileSources[4];
+
 class SDCardGCodeSource;
+class Printer;
 class FilePrintManager {
     friend class SDCardGCodeSource;
     friend class FileSource;
     friend class FileSourceSdFatBase;
     template <class Detect, int cs>
     friend class FileSourceSPI;
+    friend class Printer;
     FileSource* selectedSource; // file being written to or being read
     uint32_t selectedFileSize;
     uint32_t selectedFilePos;
@@ -199,5 +558,9 @@ public:
     void setPosition(uint32_t newPos);
     void printCardInfo(bool json);
     int posFor(FileSource* s);
+    void setSource(FileSource* source) {
+        selectedSource = source;
+    }
+    FileSource* getSelectedSource() { return selectedSource; }
 };
 extern FilePrintManager filePrintManager;

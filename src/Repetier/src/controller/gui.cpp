@@ -32,10 +32,16 @@ fast8_t GUI::bufPos;               ///< Pos for appending data
 GUIBootState GUI::curBootState = GUIBootState::DISPLAY_INIT;
 bool GUI::textIsScrolling = false; ///< Our selected row/text is now scrolling/anim
 probeProgInfo* GUI::curProbingProgress = nullptr;
+bool GUI::stopUpdating = false;
 #if SDSUPPORT || NEW_FILE_HANDLING == 1
 char GUI::cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2] = { '/', 0 };
 uint8_t GUI::folderLevel = 0;
+#if NEW_FILE_HANDLING == 1
+FileSource* GUI::source = nullptr;
+#endif
+#if SDSUPPORT
 sd_file_t GUI::cwdFile;
+#endif
 #endif
 
 #if DISPLAY_DRIVER == DRIVER_NONE
@@ -68,6 +74,9 @@ void __attribute__((weak)) warningScreenP(GUIAction action, void* data) { }
 void __attribute__((weak)) errorScreenP(GUIAction action, void* data) { }
 #else
 void GUI::resetMenu() { ///< Go to start page
+    if (GUI::stopUpdating) {
+        return;
+    }
     level = 0;
     replace(Printer::isPrinting() ? printProgress : Printer::isZProbingActive() ? probeProgress : startScreen, nullptr, GUIPageType::TOPLEVEL);
 }
@@ -154,7 +163,7 @@ void GUI::update() {
         contentChanged = true;
     }
 
-    if (level > 0 && !isStickyPageType(pageType[level]) && (HAL::timeInMilliseconds() - lastAction) > UI_AUTORETURN_TO_MENU_AFTER) {
+    if (level > 0 && !isStickyPageType(pageType[level]) && (HAL::timeInMilliseconds() - lastAction) > UI_AUTORETURN_TO_MENU_AFTER && !stopUpdating) {
         level = 0;
     }
     if ((statusLevel == GUIStatusLevel::BUSY || textIsScrolling) && timeDiff > 500) {
@@ -174,12 +183,18 @@ bool GUI::isStickyPageType(GUIPageType t) {
 }
 
 void GUI::popAll() {
+    if (GUI::stopUpdating) {
+        return;
+    }
     while (level) {
         pop();
     }
 }
 
 void GUI::pop() {
+    if (GUI::stopUpdating) {
+        return;
+    }
     if (level > 0) {
         if (pageType[level] == GUIPageType::BUSY || pageType[level] == GUIPageType::STATUS) {
             status[0] = 0;
@@ -204,6 +219,9 @@ void GUI::popBusy() {
 }
 
 void GUI::push(GuiCallback cb, void* cData, GUIPageType tp) {
+    if (GUI::stopUpdating) {
+        return;
+    }
     if (tp == GUIPageType::STATUS || tp == GUIPageType::BUSY) {
         if (pageType[level] == GUIPageType::STATUS || pageType[level] == GUIPageType::BUSY) {
             level--; // Replace as they all share status for data
@@ -220,6 +238,9 @@ void GUI::push(GuiCallback cb, void* cData, GUIPageType tp) {
 }
 
 void GUI::replace(GuiCallback cb, void* cData, GUIPageType tp) {
+    if (GUI::stopUpdating) {
+        return;
+    }
     callbacks[level] = cb;
     data[level] = cData;
     pageType[level] = tp;

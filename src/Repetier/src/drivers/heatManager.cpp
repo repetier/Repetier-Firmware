@@ -167,7 +167,13 @@ void HeatManager::update() {
         if (input->isDefect()) {
             return; // do nothing in error state
         } else {
+#if defined(PERMANENT_HEATER_ERRORS)
+            if (hotPluggable && error == HeaterError::SENSOR_DEFECT) {
+                error = HeaterError::NO_ERROR;
+            }
+#else
             error = HeaterError::NO_ERROR;
+#endif
         }
     }
     if (errorCount > 0) {
@@ -209,7 +215,11 @@ void HeatManager::update() {
                 Com::printF(PSTR(" may be defective. Sensor reported unusual values."));
                 Com::printFLN(PSTR(" This could mean a broken wire or a shorted contact on the sensor."));
                 setError(HeaterError::SENSOR_DEFECT);
+                Printer::setAnyTempsensorDefect();
                 GCode::fatalError(PSTR("Heater sensor defect"));
+#if defined(PERMANENT_HEATER_ERRORS)
+                GUI::stopUpdating = true;
+#endif
             }
         }
         return;
@@ -238,6 +248,10 @@ void HeatManager::update() {
                 Com::println();
                 setError(HeaterError::NO_HEATUP);
                 GCode::fatalError(PSTR("Heater decoupled during rising"));
+                Printer::setAnyTempsensorDefect();
+#if defined(PERMANENT_HEATER_ERRORS)
+                GUI::stopUpdating = true;
+#endif
                 return;
             }
             lastDecoupleTemp = currentTemperature;
@@ -253,6 +267,10 @@ void HeatManager::update() {
                 Com::println();
                 setError(HeaterError::LEAVING_RANGE);
                 GCode::fatalError(PSTR("Heater decoupled during hold"));
+#if defined(PERMANENT_HEATER_ERRORS)
+                GUI::stopUpdating = true;
+#endif
+                Printer::setAnyTempsensorDefect();
                 return;
             }
         }
@@ -317,7 +335,7 @@ void HeatManager::waitForTargetTemperature() {
     Printer::setAutoreportTemp(true);
     millis_t startTime = HAL::timeInMilliseconds();
     millis_t waitUntil = 0;
-    while (!Printer::breakLongCommand) {
+    while (!Printer::breakLongCommand && !Printer::isAnyTempsensorDefect()) {
         Commands::checkForPeriodicalActions(true);
         GCode::keepAlive(FirmwareState::WaitHeater);
         millis_t time = HAL::timeInMilliseconds();
@@ -341,6 +359,10 @@ void HeatManager::waitForTargetTemperature() {
         }
         if (maxWait && startTime + maxWait - currentTemperature > 2000000000UL) {
             GCode::fatalError(PSTR("Target temp. not reached within set time limit"));
+#if defined(PERMANENT_HEATER_ERRORS)
+            GUI::stopUpdating = true;
+#endif
+            Printer::setAnyTempsensorDefect();
             break;
         }
         if (getError() != HeaterError::NO_ERROR) { // decoupled or so happened
@@ -393,22 +415,31 @@ void HeatManager::reportTemperature(char c, int idx) {
 }
 
 void HeatManager::resetAllErrorStates() {
+    bool hadErrors = false;
     for (uint8_t i = 0; i < NUM_HEATERS; i++) {
-        if (heaters[i]->input->isDefect() == false) {
-#ifdef PERMANENT_DECOUPLE
-            if (heaters[i]->error == HeaterError::NO_HEATUP || heaters[i]->error == HeaterError::LEAVING_RANGE) {
-                continue;
-            }
-#endif
-            heaters[i]->resetError();
+        HeatManager* heater = heaters[i];
+#if defined(PERMANENT_HEATER_ERRORS)
+        if (heater->error != HeaterError::NO_ERROR) {
+            hadErrors = true;
+            continue;
         }
+#endif
+        if (heater->input->isDefect() == false) {
+            heater->resetError();
+        }
+    }
+    if (hadErrors) {
+        Printer::setAnyTempsensorDefect();
+    } else {
+        Printer::unsetAnyTempsensorDefect();
     }
 }
 
 bool HeatManager::reportTempsensorError() {
 #if NUM_HEATERS > 0
-    if (!Printer::isAnyTempsensorDefect())
+    if (!Printer::isAnyTempsensorDefect()) {
         return false;
+    }
     for (uint8_t i = 0; i < NUM_HEATERS; i++) {
         HeatManager* h = heaters[i];
         if (h->isBedHeater()) {
@@ -421,14 +452,17 @@ bool HeatManager::reportTempsensorError() {
             Com::printF(PSTR("Other:"));
         }
         HeaterError err = h->getError();
-        if (err == HeaterError::SENSOR_DEFECT)
+        if (err == HeaterError::SENSOR_DEFECT) {
             Com::printF(Com::tTempSensorDefect);
-        else
+        } else {
             Com::printF(Com::tTempSensorWorking);
-        if (err == HeaterError::NO_HEATUP)
+        }
+        if (err == HeaterError::NO_HEATUP) {
             Com::printF(PSTR(" temperature does not rise"));
-        if (err == HeaterError::LEAVING_RANGE)
+        }
+        if (err == HeaterError::LEAVING_RANGE) {
             Com::printF(PSTR(" temperature left control range"));
+        }
         Com::println();
     }
     Com::printErrorFLN(Com::tDryModeUntilRestart);

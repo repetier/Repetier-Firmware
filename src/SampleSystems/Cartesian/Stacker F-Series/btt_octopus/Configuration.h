@@ -91,10 +91,12 @@
 
 // The follwing variables are required early to decide on the right modules.
 
-// #define RAPS128_XY // define for usage of RAPS128 on xy axis
 // #define DEBUG_POS
 
-// #define NO_SPI // TODO: Test display
+#define NEW_FILE_HANDLING 1
+// #define SDSUPPORT 0
+#define PERMANENT_HEATER_ERRORS // force reset to work again!
+#define NO_M9999 // Prevent M9999 since we use firmware.bin on sd card for updates!
 #define NUM_SERVOS 0
 #define NUM_TOOLS 1 + IDEX
 #define MOTHERBOARD MOTHERBOARD_BTT_OCTOPUS_1_1
@@ -106,13 +108,14 @@
 #define FEATURE_RETRACTION 1
 #define USE_ADVANCE 1
 #define NUM_AXES 4 + IDEX        // X,Y,Z and E for extruder A,B,C would be 5,6,7
-#define STEPPER_FREQUENCY 200000 // Maximum stepper frequency.
+#define IGNORE_TMC2209_FEEDBACK  // feedback slows down lcd etc. too much because of low baud rate
+#define STEPPER_FREQUENCY 150000 // Maximum stepper frequency.
 #define UI_BACKLIGHT_CHANGEABLE 1
 // Update frequency for new blocks. Must be higher then
 // PREPARE_FREQUENCY.
 // Number of blocks with constant stepper rate per second.
-#define PREPARE_FREQUENCY 2000
-#define BLOCK_FREQUENCY 1000
+#define PREPARE_FREQUENCY 1500
+#define BLOCK_FREQUENCY 750
 #define VELOCITY_PROFILE 2      // 0 = linear, 1 = cubic, 2 = quintic velocity shape
 #define SLOW_DIRECTION_CHANGE 1 // can be reason for lost steps on slow drivers
 // Smaller segments reduce join speed to prevent vibrations causing lost steps
@@ -189,7 +192,7 @@
 // Use more memory to speedup display updates
 #define DISPLAY_FULL_BUFFER 1
 // Direction 1 or -1
-#define ENCODER_DIRECTION 1
+// #define ENCODER_DIRECTION 1
 // Uncomment to hide toogle light menu entry in controls
 // #define NO_LIGHT_CONTROL
 // Encoder speed 0 = fastest, 1 or 2 = slowest - set so 1 click is one menu move

@@ -1458,7 +1458,15 @@ void __attribute__((weak)) warningScreen(GUIAction action, void* data) {
         GUI::bufAddStringP(Com::tWarning);
         printRow(0, GUI::buf);
         char* text = static_cast<char*>(data);
-        printRowCentered(1, text);
+        int len = strlen(text);
+        if (len <= 20) {
+            printRowCentered(1, text);
+        } else {
+            int row = 1;
+            GUI::bufClear();
+            GUI::bufAddStringP(text);
+            scrollSelectedText(row);
+        }
         GUI::bufClear();
         printRow(2, GUI::buf);
         GUI::bufAddStringP(Com::tBtnOK);
@@ -1473,11 +1481,21 @@ void __attribute__((weak)) errorScreen(GUIAction action, void* data) {
         GUI::bufAddStringP(PSTR("Error"));
         printRow(0, GUI::buf);
         char* text = static_cast<char*>(data);
-        printRowCentered(1, text);
+        int len = strlen(text);
+        if (len <= 20) {
+            printRowCentered(1, text);
+        } else {
+            int row = 1;
+            GUI::bufClear();
+            GUI::bufAddStringP(text);
+            scrollSelectedText(row);
+        }
         GUI::bufClear();
         printRow(2, GUI::buf);
         GUI::bufAddStringP(Com::tBtnOK);
-        printRowCentered(3, GUI::buf);
+        if (!GUI::stopUpdating) {
+            printRowCentered(3, GUI::buf);
+        }
     } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
         GUI::pop();
     }
@@ -1488,11 +1506,21 @@ void __attribute__((weak)) infoScreen(GUIAction action, void* data) {
         GUI::bufAddStringP(PSTR("Info"));
         printRow(0, GUI::buf);
         char* text = static_cast<char*>(data);
-        printRowCentered(1, text);
+        int len = strlen(text);
+        if (len <= 20) {
+            printRowCentered(1, text);
+        } else {
+            int row = 1;
+            GUI::bufClear();
+            GUI::bufAddStringP(text);
+            scrollSelectedText(row);
+        }
         GUI::bufClear();
         printRow(2, GUI::buf);
         GUI::bufAddStringP(Com::tBtnOK);
-        printRowCentered(3, GUI::buf);
+        if (!GUI::stopUpdating) {
+            printRowCentered(3, GUI::buf);
+        }
     } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
         GUI::pop();
     }
@@ -1504,8 +1532,13 @@ void __attribute__((weak)) warningScreenP(GUIAction action, void* data) {
         printRow(0, GUI::buf);
         GUI::bufClear();
         GUI::bufAddStringP((const char*)data);
-        printRowCentered(1, GUI::buf);
-
+        int len = strlen(static_cast<char*>(GUI::buf));
+        if (len <= 20) {
+            printRowCentered(1, GUI::buf);
+        } else {
+            int row = 1;
+            scrollSelectedText(row);
+        }
         GUI::bufClear();
         printRow(2, GUI::buf);
         GUI::bufAddStringP(Com::tBtnOK);
@@ -1521,11 +1554,19 @@ void __attribute__((weak)) errorScreenP(GUIAction action, void* data) {
         printRow(0, GUI::buf);
         GUI::bufClear();
         GUI::bufAddStringP((const char*)data);
-        printRowCentered(1, GUI::buf);
+        int len = strlen(static_cast<char*>(GUI::buf));
+        if (len <= 20) {
+            printRowCentered(1, GUI::buf);
+        } else {
+            int row = 1;
+            scrollSelectedText(row);
+        }
         GUI::bufClear();
         printRow(2, GUI::buf);
         GUI::bufAddStringP(Com::tBtnOK);
-        printRowCentered(3, GUI::buf);
+        if (!GUI::stopUpdating) {
+            printRowCentered(3, GUI::buf);
+        }
     } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
         GUI::pop();
     }
@@ -1537,11 +1578,19 @@ void __attribute__((weak)) infoScreenP(GUIAction action, void* data) {
         printRow(0, GUI::buf);
         GUI::bufClear();
         GUI::bufAddStringP((const char*)data);
-        printRowCentered(1, GUI::buf);
+        int len = strlen(static_cast<char*>(GUI::buf));
+        if (len <= 20) {
+            printRowCentered(1, GUI::buf);
+        } else {
+            int row = 1;
+            scrollSelectedText(row);
+        }
         GUI::bufClear();
         printRow(2, GUI::buf);
         GUI::bufAddStringP(Com::tBtnOK);
-        printRowCentered(3, GUI::buf);
+        if (!GUI::stopUpdating) {
+            printRowCentered(3, GUI::buf);
+        }
     } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
         GUI::pop();
     }

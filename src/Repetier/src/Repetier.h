@@ -122,6 +122,50 @@ struct is_floating_point
 
 // Some helper macros
 
+// Macros to chain up to 40 conditions
+#define _DO_1(W, C, A) (_##W##_1(A))
+#define _DO_2(W, C, A, B) (_##W##_1(A) C _##W##_1(B))
+#define _DO_3(W, C, A, V...) (_##W##_1(A) C _DO_2(W, C, V))
+#define _DO_4(W, C, A, V...) (_##W##_1(A) C _DO_3(W, C, V))
+#define _DO_5(W, C, A, V...) (_##W##_1(A) C _DO_4(W, C, V))
+#define _DO_6(W, C, A, V...) (_##W##_1(A) C _DO_5(W, C, V))
+#define _DO_7(W, C, A, V...) (_##W##_1(A) C _DO_6(W, C, V))
+#define _DO_8(W, C, A, V...) (_##W##_1(A) C _DO_7(W, C, V))
+#define _DO_9(W, C, A, V...) (_##W##_1(A) C _DO_8(W, C, V))
+#define _DO_10(W, C, A, V...) (_##W##_1(A) C _DO_9(W, C, V))
+#define _DO_11(W, C, A, V...) (_##W##_1(A) C _DO_10(W, C, V))
+#define _DO_12(W, C, A, V...) (_##W##_1(A) C _DO_11(W, C, V))
+#define _DO_13(W, C, A, V...) (_##W##_1(A) C _DO_12(W, C, V))
+#define _DO_14(W, C, A, V...) (_##W##_1(A) C _DO_13(W, C, V))
+#define _DO_15(W, C, A, V...) (_##W##_1(A) C _DO_14(W, C, V))
+#define _DO_16(W, C, A, V...) (_##W##_1(A) C _DO_15(W, C, V))
+#define _DO_17(W, C, A, V...) (_##W##_1(A) C _DO_16(W, C, V))
+#define _DO_18(W, C, A, V...) (_##W##_1(A) C _DO_17(W, C, V))
+#define _DO_19(W, C, A, V...) (_##W##_1(A) C _DO_18(W, C, V))
+#define _DO_20(W, C, A, V...) (_##W##_1(A) C _DO_19(W, C, V))
+#define _DO_21(W, C, A, V...) (_##W##_1(A) C _DO_20(W, C, V))
+#define _DO_22(W, C, A, V...) (_##W##_1(A) C _DO_21(W, C, V))
+#define _DO_23(W, C, A, V...) (_##W##_1(A) C _DO_22(W, C, V))
+#define _DO_24(W, C, A, V...) (_##W##_1(A) C _DO_23(W, C, V))
+#define _DO_25(W, C, A, V...) (_##W##_1(A) C _DO_24(W, C, V))
+#define _DO_26(W, C, A, V...) (_##W##_1(A) C _DO_25(W, C, V))
+#define _DO_27(W, C, A, V...) (_##W##_1(A) C _DO_26(W, C, V))
+#define _DO_28(W, C, A, V...) (_##W##_1(A) C _DO_27(W, C, V))
+#define _DO_29(W, C, A, V...) (_##W##_1(A) C _DO_28(W, C, V))
+#define _DO_30(W, C, A, V...) (_##W##_1(A) C _DO_29(W, C, V))
+#define _DO_31(W, C, A, V...) (_##W##_1(A) C _DO_30(W, C, V))
+#define _DO_32(W, C, A, V...) (_##W##_1(A) C _DO_31(W, C, V))
+#define _DO_33(W, C, A, V...) (_##W##_1(A) C _DO_32(W, C, V))
+#define _DO_34(W, C, A, V...) (_##W##_1(A) C _DO_33(W, C, V))
+#define _DO_35(W, C, A, V...) (_##W##_1(A) C _DO_34(W, C, V))
+#define _DO_36(W, C, A, V...) (_##W##_1(A) C _DO_35(W, C, V))
+#define _DO_37(W, C, A, V...) (_##W##_1(A) C _DO_36(W, C, V))
+#define _DO_38(W, C, A, V...) (_##W##_1(A) C _DO_37(W, C, V))
+#define _DO_39(W, C, A, V...) (_##W##_1(A) C _DO_38(W, C, V))
+#define _DO_40(W, C, A, V...) (_##W##_1(A) C _DO_39(W, C, V))
+#define __DO_N(W, C, N, V...) _DO_##N(W, C, V)
+#define _DO_N(W, C, N, V...) __DO_N(W, C, N, V)
+#define DO(W, C, V...) (_DO_N(W, C, NUM_ARGS(V), V))
 #define _CAT(a, ...) a##__VA_ARGS__
 #define SWITCH_ENABLED_false 0
 #define SWITCH_ENABLED_true 1
@@ -130,6 +174,12 @@ struct is_floating_point
 #define SWITCH_ENABLED_ 1
 #define ENABLED(b) _CAT(SWITCH_ENABLED_, b)
 #define DISABLED(b) (!_CAT(SWITCH_ENABLED_, b))
+#define PIN_EXISTS(PN) (defined(PN##_PIN) && PN##_PIN >= 0)
+#define _PINEX_1 PIN_EXISTS
+#define PINS_EXIST(V...) DO(PINEX, &&, V)
+#define ANY_PIN(V...) DO(PINEX, ||, V)
+#define PENDING(NOW, SOON) ((int32_t)(NOW - (SOON)) < 0)
+#define ELAPSED(NOW, SOON) (!PENDING(NOW, SOON))
 
 // Use new communication model for multiple channels - only until stable, then old version gets deleted
 
@@ -304,7 +354,6 @@ enum class BootReason {
 #include "io/temperature_tables.h"
 
 #include "Configuration.h"
-
 
 #if NUM_AXES < 4
 #error The minimum NUM_AXES allowed is 4!

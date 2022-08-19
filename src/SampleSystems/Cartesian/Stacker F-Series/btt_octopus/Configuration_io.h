@@ -381,3 +381,28 @@ LIGHT_SOURCE_NEOPIXEL(uiBacklightDriver, UI_NEOPIXEL_PIN, NEO_RGB + NEO_KHZ800, 
 IO_OUTPUT(IOBeeperMain, BEEPER_PIN)
 BEEPER_SOURCE_IO(MainBeeper, IOBeeperMain)
 #endif
+
+// Define multiple sd cards with new system
+#if NEW_FILE_HANDLING == 1
+// Order of numbering:
+// 0 = USB Stick
+// 1 = sd card board
+// 2 = sd card display
+
+// USB Stick
+#if USB_HOST_SUPPORT == 1
+// FILE_SOURCE_USB(usbStick, "Flashdrive", 0)
+#endif
+
+// SDIO slot on board
+#if defined(HAS_SDIO_SD_SLOT) && HAS_SDIO_SD_SLOT == 1
+IO_INPUT_PULLUP(sdcardBoardDetect, SDIO_CARDDETECT)
+FILE_SOURCE_SDIO(sdcardSDIO, "SD Card Board", 1, sdcardBoardDetect)
+#endif
+
+// Display USB
+#if FEATURE_CONTROLLER == CONTROLLER_BTT_MINI_12864_V1
+IO_INPUT_INVERTED_PULLUP(sdcardLCDDetect, UI_SDCARDDETECT)
+FILE_SOURCE_SPI(sdcardLCD, "SD Card LCD", 2, SPI, UI_SD_SS, 4, sdcardLCDDetect)
+#endif
+#endif

@@ -618,8 +618,9 @@ void __attribute__((weak)) MCode_108(GCode* com) {
 
 void __attribute__((weak)) MCode_109(GCode* com) {
 #if NUM_TOOLS > 0
-    if (HeatManager::reportTempsensorError())
+    if (HeatManager::reportTempsensorError()) {
         return;
+    }
     previousMillisCmd = HAL::timeInMilliseconds();
     if (Printer::debugDryrun()) {
         return;
@@ -687,6 +688,7 @@ void __attribute__((weak)) MCode_111(GCode* com) {
     Com::printFLN(PSTR("debug:Communication:"), Printer::debugCommunication(), BoolFormat::ONOFF);
     Com::printFLN(PSTR("debug:NoMoves:"), Printer::debugNoMoves(), BoolFormat::ONOFF);
     Com::printFLN(PSTR("debug:Endstops:"), Printer::debugEndStop(), BoolFormat::ONOFF);
+    Com::printFLN(PSTR("debug:HeaterDefect:"), Printer::isAnyTempsensorDefect(), BoolFormat::ONOFF);
 }
 
 void __attribute__((weak)) MCode_114(GCode* com) {

@@ -1156,7 +1156,13 @@ void __attribute__((weak)) warningScreen(GUIAction action, void* data) {
         lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
         lcd.setFont(u8g2_font_6x10_mf);
         int len = strlen(static_cast<char*>(data));
-        lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(data));
+        if (len <= 20) {
+            lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(data));
+        } else {
+            GUI::bufClear();
+            GUI::bufAddString((char*)data);
+            scrollSelectedText(0, 50);
+        }
         lcd.setDrawColor(0);
         GUI::bufClear();
         GUI::bufAddStringP(Com::tBtnOK);
@@ -1177,11 +1183,19 @@ void __attribute__((weak)) errorScreen(GUIAction action, void* data) {
         lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
         lcd.setFont(u8g2_font_6x10_mf);
         int len = strlen(static_cast<char*>(data));
-        lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(data));
+        if (len <= 20) {
+            lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(data));
+        } else {
+            GUI::bufClear();
+            GUI::bufAddString((char*)data);
+            scrollSelectedText(0, 50);
+        }
         lcd.setDrawColor(0);
         GUI::bufClear();
         GUI::bufAddStringP(Com::tBtnOK);
-        lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+        if (!GUI::stopUpdating) {
+            lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+        }
         lcd.setDrawColor(1);
     } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
         GUI::pop();
@@ -1198,10 +1212,18 @@ void __attribute__((weak)) infoScreen(GUIAction action, void* data) {
         lcd.drawUTF8(79 - 5 * strlen(GUI::buf), 33, GUI::buf);
         lcd.setFont(u8g2_font_6x10_mf);
         int len = strlen(static_cast<char*>(data));
-        lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(data));
+        if (len <= 20) {
+            lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(data));
+        } else {
+            GUI::bufClear();
+            GUI::bufAddString((char*)data);
+            scrollSelectedText(0, 50);
+        }
         lcd.setDrawColor(0);
         GUI::bufClear();
-        GUI::bufAddStringP(Com::tBtnOK);
+        if (!GUI::stopUpdating) {
+            GUI::bufAddStringP(Com::tBtnOK);
+        }
         lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
         lcd.setDrawColor(1);
     } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
@@ -1221,7 +1243,11 @@ void __attribute__((weak)) warningScreenP(GUIAction action, void* data) {
         GUI::bufClear();
         GUI::bufAddStringP((const char*)data);
         int len = strlen(static_cast<char*>(GUI::buf));
-        lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(GUI::buf));
+        if (len <= 20) {
+            lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(GUI::buf));
+        } else {
+            scrollSelectedText(0, 50);
+        }
         lcd.setDrawColor(0);
         GUI::bufClear();
         GUI::bufAddStringP(Com::tBtnOK);
@@ -1243,11 +1269,17 @@ void __attribute__((weak)) errorScreenP(GUIAction action, void* data) {
         GUI::bufClear();
         GUI::bufAddStringP((const char*)data);
         int len = strlen(static_cast<char*>(GUI::buf));
-        lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(GUI::buf));
+        if (len <= 20) {
+            lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(GUI::buf));
+        } else {
+            scrollSelectedText(0, 50);
+        }
         lcd.setDrawColor(0);
         GUI::bufClear();
         GUI::bufAddStringP(Com::tBtnOK);
-        lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+        if (!GUI::stopUpdating) {
+            lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+        }
         lcd.setDrawColor(1);
     } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
         GUI::pop();
@@ -1266,11 +1298,17 @@ void __attribute__((weak)) infoScreenP(GUIAction action, void* data) {
         GUI::bufClear();
         GUI::bufAddStringP((const char*)data);
         int len = strlen(static_cast<char*>(GUI::buf));
-        lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(GUI::buf));
+        if (len <= 20) {
+            lcd.drawUTF8(64 - 3 * len, 50, static_cast<char*>(GUI::buf));
+        } else {
+            scrollSelectedText(0, 50);
+        }
         lcd.setDrawColor(0);
         GUI::bufClear();
         GUI::bufAddStringP(Com::tBtnOK);
-        lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+        if (!GUI::stopUpdating) {
+            lcd.drawUTF8(64 - 3 * strlen(GUI::buf), 62, GUI::buf);
+        }
         lcd.setDrawColor(1);
     } else if (action == GUIAction::CLICK || action == GUIAction::BACK) {
         GUI::pop();

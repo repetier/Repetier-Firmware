@@ -1,4 +1,7 @@
 Any special Repetier Firmware V2 specific changes made to the SdFat library:
+-10/8/2022:
+   - changed printSdErrorSymbol and printSdErrorText to print to rf serial
+
 -3/8/2022:
    - Upgraded SdFat to 2.2.0
 

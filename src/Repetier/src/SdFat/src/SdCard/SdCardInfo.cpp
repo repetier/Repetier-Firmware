@@ -26,21 +26,28 @@
 #include "SdCardInfo.h"
 //------------------------------------------------------------------------------
 #undef SD_CARD_ERROR
-#define SD_CARD_ERROR(e, m) case SD_CARD_ERROR_##e: pr->print(F(#e)); break;
-void printSdErrorSymbol(print_t* pr, uint8_t code) {
-  pr->print(F("SD_CARD_ERROR_"));
-  switch (code) {
-    SD_ERROR_CODE_LIST
-    default: pr->print(F("UNKNOWN"));
-  }
+#define SD_CARD_ERROR(e, m) \
+    case SD_CARD_ERROR_##e: \
+        Com::printF(PSTR(#e)); \
+        break;
+void printSdErrorSymbol(uint8_t code) {
+    Com::printF(PSTR("SD_CARD_ERROR_"));
+    switch (code) {
+        SD_ERROR_CODE_LIST
+    default:
+        Com::printF(PSTR("UNKNOWN"));
+    }
 }
 //------------------------------------------------------------------------------
 #undef SD_CARD_ERROR
-#define SD_CARD_ERROR(e, m) case SD_CARD_ERROR_##e: pr->print(F(m)); break;
-void printSdErrorText(print_t* pr, uint8_t code) {
-  switch
-  (code) {
-    SD_ERROR_CODE_LIST
-    default: pr->print(F("Unknown error"));
-  }
+#define SD_CARD_ERROR(e, m) \
+    case SD_CARD_ERROR_##e: \
+        Com::printF(PSTR(m)); \
+        break;
+void printSdErrorText(uint8_t code) {
+    switch (code) {
+        SD_ERROR_CODE_LIST
+    default:
+        Com::printF(PSTR("Unknown error"));
+    }
 }

@@ -1231,6 +1231,12 @@ void Printer::showJSONStatus(int type) {
         }
         Com::printF(PSTR("],"));
 #if NEW_FILE_HANDLING == 1
+        if (filePrintManager.isPrinting()) {
+            Com::printF(PSTR("\"fractionPrinted\":"));
+            float fraction = filePrintManager.getProgress();
+            Com::print((float)floor(fraction * 10) / 1000);
+            Com::print(',');
+        }
 #else
 #if SDSUPPORT
         if (sd.state == SDState::SD_PRINTING) {
@@ -1247,7 +1253,11 @@ void Printer::showJSONStatus(int type) {
 #endif
         Com::printF(PSTR("\"firstLayerHeight\":"));
 #if NEW_FILE_HANDLING == 1
-        Com::print('0'); // TODO: Temporary solution
+        if (filePrintManager.isPrinting()) {
+            Com::print(filePrintManager.fileInfo.layerHeight);
+        } else {
+            Com::print('0');
+        }
 #else
 #if SDSUPPORT
         if (sd.state == SDState::SD_PRINTING) {

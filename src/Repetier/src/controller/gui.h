@@ -143,6 +143,7 @@ extern void selectToolAction(GUIAction action, void* data);
 struct probeProgInfo;
 class GUI {
 public:
+    static bool stopUpdating;                    // Prevents pop/push
     static int level;                            // Menu level for back handling
     static int topRow[GUI_MAX_LEVEL];            ///< First visible row
     static int cursorRow[GUI_MAX_LEVEL];         ///< Selected row
@@ -177,6 +178,9 @@ public:
     static char cwd[SD_MAX_FOLDER_DEPTH * LONG_FILENAME_LENGTH + 2];
     static uint8_t folderLevel;
     static sd_file_t cwdFile;
+#endif
+#if NEW_FILE_HANDLING == 1
+    static FileSource* source;
 #endif
 
     static void bufClear();

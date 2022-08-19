@@ -103,17 +103,17 @@ void FilePrintManager::selectSource(FileSource* source) {
 
 void FilePrintManager::setPrinting(bool printing) {
     if (printing) {
-        flags |= 2;
+        flags |= 1;
     } else {
-        flags &= ~2;
+        flags &= ~1;
     }
 }
 
 void FilePrintManager::setWriting(bool writing) {
     if (writing) {
-        flags |= 1;
+        flags |= 2;
     } else {
-        flags &= ~1;
+        flags &= ~2;
     }
 }
 
@@ -159,8 +159,10 @@ void FilePrintManager::mount(bool manual, int pos) {
     ///< pos = 255 for first available
     // Com::printFLN(PSTR("Mounting device "), static_cast<int32_t>(pos));
     if (isPrinting() || isWriting()) {
-        Com::printWarningFLN(PSTR("SD mount skipped! Active device still busy."));
-        return;
+        if (getMountedSource(pos) == selectedSource) {
+            Com::printWarningFLN(PSTR("SD mount skipped! Active device still busy."));
+            return;
+        }
     }
     if (pos < 4) {
         if (fileSources[pos] == nullptr) {
@@ -168,14 +170,14 @@ void FilePrintManager::mount(bool manual, int pos) {
             return;
         }
         fileSources[pos]->mount(manual);
-        if (fileSources[pos]->isMounted()) {
+        if (fileSources[pos]->isMounted() && (manual || selectedSource == nullptr || !selectedSource->isMounted())) {
             selectedSource = fileSources[pos];
         }
     } else {
         for (int i = 0; i < 4; i++) {
             if (fileSources[i]) {
                 fileSources[i]->mount(manual);
-                if (fileSources[i]->isMounted()) {
+                if (fileSources[i]->isMounted() && (manual || selectedSource == nullptr || !selectedSource->isMounted())) {
                     selectedSource = fileSources[i];
                     break;
                 }
@@ -739,7 +741,11 @@ template <class Detect, int cs>
 FileSourceSPI<Detect, cs>::FileSourceSPI(PGM_P name, int pos, SPIClass* _spi, uint32_t speed)
     : FileSourceSdFatBase(name, pos)
     , spiConfig(cs, SHARED_SPI, SD_SCK_MHZ(speed), _spi) {
+    pinMode(cs, OUTPUT);
+    WRITE_VAR(cs, true); // deactivated by default
     this->speed = speed;
+    //SdSpiConfig spiConfig(cs, SHARED_SPI, SD_SCK_MHZ(speed), _spi);
+    //card.begin(spiConfig);
 }
 
 template <class Detect, int cs>
@@ -751,13 +757,17 @@ void FileSourceSPI<Detect, cs>::mount(const bool manual) {
             Com::printFLN(PSTR("SD card ok"));
         }
         return;
+    } else {
+        Com::printFLN(PSTR("SD card already mounted"));
     }
 
     if (Detect::pin() != 255 && !Detect::get()) {
         return;
     }
 
-    if (!fileSystem.begin(spiConfig)) {
+    // if (!fileSystem.begin(spiConfig)) {
+    card.begin(spiConfig);
+    if (!fileSystem.begin(&card)) {
         if (mountRetries < 3u) {
             mountRetries++;
             if (manual) {
@@ -925,6 +935,414 @@ void FileSourceSPI<Detect, cs>::handleAutomount() {
     }
 }
 
+// ------------- FileSourceSDIO --------------
+
+#if defined(HAS_SDIO_SD_SLOT) && HAS_SDIO_SD_SLOT == 1
+
+template <class Detect>
+FileSourceSDIO<Detect>::FileSourceSDIO(PGM_P name, int pos)
+    : FileSourceSdFatBase(name, pos) {
+    //SdSpiConfig spiConfig(cs, SHARED_SPI, SD_SCK_MHZ(speed), _spi);
+    //card.begin(spiConfig);
+}
+
+template <class Detect>
+void FileSourceSDIO<Detect>::mount(const bool manual) {
+    if (state > SDState::SD_SAFE_EJECTED) {
+        if (manual && state >= SDState::SD_MOUNTED) {
+            // Some hosts (BTT TFT's) require a response after M21 or they'll hang.
+            Com::writeToAll = true;
+            Com::printFLN(PSTR("SD card ok"));
+        }
+        return;
+    } else {
+        Com::printFLN(PSTR("SD card already mounted"));
+    }
+
+    if (Detect::pin() != 255 && !Detect::get()) {
+        return;
+    }
+
+    if (!card.init()) {
+        if (mountRetries < 3u) {
+            mountRetries++;
+            if (manual) {
+                mount(true); // Try recursively remounting 3 times if manually mounted
+            }
+            return;
+        }
+    }
+    if (!fileSystem.begin(&card)) {
+        if (mountRetries < 3u) {
+            mountRetries++;
+            if (manual) {
+                mount(true); // Try recursively remounting 3 times if manually mounted
+            }
+            return;
+        }
+        state = SDState::SD_HAS_ERROR;
+        mountRetries = 0ul;
+        Com::printFLN(Com::tSDInitFail);
+        UI_STATUS_UPD("SD Card read error.");
+        if (printIfCardErrCode()) {
+            if (fileSystem.card()->errorCode() == SD_CARD_ERROR_CMD0) {
+                Com::printFLN(PSTR("Card reset failed, check chip select pin (SDSS)."));
+            }
+            if (Detect::pin() != 255) {
+                HAL::delayMilliseconds(35ul); // wait a little more before reporting the pin state
+                Com::printF(PSTR("Card detect pin:"));
+                Com::printFLN(Detect::get() ? Com::tH : Com::tL);
+            }
+        } else if (!fileSystem.fatType()) {
+            Com::printFLN(PSTR("Can't find a valid FAT16/FAT32/exFAT partition."));
+        } else if (!fileSystem.chdir()) {
+            Com::printFLN(PSTR("Can't open root directory."));
+        }
+        return;
+    }
+
+    mountRetries = 0ul;
+    state = SDState::SD_MOUNTED;
+    Com::printFLN(PSTR("SD card ok"));
+    Com::printFLN(PSTR("SD card inserted"));
+
+    filePrintManager.printCardInfo(false); // <- collects our volumeLabel too.
+
+    if (!volumeLabel[0u] || strncmp_P(volumeLabel, PSTR("NO NAME"), sizeof(volumeLabel)) == 0u) {
+        volumeLabel[0u] = '\0'; // There's no volume label at all.
+        UI_STATUS_UPD("SD Card mounted.");
+    } else {
+        GUI::flashToStringString(GUI::tmpString, PSTR("@ mounted."), volumeLabel);
+        UI_STATUS_UPD_RAM(GUI::tmpString);
+    }
+
+    Printer::setMenuMode(MENU_MODE_SD_MOUNTED, true);
+#if defined(EEPROM_AVAILABLE) && EEPROM_AVAILABLE == EEPROM_SDCARD
+    HAL::importEEPROM();
+#endif
+}
+
+template <class Detect>
+void FileSourceSDIO<Detect>::printCardInfo(bool json) {
+    if (state < SDState::SD_MOUNTED) {
+        if (!json) {
+            if (state != SDState::SD_HAS_ERROR) {
+                Com::printFLN(Com::tNoMountedCard);
+            } else {
+                Com::printFLN(Com::tSDInitFail);
+            }
+        } else {
+#if JSON_OUTPUT
+            Com::printF(Com::tJSONSDInfo);
+            Com::printFLN(PSTR("{\"slot\":0,\"present\":0}}"));
+#endif
+        }
+        return;
+    }
+    // Print out some basic statistics on successful mount. We also store the volume label.
+    uint64_t volumeSectors = 0ul, usageBytes = 0ul;
+    uint16_t fileCount = 0u;
+    uint8_t folderCount = 0u;
+    getCardInfo(volumeLabel, sizeof(volumeLabel), &volumeSectors, &usageBytes, &fileCount, &folderCount);
+
+    if (!json) {
+        Com::printF(PSTR("Label: "), volumeLabel);
+        Com::printF(PSTR(" | "));
+
+        if (fileSystem.fatType() == FAT_TYPE_EXFAT) {
+            Com::printF(PSTR("exFAT"));
+        } else {
+            Com::printF(PSTR("FAT"), fileSystem.fatType());
+        }
+
+        Com::printF(PSTR(" SD"));
+        uint8_t type = fileSystem.card()->type();
+        if (type == SD_CARD_TYPE_SD1) {
+            Com::printF(PSTR("V1"));
+        } else if (type == SD_CARD_TYPE_SD2) {
+            Com::printF(PSTR("V2"));
+        } else if (type == SD_CARD_TYPE_SDHC) {
+            if (fileSystem.sectorsPerCluster() > 64ul) {
+                Com::printF(PSTR("XC")); // Cards > 32gb are XC.
+            } else {
+                Com::printF(PSTR("HC"));
+            }
+        }
+
+        // Print out volume size
+        bool gb = false;
+        float size = ((0.000001f * 512.0f) * static_cast<float>(volumeSectors));
+        if (size > 1000.0f) {
+            gb = true;
+            size /= 1000.f;
+        }
+        Com::printF(PSTR(" | Volume Size: "), size);
+        Com::printF(gb ? PSTR(" GB") : PSTR(" MB"));
+        // Print out current estimated usage
+        gb = false;
+        size = (0.000001f * static_cast<float>(usageBytes));
+        if (size > 1000.0f) {
+            gb = true;
+            size /= 1000.0f;
+        }
+        Com::printF(PSTR(" | Usage: "), size);
+        Com::printF(gb ? PSTR(" GB (") : PSTR(" MB ("), static_cast<int32_t>(fileCount));
+        Com::printF(PSTR(" files, "), folderCount);
+        Com::printFLN(PSTR(" folders found.)"));
+    } else {
+#if JSON_OUTPUT
+        //{"SDinfo":{"slot":0,"present":1,"capacity":4294967296,"free":2147485184,"speed":20971520,"clsize":32768}}
+
+        uint64_t sizeBytes = 512ull * volumeSectors;
+        Com::printF(Com::tJSONSDInfo);
+        Com::printF(PSTR("{\"slot\":0,\"present\":1,\"capacity\":"), sizeBytes);
+        Com::printF(PSTR(",\"free\":"), (sizeBytes - usageBytes));
+        Com::printF(PSTR(",\"speed\":"), (SD_SCK_MHZ(constrain(18, 1ul, 50ul)) / 8ul));
+        Com::printF(PSTR(",\"clsize\":"), static_cast<uint32_t>(fileSystem.sectorsPerCluster() * 512ul)); // bytesPerCluster isn't working properly for some reason.
+        // Extra
+        if (volumeLabel[0]) {
+            Com::printF(PSTR(",\"label\":\""));
+            FileSource::printEscapeChars(volumeLabel);
+            Com::print('"');
+        }
+        Com::printF(PSTR(",\"files\":"), fileCount);
+        Com::printF(PSTR(",\"folders\":"), folderCount);
+        Com::printFLN(PSTR("}}"));
+#endif
+    }
+}
+
+template <class Detect>
+void FileSourceSDIO<Detect>::handleAutomount() {
+    if (!usesAutomount()) {
+        return;
+    }
+    bool pinLevel = Detect::get();
+    if (pinLevel && state == SDState::SD_UNMOUNTED) {
+        Com::writeToAll = true; // tell all listeners that we are finished
+        if (!mountDebounceTimeMS) {
+            mountDebounceTimeMS = HAL::timeInMilliseconds();
+            mountRetries = 0ul;
+        } else {
+            if ((HAL::timeInMilliseconds() - mountDebounceTimeMS) > 250ul) {
+                filePrintManager.mount(false, filePrintManager.posFor(this));
+            }
+        }
+    } else if (!pinLevel) {
+        if (state == SDState::SD_SAFE_EJECTED) {
+            state = SDState::SD_UNMOUNTED;
+        }
+        if (state != SDState::SD_UNMOUNTED) {
+            Com::writeToAll = true; // tell all listeners that we are finished
+            filePrintManager.unmount(false, filePrintManager.posFor(this));
+        }
+        mountDebounceTimeMS = 0ul;
+    }
+}
+
+#endif
+
+// ------------- FileSourceUSB --------------
+
+#if USB_HOST_SUPPORT == 1
+
+FileSourceUSB::FileSourceUSB(PGM_P name, int pos)
+    : FileSourceSdFatBase(name, pos) {
+}
+
+void FileSourceUSB::mount(const bool manual) {
+    Com::printFLN(PSTR("mount 1")); // TODO
+    HAL::delayMilliseconds(20);     // TODO
+    if (state > SDState::SD_SAFE_EJECTED) {
+        if (manual && state >= SDState::SD_MOUNTED) {
+            // Some hosts (BTT TFT's) require a response after M21 or they'll hang.
+            Com::writeToAll = true;
+            Com::printFLN(PSTR("SD card ok"));
+        }
+        return;
+    } else {
+        Com::printFLN(PSTR("SD card already mounted"));
+    }
+    Com::printFLN(PSTR("mount 2")); // TODO
+    HAL::delayMilliseconds(20);     // TODO
+
+    if (!card.driveAvailable()) {
+        Com::printFLN(PSTR("No USB memory stick inserted!"));
+        return;
+    }
+    Com::printFLN(PSTR("mount 3")); // TODO
+    HAL::delayMilliseconds(20);     // TODO
+
+    if (!card.init()) {
+        if (mountRetries < 3u) {
+            mountRetries++;
+            if (manual) {
+                mount(true); // Try recursively remounting 3 times if manually mounted
+            }
+            return;
+        }
+    }
+    Com::printFLN(PSTR("mount 4")); // TODO
+    HAL::delayMilliseconds(20);     // TODO
+    if (!fileSystem.begin(&card)) {
+        if (mountRetries < 3u) {
+            mountRetries++;
+            if (manual) {
+                mount(true); // Try recursively remounting 3 times if manually mounted
+            }
+            return;
+        }
+        state = SDState::SD_HAS_ERROR;
+        mountRetries = 0ul;
+        Com::printFLN(Com::tSDInitFail);
+        UI_STATUS_UPD("SD Card read error.");
+        if (printIfCardErrCode()) {
+        } else if (!fileSystem.fatType()) {
+            Com::printFLN(PSTR("Can't find a valid FAT16/FAT32/exFAT partition."));
+        } else if (!fileSystem.chdir()) {
+            Com::printFLN(PSTR("Can't open root directory."));
+        }
+        return;
+    }
+
+    mountRetries = 0ul;
+    state = SDState::SD_MOUNTED;
+    Com::printFLN(PSTR("SD card ok"));
+    Com::printFLN(PSTR("SD card inserted"));
+
+    filePrintManager.printCardInfo(false); // <- collects our volumeLabel too.
+
+    if (!volumeLabel[0u] || strncmp_P(volumeLabel, PSTR("NO NAME"), sizeof(volumeLabel)) == 0u) {
+        volumeLabel[0u] = '\0'; // There's no volume label at all.
+        UI_STATUS_UPD("SD Card mounted.");
+    } else {
+        GUI::flashToStringString(GUI::tmpString, PSTR("@ mounted."), volumeLabel);
+        UI_STATUS_UPD_RAM(GUI::tmpString);
+    }
+
+    Printer::setMenuMode(MENU_MODE_SD_MOUNTED, true);
+#if defined(EEPROM_AVAILABLE) && EEPROM_AVAILABLE == EEPROM_SDCARD
+    HAL::importEEPROM();
+#endif
+}
+
+void FileSourceUSB::printCardInfo(bool json) {
+    if (state < SDState::SD_MOUNTED) {
+        if (!json) {
+            if (state != SDState::SD_HAS_ERROR) {
+                Com::printFLN(Com::tNoMountedCard);
+            } else {
+                Com::printFLN(Com::tSDInitFail);
+            }
+        } else {
+#if JSON_OUTPUT
+            Com::printF(Com::tJSONSDInfo);
+            Com::printFLN(PSTR("{\"slot\":0,\"present\":0}}"));
+#endif
+        }
+        return;
+    }
+    // Print out some basic statistics on successful mount. We also store the volume label.
+    uint64_t volumeSectors = 0ul, usageBytes = 0ul;
+    uint16_t fileCount = 0u;
+    uint8_t folderCount = 0u;
+    getCardInfo(volumeLabel, sizeof(volumeLabel), &volumeSectors, &usageBytes, &fileCount, &folderCount);
+
+    if (!json) {
+        Com::printF(PSTR("Label: "), volumeLabel);
+        Com::printF(PSTR(" | "));
+
+        if (fileSystem.fatType() == FAT_TYPE_EXFAT) {
+            Com::printF(PSTR("exFAT"));
+        } else {
+            Com::printF(PSTR("FAT"), fileSystem.fatType());
+        }
+
+        Com::printF(PSTR(" SD"));
+        uint8_t type = fileSystem.card()->type();
+        if (type == SD_CARD_TYPE_SD1) {
+            Com::printF(PSTR("V1"));
+        } else if (type == SD_CARD_TYPE_SD2) {
+            Com::printF(PSTR("V2"));
+        } else if (type == SD_CARD_TYPE_SDHC) {
+            if (fileSystem.sectorsPerCluster() > 64ul) {
+                Com::printF(PSTR("XC")); // Cards > 32gb are XC.
+            } else {
+                Com::printF(PSTR("HC"));
+            }
+        }
+
+        // Print out volume size
+        bool gb = false;
+        float size = ((0.000001f * 512.0f) * static_cast<float>(volumeSectors));
+        if (size > 1000.0f) {
+            gb = true;
+            size /= 1000.f;
+        }
+        Com::printF(PSTR(" | Volume Size: "), size);
+        Com::printF(gb ? PSTR(" GB") : PSTR(" MB"));
+        // Print out current estimated usage
+        gb = false;
+        size = (0.000001f * static_cast<float>(usageBytes));
+        if (size > 1000.0f) {
+            gb = true;
+            size /= 1000.0f;
+        }
+        Com::printF(PSTR(" | Usage: "), size);
+        Com::printF(gb ? PSTR(" GB (") : PSTR(" MB ("), static_cast<int32_t>(fileCount));
+        Com::printF(PSTR(" files, "), folderCount);
+        Com::printFLN(PSTR(" folders found.)"));
+    } else {
+#if JSON_OUTPUT
+        //{"SDinfo":{"slot":0,"present":1,"capacity":4294967296,"free":2147485184,"speed":20971520,"clsize":32768}}
+
+        uint64_t sizeBytes = 512ull * volumeSectors;
+        Com::printF(Com::tJSONSDInfo);
+        Com::printF(PSTR("{\"slot\":0,\"present\":1,\"capacity\":"), sizeBytes);
+        Com::printF(PSTR(",\"free\":"), (sizeBytes - usageBytes));
+        Com::printF(PSTR(",\"speed\":"), (SD_SCK_MHZ(constrain(18, 1ul, 50ul)) / 8ul));
+        Com::printF(PSTR(",\"clsize\":"), static_cast<uint32_t>(fileSystem.sectorsPerCluster() * 512ul)); // bytesPerCluster isn't working properly for some reason.
+        // Extra
+        if (volumeLabel[0]) {
+            Com::printF(PSTR(",\"label\":\""));
+            FileSource::printEscapeChars(volumeLabel);
+            Com::print('"');
+        }
+        Com::printF(PSTR(",\"files\":"), fileCount);
+        Com::printF(PSTR(",\"folders\":"), folderCount);
+        Com::printFLN(PSTR("}}"));
+#endif
+    }
+}
+
+void FileSourceUSB::handleAutomount() {
+    bool pinLevel = card.driveAvailable();
+    return; // TODO block automount until it does not crash
+
+    if (pinLevel && state == SDState::SD_UNMOUNTED) {
+        Com::writeToAll = true; // tell all listeners that we are finished
+        if (!mountDebounceTimeMS) {
+            mountDebounceTimeMS = HAL::timeInMilliseconds();
+            mountRetries = 0ul;
+        } else {
+            if ((HAL::timeInMilliseconds() - mountDebounceTimeMS) > 250ul) {
+                filePrintManager.mount(false, filePrintManager.posFor(this));
+            }
+        }
+    } else if (!pinLevel) {
+        if (state == SDState::SD_SAFE_EJECTED) {
+            state = SDState::SD_UNMOUNTED;
+        }
+        if (state != SDState::SD_UNMOUNTED) {
+            Com::writeToAll = true; // tell all listeners that we are finished
+            filePrintManager.unmount(false, filePrintManager.posFor(this));
+        }
+        mountDebounceTimeMS = 0ul;
+    }
+}
+
+#endif
+
 // ------------ FileSourceSdFatBase ---------
 
 FileSourceSdFatBase::FileSourceSdFatBase(PGM_P _identifier, int pos)
@@ -935,11 +1353,15 @@ FileSourceSdFatBase::FileSourceSdFatBase(PGM_P _identifier, int pos)
     state = SDState::SD_UNMOUNTED;
     mountRetries = 0;
     mountDebounceTimeMS = 0;
+    GUI::popAll();
 }
 
 void FileSourceSdFatBase::unmount(const bool manual) {
     if (state == SDState::SD_SAFE_EJECTED || state == SDState::SD_UNMOUNTED) {
         // in case we're unmounting manually due to sd error
+        if (manual) {
+            Com::printFLN(PSTR("SD Card already unmounted."));
+        }
         return;
     }
     mountRetries = 0u;
@@ -967,14 +1389,19 @@ void FileSourceSdFatBase::unmount(const bool manual) {
     fileSystem.end();
 #endif
 
-    Printer::setMenuMode(MENU_MODE_SD_MOUNTED + MENU_MODE_PAUSED + MENU_MODE_SD_PRINTING, false);
+    if (this == filePrintManager.selectedSource) {
+        Printer::setMenuMode(MENU_MODE_SD_MOUNTED + MENU_MODE_PAUSED + MENU_MODE_SD_PRINTING, false);
 
-    if (filePrintManager.isPrinting()) { // unmounted while printing!
-        filePrintManager.stopPrint(true);
-        GUI::setStatusP(PSTR("SD Card removed!"), GUIStatusLevel::ERROR);
+        if (filePrintManager.isPrinting()) { // unmounted while printing!
+            filePrintManager.stopPrint(true);
+            if (filePrintManager.selectedFilePos > 0) {
+                GUI::setStatusP(PSTR("SD Card removed!"), GUIStatusLevel::ERROR);
+            }
+        }
+        filePrintManager.setPrinting(false);
+        filePrintManager.setWriting(false);
+        filePrintManager.scheduledPause = SDScheduledPause::NO_PAUSE; // cancel any scheduled pauses. only scheduled stops survive
     }
-
-    filePrintManager.scheduledPause = SDScheduledPause::NO_PAUSE; // cancel any scheduled pauses. only scheduled stops survive
     state = manual ? SDState::SD_SAFE_EJECTED : SDState::SD_UNMOUNTED;
 }
 
@@ -1086,7 +1513,10 @@ bool FileSourceSdFatBase::printIfCardErrCode() {
         char buf[8u];
         buf[7u] = '\0';
         char* ptr = fmtHex(&buf[7u], fileSystem.card()->errorCode());
-        Com::printFLN(ptr);
+        Com::printF(ptr);
+        Com::print(' ');
+        printSdErrorText(fileSystem.card()->errorCode());
+        Com::println();
         return true;
     }
     return false;
@@ -1099,7 +1529,7 @@ bool FileSourceSdFatBase::isMounted() {
 bool FileSourceSdFatBase::startWrite(const char* filename) {
     // TODO: a way to cancel host filewrites from the fw side
     fileSystem.chdir();
-    if (selectedFile.open(filename, O_CREAT | O_APPEND | O_WRONLY | O_TRUNC)) {
+    if (selectedFile.open(fileSystem.vol(), filename, O_CREAT | O_APPEND | O_WRONLY | O_TRUNC)) {
         return true;
     }
     return false;
@@ -1125,7 +1555,7 @@ void FileSourceSdFatBase::lsJSON(const char* filename) {
     if (*filename == 0) {
         dir.open(Com::tSlash);
     } else {
-        if (!dir.open(filename) || !dir.isDir()) {
+        if (!dir.open(fileSystem.vol(), filename) || !dir.isDir()) {
             dir.close();
             Com::printF(Com::tJSONErrorStart);
             Com::printF(Com::tFileOpenFailed);
@@ -1148,7 +1578,7 @@ void FileSourceSdFatBase::JSONFileInfo(const char* filename) {
         targetFile = selectedFile;
         info = &filePrintManager.fileInfo;
     } else {
-        if (!targetFile.open(filename, O_RDONLY) || targetFile.isDir()) {
+        if (!targetFile.open(fileSystem.vol(), filename, O_RDONLY) || targetFile.isDir()) {
             targetFile.close();
             Com::printF(Com::tJSONErrorStart);
             Com::printF(Com::tFileOpenFailed);
@@ -1268,7 +1698,7 @@ bool FileSourceSdFatBase::startRead(const char* filename, const bool silent) {
         }
         return false;
     }
-    if (selectedFile.open(filename) && (filePrintManager.selectedFileSize = selectedFile.fileSize())) {
+    if (selectedFile.open(fileSystem.vol(), filename) && (filePrintManager.selectedFileSize = selectedFile.fileSize())) {
 #if JSON_OUTPUT
         filePrintManager.fileInfo.init(selectedFile);
 #endif
@@ -1351,6 +1781,67 @@ void FileSourceSdFatBase::makeDirectory(const char* filename) {
 
 bool FileSourceSdFatBase::isFileOpened() {
     return selectedFile.isOpen();
+}
+
+bool FileSourceSdFatBase::listDirectory(sd_file_t& dir, bool recursive, listDirectoryCallback callback, int depth) {
+    if (!dir.isDir()) {
+        return false;
+    }
+    sd_file_t file;
+    dir.rewind();
+    while (file.openNext(&dir)) {
+        HAL::pingWatchdog();
+        file.getName(tempLongFilename, sizeof(tempLongFilename));
+        if (file.isDir()) { // append / as directory marker
+            char* p = &tempLongFilename[strlen(tempLongFilename)];
+            *p = '/';
+            p++;
+            *p = 0;
+        }
+        if (!callback(tempLongFilename, file.dirIndex(), depth)) {
+            file.close();
+            return false;
+        }
+        if (recursive && file.isDir() && (depth + 1u) < SD_MAX_FOLDER_DEPTH) {
+            depth++;
+            if (!listDirectory(file, recursive, callback, depth)) {
+                file.close();
+                return false;
+            }
+            depth--;
+        }
+        file.close();
+    }
+    return true;
+}
+
+bool FileSourceSdFatBase::listDirectory(char* dir, bool recursive, listDirectoryCallback callback, int depth) {
+    sd_file_t dirF;
+    dirF.open(fileSystem.vol(), dir, O_RDONLY);
+    return listDirectory(dirF, recursive, callback, depth);
+}
+
+char* FileSourceSdFatBase::filenameAtIndex(char* dir, int idx) {
+    sd_file_t dirF;
+    dirF.open(fileSystem.vol(), dir, O_RDONLY);
+    sd_file_t file;
+    dirF.rewind();
+    while (file.openNext(&dirF)) {
+        HAL::pingWatchdog();
+        if (file.dirIndex() == idx) {
+            file.getName(tempLongFilename, sizeof(tempLongFilename));
+            if (file.isDir()) {
+                char* p = &tempLongFilename[strlen(tempLongFilename)];
+                *p = '/';
+                p++;
+                *p = 0;
+            }
+            file.close();
+            return tempLongFilename;
+        }
+        file.close();
+    }
+    return nullptr;
 }
 
 #undef IO_TARGET

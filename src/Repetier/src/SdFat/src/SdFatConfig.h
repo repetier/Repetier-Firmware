@@ -159,7 +159,7 @@
  *   }
  */
 #ifndef USE_BLOCK_DEVICE_INTERFACE
-#define USE_BLOCK_DEVICE_INTERFACE 0
+#define USE_BLOCK_DEVICE_INTERFACE 1
 #endif // USE_BLOCK_DEVICE_INTERFACE
        /**
  * SD_CHIP_SELECT_MODE defines how the functions
@@ -426,7 +426,7 @@ typedef uint8_t SdCsPin_t;
 //------------------------------------------------------------------------------
 #ifndef HAS_SDIO_CLASS
 /** Default is no SDIO. */
-#define HAS_SDIO_CLASS 0
+#define HAS_SDIO_CLASS 1
 #endif // HAS_SDIO_CLASS
 
 #endif // SdFatConfig_h
