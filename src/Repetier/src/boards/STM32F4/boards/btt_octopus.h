@@ -232,13 +232,13 @@ Raspberry Serial: Serial2
 
 #define SDPOWER -1
 
-// Used Timers for pwm output: 1, 4, 5, 9, 11 (SW serial)
+// Used Timers for pwm output: 1, 2, 4, 5, 9, 11 (SW serial)
 // 12 blocked by USB HS
 #define MOTION2_TIMER_NUM 6
 #define MOTION3_TIMER_NUM 7
 #define PWM_TIMER_NUM 10
 #define SERVO_TIMER_NUM 8
-#define TONE_TIMER_NUM 2
+#define TONE_TIMER_NUM 3
 
 /**               ------                                      ------
  * (BEEPER) PE8  |10  9 | PE7  (BTN_ENC)         (MISO) PA6  |10  9 | PA5  (SCK)

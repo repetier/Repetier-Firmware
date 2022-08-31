@@ -130,7 +130,7 @@ WEAK const PinMap PinMap_I2C_SCL[] = {
 
 /* Timer and assignments
 
-PA2 - HE0 - TIM5_CH3
+PA2 - HE0 - TIM2_CH3 // TIM5_CH3
 PA3 - HE1 - TIM5_CH4
 PB10 - HE2 -TIM2_CH3
 PB11 - HE3 - TIM2_CH4
@@ -142,7 +142,7 @@ PD13 - Fan 3 - TIM4_CH2
 PD14 - Fan 4 - TIM4_CH3
 PD15 - Fan 5 - TIM4_CH1
 
-Used Timers: 1, 4, 5, 9, 11 (SW Serial)
+Used Timers: 1, 2, 4, 5, 9, 11 (SW Serial)
 */
 
 #ifdef HAL_TIM_MODULE_ENABLED
