@@ -13,8 +13,8 @@ void menuSetTemperature(GUIAction action, void* data) {
 #if FEATURE_CONTROLLER != NO_CONTROLLER
     HeatManager* hm = reinterpret_cast<HeatManager*>(data);
     float value = hm->getTargetTemperature();
-    DRAW_FLOAT_P(PSTR("Target Temperature:"), Com::tUnitDegCelsius, value, 0);
-    if (GUI::handleFloatValueAction(action, value, hm->getMinTemperature(), hm->getMaxTemperature(), 1.0f)) {
+    DRAW_FLOAT_OFF_P(PSTR("Target Temperature:"), Com::tUnitDegCelsius, value, 0, hm->getOffTemperature());
+    if (GUI::handleFloatValueAction(action, value, hm->getOffTemperature(), hm->getMinTemperature(), hm->getMaxTemperature(), 1.0f)) {
         hm->setTargetTemperature(value);
     }
 #endif
@@ -23,7 +23,7 @@ void menuSetTemperature(GUIAction action, void* data) {
 void menuDisableTemperature(GUIAction action, void* data) {
 #if FEATURE_CONTROLLER != NO_CONTROLLER
     HeatManager* hm = reinterpret_cast<HeatManager*>(data);
-    hm->setTargetTemperature(hm->getMinTemperature());
+    hm->setTargetTemperature(hm->getOffTemperature());
     // Now remove the Disable button & move the display up if needed.
     GUI::cursorRow[GUI::level]--;
     if (GUI::topRow[GUI::level]) {
@@ -125,6 +125,7 @@ HeatManager::HeatManager(char htType, fast8_t _index, IOTemperature* i, PWMHandl
     , targetTemperature(0)
     , currentTemperature(0)
     , maxTemperature(maxTemp)
+    , minTemperature(0)
     , input(i)
     , output(o)
     , maxPWM(maxPwm)
@@ -226,7 +227,7 @@ void HeatManager::update() {
     } else {
         setCurrentTemperature(input->get());
     }
-    if (targetTemperature <= ((flags & FLAG_HEATMANAGER_FREEZER) == 0 ? MAX_ROOM_TEMPERATURE : getMinTemperature())) { // heater disabled
+    if (targetTemperature <= ((flags & FLAG_HEATMANAGER_FREEZER) == 0 ? MAX_ROOM_TEMPERATURE : getOffTemperature())) { // heater disabled
         output->set(0);
         decoupleMode = DecoupleMode::NO_HEATING;
         return;
@@ -323,7 +324,7 @@ void HeatManager::eepromHandle() {
 
 void HeatManager::disableAllHeaters() {
     for (fast8_t i = 0; i < NUM_HEATERS; i++) {
-        heaters[i]->setTargetTemperature(heaters[i]->getMinTemperature());
+        heaters[i]->setTargetTemperature(heaters[i]->getOffTemperature());
     }
 }
 
@@ -496,7 +497,7 @@ void HeatManager::showTemperature(GUIAction action, FSTRINGPARAM(name), int extT
     if (heaterType == 'C') {
         newTemp = chamberTemp;
     }
-    if (newTemp == 0 || newTemp > maxTemperature || newTemp < getMinTemperature()) {
+    if (newTemp == getOffTemperature() || newTemp > maxTemperature || newTemp < getMinTemperature()) {
         return;
     }
     GUI::bufClear();

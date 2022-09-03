@@ -176,7 +176,7 @@ IO_TEMPERATURE_TABLE(TempExt1, IOAnalogExt1, TempTableNTC)
 
 // Use PWM outputs to heat. If using hardware PWM make sure
 // that the selected pin can be used as hardware pwm otherwise
-// select a software pwm model whcih works on all pins.
+// select a software pwm model which works on all pins.
 
 IO_PWM_HARDWARE(PWMExtruder1, HEATER_0_PIN, 500)
 // Limit frequency to not heat up the FET too much!
@@ -324,6 +324,8 @@ HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 310, 255,
 // for target temperature. Stops after 300 seconds with error if it does not
 // succeed.
 HEAT_MANAGER_DEFINE_HYSTERESIS(HeaterExtruder1, 2.0, 20000, 300000)
+HEAT_MANAGER_MIN_TEMPERATURE(HeaterExtruder1, 160)
+HEAT_MANAGER_MIN_TEMPERATURE(HeatedBed1, 40)
 COOLER_MANAGER_SENSOR(ExtruderCooler, TempExt1, CoolerFan, 70, 200, 150, 255)
 
 #if IDEX

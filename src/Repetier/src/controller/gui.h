@@ -256,6 +256,7 @@ public:
     // Draw display with content for a value given as string
     static void showValueP(PGM_P text, PGM_P unit, char* value);
     static void showValue(char* text, PGM_P unit, char* value);
+    static bool handleFloatValueAction(GUIAction& action, float& value, float off, float min, float max, float increment);
     static bool handleFloatValueAction(GUIAction& action, float& value, float min, float max, float increment);
     static bool handleFloatValueAction(GUIAction& action, float& value, float increment);
     static bool handleLongValueAction(GUIAction& action, int32_t& value, int32_t min, int32_t max, int32_t increment);
@@ -280,6 +281,18 @@ struct probeProgInfo {
         GUI::curProbingProgress = nullptr;
     }
 };
+
+#define DRAW_FLOAT_OFF_P(text, unit, val, prec, off) \
+    float v = val; \
+    if (action == GUIAction::DRAW) { \
+        GUI::bufClear(); \
+        if (val == off) { \
+            GUI::bufAddStringP(Com::tOff); \
+        } else { \
+            GUI::bufAddFloat(v, 0, prec); \
+        } \
+        GUI::showValueP(text, unit, GUI::buf); \
+    }
 
 #define DRAW_FLOAT_P(text, unit, val, prec) \
     float v = val; \

@@ -78,7 +78,8 @@
         GUI::flashToStringLong(help, PSTR("= Extruder @ ="), name.getToolId() + 1); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
-        GUI::menuSelectableP(action, PSTR("Select Extruder"), selectToolAction, (void*)name.getToolId(), GUIPageType::ACTION); \
+        if (NUM_TOOLS > 1) \
+            GUI::menuSelectableP(action, PSTR("Select Extruder"), selectToolAction, (void*)name.getToolId(), GUIPageType::ACTION); \
         name.getHeater()->showControlMenu(action); \
         GUI::menuEnd(action); \
     } \
@@ -127,7 +128,8 @@
         GUI::flashToStringLong(help, PSTR("= Laser @ ="), name.getToolId() + 1); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
-        GUI::menuSelectableP(action, PSTR("Select Laser"), selectToolAction, (void*)name.getToolId(), GUIPageType::ACTION); \
+        if (NUM_TOOLS > 1) \
+            GUI::menuSelectableP(action, PSTR("Select Laser"), selectToolAction, (void*)name.getToolId(), GUIPageType::ACTION); \
         GUI::menuEnd(action); \
     } \
     void __attribute__((weak)) menuTune##name(GUIAction action, void* data) { \
@@ -167,7 +169,8 @@
         GUI::flashToStringLong(help, PSTR("= CNC @ ="), name.getToolId() + 1); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
-        GUI::menuSelectableP(action, PSTR("Select CNC"), selectToolAction, (void*)name.getToolId(), GUIPageType::ACTION); \
+        if (NUM_TOOLS > 1) \
+            GUI::menuSelectableP(action, PSTR("Select CNC"), selectToolAction, (void*)name.getToolId(), GUIPageType::ACTION); \
         GUI::menuEnd(action); \
     } \
     void __attribute__((weak)) menuTune##name(GUIAction action, void* data) { \
@@ -294,24 +297,42 @@
 #elif IO_TARGET == IO_TARGET_GUI_CONTROLS // Control tools manipulate menu
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
-    GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuControl##name, nullptr, GUIPageType::MENU);
+    if (NUM_TOOLS > 1) \
+        GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuControl##name, nullptr, GUIPageType::MENU); \
+    else \
+        GUI::menuSelectableP(action, PSTR("Extruder"), menuControl##name, nullptr, GUIPageType::MENU);
 
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
-    GUI::menuLongP(action, PSTR("Laser "), name.getToolId() + 1, menuControl##name, nullptr, GUIPageType::MENU);
+    if (NUM_TOOLS > 1) \
+        GUI::menuLongP(action, PSTR("Laser "), name.getToolId() + 1, menuControl##name, nullptr, GUIPageType::MENU); \
+    else \
+        GUI::menuSelectableP(action, PSTR("Laser "), menuControl##name, nullptr, GUIPageType::MENU);
 
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript) \
-    GUI::menuLongP(action, PSTR("CNC "), name.getToolId() + 1, menuControl##name, nullptr, GUIPageType::MENU);
+    if (NUM_TOOLS > 1) \
+        GUI::menuLongP(action, PSTR("CNC "), name.getToolId() + 1, menuControl##name, nullptr, GUIPageType::MENU); \
+    else \
+        GUI::menuSelectableP(action, PSTR("CNC "), menuControl##name, nullptr, GUIPageType::MENU);
 
 #elif IO_TARGET == IO_TARGET_GUI_CONFIG // config menu
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
-    GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU);
+    if (NUM_TOOLS > 1) \
+        GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU); \
+    else \
+        GUI::menuSelectableP(action, PSTR("Extruder "), menuConfig##name, nullptr, GUIPageType::MENU);
 
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
-    GUI::menuLongP(action, PSTR("Laser "), name.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU);
+    if (NUM_TOOLS > 1) \
+        GUI::menuLongP(action, PSTR("Laser "), name.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU); \
+    else \
+        GUI::menuSelectableP(action, PSTR("Laser "), menuConfig##name, nullptr, GUIPageType::MENU);
 
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript) \
-    GUI::menuLongP(action, PSTR("CNC "), name.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU);
+    if (NUM_TOOLS > 1) \
+        GUI::menuLongP(action, PSTR("CNC "), name.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU); \
+    else \
+        GUI::menuSelectableP(action, PSTR("CNC "), menuConfig##name, nullptr, GUIPageType::MENU);
 
 #define JAM_DETECTOR_HW(name, observer, inputPin, tool, distanceSteps, jitterSteps, jamPercentage) \
     GUI::menuLongP(action, PSTR("Jam Detector "), tool.getToolId() + 1, menuConfig##name, nullptr, GUIPageType::MENU);
@@ -319,13 +340,22 @@
 #elif IO_TARGET == IO_TARGET_GUI_TUNE // Control tune manipulate menu
 
 #define TOOL_EXTRUDER(name, offx, offy, offz, heater, stepper, diameter, resolution, yank, maxSpeed, acceleration, advance, startScript, endScript, fan) \
-    GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuTune##name, nullptr, GUIPageType::MENU);
+    if (NUM_TOOLS > 1) \
+        GUI::menuLongP(action, PSTR("Extruder "), name.getToolId() + 1, menuTune##name, nullptr, GUIPageType::MENU); \
+    else \
+        GUI::menuSelectableP(action, PSTR("Extruder "), menuTune##name, nullptr, GUIPageType::MENU);
 
 #define TOOL_LASER(name, offx, offy, offz, output, toolPin, enablePin, milliWatt, warmupUS, warmupPWM, bias, gamma, startScript, endScript) \
-    GUI::menuLongP(action, PSTR("Laser "), name.getToolId() + 1, menuTune##name, nullptr, GUIPageType::MENU);
+    if (NUM_TOOLS > 1) \
+        GUI::menuLongP(action, PSTR("Laser "), name.getToolId() + 1, menuTune##name, nullptr, GUIPageType::MENU); \
+    else \
+        GUI::menuSelectableP(action, PSTR("Laser "), menuTune##name, nullptr, GUIPageType::MENU);
 
 #define TOOL_CNC(name, offx, offy, offz, output, dirPin, toolPin, enablePin, rpm, startStopDelay, startScript, endScript) \
-    GUI::menuLongP(action, PSTR("CNC "), name.getToolId() + 1, menuTune##name, nullptr, GUIPageType::MENU);
+    if (NUM_TOOLS > 1) \
+        GUI::menuLongP(action, PSTR("CNC "), name.getToolId() + 1, menuTune##name, nullptr, GUIPageType::MENU); \
+    else \
+        GUI::menuSelectableP(action, PSTR("CNC "), menuTune##name, nullptr, GUIPageType::MENU);
 
 #endif
 

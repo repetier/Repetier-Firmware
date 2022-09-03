@@ -21,6 +21,7 @@
 #undef HEAT_MANAGER_DYN_DEAD_TIME
 #undef HEAT_MANAGER_PELTIER_PID
 #undef HEAT_MANAGER_DEFINE_HYSTERESIS
+#undef HEAT_MANAGER_MIN_TEMPERATURE
 
 #if IO_TARGET == IO_TARGET_PERIODICAL_ACTIONS // periodical action
 
@@ -49,6 +50,8 @@
 
 #define HEAT_MANAGER_DEFINE_HYSTERESIS(name, hysteresisTemperature, hysteresisTime, maxWait) \
     name.initHysteresis(hysteresisTemperature, hysteresisTime, maxWait);
+
+#define HEAT_MANAGER_MIN_TEMPERATURE(name, minTemp) name.setMinTemperature(minTemp);
 
 #elif IO_TARGET == IO_TARGET_CLASS_DEFINITION
 
@@ -110,4 +113,8 @@
 
 #ifndef HEAT_MANAGER_DEFINE_HYSTERESIS
 #define HEAT_MANAGER_DEFINE_HYSTERESIS(name, hysteresisTemperature, hysteresisTime, maxWait)
+#endif
+
+#ifndef HEAT_MANAGER_MIN_TEMPERATURE
+#define HEAT_MANAGER_MIN_TEMPERATURE(name, minTemp)
 #endif

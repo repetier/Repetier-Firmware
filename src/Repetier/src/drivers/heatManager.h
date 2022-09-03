@@ -49,6 +49,7 @@ protected:
     float targetTemperature;
     float currentTemperature;
     float maxTemperature;
+    float minTemperature;
     IOTemperature* input;
     PWMHandler* output;
     uint8_t maxPWM;
@@ -88,7 +89,8 @@ public:
             Com::println();
             return;
         }
-        if (temp <= ((flags & FLAG_HEATMANAGER_FREEZER) == 0 ? 0 : -200)) {
+        // if (temp <= ((flags & FLAG_HEATMANAGER_FREEZER) == 0 ? getOffTemperature() : -200)) {
+        if (temp <= getOffTemperature()) {
             decoupleMode = DecoupleMode::NO_HEATING;
         } else if (temp < currentTemperature) {
             decoupleMode = DecoupleMode::COOLING;
@@ -174,8 +176,10 @@ public:
     bool isOtherHeater() const { return heaterType == 'O'; }
     void printName();
     fast8_t getIndex() const { return index; }
-    virtual int getMinTemperature() const { return 0; }
-    bool isOff() const { return targetTemperature <= ((flags & FLAG_HEATMANAGER_FREEZER) == 0 ? MAX_ROOM_TEMPERATURE : getMinTemperature()); }
+    inline void setMinTemperature(float val) { minTemperature = val; }
+    virtual int getMinTemperature() const { return minTemperature; }
+    virtual int getOffTemperature() const { return 0; }
+    bool isOff() const { return targetTemperature <= getOffTemperature(); }
     static bool reportTempsensorError();
     static void disableAllHeaters();
     static void resetAllErrorStates();
@@ -268,7 +272,7 @@ public:
         targetTemperature = minTemp; // different off value!
         updateDerived();
     }
-    virtual int getMinTemperature() const { return minTemp; }
+    virtual int getOffTemperature() const override { return minTemp; }
     void updateLocal(float tempError);
     void autocalibrate(GCode* g);
 };

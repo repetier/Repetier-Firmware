@@ -810,6 +810,37 @@ void GUI::setStatus(char* text, GUIStatusLevel lvl) {
     }
 }
 
+bool GUI::handleFloatValueAction(GUIAction& action, float& value, float off, float min, float max, float increment) {
+    if (action == GUIAction::CLICK || action == GUIAction::BACK) {
+        GUI::pop();
+        return false;
+    }
+    float orig = value;
+    if (action == GUIAction::NEXT) {
+        float calc = (nextActionRepeat * increment);
+        value = (value == min) ? increment * ::floorf((value + calc * 1.01) / increment) : (value + calc);
+        contentChanged = true;
+    } else if (action == GUIAction::PREVIOUS) {
+        float calc = (nextActionRepeat * increment);
+        value = (value == max) ? increment * ::ceilf((value - calc * 1.01) / increment) : (value - calc);
+        contentChanged = true;
+    }
+    if (value != orig) {
+        if (value < min) {
+            if (orig == off && value > off) {
+                value = min;
+            } else {
+                value = off;
+            }
+        } else if (value > max) {
+            value = max;
+        } else if (signbit(orig) != signbit(value)) {
+            value = increment * round(value / increment);
+        }
+    }
+    return orig != value;
+}
+
 bool GUI::handleFloatValueAction(GUIAction& action, float& value, float min, float max, float increment) {
     if (action == GUIAction::CLICK || action == GUIAction::BACK) {
         GUI::pop();

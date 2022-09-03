@@ -100,6 +100,7 @@ public:
     FSTRINGVAR(tDebug)
     FSTRINGVAR(tFirmware)
     FSTRINGVAR(tOk)
+    FSTRINGVAR(tOff)
     FSTRINGVAR(tNewline)
     FSTRINGVAR(tNAN)
     FSTRINGVAR(tINF)
