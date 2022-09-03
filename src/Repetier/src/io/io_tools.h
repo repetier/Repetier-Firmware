@@ -75,7 +75,10 @@
     void __attribute__((weak)) menuControl##name(GUIAction action, void* data) { \
         GUI::menuStart(action); \
         char help[MAX_COLS]; \
-        GUI::flashToStringLong(help, PSTR("= Extruder @ ="), name.getToolId() + 1); \
+        if (NUM_TOOLS > 1) \
+            GUI::flashToStringLong(help, PSTR("= Extruder @ ="), name.getToolId() + 1); \
+        else \
+            GUI::flashToString(help, PSTR("= Extruder =")); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
         if (NUM_TOOLS > 1) \
@@ -86,7 +89,10 @@
     void __attribute__((weak)) menuTune##name(GUIAction action, void* data) { \
         GUI::menuStart(action); \
         char help[MAX_COLS]; \
-        GUI::flashToStringLong(help, PSTR("= Extruder @ ="), name.getToolId() + 1); \
+        if (NUM_TOOLS > 1) \
+            GUI::flashToStringLong(help, PSTR("= Extruder @ ="), name.getToolId() + 1); \
+        else \
+            GUI::flashToString(help, PSTR("= Extruder =")); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
         name.getHeater()->showControlMenu(action); \
@@ -95,7 +101,10 @@
     void __attribute__((weak)) menuConfig##name(GUIAction action, void* data) { \
         GUI::menuStart(action); \
         char help[MAX_COLS]; \
-        GUI::flashToStringLong(help, PSTR("= Extruder @ ="), name.getToolId() + 1); \
+        if (NUM_TOOLS > 1) \
+            GUI::flashToStringLong(help, PSTR("= Extruder @ ="), name.getToolId() + 1); \
+        else \
+            GUI::flashToString(help, PSTR("= Extruder =")); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
         if (stepper.overridesResolution() || stepper.hasConfigMenu()) { \
@@ -125,7 +134,10 @@
     void __attribute__((weak)) menuControl##name(GUIAction action, void* data) { \
         GUI::menuStart(action); \
         char help[MAX_COLS]; \
-        GUI::flashToStringLong(help, PSTR("= Laser @ ="), name.getToolId() + 1); \
+        if (NUM_TOOLS > 1) \
+            GUI::flashToStringLong(help, PSTR("= Laser @ ="), name.getToolId() + 1); \
+        else \
+            GUI::flashToString(help, PSTR("= Laser =")); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
         if (NUM_TOOLS > 1) \
@@ -135,7 +147,10 @@
     void __attribute__((weak)) menuTune##name(GUIAction action, void* data) { \
         GUI::menuStart(action); \
         char help[MAX_COLS]; \
-        GUI::flashToStringLong(help, PSTR("= Laser @ ="), name.getToolId() + 1); \
+        if (NUM_TOOLS > 1) \
+            GUI::flashToStringLong(help, PSTR("= Laser @ ="), name.getToolId() + 1); \
+        else \
+            GUI::flashToString(help, PSTR("= Laser =")); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
         GUI::menuEnd(action); \
@@ -143,7 +158,10 @@
     void __attribute__((weak)) menuConfig##name(GUIAction action, void* data) { \
         GUI::menuStart(action); \
         char help[MAX_COLS]; \
-        GUI::flashToStringLong(help, PSTR("= Laser @ ="), name.getToolId() + 1); \
+        if (NUM_TOOLS > 1) \
+            GUI::flashToStringLong(help, PSTR("= Laser @ ="), name.getToolId() + 1); \
+        else \
+            GUI::flashToString(help, PSTR("= Laser =")); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
         GUI::menuFloatP(action, PSTR("Power       :"), name.getMilliWatt(), 0, ToolLaser<toolPin, enablePin>::menuToolLaserMilliWatt, &name, GUIPageType::FIXED_CONTENT); \
@@ -166,7 +184,10 @@
     void __attribute__((weak)) menuControl##name(GUIAction action, void* data) { \
         GUI::menuStart(action); \
         char help[MAX_COLS]; \
-        GUI::flashToStringLong(help, PSTR("= CNC @ ="), name.getToolId() + 1); \
+        if (NUM_TOOLS > 1) \
+            GUI::flashToStringLong(help, PSTR("= CNC @ ="), name.getToolId() + 1); \
+        else \
+            GUI::flashToString(help, PSTR("= CNC =")); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
         if (NUM_TOOLS > 1) \
@@ -176,7 +197,10 @@
     void __attribute__((weak)) menuTune##name(GUIAction action, void* data) { \
         GUI::menuStart(action); \
         char help[MAX_COLS]; \
-        GUI::flashToStringLong(help, PSTR("= CNC @ ="), name.getToolId() + 1); \
+        if (NUM_TOOLS > 1) \
+            GUI::flashToStringLong(help, PSTR("= CNC @ ="), name.getToolId() + 1); \
+        else \
+            GUI::flashToString(help, PSTR("= CNC =")); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
         GUI::menuEnd(action); \
@@ -184,7 +208,10 @@
     void __attribute__((weak)) menuConfig##name(GUIAction action, void* data) { \
         GUI::menuStart(action); \
         char help[MAX_COLS]; \
-        GUI::flashToStringLong(help, PSTR("= CNC @ ="), name.getToolId() + 1); \
+        if (NUM_TOOLS > 1) \
+            GUI::flashToStringLong(help, PSTR("= CNC @ ="), name.getToolId() + 1); \
+        else \
+            GUI::flashToString(help, PSTR("= CNC =")); \
         GUI::menuText(action, help, true); \
         GUI::menuBack(action); \
         GUI::menuFloatP(action, PSTR("Max. RPM :"), name.getRPM(), 0, ToolCNC<dirPin, toolPin, enablePin>::menuRPM, &name, GUIPageType::FIXED_CONTENT); \
