@@ -79,6 +79,7 @@ void Extruder::manageTemperatures() {
     millis_t time = HAL::timeInMilliseconds(); // compare time for decouple tests
 #if NUM_TEMPERATURE_LOOPS > 0
     for (uint8_t controller = 0; controller < NUM_TEMPERATURE_LOOPS; controller++) {
+        bool isExtruder = controller < NUM_EXTRUDER;
         TemperatureController* act = tempController[controller];
         // Get Temperature
         act->updateCurrentTemperature();
@@ -187,10 +188,16 @@ void Extruder::manageTemperatures() {
         }
 
         // Run test if heater and sensor are decoupled
+        float pidRange = isExtruder ? PID_CONTROL_RANGE : PID_CONTROL_RANGE_BED;
         bool decoupleTestRequired = !errorDetected && act->decoupleTestPeriod > 0 && (time - act->lastDecoupleTest) > act->decoupleTestPeriod; // time enough for temperature change?
         if (decoupleTestRequired && act->isDecoupleFullOrHold() && Printer::isPowerOn()) {                                                     // Only test when powered
-            if (act->isDecoupleFull()) {                                                                                                       // Phase 1: Heating fully until target range is reached
-                if (act->currentTemperatureC - act->lastDecoupleTemp < DECOUPLING_TEST_MIN_TEMP_RISE) {                                        // failed test
+            float minRise = isExtruder ? DECOUPLING_TEST_MIN_TEMP_RISE : DECOUPLING_TEST_MIN_TEMP_RISE_BED;
+            if (act->isDecoupleFull()) {
+                /* if (controller == NUM_EXTRUDER) {
+                    Com::printFLN(PSTR("Rise:"), act->currentTemperatureC - act->lastDecoupleTemp);
+                } */
+                // Phase 1: Heating fully until target range is reached
+                if (act->currentTemperatureC - act->lastDecoupleTemp < minRise) { // failed test
                     extruderTempErrors++;
                     errorDetected = 1;
                     if (extruderTempErrors > 10) { // Ignore short temporary failures
@@ -213,8 +220,12 @@ void Extruder::manageTemperatures() {
                     act->stopDecouple();
                     act->startFullDecouple(time);
                 }
-            } else {                                                                                                // Phase 2: Holding temperature inside a target corridor
-                if (fabs(act->currentTemperatureC - act->targetTemperatureC) > DECOUPLING_TEST_MAX_HOLD_VARIANCE) { // failed test
+            } else {
+                /* if (controller == NUM_EXTRUDER) {
+                    Com::printFLN(PSTR("Hold:"), fabs(act->currentTemperatureC - act->targetTemperatureC));
+                } */
+                // Phase 2: Holding temperature inside a target corridor
+                if (fabs(act->currentTemperatureC - act->targetTemperatureC) > pidRange) { // failed test
                     extruderTempErrors++;
                     errorDetected = 1;
                     if (extruderTempErrors > 10) { // Ignore short temporary failures
@@ -243,7 +254,7 @@ void Extruder::manageTemperatures() {
         if (act->targetTemperatureC < 20.0f) { // heating is off
             output = 0;                        // off is off, even if damping term wants a heat peak!
             act->stopDecouple();
-        } else if (error > PID_CONTROL_RANGE) { // Phase 1: full heating until control range reached
+        } else if (error > pidRange) { // Phase 1: full heating until control range reached
             output = act->pidMax;
             act->startFullDecouple(time);
             act->tempIState = act->tempIStateLimitMin;
@@ -251,11 +262,11 @@ void Extruder::manageTemperatures() {
                 act->tempIStateLimitMax = act->pidDriveMax;
                 act->tempIStateLimitMin = 0;
             }
-        } else if (error < -PID_CONTROL_RANGE) // control range left upper side!
+        } else if (error < -pidRange) // control range left upper side!
             output = 0;
         else { // control range handle by heat manager
             if (act->heatManager == HTR_PID) {
-                act->startHoldDecouple(time);
+                act->startHoldDecouple(time, pidRange);
                 // Com::printF(PSTR(" CUR:"),act->currentTemperatureC); Com::printFLN(PSTR(" IST:"),(act->pidIGain * act->tempIState * 0.1),1);
                 float pidTerm = act->pidPGain * error;
                 // Com::printF(PSTR("PID PT:"), pidTerm);
@@ -271,7 +282,7 @@ void Extruder::manageTemperatures() {
 #endif // SCALE_PID_TO_MAX
                 output = constrain((int)pidTerm, 0, act->pidMax);
             } else if (act->heatManager == HTR_DEADTIME) { // dead-time control
-                act->startHoldDecouple(time);
+                act->startHoldDecouple(time, pidRange);
                 // output = (act->currentTemperatureC + act->tempIState * act->deadTime > act->targetTemperatureC ? 0 : act->pidDriveMax);
                 float raising = (act->temperatureC - act->lastTemperatureC); // raising dT/dt from 0.5 seconds
                                                                              // act->tempIState = 0.25 * (3.0 * act->tempIState + raising); // damp raising

@@ -268,6 +268,22 @@ Switch it off for production, it costs execution time. */
 
 #include "Configuration.h"
 
+#ifdef DECOUPLING_TEST_MAX_HOLD_VARIANCE
+#warning DECOUPLING_TEST_MAX_HOLD_VARIANCE is not used any more. Now PID_CONTROL_RANGE and PID_CONTROL_RANGE_BED are used for this.
+#endif
+
+#ifndef DECOUPLING_TEST_MIN_TEMP_RISE_BED
+#define DECOUPLING_TEST_MIN_TEMP_RISE_BED DECOUPLING_TEST_MIN_TEMP_RISE
+#endif
+
+#ifndef PID_CONTROL_RANGE_BED
+#define PID_CONTROL_RANGE_BED PID_CONTROL_RANGE
+#endif
+
+#ifndef DECOUPLING_TEST_MAX_RAISE_TO_HOLD_TIME_BED
+#define DECOUPLING_TEST_MAX_RAISE_TO_HOLD_TIME_BED DECOUPLING_TEST_MAX_RAISE_TO_HOLD_TIME
+#endif
+
 #ifndef SAFE_HOMING
 #define SAFE_HOMING 0
 #endif

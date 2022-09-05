@@ -250,21 +250,13 @@ Overridden if EEPROM activated.*/
 #define PDM_FOR_EXTRUDER 1
 #define PDM_FOR_COOLER 1
 
-// The firmware checks if the heater and sensor got decoupled, which is
-// dangerous. Since it will never reach target temperature, the heater will stay
-// on for every which can burn your printer or house. As an additional barrier
-// to your smoke detectors (I hope you have one above your printer) we now do
-// some more checks to detect if something got wrong.
-
-// If the temp. is on hold target, it may not sway more then this degrees
-// celsius, or we mark sensor as defect.
-#define DECOUPLING_TEST_MAX_HOLD_VARIANCE 20
 // Minimum temp. rise we expect after the set duration of full heating is over.
 // Always keep a good safety margin to get no false positives. If your period is
 // e.g. 10 seconds because at startup you already need 7 seconds until heater
 // starts to rise temp. for sensor then you have 3 seconds of increased heating
 // to reach 1°C.
 #define DECOUPLING_TEST_MIN_TEMP_RISE 1
+#define DECOUPLING_TEST_MIN_TEMP_RISE_BED 1
 // Set to 1 if you want firmware to kill print on decouple
 #define KILL_IF_SENSOR_DEFECT 0
 // for each extruder, fan will stay on until extruder temperature is below this
@@ -629,6 +621,7 @@ going full power too long, you need to increase this value. For one 6.8 Ohm
 heater 10 is ok. With two 6.8 Ohm heater use 15.
 */
 #define PID_CONTROL_RANGE 20
+#define PID_CONTROL_RANGE_BED 10
 
 /** Prevent extrusions longer then x mm for one command. This is especially
 important if you abort a print. Then the extrusion position might be at any
