@@ -834,7 +834,7 @@ bool GCode::parseBinary(uint8_t* buffer, fast8_t length, bool fromSerial) {
         params2 = *(uint16_t*)p;
         p += 2;
         if (hasString())
-            textlen = *p++;
+            textlen = RMath::min(80, *p++ + 1);;
     } else
         params2 = 0;
     if (params & 1) {
