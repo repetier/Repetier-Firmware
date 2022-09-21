@@ -23,7 +23,7 @@
 
 // ------- SELECT MODEL TO COMPILE -----------
 
-#define STACKER_F_SERIES_MODEL_1
+// #define STACKER_F_SERIES_MODEL_1
 // #define STACKER_F_SERIES_MODEL_2
 // #define STACKER_G2
 
@@ -39,16 +39,14 @@
 
 // ------- No further changes required below --------
 
-#if !defined(STACKER_F_SERIES_MODEL_1) &&                                      \
-    !defined(STACKER_F_SERIES_MODEL_2)
+#if !defined(STACKER_F_SERIES_MODEL_1) && !defined(STACKER_F_SERIES_MODEL_2)
 #error Please select a printer model first in Configuration.h
 #endif
 
 // ******* Model dependent changes ***********
 #define IDEX 0
 
-#if defined(STACKER_F_SERIES_MODEL_2) ||                                       \
-    defined(STACKER_G2)
+#if defined(STACKER_F_SERIES_MODEL_2) || defined(STACKER_G2)
 #define DUAL_Y 1
 #define XL_FORMAT 1
 #else
@@ -91,7 +89,7 @@
 // #define DEBUG_POS
 
 #define NUM_SERVOS 0
-#define NUM_TOOLS 1 
+#define NUM_TOOLS 1
 #define MOTHERBOARD MOTHERBOARD_E3_MINI_V3_0 // Stacker 3d Superboard
 #define EEPROM_MODE 1
 #define RFSERIAL Serial
@@ -101,7 +99,7 @@
 #define FEATURE_WATCHDOG 1
 #define FEATURE_RETRACTION 1
 #define USE_ADVANCE 1
-#define NUM_AXES 4  // X,Y,Z and E for extruder A,B,C would be 5,6,7
+#define NUM_AXES 4               // X,Y,Z and E for extruder A,B,C would be 5,6,7
 #define STEPPER_FREQUENCY 100000 // Maximum stepper frequency.
 
 // Update frequency for new blocks. Must be higher then
@@ -109,7 +107,7 @@
 // Number of blocks with constant stepper rate per second.
 #define PREPARE_FREQUENCY 1000
 #define BLOCK_FREQUENCY 500
-#define VELOCITY_PROFILE 2 // 0 = linear, 1 = cubic, 2 = quintic velocity shape
+#define VELOCITY_PROFILE 2      // 0 = linear, 1 = cubic, 2 = quintic velocity shape
 #define SLOW_DIRECTION_CHANGE 1 // can be reason for lost steps on slow drivers
 // Smaller segments reduce join speed to prevent vibrations causing lost steps
 #define SMALL_SEGMENT_SIZE 0.4
@@ -120,10 +118,10 @@
 #define MAX_ROOM_TEMPERATURE 25 // No heating below this temperature!
 // Start with controlling if temperature is +/- this value to target temperature
 #define TEMPERATURE_CONTROL_RANGE 20
-#define HOST_RESCUE 1                // Enable host rescue help system
+#define HOST_RESCUE 1 // Enable host rescue help system
 // #define DEBUG_RESCUE                 // Uncomment to add power loss entry in debug menu while printing
-#define POWERLOSS_LEVEL 0            // How much time do we have on powerloss, 0 = no move, 1 = short just raise Z, 2 = long full park move
-#define POWERLOSS_UP 0               // How much to move up if mode 1 is active
+#define POWERLOSS_LEVEL 0 // How much time do we have on powerloss, 0 = no move, 1 = short just raise Z, 2 = long full park move
+#define POWERLOSS_UP 0    // How much to move up if mode 1 is active
 #if STACKER_WITH_ZPROBE
 #define Z_PROBE_TYPE Z_PROBE_TYPE_DEFAULT
 #else
@@ -149,19 +147,19 @@
 #define Z_PROBE_FINISHED_SCRIPT ""
 #define Z_PROBE_RUN_AFTER_EVERY_PROBE ""
 #define LEVELING_METHOD 1 // Grid measurement
-#define MAX_GRID_SIZE                                                          \
-  6 // Maximum grid size allocation in memory, imported grid can be smaller
-#define ENABLE_BUMP_CORRECTION 1 // CPU intensive, so only activate if required
+#define MAX_GRID_SIZE \
+    6                                     // Maximum grid size allocation in memory, imported grid can be smaller
+#define ENABLE_BUMP_CORRECTION 1          // CPU intensive, so only activate if required
 #define BUMP_CORRECTION_START_DEGRADE 0.5 // Until this height we correct 100%
-#define BUMP_CORRECTION_END_HEIGHT 2 // From this height on we do no correction
-#define BUMP_LIMIT_TO 2              // Maximum allowed correction up/down
+#define BUMP_CORRECTION_END_HEIGHT 2      // From this height on we do no correction
+#define BUMP_LIMIT_TO 2                   // Maximum allowed correction up/down
 
 // 0 = Cartesian, 1 = CoreXYZ, 2 = delta, 3 = Dual X-Axis
 #define PRINTER_TYPE PRINTER_TYPE_CARTESIAN
 // steps to include as babysteps per 1/BLOCK_FREQUENCY seconds. Must be lower
 // then STEPPER_FREQUENCY/BLOCK_FREQUENCY and be low enough to not loose steps.
-#define BABYSTEPS_PER_BLOCK                                                    \
-  { 1, 1, 1, 1 }
+#define BABYSTEPS_PER_BLOCK \
+    { 1, 1, 1, 1 }
 // If all axis end stops are hardware based we can skip the time consuming tests
 // each step
 #define NO_SOFTWARE_AXIS_ENDSTOPS
@@ -171,7 +169,7 @@
 #define NO_MOTOR_ENDSTOPS
 #endif
 
-#define FEATURE_CONTROLLER CONTROLLER_SPARKLCD
+#define FEATURE_CONTROLLER CONTROLLER_CR10_EXP3
 // Use more memory to speedup display updates
 #define DISPLAY_FULL_BUFFER 1
 // Direction 1 or -1
@@ -280,47 +278,47 @@ CONFIG_VARIABLE_EQ(EndstopDriver, *ZProbe, ZPROBE_ADDRESS)
 // All fans in this list list become controllable with M106/M107
 // by selecteing the fan number with P0..P<NUM_FANS-1>
 #define NUM_FANS 1
-#define FAN_LIST                                                               \
-  { &Fan1PWM }
+#define FAN_LIST \
+    { &Fan1PWM }
 
 #define NUM_HEATED_BEDS 1
-#define HEATED_BED_LIST                                                        \
-  { &HeatedBed1 }
+#define HEATED_BED_LIST \
+    { &HeatedBed1 }
 
 #define NUM_HEATED_CHAMBERS 0
-#define HEATED_CHAMBER_LIST                                                    \
-  {}
+#define HEATED_CHAMBER_LIST \
+    { }
 
-#define SERVO_LIST                                                             \
-  {}
-#define TOOLS                                                                  \
-  { &ToolExtruder1 }
+#define SERVO_LIST \
+    { }
+#define TOOLS \
+    { &ToolExtruder1 }
 
 // Heaters enumerate all heaters, so we can loop over them
 // or call commands on a specific heater number.
 // Suggested order: extruder heaters, heated beds, heated chambers, additional
 // heaters
 #define NUM_HEATERS 2
-#define HEATERS                                                                \
-  { &HeaterExtruder1, &HeatedBed1 }
+#define HEATERS \
+    { &HeaterExtruder1, &HeatedBed1 }
 
 // Array to call motor related commands like microstepping/current if supported.
 // Id's start at 0 and depend on position in this array.
-#define NUM_MOTORS 4 
-#define MOTORS                                                                 \
-  { &XMotor, &YMotor, &ZMotor, &E1Motor }
-#define MOTOR_NAMES                                                            \
-  { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("E0") }
+#define NUM_MOTORS 4
+#define MOTORS \
+    { &XMotor, &YMotor, &ZMotor, &E1Motor }
+#define MOTOR_NAMES \
+    { PSTR("X"), PSTR("Y"), PSTR("Z"), PSTR("E0") }
 
 // Define beeper list
 #if BEEPER_PIN > -1
 #define NUM_BEEPERS 1
-#define BEEPER_LIST                                                            \
-  { &MainBeeper }
+#define BEEPER_LIST \
+    { &MainBeeper }
 #else
 #define NUM_BEEPERS 0
-#define BEEPER_LIST                                                            \
-  {}
+#define BEEPER_LIST \
+    { }
 #endif
 
 // Some common settings for trinamic driver settings

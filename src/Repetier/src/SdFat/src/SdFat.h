@@ -413,8 +413,9 @@ public:
     void initErrorHalt(const __FlashStringHelper* msg) {
         initErrorHalt(&Serial, msg);
     }
-#endif // ENABLE_ARDUINO_SERIAL \
-       //----------------------------------------------------------------------------
+#endif // ENABLE_ARDUINO_SERIAL
+
+    //----------------------------------------------------------------------------
 private:
     SdCard* m_card = nullptr;
     // #if NEW_FILE_HANDLING == 0

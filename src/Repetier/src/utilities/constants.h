@@ -135,6 +135,7 @@
 #define CONTROLLER_ENDER_3_12864 29
 #define CONTROLLER_BTT_MINI_12864_V1 30
 #define CONTROLLER_FYSETC_MINI_12864_2_1 30 // same as btt mini 12864 v1!
+#define CONTROLLER_CR10_EXP3 31             // Creality CR10 using exp3 connection
 
 #define PRINTER_TYPE_CARTESIAN 0
 #define PRINTER_TYPE_CORE_XYZ 1

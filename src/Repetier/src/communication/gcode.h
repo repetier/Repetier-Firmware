@@ -350,7 +350,7 @@ public:
     }
 
     inline float getR(float def) {
-        return hasR() ?: def;
+        return hasR() ? R : def;
     }
 
     inline float getR() {

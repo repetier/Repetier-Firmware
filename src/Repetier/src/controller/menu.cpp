@@ -733,10 +733,11 @@ void __attribute__((weak)) menuSDStartPrint(GUIAction action, void* data) {
         *(++p) = '\0';
         GUI::folderLevel--;
 #if NEW_FILE_HANDLING == 1
+        GUI::replace(menuSDPrint, GUI::source, GUIPageType::MENU);
 #else
         sd.fileSystem.chdir(GUI::cwd);
+        GUI::replace(menuSDPrint, data, GUIPageType::MENU);
 #endif
-        GUI::replace(menuSDPrint, GUI::source, GUIPageType::MENU);
         return;
     }
 #if NEW_FILE_HANDLING == 1

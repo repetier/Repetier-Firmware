@@ -27,7 +27,7 @@
 #endif
 
 #ifndef SDSUPPORT
-#define SDSUPPORT true
+#define SDSUPPORT 1
 #endif
 
 #define CPU_ARCH ARCH_ARM

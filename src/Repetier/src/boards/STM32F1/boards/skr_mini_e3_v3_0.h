@@ -15,10 +15,14 @@
     along with Repetier-Firmware.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-
+/*
+ Github homepage of board: https://github.com/bigtreetech/BIGTREETECH-SKR-mini-E3
+ Homepage: https://biqu.equipment/collections/control-board/products/bigtreetech-skr-mini-e3-v2-0-32-bit-control-board-for-ender-3?variant=39982232174690
+ MCU: ARM-Cortex M0 + STM32G0B1RET6 / STM32G0B0RET6
+*/
 #pragma once
 
-#ifndef skr_mini_e3_v3_0
+#if !defined(skr_mini_e3_v3_0) || !defined(STM32G0xx)
 #error "Oops! Select skr_mini_e3_v3_0 in platformio.ini -> default_envs"
 #endif
 #define skr_mini_e3_v1_2 // Prevent error message in included file
@@ -45,12 +49,15 @@
 #define ORIG_E0_ENABLE_PIN PD1
 
 #undef ORIG_FAN_PIN
-#define ORIG_FAN_PIN PC6   // "FAN0"
-#define ORIG_FAN1_PIN PC7  // "FAN1"
-#define ORIG_FAN2_PIN PB15 // "FAN2"
+#define ORIG_FAN_PIN PC6   // "FAN0" TIM2_CH3
+#define ORIG_FAN1_PIN PC7  // "FAN1" TIM2_CH4
+#define ORIG_FAN2_PIN PB15 // "FAN2" TIM1_CH3
 
 #undef NEOPIXEL_PIN
 #define NEOPIXEL_PIN PA8 // LED driving pin
+
+#undef ORIG_SDCARDDETECT
+#define ORIG_SDCARDDETECT PC3
 
 #undef ORIG_PS_ON_PIN
 #define ORIG_PS_ON_PIN PC13
@@ -65,6 +72,22 @@
 #define TEMP_1_PIN PC4 // BED
 
 #define FILAMENT_SENSOR0 PC15 // E0-STOP
+
+#define X_SERIAL_TX_PIN PC10
+#define X_SERIAL_RX_PIN PC11
+#define X_SERIAL_CHAIN_POS 0
+
+#define Y_SERIAL_TX_PIN PC10
+#define Y_SERIAL_RX_PIN PC11
+#define Y_SERIAL_CHAIN_POS 1
+
+#define Z_SERIAL_TX_PIN PC10
+#define Z_SERIAL_RX_PIN PC11
+#define Z_SERIAL_CHAIN_POS 2
+
+#define E0_SERIAL_TX_PIN PC10
+#define E0_SERIAL_RX_PIN PC11
+#define E0_SERIAL_CHAIN_POS 3
 
 // Default TMC slave addresses
 #ifndef X_SLAVE_ADDRESS
@@ -83,6 +106,15 @@
 #undef FLASH_START
 #define FLASH_START 0x08002000ul
 
+// Preselect timer
+// Extruder/Fan use timer 1 and 2
+
+#define MOTION2_TIMER_NUM 4
+#define MOTION3_TIMER_NUM 6
+#define PWM_TIMER_NUM 7
+#define SERVO_TIMER_NUM 16
+#define TONE_TIMER_NUM 3
+
 // LCD / Controller
 
 /**
@@ -90,20 +122,51 @@
  *                  ------
  *  (BEEPER)  PB5  |10  9 | PA15 (BTN_ENC)
  *  (BTN_EN1) PA9  | 8  7 | RESET
- *  (BTN_EN2) PA10   6  5 | PB9  (LCD_D4)
- *  (LCD_RS)  PB8  | 4  3 | PD6  (LCD_EN)
+ *  (BTN_EN2) PA10   6  5 | PB9  (LCD_D4, CLK)
+ *  (LCD_RS)  PB8  | 4  3 | PD6  (LCD_EN, MOSI SPI1)
  *             GND | 2  1 | 5V
  *                  ------
  *                   EXP1
+ * 
+ * 
+ * 5V        GND
+SID       ?
+SCLK      Btn_En1
+CS        Btn_En2
+Click     Beeper
  */
+
+#define EXP1_03_PIN PD6
+#define EXP1_04_PIN PB8
+#define EXP1_05_PIN PB9
+#define EXP1_06_PIN PA10
+#define EXP1_07_PIN -1
+#define EXP1_08_PIN PA9
+#define EXP1_09_PIN PA15
+#define EXP1_10_PIN PB5
 
 #ifndef CUSTOM_CONTROLLER_PINS
 #if FEATURE_CONTROLLER != CONTROLLER_NONE
 
+#if FEATURE_CONTROLLER == CONTROLLER_CR10_EXP3
+#endif
 #undef UI_ENCODER_CLICK
-#define UI_ENCODER_CLICK PA15
+#define UI_ENCODER_CLICK EXP1_09_PIN
 #undef UI_DISPLAY_ENABLE_PIN
-#define UI_DISPLAY_ENABLE_PIN PD6
+#define UI_DISPLAY_ENABLE_PIN EXP1_03_PIN
+#ifndef UI_ENCODER_A
+#define UI_ENCODER_A EXP1_08_PIN
+#endif
+#ifndef UI_ENCODER_B
+#define UI_ENCODER_B EXP1_06_PIN
+#endif
+#define UI_SPI_CS EXP1_08_PIN
+#define UI_DC EXP1_07_PIN
+#define UI_SPI_SCK EXP2_09_PIN
+#define UI_SPI_MOSI EXP2_05_PIN
+#ifndef BEEPER_PIN
+#define BEEPER_PIN EXP1_10_PIN
+#endif
 
 #endif
 #endif

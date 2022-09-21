@@ -189,8 +189,9 @@ public:
     void dmpFat(print_t* pr, uint32_t start, uint32_t count);
     bool dmpRootDir(print_t* pr, uint32_t n = 0);
     void dmpSector(print_t* pr, uint32_t sector, uint8_t bits = 8);
-#endif // DOXYGEN_SHOULD_SKIP_THIS \
-       //----------------------------------------------------------------------------
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
+    //----------------------------------------------------------------------------
 private:
     /** FatFile allowed access to private members. */
     friend class FatFile;
@@ -246,8 +247,9 @@ private:
     void updateFreeClusterCount(int32_t change) {
         (void)change;
     }
-#endif // MAINTAIN_FREE_CLUSTER_COUNT \
-       // sector caches
+#endif // MAINTAIN_FREE_CLUSTER_COUNT
+
+    // sector caches
     FsCache m_cache;
     bool cachePrepare(uint32_t sector, uint8_t option) {
         return m_cache.prepare(sector, option);

@@ -19,6 +19,8 @@
     which based on Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 */
 
+#include <functional>
+
 #ifndef USB_HOST_SUPPORT // fallback is not available
 #define USB_HOST_SUPPORT 0
 #endif
