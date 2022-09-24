@@ -23,7 +23,7 @@
 
 // ------- SELECT MODEL TO COMPILE -----------
 
-// #define STACKER_F_SERIES_MODEL_1
+#define STACKER_F_SERIES_MODEL_1
 // #define STACKER_F_SERIES_MODEL_2
 // #define STACKER_G2
 
@@ -33,9 +33,6 @@
 // required! You can increase them by factor 2. Always change both!
 #define MICROSTEPS 16
 #define STEPS_FACTOR 1
-
-// Comment to use TMC2130 instead of TMC2660 drivers
-#define USE_TMC2660
 
 // ------- No further changes required below --------
 
@@ -91,12 +88,11 @@
 #define NUM_SERVOS 0
 #define NUM_TOOLS 1
 #define MOTHERBOARD MOTHERBOARD_E3_MINI_V3_0 // Stacker 3d Superboard
-#define EEPROM_MODE 1
-#define RFSERIAL Serial
-#define BLUETOOTH_SERIAL -1
+#define EEPROM_MODE 0
+#define RFSERIAL SerialUSB
+#define BLUETOOTH_SERIAL 2
 #define JSON_OUTPUT 1
-#define FEATURE_SERVO 0
-#define FEATURE_WATCHDOG 1
+#define FEATURE_WATCHDOG 0
 #define FEATURE_RETRACTION 1
 #define USE_ADVANCE 1
 #define NUM_AXES 4               // X,Y,Z and E for extruder A,B,C would be 5,6,7
@@ -118,7 +114,7 @@
 #define MAX_ROOM_TEMPERATURE 25 // No heating below this temperature!
 // Start with controlling if temperature is +/- this value to target temperature
 #define TEMPERATURE_CONTROL_RANGE 20
-#define HOST_RESCUE 1 // Enable host rescue help system
+#define HOST_RESCUE 0 // Enable host rescue help system
 // #define DEBUG_RESCUE                 // Uncomment to add power loss entry in debug menu while printing
 #define POWERLOSS_LEVEL 0 // How much time do we have on powerloss, 0 = no move, 1 = short just raise Z, 2 = long full park move
 #define POWERLOSS_UP 0    // How much to move up if mode 1 is active
@@ -169,7 +165,7 @@
 #define NO_MOTOR_ENDSTOPS
 #endif
 
-#define FEATURE_CONTROLLER CONTROLLER_CR10_EXP3
+#define FEATURE_CONTROLLER NO_CONTROLLER // CONTROLLER_CR10_EXP3
 // Use more memory to speedup display updates
 #define DISPLAY_FULL_BUFFER 1
 // Direction 1 or -1

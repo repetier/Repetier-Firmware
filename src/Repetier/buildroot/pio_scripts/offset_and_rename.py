@@ -15,12 +15,13 @@ from SCons.Script import DefaultEnvironment
 board = DefaultEnvironment().BoardConfig()
 
 board_keys = board.get("build").keys()
-
+print("Running script offset_and_rename.py")
 #
 # For build.offset define LD_FLASH_OFFSET, used by ldscript.ld
 #
 if 'offset' in board_keys:
 	LD_FLASH_OFFSET = board.get("build.offset")
+	print("Applying offset " + LD_FLASH_OFFSET)
 	helper.relocate_vtab(LD_FLASH_OFFSET)
 
 	# Flash size

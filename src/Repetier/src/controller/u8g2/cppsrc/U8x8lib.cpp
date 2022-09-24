@@ -564,10 +564,18 @@ inline void u8g2_delay_x100ns(int x) {
 
 #if (FEATURE_CONTROLLER != CONTROLLER_NONE)
 
+#ifndef UI_SPI_SCK
 #define UI_SPI_SCK UI_DISPLAY_D4_PIN
+#endif
+#ifndef UI_SPI_MOSI
 #define UI_SPI_MOSI UI_DISPLAY_ENABLE_PIN
+#endif
+#ifndef UI_SPI_CS
 #define UI_SPI_CS UI_DISPLAY_RS_PIN
+#endif
+#ifndef UI_SPI_DC
 #define UI_SPI_DC UI_DISPLAY_D5_PIN
+#endif
 
 #endif
 
@@ -579,7 +587,7 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
     const uint8_t startLevel = u8x8_GetSPIClockDefaultLevel(u8x8);
     uint8_t b = 0;
     uint8_t* data;
-#if defined(STM32F1)
+#if defined(STM32F1) && !defined(STM32G0xx)
     // notes: EXCCNT/overhead counter overflows at 256 despite being uint32
     constexpr ufast8_t filterShift = 8; // lowpass filter shift/average applied to overhead cycles
                                         // gathered between successive byte sends.
@@ -595,7 +603,7 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
 
     switch (msg) {
     case U8X8_MSG_BYTE_SEND: {
-#if defined(STM32F1)
+#if defined(STM32F1) && !defined(STM32G0xx)
         if (exitItOvrhead) {
             if (DWT->EXCCNT) {
                 constexpr ufast8_t beta = 7;
@@ -623,7 +631,7 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
             data++;
             arg_int--;
 
-#if defined(STM32F1)
+#if defined(STM32F1) && !defined(STM32G0xx)
             uint32_t startClock = DWT->CYCCNT - ((genItOvrhead >> filterShift) * itOvrheadMult);
             // push reference clock count back a little using the overhead cycles average * multiplier.
 #endif
@@ -632,7 +640,7 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
                 for (size_t i = 0; i < 8; i++) {
                     //WRITE_VAR(u8x8->pins[U8X8_PIN_SPI_CLOCK], !startLevel);
                     WRITE(UI_SPI_SCK, !startLevel);
-#if !defined(STM32F1)
+#if !defined(STM32F1) || defined(STM32G0xx)
                     u8g2_spi_wait();
 #endif
                     if (b & 128) {
@@ -643,18 +651,18 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
                         //WRITE_VAR(u8x8->pins[U8X8_PIN_SPI_DATA], 0);
                     }
                     b <<= 1;
-#if !defined(STM32F1) // Orig due timings
+#if !defined(STM32F1) || defined(STM32G0xx) // Orig due timings
                     u8g2_spi_wait();
                     WRITE(UI_SPI_SCK, startLevel); // Takeover
                     u8g2_spi_wait();
-#else                 // STM32F1 timings
+#else                                       // STM32F1 timings
                     u8g2_delay_x100ns(2);
                     WRITE(UI_SPI_SCK, startLevel); // Takeover
                     //WRITE_VAR(u8x8->pins[U8X8_PIN_SPI_CLOCK], startLevel); // Takeover
                     u8g2_delay_x100ns(3);
 #endif
                 }
-#if defined(STM32F1)
+#if defined(STM32F1) && !defined(STM32G0xx)
                 do {
                 } while ((DWT->CYCCNT - startClock) < clocksPerByte);
 #endif
@@ -666,7 +674,7 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
                         WRITE(UI_SPI_MOSI, 0);
                     }
                     b <<= 1;
-#if !defined(STM32F1) // Orig due
+#if !defined(STM32F1) || defined(STM32G0xx) // Orig due
                     u8g2_spi_wait();
                     WRITE(UI_SPI_SCK, !startLevel); // Takeover
                     u8g2_spi_wait();
@@ -677,13 +685,13 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
                     WRITE(UI_SPI_SCK, startLevel);
 #endif
                 }
-#if defined(STM32F1)
+#if defined(STM32F1) && !defined(STM32G0xx)
                 do {
                 } while ((DWT->CYCCNT - startClock) < clocksPerByte);
 #endif
             }
         }
-#if defined(STM32F1) // our overhead cycle ref spent in interrupts.
+#if defined(STM32F1) && !defined(STM32G0xx) // our overhead cycle ref spent in interrupts.
         exitItOvrhead = DWT->EXCCNT;
 #endif
     } break;
@@ -713,7 +721,7 @@ extern "C" uint8_t u8x8_byte_arduino_4wire_sw_spi(u8x8_t* u8x8, uint8_t msg, uin
 
         break;
     case U8X8_MSG_BYTE_END_TRANSFER:
-#if defined(STM32F1) // Ignore gaps between transfers, they're too unpredictable and EXECNT overflows.
+#if defined(STM32F1) && !defined(STM32G0xx) // Ignore gaps between transfers, they're too unpredictable and EXECNT overflows.
         exitItOvrhead = 0;
 #endif
         // return u8x8_byte_4wire_sw_spi(u8x8, msg, arg_int, arg_ptr);

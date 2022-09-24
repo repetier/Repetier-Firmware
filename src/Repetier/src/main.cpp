@@ -217,16 +217,6 @@ Custom M Codes
 #if UI_DISPLAY_TYPE == DISPLAY_ARDUINO_LIB
 //#include <LiquidCrystal.h> // Uncomment this if you are using liquid crystal library
 #endif
-
-#if PURE_BOARD_TEST
-// For simple tests only, not used in production
-void setup() {
-    //Printer::setup();
-}
-
-void loop() {
-}
-#else
 void setup() {
     Printer::setup();
 }
@@ -234,4 +224,3 @@ void setup() {
 void loop() {
     Commands::commandLoop();
 }
-#endif

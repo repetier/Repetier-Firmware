@@ -20,6 +20,7 @@
       "stlink"
     ],
     "openocd_target": "stm32g0x",
+    "openocd_chipname": "stm32g0b1ret6",
     "svd_path": "STM32G0B1.svd"
   },
   "frameworks": [

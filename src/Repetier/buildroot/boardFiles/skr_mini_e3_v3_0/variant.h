@@ -70,13 +70,20 @@
 #define PD4 52
 #define PD5 53
 #define PD6 54
-#define PD8 55
-#define PD9 56
-#define PF0 57
-#define PF1 58
-#define PF2 59
-#define PA9_R 60
-#define PA10_R 61
+#define PD7 55
+#define PD8 56
+#define PD9 57
+#define PD10 58
+#define PD11 59
+#define PD12 60
+#define PD13 61
+#define PD14 62
+#define PD15 63
+#define PF0 64
+#define PF1 65
+#define PF2 66
+#define PA9_R 67
+#define PA10_R 68
 
 // Alternate pins number
 #define PA1_ALT1 (PA1 | ALT1)
@@ -121,7 +128,7 @@
 #define PC11_ALT1 (PC11 | ALT1)
 #define PD4_ALT1 (PD4 | ALT1)
 
-#define NUM_DIGITAL_PINS 62
+#define NUM_DIGITAL_PINS 69
 #define NUM_REMAP_PINS 2
 #define NUM_ANALOG_INPUTS 16
 
@@ -157,9 +164,9 @@
 #endif
 
 // UART Definitions
-#ifndef SERIAL_UART_INSTANCE
-#define SERIAL_UART_INSTANCE 2
-#endif
+// #ifndef SERIAL_UART_INSTANCE
+// #define SERIAL_UART_INSTANCE 2
+// #endif
 
 // Default pin used for generic 'Serial' instance
 // Mandatory for Firmata

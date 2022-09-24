@@ -81,8 +81,6 @@
 
 #define ORIG_FAN_PIN PA8
 
-#define EEPROM_PAGE_SIZE FLASH_PAGE_SIZE // page write buffer size
-
 // BTT's bootloader seems to use up around 28kb?
 #define FLASH_START 0x08007000ul
 
@@ -126,6 +124,9 @@
 //
 // Misc. Functions
 //
+
+// We can add usb devices to host connector
+#define USB_HOST_SUPPORT 0
 
 #ifndef SDSS
 #define SDSS PA4

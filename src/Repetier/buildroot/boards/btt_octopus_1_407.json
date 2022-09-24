@@ -19,6 +19,7 @@
         ],
         "openocd_board": "stm32f407",
         "openocd_target": "stm32f4x",
+        "openocd_chipname": "stm32f4x",
         "svd_path": "STM32F407x.svd"
     },
     "frameworks": [
@@ -29,7 +30,7 @@
         "libopencm3",
         "zephyr"
     ],
-    "name": "STM32F407ZE (128k RAM. 512k Flash)",
+    "name": "BTT Octopus STM32F407ZE (128k RAM. 512k Flash)",
     "upload": {
         "maximum_ram_size": 131072,
         "maximum_size": 524288,

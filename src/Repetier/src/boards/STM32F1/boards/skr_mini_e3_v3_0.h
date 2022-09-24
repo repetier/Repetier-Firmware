@@ -33,17 +33,19 @@
 #undef EEPROM_AVAILABLE
 #define EEPROM_AVAILABLE EEPROM_I2C
 
-#define EEPROM_SERIAL_ADDR 0x50
-#define EEPROM_PAGE_WRITE_TIME 10
+// see eeprom device data sheet for the following values these are for 24xx256
+#define I2C_SCL_PIN PB6 // Used for eeprom
+#define I2C_SDA_PIN PB7
+#define EEPROM_SERIAL_ADDR 0x50  // 7 bit i2c address (without R/W bit)
+#define EEPROM_SIZE 4096         // 4KB (AT24C32)
+#define EEPROM_PAGE_SIZE 32      // page write buffer size
+#define EEPROM_PAGE_WRITE_TIME 7 // page write time in milliseconds (docs say 5ms but that is too short)
 
 /*
     SKR E3 Mini V2 - We use V1.2 as a base since it shares almost all the same pins.
     We just replace/add any new V2 pins here.
 */
 #include "skr_mini_e3_v1_2.h"
-
-#undef EEPROM_PAGE_SIZE
-#define EEPROM_PAGE_SIZE 32
 
 #undef ORIG_E0_ENABLE_PIN
 #define ORIG_E0_ENABLE_PIN PD1
@@ -75,19 +77,19 @@
 
 #define X_SERIAL_TX_PIN PC10
 #define X_SERIAL_RX_PIN PC11
-#define X_SERIAL_CHAIN_POS 0
+#define X_SERIAL Serial3
 
 #define Y_SERIAL_TX_PIN PC10
 #define Y_SERIAL_RX_PIN PC11
-#define Y_SERIAL_CHAIN_POS 1
+#define Y_SERIAL Serial3
 
 #define Z_SERIAL_TX_PIN PC10
 #define Z_SERIAL_RX_PIN PC11
-#define Z_SERIAL_CHAIN_POS 2
+#define Z_SERIAL Serial3
 
 #define E0_SERIAL_TX_PIN PC10
 #define E0_SERIAL_RX_PIN PC11
-#define E0_SERIAL_CHAIN_POS 3
+#define E0_SERIAL Serial3
 
 // Default TMC slave addresses
 #ifndef X_SLAVE_ADDRESS
@@ -110,30 +112,32 @@
 // Extruder/Fan use timer 1 and 2
 
 #define MOTION2_TIMER_NUM 4
-#define MOTION3_TIMER_NUM 6
-#define PWM_TIMER_NUM 7
+#define MOTION3_TIMER_NUM 15
+#define PWM_TIMER_NUM 17
 #define SERVO_TIMER_NUM 16
 #define TONE_TIMER_NUM 3
+#define TIMER_SERIAL TIM14
+#define TIMER_SERIAL_RAW_IRQ RAW_TIM14_IRQHandler
 
 // LCD / Controller
 
 /**
  *              SKR Mini E3 V3.0
  *                  ------
- *  (BEEPER)  PB5  |10  9 | PA15 (BTN_ENC)
- *  (BTN_EN1) PA9  | 8  7 | RESET
- *  (BTN_EN2) PA10   6  5 | PB9  (LCD_D4, CLK)
- *  (LCD_RS)  PB8  | 4  3 | PD6  (LCD_EN, MOSI SPI1)
- *             GND | 2  1 | 5V
- *                  ------
- *                   EXP1
+ *  (BEEPER)   PB5  |10  9 | PA15 (BTN_ENC)
+ *  (BTN_EN1)  PA9  | 8  7 | RESET
+ *  (BTN_EN2)  PA10   6  5 | PB9  (LCD_D4, CLK)
+ *(LCD_RS, CS) PB8  | 4  3 | PD6  (LCD_EN, MOSI SPI1)
+ *              GND | 2  1 | 5V
+ *                   ------
+ *                    EXP1
  * 
  * 
- * 5V        GND
-SID       ?
-SCLK      Btn_En1
-CS        Btn_En2
-Click     Beeper
+  Beeper     Click   
+  Btn_En2    CS      
+  Btn_En1    SCLK 
+  ?          SID       
+  GND        5V    
  */
 
 #define EXP1_03_PIN PD6
@@ -154,16 +158,22 @@ Click     Beeper
 #define UI_ENCODER_CLICK EXP1_09_PIN
 #undef UI_DISPLAY_ENABLE_PIN
 #define UI_DISPLAY_ENABLE_PIN EXP1_03_PIN
-#ifndef UI_ENCODER_A
+#undef UI_ENCODER_A
 #define UI_ENCODER_A EXP1_08_PIN
-#endif
-#ifndef UI_ENCODER_B
+#undef UI_ENCODER_B
 #define UI_ENCODER_B EXP1_06_PIN
-#endif
+#undef UI_DISPLAY_RS_PIN
+#define UI_DISPLAY_RS_PIN EXP1_04_PIN
+#undef UI_DISPLAY_ENABLE_PIN
+#define UI_DISPLAY_ENABLE_PIN EXP1_03_PIN
+#undef UI_DISPLAY_D4_PIN
+#define UI_DISPLAY_D4_PIN EXP1_05_PIN
+#undef UI_DISPLAY_D5_PIN
+#define UI_DISPLAY_D5_PIN NO_PIN // NOT USED
 #define UI_SPI_CS EXP1_08_PIN
 #define UI_DC EXP1_07_PIN
-#define UI_SPI_SCK EXP2_09_PIN
-#define UI_SPI_MOSI EXP2_05_PIN
+#define UI_SPI_SCK EXP1_05_PIN
+#define UI_SPI_MOSI EXP1_03_PIN
 #ifndef BEEPER_PIN
 #define BEEPER_PIN EXP1_10_PIN
 #endif

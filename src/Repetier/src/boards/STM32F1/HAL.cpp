@@ -594,7 +594,11 @@ void HAL::analogStart(void) {
 
     RCC_PeriphCLKInitTypeDef PeriphClkInit = { 0 };
     PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+#ifdef STM32G0xx
+    PeriphClkInit.AdcClockSelection = RCC_ADCCLKSOURCE_SYSCLK; // RCCEx_ADC_Clock_Source;
+#else
     PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV8;
+#endif
     HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
 
     HAL_ADCEx_Calibration_Start(&AdcHandle);
@@ -747,8 +751,13 @@ void HAL::updateStartReason() {
         startReason = BootReason::WATCHDOG_RESET;
     } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST)) {
         startReason = BootReason::SOFTWARE_RESET;
+#ifdef STM32G0xx
+        //} else if (__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST)) {
+        //    startReason = BootReason::POWER_UP;
+#else
     } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST)) {
         startReason = BootReason::POWER_UP;
+#endif
     } else if (__HAL_RCC_GET_FLAG(RCC_FLAG_PINRST)) {
         startReason = BootReason::EXTERNAL_PIN;
     } else {
@@ -803,7 +812,13 @@ void HAL::i2cSetClockspeed(uint32_t clockSpeedHz) {
 *************************************************************************/
 void HAL::i2cInit(uint32_t clockSpeedHz) {
 #if defined(WIRE_PORT) && !defined(HAL_I2C_MODULE_DISABLED)
+#if defined(I2C_SCL_PIN) && defined(I2C_SCL_PIN)
+    WIRE_PORT.setSDA(I2C_SDA_PIN);
+    WIRE_PORT.setSCL(I2C_SCL_PIN);
     WIRE_PORT.begin(); // create I2C master access
+#else
+    WIRE_PORT.begin(); // create I2C master access
+#endif
     WIRE_PORT.setClock(clockSpeedHz);
 #endif
 }

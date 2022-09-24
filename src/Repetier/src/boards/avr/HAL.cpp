@@ -293,7 +293,7 @@ SIGNAL(TIMER3_COMPA_vect) {
     }
 }
 #else
-#error No servo support for your board, please diable FEATURE_SERVO
+#error No servo support for your board, please diable servos
 #endif
 #endif
 

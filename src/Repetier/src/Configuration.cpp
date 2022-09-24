@@ -30,11 +30,9 @@
 
 // Create class instances form Configuration_io.h
 
-#if PURE_BOARD_TEST == 0
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_DEFINE_VARIABLES
 #include "io/redefine.h"
-#endif
 
 void updateEndstops() {
 #undef IO_TARGET

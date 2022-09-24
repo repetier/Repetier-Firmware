@@ -22,7 +22,6 @@
 #ifndef _REPETIER_H
 #define _REPETIER_H
 
-#define PURE_BOARD_TEST 0
 #include <math.h>
 #include <stdint.h>
 #if 1 || !(defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__))

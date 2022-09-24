@@ -12,6 +12,7 @@
     "debug": {
         "jlink_device": "STM32F446ZE",
         "openocd_target": "stm32f4x",
+        "openocd_chipname": "stm32f4x",
         "svd_path": "STM32F446x.svd"
     },
     "frameworks": [

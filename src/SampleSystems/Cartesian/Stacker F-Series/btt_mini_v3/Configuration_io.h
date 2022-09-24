@@ -94,12 +94,12 @@ ENDSTOP_NONE(endstopZMin)
 
 // Set to nullptr for no zprobe or &endstopName for a switch
 #ifdef STACKER_WITH_ZPROBE
-IO_INPUT_INVERTED_PULLUP(IOEndstopZProbe, ORIG_Z_MIN_PIN)
+IO_INPUT_INVERTED_PULLUP(IOEndstopZProbe, BLTOUCH_Z_MIN)
 ENDSTOP_SWITCH_HW(endstopZProbe, IOEndstopZProbe, ZPROBE_AXIS, false)
 #undef ZPROBE_ADDRESS
 #define ZPROBE_ADDRESS &endstopZProbe
 #else
-IO_INPUT_INVERTED_PULLUP(IOEndstopZMin, ORIG_Z_MIN_PIN)
+IO_INPUT_INVERTED_PULLUP(IOEndstopZMin, BLTOUCH_Z_MIN)
 ENDSTOP_SWITCH_HW(endstopZMin, IOEndstopZMin, Z_AXIS, false)
 #undef ZPROBE_ADDRESS
 #define ZPROBE_ADDRESS nullptr
@@ -141,20 +141,26 @@ IO_PWM_HARDWARE(PWMBed1, HEATER_1_PIN, 100)
 // For deltas the top is the minumum position in motor coordinates
 // therefore the max endstops of a delta need to be entered as
 // minimum endstop here!
-STEPPER_TMC2209_HW_UART(XMotor, IOX1Step, IOX1Dir, IOX1Enable, Serial4,
+#if 1
+STEPPER_TMC2209_HW_UART(XMotor, IOX1Step, IOX1Dir, IOX1Enable, X_SERIAL,
                         0.11, MICROSTEPS, 1000, true, 100, X_SLAVE_ADDRESS, 8, 12500000,
                         endstopNone, endstopNone)
-STEPPER_TMC2209_HW_UART(YMotor, IOY1Step, IOY1Dir, IOY1Enable, Serial4,
+STEPPER_TMC2209_HW_UART(YMotor, IOY1Step, IOY1Dir, IOY1Enable, Y_SERIAL,
                         0.11, MICROSTEPS, 1000, true, 100, Y_SLAVE_ADDRESS, 8, 12500000,
                         endstopNone, endstopNone)
 
-STEPPER_TMC2209_HW_UART(ZMotor, IOZ1Step, IOZ1Dir, IOZ1Enable, Serial4,
+STEPPER_TMC2209_HW_UART(ZMotor, IOZ1Step, IOZ1Dir, IOZ1Enable, Z_SERIAL,
                         0.11, MICROSTEPS, 300, true, 100, Z_SLAVE_ADDRESS, 8, 12500000,
                         endstopNone, endstopNone)
-STEPPER_TMC2209_HW_UART(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, Serial4,
+STEPPER_TMC2209_HW_UART(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, E0_SERIAL,
                         0.11, MICROSTEPS, 300, true, 100, E0_SLAVE_ADDRESS, 8, 12500000,
                         endstopNone, endstopNone)
-
+#else
+STEPPER_SIMPLE(XMotor, IOX1Step, IOX1Dir, IOX1Enable, endstopNone, endstopNone)
+STEPPER_SIMPLE(YMotor, IOY1Step, IOY1Dir, IOY1Enable, endstopNone, endstopNone)
+STEPPER_SIMPLE(ZMotor, IOZ1Step, IOZ1Dir, IOZ1Enable, endstopNone, endstopNone)
+STEPPER_SIMPLE(E1Motor, IOE1Step, IOE1Dir, IOE1Enable, endstopNone, endstopNone)
+#endif
 // Heat manages are used for every component that needs to
 // control temperature. Higher level classes take these as input
 // and simple heater like a heated bed use it directly.
@@ -182,7 +188,6 @@ TOOL_EXTRUDER(ToolExtruder1, 0, 0, 0, HeaterExtruder1, E1Motor, 1.75, 440, 20,
               50, 5000, 177, "", "", &Fan1PWM)
 
 // IO_INPUT_LOG(IOJam1Mon, IOJam1, true)
-// IO_INPUT_LOG(IOJam2Mon, IOJam2, true)
 FILAMENT_DETECTOR(JamDetector1, IOJam1, ToolExtruder1)
 
 // IO_OUTPUT(caseLightPin, LED_PIN)

@@ -117,7 +117,7 @@ void FEReset(void) {
     uint32_t SectorError = 0;
     EraseInitStruct.TypeErase = FLASH_TYPEERASE_PAGES;
     EraseInitStruct.PageAddress = FLASH_EEPROM_START;
-    EraseInitStruct.NbPages = FLASH_EEPROM_SIZE / EEPROM_PAGE_SIZE;
+    EraseInitStruct.NbPages = FLASH_EEPROM_SIZE / FLASH_PAGE_SIZE;
     HAL_StatusTypeDef status = HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError);
     LOCK_FLASH();
     if (status != HAL_OK) {

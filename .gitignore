@@ -29,3 +29,5 @@ src/Repetier/Configuration.h
 src/Repetier/Configuration_io.h
 src/Repetier/.pio
 S2SetUp.jpg
+*.pyc
+src/Repetier/src_test

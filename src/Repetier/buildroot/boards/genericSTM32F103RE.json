@@ -21,6 +21,7 @@
   "debug": {
     "jlink_device": "STM32F103RE",
     "openocd_target": "stm32f1x",
+    "openocd_chipname": "stm32f1x",
     "svd_path": "STM32F103xx.svd"
   },
   "frameworks": [

@@ -34,7 +34,7 @@
   "debug": {
     "jlink_device": "ATSAM3X8E",
     "openocd_chipname": "at91sam3X8E",
-    "openocd_target": "at91sam3XXX",
+    "openocd_target": "at91sam3ax_8x",
     "svd_path": "ATSAM3X8E.svd"
   },
   "frameworks": [

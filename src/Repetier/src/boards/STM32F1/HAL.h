@@ -98,18 +98,6 @@ typedef char prog_char;
 #define FSTRINGVAR(var) static const char var[] PROGMEM;
 #define FSTRINGPARAM(var) PGM_P var
 
-#ifdef STM32G0xx
-#ifndef MOTION3_TIMER_NUM
-#define MOTION3_TIMER_NUM 2
-#endif
-#ifndef PWM_TIMER_NUM
-#define PWM_TIMER_NUM 7
-#endif
-#ifndef SERVO_TIMER_NUM
-#define SERVO_TIMER_NUM 16
-#endif
-#endif
-
 #ifndef MOTION2_TIMER_NUM
 #define MOTION2_TIMER_NUM 4
 #endif

@@ -60,7 +60,6 @@
 #define SOFTWARESERIAL_H
 
 #include <Arduino.h>
-
 /******************************************************************************
 * Definitions
 ******************************************************************************/
@@ -111,6 +110,7 @@ private:
     void setRX();
     void setSpeed(uint32_t speed);
     void setRXTX(bool input);
+
 public:
     static void handleInterrupt();
     // public methods
