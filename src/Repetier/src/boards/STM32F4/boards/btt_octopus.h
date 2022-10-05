@@ -120,10 +120,10 @@ Raspberry Serial: Serial2
 #define THERMOCOUPLE_0_PIN static_cast<int>(PF_8) // J45
 
 // Heaters / Fans
-#define HEATER_0_PIN PA2  // HE0
-#define HEATER_2_PIN PA3  // HE1
-#define HEATER_3_PIN PB10 // HE2
-#define HEATER_4_PIN PB11 // HE3
+#define HEATER_0_PIN PA2  // HE0 - TIM5_CH3
+#define HEATER_2_PIN PA3  // HE1 - TIM5_CH4
+#define HEATER_3_PIN PB10 // HE2 - TIM2_CH3
+#define HEATER_4_PIN PB11 // HE3 - TIM2_CH4
 #define HEATER_1_PIN PA1  // BED_OUT
 
 #define ORIG_FAN_PIN PA8   // Fan 0

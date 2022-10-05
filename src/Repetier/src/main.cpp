@@ -191,6 +191,7 @@ Custom M Codes
 - M532 X<percent> L<curLayer> - update current print state progress (X=0..100) and layer L
 - M539 S<supportStartStop> P<paused> - S1 Tells firmware that host will use the feature. P1/0 signals paused/running state.
 - M575 B<Baudrate> - Update all available serial port baudrates to one of the permitted rates (38400, 56000, 57600, 76800, 115200, 128000, 230400, 250000, 256000, 460800, 500000)
+- M576 Sx - Enable/disable out of order commands.
 - M600 Change filament
 - M601 S<1/0> E<1/0> B<1/0> C<1/0> P<1/0> - Pause extruders. E0 excepts extruders. B1 also pauses heated bed. C1 also waits for chamber. If E, B and C are omitted all are assumed to be 1! Paused extrudes disable heaters and motor. Continue (S0) reheats extruder to old temp. P0 does not wait for target temperature.
 - M602 S<1/0> P<1/0>- Debug jam control (S) Disable jam control (P). If enabled it will log signal changes and will not trigger jam errors!
@@ -201,6 +202,7 @@ Custom M Codes
 - M667 - force communication error, required DEBUG_COM_ERRORS
 - M668 - set line number 0 without notice to simulate error
 - M669 - Measure time for a LCD display refresh
+- M876 Sx Py - Action dialog choose selection x. P<1/0> enable/disable prompt support. 
 - M900 K<advance> R<ratio> W<extrusion width> H<layer height> D<filament diameter> T<toolId> - set advance parameter.
 - M906 P<address> S<value> - Get stepper current, with S value it is also set
 - M907 P<address> S<value> - Set stepper current

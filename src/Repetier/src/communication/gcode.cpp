@@ -1412,7 +1412,7 @@ bool SerialGCodeSource::testEmergency(GCode& gcode) {
         } else if (gcode.M == 290) { // speed up babystepping
             PrinterType::M290(&gcode);
             return true;
-        } else if (gcode.M == 876) { // speed up babystepping
+        } else if (gcode.M == 876) { // Dialog choice
             MCode_876(&gcode);
             return true;
         } else if (gcode.M == 416) {

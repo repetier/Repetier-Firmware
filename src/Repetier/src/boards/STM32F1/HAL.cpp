@@ -296,6 +296,8 @@ extern "C" void TIMER_VECTOR(TONE_TIMER_NUM);
 
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
 extern void servoOffTimer();
+extern void toneOnTimer();
+extern void toneOffTimer();
 extern "C" void TIMER_VECTOR(SERVO_TIMER_NUM);
 static uint32_t ServoPrescalerfactor = 20000;
 static uint32_t Servo2500 = 2500;
@@ -401,8 +403,11 @@ void HAL::setupTimer() {
             toneTimer = reserveTimerInterrupt(TONE_TIMER_NUM); // prevent pwm usage
             toneTimer->timer = new HardwareTimer(TIMER(TONE_TIMER_NUM));
             toneTimer->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
-            toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
-            toneTimer->timer->attachInterrupt(2, [] {});
+            toneTimer->timer->attachInterrupt(&toneOnTimer);
+            toneTimer->timer->attachInterrupt(1, &toneOffTimer);
+
+            // toneTimer->timer->attachInterrupt(TIMER_VECTOR_NAME(TONE_TIMER_NUM));
+            // toneTimer->timer->attachInterrupt(2, [] {});
             // Not on by default for output_compare
             LL_TIM_OC_EnablePreload(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
             LL_TIM_OC_EnableFast(TIMER(TONE_TIMER_NUM), toneTimer->timer->getLLChannel(1));
@@ -586,6 +591,7 @@ void HAL::analogStart(void) {
     }
     __HAL_RCC_GPIOA_CLK_ENABLE();
 #ifdef STM32G0xx
+    __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_ADC_CLK_ENABLE();
 #else
     __HAL_RCC_ADC1_CLK_ENABLE();
@@ -604,6 +610,7 @@ void HAL::analogStart(void) {
     HAL_ADCEx_Calibration_Start(&AdcHandle);
 
     hdma_adc.Instance = DMA1_Channel1;
+    hdma_adc.Init.Request = DMA_REQUEST_ADC1;
     hdma_adc.Init.Direction = DMA_PERIPH_TO_MEMORY;
     hdma_adc.Init.PeriphInc = DMA_PINC_DISABLE;
     hdma_adc.Init.MemInc = DMA_MINC_ENABLE;
@@ -611,6 +618,7 @@ void HAL::analogStart(void) {
     hdma_adc.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
     hdma_adc.Init.Mode = DMA_CIRCULAR;
     hdma_adc.Init.Priority = DMA_PRIORITY_HIGH;
+
     dmaerror += HAL_DMA_Init(&hdma_adc);
 
     dmaInitState = hdma_adc.State;
@@ -944,28 +952,21 @@ FORCE_INLINE void servoOffTimer() {
 
 // Servo timer Interrupt handler
 void TIMER_VECTOR(SERVO_TIMER_NUM) {
-#if NUM_SERVOS > 0 || NUM_BEEPERS > 0
 #if NUM_SERVOS > 0
     if (actServo && HAL::servoTimings[servoId]) {
         actServo->enable();
     }
-#endif
-    /* if (LL_TIM_IsActiveFlag_CC1(TIMER(SERVO_TIMER_NUM))) {
-        LL_TIM_ClearFlag_CC1(TIMER(SERVO_TIMER_NUM));
-        servoOffTimer();
-    } else if (LL_TIM_IsActiveFlag_UPDATE(TIMER(SERVO_TIMER_NUM))) {
-        LL_TIM_ClearFlag_UPDATE(TIMER(SERVO_TIMER_NUM));
-    }*/
 #endif
 }
 
 /** \brief Timer interrupt routine to drive the stepper motors.
 */
 void TIMER_VECTOR(MOTION3_TIMER_NUM) {
+    INC_DEBUG_COUNTER(0);
 #if DEBUG_TIMING && defined(DEBUG_ISR_STEPPER_PIN) && DEBUG_ISR_STEPPER_PIN >= 0
     WRITE(DEBUG_ISR_STEPPER_PIN, 1);
 #endif
-    LL_TIM_ClearFlag_UPDATE(TIMER(MOTION3_TIMER_NUM));
+    // LL_TIM_ClearFlag_UPDATE(TIMER(MOTION3_TIMER_NUM));
     Motion3::timer();
 #if DEBUG_TIMING && defined(DEBUG_ISR_STEPPER_PIN) && DEBUG_ISR_STEPPER_PIN >= 0
     WRITE(DEBUG_ISR_STEPPER_PIN, 0);
@@ -984,6 +985,7 @@ pwm values for heater and some other frequent jobs.
 */
 
 void TIMER_VECTOR(PWM_TIMER_NUM) {
+    INC_DEBUG_COUNTER(1);
 #if DEBUG_TIMING && defined(DEBUG_ISR_TEMP_PIN) && DEBUG_ISR_TEMP_PIN >= 0
     WRITE(DEBUG_ISR_TEMP_PIN, 1);
 #endif
@@ -1012,6 +1014,7 @@ void TIMER_VECTOR(PWM_TIMER_NUM) {
     pwm_count4 += 16;
 
     if (__HAL_DMA_GET_FLAG(&hdma_adc, __HAL_DMA_GET_TC_FLAG_INDEX(&hdma_adc))) {
+        INC_DEBUG_COUNTER(2);
         for (int i = 0; i < numAnalogInputs; i++) {
             analogValues[i].lastValue = adcData[i];
         }
@@ -1060,16 +1063,16 @@ void HAL::spiEnd() {
 }
 
 #if NUM_BEEPERS > 0
-void TIMER_VECTOR(TONE_TIMER_NUM) {
+void toneOnTimer() {
+    bool beeperIRQPhase = true;
+#undef IO_TARGET
+#define IO_TARGET IO_TARGET_BEEPER_LOOP
+#include "io/redefine.h"
+    UNUSED(beeperIRQPhase);
+}
+
+void toneOffTimer() {
     bool beeperIRQPhase = false;
-    if (LL_TIM_IsActiveFlag_UPDATE(TIMER(TONE_TIMER_NUM))) {
-        LL_TIM_ClearFlag_UPDATE(TIMER(TONE_TIMER_NUM));
-        beeperIRQPhase = true;
-    }
-    if (LL_TIM_IsActiveFlag_CC1(TIMER(TONE_TIMER_NUM))) {
-        LL_TIM_ClearFlag_CC1(TIMER(TONE_TIMER_NUM));
-        beeperIRQPhase = false;
-    }
 #undef IO_TARGET
 #define IO_TARGET IO_TARGET_BEEPER_LOOP
 #include "io/redefine.h"
