@@ -1762,6 +1762,7 @@ void __attribute__((weak)) MCode_910(GCode* com) {
 
 #if defined(DEBUG_COUNTER) && DEBUG_COUNTER
 void __attribute__((weak)) MCode_997(GCode* com) {
+    Com::printFLN(PSTR("ms since start:"), HAL::timeInMilliseconds());
     for (int i = 0; i < DEBUG_COUNTER; i++) {
         Com::printF(PSTR("Counter"), static_cast<int32_t>(i));
         Com::printFLN(PSTR(":"), debugCounter[i]);

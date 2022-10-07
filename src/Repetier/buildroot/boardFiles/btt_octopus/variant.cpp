@@ -117,7 +117,7 @@ const PinName digitalPin[] = {
     PE_12, //D76
     PE_13, //D77
     PE_14, //D78
-    PE_15,  //D79
+    PE_15, //D79
     PF_0,  //D80
     PF_1,  //D81
     PF_2,  //D82
@@ -133,7 +133,7 @@ const PinName digitalPin[] = {
     PF_12, //D92
     PF_13, //D93
     PF_14, //D94
-    PF_15,  //D95
+    PF_15, //D95
     PG_0,  //D96
     PG_1,  //D97
     PG_2,  //D98
@@ -154,12 +154,12 @@ const PinName digitalPin[] = {
 
 // Analog (Ax) pin number array
 const uint32_t analogInputPin[] = {
-    83,  // A0,  PF3
-    84,  // A1,  PF4
-    85,  // A2,  PF5
-    86,  // A3,  PF6
-    87,  // A4,  PF7
-    88,  // A5,  PF8
+    83, // A0,  PF3
+    84, // A1,  PF4
+    85, // A2,  PF5
+    86, // A3,  PF6
+    87, // A4,  PF7
+    88, // A5,  PF8
     /* 6,  // A6,  PA6
     7,  // A7,  PA7
     16, // A8,  PB0
@@ -204,14 +204,26 @@ WEAK void SystemClock_Config(void) {
     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+#ifdef STM32F446xx
+    RCC_OscInitStruct.PLL.PLLM = 6;
+    RCC_OscInitStruct.PLL.PLLN = 180;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLQ = 7;
+    RCC_OscInitStruct.PLL.PLLR = 2;
+    // HZ = ((12000000/6)*180)/2 = 180000000
+#else
     RCC_OscInitStruct.PLL.PLLM = 8;
     RCC_OscInitStruct.PLL.PLLN = 336;
     RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
     RCC_OscInitStruct.PLL.PLLQ = 7;
+    // HZ = ((8000000/8)*336)/2 = 168000000
+#endif
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
         _Error_Handler(__FILE__, __LINE__);
     }
-
+#ifdef STM32F446xx
+    HAL_PWREx_EnableOverDrive();
+#endif
     /**Initializes the CPU, AHB and APB busses clocks
   */
     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
@@ -235,6 +247,18 @@ WEAK void SystemClock_Config(void) {
 
     /* SysTick_IRQn interrupt configuration */
     HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
+
+#ifdef STM32F446xx
+    RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CLK48;
+    PeriphClkInitStruct.PLLSAI.PLLSAIM = 6;
+    PeriphClkInitStruct.PLLSAI.PLLSAIN = 96;
+    PeriphClkInitStruct.PLLSAI.PLLSAIQ = 2;
+    PeriphClkInitStruct.PLLSAI.PLLSAIP = RCC_PLLSAIP_DIV4;
+    PeriphClkInitStruct.PLLSAIDivQ = 1;
+    PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48CLKSOURCE_PLLSAIP;
+    HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
+#endif
 }
 
 #ifdef __cplusplus

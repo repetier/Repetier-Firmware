@@ -91,8 +91,12 @@ extern "C" {
   *        (when HSE is used as system clock source, directly or through the PLL).
   */
 #ifndef HSE_VALUE
+#ifdef STM32F446xx
+#define HSE_VALUE 12000000U
+#else
 #define HSE_VALUE 8000000U /*!< Value of the External oscillator in Hz */
-#endif                     /* HSE_VALUE */
+#endif
+#endif /* HSE_VALUE */
 
 #ifndef HSE_STARTUP_TIMEOUT
 #define HSE_STARTUP_TIMEOUT 100U /*!< Time out for HSE start up, in ms */
