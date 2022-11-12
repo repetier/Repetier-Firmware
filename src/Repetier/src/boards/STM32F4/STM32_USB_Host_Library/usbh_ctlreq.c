@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_ctlreq.h"
+#ifdef HAL_HCD_MODULE_ENABLED
 
 /** @addtogroup USBH_LIB
 * @{
@@ -979,7 +980,7 @@ static USBH_StatusTypeDef USBH_HandleControl(USBH_HandleTypeDef *phost)
 
   return status;
 }
-
+#endif
 /**
 * @}
 */

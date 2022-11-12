@@ -20,7 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_core.h"
-
+#ifdef HAL_HCD_MODULE_ENABLED
 
 /** @addtogroup USBH_LIB
   * @{
@@ -1315,6 +1315,7 @@ USBH_StatusTypeDef  USBH_LL_NotifyURBChange(USBH_HandleTypeDef *phost)
 
   return USBH_OK;
 }
+#endif
 #endif
 /**
   * @}

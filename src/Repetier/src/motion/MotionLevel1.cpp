@@ -1025,7 +1025,7 @@ bool Motion1::queueMove(float feedrate, bool secondaryMove) {
         if (filePrintManager.isPrinting()) {
             Com::printWarningFLN(PSTR("Print stopped due to illegal positions!"));
         }
-#else    
+#else
 #if SDSUPPORT
         if (sd.state == SDState::SD_PRINTING) {
             Com::printWarningFLN(PSTR("Print stopped due to illegal positions!"));

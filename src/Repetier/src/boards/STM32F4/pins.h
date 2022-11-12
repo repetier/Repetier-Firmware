@@ -55,6 +55,16 @@
 
 // define non existent pins as empty placeholder
 
+#ifndef ORIG_E1_STEP_PIN
+#define ORIG_E1_STEP_PIN -1
+#endif
+#ifndef ORIG_E1_DIR_PIN
+#define ORIG_E1_DIR_PIN -1
+#endif
+#ifndef ORIG_E1_ENABLE_PIN
+#define ORIG_E1_ENABLE_PIN -1
+#endif
+
 #ifndef ORIG_E2_STEP_PIN
 #define ORIG_E2_STEP_PIN -1
 #endif

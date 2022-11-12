@@ -320,15 +320,24 @@ static fast8_t calcRepeatSteps(bool changedDir) {
 #endif
 void GUI::nextKey() {
     nextAction = GUIAction::NEXT;
+#ifdef DEBUG_KEYS
+    Com::printFLN(PSTR("key:next"));
+#endif
 }
 
 void GUI::previousKey() {
     nextAction = GUIAction::PREVIOUS;
+#ifdef DEBUG_KEYS
+    Com::printFLN(PSTR("key:previous"));
+#endif
 }
 
 void GUI::okKey() {
     nextAction = GUIAction::CLICK;
     contentChanged = true;
+#ifdef DEBUG_KEYS
+    Com::printFLN(PSTR("key:ok"));
+#endif
     resetScrollbarTimer();
 }
 

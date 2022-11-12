@@ -27,6 +27,7 @@ EndBSPDependencies */
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_msc_bot.h"
 #include "usbh_msc.h"
+#ifdef HAL_HCD_MODULE_ENABLED
 
 /** @addtogroup USBH_LIB
 * @{
@@ -672,7 +673,7 @@ static BOT_CSWStatusTypeDef USBH_MSC_DecodeCSW(USBH_HandleTypeDef *phost)
 
   return status;
 }
-
+#endif
 
 /**
 * @}

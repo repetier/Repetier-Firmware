@@ -155,7 +155,6 @@ typedef char prog_char;
             LL_GPIO_ResetOutputPin(get_GPIO_Port(STM_PORT(pin)), STM_LL_GPIO_PIN(pin)); \
         } \
     } while (0)
-#define WRITE(pin, v) _WRITE(pin, v)
 
 #define SET_INPUT(pin) ::pinMode(pin, INPUT);
 #define SET_OUTPUT(pin) ::pinMode(pin, OUTPUT);

@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_ioreq.h"
+#ifdef HAL_HCD_MODULE_ENABLED
 
 /** @addtogroup USBH_LIB
   * @{
@@ -328,6 +329,7 @@ USBH_StatusTypeDef USBH_IsocSendData(USBH_HandleTypeDef *phost,
 
   return USBH_OK;
 }
+#endif
 /**
 * @}
 */

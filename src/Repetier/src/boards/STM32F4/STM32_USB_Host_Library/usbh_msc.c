@@ -41,6 +41,7 @@ EndBSPDependencies */
 #include "usbh_msc_bot.h"
 #include "usbh_msc_scsi.h"
 
+#ifdef HAL_HCD_MODULE_ENABLED
 
 /** @addtogroup USBH_LIB
   * @{
@@ -834,7 +835,7 @@ USBH_StatusTypeDef USBH_MSC_Write(USBH_HandleTypeDef *phost,
   MSC_Handle->state = MSC_IDLE;
   return USBH_OK;
 }
-
+#endif
 /**
   * @}
   */

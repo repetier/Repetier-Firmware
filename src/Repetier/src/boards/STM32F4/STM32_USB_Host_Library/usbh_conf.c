@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_core.h"
+#ifdef HAL_HCD_MODULE_ENABLED
 
 HCD_HandleTypeDef hhcd_USB_OTG_HS;
 
@@ -546,4 +547,5 @@ void  USBH_Delay(uint32_t Delay)
   HAL_Delay(Delay);
 
 }
+#endif
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

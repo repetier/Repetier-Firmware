@@ -28,6 +28,7 @@ EndBSPDependencies */
 #include "usbh_msc.h"
 #include "usbh_msc_scsi.h"
 #include "usbh_msc_bot.h"
+#ifdef HAL_HCD_MODULE_ENABLED
 
 
 /** @addtogroup USBH_LIB
@@ -438,7 +439,7 @@ USBH_StatusTypeDef USBH_MSC_SCSI_Read(USBH_HandleTypeDef *phost,
 
   return error;
 }
-
+#endif
 
 /**
   * @}

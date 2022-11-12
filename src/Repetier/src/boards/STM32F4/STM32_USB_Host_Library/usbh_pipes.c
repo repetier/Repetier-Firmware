@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_pipes.h"
+#ifdef HAL_HCD_MODULE_ENABLED
 
 /** @addtogroup USBH_LIB
   * @{
@@ -167,6 +168,7 @@ static uint16_t USBH_GetFreePipe(USBH_HandleTypeDef *phost)
 
   return 0xFFFFU;
 }
+#endif
 /**
 * @}
 */

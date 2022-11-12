@@ -299,6 +299,7 @@ void HAL::hwSetup(void) {
     Servo2500 = ((2500 * (servo->timer->getTimerClkFreq() / 1000000)) / ServoPrescalerfactor) - 1;
     HAL_NVIC_SetPriority(TIMER_IRQ(SERVO_TIMER_NUM), 3, 0);
 #endif
+
 #if defined(TWI_CLOCK_FREQ) && TWI_CLOCK_FREQ > 0 //init i2c if we have a frequency
     HAL::i2cInit(TWI_CLOCK_FREQ);
 #endif
