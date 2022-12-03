@@ -813,6 +813,7 @@ void TMCStepper5161Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
     if (!initSucceded) {
         init();
     }
+#ifndef IGNORE_TMC5161_FEEDBACK
     if (debug != -1) {
         reportTMC5161(driver, this, debug);
     }
@@ -849,6 +850,7 @@ void TMCStepper5161Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
             otpwCount = 0;
         }
     }
+#endif
 }
 
 /// Set microsteps. Must be a power of 2.
@@ -1099,6 +1101,7 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
     if (!initSucceded) {
         init();
     }
+#ifndef IGNORE_TMC5160_FEEDBACK
     if (debug != -1) {
         reportTMC5160(driver, this, debug);
     }
@@ -1135,6 +1138,7 @@ void TMCStepper5160Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
             otpwCount = 0;
         }
     }
+#endif
 }
 
 /// Set microsteps. Must be a power of 2.
