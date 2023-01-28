@@ -542,7 +542,7 @@ void __attribute__((weak)) MCode_104(GCode* com) {
     if (com->hasT()) {
         tool = Tool::getTool(com->T);
     }
-    if (tool == nullptr) {
+    if (tool == nullptr || tool->getHeater() == nullptr) {
         return;
     }
     if (Motion1::dittoMode) {
@@ -635,7 +635,7 @@ void __attribute__((weak)) MCode_109(GCode* com) {
     if (com->hasT()) {
         tool = Tool::getTool(com->T);
     }
-    if (tool == nullptr) {
+    if (tool == nullptr || tool->getHeater() == nullptr) {
         return;
     }
     if (Motion1::dittoMode) {
