@@ -25,6 +25,7 @@ ENDSTOP_NONE(endstopNone)
 IO_OUTPUT(IOX1Step, ORIG_X_STEP_PIN)
 IO_OUTPUT_INVERTED(IOX1Dir, ORIG_X_DIR_PIN)
 IO_OUTPUT_INVERTED(IOX1Enable, ORIG_X_ENABLE_PIN)
+// IO_OUTPUT(IOX1Enable, ORIG_X_ENABLE_PIN)
 
 // Y Motor
 
@@ -119,8 +120,8 @@ IO_PWM_KICKSTART(Fan1PWM, Fan1NoKSPWM, 20, 85)
 // Typically they require an analog input (12 bit) so define
 // them first.
 
-IO_ANALOG_INPUT(IOAnalogBed1, TEMP_1_PIN, 5)
 IO_ANALOG_INPUT(IOAnalogExt1, TEMP_0_PIN, 5)
+IO_ANALOG_INPUT(IOAnalogBed1, TEMP_1_PIN, 5)
 
 // Need a conversion table for epcos NTC
 IO_TEMP_TABLE_NTC(TempTable1, Epcos_B57560G0107F000)

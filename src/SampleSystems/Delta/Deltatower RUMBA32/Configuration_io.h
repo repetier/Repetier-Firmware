@@ -168,7 +168,11 @@ HEAT_MANAGER_PID(HeaterExtruder1, 'E', 0, TempExt1, PWMExtruder1, 310, 255, 1000
 HEAT_MANAGER_DEFINE_HYSTERESIS(HeaterExtruder1, 2.0, 20000, 300000)
 HEAT_MANAGER_PID(HeaterExtruder2, 'E', 1, TempExt2, PWMExtruder2, 310, 255, 1000, 20, 20000, 18.3, 2.13, 39, 40, 235, false)
 HEAT_MANAGER_DEFINE_HYSTERESIS(HeaterExtruder2, 2.0, 20000, 300000)
-COOLER_MANAGER_SENSOR(ExtruderCooler, TempHottestExtruder, CoolerFan, 70, 200, 150, 255)
+IO_TEMPERATURE_OF_HEATER_SET(ExtruderTempSet1, HeaterExtruder1)
+IO_TEMPERATURE_OF_HEATER_SET(ExtruderTempSet2, HeaterExtruder2)
+IO_HOTTEST_OF_2(ExtruderTempSet, ExtruderTempSet1, ExtruderTempSet2)
+IO_HOTTEST_OF_2(HottestSetReached, TempHottestExtruder, ExtruderTempSet)
+COOLER_MANAGER_SENSOR(ExtruderCooler, HottestSetReached, CoolerFan, 50, 200, 150, 255)
 
 // Coolers are stand alone functions that allow it to control
 // a fan with external sensors. Many extruders require a cooling

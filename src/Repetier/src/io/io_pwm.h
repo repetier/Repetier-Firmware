@@ -51,6 +51,7 @@
 #undef IO_PWM_INVERTED
 #undef IO_PWM_REPORT
 #undef IO_PWM_SCALEDOWN
+#undef IO_PWM_MIRROR
 
 #if IO_TARGET == IO_TARGET_INIT // init
 
@@ -348,6 +349,23 @@
     }; \
     extern name##Class name;
 
+#define IO_PWM_MIRROR(name, pwm1, pwm2) \
+    class name##Class : public PWMHandler { \
+\
+    public: \
+        void set(ufast8_t _pwm) final { \
+            pwm1.set(_pwm); \
+            pwm2.set(_pwm); \
+        } \
+        ufast8_t get() final { return pwm1.get(); } \
+        void setFreq(uint32_t _freq) final { \
+            pwm1.setFreq(_freq); \
+            pwm2.setFreq(_freq); \
+        } \
+        uint32_t getFreq() final { return pwm1.getFreq(); } \
+    }; \
+    extern name##Class name;
+
 #elif IO_TARGET == IO_TARGET_DEFINE_VARIABLES // variable
 
 #define IO_PWM_SOFTWARE(name, pinname, speed) \
@@ -384,6 +402,9 @@
     name##Class name;
 
 #define IO_PWM_SCALEDOWN(name, pwmname, maxValue) \
+    name##Class name;
+
+#define IO_PWM_MIRROR(name, pwm1, pwm2) \
     name##Class name;
 
 #endif
@@ -423,4 +444,7 @@
 #endif
 #ifndef IO_PWM_SCALEDOWN
 #define IO_PWM_SCALEDOWN(name, pwmname, maxValue)
+#endif
+#ifndef IO_PWM_MIRROR
+#define IO_PWM_MIRROR(name, pwm1, pwm2)
 #endif

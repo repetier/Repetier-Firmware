@@ -70,7 +70,7 @@
 
 // Adds output signals to pins below to measure interrupt timings
 // with a logic analyser. Set to 0 for production!
-// Only pins not set to -1  will be used
+// Pins set to -1 will not enable the check. Use pins unused by other function on your printer!
 #define DEBUG_TIMING 0
 #define DEBUG_ISR_STEPPER_PIN -1 // 60 // PD12
 #define DEBUG_ISR_MOTION_PIN -1  // 61  // PD13
@@ -323,15 +323,14 @@ void HAL::hwSetup(void) {
 #if NUM_SERVOS > 0 || NUM_BEEPERS > 0
     servo = reserveTimerInterrupt(SERVO_TIMER_NUM); // prevent pwm usage
     servo->timer = new HardwareTimer(TIMER(SERVO_TIMER_NUM));
-    servo->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
+    // servo->timer->setMode(1, TIMER_OUTPUT_COMPARE, NC);
     servo->timer->setOverflow(200, HERTZ_FORMAT);
 
     LL_TIM_OC_EnableFast(TIMER(SERVO_TIMER_NUM), servo->timer->getLLChannel(1));
     LL_TIM_OC_EnablePreload(TIMER(SERVO_TIMER_NUM), servo->timer->getLLChannel(1));
 
     servo->timer->attachInterrupt(TIMER_VECTOR_NAME(SERVO_TIMER_NUM));
-    servo->timer->attachInterrupt(1, &servoOffTimer);
-
+    servo->timer->attachInterrupt(1, &servoOffTimer); // called on compare match
     servo->timer->refresh();
     servo->timer->resume();
 
@@ -370,7 +369,7 @@ void HAL::setupTimer() {
 
     motion2 = reserveTimerInterrupt(MOTION2_TIMER_NUM); // prevent pwm usage
     motion2->timer = new HardwareTimer(TIMER(MOTION2_TIMER_NUM));
-    motion2->timer->setMode(2, TIMER_OUTPUT_COMPARE);
+    // motion2->timer->setMode(2, TIMER_OUTPUT_COMPARE);
     motion2->timer->setOverflow(PREPARE_FREQUENCY, HERTZ_FORMAT);
     motion2->timer->attachInterrupt(TIMER_VECTOR_NAME(MOTION2_TIMER_NUM));
     motion2->timer->resume();
@@ -380,7 +379,7 @@ void HAL::setupTimer() {
 
     pwm = reserveTimerInterrupt(PWM_TIMER_NUM); // prevent pwm usage
     pwm->timer = new HardwareTimer(TIMER(PWM_TIMER_NUM));
-    pwm->timer->setMode(2, TIMER_OUTPUT_COMPARE);
+    // pwm->timer->setMode(2, TIMER_OUTPUT_COMPARE);
     pwm->timer->setOverflow(PWM_CLOCK_FREQ, HERTZ_FORMAT);
     pwm->timer->attachInterrupt(TIMER_VECTOR_NAME(PWM_TIMER_NUM));
     pwm->timer->resume();
@@ -390,7 +389,7 @@ void HAL::setupTimer() {
 
     motion3 = reserveTimerInterrupt(MOTION3_TIMER_NUM); // prevent pwm usage
     motion3->timer = new HardwareTimer(TIMER(MOTION3_TIMER_NUM));
-    motion3->timer->setMode(2, TIMER_OUTPUT_COMPARE);
+    // motion3->timer->setMode(2, TIMER_OUTPUT_COMPARE);
     motion3->timer->setOverflow(STEPPER_FREQUENCY, HERTZ_FORMAT);
     motion3->timer->attachInterrupt(TIMER_VECTOR_NAME(MOTION3_TIMER_NUM));
     motion3->timer->resume();
@@ -521,7 +520,25 @@ static AnalogFunction* analogMap[300] = { nullptr }; // Map pin number to entry 
 int numAnalogInputs = 0;
 uint16_t adcData[NUM_ANALOG_INPUTS] = { 0 }; // Target for DMA adc transfer
 
+static DMA_HandleTypeDef hdma_adc;
+int dmaInitState, dmaInitError;
+int adcerror = 0, dmaerror = 0;
+
+void reportHALDebug() {
+    Com::printFLN("AdcHandle state:", AdcHandle.State);
+    Com::printFLN("AdcHandle ErrorCode:", AdcHandle.ErrorCode);
+    Com::printFLN("hdma_adc state:", hdma_adc.State);
+    Com::printFLN("hdma_adc ErrorCode:", hdma_adc.ErrorCode);
+    Com::printFLN("dmaInitState state:", dmaInitState);
+    Com::printFLN("dmaInitError ErrorCode:", dmaInitError);
+    Com::printFLN("numAnalogInputs:", numAnalogInputs);
+    Com::printFLN("numPWMEntries:", numPWMEntries);
+    Com::printFLN("adcerror:", adcerror);
+    Com::printFLN("dmaerror:", dmaerror);
+}
+
 void reportAnalog() {
+    reportHALDebug();
     for (int i = 0; i < 300; i++) {
         if (analogMap[i]) {
             Com::printF("Analog ", i);
@@ -536,24 +553,6 @@ void reportAnalog() {
     }
 }
 
-static DMA_HandleTypeDef hdma_adc;
-int dmaInitState, dmaInitError;
-int adcerror = 0, dmaerror = 0;
-
-void HAL::reportHALDebug() {
-    reportAnalog();
-    Com::printFLN("AdcHandle state:", AdcHandle.State);
-    Com::printFLN("AdcHandle ErrorCode:", AdcHandle.ErrorCode);
-    Com::printFLN("hdma_adc state:", hdma_adc.State);
-    Com::printFLN("hdma_adc ErrorCode:", hdma_adc.ErrorCode);
-    Com::printFLN("dmaInitState state:", dmaInitState);
-    Com::printFLN("dmaInitError ErrorCode:", dmaInitError);
-    Com::printFLN("numAnalogInputs:", numAnalogInputs);
-    Com::printFLN("numPWMEntries:", numPWMEntries);
-    Com::printFLN("adcerror:", adcerror);
-    Com::printFLN("dmaerror:", dmaerror);
-}
-
 void HAL::analogStart(void) {
     // Analog channels being used are already enabled. Start conversion
     // only if we have any analog sources.
@@ -561,13 +560,15 @@ void HAL::analogStart(void) {
         return;
     }
 
+#ifndef STM32G0xx
+    // STM32F1xxx version
     // All of the following needs more tuning, but works decently for now.
     AdcHandle.Instance = ADC1;
     AdcHandle.State = 0;
     AdcHandle.Init.ScanConvMode = ADC_SCAN_ENABLE;
     AdcHandle.Init.ContinuousConvMode = ENABLE;
     AdcHandle.Init.DiscontinuousConvMode = DISABLE;
-    // AdcHandle.Init.NbrOfDiscConversion = 0;
+    AdcHandle.Init.NbrOfDiscConversion = 0;
     AdcHandle.Init.ExternalTrigConv = ADC_SOFTWARE_START;
     AdcHandle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
     AdcHandle.Init.NbrOfConversion = numAnalogInputs;
@@ -576,11 +577,7 @@ void HAL::analogStart(void) {
         return;
     }
     ADC_ChannelConfTypeDef sConfig = { 0 };
-#ifdef STM32G0xx
-    sConfig.SamplingTime = ADC_SAMPLETIME_160CYCLES_5;
-#else
     sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
-#endif
 
     for (int i = 0; i < numAnalogInputs; i++) {
         sConfig.Channel = analogValues[i].channel;
@@ -590,13 +587,70 @@ void HAL::analogStart(void) {
         }
     }
     __HAL_RCC_GPIOA_CLK_ENABLE();
-#ifdef STM32G0xx
+    __HAL_RCC_ADC1_CLK_ENABLE();
+    __HAL_RCC_DMA1_CLK_ENABLE(); // ADC1 is connected with DMA1
+
+    RCC_PeriphCLKInitTypeDef PeriphClkInit = { 0 };
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+    PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV8;
+    HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
+
+    HAL_ADCEx_Calibration_Start(&AdcHandle);
+
+    hdma_adc.Instance = DMA1_Channel1;
+    hdma_adc.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_adc.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_adc.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_adc.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+    hdma_adc.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+    hdma_adc.Init.Mode = DMA_CIRCULAR;
+    hdma_adc.Init.Priority = DMA_PRIORITY_HIGH;
+    dmaerror += HAL_DMA_Init(&hdma_adc);
+
+    dmaInitState = hdma_adc.State;
+    dmaInitError = hdma_adc.ErrorCode;
+    __HAL_LINKDMA(&AdcHandle, DMA_Handle, hdma_adc);
+
+    dmaerror += HAL_ADC_Start_DMA(&AdcHandle, (uint32_t*)(adcData), numAnalogInputs);
+    // Just in case.
+    __HAL_DMA_DISABLE_IT(&hdma_adc, DMA_IT_HT | DMA_IT_TE | DMA_IT_TC);
+#else
+
+    // All of the following needs more tuning, but works decently for now.
+    AdcHandle.Instance = ADC1;
+    AdcHandle.State = 0;
+    AdcHandle.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+    AdcHandle.Init.Resolution = ADC_RESOLUTION_12B;
+    AdcHandle.Init.ScanConvMode = ADC_SCAN_ENABLE;
+    AdcHandle.Init.ContinuousConvMode = ENABLE;
+    AdcHandle.Init.DiscontinuousConvMode = DISABLE;
+    AdcHandle.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+    // AdcHandle.Init.NbrOfDiscConversion = 0;
+    AdcHandle.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+    AdcHandle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+    AdcHandle.Init.SamplingTimeCommon1 = ADC_SAMPLETIME_160CYCLES_5;
+    AdcHandle.Init.SamplingTimeCommon2 = ADC_SAMPLETIME_160CYCLES_5;
+    AdcHandle.Init.DMAContinuousRequests = ENABLE;
+    AdcHandle.Init.EOCSelection = ADC_EOC_SEQ_CONV;
+    AdcHandle.Init.NbrOfConversion = numAnalogInputs;
+    AdcHandle.Init.TriggerFrequencyMode = ADC_TRIGGER_FREQ_LOW;
+    if (HAL_ADC_Init(&AdcHandle) != HAL_OK) {
+        adcerror++;
+        return;
+    }
+    ADC_ChannelConfTypeDef sConfig = { 0 };
+    sConfig.SamplingTime = ADC_SAMPLINGTIME_COMMON_1;
+    for (int i = 0; i < numAnalogInputs; i++) {
+        sConfig.Channel = analogValues[i].channel;
+        sConfig.Rank = 4 * i; // f1 uses instead i + 1;
+        if (HAL_ADC_ConfigChannel(&AdcHandle, &sConfig) != HAL_OK) {
+            adcerror++;
+        }
+    }
+    __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_ADC_CLK_ENABLE();
-#else
-    __HAL_RCC_ADC1_CLK_ENABLE();
-#endif
-    __HAL_RCC_DMA1_CLK_ENABLE(); // ADC1 is connected with DMA1
+    __HAL_RCC_DMA2_CLK_ENABLE(); // ADC1 is connected with DMA1
 
     RCC_PeriphCLKInitTypeDef PeriphClkInit = { 0 };
     PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
@@ -609,7 +663,7 @@ void HAL::analogStart(void) {
 
     HAL_ADCEx_Calibration_Start(&AdcHandle);
 
-    hdma_adc.Instance = DMA1_Channel1;
+    hdma_adc.Instance = DMA2_Channel1;
     hdma_adc.Init.Request = DMA_REQUEST_ADC1;
     hdma_adc.Init.Direction = DMA_PERIPH_TO_MEMORY;
     hdma_adc.Init.PeriphInc = DMA_PINC_DISABLE;
@@ -617,7 +671,7 @@ void HAL::analogStart(void) {
     hdma_adc.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
     hdma_adc.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
     hdma_adc.Init.Mode = DMA_CIRCULAR;
-    hdma_adc.Init.Priority = DMA_PRIORITY_HIGH;
+    hdma_adc.Init.Priority = DMA_PRIORITY_LOW;
 
     dmaerror += HAL_DMA_Init(&hdma_adc);
 
@@ -628,6 +682,7 @@ void HAL::analogStart(void) {
     dmaerror += HAL_ADC_Start_DMA(&AdcHandle, (uint32_t*)(adcData), numAnalogInputs);
     // Just in case.
     __HAL_DMA_DISABLE_IT(&hdma_adc, DMA_IT_HT | DMA_IT_TE | DMA_IT_TC);
+#endif
 }
 
 void HAL::analogEnable(int pinId) {
@@ -1041,7 +1096,7 @@ void TIMER_VECTOR(MOTION2_TIMER_NUM) {
 #if DEBUG_TIMING && defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
     WRITE(DEBUG_ISR_MOTION_PIN, 1);
 #endif
-    LL_TIM_ClearFlag_UPDATE(TIMER(MOTION2_TIMER_NUM));
+    // LL_TIM_ClearFlag_UPDATE(TIMER(MOTION2_TIMER_NUM));
     Motion2::timer();
 #if DEBUG_TIMING && defined(DEBUG_ISR_MOTION_PIN) && DEBUG_ISR_MOTION_PIN >= 0
     WRITE(DEBUG_ISR_MOTION_PIN, 0);
@@ -1147,15 +1202,35 @@ void HAL::noTone() {
 #endif
 }
 
+typedef void (*pFunction)(void);
 void init(void) {
+    if (getBackupRegister(LL_RTC_BKP_DR2) == 0xDEADB00Dul) { // marker set - jump to boot mode
+        enableBackupDomain();
+        setBackupRegister(LL_RTC_BKP_DR2, 0); // clear marker, want just one time to call bootloader
+        pFunction SysMemBootJump;
+        HAL_RCC_DeInit();
+        SysTick->CTRL = 0; // reset systick timer
+        SysTick->LOAD = 0;
+        SysTick->VAL = 0;
+        // __disable_irq(); // disable all interrupts
+        __DSB();
+        // __HAL_SYSCFG_REMAPMEMORY_SYSTEMFLASH();
+        __DSB();
+        __ISB();
+        // __set_PRIMASK(1);
+        SysMemBootJump = (void (*)(void))(*((uint32_t*)(0x1FFF0000 + 4)));
+        __set_MSP(*(__IO uint32_t*)0x1FFF0000);
+        SysMemBootJump();
+    }
     HAL_SuspendTick();
     hw_config_init();
 }
 
-// moses todo: implement HAL usb connected handler
-// #include "usbd_cdc_if.h"
-//CDC_connected();
 void HAL::switchToBootMode() {
+    Printer::kill(false); // safety shut down hardware
+    enableBackupDomain();
+    setBackupRegister(LL_RTC_BKP_DR2, 0xDEADB00Dul);
+    NVIC_SystemReset();
 }
 
 #endif

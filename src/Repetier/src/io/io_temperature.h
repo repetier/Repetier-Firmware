@@ -48,11 +48,13 @@ IO_TEMPERATURE_TABLE(name,analog,table)
 #undef IO_TEMPERATURE_LINEAR_ANALOG
 #undef IO_TEMPERATURE_LINEAR_ANALOG_PERMANENT_ERROR
 #undef IO_TEMPERATURE_MAX31855
+#undef IO_TEMPERATURE_MAX31865
 #undef IO_TEMPERATURE_MAX6675
 #undef IO_TEMPERATURE_FAKE
 #undef IO_HOTTEST_OF_2
 #undef IO_COOLEST_OF_2
 #undef IO_FIRST_WORKING_OF_2
+#undef IO_TEMPERATURE_OF_HEATER_SET
 
 #if IO_TARGET == IO_TARGET_INIT // hardware init
 
@@ -63,6 +65,8 @@ IO_TEMPERATURE_TABLE(name,analog,table)
 #define IO_TEMPERATURE_TABLE_PERMANENT_ERROR(name, analog, table)
 #define IO_TEMPERATURE_BETA_PERMANENT_ERROR(name, analog, beta, seriesResistance, thermistorR25, cCoefficient)
 #define IO_TEMPERATURE_MAX31855(name, spiDriver)
+#define IO_TEMPERATURE_MAX31865(name, spiDriver, wires, RTDnominal, refResistor) \
+    name.init();
 #define IO_TEMPERATURE_MAX6675(name, spiDriver)
 
 #define IO_HOTTEST_OF_2(name, temp1, temp2)
@@ -256,6 +260,162 @@ public:
     }; \
     extern name##Class name;
 
+#define IO_TEMPERATURE_MAX31865(name, spiDriver, wires, RTDnominal, refResistor) \
+    class name##Class : public IOTemperature { \
+        int8_t errors; \
+        float temp; \
+        uint8_t fault; \
+\
+    public: \
+        name##Class() \
+            : errors(0) \
+            , temp(0) \
+            , fault(0) { } \
+        float get() { \
+            if (errors >= 0) { \
+                isDefect(); \
+            } \
+            if (errors < 0) { \
+                errors = 0; \
+            } \
+            return temp; \
+        } \
+        bool isDefect() { \
+            temp = temperature(); \
+            if (fault) { \
+                Com::printFLN(PSTR("MAX31865 fault: "), fault); \
+                if (errors > 1) { \
+                    clearFault(); \
+                    return true; \
+                } \
+                errors++; \
+                return false; \
+            } \
+            return false; \
+        } \
+        void init() { \
+            setWires(); \
+            enableBias(true); \
+            autoConvert(true); \
+            setThresholds(0, 0xFFFF); \
+            clearFault(); \
+        } \
+        uint8_t readFault(max31865_fault_cycle_t fault_cycle = MAX31865_FAULT_AUTO) { \
+            if (fault_cycle) { \
+                uint8_t cfg_reg = readRegister8(MAX31865_CONFIG_REG); \
+                cfg_reg &= 0x11; \
+                switch (fault_cycle) { \
+                case MAX31865_FAULT_AUTO: \
+                    writeRegister8(MAX31865_CONFIG_REG, (cfg_reg | 0b10000100)); \
+                    HAL::delayMicroseconds(1000); \
+                    break; \
+                case MAX31865_FAULT_MANUAL_RUN: \
+                    writeRegister8(MAX31865_CONFIG_REG, (cfg_reg | 0b10001000)); \
+                    return 0; \
+                case MAX31865_FAULT_MANUAL_FINISH: \
+                    writeRegister8(MAX31865_CONFIG_REG, (cfg_reg | 0b10001100)); \
+                    return 0; \
+                case MAX31865_FAULT_NONE: \
+                default: \
+                    break; \
+                } \
+            } \
+            return readRegister8(MAX31865_FAULTSTAT_REG); \
+        } \
+        void clearFault() { \
+            uint8_t t = (readRegister8(MAX31865_CONFIG_REG) & ~0x2C) | 2; \
+            writeRegister8(MAX31865_CONFIG_REG, t); \
+            fault = 0; \
+        } \
+        void enableBias(bool b) { \
+            uint8_t t = readRegister8(MAX31865_CONFIG_REG); \
+            if (b) { \
+                t |= MAX31865_CONFIG_BIAS; \
+            } else { \
+                t &= ~MAX31865_CONFIG_BIAS; \
+            } \
+            writeRegister8(MAX31865_CONFIG_REG, t); \
+        } \
+        void autoConvert(bool b) { \
+            uint8_t t = readRegister8(MAX31865_CONFIG_REG); \
+            if (b) { \
+                t |= MAX31865_CONFIG_MODEAUTO; \
+            } else { \
+                t &= ~MAX31865_CONFIG_MODEAUTO; \
+            } \
+            writeRegister8(MAX31865_CONFIG_REG, t); \
+        } \
+        void setThresholds(uint16_t lower, uint16_t upper) { \
+            writeRegister8(MAX31865_LFAULTLSB_REG, lower & 0xFF); \
+            writeRegister8(MAX31865_LFAULTMSB_REG, lower >> 8); \
+            writeRegister8(MAX31865_HFAULTLSB_REG, upper & 0xFF); \
+            writeRegister8(MAX31865_HFAULTMSB_REG, upper >> 8); \
+        } \
+        void setWires() { \
+            uint8_t t = readRegister8(MAX31865_CONFIG_REG); \
+            if (wires == 3) { \
+                t |= MAX31865_CONFIG_3WIRE; \
+            } else { \
+                t &= ~MAX31865_CONFIG_3WIRE; \
+            } \
+            writeRegister8(MAX31865_CONFIG_REG, t); \
+        } \
+        float temperature() { \
+            float Rt, temp; \
+            Rt = static_cast<float>(readRTD()) / 32768.0f * refResistor; \
+            uint8_t t = readRegister8(MAX31865_CONFIG_REG); \
+            temp = (RTD_A * RTD_A - (4.0 * RTD_B)) + (((4.0 * RTD_B) / RTDnominal) * Rt); \
+            temp = (sqrt(temp) - RTD_A) / (2.0 * RTD_B); \
+            if (temp >= 0.0) \
+                return temp; \
+            Rt /= RTDnominal; \
+            Rt *= 100; \
+            float rpoly = Rt; \
+            temp = -242.02; \
+            temp += 2.2228 * rpoly; \
+            rpoly *= Rt; \
+            temp += 2.5859e-3 * rpoly; \
+            rpoly *= temp -= 4.8260e-6 * rpoly; \
+            rpoly *= Rt; \
+            temp -= 2.8183e-8 * rpoly; \
+            rpoly *= Rt; \
+            temp += 1.5243e-10 * rpoly; \
+            return temp; \
+        } \
+        uint16_t readRTD() { \
+            uint16_t rtd = readRegister16(MAX31865_RTDMSB_REG); \
+            if (rtd & 1) { \
+                fault = readFault(MAX31865_FAULT_NONE); \
+                clearFault(); \
+            } \
+            return rtd >> 1; \
+        } \
+        uint8_t readRegister8(uint8_t addr) { \
+            uint8_t ret = 0; \
+            readRegisterN(addr, &ret, 1); \
+            return ret; \
+        } \
+        uint16_t readRegister16(uint8_t addr) { \
+            uint8_t buffer[2] = { 0, 0 }; \
+            readRegisterN(addr, buffer, 2); \
+            return (static_cast<uint16_t>(buffer[0]) << 8) + buffer[1]; \
+        } \
+        void readRegisterN(uint8_t addr, uint8_t buffer[], uint8_t n) { \
+            spiDriver.begin(); \
+            spiDriver.transfer(addr & 0x7F); \
+            for (int i = 0; i < n; i++) \
+                buffer[i] = spiDriver.transfer(0); \
+            spiDriver.end(); \
+        } \
+        void writeRegister8(uint8_t addr, uint8_t data) { \
+            spiDriver.begin(); \
+            spiDriver.transfer(addr | 0x80); \
+            spiDriver.transfer(data); \
+            spiDriver.end(); \
+        } \
+    }; \
+    extern name##Class name;
+
 #define IO_TEMPERATURE_MAX6675(name, spiDriver) \
     class name##Class : public IOTemperature { \
         int8_t errors; \
@@ -308,6 +468,16 @@ public:
     public: \
         float get() { \
             return fakeTemp; \
+        } \
+        bool isDefect() { return false; } \
+    }; \
+    extern name##Class name;
+
+#define IO_TEMPERATURE_OF_HEATER_SET(name, heater) \
+    class name##Class : public IOTemperature { \
+    public: \
+        float get() { \
+            return heater.getTargetTemperature(); \
         } \
         bool isDefect() { return false; } \
     }; \
@@ -377,10 +547,16 @@ public:
 #define IO_TEMPERATURE_MAX31855(name, spiDriver) \
     name##Class name;
 
+#define IO_TEMPERATURE_MAX31865(name, spiDriver, wires, RTDnominal, refResistor) \
+    name##Class name;
+
 #define IO_TEMPERATURE_MAX6675(name, spiDriver) \
     name##Class name;
 
 #define IO_TEMPERATURE_FAKE(name, fakeTemp) \
+    name##Class name;
+
+#define IO_TEMPERATURE_OF_HEATER_SET(name, heater) \
     name##Class name;
 
 #define IO_HOTTEST_OF_2(name, temp1, temp2) \
@@ -421,6 +597,9 @@ public:
 #ifndef IO_TEMPERATURE_MAX31855
 #define IO_TEMPERATURE_MAX31855(name, spiDriver)
 #endif
+#ifndef IO_TEMPERATURE_MAX31865
+#define IO_TEMPERATURE_MAX31865(name, spiDriver, wires, RTDnominal, refResistor)
+#endif
 #ifndef IO_TEMPERATURE_MAX6675
 #define IO_TEMPERATURE_MAX6675(name, spiDriver)
 #endif
@@ -435,4 +614,7 @@ public:
 #endif
 #ifndef IO_FIRST_WORKING_OF_2
 #define IO_FIRST_WORKING_OF_2(name, temp1, temp2)
+#endif
+#ifndef IO_TEMPERATURE_OF_HEATER_SET
+#define IO_TEMPERATURE_OF_HEATER_SET(name, heater)
 #endif

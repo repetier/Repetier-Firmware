@@ -369,6 +369,10 @@ bool Leveling::measure(GCode* com) {
             }
         }
     }
+    if (!ok) {
+        Com::printFLN(PSTR("Calibration stopped due to z-probe error!"));
+        return false;
+    }
     if (ok && builder.numPoints() < 3 && !Printer::breakLongCommand) {
         ok = false;
         Com::printFLN(PSTR("You need at least 3 valid points for correction!"));
@@ -953,7 +957,7 @@ void Leveling::reportDistortionStatus() {
 
 bool Leveling::execute_G32(GCode* com) {
     bool ok = measure(com);
-    if (com->hasS() && com->S > 0) {
+    if (ok && com->hasS() && com->S > 0) {
         EEPROM::markChanged();
     }
     return ok;

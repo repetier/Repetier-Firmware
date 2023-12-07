@@ -21,6 +21,10 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+#define DEBUG_COUNTER 3
+#define DEBUG_KEYS             // write messages on encoder actions
+#define SUPPORTS_REPORT_ANALOG // M1005
+
 // ------- SELECT MODEL TO COMPILE -----------
 
 #define STACKER_F_SERIES_MODEL_1
@@ -165,7 +169,8 @@
 #define NO_MOTOR_ENDSTOPS
 #endif
 
-#define FEATURE_CONTROLLER NO_CONTROLLER // CONTROLLER_CR10_EXP3
+// #define FEATURE_CONTROLLER NO_CONTROLLER // CONTROLLER_CR10_EXP3
+#define FEATURE_CONTROLLER CONTROLLER_CR10_EXP3
 // Use more memory to speedup display updates
 #define DISPLAY_FULL_BUFFER 1
 // Direction 1 or -1

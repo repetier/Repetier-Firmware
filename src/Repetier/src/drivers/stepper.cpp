@@ -1708,6 +1708,7 @@ void TMCStepper2209Driver<stepCls, dirCls, enableCls, fclk>::timer500ms() {
                     driver->rms_current(currentMillis);
                     printMotorNumberAndName(false);
                     Com::printFLN(Com::tMotorCurrentDecreasedTo, currentMillis);
+                    otpwCount = 0; // reset counter
                 }
             }
 #endif
