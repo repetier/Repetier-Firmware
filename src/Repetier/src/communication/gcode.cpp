@@ -250,6 +250,12 @@ void GCode::requestResend() {
   Check if result is plausible. If it is, an ok is send and the command is stored in queue.
   If not, a resend and ok is send.
 */
+
+// Reject previous linenumbers through serial in case we startup very fast.
+#ifndef REJECT_PREV_LINENUM_ON_BOOT
+#define REJECT_PREV_LINENUM_ON_BOOT 0
+#endif
+
 void GCode::checkAndPushCommand() {
     if (hasM()) {
         if (M == 110) { // Reset line number
@@ -273,7 +279,10 @@ void GCode::checkAndPushCommand() {
     }
     if (hasN()) {
         if ((((GCodeSource::activeSource->lastLineNumber + 1) & 0xffff) != (actLineNumber & 0xffff))) {
-            if (static_cast<uint16_t>(GCodeSource::activeSource->lastLineNumber - actLineNumber) < 40) {
+            uint32_t dif = (actLineNumber > GCodeSource::activeSource->lastLineNumber)
+                ? (actLineNumber - GCodeSource::activeSource->lastLineNumber)
+                : (GCodeSource::activeSource->lastLineNumber - actLineNumber);
+            if (dif < 40) {
                 // we have seen that line already. So we assume it is a repeated resend and we ignore it
                 commandsReceivingWritePosition = 0;
                 Com::printFLN(Com::tSkip, actLineNumber);
@@ -284,7 +293,16 @@ void GCode::checkAndPushCommand() {
                     Com::printF(Com::tExpectedLine, GCodeSource::activeSource->lastLineNumber + 1);
                     Com::printFLN(Com::tGot, actLineNumber);
                 }
-                requestResend(); // Line missing, force resend
+#if REJECT_PREV_LINENUM_ON_BOOT
+                if (!GCodeSource::activeSource->lastLineNumber) {
+                    HAL::serialFlush();
+                    GCodeSource::activeSource->waitingForResend = sendAsBinary ? 30 : 14;
+                    Com::println();
+                    Com::printFLN(Com::tStart);
+                    Com::printFLN(Com::tOk);
+                } else
+#endif
+                    requestResend(); // Line missing, force resend
             } else {
                 --GCodeSource::activeSource->waitingForResend;
                 commandsReceivingWritePosition = 0;
